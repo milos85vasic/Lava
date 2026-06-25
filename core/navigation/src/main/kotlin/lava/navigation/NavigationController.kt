@@ -19,6 +19,16 @@ import lava.ui.platform.LocalLoggerFactory
 interface NavigationController {
     val navHostController: NavHostController
     fun navigate(route: String)
+
+    /**
+     * Navigate to [route]; when [launchSingleTop] is true the navigation-compose
+     * `launchSingleTop` option is applied so a second instance of the same
+     * destination is never stacked. LVA-008 Candidate #8 uses this to dedupe the
+     * `search_input` destination; the plain [navigate] path is unchanged. The
+     * `androidx.navigation` option type is kept inside this module so consumers
+     * need not depend on `androidx.navigation` directly.
+     */
+    fun navigate(route: String, launchSingleTop: Boolean)
     fun deeplink(uri: Uri)
     fun popBackStack(): Boolean
 }
@@ -48,6 +58,13 @@ private open class NavigationControllerImpl(
     override fun navigate(route: String) {
         logger.d { "navigate: route=$route" }
         navHostController.navigate(route = route)
+    }
+
+    override fun navigate(route: String, launchSingleTop: Boolean) {
+        logger.d { "navigate: route=$route launchSingleTop=$launchSingleTop" }
+        navHostController.navigate(route = route) {
+            this.launchSingleTop = launchSingleTop
+        }
     }
 
     @Suppress("RestrictedApi")

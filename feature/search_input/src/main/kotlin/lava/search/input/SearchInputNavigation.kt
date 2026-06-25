@@ -83,6 +83,8 @@ fun openSearchInput(filter: Filter = Filter()) {
                 )
             },
         ),
+        // LVA-008 Candidate #8 — see KDoc below.
+        launchSingleTop = true,
     )
 }
 
@@ -97,8 +99,34 @@ fun openSearchInput(categoryId: String) {
                 )
             },
         ),
+        // LVA-008 Candidate #8 — see KDoc on [openSearchInput] below.
+        launchSingleTop = true,
     )
 }
+
+/*
+ * LVA-008 Candidate #8 (UNCONFIRMED, device-gated by Challenge C06 + C11).
+ *
+ * The two `openSearchInput` overloads above navigate into `search_input` with
+ * `launchSingleTop = true` so a second, never-composed (`INITIALIZED`)
+ * `search_input` `NavBackStackEntry` is never minted on the back stack. The
+ * §11.4.150 deep-research pass identifies a duplicate `INITIALIZED`
+ * `search_input` entry as the one that strands below `CREATED` at `MainActivity`
+ * destroy and crashes `LifecycleRegistry`'s `CREATED -> DESTROYED` guard (the
+ * LVA-008 teardown ISE).
+ *
+ * The research predicted the duplicate was minted by a `launchSingleTop` +
+ * `popUpTo` single-top combo on the `search_input -> search_result` transition;
+ * on inspection that transition is the app-layer `popBackStack();
+ * openSearchResult(it)` lambda (no single-top combo present), so this candidate
+ * instead prevents the duplicate at the navigation INTO `search_input`, using
+ * `launchSingleTop` — the navigation-compose idiom for "do not stack a second
+ * instance of the same destination". The already-device-FALSIFIED
+ * atomic-`popUpTo`-replace (incident hypothesis_2) acted on the forward
+ * (`search_result`) transition; this acts on the `search_input` entry
+ * navigation and is distinct from all 6 prior falsified avenues. UNCONFIRMED
+ * until C06 + C11 pass on the thinker containerized-KVM gate.
+ */
 
 internal val SavedStateHandle.filter: Filter
     get() = Filter(
