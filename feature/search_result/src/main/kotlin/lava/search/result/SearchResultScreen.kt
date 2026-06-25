@@ -339,6 +339,18 @@ private fun SearchResultList(
                         onFavoriteClick = { onAction(SearchResultAction.FavoriteClick(model)) },
                     )
                 }
+                // 2026-06-25 video-cluster fix (#5 — no loading indicator).
+                // While at least one provider is still SEARCHING, show a loading
+                // spinner below whatever incremental results have arrived. Before
+                // this, a freshly-started multi-provider search rendered a BLANK
+                // screen (no items yet + no spinner) — perceived as a hang. The
+                // terminal Empty / Error / Content states are produced by
+                // handleStreamEnd() once every provider reaches a terminal state.
+                if (filteredItems.isEmpty() &&
+                    state.searchContent.activeProviders.any { it.status == StreamStatus.SEARCHING }
+                ) {
+                    loadingItem()
+                }
             }
 
             is SearchResultContent.Initial -> loadingItem()

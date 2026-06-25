@@ -22,7 +22,6 @@ import lava.testing.TestDispatchers
 import lava.testing.logger.TestLoggerFactory
 import lava.testing.rule.MainDispatcherRule
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -102,6 +101,18 @@ class SearchInputViewModelTest {
         override fun log(message: String) {}
     }
 
+    /**
+     * Behaviorally-equivalent in-memory [ProviderDisplayNameResolver] — the
+     * outermost provider-catalogue boundary the production resolver wraps
+     * (`LavaTrackerSdk.listAvailableTrackers()`). Returns the configured
+     * display name for a known provider id, or `null` (so the VM falls back
+     * to the raw id, matching the production resolver's fallback contract).
+     */
+    private class FakeDisplayNames(private val names: Map<String, String> = emptyMap()) :
+        ProviderDisplayNameResolver {
+        override fun displayNames(): Map<String, String> = names
+    }
+
     private lateinit var suggestsRepo: FakeSuggestsRepository
     private lateinit var dao: FakeProviderConfigDao
     private lateinit var configRepo: ProviderConfigRepository
@@ -109,6 +120,7 @@ class SearchInputViewModelTest {
     private fun createViewModel(
         scheduler: kotlinx.coroutines.test.TestCoroutineScheduler,
         savedState: SavedStateHandle = SavedStateHandle(),
+        displayNames: Map<String, String> = emptyMap(),
     ): SearchInputViewModel {
         suggestsRepo = FakeSuggestsRepository()
         dao = FakeProviderConfigDao()
@@ -121,6 +133,7 @@ class SearchInputViewModelTest {
             loggerFactory = TestLoggerFactory(),
             analytics = NoopAnalytics(),
             providerConfigRepository = configRepo,
+            displayNameResolver = FakeDisplayNames(displayNames),
         )
     }
 
@@ -136,8 +149,13 @@ class SearchInputViewModelTest {
     }
 
     // VM-CONTRACT
+    //
+    // 2026-06-25 video-cluster root-cause fix. The chip set is now built
+    // from ProviderConfigRepository (the source of truth onboarding writes
+    // to) — NOT a hardcoded list of 4. With nothing onboarded, the bar is
+    // EMPTY (the old code rendered 4 phantom chips the user never onboarded).
     @Test
-    fun onCreate_with_no_onboarded_providers_selects_no_chips() =
+    fun onCreate_with_no_onboarded_providers_renders_empty_chip_bar() =
         runTest(mainDispatcherRule.testDispatcher) {
             val vm = createViewModel(testScheduler)
             vm.test(this) {
@@ -145,39 +163,137 @@ class SearchInputViewModelTest {
                 cancelAndIgnoreRemainingItems()
             }
             val chips = vm.container.stateFlow.value.providerChips
-            assertEquals(4, chips.size)
-            assertTrue("no chip may be selected when nothing is onboarded", chips.none { it.selected })
+            assertTrue("chip bar must be empty when nothing is onboarded", chips.isEmpty())
         }
 
     // VM-CONTRACT
     @Test
-    fun onCreate_pre_selects_only_onboarded_search_enabled_providers() =
+    fun onCreate_renders_chips_for_only_onboarded_search_enabled_providers() =
         runTest(mainDispatcherRule.testDispatcher) {
             val vm = createViewModel(testScheduler)
             onboard("archiveorg")
-            onboard("rutor", searchEnabled = false) // onboarded but search disabled -> not selected
-            onboard("gutenberg", isEnabled = false) // provider disabled -> not selected
+            onboard("rutor", searchEnabled = false) // onboarded but search disabled -> not shown
+            onboard("gutenberg", isEnabled = false) // provider disabled -> not shown
             vm.test(this) {
                 runOnCreate()
                 cancelAndIgnoreRemainingItems()
             }
-            val selected = vm.container.stateFlow.value.providerChips.filter { it.selected }.map { it.providerId }
-            assertEquals(listOf("archiveorg"), selected)
+            // Only the searchEnabled+isEnabled provider appears AND is selected.
+            val chips = vm.container.stateFlow.value.providerChips
+            assertEquals(listOf("archiveorg"), chips.map { it.providerId })
+            assertTrue("the onboarded provider must default-select", chips.single().selected)
         }
 
     // VM-CONTRACT
+    //
+    // REPRODUCES the video-reported cluster (#1/#2/#3): the user onboarded
+    // ONLY a provider that is NOT in the legacy hardcoded list (e.g. YTS).
+    // Pre-fix the chip bar showed the 4 hardcoded providers (rutracker/rutor/
+    // archiveorg/gutenberg) and selected NONE of them, so search queried the
+    // wrong set entirely. Post-fix the bar shows ONLY the onboarded provider.
+    @Test
+    fun onCreate_with_onboarded_provider_outside_legacy_list_renders_it() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val vm = createViewModel(testScheduler, displayNames = mapOf("yts" to "YTS"))
+            onboard("yts")
+            vm.test(this) {
+                runOnCreate()
+                cancelAndIgnoreRemainingItems()
+            }
+            val chips = vm.container.stateFlow.value.providerChips
+            // The onboarded provider IS the chip set — not the 4 hardcoded ones.
+            assertEquals(listOf("yts"), chips.map { it.providerId })
+            assertEquals("YTS", chips.single().displayName)
+            assertTrue("the onboarded provider must default-select", chips.single().selected)
+            assertTrue(
+                "no phantom hardcoded provider may appear",
+                chips.none { it.providerId in setOf("rutracker", "rutor", "archiveorg", "gutenberg") },
+            )
+        }
+
+    // VM-CONTRACT
+    //
+    // REPRODUCES video #2: search must query EXACTLY the onboarded provider,
+    // never the legacy hardcoded set, never the null-means-all sentinel.
+    @Test
+    fun SubmitClick_with_provider_outside_legacy_list_queries_only_it() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val vm = createViewModel(testScheduler, displayNames = mapOf("yts" to "YTS"))
+            onboard("yts")
+            var captured: SearchInputSideEffect.OpenSearch? = null
+            vm.test(this) {
+                runOnCreate()
+                vm.perform(SearchInputAction.InputChanged(TextFieldValue("inception")))
+                vm.perform(SearchInputAction.SubmitClick)
+                captured = awaitOpenSearch()
+                cancelAndIgnoreRemainingItems()
+            }
+            assertEquals("inception", captured?.filter?.query)
+            // The explicit onboarded set — NOT null (which routes the result
+            // screen into the single-tracker rutracker path → "Something went wrong").
+            assertEquals(listOf("yts"), captured?.filter?.providerIds)
+        }
+
+    // VM-CONTRACT
+    //
+    // REPRODUCES video #3: the input-selected provider set MUST equal the set
+    // the result screen renders chips from. The result screen reads
+    // `filter.providerIds` for its chip bar, so the submit payload's
+    // `providerIds` MUST carry the exact selected onboarded set (deterministic,
+    // sorted) — never a divergent or null value that drops the result chips.
+    @Test
+    fun SubmitClick_providerIds_match_the_selected_chip_set_deterministically() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val vm = createViewModel(
+                testScheduler,
+                displayNames = mapOf("gutenberg" to "Gutenberg", "archiveorg" to "Internet Archive"),
+            )
+            // Onboard in non-sorted insertion order to prove deterministic ordering.
+            onboard("gutenberg")
+            onboard("archiveorg")
+            var captured: SearchInputSideEffect.OpenSearch? = null
+            val chipsSelected = mutableListOf<String>()
+            vm.test(this) {
+                runOnCreate()
+                chipsSelected += vm.container.stateFlow.value.providerChips
+                    .filter { it.selected }.map { it.providerId }
+                vm.perform(SearchInputAction.InputChanged(TextFieldValue("dune")))
+                vm.perform(SearchInputAction.SubmitClick)
+                captured = awaitOpenSearch()
+                cancelAndIgnoreRemainingItems()
+            }
+            // Input chip set (selected) == submit payload providerIds == sorted.
+            assertEquals(listOf("archiveorg", "gutenberg"), chipsSelected)
+            assertEquals(listOf("archiveorg", "gutenberg"), captured?.filter?.providerIds)
+        }
+
+    // VM-CONTRACT
+    //
+    // Toggling de-selects an onboarded provider's chip (the user narrows the
+    // search to a subset of what they onboarded). The chip stays in the bar
+    // (it is onboarded) but flips to unselected.
     @Test
     fun ProviderToggled_flips_chip_selection_in_rendered_state() =
         runTest(mainDispatcherRule.testDispatcher) {
-            val vm = createViewModel(testScheduler)
+            val vm = createViewModel(
+                testScheduler,
+                displayNames = mapOf("rutracker" to "RuTracker", "rutor" to "RuTor"),
+            )
+            onboard("rutracker")
+            onboard("rutor")
             vm.test(this) {
                 runOnCreate()
+                // The chip-population intent is queued before this toggle on the
+                // container's single intent queue (deterministic ordering), so
+                // both chips are present + selected by the time the toggle runs.
                 vm.perform(SearchInputAction.ProviderToggled("rutracker"))
                 cancelAndIgnoreRemainingItems()
             }
             val chips = vm.container.stateFlow.value.providerChips
-            assertTrue("rutracker chip must become selected", chips.first { it.providerId == "rutracker" }.selected)
-            assertTrue("untouched chips stay unselected", chips.filter { it.providerId != "rutracker" }.none { it.selected })
+            // Deterministic id-sorted order (rutor < rutracker) — video issue #3.
+            assertEquals(listOf("rutor", "rutracker"), chips.map { it.providerId })
+            assertTrue("toggled rutracker chip must become unselected", chips.first { it.providerId == "rutracker" }.selected.not())
+            assertTrue("untouched rutor chip stays selected", chips.first { it.providerId == "rutor" }.selected)
         }
 
     // VM-CONTRACT
@@ -219,10 +335,24 @@ class SearchInputViewModelTest {
         }
 
     // VM-CONTRACT
+    //
+    // 2026-06-25 video-cluster fix. PRE-FIX this asserted that onboarding all
+    // 4 legacy-hardcoded providers collapsed `providerIds` to `null` — and
+    // `null` routed the RESULT screen into `observePagingData()` (the
+    // single-tracker rutracker path) which 401'd → "Something went wrong".
+    // That was the bug, encoded as an expectation (§6.J bluff). POST-FIX the
+    // submit ALWAYS carries the explicit onboarded set; the `null`-means-all
+    // sentinel is never produced from the search-input side.
     @Test
-    fun SubmitClick_with_all_providers_onboarded_emits_null_providerIds() =
+    fun SubmitClick_with_many_providers_onboarded_emits_explicit_list_not_null() =
         runTest(mainDispatcherRule.testDispatcher) {
-            val vm = createViewModel(testScheduler)
+            val vm = createViewModel(
+                testScheduler,
+                displayNames = mapOf(
+                    "rutracker" to "RuTracker", "rutor" to "RuTor",
+                    "archiveorg" to "Internet Archive", "gutenberg" to "Gutenberg",
+                ),
+            )
             onboard("rutracker")
             onboard("rutor")
             onboard("archiveorg")
@@ -235,8 +365,12 @@ class SearchInputViewModelTest {
                 captured = awaitOpenSearch()
                 cancelAndIgnoreRemainingItems()
             }
-            // null == "search all providers" per resolveProviderIdsForSubmit().
-            assertNull("all-onboarded must collapse to null providerIds", captured?.filter?.providerIds)
+            // Explicit, sorted, never null — so the result screen renders the
+            // multi-provider stream + chips, never the rutracker-only fallback.
+            assertEquals(
+                listOf("archiveorg", "gutenberg", "rutor", "rutracker"),
+                captured?.filter?.providerIds,
+            )
         }
 
     // VM-CONTRACT
