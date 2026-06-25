@@ -2295,3 +2295,103 @@ block 1073 (which fixes the P0 + P1 FATALs + the search timeout). Full fix ships
 **Forensic anchor:** Crashlytics issue `8cde0ac208b3…`, NON_FATAL, 1 event on Genymobile Pixel 9
 / Android 16, version 1.3.9-1066, topic `WPO-20230122202907-crawl897`.
 **§6.O closure log:** `.lava-ci-evidence/crashlytics-resolved/2026-06-24-topicpagedto-missing-field.md`
+
+---
+
+## LVA-008 — C11/C06 nested-NavHost `search_input` teardown crash (Activity-scoped inner-host lifecycle)
+
+**Status:** FIX LANDED in working tree — device-gate verification PENDING (see "Verification" below).
+**Type:** Bug · **Severity:** P1 · **Workable item:** LVA-008
+
+**Symptom (CONFIRMED on device, 2026-06-08):** the app PROCESS crashes at
+`MainActivity` destroy with
+`java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED'`
+(top frame `androidx.lifecycle.LifecycleRegistryKt.checkLifecycleStateTransition`,
+`LifecycleRegistry.kt:92`), on the inner
+`search/search_input?query={query}&…` NavBackStackEntry. Reproduced by
+`Challenge11ArchiveOrgAnonymousSearchTest` (archive.org anonymous search) AND
+`Challenge06DownloadTorrentFileTest` (both deep-nav search → search_input →
+search_result → topic). Forensics:
+`.lava-ci-evidence/sixth-law-incidents/2026-06-08-navbackstackentry-teardown-crash-2.9.1-incomplete.json`.
+
+**Root cause (CONFIRMED):** the bottom-nav graph is mounted as a NESTED
+`NavHost` from a parent `NavBackStackEntry` (`addNestedNavigation` in
+`app/.../navigation/MobileNavigation.kt`). The inner `NavController`'s host
+`LifecycleOwner` defaults to that parent entry. At activity-destroy the parent
+entry is driven straight to `DESTROYED`; the inner controller's host-lifecycle
+observer then walks its OWN back stack moving every entry to `DESTROYED` —
+including a `search_input` entry left `INITIALIZED` (created by the
+`popBackStack(); openSearchResult()` pattern + nested `saveState`/`restoreState`,
+never composed to `CREATED`). `LifecycleRegistry` rejects `INITIALIZED →
+DESTROYED`, killing the process.
+
+**Candidate-fix selection (per incident JSON ranking):** prior device-FALSIFIED
+candidates — nav-compose `2.9.1 → 2.9.8`, `LenientTeardownRule` (uncatchable
+process death), move-search-to-outer-host, atomic `popUpTo` replace, and the
+`NavTeardownGuard` ON_STOP pruner (the stranded entry is NOT in the public
+`currentBackStack` StateFlow, so a public-API walk cannot reach it). The
+TOP-RANKED previously-UNTRIED candidate is the inner-NavHost lifecycle scoping
+(`next_hypotheses_untried[0]`: "Scope/lifecycle of the inner
+`rememberNestedNavigationController` vs the outer host at destroy"). That is
+what this fix implements.
+
+**Fix:** bind the inner (nested) `NavHost`'s host `LifecycleOwner` to the
+Activity's view-tree `LifecycleOwner` instead of the parent
+`NavBackStackEntry`. The Activity reaches `CREATED` during its own normal
+lifecycle (driving inner entries to at least `CREATED` before any teardown) and
+its destroy path runs the inner entries through the regular `RESUMED → … →
+CREATED → DESTROYED` backward pass rather than the parent entry's abrupt
+collapse to `DESTROYED`. Only `LocalLifecycleOwner` is re-pointed —
+`LocalViewModelStoreOwner` + `LocalSavedStateRegistryOwner` remain the parent
+entry, so nested-graph ViewModels still clear when the nested destination leaves
+the back stack (no leak / no scope regression).
+
+**Affected files:**
+- `core/navigation/src/main/kotlin/lava/navigation/ui/NavigationHost.kt` — new
+  `activityScopedLifecycle: Boolean = false` param; when true, wraps the
+  `NavHost` in `CompositionLocalProvider(LocalLifecycleOwner provides
+  <view-tree owner>)`; new private `rememberActivityScopedLifecycleOwner()`
+  using `LocalView.findViewTreeLifecycleOwner()` (same pattern already used in
+  `core/ui/.../ModalBottomDialog.kt`).
+- `core/navigation/src/main/kotlin/lava/navigation/ui/MobileNavigation.kt` —
+  `NestedMobileNavigation` passes `activityScopedLifecycle = true` to its
+  `NavigationHost` (the outer `MobileNavigation` host is unchanged → default
+  `false`, preserving existing per-destination lifecycle scoping there).
+
+**Verification:**
+- **Compile (DONE, captured):** `./gradlew :core:navigation:compileDebugKotlin
+  --max-workers=2 --no-daemon --offline` → `BUILD SUCCESSFUL in 37s` (only
+  pre-existing deprecation/context-receiver warnings). The added defaulted param
+  keeps all existing `NavigationHost` callers source-compatible.
+- **Regression tests = the device Challenges (device-gate PENDING):** the
+  load-bearing regression tests are the existing on-device
+  `Challenge11ArchiveOrgAnonymousSearchTest` + `Challenge06DownloadTorrentFileTest`,
+  which crash at teardown BEFORE this fix and must pass AFTER it. **No
+  JVM/Robolectric regression test is feasible:** this is an androidx
+  `LifecycleRegistry` teardown-ORDERING crash at real `Activity` destroy with a
+  nested `NavHost` + a stranded `INITIALIZED` entry; the incident JSON proves it
+  is even uncatchable by any in-process JUnit `TestRule` (it is process death
+  inside `ActivityThread.performDestroyActivity`). Device-gate execution on this
+  macOS host is BLOCKED by §6.AH-debt (container/VM emulator path does not yet
+  boot here; no host-direct fallback permitted). The fix is therefore landed +
+  compiled but **NOT yet device-verified** — it MUST be run on the Genymotion /
+  emulator gate-host (C06 + C11) before this entry's status flips to
+  "device-verified" and before any distribute. Prior sibling candidates were
+  device-FALSIFIED, so this remains a hypothesis-with-strong-mechanism until the
+  gate run, NOT a confirmed fix.
+
+**Falsifiability rehearsal (§6.N/§6.J, device-gate):** a deliberate non-crashing
+break that the device Challenge would catch — revert `activityScopedLifecycle =
+true` to `false` in `NestedMobileNavigation` (the production state this fix
+changes). Expected on-device result: C06 + C11 crash again at `MainActivity`
+destroy with the identical `IllegalStateException: State must be at least
+'CREATED' to be moved to 'DESTROYED'` on the inner `search_input` entry
+(reverting reproduces the exact prior failure). Re-apply `true`; re-run; the
+teardown crash must not recur. (The rehearsal is device-gated for the same
+reason the fix is: the failure is a real-Activity teardown-ordering event with
+no JVM equivalent.)
+
+**Fix commit:** on the agent worktree branch (see `git log` for SHA; this entry
+authored in the same commit as the fix per §6.T.4).
+**Forensic anchor / incident JSON (status updated):**
+`.lava-ci-evidence/sixth-law-incidents/2026-06-08-navbackstackentry-teardown-crash-2.9.1-incomplete.json`
