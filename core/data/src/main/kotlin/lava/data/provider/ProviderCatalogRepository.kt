@@ -160,7 +160,12 @@ internal fun ProviderDescriptorDto.toRemoteDescriptor(
 ): RemoteTrackerDescriptor =
     RemoteTrackerDescriptor.from(
         trackerId = id,
-        displayName = displayName,
+        // Issue #4: the search-result + onboarding UIs render this displayName.
+        // When the API supplies a blank `display_name` OR one that is just the
+        // raw id (e.g. "archiveorg", "torrentdownloads", "yts"), humanize the id
+        // so chips/subtitles never show a raw lowercased id. A genuine
+        // server-supplied friendly name (different from id, non-blank) is kept.
+        displayName = friendlyDisplayName(id, displayName),
         capabilities = capabilities,
         authType = authType,
         baseUrls = baseUrls,
@@ -168,3 +173,32 @@ internal fun ProviderDescriptorDto.toRemoteDescriptor(
         supportsAnonymous = supportsAnonymous,
         warn = warn,
     )
+
+/**
+ * Issue #4 (2026-06-25 video sweep): produce a user-facing provider name.
+ *
+ * Returns [serverDisplayName] when it is a real friendly name — non-blank AND
+ * not just the raw [id] (case-insensitive). Otherwise derives a readable label
+ * from the id by splitting on `_`/`-`/`.` separators and Title-Casing each word,
+ * so `"torrentdownloads"` → `"Torrentdownloads"`, `"torrent_downloads"` →
+ * `"Torrent Downloads"`, `"archive.org"` → `"Archive Org"`. Pure + side-effect
+ * free so the rule is unit-testable without the network layer.
+ *
+ * This is the single shared source the catalogue feeds every consumer (search
+ * filter chips, onboarding provider subtitles, provider-config rows), so a
+ * poor server `display_name` is upgraded once, here, rather than leaking a raw
+ * id into each UI surface independently.
+ */
+internal fun friendlyDisplayName(id: String, serverDisplayName: String): String {
+    val server = serverDisplayName.trim()
+    if (server.isNotEmpty() && !server.equals(id.trim(), ignoreCase = true)) {
+        return server
+    }
+    return id.trim()
+        .split('_', '-', '.', ' ')
+        .filter { it.isNotBlank() }
+        .joinToString(" ") { word ->
+            word.replaceFirstChar { ch -> ch.titlecase() }
+        }
+        .ifBlank { id }
+}

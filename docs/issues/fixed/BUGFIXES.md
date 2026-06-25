@@ -61,6 +61,127 @@ Format per entry:
 
 ---
 
+## 2026-06-25 — display/onboarding video-sweep batch (issues #4 / #6 / #7 / #8 / #9)
+
+Five display/onboarding defects from the operator's 2026-06-25 issue video.
+Each fix is root-caused to a `file:line`, reproduce-first tested (where it has
+logic), and falsifiability-rehearsed.
+
+### #4 [HIGH] — raw lowercased provider ids in search-RESULT filter chips
+
+**Root cause:** The search-result chip renders `providerDisplayNames[pid] ?: pid`
+(`feature/search_result/.../SearchResultScreen.kt:377,383`) — display-name-correct
+WITH a raw-id fallback. The display name flows from
+`MultiSearchEvent.ProviderStart(id, descriptor.displayName)`
+(`core/tracker/client/.../LavaTrackerSdk.kt:826`). For an API-catalogue provider
+that descriptor is a `RemoteTrackerDescriptor` whose `displayName` is whatever the
+lava-api-go `/v1/providers` payload supplied — for these providers, the RAW id
+(or blank), so the chip showed "archiveorg"/"torrentdownloads"/"yts"/"kinozal".
+The bug is NOT in the chip render (which is correct); it is the display name being
+a raw id at the catalogue SOURCE.
+**Affected files (SHARED/CORE source — per task, the chip render in
+`feature/search_result` was NOT edited and is flagged for the search subagent):**
+`core/data/src/main/kotlin/lava/data/provider/ProviderCatalogRepository.kt`
+(new `friendlyDisplayName(id, serverDisplayName)` + `toRemoteDescriptor` now
+humanizes), `core/network/api/.../dto/ProviderDescriptorDto.kt`
+(`displayName` defaulted to `""` so a missing field no longer drops the provider).
+**Fix:** the single catalogue→descriptor adapter humanizes a blank-or-equal-to-id
+`display_name` (split on `_`/`-`/`.`/space → Title-Case), upgrading every
+downstream consumer (search chips, onboarding subtitles, provider-config rows) at
+once. A genuine server-supplied friendly name (≠ id, non-blank) is preserved.
+**Verification test:** `core/data/src/test/.../provider/ProviderDisplayNameTest.kt`
+(6 tests). **GREEN** `:core:data:testDebugUnitTest --tests
+lava.data.provider.ProviderDisplayNameTest` + `:core:network:api:test`.
+**Falsifiability:** echo-back mutation (`return serverDisplayName.ifBlank { id }`)
+→ 5/6 FAIL ("Archiveorg" expected, "archiveorg" got). Reverted.
+
+### #6 [MEDIUM] — Welcome "N providers available" contradicted by the ~12-entry picker
+
+**Root cause:** `OnboardingScreen.kt:136` passed `providerCount = state.providers
+.size` to WelcomeStep. `state.providers` is the BUNDLED list loaded at init
+(`OnboardingViewModel.loadProviders`, ~4 verified+apiSupported providers). In the
+ApiSelection flow, after the user picks an API, `fetchAndPopulateProviders` →
+`trackerRegistry.populateFrom(catalogue)` → `loadProviders()` repopulates the list
+to ~12. Welcome (which precedes API selection) showed the premature bundled count.
+**Affected files:** `OnboardingState.kt` (new `welcomeProviderCount: Int?`),
+`OnboardingViewModel.kt` (`loadProviders` sets it `null` when `apiSelectionEnabled`,
+else `items.size`), `steps/WelcomeStep.kt` (nullable param; `null` → count-free
+copy "Multiple content providers available"), `OnboardingScreen.kt:136`.
+**Fix:** count==list by construction — a concrete number is shown ONLY in the
+legacy Welcome→Providers flow where it IS the next screen's list; in the
+ApiSelection flow Welcome omits the (unknowable-yet) number.
+**Verification test:** `OnboardingViewModelVideoFixesTest` (2 tests).
+**GREEN.** **Falsifiability:** drop the `if (apiSelectionEnabled) null` guard →
+"ApiSelection flow MUST NOT pin a premature Welcome count; was 2 expected null".
+Reverted.
+
+### #7 [MEDIUM, UNCONFIRMED → resolved] — `lava.app:7777` preset + "On this network" label
+
+**§6.R verdict: NOT a violation.** The `lava.app:7777` preset is NOT a hardcoded
+source literal. It originates in `.env.example:176`
+(`LAVA_DEFAULT_CLOUD_API=https://lava.app:7777`, a placeholder by definition),
+flows through `app/build.gradle.kts:101`
+`buildConfigField("DEFAULT_CLOUD_API", env["LAVA_DEFAULT_CLOUD_API"])`, is read by
+`CloudApiModule.defaultCloudApi() = BuildConfig.DEFAULT_CLOUD_API`, and parsed by
+`CloudApiDefaults.defaultsFrom()`. Every `7777`/`lava.app` literal in tracked
+`.kt` production source is in test files (§6.R-exempt) or comments. This is the
+§6.R-compliant config pattern, not a hardcoded literal.
+**Label bug (real, fixed):** the cloud preset is an `Endpoint.GoApi(platform=null)`
+rendered via `displaySubtitle()` → `"Lava API · ${discoveredApiLabel(null)}"` →
+`"Lava API · On this network"` — but a cloud/remote preset is NOT "on this
+network". **Affected files:** `steps/ApiSelectionStep.kt` (cloud preset rows now
+pass `subtitleOverride = CLOUD_SUBTITLE = "Cloud / remote server"`).
+**Verification test:** `OnboardingViewModelVideoFixesTest
+.cloud preset subtitle is honest and not on-this-network`. **GREEN.**
+
+### #8 [MEDIUM, UNCONFIRMED → real] — discovered API shown as raw `192.168.0.107:8443`
+
+**Friendly name IS available but was dropped.** `DiscoveredEndpoint` carries the
+mDNS instance name (`.name`, e.g. lava-api-go's `LAVA_API_MDNS_INSTANCE`, default
+"Lava API"; the on-device app may publish its own) —
+`core/data/.../LocalNetworkDiscoveryServiceImpl.kt:108` reads
+`serviceInfo.serviceName`. But `OnboardingViewModel.startApiDiscovery` built
+`Endpoint.GoApi(host, port, platform, storage)` and DROPPED `hit.name`; the
+`Endpoint.GoApi` model has no name field. ApiSelectionStep then rendered
+`displayHostPort()` = raw `host:port`. Adding `name` to `Endpoint.GoApi` was
+rejected — it would change the model's `equals`/persistence identity that the
+menu-side dedup (`DiscoverLocalEndpointsUseCase: it == endpoint`) relies on.
+**Fix (display-only, identity-preserving):** thread the name through a side map
+`OnboardingState.discoveredApiNames: Map<"host:port", name>`; ApiSelectionStep
+renders the name as the PRIMARY label (host:port demoted to the subtitle) when
+present, else falls back to host:port unchanged. **Affected files:**
+`OnboardingState.kt`, `OnboardingViewModel.kt` (populate + symmetric resets +
+`discoveredApiNameKey`), `OnboardingScreen.kt`, `steps/ApiSelectionStep.kt`
+(`discoveredNames` param + `discoveredName` helper). Default-empty preserves all
+existing Challenge call sites (C26/C30) unchanged.
+**Verification test:** `OnboardingViewModelVideoFixesTest` (2 tests: VM map
+population + `discoveredName` helper). **GREEN.** **Falsifiability:** drop the
+name-capture reduce → "discovered API name MUST be captured". Reverted.
+
+### #9 [LOW] — "Select all" silently enables captcha/form-login providers
+
+**Root cause:** `OnboardingViewModel.onToggleAllProviders` set every item
+`selected = true` on select-all, including providers whose
+`authType != NONE && !supportsAnonymous` (FORM_LOGIN/CAPTCHA_LOGIN without an
+anonymous path) — bulk-selecting them strands the user on a Configure page they
+cannot pass without credentials they never entered.
+**Affected files:** `OnboardingViewModel.kt` (`onToggleAllProviders` +
+`requiresNoCredentials()` predicate).
+**Fix:** select-all enables ONLY no-credential-reachable providers
+(`authType == NONE || supportsAnonymous`); credential-required providers stay
+unselected so the user opts in explicitly (the informed tap that routes them
+through Configure). Deselect-all still clears the WHOLE list.
+**Verification test:** `OnboardingViewModelVideoFixesTest` (2 tests).
+**GREEN.** **Falsifiability:** select-all `target = true` for all → "credential-
+required provider MUST NOT be silently enabled by select-all". Reverted.
+
+**Fix commit:** see `git log` on the worktree branch
+`fix/display-onboarding-bugs-batch`. Full onboarding unit suite 64/64 green;
+`core:data` provider suite + `core:network:api` test green. No version bump, no
+push (per task scope).
+
+---
+
 ## 2026-06-25 — provider "Sync this provider" toggle crashes (SerializationException, prod 1.3.11(1075) RELEASE)
 
 **Root cause:** `feature/provider_config/build.gradle.kts` applied only

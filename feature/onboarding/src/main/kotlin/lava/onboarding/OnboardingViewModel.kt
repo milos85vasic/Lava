@@ -223,6 +223,7 @@ class OnboardingViewModel @Inject constructor(
             state.copy(
                 apiDiscoveryRunning = true,
                 discoveredApis = emptyList(),
+                discoveredApiNames = emptyMap(), // Issue #8: clear stale names on rescan
                 selectedApi = null,
                 apiConnectivity = ApiConnectivityState.Idle,
                 // Populate the Cloud-section pre-installed defaults from build
@@ -260,10 +261,25 @@ class OnboardingViewModel @Inject constructor(
                     platform = hit.platform,
                     storage = hit.storage,
                 )
+                // Issue #8: capture the friendly mDNS instance name so the
+                // discovered row renders e.g. "Lava API" (or an operator's
+                // custom LAVA_API_MDNS_INSTANCE) instead of a raw ip:port. Blank
+                // names are ignored (the row then falls back to host:port). The
+                // name is dropped if the advertiser published nothing useful.
+                val friendlyName = hit.name.trim().ifEmpty { null }
                 intent {
                     val existing = state.discoveredApis
                     if (existing.none { it is Endpoint.GoApi && it.host == bareHost && it.port == hit.port }) {
-                        reduce { state.copy(discoveredApis = existing + endpoint) }
+                        reduce {
+                            state.copy(
+                                discoveredApis = existing + endpoint,
+                                discoveredApiNames = if (friendlyName != null) {
+                                    state.discoveredApiNames + (discoveredApiNameKey(bareHost, hit.port) to friendlyName)
+                                } else {
+                                    state.discoveredApiNames
+                                },
+                            )
+                        }
                     }
                 }
             }
@@ -442,7 +458,19 @@ class OnboardingViewModel @Inject constructor(
         val configs = items.associate {
             it.descriptor.trackerId to ProviderConfigState(it.descriptor.trackerId)
         }
-        reduce { state.copy(providers = items, configs = configs) }
+        reduce {
+            state.copy(
+                providers = items,
+                configs = configs,
+                // Issue #6: only surface a concrete Welcome count when the
+                // bundled list IS the list the user sees next (legacy flow,
+                // Welcome → Providers). In the ApiSelection flow the catalogue
+                // fetch repopulates this list after Welcome, so a count here
+                // would be premature and contradict the picker — keep it null
+                // so Welcome shows count-free copy.
+                welcomeProviderCount = if (apiSelectionEnabled) null else items.size,
+            )
+        }
     }
 
     private fun onNextStep() = intent {
@@ -488,6 +516,7 @@ class OnboardingViewModel @Inject constructor(
                         step = OnboardingStep.Welcome,
                         apiDiscoveryRunning = false,
                         discoveredApis = emptyList(),
+                        discoveredApiNames = emptyMap(), // Issue #8: symmetric reset with startApiDiscovery
                         selectedApi = null,
                         apiConnectivity = ApiConnectivityState.Idle,
                         // F1 (2026-06-13 audit): the back-to-Welcome reset MUST be
@@ -538,18 +567,58 @@ class OnboardingViewModel @Inject constructor(
     }
 
     /**
-     * Select-all / deselect-all for the Pick-your-providers list. If every
-     * provider is currently selected, deselect them all; otherwise select them
-     * all. An empty list is a no-op (vacuously "all selected" → target=false →
-     * maps over nothing). The Next gate ([hasSelectedProviders]) reacts to the
-     * resulting selection like any per-row toggle does.
+     * Select-all / deselect-all for the Pick-your-providers list.
+     *
+     * Issue #9 (2026-06-25 video sweep): "Select all" MUST NOT silently enable
+     * providers that require credentials the user hasn't entered. A FORM_LOGIN /
+     * CAPTCHA_LOGIN / OAUTH / API_KEY provider whose `supportsAnonymous == false`
+     * cannot be used without credentials — bulk-selecting it strands the user on
+     * a Configure page they cannot pass (or, worse, persists a credential-less
+     * provider that 401s on every search). Select-all therefore only auto-selects
+     * NO-AUTH-REACHABLE providers: `authType == NONE` (anonymous by construction)
+     * OR `supportsAnonymous == true` (the user may opt out of credentials). A
+     * credential-required provider stays unselected and the user must tap it
+     * explicitly — that explicit tap is the informed opt-in that routes them
+     * through the Configure page where credentials are entered.
+     *
+     * Deselect-all (when every NO-AUTH-REACHABLE provider is already selected)
+     * still clears the WHOLE list, including any credential-required providers
+     * the user opted into manually — "Deselect all" means none.
+     *
+     * An empty list is a no-op. The Next gate reacts to the resulting selection
+     * like any per-row toggle does.
      */
     private fun onToggleAllProviders() = intent {
         reduce {
-            val target = !(state.providers.isNotEmpty() && state.providers.all { it.selected })
-            state.copy(providers = state.providers.map { it.copy(selected = target) })
+            val noAuthReachable = state.providers.filter { it.requiresNoCredentials() }
+            // "All selected" for the toggle's purpose = every NO-AUTH-REACHABLE
+            // provider is selected. If so, the gesture means "clear everything";
+            // otherwise it means "select every NO-AUTH-REACHABLE provider".
+            val allReachableSelected =
+                noAuthReachable.isNotEmpty() && noAuthReachable.all { it.selected }
+            state.copy(
+                providers = state.providers.map { item ->
+                    val target = if (allReachableSelected) {
+                        false // deselect-all clears everything, credential-required included
+                    } else {
+                        // select-all enables ONLY providers usable without credentials
+                        item.requiresNoCredentials()
+                    }
+                    item.copy(selected = target)
+                },
+            )
         }
     }
+
+    /**
+     * Whether this provider can be used without the user entering credentials —
+     * either it has no auth at all (`AuthType.NONE`) or it explicitly permits an
+     * anonymous browse/search path (`supportsAnonymous`). Credential-required
+     * providers (FORM_LOGIN/CAPTCHA_LOGIN/OAUTH/API_KEY without anonymous support)
+     * return false and are NOT auto-selected by "Select all" (Issue #9).
+     */
+    private fun ProviderOnboardingItem.requiresNoCredentials(): Boolean =
+        descriptor.authType == AuthType.NONE || descriptor.supportsAnonymous
 
     private fun onUsernameChanged(value: String) = updateCurrentConfig { it.copy(username = value) }
     private fun onPasswordChanged(value: String) = updateCurrentConfig { it.copy(password = value) }
@@ -909,3 +978,12 @@ class OnboardingViewModel @Inject constructor(
             "Couldn't reach the selected API — showing bundled providers."
     }
 }
+
+/**
+ * Issue #8: stable key for [OnboardingState.discoveredApiNames] — the friendly
+ * mDNS instance-name side map. Keyed by `host:port` because that is the identity
+ * the discovered [lava.models.settings.Endpoint.GoApi] carries (its model does
+ * not hold the name). `internal` + file-level so the ApiSelection render path
+ * and unit tests resolve the SAME key the ViewModel writes (no drift).
+ */
+internal fun discoveredApiNameKey(host: String, port: Int): String = "$host:$port"
