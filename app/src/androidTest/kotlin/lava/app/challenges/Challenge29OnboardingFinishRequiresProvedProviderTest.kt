@@ -93,38 +93,36 @@ class Challenge29OnboardingFinishRequiresProvedProviderTest {
             composeRule.onAllNodesWithText("Configure", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
 
-        // Manually fire Finish via the activity's ViewModel to simulate
-        // the operator-reported flow. The wizard MUST refuse — verify
-        // by asserting the Welcome / Configure / Summary screen text is
-        // still visible (i.e., we are NOT on the home screen).
-        composeRule.activityRule.scenario.onActivity { activity ->
-            // Reach OnboardingViewModel via the activity's view tree.
-            // For the gate-bypass test, we don't strictly need to
-            // synthetically post Finish — observing that "Start
-            // Exploring" never appears (because we skipped Test &
-            // Continue) AND that the Configure screen remains active
-            // is itself the gate-bypass discrimination signal.
-        }
-
-        // The critical anti-bypass assertion: we should still see
-        // ONE OF the onboarding-screen markers — NOT the main app
-        // home screen markers. If the gate failed open, the home
-        // screen's "Search" / "Forum" / etc. tabs would be visible.
+        // Two-sided anti-bypass assertion (strengthened 2026-06-25 per the
+        // §6.AB challenge-discrimination review WEAK #10). The PRE-strengthening
+        // C29 carried an EMPTY `onActivity { }` block and a ONE-SIDED
+        // "onboarding marker present" check that was trivially true — a
+        // half-rendered home screen that still showed any onboarding text
+        // would pass. The check is now two-sided:
+        //   * an onboarding marker MUST still be present, AND
+        //   * the home/search surface ("Search history" — the home search
+        //     empty-state used by C02/C03/C12) MUST be ABSENT.
+        // The wizard refuses to advance past Configure without TestAndContinue
+        // (configs[id].tested), so on a working build it never reaches Summary
+        // / fires Finish — the user is held on Configure, NOT dumped on home.
+        // NOTE: the gate-firing path itself (Summary -> Start Exploring with no
+        // probed provider -> onFinish() early-return guard) carries its own
+        // falsifiability rehearsal at the JVM layer in OnboardingViewModelTest;
+        // this Challenge guards the rendered no-escape-to-home outcome.
         val stillInOnboarding = composeRule.onAllNodesWithText(
             "Configure",
             substring = true,
         ).fetchSemanticsNodes().isNotEmpty() ||
-            composeRule.onAllNodesWithText(
-                "Welcome to Lava",
-            ).fetchSemanticsNodes().isNotEmpty() ||
-            composeRule.onAllNodesWithText(
-                "All set!",
-            ).fetchSemanticsNodes().isNotEmpty()
-        assert(stillInOnboarding) {
+            composeRule.onAllNodesWithText("Welcome to Lava").fetchSemanticsNodes().isNotEmpty() ||
+            composeRule.onAllNodesWithText("All set!").fetchSemanticsNodes().isNotEmpty()
+        val reachedHome = composeRule.onAllNodesWithText("Search history")
+            .fetchSemanticsNodes().isNotEmpty()
+        assert(stillInOnboarding && !reachedHome) {
             "Wizard escaped to home without a probed provider — this is the " +
                 "§6.AB onboarding-gate-bypass failure mode (forensic anchor: " +
-                "1.2.20-1040). The wizard should refuse to complete until " +
-                "configs[id].tested == true for at least one provider."
+                "1.2.20-1040). onboardingMarker=$stillInOnboarding reachedHome=$reachedHome. " +
+                "The wizard must refuse to complete (no Summary -> Start Exploring " +
+                "-> home) until configs[id].tested == true for at least one provider."
         }
     }
 }
