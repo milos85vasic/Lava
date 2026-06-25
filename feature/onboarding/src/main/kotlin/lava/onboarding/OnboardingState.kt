@@ -45,6 +45,18 @@ sealed interface ApiConnectivityState {
 data class OnboardingState(
     val step: OnboardingStep = OnboardingStep.Welcome,
     val providers: List<ProviderOnboardingItem> = emptyList(),
+
+    // Issue #6 (2026-06-25 video sweep): the Welcome screen's "N providers
+    // available" line MUST match the provider list the user will actually see.
+    // In the ApiSelection-enabled flow the picker list is repopulated from the
+    // chosen API's catalogue AFTER Welcome (`fetchAndPopulateProviders`), so the
+    // bundled `providers.size` shown on Welcome was premature and contradicted
+    // the ~12-entry picker. When `null`, the Welcome screen omits the specific
+    // count (the honest copy for "we don't yet know how many your API offers");
+    // when non-null it equals the list the very next step renders, so count ==
+    // list by construction. The ViewModel sets this to `providers.size` ONLY in
+    // the legacy Welcome → Providers flow where no API-catalogue step intervenes.
+    val welcomeProviderCount: Int? = null,
     val configs: Map<String, ProviderConfigState> = emptyMap(),
     val currentProviderIndex: Int = 0,
     val connectionTestRunning: Boolean = false,
@@ -61,6 +73,18 @@ data class OnboardingState(
 
     // ApiSelection step (60th §6.L invocation, 2026-05-18)
     val discoveredApis: List<Endpoint> = emptyList(),
+
+    // Issue #8 (2026-06-25 video sweep): the friendly mDNS instance name the
+    // advertiser published (lava-api-go's `LAVA_API_MDNS_INSTANCE`, default
+    // "Lava API"; the on-device app may publish its own). `DiscoveredEndpoint`
+    // carries this as `.name`, but the `Endpoint.GoApi` model does NOT (adding
+    // it would change the model's equals/persistence identity, which the
+    // menu-side dedup `it == endpoint` relies on). So the name is threaded as a
+    // display-only side map keyed by the same host:port the discovered Endpoint
+    // carries — used by ApiSelectionStep to show "Lava API" instead of a raw
+    // "192.168.0.107:8443" as the primary label. Empty/absent → fall back to
+    // host:port (still distinguishing). Not persisted; live-discovery hint only.
+    val discoveredApiNames: Map<String, String> = emptyMap(),
     val apiDiscoveryRunning: Boolean = false,
     val selectedApi: Endpoint? = null,
     val apiConnectivity: ApiConnectivityState = ApiConnectivityState.Idle,

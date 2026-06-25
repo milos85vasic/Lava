@@ -133,13 +133,19 @@ fun OnboardingScreen(
     ) { step ->
         when (step) {
             OnboardingStep.Welcome -> WelcomeStep(
-                providerCount = state.providers.size,
+                // Issue #6: count-or-null sourced from state so it equals the
+                // provider list the user sees next (or is omitted when the count
+                // would be premature in the ApiSelection flow).
+                providerCount = state.welcomeProviderCount,
                 onGetStarted = { viewModel.perform(OnboardingAction.NextStep) },
             )
             // 60th §6.L invocation (2026-05-18): new API selection step
             OnboardingStep.ApiSelection -> ApiSelectionStep(
                 discoveryRunning = state.apiDiscoveryRunning,
                 discovered = state.discoveredApis,
+                // Issue #8: friendly mDNS instance names so a discovered API
+                // renders "Lava API" instead of a raw ip:port primary label.
+                discoveredNames = state.discoveredApiNames,
                 selected = state.selectedApi,
                 connectivity = state.apiConnectivity,
                 onSelect = { viewModel.perform(OnboardingAction.SelectApi(it)) },

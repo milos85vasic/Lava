@@ -20,7 +20,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ProviderDescriptorDto(
     val id: String,
-    val displayName: String,
+    // Issue #4 (2026-06-25 video sweep): default to empty so a server payload
+    // that omits `display_name` parses (and is then humanized from `id` by
+    // [lava.data.provider.toRemoteDescriptor]) instead of failing JSON decode
+    // and dropping the provider entirely. A present-but-raw value (display_name
+    // == id) is likewise upgraded downstream.
+    val displayName: String = "",
     val kind: String,
     val indexer: String? = null,
     val capabilities: List<String> = emptyList(),

@@ -23,7 +23,12 @@ import lava.designsystem.theme.AppTheme
 
 @Composable
 fun WelcomeStep(
-    providerCount: Int,
+    // Issue #6 (2026-06-25): nullable. `null` → omit the specific count (the
+    // honest state when the provider list will be (re)populated from the
+    // chosen API's catalogue on a LATER step, so any number here would be
+    // premature and contradict the picker). Non-null → "N providers available",
+    // shown only when this number equals the very next screen's list.
+    providerCount: Int?,
     onGetStarted: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -55,7 +60,14 @@ fun WelcomeStep(
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "$providerCount providers available",
+                // Issue #6: with a known, list-accurate count show it; otherwise
+                // show count-free copy rather than a premature number that the
+                // provider picker would contradict after API selection.
+                text = if (providerCount != null) {
+                    "$providerCount providers available"
+                } else {
+                    "Multiple content providers available"
+                },
                 style = AppTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = AppTheme.colors.onSurfaceVariant,

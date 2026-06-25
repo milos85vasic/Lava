@@ -65,6 +65,12 @@ fun ApiSelectionStep(
     onSelect: (Endpoint) -> Unit,
     onRetryDiscovery: () -> Unit,
     onRetryProbe: () -> Unit,
+    // Issue #8 (2026-06-25): friendly mDNS instance names keyed by "host:port".
+    // When a discovered endpoint has an entry, its row shows the name as the
+    // primary label (host:port demoted to the subtitle); absent → host:port
+    // primary, as before. Default empty keeps existing call sites (Challenge26
+    // / Challenge30) compiling unchanged.
+    discoveredNames: Map<String, String> = emptyMap(),
     // Cloud / remote-server section (2026-05-31 operator request).
     // Defaults keep existing call sites (e.g. Challenge26) compiling; the
     // production OnboardingScreen + Challenge30 pass all five explicitly.
@@ -150,6 +156,10 @@ fun ApiSelectionStep(
                     isSelected = endpoint == selected,
                     connectivity = if (endpoint == selected) connectivity else ApiConnectivityState.Idle,
                     onClick = { onSelect(endpoint) },
+                    // Issue #8: prefer the advertised friendly name (e.g. "Lava
+                    // API" or a custom LAVA_API_MDNS_INSTANCE) as the primary
+                    // label; the host:port moves to the subtitle.
+                    friendlyName = endpoint.discoveredName(discoveredNames),
                 )
                 Spacer(Modifier.height(8.dp))
             }
@@ -236,6 +246,12 @@ fun ApiSelectionStep(
                     connectivity = if (endpoint == selected) connectivity else ApiConnectivityState.Idle,
                     onClick = { onSelect(endpoint) },
                     contentTag = "api-cloud-default",
+                    // Issue #7 (2026-06-25): a cloud / remote-server preset is NOT
+                    // "On this network" — overriding the default subtitle (which
+                    // discoveredApiLabel(null) would render as "On this network")
+                    // with the honest "Cloud / remote server" tag prevents the
+                    // mislabel the operator flagged.
+                    subtitleOverride = CLOUD_SUBTITLE,
                 )
                 Spacer(Modifier.height(8.dp))
             }
@@ -280,6 +296,12 @@ private fun ApiRow(
     connectivity: ApiConnectivityState,
     onClick: () -> Unit,
     contentTag: String = "api-row",
+    // Issue #8: when non-null, shown as the PRIMARY label (host:port demoted to
+    // the subtitle). Used for a discovered API that advertised a friendly name.
+    friendlyName: String? = null,
+    // Issue #7: when non-null, replaces the computed subtitle. Used to label a
+    // cloud preset honestly ("Cloud / remote server") instead of "On this network".
+    subtitleOverride: String? = null,
 ) {
     Surface(
         onClick = onClick,
@@ -299,13 +321,25 @@ private fun ApiRow(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Column {
+                // Issue #8: a friendly mDNS name (when present) is the primary
+                // label; the host:port then becomes the secondary/subtitle line
+                // so the user still sees the distinguishing address. No name →
+                // host:port primary, exactly as before.
                 Text(
-                    text = endpoint.displayHostPort(),
+                    text = friendlyName ?: endpoint.displayHostPort(),
                     style = AppTheme.typography.bodyLarge,
                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                 )
                 Text(
-                    text = endpoint.displaySubtitle(),
+                    text = when {
+                        // Issue #7: caller-supplied honest subtitle (cloud preset).
+                        subtitleOverride != null -> subtitleOverride
+                        // Issue #8: when the name took the primary slot, surface
+                        // the host:port + the network label on the subtitle so the
+                        // address is still visible.
+                        friendlyName != null -> "${endpoint.displayHostPort()} · ${endpoint.displaySubtitle()}"
+                        else -> endpoint.displaySubtitle()
+                    },
                     style = AppTheme.typography.labelSmall,
                     color = AppTheme.colors.onSurfaceVariant,
                 )
@@ -332,6 +366,25 @@ internal fun Endpoint.displayHostPort(): String = when (this) {
     is Endpoint.GoApi -> "$host:$port"
     is Endpoint.Mirror -> host
     is Endpoint.Rutracker -> host
+}
+
+/**
+ * Issue #7: honest subtitle for a cloud / remote-server preset row, so it is
+ * never rendered as "On this network" (the default `displaySubtitle()` for a
+ * platform-less GoApi). User-facing copy — not a connection literal.
+ */
+internal const val CLOUD_SUBTITLE: String = "Cloud / remote server"
+
+/**
+ * Issue #8: look up the friendly mDNS instance name for this discovered
+ * endpoint from the side map the ViewModel populated, keyed by `host:port`
+ * (the same key [lava.onboarding.discoveredApiNameKey] writes). Returns `null`
+ * for a non-GoApi endpoint or when no name was advertised — the row then falls
+ * back to the host:port primary label.
+ */
+internal fun Endpoint.discoveredName(names: Map<String, String>): String? = when (this) {
+    is Endpoint.GoApi -> names[lava.onboarding.discoveredApiNameKey(host, port)]
+    else -> null
 }
 
 internal fun Endpoint.displaySubtitle(): String = when (this) {
