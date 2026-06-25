@@ -1,0 +1,82 @@
+{
+  "_comment": "§6.N bluff-hunt of THIS session's NEW code (the client-1075 / api-app-21 release cycle). Per Seventh Law clause 5 + §6.N: each new gate/fix/test from commits between 2d55ab9b (session start) and HEAD c6fbaa95 was verified by DELIBERATE MUTATION of the production code path it claims to cover, the verbatim FAIL captured, then reverted and re-confirmed PASS. All mutations reverted; git status clean of mutations at end. No bluffs found (target: 0).",
+  "hunt_date": "2026-06-25",
+  "cycle": "client 1.x-1075 + api-app 21 (§6.AA stage-1 DEBUG, commit e83ed3c9)",
+  "commit_range": "2d55ab9b..c6fbaa95",
+  "host": "darwin/arm64",
+  "resource_bounds": "--max-workers=2 --no-daemon, module-scoped only",
+  "submodule_materialization_note": "tracker_sdk (includeBuild) + containers (emulator-matrix CLI) were materialized read-only from the main checkout at their EXACT pinned SHAs (tracker_sdk=7afc37aa, containers=71d32562) to allow Gradle config + CLI build. Removed/cleaned after; no submodule content committed. gitlinks unchanged.",
+  "targets": [
+    {
+      "id": 1,
+      "target": "api-app okhttp alignment constraint",
+      "file": "api-app/build.gradle.kts (constraints { implementation(libs.okhttp.core) })",
+      "fix_commit": "d665b9e5",
+      "claims_to_catch": "AGP consistent-resolution conflict: debugAndroidTestRuntimeClasspath's projected `strictly 3.12.13` (from firebase-perf transitive) vs androidTest okhttp 4.12.0 -> unresolvable, FAILS :api-app:assembleDebugAndroidTest",
+      "mutation": "Commented out the `constraints { implementation(libs.okhttp.core) }` block, then ran ./gradlew :api-app:dependencies --configuration debugAndroidTestRuntimeClasspath --max-workers=2 --no-daemon (+ dependencyInsight for verbatim text).",
+      "observed_failure_verbatim": "com.squareup.okhttp3:okhttp:4.12.0 FAILED / com.squareup.okhttp3:okhttp:{strictly 3.12.13} FAILED ;; dependencyInsight: 'Could not resolve com.squareup.okhttp3:okhttp:{strictly 3.12.13}. - Cannot find a version of \\'com.squareup.okhttp3:okhttp\\' that satisfies the version constraints: Dependency path ... --> okhttp:4.12.0 ; Constraint path ... --> okhttp:{strictly 3.12.13} because of the following reason: version resolved in configuration \\':api-app:debugRuntimeClasspath\\' by consistent resolution'",
+      "baseline_with_constraint": "okhttp:4.12.0 ; okhttp:{strictly 4.12.0} -> 4.12.0 (c) ; no FAILED markers — resolution succeeds",
+      "repass_after_revert": "okhttp:4.12.0 ; {strictly 4.12.0} -> 4.12.0 (c) — conflict resolved, no FAILED",
+      "verdict": "GENUINE",
+      "reverted": "yes"
+    },
+    {
+      "id": 2,
+      "target": "gate-runner CLI --container-image forwarding",
+      "file": "scripts/run-challenge-matrix.sh (CONTAINER_ARGS=(--container-image ... --container-runtime ...)) -> submodules/containers/cmd/emulator-matrix",
+      "fix_commit": "49c831fe",
+      "claims_to_catch": "pinned cmd/emulator-matrix (71d32562) rejects with exit 2 when the RESOLVED runner is containerized and --container-image is absent; without the script forwarding CONTAINER_ARGS, the gate-tooling cannot drive the containerized-KVM matrix",
+      "mutation": "Built emulator-matrix CLI from pinned containers @71d32562; ran CASE A (--runner=containerized WITHOUT --container-image; earlier required-flags satisfied with dummy --apk/--test-class/--evidence-dir/--android-sdk-root/--avds) = the script's CONTAINER_ARGS-forwarding removed; vs CASE B (WITH --container-image + --container-runtime). No emulator boot — flag gate only.",
+      "observed_failure_verbatim": "CASE A: 'ERROR: --container-image is required when the resolved runner is containerized'  exit 2. CASE B: '[§6.X] runner=containerized image=ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64 runtime=podman' then exit 1 at later podman image-pull (PAST the flag gate, on unprovisioned host).",
+      "verdict": "GENUINE",
+      "reverted": "yes (no production file mutated; CASE A IS the without-forwarding state — proven directly against the pinned CLI's os.Exit(2) at cmd/emulator-matrix/main.go:201-204)"
+    },
+    {
+      "id": 3,
+      "target": "OS-aware ANDROID_NDK_HOME resolution (Linux branch)",
+      "file": "lava-api-go/scripts/build-cshared.sh (os_conventional_sdk_root Linux) -> ~/Android/Sdk + resolve_newest_ndk)",
+      "fix_commit": "a25aa73a",
+      "claims_to_catch": "On a Linux gate host the NDK resolves via uname=Linux -> ~/Android/Sdk/ndk/<newest sort -V>, not the macOS-only default; a wrong Linux path yields empty resolution -> loud FATAL exit 2",
+      "mutation": "Changed the Linux branch from 'echo \"${HOME}/Android/Sdk\"' to 'echo \"${HOME}/wrong/Sdk\"' in the real script, then re-extracted the helper fns and ran the Linux-branch resolution against a synthetic ~/Android/Sdk/ndk/{26.1.10909125,27.0.12077973} tree (FAKE_UNAME=Linux).",
+      "observed_failure_verbatim": "BASELINE: Linux-resolved-NDK=<fakehome>/Android/Sdk/ndk/27.0.12077973 (sort -V newest). MUTATED: Linux-conventional-root=<fakehome>/wrong/Sdk ; Linux-resolved-NDK=  (EMPTY — no ndk/ dir at wrong root; resolve_newest_ndk echoes nothing, which falls through to the script's FATAL exit-2 'could not locate an Android NDK').",
+      "repass_after_revert": "Linux-resolved-NDK=<fakehome>/Android/Sdk/ndk/27.0.12077973 ; bash -n parse-clean PASS",
+      "verdict": "GENUINE",
+      "reverted": "yes"
+    },
+    {
+      "id": 4,
+      "target": "CM-SUBAGENT-DELEGATION-AUDIT gate",
+      "file": "scripts/check-subagent-delegation-audit.sh + .lava-ci-evidence/subagent-dispatches/2026-06-25-1075-release-cycle.json",
+      "fix_commit": "1176496d",
+      "claims_to_catch": "When a commit describes subagent-dispatch activity (e.g. 'Merge branch worktree-agent-...'), the gate FAILs (exit 1) unless a dispatch-record JSON references that commit's 8-char short SHA",
+      "mutation": "In the dispatch-record JSON, changed the okhttp dispatch's `dispatched_for_commit` from '9c5b187a' (the real worktree-agent merge SHA) to 'DEADBEEF', then ran the gate over 2d55ab9b..HEAD.",
+      "observed_failure_verbatim": "CM-SUBAGENT-DELEGATION-AUDIT VIOLATION (cutoff=2026-05-19): Commits describe subagent-dispatch activity but lack an audit entry under .lava-ci-evidence/subagent-dispatches/: commit 9c5b187a (2026-06-25) — trigger: \"Merge branch 'worktree-agent-a09f8666fcfed7d98'\"  ;; EXIT=1",
+      "baseline": "gate clean: 19 commit(s) scanned, 7 subagent-trigger, 0 grandfathered, 0 orphans (exit 0)",
+      "repass_after_revert": "gate clean: 19 commit(s) scanned, 7 subagent-trigger, 0 orphans (exit 0)",
+      "verdict": "GENUINE",
+      "reverted": "yes"
+    },
+    {
+      "id": 5,
+      "target": "§6.AB strengthened onboarding Challenge (C29)",
+      "file": "app/src/androidTest/kotlin/lava/app/challenges/Challenge29OnboardingFinishRequiresProvedProviderTest.kt",
+      "fix_commit": "9156984a",
+      "claims_to_catch": "Onboarding-gate-bypass (§6.AB forensic anchor 1.2.20-1040): reaching home requires >=1 probed provider; the wizard must NOT escape to home without configs[id].tested==true",
+      "method": "READ-ONLY inspection of the assertion + KDoc falsifiability rehearsal (execution requires the emulator gate, BLOCKED on this darwin/arm64 host per §6.AH — container/VM path does not boot; no host-direct fallback).",
+      "assertion_is_user_visible": true,
+      "assertion_detail": "Two-sided (strengthened 2026-06-25 from WEAK one-sided + empty onActivity{}): asserts `stillInOnboarding && !reachedHome` where stillInOnboarding samples rendered Compose nodes ('Configure' substring OR 'Welcome to Lava' OR 'All set!') AND reachedHome samples the home empty-state node 'Search history' (used by C02/C03/C12). NOT a classpath/presence-only check; the chief failure signal is rendered UI text per Sixth Law clause 3.",
+      "kdoc_rehearsal": "Names a real production mutation: remove the `verifiedProviders.isEmpty()` early-return guard in OnboardingViewModel.onFinish() so Finish fires unconditionally -> Activity transitions to home -> the `stillInOnboarding && !reachedHome` assertion fails (the §6.AB gate-bypass failure mode).",
+      "verdict": "GENUINE (by inspection; the assertion is on real user-visible Compose state, two-sided, with a named production-path rehearsal — not a bluff). Live emulator execution honestly BLOCKED per §6.AH on this host.",
+      "reverted": "yes (read-only; no mutation applied)"
+    }
+  ],
+  "summary": {
+    "targets_total": 5,
+    "genuine": 5,
+    "bluffs_found": 0,
+    "all_mutations_reverted": true,
+    "git_status_clean_of_mutations": true,
+    "execution_targets_proven_by_real_mutation": [1, 2, 3, 4],
+    "inspection_only_host_blocked": [5]
+  }
+}
