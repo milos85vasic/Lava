@@ -84,6 +84,15 @@ ALLOWLIST=(
     # is misleading (would be cleaner as .config); rename owed to Phase 6
     # (lowercase snake_case + clearer semantics).
     "deployment/thinker/thinker.local.env"
+    # deployment/nezha/nezha.local.env — same class as thinker.local.env above:
+    # an intentionally-tracked DEPLOYMENT-RECIPE doc, NOT a secret container.
+    # Header explicitly binds §6.H ("NO real secrets in this committed file; real
+    # tracker creds / HMAC secret / Firebase token are appended at distribute time
+    # from the operator's gitignored local .env"). Audited 2026-06-25: contains
+    # only LAN ports/host-names + an explicitly-labelled NON-production test-default
+    # Postgres password (LAVA_NEZHA_POSTGRES_PASSWORD=lava-nezha-test-default).
+    # The .env extension is misleading (cleaner as .config); rename owed to Phase 6.
+    "deployment/nezha/nezha.local.env"
 )
 
 is_allowlisted() {
