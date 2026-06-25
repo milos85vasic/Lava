@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import lava.common.analytics.AnalyticsTracker
 import lava.common.analytics.rethrowIfCancellation
 import lava.common.newCancelableScope
@@ -35,61 +34,79 @@ internal class SearchInputViewModel @Inject constructor(
     loggerFactory: LoggerFactory,
     private val analytics: AnalyticsTracker,
     private val providerConfigRepository: ProviderConfigRepository,
+    private val displayNameResolver: ProviderDisplayNameResolver,
 ) : ViewModel(), ContainerHost<SearchInputState, SearchInputSideEffect> {
     private val logger = loggerFactory.get("SearchInputViewModel")
     private val filter = savedStateHandle.filter
     private val observeSuggestsScope = viewModelScope.newCancelableScope()
 
     /**
-     * The full set of providers Lava knows about. ProviderChip(providerId,
-     * displayName, selected) — selected is recomputed in onCreate based on
-     * which providers the user actually onboarded; never trust this default
-     * for the rendered UI.
-     */
-    private val availableProviders = listOf(
-        ProviderChip("rutracker", "RuTracker", false),
-        ProviderChip("rutor", "RuTor", false),
-        ProviderChip("archiveorg", "Internet Archive", false),
-        ProviderChip("gutenberg", "Gutenberg", false),
-    )
-
-    /**
-     * Bug 3 (2026-05-17, user report on 1.2.23-1043): the prior version
-     * initialized this to `availableProviders.map { it.providerId }.toSet()`
-     * — ALL providers selected by default. The user saw the search filter
-     * pre-selecting providers they had never onboarded, which then either
-     * (a) failed with "not registered" in streamMultiSearch, or
-     * (b) silently sent traffic for unconfigured providers.
+     * The set of provider ids the search will query — i.e. the user's
+     * currently-selected chips.
      *
-     * Fix: initialize empty + populate in onCreate from the persisted
-     * ProviderConfigRepository (the same source onboarding writes to).
-     * Only providers with a config row AND searchEnabled = true are
-     * pre-selected. The user can still toggle any chip; this only
-     * controls the DEFAULT for the search-input chip bar.
+     * 2026-06-25 VIDEO-CLUSTER ROOT-CAUSE FIX (operator video, issues #1/#2/#3).
+     * The prior version maintained a HARDCODED `availableProviders` list of 4
+     * ids (rutracker/rutor/archiveorg/gutenberg) and intersected the onboarded
+     * set with it. A user who onboarded a provider OUTSIDE that list (e.g. YTS)
+     * got ZERO selected chips → the submit resolved to an empty list → the
+     * SearchResultNavigation serializer dropped the empty list → the result
+     * screen read `providerIds == null` → `observePagingData()` (the
+     * single-tracker rutracker path) → 401 → "Something went wrong". The chip
+     * bar ALSO only ever showed those 4 phantom providers, never the onboarded
+     * one. And the legacy `null`-means-ALL sentinel (when the selected size
+     * happened to equal 4) silently re-routed search to the wrong set.
+     *
+     * Fix: the chip bar IS the user's onboarded set (the source of truth
+     * `ProviderConfigRepository` — the same table onboarding writes to),
+     * filtered by `searchEnabled && isEnabled`, deterministically sorted by
+     * provider id. Display names resolve from the live tracker registry
+     * (so dynamic / API-vended providers like YTS render correctly). Submit
+     * passes the EXPLICIT selected list — never the `null`-means-all sentinel.
      */
     private var selectedProviders: Set<String> = emptySet()
 
     override val container: Container<SearchInputState, SearchInputSideEffect> = container(
-        initialState = SearchInputState(providerChips = availableProviders),
+        initialState = SearchInputState(providerChips = emptyList()),
         onCreate = {
-            viewModelScope.launch {
-                val configured = providerConfigRepository.observeAll().first()
-                val onboardedAndSearchEnabled = configured
-                    .filter { it.searchEnabled && it.isEnabled }
-                    .map { it.providerId }
-                    .toSet()
-                selectedProviders = onboardedAndSearchEnabled
-                reduce {
-                    state.copy(
-                        providerChips = availableProviders.map {
-                            it.copy(selected = it.providerId in onboardedAndSearchEnabled)
-                        },
-                    )
-                }
-            }
+            // Populate the chip bar as an Orbit intent (NOT a raw
+            // viewModelScope.launch) so it shares the container's single
+            // intent queue — guaranteeing the chips are in state before any
+            // user ProviderToggled intent is processed (deterministic
+            // ordering; video issue #3).
+            loadOnboardedChips()
             onInputChanged(filter.query.toTextFieldValue())
         },
     )
+
+    private fun loadOnboardedChips() = intent {
+        val onboarded = onboardedSearchableProviders()
+        selectedProviders = onboarded.toSet()
+        val names = displayNameResolver.displayNames()
+        reduce {
+            state.copy(
+                providerChips = onboarded.map { id ->
+                    ProviderChip(
+                        providerId = id,
+                        displayName = names[id] ?: id,
+                        selected = true,
+                    )
+                },
+            )
+        }
+    }
+
+    /**
+     * The user's onboarded, search-enabled providers — the single source of
+     * truth for both the chip bar and the search query set. Deterministically
+     * sorted by provider id so the rendered chips + the submit payload are
+     * stable run-to-run (video issue #3: no non-deterministic provider set).
+     */
+    private suspend fun onboardedSearchableProviders(): List<String> =
+        providerConfigRepository.observeAll().first()
+            .filter { it.searchEnabled && it.isEnabled }
+            .map { it.providerId }
+            .distinct()
+            .sorted()
 
     fun perform(action: SearchInputAction) {
         logger.d { "Perform $action" }
@@ -123,32 +140,25 @@ internal class SearchInputViewModel @Inject constructor(
     }
 
     /**
-     * Bug 2 second-cascade fix (2026-05-17): if the user taps Submit
-     * BEFORE the Bug 3 onCreate async coroutine has populated
-     * selectedProviders from the repository, selectedProviders is
-     * still emptySet() and the prior code produced providerIds = [].
-     * The empty list was then dropped by SearchResultNavigation's
-     * serializer, routing the user into observePagingData() (the
-     * single-tracker rutracker path) which fails with LoadState.Error
-     * for users who only onboarded anonymous providers.
+     * Resolves the explicit provider-id list for the search the user just
+     * submitted. ALWAYS an explicit list — NEVER the legacy `null`-means-all
+     * sentinel (removed 2026-06-25): the search-input set is the user's
+     * onboarded set, so "all" has no meaning here, and emitting `null` would
+     * route the result screen into the single-tracker rutracker fallback
+     * (video issue #1/#2). Returns `null` ONLY when the user has no onboarded
+     * search-enabled providers at all — in which case there is genuinely
+     * nothing to query and the result screen renders its empty/error state.
      *
-     * Fix: if selectedProviders is empty at submit time, BLOCK on
-     * loading from ProviderConfigRepository (same source the chip-bar
-     * onCreate reads). The user's perceived latency on first tap is
-     * the existing repo-read time, which is < 100 ms in practice.
-     * Subsequent taps reuse the cached selectedProviders.
+     * Bug 2 second-cascade guard (2026-05-17) retained: if Submit fires
+     * BEFORE the onCreate coroutine populated [selectedProviders], block on a
+     * fresh repository read (the same source-of-truth) so the submit never
+     * ships an empty set the navigation serializer would silently drop.
      */
     private suspend fun resolveProviderIdsForSubmit(): List<String>? {
         if (selectedProviders.isEmpty()) {
-            val configured = providerConfigRepository.observeAll().first()
-            val onboarded = configured
-                .filter { it.searchEnabled && it.isEnabled }
-                .map { it.providerId }
-                .toSet()
-            selectedProviders = onboarded
+            selectedProviders = onboardedSearchableProviders().toSet()
         }
-        val selected = selectedProviders.toList()
-        return if (selected.size == availableProviders.size) null else selected
+        return selectedProviders.toList().sorted().takeIf { it.isNotEmpty() }
     }
 
     private fun onSubmit() = intent {
@@ -179,9 +189,11 @@ internal class SearchInputViewModel @Inject constructor(
             current.add(providerId)
         }
         selectedProviders = current
+        // Toggle selection on the EXISTING (onboarded) chip set — the chip bar
+        // membership is the onboarded set; toggling only flips `selected`.
         reduce {
             state.copy(
-                providerChips = availableProviders.map { it.copy(selected = it.providerId in current) },
+                providerChips = state.providerChips.map { it.copy(selected = it.providerId in current) },
             )
         }
     }

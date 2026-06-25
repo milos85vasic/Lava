@@ -15,6 +15,13 @@ dependencies {
     // all 4 hard-coded providers.
     implementation(project(":core:credentials"))
 
+    // 2026-06-25 video-cluster root-cause fix: SearchInputViewModel resolves
+    // the display name of each ONBOARDED provider from the live tracker
+    // registry (LavaTrackerSdk.listAvailableTrackers()) so the chip bar
+    // reflects the user's real configuration (including dynamic / API-vended
+    // providers like YTS) instead of a hardcoded 4-provider list.
+    implementation(project(":core:tracker:client"))
+
     // SearchInputNavigationRoundtripTest (LVA-048 / LVA-049) runs under Robolectric
     // so the REAL android.net.Uri.encode (production encode side) and Uri.decode
     // (Navigation-Compose decode side) both execute on the JVM unit-test path.

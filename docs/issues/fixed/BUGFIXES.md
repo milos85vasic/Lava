@@ -2479,3 +2479,114 @@ no JVM equivalent.)
 authored in the same commit as the fix per §6.T.4).
 **Forensic anchor / incident JSON (status updated):**
 `.lava-ci-evidence/sixth-law-incidents/2026-06-08-navbackstackentry-teardown-crash-2.9.1-incomplete.json`
+
+---
+
+## BUG-2026-06-25 — Search queries the WRONG provider set (video cluster #1/#2/#3/#5)
+
+**Reported:** operator video, 2026-06-25 (`.lava-ci-evidence/video-analysis/`).
+Four symptoms, ONE causal cluster:
+- **#2 (root):** user onboarded ONLY YTS, but Search queried RuTracker / RuTor /
+  Internet Archive / Gutenberg (and result chips showed torrentdownloads /
+  kinozal / yts) — search used the WRONG provider set, not the onboarded one.
+- **#1:** those non-onboarded providers fail → zero results → full-screen
+  "Something went wrong / Retry" (search appears completely broken).
+- **#3:** the search-input provider chips disagreed with the results-screen
+  provider chips, and the results chip set changed run-to-run for the same query.
+- **#5:** no loading indicator + no empty-state — blank screen during/after search.
+
+**Root cause (FACT, file:line):**
+
+1. **`feature/search_input/.../SearchInputViewModel.kt:49-54` (pre-fix)** — a
+   HARDCODED `availableProviders = [rutracker, rutor, archiveorg, gutenberg]`.
+   The real onboarded providers live in `ProviderConfigRepository`
+   (`provider_configs`, written by `OnboardingViewModel` `ensureDefault()`), and
+   the live set is dynamic (vended by the lava-api-go `/providers` catalogue →
+   `TrackerRegistry.populateFrom()`). `onCreate` (pre-fix `:84-85`) only flipped
+   `selected` on chips that EXISTED in the hardcoded 4. A user who onboarded YTS
+   (not in the 4) got ZERO selected chips, and the chip bar SET itself never
+   showed YTS — it showed the 4 phantom providers.
+
+2. **`SearchInputViewModel.kt:151` (pre-fix)** — `resolveProviderIdsForSubmit()`
+   returned `null` when `selected.size == availableProviders.size` (the
+   `null`-means-ALL sentinel). The empty-selection case produced `emptyList()`,
+   which `SearchResultNavigation.kt:120` (`?.takeIf(isNotEmpty)`) DROPPED →
+   deserialized at `:135-138` as `null` → `SearchResultViewModel.kt:100`
+   `filter.providerIds == null` → `observePagingData()` (the single-tracker
+   rutracker path) → 401/unauthorized → `SearchResultContent.Error`
+   ("Something went wrong"). That is #1.
+
+3. **#3 divergence + run-to-run instability** — input chips came from the
+   hardcoded 4; result chips come from `state.filter.providerIds`
+   (`SearchResultScreen.kt:238`). When the selection was dropped to `null`,
+   result chips vanished entirely; and provider display names are filled by
+   `LavaTrackerSdk.streamMultiSearch`'s `ProviderStart` events emitted from an
+   UNORDERED parallel `channelFlow` (`LavaTrackerSdk.kt:806-826`), so names
+   arrived non-deterministically.
+
+4. **#5 blank screen** — `SearchResultScreen.kt:326-342` (pre-fix) rendered
+   `items(filteredItems)` over the (empty) `Streaming.items` with NO loading
+   indicator while providers were still SEARCHING → a blank screen during the
+   in-flight search.
+
+**Fix (affected files):**
+- `feature/search_input/.../SearchInputViewModel.kt` — chip bar + query set are
+  now built from `ProviderConfigRepository.observeAll()` (the source of truth),
+  filtered by `searchEnabled && isEnabled`, **deterministically sorted by
+  provider id** (kills #3 instability). Display names resolve from the live
+  registry via the new `ProviderDisplayNameResolver` seam. `onCreate` populates
+  chips via an Orbit `intent` (shared single intent queue → ordering guarantee).
+  `resolveProviderIdsForSubmit()` ALWAYS returns the explicit selected list
+  (the `null`-means-all sentinel is REMOVED; `null` only when nothing onboarded).
+- `feature/search_input/.../ProviderDisplayNameResolver.kt` (new) +
+  `SearchInputHiltModule.kt` (new) — narrow display-name boundary backed by
+  `LavaTrackerSdk.listAvailableTrackers()`.
+- `feature/search_input/build.gradle.kts` — adds `:core:tracker:client`.
+- `feature/search_result/.../SearchResultScreen.kt` — Streaming branch now
+  renders `loadingItem()` while any provider is still SEARCHING and no items
+  have arrived (fixes #5 blank screen). The terminal Empty vs Error vs Content
+  states are already produced by `SearchResultViewModel.handleStreamEnd()`
+  (Empty on 0 results + no error; Error on 0 results + any provider ERROR).
+
+**Reproduce-first (RED) capture (§11.4.146 / §6.T.1):** with the production VM
+mutated back toward the bug (re-introducing the
+`.filter { it in setOf("rutracker","rutor","archiveorg","gutenberg") }`
+intersection), the two video-scenario tests FAILED:
+- `onCreate_with_onboarded_provider_outside_legacy_list_renders_it`
+- `SubmitClick_with_provider_outside_legacy_list_queries_only_it`
+`12 tests completed, 2 failed`. Mutation reverted → `BUILD SUCCESSFUL` (12/12).
+
+**Tests added (`feature/search_input/.../SearchInputViewModelTest.kt`):**
+- `onCreate_with_no_onboarded_providers_renders_empty_chip_bar`
+- `onCreate_renders_chips_for_only_onboarded_search_enabled_providers`
+- `onCreate_with_onboarded_provider_outside_legacy_list_renders_it` (YTS #2/#3)
+- `SubmitClick_with_provider_outside_legacy_list_queries_only_it` (#2)
+- `SubmitClick_providerIds_match_the_selected_chip_set_deterministically` (#3)
+- rewrote 2 prior bluff tests that ENCODED the bug as expectation
+  (`..._selects_no_chips` → `..._renders_empty_chip_bar`;
+  `..._emits_null_providerIds` → `..._emits_explicit_list_not_null`) per §6.J.
+
+**Bluff-Audit:** SearchInputViewModelTest
+  Mutation: re-introduce the hardcoded-4 intersection in
+    `onboardedSearchableProviders()` (the legacy bug).
+  Observed-Failure: `expected:<[yts]> but was:<[]>` /
+    `onCreate_with_onboarded_provider_outside_legacy_list_renders_it FAILED` +
+    `SubmitClick_with_provider_outside_legacy_list_queries_only_it FAILED`
+    (`12 tests completed, 2 failed`).
+  Reverted: yes
+
+**GREEN:** `:feature:search_input:testDebugUnitTest` +
+`:feature:search_result:testDebugUnitTest` both `BUILD SUCCESSFUL`
+(--max-workers=2 --no-daemon). Production Hilt/KSP for the new binding:
+`:feature:search_input:kspDebugKotlin` `BUILD SUCCESSFUL`.
+
+**§6.O-style note / OWED:** the on-device confirmation is owed at the next
+(1076) §6.Z gate — the new search-provider Challenge (only-onboarded-provider
+search returns its results, chips agree, loading→empty/content) + C48–C52 must
+run on the Containers/VM emulator gate-host (§6.AH). The full `:app` build is
+env-gated here (`.env` + `keystores/debug.keystore` absent in the worktree per
+§6.H), so the device gate runs on the provisioned gate-host. The JVM RED→GREEN
+above is the unit-level proof.
+
+**Fix commit:** on the agent worktree branch (authored in the same commit as the
+fix per §6.T.4).
