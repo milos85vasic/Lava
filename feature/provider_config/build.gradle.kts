@@ -1,6 +1,13 @@
 plugins {
     id("lava.android.feature")
     id("lava.android.library.compose")
+    // Required: the @Serializable WireToggle / WireBinding / WireMirror wire
+    // classes in ProviderConfigViewModel are serialized via
+    // json.encodeToString(...). Without the serialization compiler plugin the
+    // generated $serializer is absent and encodeToString throws at runtime
+    // (prod 1.3.11(1075) "Serializer for class 'WireToggle' is not found"
+    // crash on Settings → provider → Sync toggle). §11.4.146 reproduce-first.
+    id("lava.kotlin.serialization")
 }
 
 android {

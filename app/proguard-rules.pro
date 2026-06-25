@@ -31,6 +31,50 @@
 -keep class com.google.crypto.tink.** { *; }
 -keep class lava.network.dto.** { *; }
 
+# kotlinx.serialization keep rules — added 2026-06-25 after the prod
+# 1.3.11(1075) RELEASE crash on Settings → provider → "Sync this provider"
+# toggle: "Serializer for class 'WireToggle' is not found". Root cause was
+# the missing serialization compiler plugin in feature/provider_config (now
+# applied via id("lava.kotlin.serialization")); R8 release would ALSO strip
+# the generated $serializer companions even with the plugin, because nothing
+# referenced them reflectively from kept code. These rules keep the
+# @Serializable wire classes + their generated $serializer for the
+# provider-config feature (WireToggle / WireBinding / WireMirror are private
+# nested classes of ProviderConfigViewModel → ProviderConfigViewModel$Wire*)
+# and any other @Serializable type, mirroring the kotlinx-serialization
+# consumer rules. §11.4.146 reproduce-first; Crashlytics eaa80c1486d2d5d7526346ece016e15a.
+
+# Keep the kotlinx-serialization runtime + the generated companions.
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.**
+
+# Keep @Serializable classes and their synthesized Companion / $serializer.
+-if @kotlinx.serialization.Serializable class **
+-keepclassmembers class <1> {
+    static <1>$Companion Companion;
+}
+-if @kotlinx.serialization.Serializable class ** {
+    static **$* *;
+}
+-keepclassmembers class <2>$<3> {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-if @kotlinx.serialization.Serializable class **
+-keepclassmembers class <1> {
+    *** Companion;
+}
+-keepclasseswithmembers class ** {
+    @kotlinx.serialization.Serializable <methods>;
+}
+
+# Targeted belt-and-braces keep for the provider-config feature's wire
+# classes (the prod-crash surface) + their generated serializers.
+-keep,includedescriptorclasses class lava.provider.config.**$$serializer { *; }
+-keepclassmembers class lava.provider.config.** {
+    *** Companion;
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
 # Firebase keep rules — added 2026-05-05 after operator reported 2
 # Crashlytics-recorded crashes within minutes of the first Firebase-
 # instrumented release distribution. The Firebase BOM ships consumer
