@@ -349,8 +349,10 @@ class SearchInputViewModelTest {
             val vm = createViewModel(
                 testScheduler,
                 displayNames = mapOf(
-                    "rutracker" to "RuTracker", "rutor" to "RuTor",
-                    "archiveorg" to "Internet Archive", "gutenberg" to "Gutenberg",
+                    "rutracker" to "RuTracker",
+                    "rutor" to "RuTor",
+                    "archiveorg" to "Internet Archive",
+                    "gutenberg" to "Gutenberg",
                 ),
             )
             onboard("rutracker")

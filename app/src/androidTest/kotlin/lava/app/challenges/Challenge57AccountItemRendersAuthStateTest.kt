@@ -151,8 +151,8 @@ class Challenge57AccountItemRendersAuthStateTest {
         hiltRule.inject()
 
         val authorizedName = "InstrumentationTest" // set by OnboardingBypassRule.signalAuthorized
-        val logoutCd = "Logout"                    // R.string.designsystem_action_logout
-        val loginLabel = "Login"                   // R.string.account_item_login_action
+        val logoutCd = "Logout" // R.string.designsystem_action_logout
+        val loginLabel = "Login" // R.string.account_item_login_action
 
         // Step 1 — AUTHORIZED branch: the real AccountViewModel observes
         // the Authorized state and AccountItem renders the user name +

@@ -30,9 +30,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.mutableStateOf
+import dagger.hilt.android.AndroidEntryPoint
 import lava.account.AccountItem
 import lava.designsystem.theme.LavaTheme
-import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class AccountTestHostActivity : ComponentActivity() {

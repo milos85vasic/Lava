@@ -73,10 +73,14 @@ class Challenge33BookmarksScreenReachableTest {
         val ctx = InstrumentationRegistry.getInstrumentation().targetContext
         val pkg = ctx.packageName
         val titleId = ctx.resources.getIdentifier(
-            "forum_screen_bookmarks_empty_title", "string", pkg,
+            "forum_screen_bookmarks_empty_title",
+            "string",
+            pkg,
         )
         val subtitleId = ctx.resources.getIdentifier(
-            "forum_screen_bookmarks_empty_subtitle", "string", pkg,
+            "forum_screen_bookmarks_empty_subtitle",
+            "string",
+            pkg,
         )
         val illId = ctx.resources.getIdentifier("ill_bookmarks", "drawable", pkg)
         assert(titleId != 0 && subtitleId != 0 && illId != 0) {

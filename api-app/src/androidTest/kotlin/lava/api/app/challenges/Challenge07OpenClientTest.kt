@@ -136,9 +136,12 @@ class Challenge07OpenClientTest {
         // it spawning a real browser/chooser on the device.
         val instr = InstrumentationRegistry.getInstrumentation()
         val mon = instr.addMonitor(
-            /* filter = */ IntentFilter(Intent.ACTION_VIEW),
-            /* result = */ Instrumentation.ActivityResult(Activity.RESULT_OK, null),
-            /* block = */ true,
+            /* filter = */
+            IntentFilter(Intent.ACTION_VIEW),
+            /* result = */
+            Instrumentation.ActivityResult(Activity.RESULT_OK, null),
+            /* block = */
+            true,
         )
         monitor = mon
 

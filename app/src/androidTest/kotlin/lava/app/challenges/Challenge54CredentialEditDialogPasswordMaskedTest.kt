@@ -84,9 +84,9 @@ import lava.feature.credentials.CredentialsAction
 import org.junit.Rule
 import org.junit.Test
 
-@SdkSuppress(maxSdkVersion = 35) // Forward-compat skip on API 36+ per the project's
 // Espresso/Compose-on-API36 incident
 // (.lava-ci-evidence/sixth-law-incidents/2026-05-05-pixel9a-espresso-api36-incompatibility.json).
+@SdkSuppress(maxSdkVersion = 35) // Forward-compat skip on API 36+ per the project's
 class Challenge54CredentialEditDialogPasswordMaskedTest {
 
     @get:Rule
