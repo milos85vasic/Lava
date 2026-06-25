@@ -1,0 +1,33 @@
+[gate] commit=40301014f73d8f40ff01d65cf089a57786c5bd9e
+[gate] apk=/home/milosvasic/lava/api-app/build/outputs/apk/debug/api-app-debug.apk
+-rw-rw-r-- 1 milosvasic milosvasic 190422957 Jun 25 18:19 /home/milosvasic/lava/api-app/build/outputs/apk/debug/api-app-debug.apk
+[gate] booting containerized-KVM emulator (avd=default, cold-boot, port 16555)
+393815cd9e538a565df8fbc0021653575ce9b977b63d4823a90d23fcb686bb2f
+failed to connect to localhost:16555
+[gate] polling sys.boot_completed (timeout 300s)
+[gate] boot_completed=1 boot_seconds=24.328
+[gate] waiting for package manager
+[gate] installing api-app debug APK
+Performing Streamed Install
+Success
+[gate] pm clear digital.vasic.lava.api.dev (force genuine cold start)
+Success
+[gate] am start -W digital.vasic.lava.api.dev/lava.api.app.MainActivity
+Starting: Intent { cmp=digital.vasic.lava.api.dev/lava.api.app.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: digital.vasic.lava.api.dev/lava.api.app.MainActivity
+TotalTime: 2554
+WaitTime: 2563
+Complete
+[gate] capturing logcat
+[gate] process liveness + resumed activity
+[gate] screenshot
+-rw-rw-r-- 1 milosvasic milosvasic 83333 Jun 25 18:23 /home/milosvasic/lava/.lava-ci-evidence/1075-apiapp-gate/screenshot.png
+[gate] FATAL_HITS:
+
+[gate] PKG_FATAL:
+
+[gate] PID=3351 RESUMED=    topResumedActivity=ActivityRecord{d74d63e u0 digital.vasic.lava.api.dev/lava.api.app.MainActivity t8} AM_STATUS=ok INSTALL_OK=1
+[gate] VERDICT=PASS REASON=launcher MainActivity resumed, process alive (3351), no FATAL on cold start
+[gate] wrote /home/milosvasic/lava/.lava-ci-evidence/1075-apiapp-gate/real-device-verification.json

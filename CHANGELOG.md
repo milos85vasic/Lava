@@ -54,6 +54,16 @@ fast "Error — Retry" rather than a hang — that's the correct, honest behavio
   measure is fixed + guarded by a structural scanner so the class cannot recur.
 - **P2 (partial):** improved tolerance for Internet Archive crawl topics that omit a comments section; the full fix for IA crawl topics that omit most fields is a tracked follow-up (a niche, non-crashing case).
 
+## Lava-API-App-0.2.11-21 — 2026-06-25 (version-parity cycle bump)
+
+**Previous published:** Lava-API-App-0.2.11-18. (19 + 20 were built but never distributed.)
+
+Version-parity bump alongside the client 1075 cycle; no api-app source change beyond the shared
+cycle (it still embeds lava-api-go 2.3.33 with the on-device search-timeout fix from the 19 build,
+which never reached testers). versionName held (0.2.11). §6.Z cold-start gated on a real
+containerized-KVM emulator (boot 24.3s, rendered launcher, zero FATAL — `.lava-ci-evidence/1075-apiapp-gate/`).
+Fresh auth (rotated pepper + client-name `android-1.3.11-1075`). **Channel:** firebase-app-distribution-api-app.
+
 ## Lava-API-App-0.2.11-19 — 2026-06-24 (on-device engine: search timeout fix)
 
 **Previous published:** Lava-API-App-0.2.11-18.
