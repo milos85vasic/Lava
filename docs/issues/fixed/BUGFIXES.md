@@ -2310,11 +2310,19 @@ NavBackStackEntry (destination `0xe36e02dd`) at `MainActivity` destroy (evidence
 nested-host move, atomic popUpTo, NavTeardownGuard, Activity-scoped LifecycleOwner, launchSingleTop dedupe)
 are exhausted-and-device-falsified — **CONFIRMED upstream androidx-navigation defect** (§11.4.150 research:
 `b/244910446` family; no fixed-version through nav 2.10.0-alpha04; `docs/research/lva-008-nav-teardown-20260625/`).
-**NEXT (operator-prioritized):** (a) file an androidx minimal-repro issue (low-risk, the path to an upstream
-fix); (b) Candidate #7 — collapse the nested bottom-nav `NavHost` into a single outer `NavHost`
-(multi-back-stack pattern) — the only remaining app-level avenue, but a HIGH-blast-radius architectural
-refactor of working navigation (operator go-ahead recommended before attempting; a botched refactor is
-worse than the current single known teardown crash).
+**8th candidate (Candidate #7 — single-NavHost collapse, branch `lva-008-cand7-singlenavhost` @ `f4e32bc3`)
+ALSO device-FALSIFIED** (2026-06-25, thinker containerized-KVM): removed `addNestedNavigation` entirely +
+hoisted the 4 bottom-nav graphs to top-level destinations in ONE Activity-hosted NavHost (official
+multi-back-stack pattern). Result — **C00/C01/C07/C08 PASS (zero nav regression)** but **C06 + C11 reproduce
+the IDENTICAL teardown ISE** on `route=search/search_input` (destination `0xe36e02dd`). Evidence
+`.lava-ci-evidence/lva008-cand7-gate/`. DEFINITIVE finding: the crash is **intrinsic to the `search_input`
+destination inside ANY graph, independent of nesting depth** — the `search` sub-graph entry collapses
+straight to DESTROYED, stranding the INITIALIZED `search_input` child. The cand7 branch is a clean
+no-regression refactor but provides ZERO LVA-008 benefit (DISCARD for the fix; may merge on architectural
+merits separately if desired). **ALL 8 app-level candidate classes now exhausted-and-device-falsified —
+CONCLUSIVELY an upstream androidx-navigation defect.** **NEXT:** file the authored androidx minimal-repro +
+issue (`docs/issues/upstream/lva-008-androidx-navigation/`, branch `worktree-agent-a26086a188d3abfa6`@`71bee48c`,
+operator files it — needs a Google account); track for an upstream fix. No further app-level candidate remains.
 **Type:** Bug · **Severity:** P1 · **Workable item:** LVA-008
 
 **Symptom (CONFIRMED on device, 2026-06-08):** the app PROCESS crashes at

@@ -1,0 +1,6 @@
+[§6.X] runner=containerized image=localhost/lava-android-emulator:api34-x86_64 runtime=podman
+Matrix run finished. Attestation: .lava-ci-evidence/lva008-cand7-gate/C06/real-device-verification.json
+  [1] default                   api=34 phone FAIL
+       error: exit status 1
+Gating: TRUE  (serial run, --dev=false — clause-6.I-clause-7-eligible)
+MATRIX FAILED — at least one AVD did not pass. tag.sh MUST refuse this commit.

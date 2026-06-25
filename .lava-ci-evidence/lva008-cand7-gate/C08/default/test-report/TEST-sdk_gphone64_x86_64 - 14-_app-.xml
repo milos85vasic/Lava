@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="lava.app.challenges.Challenge08CrossTrackerFallbackDismissTest" tests="2" failures="0" errors="0" skipped="0" time="3.858" timestamp="2026-06-25T16:47:50" hostname="localhost">
+  <properties>
+    <property name="device" value="sdk_gphone64_x86_64 - 14" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="fallbackModal_rendersCancelButton" classname="lava.app.challenges.Challenge08CrossTrackerFallbackDismissTest" time="2.05" />
+  <testcase name="tappingCancel_invokesOnDismiss" classname="lava.app.challenges.Challenge08CrossTrackerFallbackDismissTest" time="1.104" />
+</testsuite>

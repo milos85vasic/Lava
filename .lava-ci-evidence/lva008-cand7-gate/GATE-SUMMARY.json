@@ -1,0 +1,70 @@
+{
+  "gate": "LVA-008 Candidate #7 device-gate (single-NavHost multiple-back-stack collapse)",
+  "host": "thinker (Linux x86_64, /dev/kvm, podman containerized)",
+  "branch": "lva-008-cand7-singlenavhost",
+  "head": "f4e32bc3",
+  "runner": "containerized",
+  "container_image": "localhost/lava-android-emulator:api34-x86_64",
+  "container_runtime": "podman",
+  "avd": "default:34:phone",
+  "cold_boot": true,
+  "gating": true,
+  "candidate": "Collapse nested bottom-nav NavHost -> ONE Activity-hosted NavHost; bottom-nav graphs as TOP-LEVEL destinations switched via popUpTo(findStartDestination){saveState}+launchSingleTop+restoreState. Removes addNestedNavigation / parent-entry-as-inner-host.",
+  "lva008_challenges": {
+    "C06": {
+      "challenge": "C06",
+      "test_passed": false,
+      "boot_seconds": 27.110769024,
+      "test_seconds": 51.586986385,
+      "failure": "LVA-008 teardown ISE: route=search/search_input destination=0xe36e02dd (IDENTICAL to incident)"
+    },
+    "C11_run1": {
+      "challenge": "C11",
+      "test_passed": false,
+      "boot_seconds": 27.063150654,
+      "test_seconds": 42.233722769,
+      "failure": "Compose-harness flake: multithreaded SnapshotStateObserver access (NOT teardown ISE, NOT a nav regression)"
+    },
+    "C11_rerun": {
+      "challenge": "C11",
+      "test_passed": false,
+      "boot_seconds": 27.225034928,
+      "test_seconds": 54.21257698,
+      "failure": "LVA-008 teardown ISE: route=search/search_input destination=0xe36e02dd (IDENTICAL to incident)"
+    }
+  },
+  "nav_regression_challenges": {
+    "C00": {
+      "challenge": "C00",
+      "test_passed": true,
+      "boot_seconds": 27.100890078,
+      "test_seconds": 44.134370714,
+      "failure": null
+    },
+    "C01": {
+      "challenge": "C01",
+      "test_passed": true,
+      "boot_seconds": 27.088095357,
+      "test_seconds": 43.200348228,
+      "failure": null
+    },
+    "C07": {
+      "challenge": "C07",
+      "test_passed": true,
+      "boot_seconds": 27.122521819,
+      "test_seconds": 42.158175128,
+      "failure": null
+    },
+    "C08": {
+      "challenge": "C08",
+      "test_passed": true,
+      "boot_seconds": 27.049657459,
+      "test_seconds": 44.032248674,
+      "failure": null
+    }
+  },
+  "verdict": "FALSIFIED-8th \u2014 C06 AND C11(rerun) BOTH reproduce the IDENTICAL LVA-008 teardown IllegalStateException on route=search/search_input (destination 0xe36e02dd) at MainActivity destroy. Collapsing the nested NavHost does NOT fix it: the search_input entry still strands INITIALIZED because the `search` bottom-nav GRAPH entry (still a sub-graph in the single host) collapses straight to DESTROYED. NO nav regression: C00/C01/C07/C08 all PASS. C11 run-1 first hit an unrelated Compose-harness SnapshotStateObserver flake; the rerun surfaced the genuine teardown ISE.",
+  "no_regression": "C00/C01/C07/C08 PASS \u2014 the single-NavHost collapse did not break cold-start, launch+tracker, or cross-tracker-fallback navigation.",
+  "recommendation": "DISCARD for the LVA-008 fix (does not resolve the teardown crash). Consistent with the 2026-06-09/2026-06-25 conclusion: UPSTREAM androidx-navigation defect, no clean app-level public-API fix. The branch is a clean, no-regression refactor but provides no LVA-008 benefit. Do NOT ship 1076 as an LVA-008 fix.",
+  "generated_at": "2026-06-25T19:52:16.191438+03:00"
+}

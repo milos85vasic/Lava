@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="lava.app.challenges.Challenge07CrossTrackerFallbackAcceptTest" tests="2" failures="0" errors="0" skipped="0" time="4.375" timestamp="2026-06-25T16:46:35" hostname="localhost">
+  <properties>
+    <property name="device" value="sdk_gphone64_x86_64 - 14" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="tappingTryButton_invokesOnAccept" classname="lava.app.challenges.Challenge07CrossTrackerFallbackAcceptTest" time="2.292" />
+  <testcase name="fallbackModal_rendersTitleAndTryButton" classname="lava.app.challenges.Challenge07CrossTrackerFallbackAcceptTest" time="1.026" />
+</testsuite>

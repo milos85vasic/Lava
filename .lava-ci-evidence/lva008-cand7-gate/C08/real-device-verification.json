@@ -1,0 +1,21 @@
+{
+  "all_passed": true,
+  "finished_at": "2026-06-25T19:47:52+03:00",
+  "gating": true,
+  "rows": [
+    {
+      "avd": "default",
+      "api_level": 34,
+      "form_factor": "phone",
+      "boot_seconds": 27.049657459,
+      "test_class": "lava.app.challenges.Challenge08CrossTrackerFallbackDismissTest",
+      "test_passed": true,
+      "test_seconds": 44.032248674,
+      "gradle_log_path": "default/gradle.log",
+      "diag": {},
+      "failure_summaries": [],
+      "concurrent": 1
+    }
+  ],
+  "started_at": "2026-06-25T19:46:38+03:00"
+}
