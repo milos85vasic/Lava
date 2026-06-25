@@ -396,5 +396,13 @@ dependencies {
     // CredentialsKeyHolder is NOT on the app androidTest classpath transitively
     // — declare it here using the same pattern as room.runtime above.
     androidTestImplementation(project(":core:credentials"))
+    // C53 (Challenge53CredentialEditDialogSavePersistsTest) renders the real
+    // CredentialsScreen backed by a real CredentialsViewModel whose SDK is wired
+    // with FakeTrackerClient (the outermost boundary — the same construction the
+    // unit CredentialsViewModelTest uses). FakeTrackerClient lives in
+    // :core:tracker:testing, which :core:tracker:client only pulls as
+    // testImplementation, so it is NOT on the app androidTest classpath
+    // transitively — declare it here (same pattern as room.runtime / :core:credentials above).
+    androidTestImplementation(project(":core:tracker:testing"))
     kspAndroidTest(libs.hilt.compiler)
 }
