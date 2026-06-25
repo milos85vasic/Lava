@@ -1,0 +1,15 @@
+go version: go version go1.26.2 darwin/arm64
+=== go build ./... ===
+go: downloading github.com/go-rod/rod v0.112.0
+go: downloading github.com/spf13/viper v1.18.2
+go: downloading golang.org/x/crypto v0.43.0
+go: downloading github.com/fsnotify/fsnotify v1.7.0
+go: downloading github.com/sagikazarmark/slog-shim v0.1.0
+go: downloading github.com/spf13/afero v1.11.0
+go: downloading github.com/spf13/cast v1.6.0
+go: downloading github.com/ysmood/gson v0.7.1
+go: downloading golang.org/x/sys v0.37.0
+go: downloading github.com/magiconair/properties v1.8.7
+go: downloading github.com/pelletier/go-toml/v2 v2.1.0
+go: downloading github.com/ysmood/leakless v0.8.0
+BUILD_EXIT=

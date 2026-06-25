@@ -1,0 +1,16 @@
+{"ImportPath":"panoptic/tests/security [panoptic/tests/security.test]","Action":"build-output","Output":"# panoptic/tests/security [panoptic/tests/security.test]\n"}
+{"ImportPath":"panoptic/tests/security [panoptic/tests/security.test]","Action":"build-output","Output":"tests/security/panoptic_test.go:85:19: undefined: context\n"}
+{"ImportPath":"panoptic/tests/security [panoptic/tests/security.test]","Action":"build-output","Output":"tests/security/panoptic_test.go:92:23: undefined: bytes\n"}
+{"ImportPath":"panoptic/tests/security [panoptic/tests/security.test]","Action":"build-output","Output":"tests/security/panoptic_test.go:158:18: undefined: context\n"}
+{"ImportPath":"panoptic/tests/security [panoptic/tests/security.test]","Action":"build-output","Output":"tests/security/panoptic_test.go:164:22: undefined: bytes\n"}
+{"ImportPath":"panoptic/tests/security [panoptic/tests/security.test]","Action":"build-output","Output":"tests/security/panoptic_test.go:168:3: declared and not used: err\n"}
+{"ImportPath":"panoptic/tests/security [panoptic/tests/security.test]","Action":"build-output","Output":"tests/security/panoptic_test.go:202:18: undefined: context\n"}
+{"ImportPath":"panoptic/tests/security [panoptic/tests/security.test]","Action":"build-output","Output":"tests/security/panoptic_test.go:208:22: undefined: bytes\n"}
+{"ImportPath":"panoptic/tests/security [panoptic/tests/security.test]","Action":"build-output","Output":"tests/security/panoptic_test.go:212:3: declared and not used: err\n"}
+{"ImportPath":"panoptic/tests/security [panoptic/tests/security.test]","Action":"build-output","Output":"tests/security/panoptic_test.go:278:19: undefined: context\n"}
+{"ImportPath":"panoptic/tests/security [panoptic/tests/security.test]","Action":"build-output","Output":"tests/security/panoptic_test.go:284:23: undefined: bytes\n"}
+{"ImportPath":"panoptic/tests/security [panoptic/tests/security.test]","Action":"build-output","Output":"tests/security/panoptic_test.go:284:23: too many errors\n"}
+{"ImportPath":"panoptic/tests/security [panoptic/tests/security.test]","Action":"build-fail"}
+{"Time":"2026-06-25T17:01:44.683316+03:00","Action":"start","Package":"panoptic/tests/security"}
+{"Time":"2026-06-25T17:01:44.683522+03:00","Action":"output","Package":"panoptic/tests/security","Output":"FAIL\tpanoptic/tests/security [build failed]\n"}
+{"Time":"2026-06-25T17:01:44.683529+03:00","Action":"fail","Package":"panoptic/tests/security","Elapsed":0,"FailedBuild":"panoptic/tests/security [panoptic/tests/security.test]"}

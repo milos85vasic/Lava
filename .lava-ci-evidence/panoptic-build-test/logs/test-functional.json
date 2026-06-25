@@ -1,0 +1,8 @@
+{"ImportPath":"panoptic/tests/functional [panoptic/tests/functional.test]","Action":"build-output","Output":"# panoptic/tests/functional [panoptic/tests/functional.test]\n"}
+{"ImportPath":"panoptic/tests/functional [panoptic/tests/functional.test]","Action":"build-output","Output":"tests/functional/panoptic_test.go:10:2: \"io\" imported and not used\n"}
+{"ImportPath":"panoptic/tests/functional [panoptic/tests/functional.test]","Action":"build-output","Output":"tests/functional/panoptic_test.go:236:4: assert.Contains(t, logContent, \"Functional Web Form Test\") || assert.Contains(t, logContent, \"Test Web App\") (value of type bool) is not used\n"}
+{"ImportPath":"panoptic/tests/functional [panoptic/tests/functional.test]","Action":"build-output","Output":"tests/functional/panoptic_test.go:409:2: declared and not used: err\n"}
+{"ImportPath":"panoptic/tests/functional [panoptic/tests/functional.test]","Action":"build-fail"}
+{"Time":"2026-06-25T16:57:37.679646+03:00","Action":"start","Package":"panoptic/tests/functional"}
+{"Time":"2026-06-25T16:57:37.679717+03:00","Action":"output","Package":"panoptic/tests/functional","Output":"FAIL\tpanoptic/tests/functional [build failed]\n"}
+{"Time":"2026-06-25T16:57:37.679723+03:00","Action":"fail","Package":"panoptic/tests/functional","Elapsed":0,"FailedBuild":"panoptic/tests/functional [panoptic/tests/functional.test]"}

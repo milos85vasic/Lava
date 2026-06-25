@@ -1,0 +1,41 @@
+        [36mINFO[0m[2026-06-25T16:56:00+03:00] Starting execution                           
+        [36mINFO[0m[2026-06-25T16:56:00+03:00] Validating configuration...                  
+        [36mINFO[0m[2026-06-25T16:56:00+03:00] Configuration validated, starting app processing... 
+        [36mINFO[0m[2026-06-25T16:56:00+03:00] Processing application: Android Test App (mobile) 
+        [37mDEBU[0m[2026-06-25T16:56:00+03:00] Executing action 0: wait_device (wait)       
+        [37mDEBU[0m[2026-06-25T16:56:01+03:00] Executing action 1: navigate_to_url (navigate) 
+        [37mDEBU[0m[2026-06-25T16:56:09+03:00] Executing action 2: wait_navigation (wait)   
+        [37mDEBU[0m[2026-06-25T16:56:11+03:00] Executing action 3: take_screenshot (screenshot) 
+        [36mINFO[0m[2026-06-25T16:56:17+03:00] Screenshot saved: /Volumes/T7/tmp/TestPanoptic_MobileAppIntegration3341420427/001/screenshots/mobile_screenshot.png 
+        [36mINFO[0m[2026-06-25T16:56:17+03:00] executeApp completed successfully for Android Test App 
+        [36mINFO[0m[2026-06-25T16:56:17+03:00] Application processing completed for Android Test App 
+        [36mINFO[0m[2026-06-25T16:56:17+03:00] Successfully completed app: Android Test App 
+        [36mINFO[0m[2026-06-25T16:56:17+03:00] Execution completed                          
+        [36mINFO[0m[2026-06-25T16:56:17+03:00] Generating report...                         
+        [36mINFO[0m[2026-06-25T16:56:17+03:00] Generating report: /Volumes/T7/tmp/TestPanoptic_MobileAppIntegration3341420427/001/report.html 
+        [36mINFO[0m[2026-06-25T16:56:17+03:00] Report generated: /Volumes/T7/tmp/TestPanoptic_MobileAppIntegration3341420427/001/report.html 
+        [36mINFO[0m[2026-06-25T16:56:17+03:00] Execution completed successfully             
+    panoptic_test.go:311: Mobile test duration: 17.346361708s
+    panoptic_test.go:325: Mobile test completed successfully
+--- PASS: TestPanoptic_MobileAppIntegration (18.63s)
+=== RUN   TestPanoptic_ReportGeneration
+    panoptic_test.go:368: Report generated successfully
+    panoptic_test.go:378: 
+        	Error Trace:	/Volumes/T7/Projects/lava/panoptic/tests/integration/panoptic_test.go:378
+        	Error:      	"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Panoptic Test Report</title>\n<style>\n*{box-sizing:border-box;margin:0;padding:0}\nbody{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a2e;color:#e0e0e0;padding:20px}\n.header{text-align:center;padding:30px 0;border-bottom:2px solid #16213e}\n.header h1{font-size:2em;color:#e94560}\n.header .subtitle{color:#888;margin-top:8px}\n.summary{display:flex;justify-content:center;gap:30px;padding:20px 0;flex-wrap:wrap}\n.stat{text-align:center;padding:15px 25px;background:#16213e;border-radius:8px;min-width:120px}\n.stat .value{font-size:2em;font-weight:bold}\n.stat .label{font-size:0.85em;color:#888;margin-top:4px}\n.stat.pass .value{color:#4caf50}\n.stat.fail .value{color:#f44336}\n.stat.total .value{color:#2196f3}\n.stat.time .value{color:#ff9800;font-size:1.4em}\n.apps{padding:20px 0}\n.app-card{background:#16213e;border-radius:8px;margin:15px 0;padding:20px;border-left:4px solid #4caf50}\n.app-card.failed{border-left-color:#f44336}\n.app-card .app-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}\n.app-card .app-name{font-size:1.3em;font-weight:bold}\n.app-card .app-type{background:#0f3460;padding:3px 10px;border-radius:4px;font-size:0.8em}\n.app-card .app-status{padding:4px 12px;border-radius:4px;font-weight:bold;font-size:0.9em}\n.app-card .app-status.pass{background:#1b5e20;color:#a5d6a7}\n.app-card .app-status.fail{background:#b71c1c;color:#ef9a9a}\n.app-card .app-meta{margin-top:10px;font-size:0.9em;color:#888}\n.app-card .app-error{margin-top:10px;padding:10px;background:#2a0a0a;border-radius:4px;color:#ef9a9a;font-family:monospace;font-size:0.85em;white-space:pre-wrap;word-break:break-all}\n.screenshots{margin-top:15px}\n.screenshots h3{font-size:1em;margin-bottom:8px;color:#aaa}\n.screenshot-grid{display:flex;gap:10px;flex-wrap:wrap}\n.screenshot-grid img{max-width:200px;max-height:150px;border-radius:4px;border:1px solid #333;cursor:pointer;transition:transform 0.2s}\n.screenshot-grid img:hover{transform:scale(1.05)}\n.screenshot-grid a{color:#64b5f6;font-size:0.85em;text-decoration:none}\n.videos{margin-top:15px}\n.videos h3{font-size:1em;margin-bottom:8px;color:#aaa}\n.videos video{max-width:480px;border-radius:4px;border:1px solid #333}\n.videos .video-link{color:#64b5f6;font-size:0.85em;text-decoration:none;display:block;margin-top:4px}\n.footer{text-align:center;padding:30px 0;color:#555;font-size:0.85em;border-top:1px solid #16213e;margin-top:30px}\n</style>\n</head>\n<body>\n<div class=\"header\">\n<h1>Panoptic Test Report</h1>\n<div class=\"subtitle\">Generated: 2026-06-25 16:56:19 MSK</div>\n</div>\n\n<div class=\"summary\">\n<div class=\"stat total\"><div class=\"value\">2</div><div class=\"label\">Total Apps</div></div>\n<div class=\"stat pass\"><div class=\"value\">0</div><div class=\"label\">Passed</div></div>\n<div class=\"stat fail\"><div class=\"value\">2</div><div class=\"label\">Failed</div></div>\n<div class=\"stat time\"><div class=\"value\">0ms</div><div class=\"label\">Total Duration</div></div>\n</div>\n\n<div class=\"apps\">\n<div class=\"app-card failed\">\n<div class=\"app-header\">\n<span class=\"app-name\">Test App 1</span>\n<span class=\"app-type\">web</span>\n<span class=\"app-status fail\">FAILED</span>\n</div>\n<div class=\"app-meta\">Duration: 0ms | Start: 16:56:19</div>\n<div class=\"app-error\">Failed to initialize platform: timeout must be greater than 0</div>\n</div>\n<div class=\"app-card failed\">\n<div class=\"app-header\">\n<span class=\"app-name\">Test App 2</span>\n<span class=\"app-type\">desktop</span>\n<span class=\"app-status fail\">FAILED</span>\n</div>\n<div class=\"app-meta\">Duration: 0ms | Start: 16:56:19</div>\n<div class=\"app-error\">Failed to initialize platform: application not found at path: /Applications/Calculator.app</div>\n</div>\n</div>\n<div class=\"footer\">\nPanoptic Automated Testing Framework &mdash; Report generated automatically\n</div>\n</body>\n</html>\n" does not contain "Total Tests:"
+        	Test:       	TestPanoptic_ReportGeneration
+--- FAIL: TestPanoptic_ReportGeneration (1.98s)
+=== RUN   TestPanoptic_ConfigValidation
+=== RUN   TestPanoptic_ConfigValidation/Valid_minimal_config
+=== RUN   TestPanoptic_ConfigValidation/Invalid_-_no_apps
+=== RUN   TestPanoptic_ConfigValidation/Invalid_-_web_app_without_URL
+=== RUN   TestPanoptic_ConfigValidation/Invalid_-_unknown_app_type
+--- PASS: TestPanoptic_ConfigValidation (1.17s)
+    --- PASS: TestPanoptic_ConfigValidation/Valid_minimal_config (0.25s)
+    --- PASS: TestPanoptic_ConfigValidation/Invalid_-_no_apps (0.01s)
+    --- PASS: TestPanoptic_ConfigValidation/Invalid_-_web_app_without_URL (0.01s)
+    --- PASS: TestPanoptic_ConfigValidation/Invalid_-_unknown_app_type (0.01s)
+FAIL
+FAIL	panoptic/tests/integration	96.638s
+FAIL
+INTEGRATION_EXIT=

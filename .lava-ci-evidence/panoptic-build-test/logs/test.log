@@ -1,0 +1,18 @@
+go: downloading github.com/stretchr/testify v1.8.4
+?   	panoptic	[no test files]
+?   	panoptic/challenges/runner	[no test files]
+ok  	panoptic/cmd	4.544s
+?   	panoptic/cmd/launcher	[no test files]
+ok  	panoptic/internal/ai	1.658s
+ok  	panoptic/internal/cloud	0.887s
+ok  	panoptic/internal/config	0.968s
+ok  	panoptic/internal/enterprise	2.931s
+ok  	panoptic/internal/executor	4.621s
+ok  	panoptic/internal/launcher	0.336s
+ok  	panoptic/internal/logger	0.421s
+ok  	panoptic/internal/ocr	1.556s
+ok  	panoptic/internal/platforms	163.828s
+ok  	panoptic/internal/recvalidate	1.665s
+ok  	panoptic/internal/vision	0.232s
+ok  	panoptic/pkg/i18n	0.192s
+TEST_EXIT=
