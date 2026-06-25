@@ -48,5 +48,19 @@
       "A production guard that force-completes the inner NavHost's in-progress/INITIALIZED entries on host ON_STOP before ON_DESTROY."
     ]
   },
-  "no_guessing": "§11.4.6: every crash signature, route, stack frame, and falsified-hypothesis result is captured verbatim from device logs under .lava-ci-evidence/genymotion/, not surmised."
+  "fix_attempt_2026_06_25": {
+    "candidate": "TOP-RANKED previously-UNTRIED: inner-NavHost Activity-scoped LifecycleOwner (next_hypotheses_untried[0] — scope/lifecycle of the inner rememberNestedNavigationController vs the outer host at destroy). This is a NEW candidate class, distinct from the 5 device-FALSIFIED avenues (nav-version, LenientTeardownRule, nested-host move, atomic popUpTo replace, NavTeardownGuard public-currentBackStack pruner).",
+    "change": "core/navigation NavigationHost gains activityScopedLifecycle param; when true it wraps the inner NavHost in CompositionLocalProvider(LocalLifecycleOwner provides view.findViewTreeLifecycleOwner()) so the inner NavController's host LifecycleOwner is the Activity, NOT the parent addNestedNavigation NavBackStackEntry. NestedMobileNavigation passes activityScopedLifecycle=true; the outer MobileNavigation host keeps the default false. Only LocalLifecycleOwner is re-pointed — LocalViewModelStoreOwner + LocalSavedStateRegistryOwner stay the parent entry, so nested-graph ViewModel scoping is unchanged.",
+    "mechanism": "The Activity reaches CREATED during its own normal lifecycle (driving inner entries to at least CREATED before any teardown) and its destroy runs the inner entries through the regular RESUMED->...->CREATED->DESTROYED backward pass, rather than the parent entry's abrupt collapse straight to DESTROYED that strands an INITIALIZED search_input entry.",
+    "affected_files": [
+      "core/navigation/src/main/kotlin/lava/navigation/ui/NavigationHost.kt",
+      "core/navigation/src/main/kotlin/lava/navigation/ui/MobileNavigation.kt"
+    ],
+    "compile": "BUILD SUCCESSFUL — ./gradlew :core:navigation:compileDebugKotlin --max-workers=2 --no-daemon --offline (37s, only pre-existing deprecation/context-receiver warnings).",
+    "device_verification": "PENDING_FORENSICS: not yet run on a device. The load-bearing regression tests are the existing on-device C06 + C11 (they crash at teardown before this change; must pass after). Device-gate on this macOS host is BLOCKED by §6.AH-debt (container/VM emulator path does not boot here; no host-direct fallback). No JVM/Robolectric reproduction is feasible — the crash is an androidx LifecycleRegistry teardown-ORDERING event at real Activity destroy, uncatchable by any in-process TestRule (process death in ActivityThread.performDestroyActivity). MUST be run on the Genymotion/emulator gate-host before this is declared device-verified and before any distribute.",
+    "falsifiability_rehearsal": "Revert activityScopedLifecycle=true -> false in NestedMobileNavigation; on-device C06+C11 are expected to crash again at MainActivity destroy with the identical IllegalStateException on the inner search_input entry; re-apply true and the crash must not recur. Device-gated (no JVM equivalent).",
+    "status": "FIX LANDED + COMPILES, device-gate verification OWED. LVA-008 remains OPEN until C06+C11 pass on the gate-host.",
+    "bugfix_log": "docs/issues/fixed/BUGFIXES.md (LVA-008 entry appended 2026-06-25)"
+  },
+  "no_guessing": "§11.4.6: every crash signature, route, stack frame, and falsified-hypothesis result is captured verbatim from device logs under .lava-ci-evidence/genymotion/, not surmised. The 2026-06-25 fix attempt's device_verification is explicitly marked PENDING_FORENSICS — the fix compiles but is NOT claimed to resolve the crash until C06+C11 pass on the gate-host."
 }
