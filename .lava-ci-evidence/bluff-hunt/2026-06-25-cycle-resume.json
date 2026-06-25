@@ -1,0 +1,118 @@
+{
+  "date": "2026-06-25",
+  "cycle": "cycle-resume — §6.N 5+2 bluff-hunt (5 *Test.kt + 2 gate-shaping production files)",
+  "branch": "worktree-agent-aed25d56a36855eb6",
+  "head": "2d55ab9bb06363703433f0bb1fc687f73b9e5ca3",
+  "host": "darwin/arm64",
+  "resource_bounds": "--max-workers=2 --no-daemon, module-scoped tests only",
+  "build_precondition": "submodules/tracker_sdk populated from main worktree at matching pin 7afc37a (composite includeBuild) — §11.4.80 init; not a code mutation, git status clean",
+  "verify_all_attestation": ".lava-ci-evidence/verify-all/2026-06-25T13-47-53Z.json",
+  "verify_all_result": "40 PASS / 14 FAIL of 54 (pre-existing branch state, no agent changes; FAILs: constitution-doc-parser, markdown-export-sync, gitignore-coverage, canonical-root-and-upstreams, helix-deps-manifest, coverage-ledger, workable-items-sync, hermetic-suite-firebase, hermetic-suite-vm-images, hermetic test_audit_snake_case_references, test_clause_6r_inheritance, test_covenant_114_propagation, test_gitignore_coverage, check_constitution_test)",
+  "bluffs_found": 0,
+  "protocol": "For each target: read test, identify covered production class, apply ONE deliberate mutation to that production code, run ONLY the module's test class, confirm clear-assertion failure, git checkout to revert, confirm green again. Captured failure messages are verbatim.",
+  "test_targets": [
+    {
+      "n": 1,
+      "test_file": "core/common/src/test/kotlin/lava/common/torrent/MagnetLinkValidatorTest.kt",
+      "module": "core:common",
+      "test_task": ":core:common:test --tests lava.common.torrent.MagnetLinkValidatorTest",
+      "production_file": "core/common/src/main/kotlin/lava/common/torrent/MagnetLinkValidator.kt",
+      "production_class": "MagnetLinkValidator",
+      "mutation": "normalizeBtih(): 'else -> null' changed to 'else -> raw.lowercase()' (accept any btih hash length, dropping the 40-hex / 32-base32 length gate)",
+      "test_that_failed": "badHashLength_isRejected (MagnetLinkValidatorTest.kt:84)",
+      "observed_failure": "java.lang.AssertionError: magnet with bad hash length must be rejected",
+      "verdict": "GENUINE",
+      "reverted": "yes",
+      "post_revert": "BUILD SUCCESSFUL (23 tests)"
+    },
+    {
+      "n": 2,
+      "test_file": "core/common/src/test/kotlin/lava/common/CollectionsTest.kt",
+      "module": "core:common",
+      "test_task": ":core:common:test --tests lava.common.CollectionsTest",
+      "production_file": "core/common/src/main/kotlin/lava/common/Collections.kt",
+      "production_class": "mapInstanceOf (reified inline extension)",
+      "mutation": "'filterIsInstance<R>().map(transform)' changed to 'filterIsInstance<R>().drop(1).map(transform)' (silently drops the first matching element)",
+      "test_that_failed": "keeps only the requested subtype and transforms each kept element (CollectionsTest.kt:36) plus 2 more (lines 63, 72)",
+      "observed_failure": "java.lang.AssertionError: expected:<[1, 2, 3]> but was:<[2, 3]>",
+      "verdict": "GENUINE",
+      "reverted": "yes",
+      "post_revert": "BUILD SUCCESSFUL (5 tests)"
+    },
+    {
+      "n": 3,
+      "test_file": "core/common/src/test/kotlin/lava/common/torrent/TorrentFileValidatorTest.kt",
+      "module": "core:common",
+      "test_task": ":core:common:test --tests lava.common.torrent.TorrentFileValidatorTest",
+      "production_file": "core/common/src/main/kotlin/lava/common/torrent/TorrentFileValidator.kt",
+      "production_class": "TorrentFileValidator",
+      "mutation": "pieces-length gate 'if (pieces.bytes.isEmpty() || pieces.bytes.size % SHA1_LEN != 0)' changed to 'if (pieces.bytes.isEmpty())' (drop the multiple-of-20 SHA-1 piece check)",
+      "test_that_failed": "piecesLengthNotMultipleOf20_isRejected (TorrentFileValidatorTest.kt:172) + piecesLength21_isRejected",
+      "observed_failure": "java.lang.AssertionError: expected invalid result for pieces length not a multiple of 20",
+      "verdict": "GENUINE",
+      "reverted": "yes",
+      "post_revert": "BUILD SUCCESSFUL (33 tests)"
+    },
+    {
+      "n": 4,
+      "test_file": "core/models/src/test/kotlin/lava/models/settings/HostUtilsTest.kt",
+      "module": "core:models",
+      "test_task": ":core:models:test --tests lava.models.settings.HostUtilsTest",
+      "production_file": "core/models/src/main/kotlin/lava/models/settings/HostUtils.kt",
+      "production_class": "String.isLocalHost()",
+      "mutation": "IPv4 private-range check 'if (ints[0] == 192 && ints[1] == 168) return true' changed to '... ints[1] == 169 ...' (192.168/16 no longer classified local)",
+      "test_that_failed": "192_168_x_x is local (HostUtilsTest.kt) + 192_168_with_port is local",
+      "observed_failure": "java.lang.AssertionError (assertTrue on '192.168.0.1'.isLocalHost() — failure localized to the two 192.168 tests only)",
+      "verdict": "GENUINE",
+      "reverted": "yes",
+      "post_revert": "BUILD SUCCESSFUL (15 tests)"
+    },
+    {
+      "n": 5,
+      "test_file": "core/preferences/src/test/kotlin/lava/securestorage/EndpointConverterTest.kt",
+      "module": "core:preferences",
+      "test_task": ":core:preferences:testDebugUnitTest --tests lava.securestorage.EndpointConverterTest",
+      "production_file": "core/preferences/src/main/kotlin/lava/securestorage/model/EndpointConverter.kt",
+      "production_class": "EndpointConverter",
+      "mutation": "Endpoint.toJson() GoApi branch 'put(PortKey, port)' changed to 'put(PortKey, Endpoint.GoApi.DEFAULT_PORT)' (always serialize default port, dropping the real port)",
+      "test_that_failed": "convert GoApi with non-default port to json preserves port + roundtrip GoApi survives toJson then fromJson with port preserved + roundtrip GoApi preserves host port and key together (on-device search auth)",
+      "observed_failure": "java.lang.AssertionError: expected:<12345> but was:<8443>",
+      "verdict": "GENUINE",
+      "reverted": "yes",
+      "post_revert": "BUILD SUCCESSFUL (17 tests)"
+    }
+  ],
+  "production_gate_targets": [
+    {
+      "n": 6,
+      "production_file": "scripts/scan-no-hardcoded-ipv4.sh",
+      "gate": "CM §6.R IPv4 no-hardcoding scanner",
+      "gate_runner": "tests/check-constitution/test_no_hardcoded_ipv4.sh",
+      "mutation": "violation-branch verdict 'exit 1' changed to 'exit 0' (scanner reports success even when a hardcoded IPv4 is present)",
+      "baseline": "ALL PASS test_no_hardcoded_ipv4",
+      "observed_failure": "FAIL test_real_ipv4_flagged: expected 1, got 0  ->  FAIL test_no_hardcoded_ipv4 (one or more cases failed)",
+      "verdict": "GENUINE",
+      "reverted": "yes",
+      "post_revert": "ALL PASS test_no_hardcoded_ipv4"
+    },
+    {
+      "n": 7,
+      "production_file": "scripts/check-script-docs-sync.sh",
+      "gate": "CM-SCRIPT-DOCS-SYNC / HelixConstitution §11.4.18",
+      "gate_runner": "tests/check-constitution/test_script_docs_sync.sh",
+      "mutation": "violation-branch verdict 'exit 1' changed to 'exit 0' (orphan script/doc no longer fails the gate)",
+      "baseline": "All 7 script-docs-sync gate tests PASSED",
+      "observed_failure": "FAIL test_orphan_script_rejected: rc=0 out=CM-SCRIPT-DOCS-SYNC / HelixConstitution §11.4.18 VIOLATION:",
+      "verdict": "GENUINE",
+      "reverted": "yes",
+      "post_revert": "All 7 script-docs-sync gate tests PASSED"
+    }
+  ],
+  "summary": {
+    "targets_total": 7,
+    "genuine": 7,
+    "bluffs": 0,
+    "all_reverted": true,
+    "tree_clean_of_mutations": true
+  }
+}
