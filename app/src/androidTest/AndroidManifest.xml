@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  androidTest manifest — registers test-only host activities so Compose
+  UI Challenge Tests can launch them via createAndroidComposeRule<…>().
+
+  AccountTestHostActivity (Challenge C57) is an @AndroidEntryPoint host
+  that composes the REAL production feature/account AccountItem() with its
+  REAL hiltViewModel()-resolved AccountViewModel. It exists because
+  AccountItem is not currently mounted by any production screen (an honest
+  finding recorded in C57's KDoc), so there is no in-app navigation path
+  to it — yet the real composable + real ViewModel + real
+  ObserveAuthStateUseCase must still be drivable end-to-end on a device.
+  This is test infrastructure only; it ships in the androidTest APK, never
+  in a distributable build.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application>
+        <activity
+            android:name="lava.app.AccountTestHostActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Lava"
+            tools:ignore="MissingClass" />
+    </application>
+</manifest>
