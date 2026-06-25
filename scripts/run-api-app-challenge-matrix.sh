@@ -47,6 +47,13 @@ NO_BUILD=0
 # cold-boot can exceed 5m purely on host contention (NOT a product defect);
 # raise this to give the boot headroom. Empty = use the CLI default.
 BOOT_TIMEOUT=""
+# §6.X containerized-runner image + runtime. The pinned Containers
+# cmd/emulator-matrix CLI (>= 71d32562) REQUIRES --container-image when the
+# resolved runner is containerized (Linux + /dev/kvm path); forwarded only in
+# that case. Default image = canonical Android-SDK-bearing emulator image
+# documented in submodules/containers/pkg/emulator/Containerfile.
+CONTAINER_IMAGE="ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64"
+CONTAINER_RUNTIME="podman"      # podman|docker
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -55,6 +62,8 @@ while [[ $# -gt 0 ]]; do
         --avds)          AVDS_OVERRIDE="$2"; shift 2 ;;
         --evidence-dir)  EVIDENCE_DIR="$2"; shift 2 ;;
         --boot-timeout)  BOOT_TIMEOUT="$2"; shift 2 ;;
+        --container-image)   CONTAINER_IMAGE="$2"; shift 2 ;;
+        --container-runtime) CONTAINER_RUNTIME="$2"; shift 2 ;;
         --no-build)      NO_BUILD=1; shift ;;
         -h|--help)       sed -n '3,40p' "$0"; exit 0 ;;
         *)               echo "ERROR: unknown argument: $1" >&2; exit 2 ;;
@@ -134,6 +143,16 @@ fi
 # Containers-orchestrated macOS gate runner). The CLI boots the AVD, installs
 # $APK, runs the instrumentation against the --gradle-module module, and tears
 # down.
+# §6.X: forward --container-image (+ --container-runtime) ONLY when the
+# resolved runner is containerized. On this script that is the Linux+KVM
+# case (ACCEL_BACKEND=kvm → --runner=auto resolves to containerized); on
+# macOS+HVF auto resolves to host-direct and the CLI ignores these flags.
+declare -a CONTAINER_ARGS=()
+if [[ "$ACCEL_BACKEND" == "kvm" ]]; then
+    CONTAINER_ARGS=(--container-image "$CONTAINER_IMAGE" --container-runtime "$CONTAINER_RUNTIME")
+    echo "==> containerized runner: --container-image=$CONTAINER_IMAGE --container-runtime=$CONTAINER_RUNTIME"
+fi
+
 echo "==> Delegating to Containers/cmd/emulator-matrix --runner=auto (module=$GRADLE_MODULE)"
 "$CONTAINERS_CLI" \
     --gradle-module "${GRADLE_MODULE#:}" \
@@ -143,6 +162,7 @@ echo "==> Delegating to Containers/cmd/emulator-matrix --runner=auto (module=$GR
     --test-class "$TEST_CLASS" \
     --evidence-dir "$EVIDENCE_DIR" \
     --image-manifest tools/lava-containers/vm-images.json \
+    "${CONTAINER_ARGS[@]}" \
     ${BOOT_TIMEOUT:+--boot-timeout "$BOOT_TIMEOUT"} \
     --cold-boot \
     --concurrent=1

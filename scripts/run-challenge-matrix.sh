@@ -82,6 +82,16 @@ AVDS_OVERRIDE=""                # when non-empty, REPLACES the §6.AE.2 default 
 BOOT_TIMEOUT=""                 # forwarded to emulator-matrix --boot-timeout (default 5m).
                                 # Raise on a loaded host where an ARM/HVF cold-boot legitimately
                                 # exceeds 5m on contention (NOT a product defect). Empty = CLI default.
+# §6.X containerized-runner image + runtime. The pinned Containers
+# cmd/emulator-matrix CLI (>= 71d32562) REQUIRES --container-image when the
+# resolved runner is containerized (Linux + /dev/kvm), and accepts
+# --container-runtime (default podman). These are forwarded ONLY when the
+# resolved runner is containerized; on a host-direct (macOS+HVF / Windows+WHPX)
+# resolution the CLI ignores them. The default image is the canonical
+# Android-SDK-bearing emulator image documented in
+# submodules/containers/pkg/emulator/Containerfile.
+CONTAINER_IMAGE="ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64"
+CONTAINER_RUNTIME="podman"      # podman|docker
 
 # §6.AE.2 minimum AVD matrix. Format: name:apiLevel:formFactor.
 # This is the constitutional minimum for gate runs. Sub-minimums are
@@ -103,6 +113,8 @@ while [[ $# -gt 0 ]]; do
         --no-build)      NO_BUILD=1; shift ;;
         --avds)          AVDS_OVERRIDE="$2"; shift 2 ;;
         --boot-timeout)  BOOT_TIMEOUT="$2"; shift 2 ;;
+        --container-image)   CONTAINER_IMAGE="$2"; shift 2 ;;
+        --container-runtime) CONTAINER_RUNTIME="$2"; shift 2 ;;
         --latest-api)    LATEST_API="$2"; shift 2 ;;
         --add-tv)        ADD_TV=1; shift ;;
         --add-foldable)  ADD_FOLDABLE=1; shift ;;
@@ -303,6 +315,18 @@ if [[ -n "$TEST_CLASS" ]]; then
     TEST_CLASS_ARGS=(--test-class "$TEST_CLASS")
 fi
 
+# §6.X: the pinned cmd/emulator-matrix CLI (>= 71d32562) REQUIRES
+# --container-image when the RESOLVED runner is containerized (Linux +
+# /dev/kvm path). Forward it (plus --container-runtime) only in that case;
+# on a host-direct resolution (macOS+HVF / Windows+WHPX) the CLI does not
+# consult them. --image-manifest stays forwarded for backward compat
+# (cache-routed system-image fetch on the containerized path).
+declare -a CONTAINER_ARGS=()
+if [[ "$RESOLVED_RUNNER" == "containerized" ]]; then
+    CONTAINER_ARGS=(--container-image "$CONTAINER_IMAGE" --container-runtime "$CONTAINER_RUNTIME")
+    echo "==> containerized runner: --container-image=$CONTAINER_IMAGE --container-runtime=$CONTAINER_RUNTIME"
+fi
+
 echo "==> Delegating to Containers/cmd/emulator-matrix --runner=auto (resolves to $RESOLVED_RUNNER on $PLATFORM)"
 "$CONTAINERS_CLI" \
     --runner=auto \
@@ -310,6 +334,7 @@ echo "==> Delegating to Containers/cmd/emulator-matrix --runner=auto (resolves t
     --avds "$AVDS_JOINED" \
     --evidence-dir "$EVIDENCE_DIR" \
     --image-manifest tools/lava-containers/vm-images.json \
+    "${CONTAINER_ARGS[@]}" \
     ${BOOT_TIMEOUT:+--boot-timeout "$BOOT_TIMEOUT"} \
     --cold-boot \
     "${TEST_CLASS_ARGS[@]}"
