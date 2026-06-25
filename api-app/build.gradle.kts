@@ -204,6 +204,38 @@ android {
 }
 
 dependencies {
+    // okhttp alignment constraint (§6.J / consistent-resolution fix, 2026-06-25).
+    // api-app's production code does NOT use okhttp — the on-device API is a Go
+    // embed (:core:apiengine). okhttp appears ONLY transitively on the runtime
+    // classpath, pulled by com.google.firebase:firebase-perf:21.0.5 (via
+    // :core:analytics-firebase → firebase-bom), which hard-depends on the stale
+    // okhttp 3.x line (resolved 3.12.13). Meanwhile the androidTest scope below
+    // declares okhttp 4.12.0 (the project-canonical pin in libs.versions.toml)
+    // as the real HTTPS client the C02/C03 Challenges use to hit the on-device
+    // embed over TLS.
+    //
+    // AGP's consistent resolution projects the runtime-resolved okhttp version
+    // as a `strictly` constraint onto debugAndroidTestRuntimeClasspath. Without
+    // alignment that constraint is `strictly 3.12.13`, which conflicts with the
+    // androidTest okhttp 4.12.0 and FAILS :api-app:assembleDebugAndroidTest with
+    // "Cannot find a version of 'com.squareup.okhttp3:okhttp' that satisfies the
+    // version constraints ... {strictly 3.12.13} ... by consistent resolution".
+    //
+    // This constraint aligns okhttp to the SAME project-canonical 4.12.0 the
+    // version catalog pins and that :app already resolves to (where :app's
+    // runtime carries a direct okhttp 4.12.0 via :core:data, so firebase-perf's
+    // 3.12.13 is upgraded by normal conflict resolution). Here :api-app has no
+    // direct runtime okhttp, so we express the same alignment as a constraint:
+    // it only takes effect because firebase-perf already pulls okhttp — it adds
+    // NO unused production dependency, and it does not downgrade anything (3.12.13
+    // was a stale transitive, never an intentional runtime pin). Runtime then
+    // resolves to 4.12.0; consistent resolution projects `strictly 4.12.0` onto
+    // androidTest; the androidTest 4.12.0 dep matches. §6.R: version flows from
+    // the catalog (libs.okhttp.core), never a hardcoded literal here.
+    constraints {
+        implementation(libs.okhttp.core)
+    }
+
     // Shared cross-app intent contract (AppLinkContract, SiblingAppLauncher,
     // PackageManagerSiblingAppLauncher). Both :app and :api-app depend on this
     // so the intent contract cannot drift between the two apps. §4 design spec.
