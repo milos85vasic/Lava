@@ -2300,7 +2300,13 @@ block 1073 (which fixes the P0 + P1 FATALs + the search timeout). Full fix ships
 
 ## LVA-008 — C11/C06 nested-NavHost `search_input` teardown crash (Activity-scoped inner-host lifecycle)
 
-**Status:** FIX LANDED in working tree — device-gate verification PENDING (see "Verification" below).
+**Status:** STILL OPEN — the 2026-06-25 candidate fix (Activity-scoped inner-host `LocalLifecycleOwner`)
+was **FALSIFIED a 6th time at the §6.Z device gate** (thinker containerized-KVM, build 1074 @ `1310a922`):
+C06 + C11 reproduced the identical `IllegalStateException` on the `search/search_input` NavBackStackEntry
+at `MainActivity` destroy (evidence `.lava-ci-evidence/1074-gate/`). The fix was **REVERTED**; shipped as
+1075 WITHOUT it, crash documented KNOWN-OPEN in the 1075 CHANGELOG. All 6 app-level candidate classes are
+now exhausted-and-device-falsified — consistent with the conclusion that this is an upstream
+androidx-navigation defect. NEXT: androidx minimal repro + a fresh §11.4.150 deep multi-angle research cycle.
 **Type:** Bug · **Severity:** P1 · **Workable item:** LVA-008
 
 **Symptom (CONFIRMED on device, 2026-06-08):** the app PROCESS crashes at

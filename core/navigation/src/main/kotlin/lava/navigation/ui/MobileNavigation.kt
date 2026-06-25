@@ -52,13 +52,6 @@ fun NestedMobileNavigation(
             NavigationHost(
                 modifier = Modifier.padding(padding),
                 navigationController = navigationController,
-                // LVA-008: this is the NESTED NavHost (bottom-nav graph mounted
-                // from a parent NavBackStackEntry). Bind its host LifecycleOwner
-                // to the Activity rather than the parent entry so an INITIALIZED
-                // inner entry (a stranded search_input) is not driven straight
-                // from INITIALIZED -> DESTROYED at activity-destroy. See the
-                // NavigationHost.activityScopedLifecycle KDoc.
-                activityScopedLifecycle = true,
                 navigationGraphBuilder = navigationGraphBuilder,
             )
         },

@@ -1,0 +1,29 @@
+{
+  "all_passed": false,
+  "finished_at": "2026-06-25T17:37:00+03:00",
+  "gating": true,
+  "rows": [
+    {
+      "avd": "default",
+      "api_level": 34,
+      "form_factor": "phone",
+      "boot_seconds": 27.036594009,
+      "test_class": "lava.app.challenges.Challenge06DownloadTorrentFileTest",
+      "test_passed": false,
+      "test_seconds": 53.278993662,
+      "test_error": "exit status 1",
+      "gradle_log_path": "default/gradle.log",
+      "diag": {},
+      "failure_summaries": [
+        {
+          "class": "lava.app.challenges.Challenge06DownloadTorrentFileTest",
+          "name": "searchTapResult_tapTorrent_downloadDialogRenders",
+          "type": "failure",
+          "body": "java.lang.IllegalStateException: State must be at least 'CREATED' to be moved to 'DESTROYED' in component NavBackStackEntry(5328db2b-527b-4589-a609-94f6e8be59ee) destination=Destination(0xe36e02dd) route=search/search_input?query={query}\u0026categories={categories}\u0026author_name={author_name}\u0026author_id={author_id}\u0026sort={sort}\u0026order={order}\u0026period={period}\nat androidx.lifecycle.LifecycleRegistryKt.checkLifecycleStateTransition(LifecycleRegistry.kt:92)\nat androidx.lifecycle.LifecycleRegistry.moveToState(LifecycleRegistry.jvm.kt:126)\nat androidx.lifecycle.LifecycleRegistry.setCurrentState(LifecycleRegistry.jvm.kt:102)\nat androidx.navigation.internal.NavBackStackEntryImpl.updateState$navigation_common_release(NavBackStackEntryImpl.kt:107)\nat androidx.navigation.internal.NavBackStackEntryImpl.handleLifecycleEvent$navigation_common_release(NavBackStackEntryImpl.kt:92)\nat androidx.navigation.NavBackStackEntry.handleLifecycleEvent(NavBackStackEntry.android.kt:116)\nat androidx.navigation.internal.NavControllerImpl.lifecycleObserver$lambda$1(NavControllerImpl.kt:153)\nat androidx.navigation.internal.NavControllerImpl.$r8$lambda$NoxMp6GNHB-Ld29Z6h5JLrOHxiQ(Unknown Source:0)\nat androidx.navigation.internal.NavControllerImpl$$ExternalSyntheticLambda8.onStateChanged(D8$$SyntheticClass:0)\nat androidx.lifecycle.LifecycleRegistry$ObserverWithState.dispatchEvent(LifecycleRegistry.jvm.kt:313)\nat androidx.lifecycle.LifecycleRegistry.backwardPass(LifecycleRegistry.jvm.kt:266)\nat androidx.lifecycle.LifecycleRegistry.sync(LifecycleRegistry.jvm.kt:284)\nat androidx.lifecycle.LifecycleRegistry.moveToState(LifecycleRegistry.jvm.kt:135)\nat androidx.lifecycle.LifecycleRegistry.handleLifecycleEvent(LifecycleRegistry.jvm.kt:119)\nat androidx.lifecycle.ReportFragment$Companion.dispatch$lifecycle_runtime_release(ReportFragment.android.kt:181)\nat androidx.lifecycle.ReportFragment$LifecycleCallbacks.onActivityPreDestroyed(ReportFragment.android.kt:137)\nat android.app.Activity.dispatchActivityPreDestroyed(Activity.java:1602)\nat android.app.Activity.performDestroy(Activity.java:8871)\nat android.app.Instrumentation.callActivityOnDestroy(Instrumentation.java:1491)\nat androidx.test.runner.MonitoringInstrumentation.callActivityOnDestroy(MonitoringInstrumentation.java:753)\nat android.app.ActivityThread.performDestroyActivity(ActivityThread.java:5600)\nat android.app.ActivityThread.handleDestroyActivity(ActivityThread.java:5645)\nat android.app.servertransaction.DestroyActivityItem.execute(DestroyActivityItem.java:47)\nat android.app.servertransaction.ActivityTransactionItem.execute(ActivityTransactionItem.java:45)\nat android.app.servertransaction.TransactionExecutor.executeLifecycleState(TransactionExecutor.java:180)\nat android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:98)\nat android.app.ActivityThread$H.handleMessage(ActivityThread.java:2443)\nat android.os.Handler.dispatchMessage(Handler.java:106)\nat android.os.Looper.loopOnce(Looper.java:205)\nat android.os.Looper.loop(Looper.java:294)\nat android.app.ActivityThread.main(ActivityThread.java:8177)\nat java.lang.reflect.Method.invoke(Native Method)\nat com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:552)\nat com.android.internal.os.ZygoteInit.main(ZygoteInit.java:971)\n"
+        }
+      ],
+      "concurrent": 1
+    }
+  ],
+  "started_at": "2026-06-25T17:35:36+03:00"
+}

@@ -1,27 +1,27 @@
 # Changelog
 
-## Lava-Android-1.3.11-1074 — 2026-06-25 (LVA-008 nav-teardown candidate fix + anti-bluff test strengthening)
+## Lava-Android-1.3.11-1075 — 2026-06-25 (ships the never-distributed search-timeout fix + anti-bluff test strengthening)
 
-**Previous published:** Lava-Android-1.3.11-1072. (1073 was built + canary-gated but never distributed.)
+**Previous published:** Lava-Android-1.3.11-1072. (1073 + 1074 were both built + gated but never distributed.)
 
-1074 bundles a candidate fix for the long-standing search→back navigation teardown crash (LVA-008, the
-6th attempt) plus anti-bluff test strengthening. **versionName HELD at 1.3.11** — the LVA-008 fix is
-verified at the gate (C00 cold-start + C06/C11 nav-teardown on the thinker containerized-KVM emulator)
-BEFORE this build ships; no user-facing "fixed" claim is made until the gate confirms it. The verified
-ship earns the 1.3.12 patch bump.
+1075 finally distributes the **1073 search-timeout fix** (the coordinated 18s-engine / 25s-client / 30s-socket
+timeout ladder + back-press-cancels-search + YTS live endpoints) which has NOT yet reached testers (last
+published was 1072), plus anti-bluff test strengthening. **versionName HELD at 1.3.11.**
 
-- **LVA-008 (candidate, gate-verified before ship):** the inner nested NavHost now provides an
-  Activity-scoped `LocalLifecycleOwner`, so the Activity drives the inner search/search_input entries to
-  ≥CREATED before teardown — preventing the `IllegalStateException: State must be at least 'CREATED'`
-  process crash at activity-destroy. `ViewModelStore`/`SavedStateRegistry` untouched (no scope/leak
-  change). Load-bearing verification: on-device Challenges C06 + C11 (crash before, pass after).
-- **Anti-bluff test strengthening (test-only, no APK behavior change):** Challenge21 now actually drives
-  back-press and asserts both `isFinishing` AND the onboarding-complete pref stays false; Challenge29
-  asserts the home empty-state is absent when onboarding isn't proved. §6.AB WEAK count 10→8.
-- **§6.N bluff-hunt:** 7/7 sampled tests/gates GENUINE, 0 bluffs (`core:common`/`models`/`preferences`
-  + `scan-no-hardcoded-ipv4` + `check-script-docs-sync`).
-- **Supporting:** panoptic submodule's 4 tagged test suites (functional/security/integration/e2e) now
-  compile clean (pre-existing drift fixed); both REST APIs (prod :8443 + dev :8543) booted + health-verified.
+- **Search no longer hangs (from 1073, now shipping):** on-device engine has an 18s deadline (always
+  responds before the 30s socket timeout); back during a search cancels immediately; YTS endpoints refreshed.
+- **Test-only (no APK behavior change):** Challenge21 drives real back-press + asserts `isFinishing` AND
+  onboarding-complete pref stays false; Challenge29 asserts home empty-state absent when onboarding unproved.
+  §6.AB WEAK 10→8. §6.N bluff-hunt 7/7 GENUINE, 0 bluffs.
+- **Supporting:** panoptic submodule's 4 tagged suites compile-fixed; both REST APIs booted + health-verified.
+
+**KNOWN OPEN — LVA-008 (search→back nav-teardown crash) is NOT fixed in this build.** The 1074 candidate fix
+(`core:navigation` Activity-scoped `LocalLifecycleOwner`) was **FALSIFIED a 6th time** at the §6.Z device gate
+on a real KVM emulator (C06 + C11 reproduced the identical `IllegalStateException: State must be at least
+'CREATED'` on the `search/search_input` NavBackStackEntry during MainActivity destroy — evidence
+`.lava-ci-evidence/1074-gate/`) and was REVERTED. All ranked candidates are now exhausted; LVA-008 needs a
+fresh deep-research cycle. This crash is **pre-existing** (present in the distributed 1072 too) — 1075 is not a
+regression on this axis; it adds the search fix while the nav crash remains tracked-open.
 
 Auth: append-only. **Channel:** firebase-app-distribution (debug `digital.vasic.lava.client.dev` + release `digital.vasic.lava.client`).
 

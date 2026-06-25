@@ -1,0 +1,18 @@
+{
+  "gate": "§6.Z device gate",
+  "commit": "1310a922fc62c7523bf80bd7d5e7e9f5eeabd01a",
+  "commit_subject": "release(1074/20): §6.Y bump + CHANGELOG/snapshots + CONTINUATION (4-stream cycle)",
+  "containers_submodule_pin": "71d32562d64f0c3417ac52cfb2cd677cfbc8c05f",
+  "build": {"versionCode": 1074, "versionName": "1.3.11", "package": "digital.vasic.lava.client.dev", "aapt_verified": true},
+  "runner": "containers-submodule", "runtime": "podman",
+  "container_image": "localhost/lava-android-emulator:api34-x86_64",
+  "avd": "default:34:phone", "cold_boot": true, "concurrent": 1, "gating": true,
+  "host": "thinker (Linux x86_64, /dev/kvm present)",
+  "results": [
+    {"challenge": "C00", "class": "Challenge00CrashSurvivalTest", "verdict": "PASS", "boot_s": 29.20, "test_s": 44.26},
+    {"challenge": "C06", "class": "Challenge06DownloadTorrentFileTest", "verdict": "FAIL", "boot_s": 27.04, "test_s": 53.28, "crash": "LVA-008 IllegalStateException NavBackStackEntry search/search_input DESTROYED-from-below-CREATED; Unable to destroy MainActivity; instrumentation Process crashed"},
+    {"challenge": "C11", "class": "Challenge11ArchiveOrgAnonymousSearchTest", "verdict": "FAIL", "boot_s": 27.09, "test_s": 54.56, "crash": "LVA-008 IllegalStateException NavBackStackEntry search/search_input DESTROYED-from-below-CREATED (identical destination 0xe36e02dd)"}
+  ],
+  "lva_008": "FALSIFIED (6th) — search→back nav-teardown crash STILL occurs on 1074; C06+C11 reproduce identical ISE; C00 cold-start PASS",
+  "generated_at": "2026-06-25T14:40:41Z"
+}

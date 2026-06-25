@@ -122,9 +122,10 @@ android {
         // CLEAN-rebuilt corrective ship carrying the FGS telemetry on BOTH variants;
         // firebase-distribute.sh now aapt-verifies the picked APK's actual versionCode.
         // versionName held (diagnostics-only).
-        // 20 (§6.Y, this cycle): version-parity bump alongside the client 1074 cycle;
+        // 21 (§6.Y, this cycle): version-parity bump alongside the client 1075 cycle;
         // no api-app source change beyond the shared cycle. versionName held.
-        versionCode = 20
+        // (20 burned alongside the reverted-LVA-008 1074 client build.)
+        versionCode = 21
         versionName = "0.2.11"
         // EncryptedSharedPreferences (androidx.security-crypto) requires API 23+
         // — the per-install auth-key store ([ApiKeyStore]) relies on it. The
