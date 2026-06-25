@@ -76,6 +76,31 @@ esac
 GITEOF
 chmod +x "$FAKE_BIN_DIR/git"
 
+# --- Fake Android SDK + aapt2 (for the §6.Z content-versionCode guard) --------
+# firebase-distribute.sh's §6.Z content-versionCode guard (added 2026-06-23)
+# resolves aapt2 from $ANDROID_SDK_ROOT/build-tools/*/aapt2 and runs
+# `aapt2 dump badging <apk>` to assert the APK's BINARY versionCode == the
+# version being distributed. The hermetic fixture's APKs are not real ZIP/AAB
+# archives, so a real aapt2 would error on them; and under the script's
+# `set -e`/pipefail, _aapt2's own ls-glob failure (when no real SDK is present)
+# would abort the script BEFORE its documented WARN-skip path. We therefore
+# ship a FAKE, deterministic aapt2 inside a FAKE SDK that the guard resolves,
+# and seed each fixture APK with a `versionCode='<code>'` badging line so the
+# guard runs and PASSES truthfully (the test exercises the guard, not bypasses
+# it). The fake aapt2 simply echoes the APK's seeded contents.
+FAKE_SDK_ROOT="$TMP/fake-sdk"
+FAKE_BUILD_TOOLS="$FAKE_SDK_ROOT/build-tools/99.0.0"
+mkdir -p "$FAKE_BUILD_TOOLS"
+cat > "$FAKE_BUILD_TOOLS/aapt2" <<'AAPTEOF'
+#!/usr/bin/env bash
+# Fake aapt2: only `dump badging <apk>` is used by the §6.Z guard. Echo the
+# APK's seeded badging contents (the fixture writes a `versionCode='N'` line).
+if [[ "${1:-}" == "dump" && "${2:-}" == "badging" ]]; then
+    cat "${3:?fake aapt2: missing apk path}"
+fi
+AAPTEOF
+chmod +x "$FAKE_BUILD_TOOLS/aapt2"
+
 # --- Fake repo layout ---------------------------------------------------------
 FAKE_REPO="$TMP/repo"
 mkdir -p "$FAKE_REPO/scripts"
@@ -140,16 +165,22 @@ mkdir -p "$API_APP_CHAN"
 echo "Client snapshot 1.2.35-1055" > "$CLIENT_CHAN/1.2.35-1055.md"
 echo "API-App snapshot 0.1.0-1"    > "$API_APP_CHAN/0.1.0-1.md"
 
-# Fake release APK trees
+# Fake release APK trees. Each APK is seeded with a `versionCode='<code>'`
+# badging line so the §6.Z content-versionCode guard (via the fake aapt2 above)
+# resolves the EXPECTED code and PASSES — client code 1055, api-app code 1.
 mkdir -p "$FAKE_REPO/releases/1.2.35/android-debug"
 mkdir -p "$FAKE_REPO/releases/1.2.35/android-release"
-touch "$FAKE_REPO/releases/1.2.35/android-debug/digital.vasic.lava.client-1.2.35-debug.apk"
-touch "$FAKE_REPO/releases/1.2.35/android-release/digital.vasic.lava.client-1.2.35-release.apk"
+printf "package: name='digital.vasic.lava.client' versionCode='1055' versionName='1.2.35'\n" \
+    > "$FAKE_REPO/releases/1.2.35/android-debug/digital.vasic.lava.client-1.2.35-debug.apk"
+printf "package: name='digital.vasic.lava.client' versionCode='1055' versionName='1.2.35'\n" \
+    > "$FAKE_REPO/releases/1.2.35/android-release/digital.vasic.lava.client-1.2.35-release.apk"
 
 mkdir -p "$FAKE_REPO/releases/api-app/0.1.0/android-debug"
 mkdir -p "$FAKE_REPO/releases/api-app/0.1.0/android-release"
-touch "$FAKE_REPO/releases/api-app/0.1.0/android-debug/digital.vasic.lava.api-0.1.0-debug.apk"
-touch "$FAKE_REPO/releases/api-app/0.1.0/android-release/digital.vasic.lava.api-0.1.0-release.apk"
+printf "package: name='digital.vasic.lava.api' versionCode='1' versionName='0.1.0'\n" \
+    > "$FAKE_REPO/releases/api-app/0.1.0/android-debug/digital.vasic.lava.api-0.1.0-debug.apk"
+printf "package: name='digital.vasic.lava.api' versionCode='1' versionName='0.1.0'\n" \
+    > "$FAKE_REPO/releases/api-app/0.1.0/android-release/digital.vasic.lava.api-0.1.0-release.apk"
 
 # Symlink the real scripts into the fake repo's scripts/ so sourcing works
 ln -sf "$ENV_SH"  "$FAKE_REPO/scripts/firebase-env.sh"
@@ -163,7 +194,12 @@ FIREBASE_CALLS_LOG="$TMP/firebase_calls.log"
 run_distribute() {
     # Clear the fake firebase call log before each run.
     : > "$FIREBASE_CALLS_LOG"
+    # Pin the §6.Z guard at the FAKE SDK so the content-versionCode check
+    # resolves the fake aapt2 (deterministic, host-independent) — never the
+    # operator's real build-tools, which would error on the fixture APKs.
     FAKE_FIREBASE_LOG="$FIREBASE_CALLS_LOG" \
+    ANDROID_SDK_ROOT="$FAKE_SDK_ROOT" \
+    ANDROID_HOME="$FAKE_SDK_ROOT" \
     LAVA_REPO_ROOT="$FAKE_REPO" \
     bash "$FAKE_REPO/scripts/firebase-distribute.sh" "$@" 2>&1
 }
