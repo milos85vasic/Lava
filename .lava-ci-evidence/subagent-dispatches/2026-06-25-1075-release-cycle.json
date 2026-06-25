@@ -1,0 +1,83 @@
+{
+  "_comment": "Subagent delegation audit trail for the 2026-06-25 client-1075 / api-app-21 release cycle. CM-SUBAGENT-DELEGATION-AUDIT (HelixConstitution §11.4.x + Lava §6.AD-debt). All data verified from git log: each entry's dispatched_for_commit is the worktree-agent merge SHA (the audit-gate matches on this 8-char short SHA); merged_tip is the single commit the merge brought in. Subjects are copied verbatim from git log -1 --format=%s. No counts or outcomes are claimed beyond what the committed tree proves (each branch was merged into master = outcome 'merged').",
+  "cycle": "client 1.x-1075 + api-app 21 (§6.AA stage-1 DEBUG distributed, commit e83ed3c9)",
+  "dispatch_date": "2026-06-25",
+  "dispatches": [
+    {
+      "dispatch_date": "2026-06-25",
+      "agent_type": "general-purpose",
+      "purpose": "api-app okhttp alignment — align okhttp to catalog 4.12.0 to unblock :api-app:assembleDebugAndroidTest (consistent-resolution conflict)",
+      "dispatched_for_commit": "9c5b187a",
+      "outcome": "merged",
+      "isolation": "worktree",
+      "worktree_branch": "worktree-agent-a09f8666fcfed7d98",
+      "merged_tip": "d665b9e5"
+    },
+    {
+      "dispatch_date": "2026-06-25",
+      "agent_type": "general-purpose",
+      "purpose": "NDK-path fix — OS-aware ANDROID_NDK_HOME resolution in lava-api-go/build-cshared.sh",
+      "dispatched_for_commit": "b89123cb",
+      "outcome": "merged",
+      "isolation": "worktree",
+      "worktree_branch": "worktree-agent-a258ead3ceefaf51e",
+      "merged_tip": "a25aa73a"
+    },
+    {
+      "dispatch_date": "2026-06-25",
+      "agent_type": "general-purpose",
+      "purpose": "structural verify-all fixes — close 2 of 3 structural-debt gates (gitignore-coverage + hermetic-suite-firebase)",
+      "dispatched_for_commit": "5c0c2844",
+      "outcome": "merged",
+      "isolation": "worktree",
+      "worktree_branch": "worktree-agent-a624e618aefc46c5a",
+      "merged_tip": "d486ec61"
+    },
+    {
+      "dispatch_date": "2026-06-25",
+      "agent_type": "general-purpose",
+      "purpose": "gate-runner CLI fix (§6.X/§6.AE) — forward --container-image to emulator-matrix containerized runner",
+      "dispatched_for_commit": "b8a931c6",
+      "outcome": "merged",
+      "isolation": "worktree",
+      "worktree_branch": "worktree-agent-a3fb453edefb37c09",
+      "merged_tip": "49c831fe"
+    },
+    {
+      "dispatch_date": "2026-06-25",
+      "agent_type": "general-purpose",
+      "purpose": "§6.N bluff-hunt — cycle-resume 5+2 bluff-hunt with genuine mutation rehearsals (7/7 GENUINE, 0 bluffs); evidence at .lava-ci-evidence/bluff-hunt/2026-06-25-cycle-resume.json",
+      "dispatched_for_commit": "10b7ab6f",
+      "outcome": "merged",
+      "isolation": "worktree",
+      "worktree_branch": "worktree-agent-aed25d56a36855eb6",
+      "merged_tip": "0802c549"
+    },
+    {
+      "dispatch_date": "2026-06-25",
+      "agent_type": "general-purpose",
+      "purpose": "§6.AB challenge strengthening — strengthen C21+C29 onboarding Challenges (WEAK->STRONG); document 8 visibility-blocked",
+      "dispatched_for_commit": "474155de",
+      "outcome": "merged",
+      "isolation": "worktree",
+      "worktree_branch": "worktree-agent-a6aaeeeca92a51e4a",
+      "merged_tip": "9156984a"
+    },
+    {
+      "dispatch_date": "2026-06-25",
+      "agent_type": "general-purpose",
+      "purpose": "LVA-008 nav fix — Activity-scope the nested NavHost lifecycle to fix search_input teardown crash",
+      "dispatched_for_commit": "238978f3",
+      "outcome": "merged",
+      "isolation": "worktree",
+      "worktree_branch": "worktree-agent-ae3cebffa9c0277fc",
+      "merged_tip": "d5eb91c7"
+    }
+  ],
+  "provenance": {
+    "authored_by": "structural-gate-closure agent (this worktree)",
+    "method": "git log -1 --format='%H %cs %s' on each worktree-agent merge commit + its ^2 merged tip",
+    "no_fabricated_counts": true,
+    "note": "Additional in-cycle streams (thinker §6.Z client gate, thinker api-app gate, LVA-008 deep research, panoptic build-test, vision_engine manifests) ran inline / produced evidence under .lava-ci-evidence/{1075-gate,1075-apiapp-gate,panoptic-build-test}/ but did NOT land as separate worktree-agent merge commits, so they are not gate-triggering and are recorded here only as context, not as dispatched_for_commit anchors."
+  }
+}

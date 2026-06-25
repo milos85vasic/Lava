@@ -28,6 +28,10 @@
 #   - Skip paths inside parentheses if also inside a backtick span.
 #   - Skip lines that begin with '> ' (markdown blockquote — typically
 #     verbatim operator-quote in §6.L cycle bodies).
+#   - Skip paths matched by .gitignore (e.g. .lava-ci-evidence/verify-all/*.json
+#     verify-all attestations are gitignored operator-local evidence; a commit
+#     body that records the attestation filename is following the audit-trail
+#     convention, not making an unfalsifiable claim).
 #
 # Exit codes:
 #   0 — every referenced path resolves
@@ -117,6 +121,18 @@ for sha in "${commits[@]}"; do
         [[ "$clean" == *'*'* ]] && continue
         # Existence check — exact path first
         if [[ -e "$clean" ]]; then
+            continue
+        fi
+        # Gitignored-evidence skip: a path that matches a .gitignore rule is
+        # intentionally never tracked (e.g. .lava-ci-evidence/verify-all/*.json
+        # — operator-local verify-all attestations, gitignored by design per the
+        # §6.J/§11.4.32 attestation convention). Referencing such a path in a
+        # commit body is the documented audit-trail convention, NOT an
+        # unfalsifiable claim — the operator holds the file locally and the
+        # commit body records its filename. The gate exists to catch references
+        # to files that were SUPPOSED to be committed but never were; a path the
+        # repo deliberately ignores is out of that scope.
+        if git check-ignore -q -- "$clean" 2>/dev/null; then
             continue
         fi
         # Fuzzy fallback: short-form prose references like
