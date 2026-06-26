@@ -164,12 +164,21 @@ class Challenge66SelectAllDoesNotEnableAuthProvidersTest {
         val total = composeRule.onAllNodes(isToggleable()).fetchSemanticsNodes().size
         val onCount = composeRule.onAllNodes(isToggleable().and(isOn)).fetchSemanticsNodes().size
 
+        // §6.AK diagnostic — capture WHAT the picker rendered after select-all so a
+        // device RED is self-explaining (total==1 → only the control is toggleable
+        // i.e. rows are not checkbox-semantic = test-query gap; total>=N but
+        // onCount==0 → select-all did not propagate to the checkboxes).
+        val archiveRows = composeRule.onAllNodesWithText("Internet Archive", substring = true).fetchSemanticsNodes().size
+        val gutenbergRows = composeRule.onAllNodesWithText("Gutenberg", substring = true).fetchSemanticsNodes().size
+        val rutrackerRows = composeRule.onAllNodesWithText("RuTracker", substring = true).fetchSemanticsNodes().size
+        val diag = "total=$total onCount=$onCount rows[Archive=$archiveRows Gutenberg=$gutenbergRows RuTracker=$rutrackerRows]"
+
         // PRIMARY ASSERTION (positive) — "Select all" actually selected the
         // no-credentials providers, so the user makes progress.
         assertTrue(
             "After tapping 'Select all', at least one no-credentials provider " +
                 "must be selected (the Internet Archive / Project Gutenberg " +
-                "NONE-auth providers). ON checkbox count was $onCount.",
+                "NONE-auth providers). DIAG: $diag",
             onCount >= 1,
         )
 

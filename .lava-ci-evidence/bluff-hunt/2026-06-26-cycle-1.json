@@ -1,0 +1,91 @@
+{
+  "_comment": "§6.N bluff-hunt of PRE-EXISTING tests (NOT authored this session) across 5 distinct modules + architectural layers. Per Seventh Law clause 5 + §6.N protocol: for each target the EXACT production code path the test claims to cover was deliberately MUTATED, ONLY the scoped single test was run (no device/emulator, no full build), the verbatim FAIL captured, then the mutation reverted via `git checkout --` and the scoped test re-run to confirm GREEN. All mutations reverted; git status clean of production-file mutations at end. No bluffs found.",
+  "hunt_date": "2026-06-26",
+  "cycle": "post-1076 device-gate-repair cycle (§6.AK), bluff-hunt of pre-existing tests",
+  "host": "darwin/arm64",
+  "constraints": "scoped single-module JVM/Go unit tests only; NO :app:connectedAndroidTest, NO emulator/device, NO full-project build, NO git add/commit/push",
+  "targets": [
+    {
+      "id": 1,
+      "module": ":core:tracker:kinozal",
+      "layer": "parser (core, pure-Kotlin)",
+      "test_file": "core/tracker/kinozal/src/test/kotlin/lava/tracker/kinozal/parser/KinozalSizeParserTest.kt",
+      "production_file": "core/tracker/kinozal/src/main/kotlin/lava/tracker/kinozal/parser/KinozalSizeParser.kt",
+      "claims_to_cover": "size-string -> byte conversion (binary 1024 multipliers); LVA-027 regression where Kinozal rows dropped their size",
+      "mutation": "GB/ГБ multiplier `1_024L * 1_024L * 1_024L` -> `1_000L * 1_000L * 1_000L` (binary -> decimal GB)",
+      "run_command": "./gradlew :core:tracker:kinozal:test --tests lava.tracker.kinozal.parser.KinozalSizeParserTest",
+      "observed_failure_verbatim": "java.lang.AssertionError: expected:<1610612736> but was:<1500000000>  (at KinozalSizeParserTest.kt:22 `parses comma-decimal`; same failure on `parses Latin GB to binary bytes` and the end-to-end `search row carries sizeBytes end to end`). 5 tests completed, 4 failed.",
+      "repass_after_revert": "BUILD SUCCESSFUL (KinozalSizeParserTest all PASSED)",
+      "verdict": "GENUINE",
+      "reverted": "yes"
+    },
+    {
+      "id": 2,
+      "module": ":core:tracker:iptorrents",
+      "layer": "model mapper (core, pure-Kotlin; lava-api-go /jackett/search JSON -> SDK SearchResult)",
+      "test_file": "core/tracker/iptorrents/src/test/kotlin/lava/tracker/iptorrents/model/JackettResultMapperTest.kt",
+      "production_file": "core/tracker/iptorrents/src/main/kotlin/lava/tracker/iptorrents/model/JackettResultMapper.kt",
+      "claims_to_cover": "1-based route page -> 0-based SDK currentPage conversion (`currentPage = dto.page - 1`)",
+      "mutation": "`currentPage = dto.page - 1` -> `currentPage = dto.page` (drop the 1-based->0-based shift)",
+      "run_command": "./gradlew :core:tracker:iptorrents:test --tests lava.tracker.iptorrents.model.JackettResultMapperTest",
+      "observed_failure_verbatim": "java.lang.AssertionError: page 1 (1-based) becomes 0 (0-based) expected:<0> but was:<1>  (at JackettResultMapperTest.kt:41; the page-2 test fails the same way expected:<1> but was:<2>). 3 tests completed, 2 failed.",
+      "repass_after_revert": "BUILD SUCCESSFUL (JackettResultMapperTest all PASSED)",
+      "verdict": "GENUINE",
+      "reverted": "yes"
+    },
+    {
+      "id": 3,
+      "module": ":core:sync",
+      "layer": "outbox impl (core, Android library)",
+      "test_file": "core/sync/src/test/kotlin/lava/sync/SyncOutboxImplTest.kt",
+      "production_file": "core/sync/src/main/kotlin/lava/sync/SyncOutboxImpl.kt",
+      "claims_to_cover": "enqueue stamps a real monotonic wall-clock createdAt so the DAO's `ORDER BY createdAt ASC` FIFO replay is meaningful",
+      "mutation": "`createdAt = System.currentTimeMillis()` -> `createdAt = 0` (stop stamping a real timestamp)",
+      "run_command": "./gradlew :core:sync:testDebugUnitTest --tests lava.sync.SyncOutboxImplTest",
+      "observed_failure_verbatim": "SyncOutboxImplTest > enqueue stamps real createdAt and observe replays in FIFO order FAILED ;; java.lang.AssertionError at SyncOutboxImplTest.kt:84 (the non-zero-createdAt assertTrue at lines 100-104: 'every enqueued row MUST carry a real (non-zero) createdAt timestamp' fires because both rows carried createdAt==0 < before). 3 tests completed, 1 failed.",
+      "verbatim_capture_note": "The assertTrue message string was not in the captured stdout tail (truncated to the AssertionError + source line); the report html was overwritten by the green revert re-run, so only the FAILED line + source location were captured verbatim. The failing assertion is identified by source line, not fabricated.",
+      "repass_after_revert": "BUILD SUCCESSFUL (:core:sync:testDebugUnitTest)",
+      "verdict": "GENUINE",
+      "reverted": "yes"
+    },
+    {
+      "id": 4,
+      "module": "lava-api-go internal/auth",
+      "layer": "HTTP middleware (Go)",
+      "test_file": "lava-api-go/internal/auth/backoff_test.go",
+      "production_file": "lava-api-go/internal/auth/backoff.go",
+      "claims_to_cover": "trusted-proxy X-Forwarded-For unwrap: when RemoteAddr is in the trusted-CIDR set, the XFF client IP is used as the ladder lookup key (so a blocked client behind a trusted proxy still gets 429)",
+      "mutation": "in resolveClientIP, inside the trusted-CIDR branch, replaced `first := strings.SplitN(xff,\",\",2)[0]; return strings.TrimSpace(first)` with `_ = strings.SplitN(xff,\",\",2)[0]; return remote` (ignore the XFF, return the proxy's own IP)",
+      "run_command": "go test ./internal/auth/ -run 'TestBackoffMiddleware_BlockedHonorsTrustedProxy_XForwardedFor|TestBackoffMiddleware_UntrustedProxy_IgnoresXForwardedFor' -v",
+      "observed_failure_verbatim": "backoff_test.go:83: status = 200, want 429 (trusted proxy XFF unwrap failed) ;; --- FAIL: TestBackoffMiddleware_BlockedHonorsTrustedProxy_XForwardedFor (0.00s). The untrusted-proxy test stayed PASS (mutation localized to the trusted branch).",
+      "repass_after_revert": "ok  digital.vasic.lava.apigo/internal/auth (all TestBackoffMiddleware PASS)",
+      "verdict": "GENUINE",
+      "reverted": "yes"
+    },
+    {
+      "id": 5,
+      "module": ":feature:account",
+      "layer": "ViewModel (feature, Orbit MVI)",
+      "test_file": "feature/account/src/test/kotlin/lava/account/AccountViewModelTest.kt",
+      "production_file": "feature/account/src/main/kotlin/lava/account/AccountViewModel.kt",
+      "claims_to_cover": "observed AuthState is reduced into rendered VM state (account screen shows the authorized identity; logout flips render to Unauthorized)",
+      "mutation": "in observeAuthState(), removed `reduce { authState }` inside collectLatest (observe the flow but never re-render)",
+      "run_command": "./gradlew :feature:account:testDebugUnitTest --tests lava.account.AccountViewModelTest",
+      "observed_failure_verbatim": "AccountViewModelTest > ConfirmLogoutClick logs out and clears local data FAILED ;; app.cash.turbine.TurbineAssertionError at channel.kt:89 / Caused by: app.cash.turbine.TurbineTimeoutCancellationException at channel.kt:123 (the `observed Authorized auth state is rendered` test fails the same way — the Authorized/Unauthorized re-render never emits so awaitState() times out, exactly as the test KDoc's documented rehearsal predicts). 4 tests completed, 2 failed. The two SideEffect-only tests (LoginClick/LogoutClick) stayed PASS — mutation localized to the state-render path.",
+      "repass_after_revert": "BUILD SUCCESSFUL (:feature:account:testDebugUnitTest)",
+      "verdict": "GENUINE",
+      "reverted": "yes"
+    }
+  ],
+  "summary": {
+    "targets_total": 5,
+    "genuine": 5,
+    "bluffs_found": 0,
+    "modules_covered": [":core:tracker:kinozal", ":core:tracker:iptorrents", ":core:sync", "lava-api-go/internal/auth", ":feature:account"],
+    "layers_covered": ["parser", "model-mapper", "outbox-impl", "go-http-middleware", "viewmodel"],
+    "all_mutations_reverted": true,
+    "git_status_clean_of_production_mutations": true,
+    "device_or_emulator_used": false,
+    "full_build_run": false
+  }
+}
