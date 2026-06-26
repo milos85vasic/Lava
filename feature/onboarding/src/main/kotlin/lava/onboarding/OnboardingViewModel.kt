@@ -806,6 +806,17 @@ class OnboardingViewModel @Inject constructor(
                 avatarUrl = null,
             )
         }
+
+        // 2026-06-26 operator FIX ("provider filters don't follow available
+        // configured providers"): onboarding's ensureDefault() (line ~701) only
+        // ADDS provider_config rows — it never disables ones the user did NOT
+        // onboard this run. A row left over from a prior onboarding / the
+        // Provider Config screen / setUseAnonymous lingers isEnabled=true and
+        // pollutes the search filter chips (SearchInputViewModel reads
+        // observeAll().filter{searchEnabled && isEnabled}). Reconcile so the
+        // SEARCH-active set is EXACTLY the providers verified this run.
+        providerConfigRepository.keepOnlySearchEnabled(verifiedProviders.keys)
+
         postSideEffect(OnboardingSideEffect.Finish)
     }
 

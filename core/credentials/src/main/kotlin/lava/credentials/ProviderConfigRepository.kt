@@ -1,6 +1,7 @@
 package lava.credentials
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import lava.database.dao.ProviderConfigDao
 import lava.database.entity.ProviderConfigEntity
@@ -59,6 +60,41 @@ class ProviderConfigRepository @Inject constructor(
         val updated = (existing?.toModel() ?: ProviderConfig(providerId = providerId))
             .copy(useAnonymous = useAnonymous, updatedAt = System.currentTimeMillis())
         dao.upsert(updated.toEntity())
+    }
+
+    /**
+     * 2026-06-26 operator FIX ("provider filters don't follow available
+     * configured providers"): reconcile the SEARCH-active provider set to be
+     * EXACTLY [selectedIds]. Every existing config row whose providerId is NOT
+     * in [selectedIds] is disabled (`isEnabled = false`, `searchEnabled =
+     * false`) so it stops appearing in the search filter chips; rows IN
+     * [selectedIds] are left untouched (onboarding already [ensureDefault]'d +
+     * configured them).
+     *
+     * Root cause this fixes: row creation is purely ADDITIVE — onboarding's
+     * [ensureDefault] (per selected provider), the Provider Config screen, and
+     * [setUseAnonymous] all create rows with the default `isEnabled = true`,
+     * and NOTHING ever disabled them. So [observeAll] `.filter { searchEnabled
+     * && isEnabled }` returned the UNION of every provider ever onboarded or
+     * opened, not the user's current selection — the user configures rutracker
+     * only, yet the search filter chips show every provider that ever had a
+     * row. Reconciling at onboarding-finish makes the chip bar honour the
+     * actual selection. Reproduced by
+     * ProviderConfigRepositoryReconcileTest.
+     */
+    suspend fun keepOnlySearchEnabled(selectedIds: Set<String>) {
+        val all = dao.observeAll().first()
+        for (entity in all) {
+            if (entity.providerId !in selectedIds && (entity.isEnabled || entity.searchEnabled)) {
+                dao.upsert(
+                    entity.copy(
+                        isEnabled = false,
+                        searchEnabled = false,
+                        updatedAt = System.currentTimeMillis(),
+                    ),
+                )
+            }
+        }
     }
 
     private fun ProviderConfigEntity.toModel(): ProviderConfig {
