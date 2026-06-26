@@ -31,3 +31,129 @@ Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at activity-des
 
 github/master and gitlab/master diverged at d2a2151 with unique non-doc go.mod content each; LVA-030 commit landed gitlab+working-tree but github refused non-FF. Needs a content-merge decision (operator-gated, NO force-push per §6.T.3).
 
+## LVA-079 — Video #3 — search-input chips vs results-filter chips disagree + results chip set non-deterministic run-to-run
+
+**Status:** In progress
+**Type:** Bug
+**Severity:** P1
+**Created-By:** AI
+**Assigned-To:** AI
+
+QA video 2026-06-25 (frames 0040 vs 0060 vs 0125): input chip bar and results filter chips show different provider sets, and the results chip set CHANGES between two identical queries. 1076 fixed the INPUT chips (observeAll filtered+sorted) but the input-vs-RESULTS divergence + run-to-run instability is distinct and still open. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md issue #3.
+
+## LVA-080 — Distribute 1076/1.3.12 (+ api-app 22): build_and_release -> §6.Z C00 gate on thinker -> §6.AA two-stage Firebase distribute
+
+**Status:** Queued
+**Type:** Task
+**Severity:** P1
+**Created-By:** AI
+
+1076 built but never distributed (last-distributed=1075). Operator directive: rebuild, gate, distribute all 4 variants. Infra confirmed UP this session: thinker+nezha reachable, T7 writable, JDK17/Gradle8.9/podman5.8.2 present.
+
+## LVA-081 — Fetch/pull/merge latest from all submodules + build-verify (operator directive 2026-06-26)
+
+**Status:** Queued
+**Type:** Task
+**Severity:** P2
+**Created-By:** AI
+
+Operator directive: fetch+pull+merge latest codebase from all submodules. Frozen-by-default overridden for this cycle. Must build-verify after each bump; revert+report any submodule whose bump breaks the build.
+
+## LVA-082 — Crashlytics read NOT available via Firebase CLI — only symbols/mappingfile upload; no issues:list; bq absent
+
+**Status:** Queued
+**Type:** Task
+**Severity:** P3
+**Created-By:** AI
+
+Operator asked to use Firebase CLI to pull Crashlytics. Verified Firebase CLI 14.17.0 exposes only crashlytics:symbols:upload + mappingfile:* (NO issue/non-fatal read). bq CLI absent. Crashlytics dashboard read requires console or a BigQuery export not configured. Fallback: in-repo §6.AC telemetry + known crash tickets; operator to paste console items for full triage. §11.4.6 honest record.
+
+## LVA-083 — Video #1 — Search returns ZERO results then 'Something went wrong' Error (primary function unusable)
+
+**Status:** In progress
+**Type:** Bug
+**Severity:** P0
+**Created-By:** AI
+**Assigned-To:** AI
+
+QA video 2026-06-25 frames 0060-0140: every search fails (blank ~25s then Error/Retry; 'prince' stays blank). KNOWN-class (anonymous/provider-mismatch). CODE-FIX landed in 1076 (SearchInputViewModel observeAll filtered+sorted + loading/empty state) but 1076 NOT yet distributed/device-verified. Pending §6.Z gate. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #1.
+
+## LVA-084 — Video #2 — Onboarded provider (YTS) is NOT the provider set used by Search; unconfigured providers active as filters
+
+**Status:** In progress
+**Type:** Bug
+**Severity:** P0
+**Created-By:** AI
+**Assigned-To:** AI
+
+QA video frames 0030 vs 0040/0060: onboarded only YTS but search used RuTracker/RuTor/IA/Gutenberg etc. KNOWN (§6.L 57th/59th). CODE-FIX in 1076 (chips from ProviderConfigRepository.observeAll() searchEnabled&&isEnabled). Pending §6.Z device verification. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #2.
+
+## LVA-085 — Video #4 — Provider id labels shown raw/lowercased ('torrentdownloads','archiveorg','kinozal','yts') in results filter chips
+
+**Status:** In progress
+**Type:** Bug
+**Severity:** P1
+**Created-By:** AI
+**Assigned-To:** AI
+
+QA video frames 0060/0125/0130: results chips render internal provider key not displayName. KNOWN-class (§6.L 60th displayLabel). CODE-FIX in 1076 (friendly chip names). Pending §6.Z verification. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #4.
+
+## LVA-086 — Video #5 — No empty-state and no loading indicator on search results (perceived hang)
+
+**Status:** In progress
+**Type:** Bug
+**Severity:** P1
+**Created-By:** AI
+**Assigned-To:** AI
+
+QA video frames 0060-0110: pure blank ~25s, no spinner/skeleton/no-results; 'prince' stays blank with no error. NEW. CODE-FIX in 1076 (loading/empty state branches). Pending §6.Z verification. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #5.
+
+## LVA-087 — Video #6 — Welcome claims '4 providers available' but picker lists ~12
+
+**Status:** In progress
+**Type:** Bug
+**Severity:** P2
+**Created-By:** AI
+**Assigned-To:** AI
+
+QA video frames 0007/0010/0015 vs 0020-0030. NEW. CODE-FIX in 1076 (#6 count bound to real descriptor list). Pending §6.Z verification. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #6.
+
+## LVA-088 — Video #7 — 'Choose your API' shows 'lava.app:7777' preset + mislabeled 'On this network'
+
+**Status:** In progress
+**Type:** Bug
+**Severity:** P2
+**Created-By:** AI
+**Assigned-To:** AI
+
+QA video frames 0012/0015. 1076 investigation: NOT a §6.R hardcoding violation (config-driven preset). 'On this network' label for a cloud/remote preset still worth confirming. Pending §6.Z verification. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #7.
+
+## LVA-089 — Video #8 — mDNS-discovered API shows raw IP 192.168.0.107:8443 with no friendly name
+
+**Status:** In progress
+**Type:** Bug
+**Severity:** P2
+**Created-By:** AI
+**Assigned-To:** AI
+
+QA video frames 0012/0015. NEW UX. CODE-FIX in 1076 (discovered-API friendly name). Pending §6.Z verification. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #8.
+
+## LVA-090 — Video #9 — Onboarding 'Select all' silently enables auth-requiring (Captcha/Form Login) providers
+
+**Status:** In progress
+**Type:** Bug
+**Severity:** P3
+**Created-By:** AI
+**Assigned-To:** AI
+
+QA video frames 0020-0025. NEW UX, contributes to #1. CODE-FIX in 1076 (#9 select-all handling). Pending §6.Z verification. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #9.
+
+## LVA-091 — Video #10 — App-ID co-mingling (debug .dev + release both labeled 'Lava') — UNCONFIRMED in video
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** P3
+**Created-By:** AI
+
+QA video frames 0001/0005: single Lava icon launched; co-mingling NOT visually confirmed. Needs on-device package check (applicationIdSuffix .dev + launcher label). OPEN/UNCONFIRMED. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #10.
+

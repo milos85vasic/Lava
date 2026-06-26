@@ -235,8 +235,13 @@ private fun SearchResultList(
     ),
     onLastItemVisible = { onAction(SearchResultAction.ListBottomReached) },
 ) {
-    val providerIds = state.filter.providerIds
-    if (!providerIds.isNullOrEmpty()) {
+    // Issue #3 (2026-06-25 QA video): render the chips from the deterministic,
+    // request-derived source of truth (`filterProviderChipIds`) — NOT raw
+    // `filter.providerIds` — so the results chip set agrees with the search-input
+    // chip set and is stable run-to-run regardless of response order or caller
+    // ordering. See SearchPageState.filterProviderChipIds.
+    val providerIds = state.filterProviderChipIds
+    if (providerIds.isNotEmpty()) {
         item {
             ProviderFilterChipBar(
                 providerIds = providerIds,

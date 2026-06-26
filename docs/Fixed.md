@@ -660,3 +660,13 @@ App has no connectedReleaseAndroidTest because testBuildType is debug; added scr
 
 Root containerignore blanket-excluded submodules but go.mod replaces parent submodules X; in-container go build failed on missing replacement dirs. Excluded only nested git and build, kept source.
 
+## LVA-092 — Video #11 — Negative finding: NO crash/ANR/white-icon observed in this recording (recorded for completeness)
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
+**Severity:** P3
+**Created-By:** AI
+
+QA video 0001-0155: app did not crash/ANR; brand logo renders red. LVA-008 search-back crash + Sync-toggle crash + §6.AB white-icon were NOT triggered on screen here (remain open under their own tickets). Informational record. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #11.
+
