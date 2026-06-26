@@ -464,9 +464,24 @@ internal class SearchResultViewModel @Inject constructor(
             // Now: items empty + any ERROR row -> Error(reason) -> screen
             // renders the Retry button -> RetryClick re-subscribes the stream.
             // Covered by SearchResultViewModelRetryTest.
-            val anyProviderFailed = current.activeProviders.any { it.status == StreamStatus.ERROR }
+            // 2026-06-26 operator-video FIX (issue #1 "Something went wrong"):
+            // distinguish a GENUINE failure (EVERY provider errored) from a
+            // PARTIAL failure (some provider succeeded with 0 results while
+            // another errored). The prior `anyProviderFailed` rule rendered the
+            // full-screen Error whenever ANY single provider errored + items
+            // were empty — so a search where yts legitimately returned 0 hits
+            // for "1080p" (a quality term, not a movie title) while a DOWN
+            // provider (torrentdownloads, Cloudflare 522) errored, wrongly
+            // showed "search failed". A provider that searched and found
+            // nothing is a valid "No results", NOT a failure. Only when EVERY
+            // provider errored (nothing actually searched) is it a real Error.
+            // Reproduced by SearchResultViewModelPartialFailureTest +
+            // engine-side curl evidence (.lava-ci-evidence/1076-repro/).
+            val providers = current.activeProviders
+            val allProvidersFailed =
+                providers.isNotEmpty() && providers.all { it.status == StreamStatus.ERROR }
             if (current.items.isEmpty()) {
-                if (anyProviderFailed) {
+                if (allProvidersFailed) {
                     reduce {
                         state.copy(
                             searchContent = SearchResultContent.Error(

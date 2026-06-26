@@ -275,4 +275,60 @@ class SearchResultViewModelRetryTest {
                 pagingFake.invocations,
             )
         }
+
+    private class AlwaysEmptyClient(override val descriptor: TrackerDescriptor) : TrackerClient {
+        override suspend fun healthCheck(): Boolean = true
+        override fun close() {}
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : TrackerFeature> getFeature(featureClass: KClass<T>): T? = when (featureClass) {
+            SearchableTracker::class -> object : SearchableTracker {
+                override suspend fun search(request: SearchRequest, page: Int): SearchResult =
+                    SearchResult(items = emptyList(), totalPages = 1, currentPage = page)
+            } as T
+            else -> null
+        }
+    }
+
+    private class AlwaysErrorClient(override val descriptor: TrackerDescriptor) : TrackerClient {
+        override suspend fun healthCheck(): Boolean = true
+        override fun close() {}
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : TrackerFeature> getFeature(featureClass: KClass<T>): T? = when (featureClass) {
+            SearchableTracker::class -> object : SearchableTracker {
+                override suspend fun search(request: SearchRequest, page: Int): SearchResult =
+                    throw java.io.IOException("provider down (Cloudflare 522)")
+            } as T
+            else -> null
+        }
+    }
+
+    // CHALLENGE — reproduce-first for the 2026-06-26 operator-video issue #1
+    // ("Something went wrong" on every search). One provider SUCCEEDS with 0
+    // results (yts: "1080p" is a quality term, not a movie title), another
+    // ERRORS (torrentdownloads: Cloudflare 522, site down). The user MUST see
+    // "No results" (Empty) — a provider that searched and found nothing is a
+    // valid empty result — NOT a full-screen "search failed" (Error) that hides
+    // everything. Pre-fix handleStreamEnd used `anyProviderFailed`, so any single
+    // provider error + empty items wrongly rendered Error. Engine evidence:
+    // .lava-ci-evidence/1076-repro/ (torrentdownloads 522 + yts 0-result).
+    @Test
+    fun streaming_partial_failure_one_empty_one_error_renders_Empty_not_Error() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val ok = AlwaysEmptyClient(descriptor("ytsok"))
+            val err = AlwaysErrorClient(descriptor("tderr"))
+            val vm = createViewModel(providerIds = listOf("ytsok", "tderr"), clients = listOf(ok, err))
+
+            vm.test(this) {
+                runOnCreate()
+                val end = vm.container.stateFlow.value.searchContent
+                assertTrue(
+                    "partial failure (one provider returned 0 results, one errored) must render " +
+                        "Empty (No results), not full-screen Error; was ${end::class.simpleName}",
+                    end is SearchResultContent.Empty,
+                )
+                cancelAndIgnoreRemainingItems()
+            }
+        }
 }
