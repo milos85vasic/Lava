@@ -125,7 +125,11 @@ android {
         // 22 (§6.Y, this cycle): version-parity bump alongside the client 1076/1.3.12 cycle.
         // api-app gains the okhttp-androidTest fix + C06/C07 UI Challenges (test-only); no
         // user-facing functional change → versionName held (0.2.11, diagnostics-only app).
-        versionCode = 22
+        // 23 (§6.Y post-distribute bump, 2026-06-26): 0.2.11-22 was §6.Z-gated
+        // (Challenge01ApiAppColdStartTest PASS on thinker containerized-KVM,
+        // .lava-ci-evidence/1076-apiapp-gate/) and §6.AA two-stage distributed
+        // (debug 6mn8lmmqke928 + release 15l34kl1d1138). versionName HELD (diagnostics-only).
+        versionCode = 23
         versionName = "0.2.11"
         // EncryptedSharedPreferences (androidx.security-crypto) requires API 23+
         // — the per-install auth-key store ([ApiKeyStore]) relies on it. The

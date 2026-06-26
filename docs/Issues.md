@@ -41,16 +41,6 @@ github/master and gitlab/master diverged at d2a2151 with unique non-doc go.mod c
 
 QA video 2026-06-25 (frames 0040 vs 0060 vs 0125): input chip bar and results filter chips show different provider sets, and the results chip set CHANGES between two identical queries. 1076 fixed the INPUT chips (observeAll filtered+sorted) but the input-vs-RESULTS divergence + run-to-run instability is distinct and still open. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md issue #3.
 
-## LVA-080 — Distribute 1076/1.3.12 (+ api-app 22): build_and_release -> §6.Z C00 gate on thinker -> §6.AA two-stage Firebase distribute
-
-**Status:** In progress
-**Type:** Task
-**Severity:** P1
-**Created-By:** AI
-**Assigned-To:** AI
-
-1076 built but never distributed (last-distributed=1075). Operator directive: rebuild, gate, distribute all 4 variants. Infra confirmed UP this session: thinker+nezha reachable, T7 writable, JDK17/Gradle8.9/podman5.8.2 present.
-
 ## LVA-081 — Fetch/pull/merge latest from all submodules + build-verify (operator directive 2026-06-26)
 
 **Status:** In progress

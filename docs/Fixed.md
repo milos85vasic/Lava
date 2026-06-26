@@ -670,3 +670,14 @@ Root containerignore blanket-excluded submodules but go.mod replaces parent subm
 
 QA video 0001-0155: app did not crash/ANR; brand logo renders red. LVA-008 search-back crash + Sync-toggle crash + §6.AB white-icon were NOT triggered on screen here (remain open under their own tickets). Informational record. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #11.
 
+## LVA-080 — Distribute 1076/1.3.12 (+ api-app 22): build_and_release -> §6.Z C00 gate on thinker -> §6.AA two-stage Firebase distribute
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.2.11-22-test-evidence.md
+**Severity:** P1
+**Created-By:** AI
+**Assigned-To:** AI
+
+1076 built but never distributed (last-distributed=1075). Operator directive: rebuild, gate, distribute all 4 variants. Infra confirmed UP this session: thinker+nezha reachable, T7 writable, JDK17/Gradle8.9/podman5.8.2 present.
+
