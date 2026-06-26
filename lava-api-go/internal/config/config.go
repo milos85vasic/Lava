@@ -62,6 +62,23 @@ type Config struct {
 	// rutracker upstream
 	RutrackerBaseURL string
 
+	// SearchTimeout bounds the server-side single-provider /v1/{provider}/search
+	// upstream call (LVA-083 H2 / §6.Z). It MUST stay strictly shorter than the
+	// Android client's OkHttp readTimeout (30s) so the response always arrives
+	// before the socket read times out. Env: LAVA_API_SEARCH_TIMEOUT (Go
+	// duration, e.g. "18s"); default 18s.
+	SearchTimeout time.Duration
+
+	// MultiSearchProviderTimeout bounds each per-provider upstream call inside
+	// the SSE multi-search fan-out (handlers/v1.MultiSearchHandler.GetMultiSearch).
+	// Every provider in the stream is given this deadline independently; a slow
+	// provider is cut short and emitted as a provider_error event instead of
+	// stalling the whole stream (§6.AK §6.4 reduced this from the prior bare 30s
+	// literal). It MUST stay strictly shorter than the Android client's OkHttp
+	// readTimeout (30s). Env: LAVA_API_MULTISEARCH_PROVIDER_TIMEOUT (Go duration,
+	// e.g. "20s"); default 20s.
+	MultiSearchProviderTimeout time.Duration
+
 	// === Jackett sidecar (optional / profile-gated) ===
 	// JackettEnabled turns the /jackett/search route on. It is OFF by
 	// default; the route is a no-op (never registered) unless this is
@@ -124,6 +141,13 @@ func Load() (*Config, error) {
 		// slash is omitted here because Client.Fetch builds c.base + path
 		// where path starts with `/`.
 		RutrackerBaseURL: envDefault("LAVA_API_RUTRACKER_URL", "https://rutracker.org/forum"),
+
+		// SearchTimeout default 18s < client 30s OkHttp readTimeout (LVA-083 H2).
+		SearchTimeout: envDuration("LAVA_API_SEARCH_TIMEOUT", 18*time.Second),
+
+		// MultiSearchProviderTimeout default 20s < client 30s OkHttp readTimeout
+		// (§6.AK §6.4: replaces the prior bare 30s literal in GetMultiSearch).
+		MultiSearchProviderTimeout: envDuration("LAVA_API_MULTISEARCH_PROVIDER_TIMEOUT", 20*time.Second),
 
 		// Jackett sidecar — all injected; OFF by default per §6.R.
 		JackettEnabled:        envBool("LAVA_API_JACKETT_ENABLED", false),

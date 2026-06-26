@@ -208,3 +208,89 @@ func TestProvidersHandler_IncludesRealCuratedProvidersEndToEnd(t *testing.T) {
 		t.Fatalf("GET /providers returned %d providers, want >= 3 curated", len(resp.Providers))
 	}
 }
+
+// TestProvidersHandler_ServesAdapterDisplayName is the LVA-085 root-cause probe
+// + regression guard. The operator's manual-testing video showed provider
+// filter chips rendered as RAW LOWERCASE IDS ("yts", "torrentdownloads")
+// instead of the human display names ("YTS", "TorrentDownloads"). The Android
+// client renders a dynamically-discovered provider's chip label from the
+// `displayName` field of the GET /providers catalogue body. So the crux is:
+// does the engine SERVE the adapter's DisplayName() in that field, or does it
+// serve the raw id (or empty)?
+//
+// This test drives the REAL curated.RegisterAll through the REAL providers
+// handler over a real httptest engine and asserts the served `displayName` for
+// each curated provider equals its adapter's DisplayName() — NOT its id. If
+// this PASSES, the engine is correct and LVA-085 is a pure client-side render
+// issue (this test is then the engine-side regression guard). If it FAILS, the
+// engine emits the raw id and THIS is the device-independent root cause.
+//
+// FALSIFIABILITY REHEARSAL (§6.J clause 2) — recorded in the Bluff-Audit stamp:
+//
+//	Mutation: in internal/handlers/v1/providers.go GetProviders, change
+//	          `DisplayName: p.DisplayName(),` to `DisplayName: p.ID(),`
+//	          (serve the raw id — the exact LVA-085 symptom).
+//	Observed: this test fails with
+//	          'yts displayName = "yts", want "YTS" — catalogue is serving the
+//	          raw id, NOT the adapter DisplayName(): this IS LVA-085 engine-side'.
+//	Reverted: yes (final committed handler is unmutated).
+func TestProvidersHandler_ServesAdapterDisplayName(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	reg := provider.NewRegistry()
+	curated.RegisterAll(reg)
+
+	r := gin.New()
+	r.GET("/providers", NewProvidersHandler(reg).GetProviders)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodGet, "/providers", nil)
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("GET /providers status = %d, want 200; body=%s", w.Code, w.Body.String())
+	}
+
+	var resp struct {
+		Providers []struct {
+			ID          string `json:"id"`
+			DisplayName string `json:"displayName"`
+		} `json:"providers"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("decode body: %v; body=%s", err, w.Body.String())
+	}
+
+	displayByID := make(map[string]string, len(resp.Providers))
+	for _, p := range resp.Providers {
+		displayByID[p.ID] = p.DisplayName
+	}
+
+	// The exact two chips from the operator's video, plus the rest of the
+	// curated set so the whole catalogue is pinned to human names. The wanted
+	// values are the adapters' own DisplayName() returns (see
+	// internal/provider/curated/<id>/provider.go).
+	want := map[string]string{
+		"yts":              "YTS",
+		"torrentdownloads": "TorrentDownloads",
+		"thepiratebay":     "The Pirate Bay",
+		"torrentscsv":      "Torrents-CSV",
+		"bitsearch":        "BitSearch",
+		"knaben":           "Knaben",
+		"nyaa":             "Nyaa",
+		"tokyotosho":       "Tokyo Toshokan",
+	}
+
+	for id, wantName := range want {
+		got, ok := displayByID[id]
+		if !ok {
+			t.Fatalf("GET /providers body is missing curated provider %q (registry→handler→body drift)", id)
+		}
+		if got == id {
+			t.Errorf("%s displayName = %q, want %q — catalogue is serving the raw id, NOT the adapter DisplayName(): this IS LVA-085 engine-side", id, got, wantName)
+			continue
+		}
+		if got != wantName {
+			t.Errorf("%s displayName = %q, want %q (the adapter DisplayName())", id, got, wantName)
+		}
+	}
+}

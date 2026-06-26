@@ -1,9 +1,9 @@
 {
   "all_200_correct_body": true,
   "amplification_note": "FACT not guarantee: production read-through has no singleflight; \u003e=1 expected, dedup not asserted",
-  "amplification_x": 9,
+  "amplification_x": 64,
   "calls_per_worker": 8,
-  "captured_at": "2026-06-24T08:35:06Z",
+  "captured_at": "2026-06-26T17:02:32Z",
   "clause": "HelixConstitution §11.4.85 (Stress + Chaos) + §6.J/§6.L Anti-Bluff",
   "convergence_pass": true,
   "dimension": "cache-thundering-herd (concurrent identical-key cache stampede)",
@@ -15,6 +15,6 @@
   "surface": "GET /v1/{provider}/search via REAL Register→SearchHandler.GetSearch read-through cache + REAL storage.NewSQLite; only upstream provider.Search faked",
   "test": "TestStress_Chaos_SearchThunderingHerd",
   "total_identical_requests": 512,
-  "upstream_burst_loads": 9,
+  "upstream_burst_loads": 64,
   "workers": 64
 }

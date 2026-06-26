@@ -22,12 +22,28 @@ const searchTTL = 1 * time.Minute
 
 const searchRouteTemplate = "/v1/{provider}/search"
 
+// defaultSearchTimeout is the documented fallback for the server-side
+// single-provider search deadline used by GetSearch (§6.R: no bare literal
+// in the handler body — the deadline value is a named, documented constant
+// and the production value is injected via config env LAVA_API_SEARCH_TIMEOUT,
+// see internal/config.Config.SearchTimeout). It MUST stay strictly shorter
+// than the Android client's OkHttp readTimeout (30s) so the response always
+// arrives before the socket read times out; 18s leaves margin for the network
+// round-trip on top of the upstream call. NewSearchHandler falls back to this
+// constant only when Deps.SearchTimeout is unset (direct/test construction).
+const defaultSearchTimeout = 18 * time.Second
+
 type SearchHandler struct {
-	cache Cache
+	cache         Cache
+	searchTimeout time.Duration
 }
 
 func NewSearchHandler(deps *Deps) *SearchHandler {
-	return &SearchHandler{cache: deps.Cache}
+	timeout := deps.SearchTimeout
+	if timeout <= 0 {
+		timeout = defaultSearchTimeout
+	}
+	return &SearchHandler{cache: deps.Cache, searchTimeout: timeout}
 }
 
 func (h *SearchHandler) GetSearch(c *gin.Context) {
@@ -61,13 +77,15 @@ func (h *SearchHandler) GetSearch(c *gin.Context) {
 		return
 	}
 
-	// §6.Z / engine-side timeout fix: bound the total search time to 18 s so
-	// the response always arrives before the Android client's OkHttp
+	// §6.Z / engine-side timeout fix (LVA-083 H2): bound the total search time
+	// so the response always arrives before the Android client's OkHttp
 	// readTimeout (30 s). Without this, a provider failover loop can stall for
 	// perAttemptTimeout(8s) × N mirrors (YTS now has 5) ≈ 40 s > 30 s, causing a
-	// SocketTimeoutException on the device ("no results"). The 18 s parent
-	// deadline caps the TOTAL regardless of mirror count.
-	searchCtx, searchCancel := context.WithTimeout(c.Request.Context(), 18*time.Second)
+	// SocketTimeoutException on the device ("no results"). The parent deadline
+	// caps the TOTAL regardless of mirror count. The value is config-driven
+	// (LAVA_API_SEARCH_TIMEOUT) with defaultSearchTimeout as the documented
+	// fallback — never a bare literal here (§6.R).
+	searchCtx, searchCancel := context.WithTimeout(c.Request.Context(), h.searchTimeout)
 	defer searchCancel()
 	result, err := p.Search(searchCtx, opts, creds)
 	if err != nil {
@@ -104,11 +122,32 @@ func streamEvent(w io.Writer, evt sseEvent) error {
 }
 
 type MultiSearchHandler struct {
-	registry *provider.ProviderRegistry
+	registry           *provider.ProviderRegistry
+	perProviderTimeout time.Duration
 }
 
-func NewMultiSearchHandler(reg *provider.ProviderRegistry) *MultiSearchHandler {
-	return &MultiSearchHandler{registry: reg}
+// defaultMultiSearchProviderTimeout is the documented fallback for the
+// per-provider deadline applied inside the SSE multi-search fan-out
+// (GetMultiSearch). §6.R: no bare literal in the handler body — the deadline is
+// a named, documented constant and the production value is injected via config
+// env LAVA_API_MULTISEARCH_PROVIDER_TIMEOUT (see config.Config.
+// MultiSearchProviderTimeout). It MUST stay strictly shorter than the Android
+// client's OkHttp readTimeout (30s); 20s leaves margin for the network
+// round-trip on top of the upstream call (§6.AK §6.4 reduced this from the prior
+// bare 30s literal). NewMultiSearchHandler falls back to this constant only when
+// the injected per-provider timeout is unset (direct/test construction).
+const defaultMultiSearchProviderTimeout = 20 * time.Second
+
+// NewMultiSearchHandler builds the SSE multi-search handler. perProviderTimeout
+// is the config-driven (LAVA_API_MULTISEARCH_PROVIDER_TIMEOUT) deadline applied
+// to each provider's upstream call; when <= 0 it falls back to
+// defaultMultiSearchProviderTimeout (§6.R: the deadline flows config → handler,
+// never a bare literal in GetMultiSearch).
+func NewMultiSearchHandler(reg *provider.ProviderRegistry, perProviderTimeout time.Duration) *MultiSearchHandler {
+	if perProviderTimeout <= 0 {
+		perProviderTimeout = defaultMultiSearchProviderTimeout
+	}
+	return &MultiSearchHandler{registry: reg, perProviderTimeout: perProviderTimeout}
 }
 
 type providerStreamStatus struct {
@@ -206,7 +245,7 @@ func (h *MultiSearchHandler) GetMultiSearch(c *gin.Context) {
 				return false
 			}
 
-			ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
+			ctx, cancel := context.WithTimeout(c.Request.Context(), h.perProviderTimeout)
 			result, err := p.Search(ctx, opts, parseCredentials(c))
 			cancel()
 

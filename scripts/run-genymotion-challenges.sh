@@ -110,6 +110,20 @@ export LAVA_REAL_DEVICE_SERIALS="$SERIAL"
 adb -s "$SERIAL" shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1 || true
 adb -s "$SERIAL" shell svc power stayon true >/dev/null 2>&1 || true
 
+# Dismiss the keyguard / notification shade. WAKEUP alone leaves the device on
+# the lockscreen: dumpsys reports mCurrentFocus=NotificationShade +
+# mDreamingLockscreen=true, so every launched MainActivity sits BEHIND the
+# keyguard and the ComposeTestRule sees "No compose hierarchies found ... the
+# Activity that calls setContent did not launch" for EVERY Challenge (a
+# systemic, whole-suite false-fail — not a per-feature defect). Root cause
+# diagnosed 2026-06-26: WAKEUP turns the screen on but does not unlock it.
+# `wm dismiss-keyguard` clears the lockscreen (Genymotion has no secure lock);
+# KEYCODE_HOME collapses any open shade so the app window becomes the
+# foreground rendering surface. Verified on-device: after both, mCurrentFocus
+# becomes …/MainActivity and mDreamingLockscreen=false.
+adb -s "$SERIAL" shell wm dismiss-keyguard >/dev/null 2>&1 || true
+adb -s "$SERIAL" shell input keyevent KEYCODE_HOME >/dev/null 2>&1 || true
+
 GRADLE_TASK=":$MODULE:connectedDebugAndroidTest"
 GRADLE_ARGS=( "$GRADLE_TASK" --no-daemon --max-workers=2 )
 [[ "$NO_BUILD" == "1" ]] && GRADLE_ARGS+=( -x assembleDebug )

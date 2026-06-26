@@ -89,7 +89,7 @@ func (p *streamProvider) HealthCheck(ctx context.Context) (*provider.HealthStatu
 func multiSearchRouter(reg *provider.ProviderRegistry) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	h := NewMultiSearchHandler(reg)
+	h := NewMultiSearchHandler(reg, 0)
 	r.GET("/v1/search", h.GetMultiSearch)
 	return r
 }

@@ -17,10 +17,15 @@ import (
 // fakeProvider is a minimal Provider implementation for handler tests.
 type fakeProvider struct {
 	provider.BaseProvider
-	id             string
-	name           string
-	searchResult   *provider.SearchResult
-	searchErr      error
+	id           string
+	name         string
+	searchResult *provider.SearchResult
+	searchErr    error
+	// searchBlock, when > 0, makes Search block for that duration BUT respect
+	// context cancellation (returns ctx.Err() if the ctx deadline fires first),
+	// mirroring how a real provider's HTTP client honours the request context.
+	// Default 0 = return immediately (existing behaviour, unchanged).
+	searchBlock    time.Duration
 	browseResult   *provider.BrowseResult
 	forumResult    *provider.ForumTree
 	topicResult    *provider.TopicResult
@@ -41,6 +46,13 @@ func (f *fakeProvider) Capabilities() []provider.ProviderCapability {
 func (f *fakeProvider) AuthType() provider.AuthType { return provider.AuthNone }
 func (f *fakeProvider) Encoding() string            { return "UTF-8" }
 func (f *fakeProvider) Search(ctx context.Context, opts provider.SearchOpts, cred provider.Credentials) (*provider.SearchResult, error) {
+	if f.searchBlock > 0 {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-time.After(f.searchBlock):
+		}
+	}
 	return f.searchResult, f.searchErr
 }
 func (f *fakeProvider) Browse(ctx context.Context, categoryID string, page int, cred provider.Credentials) (*provider.BrowseResult, error) {

@@ -127,9 +127,16 @@ func Build(deps Deps) *gin.Engine {
 	// mobile); passing it here is what makes /v1/{provider}/... dispatch to a
 	// real provider instead of panicking in currentProvider() → 500 (LVA-010).
 	v1 := engine.Group("/v1/:provider")
-	v1handlers.Register(v1, &v1handlers.Deps{
+	v1Deps := &v1handlers.Deps{
 		Cache: deps.Cache,
-	}, deps.Registry)
+	}
+	// Inject the config-driven server-side search deadline (LVA-083 H2 / §6.Z /
+	// §6.R: no bare literal in the handler). When Cfg is nil (registration-only
+	// test paths) the handler falls back to v1.defaultSearchTimeout.
+	if deps.Cfg != nil {
+		v1Deps.SearchTimeout = deps.Cfg.SearchTimeout
+	}
+	v1handlers.Register(v1, v1Deps, deps.Registry)
 	// NOTE: GET /providers is registered ABOVE, before the auth middleware (it is
 	// public catalogue metadata — see the rationale there).
 

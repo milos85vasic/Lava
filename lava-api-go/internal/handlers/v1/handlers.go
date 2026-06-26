@@ -31,6 +31,12 @@ import (
 // Deps bundles the shared dependencies every v1 handler needs.
 type Deps struct {
 	Cache Cache
+	// SearchTimeout is the server-side deadline applied to the single-provider
+	// GetSearch upstream call (LVA-083 H2 / §6.Z). It is injected from
+	// config.Config.SearchTimeout (env LAVA_API_SEARCH_TIMEOUT). When zero,
+	// NewSearchHandler falls back to v1.defaultSearchTimeout. §6.R: no bare
+	// literal in the handler — the value flows config → Deps → handler.
+	SearchTimeout time.Duration
 }
 
 // Cache is the subset of *cache.Client the handlers depend on.
