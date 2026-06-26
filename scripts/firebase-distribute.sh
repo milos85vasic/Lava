@@ -306,6 +306,42 @@ else
 fi
 
 # ----------------------------------------------------------------
+# 1c. §6.AK Phase-1 Gate 7 — cycle-coverage (claims × executed device Challenges).
+# Closes the firebase-distribute portion of §6.AK-debt. Refuses to distribute
+# unless EVERY CHANGELOG-claimed user-visible fix for this version has an
+# EXECUTED+PASSED covering device Challenge in the §6.Z evidence file for the
+# SAME commit SHA (spec §5.3). This is the gate that would have CAUGHT the 1076
+# incident (commit 627a0d58): a C00-only device gate while the CHANGELOG claimed
+# search / provider-selection / onboarding fixes. Verified by
+# tests/cycle-coverage/test_wiring.sh (5/5, mutation-rehearsal proven).
+# The gate's --evidence-dir is pinned to $CHANGELOG_DIR (the app-resolved §6.Z
+# evidence dir) and it also subsumes the §6.Z-debt runtime checks (evidence
+# presence + commit-SHA match + ≤24h freshness → exit 2 / exit 1).
+# ----------------------------------------------------------------
+case "$MODE" in
+    release) AK_CHANNEL="release" ;;
+    *)       AK_CHANNEL="debug"   ;;
+esac
+echo "    Phase 1 Gate 7 (§6.AK): cycle-coverage — CHANGELOG claims × executed device Challenges"
+ak_rc=0
+"$SCRIPT_DIR/check-cycle-coverage.sh" \
+    --version="$APP_VERSION-$APP_VERSION_CODE" \
+    --channel="$AK_CHANNEL" \
+    --evidence-dir="$CHANGELOG_DIR" \
+    --strict || ak_rc=$?
+case "$ak_rc" in
+    0) echo "    §6.AK gate PASS — all CHANGELOG claims covered by executed device Challenges" ;;
+    1) echo "FATAL §6.AK: CHANGELOG claim(s) lack a covering executed+PASSED device Challenge for $APP_VERSION-$APP_VERSION_CODE." >&2
+       echo "       Run the missing device Challenge(s) on the gate, OR strike the unverified claim(s) from CHANGELOG.md (§6.AK clause 6)." >&2
+       exit 1 ;;
+    2) echo "FATAL §6.AK: §6.Z evidence or cycle-coverage-map missing / stale / wrong-SHA for $APP_VERSION-$APP_VERSION_CODE." >&2
+       echo "       Re-run the device gate on THIS commit and write the cycle-coverage-map before distributing." >&2
+       exit 1 ;;
+    *) echo "FATAL §6.AK: internal error in cycle-coverage scanner (rc=$ak_rc)." >&2
+       exit 1 ;;
+esac
+
+# ----------------------------------------------------------------
 # 2. Resolve git SHA + branch for the release notes
 # ----------------------------------------------------------------
 GIT_SHA="$(git rev-parse --short HEAD)"

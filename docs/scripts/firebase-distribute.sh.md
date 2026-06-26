@@ -1,6 +1,6 @@
 # `scripts/firebase-distribute.sh` — User Guide
 
-**Last verified:** 2026-05-15 (1.2.23 closure-cycle, §6.AD-debt task #61 backfill)
+**Last verified:** 2026-06-26 (§6.AK Phase-1 Gate 7 wiring)
 **Inheritance:** HelixConstitution §11.4.18 (script documentation mandate)
 
 ## Overview
@@ -42,6 +42,25 @@ Constitutional bindings:
 ## Usage
 
 See the script's in-source comment block (above) for canonical usage examples.
+
+## Phase 1 Gate 7 (§6.AK cycle-coverage) — added 2026-06-26
+
+Closes the firebase-distribute portion of §6.AK-debt. After the §6.P/§6.AA/§6.Z
+Phase-1 gates, the script invokes `scripts/check-cycle-coverage.sh` for the
+version+channel being distributed (`--evidence-dir="$CHANGELOG_DIR"`, `--strict`)
+and **refuses the distribute** unless EVERY CHANGELOG-claimed user-visible fix has
+an EXECUTED+PASSED covering device Challenge in the §6.Z evidence file for the
+SAME commit SHA. This is the gate that would have caught the 1076 incident
+(`627a0d58`: a C00-only device gate while the CHANGELOG claimed search /
+provider-selection / onboarding fixes). Exit mapping: `0` PASS · `1` an uncovered
+claim · `2` evidence/map missing/stale/wrong-SHA. The `|| ak_rc=$?` idiom keeps
+`set -e` from aborting before the §6.AK FATAL directive prints. Gates BOTH apps
+(client + api-app) via the app-resolved `$CHANGELOG_DIR`. Companion hermetic test:
+`tests/cycle-coverage/test_wiring.sh` (5/5, mutation-rehearsal proven); the gate's
+own test is `tests/cycle-coverage/test_cycle_coverage.sh` (7/7). The cycle author
+must write `<vname>-<code>-test-evidence.{md,json}` (with the `cycle-coverage:`
+header + per-Challenge `challenge:` rows) and `<vname>-<code>-cycle-coverage-map.yaml`
+under the channel dir for this gate to pass on a real distribute.
 
 ## Maintenance
 
