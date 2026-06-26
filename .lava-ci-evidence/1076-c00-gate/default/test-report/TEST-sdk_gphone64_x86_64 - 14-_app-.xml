@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="lava.app.challenges.Challenge00CrashSurvivalTest" tests="1" failures="0" errors="0" skipped="0" time="5.394" timestamp="2026-06-26T09:12:58" hostname="localhost">
+  <properties>
+    <property name="device" value="sdk_gphone64_x86_64 - 14" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="continueOnArchiveOrg_persists_signaledAuthState_to_disk" classname="lava.app.challenges.Challenge00CrashSurvivalTest" time="4.598" />
+</testsuite>

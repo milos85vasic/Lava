@@ -73,7 +73,12 @@ android {
         // LVA-008 nav-teardown crash remains OPEN (conclusively upstream androidx defect, 8 candidates
         // falsified — minimal-repro authored for upstream filing). Auth rotated android-1.3.12-1076
         // (fresh pepper, active-list prepend). On-device R8-release + search verification at the §6.Z gate.
-        versionCode = 1076
+        // 1077 (§6.Y post-distribute bump, 2026-06-26): 1.3.12-1076 was §6.Z-gated
+        // (C00 cold-start PASS on thinker containerized-KVM, .lava-ci-evidence/1076-c00-gate/)
+        // and §6.AA two-stage distributed (debug 216fs8pr1dkbg + release 50dusshe2uru0).
+        // versionName HELD — no new user-facing changes yet in the 1077 dev cycle (the video #3
+        // deterministic-chip fix shipped in 1076). Auth NOT re-rotated until 1077 actually distributes.
+        versionCode = 1077
         versionName = "1.3.12"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/

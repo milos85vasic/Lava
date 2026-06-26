@@ -43,19 +43,21 @@ QA video 2026-06-25 (frames 0040 vs 0060 vs 0125): input chip bar and results fi
 
 ## LVA-080 — Distribute 1076/1.3.12 (+ api-app 22): build_and_release -> §6.Z C00 gate on thinker -> §6.AA two-stage Firebase distribute
 
-**Status:** Queued
+**Status:** In progress
 **Type:** Task
 **Severity:** P1
 **Created-By:** AI
+**Assigned-To:** AI
 
 1076 built but never distributed (last-distributed=1075). Operator directive: rebuild, gate, distribute all 4 variants. Infra confirmed UP this session: thinker+nezha reachable, T7 writable, JDK17/Gradle8.9/podman5.8.2 present.
 
 ## LVA-081 — Fetch/pull/merge latest from all submodules + build-verify (operator directive 2026-06-26)
 
-**Status:** Queued
+**Status:** In progress
 **Type:** Task
 **Severity:** P2
 **Created-By:** AI
+**Assigned-To:** AI
 
 Operator directive: fetch+pull+merge latest codebase from all submodules. Frozen-by-default overridden for this cycle. Must build-verify after each bump; revert+report any submodule whose bump breaks the build.
 
