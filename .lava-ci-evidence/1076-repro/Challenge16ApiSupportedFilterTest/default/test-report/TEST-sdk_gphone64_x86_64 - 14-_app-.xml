@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="lava.app.challenges.Challenge16ApiSupportedFilterTest" tests="1" failures="0" errors="0" skipped="0" time="3.068" timestamp="2026-06-26T09:45:49" hostname="localhost">
+  <properties>
+    <property name="device" value="sdk_gphone64_x86_64 - 14" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="providerListShowsAllApiSupportedVerifiedProviders" classname="lava.app.challenges.Challenge16ApiSupportedFilterTest" time="2.503" />
+</testsuite>

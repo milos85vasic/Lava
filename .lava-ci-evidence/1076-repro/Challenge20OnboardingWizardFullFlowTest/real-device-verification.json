@@ -1,0 +1,21 @@
+{
+  "all_passed": true,
+  "finished_at": "2026-06-26T12:44:39+03:00",
+  "gating": true,
+  "rows": [
+    {
+      "avd": "default",
+      "api_level": 34,
+      "form_factor": "phone",
+      "boot_seconds": 29.120048942,
+      "test_class": "lava.app.challenges.Challenge20OnboardingWizardFullFlowTest",
+      "test_passed": true,
+      "test_seconds": 42.635907392,
+      "gradle_log_path": "default/gradle.log",
+      "diag": {},
+      "failure_summaries": [],
+      "concurrent": 1
+    }
+  ],
+  "started_at": "2026-06-26T12:43:24+03:00"
+}

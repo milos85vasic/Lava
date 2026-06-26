@@ -1,0 +1,28 @@
+{
+  "incident": "2026-06-26-c00-only-gate-shipped-broken-flows",
+  "law": "Sixth/Seventh Law + §6.J/§6.AB/§6.Z; births §6.AK",
+  "severity": "critical",
+  "reported_by": "operator (retested distributed 1.3.12-1076 + api-app 0.2.11-22; new manual video)",
+  "summary": "The §6.Z device gate that green-lit BOTH the client and api-app distribute executed exactly ONE test each — Challenge00CrashSurvivalTest (client) / Challenge01ApiAppColdStartTest (api-app), both cold-start canaries — while the cycle's CHANGELOG claimed fixes to search, provider-selection, onboarding, and display. 60+ Challenges (C01-C57) cover those exact flows; NONE were executed. Inherited 'fixed in 1076' claims (video issues #1/#2/#4-#9) were trusted from a prior session's commit message and shipped without a single reproduce-first test confirming they were broken or fixed.",
+  "which_test_was_the_bluff": "The gate itself: a cold-start-only executed-test set used to authorize a distribute of search/provider/onboarding/display fixes. Zero intersection between gate-coverage and cycle-claims.",
+  "why_it_was_a_bluff": [
+    "§6.Z.2: source-compile is NEVER sufficient; the 1076 Challenges were compile-green, never executed.",
+    "§6.J: a passing test that does not exercise the claimed-fixed feature guarantees nothing about that feature.",
+    "§6.AB: even the covering Challenges may pass-while-broken (discrimination gap) — untested either way.",
+    "Reproduce-first (§6.T.1/§11.4.146) skipped for inherited fix-claims."
+  ],
+  "root_cause": [
+    "Gate-coverage did not intersect cycle-claims (C00 vs search/provider/onboarding/display).",
+    "Compile-green treated as executed.",
+    "Prior-session 'fixed' claims trusted, not reproduced.",
+    "Crash fixes shipped without obtaining/reproducing the Crashlytics stack.",
+    "§6.Z evidence file had no per-claim coverage requirement; one test satisfied the debt-incomplete gate."
+  ],
+  "the_mutation_that_would_have_caught_it": "Run the covering Challenges (C20/C41/C52/C16/C47/C48...) on the device gate before distribute; the still-broken flows fail, blocking the ship. (In progress: .lava-ci-evidence/1076-repro/ device batch.)",
+  "remediation_clause": "§6.AK Cycle-Coverage Device Gate — no distribute unless every CHANGELOG-claimed user-visible fix has an EXECUTED+PASSED reproduce-first covering device Challenge for the exact shipped artifact; C00 alone never satisfies it.",
+  "evidence_access_gaps_surfaced": [
+    "New operator video on nezha.local NOT locatable via exhaustive find (no Lava/Screen_Recording mp4 found; need operator path).",
+    "Crashlytics NOT readable here: firebase CLI has no issues/non-fatals read (only symbols/mappingfile upload); gcloud + bq absent. Need operator console paste OR a service-account + BigQuery export."
+  ],
+  "status": "OPEN — device reproduction batch running; fixes + re-gate pending real evidence; constitution extended (§6.AK)."
+}

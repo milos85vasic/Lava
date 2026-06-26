@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="lava.app.challenges.Challenge20OnboardingWizardFullFlowTest" tests="1" failures="0" errors="0" skipped="0" time="5.284" timestamp="2026-06-26T09:44:37" hostname="localhost">
+  <properties>
+    <property name="device" value="sdk_gphone64_x86_64 - 14" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="welcome_pickAnonProvider_configure_finish_reachesMainApp" classname="lava.app.challenges.Challenge20OnboardingWizardFullFlowTest" time="4.614" />
+</testsuite>

@@ -1,0 +1,9 @@
+C52 search-input chips: FAIL (LVA-008 nav-teardown ISE, route search/search_input)
+C48 provider sync-toggle: FAIL (LVA-008 nav-teardown ISE, route provider_config)
+C41 select-all: PASS
+C20 onboarding full flow: PASS
+C16 api-supported-filter: PASS
+C47 credentials-locked-search: PASS
+
+VIDEO (1076 retest, Screen_Recording_20260626_122718): search STILL errors "Something went wrong"; results chips raw lowercase ids; input/results chip divergence (Kinozal.tv missing from results).
+Gate that shipped 1076 ran C00 ONLY — none of C52/C48 executed. Births §6.AK.
