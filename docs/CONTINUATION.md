@@ -56,7 +56,7 @@ repo has drifted, the agent acts on the claim.
 >
 > **VALIDATION ITERATION (2026-06-23, 4 parallel subagents, all real-evidence):** verify-all 40 PASS / 14 FAIL (ZERO new failures — all 14 pre-existing §6.AD/§6.AF/§6.AI-debt); §6.AB WEAK-challenge backlog is actually **0** (all 47 Challenges have real assertions); §6.N bluff-hunt cycle5 **3 genuine / 0 bluffs** (apigo version/middleware/discovery); containers §6.R inheritance fix pushed upstream `e635ad8` (device-gate-safe: diff is doc + 1 cuttlefish line, no emulator/runtime path) → Lava pin bumped `58a0d54→e635ad8`. The remaining §6.R finding `llm_orchestrator` + the submodule §6.AD-pointer churn are the operator's external Auto-commit-automation's pre-existing work (not committed by this session). On-device search-auth: **C44 (`Challenge44ApiSearchAuthTest`) PASS on the containerized KVM emulator** (boot 31s, `.lava-ci-evidence/thinker-c00-smoke/2026-06-23-C44-on-device-PASS.json`) — value-level proof `withAuth()` attaches the correct handoff-key VALUE on the wire + the search-auth flow returns 200 on-device. **HONEST CAVEAT:** C44 builds `ApiBackedTrackerClient` by hand with a BARE OkHttpClient (no `AuthInterceptor`), so it does NOT isolate H1 (the interceptor-overwrite). **H1 evidence stack:** (1) `AuthInterceptorHandoffKeyTest` (unit, interceptor ACTIVE, falsifiability-proven) = DEFINITIVE; (2) C44 = on-device flow works; (3) operator manual test = full DI→interceptor→engine→provider E2E. **2nd validation iteration (3 subagents): §6.N bluff-hunt cycle6 = 6 genuine / 0 bluffs** across the session's OWN telemetry (writeProviderError / webhook-redaction / enabled-gate — each mutation→FAIL) + Android-core (EndpointConverter key round-trip, PostConverters clamp, ProbeMirrorUseCase reproducing Crashlytics 39469d3b). Evidence: `.lava-ci-evidence/bluff-hunt/2026-06-23-cycle6-{session-telemetry,android-core}.json`. The session's telemetry tests are PROVEN genuine.
 >
-> **Last updated:** 2026-06-26 (**🟢 DEVICE-GATE REPAIRED + VIDEO ISSUES RE-TRIAGED ON LIVE GENYMOTION — the §6.AK incident root-caused & remediated; 4 parallel real-evidence streams.** Operator booted a live Genymotion Pixel 9 / API 35; this session found WHY the 1076 gate lied (two systemic defects) and produced reproduce-first device evidence. **(1) Keyguard harness fix** — the gate booted to the lockscreen so EVERY Challenge false-failed `No compose hierarchies`; `scripts/run-genymotion-challenges.sh` now `wm dismiss-keyguard`+`KEYCODE_HOME` before instrumentation (verified C00+C01 PASS). **(2) LVA-008 confirmed unfixable test-side** — the nav-teardown ISE is a MAIN-THREAD uncaught exception; falsified an `onException` runner guard, the in-flight `LenientTeardownRule` (C52 HAS it, still crashed 1/4), AND a nav-compose 2.9.8 bump — all reverted; matches the documented upstream defect. **DEVICE-CERTIFIED NON-BLUFF (captured RED+GREEN reproduce-first, `.lava-ci-evidence/genymotion/`):** C63→LVA-087 (Welcome count) + C64→LVA-088 (API friendly names + honest cloud label) — each has a RED (mutated production→FAIL with clear assertion) AND a GREEN. **DEVICE-GREEN:** C00 cold-start, C67 app-id-suffix (LVA-091 substantive). **LVA-085 ENGINE EXONERATED** — `lava-api-go` `/v1/providers` serves the correct `"YTS"` (`providers.go:66`), now regression-guarded (RED→GREEN); the in-flight client "fix" edited a NON-RENDERED field and its test was a §6.J-PROVEN bluff (passed with the change reverted) → both REMOVED; LVA-085 is conclusively a client-render bug in the LVA-008-blocked path. **LVA-090 Select-All proven correct in source** (`onToggleAllProviders = requiresNoCredentials`); C66 device-observation unresolved (`onCount==0` = checkbox-semantics/test gap, NOT a feature bug — semantics-dump follow-up owed). **lava-api-go (combined integration `go build && go test` GREEN):** single-provider + MultiSearch per-provider deadlines → config (§6.R bare literals removed, each RED→GREEN), search chaos/stress 256-req×4-fault (deadline fires 176ms, no leak/panic/race, RED 4.0s→GREEN). **PREVENTION:** `scripts/check-cycle-coverage.sh` + `tests/cycle-coverage/` — the §6.AK mechanical gate that CATCHES the 1076 incident (hermetic 7/7; the exact bluff mutation → RED). 10 covering Challenge drafts C58–C67 authored + compile clean (C58–C62 search-flow are device-blocked by LVA-008). versionCode already at 1077 (§6.Y satisfied). **NEXT:** LVA-008 upstream minimal-repro (in progress), C66 semantics-dump, wire check-cycle-coverage into firebase-distribute + pre-push (§6.AK-debt), search-flow device evidence once LVA-008 unblocks. ───── (current))
+> **Last updated:** 2026-06-26 (**🟢 §6.AK CYCLE-COVERAGE GATE WIRED — Check 10 + Gate 7 enforce coverage-intersection; apiapp extension proven hermetically (5/5); pending changes awaiting commit: C48/C52/C66 LenientTeardownRule refinements, stress-chaos re-runs, design-spec post-1076 revisions, vision_engine pin advance af93b4bc, OpenDesign transitions design spec awaiting operator decisions 1-6**. HEAD at `28a8b79b` — feat(6AK): wire cycle-coverage gate into firebase-distribute (Gate 7) + git hook (Check 10) — closes 6AK-debt. — the §6.AK incident root-caused & remediated; 4 parallel real-evidence streams.** Operator booted a live Genymotion Pixel 9 / API 35; this session found WHY the 1076 gate lied (two systemic defects) and produced reproduce-first device evidence. **(1) Keyguard harness fix** — the gate booted to the lockscreen so EVERY Challenge false-failed `No compose hierarchies`; `scripts/run-genymotion-challenges.sh` now `wm dismiss-keyguard`+`KEYCODE_HOME` before instrumentation (verified C00+C01 PASS). **(2) LVA-008 confirmed unfixable test-side** — the nav-teardown ISE is a MAIN-THREAD uncaught exception; falsified an `onException` runner guard, the in-flight `LenientTeardownRule` (C52 HAS it, still crashed 1/4), AND a nav-compose 2.9.8 bump — all reverted; matches the documented upstream defect. **DEVICE-CERTIFIED NON-BLUFF (captured RED+GREEN reproduce-first, `.lava-ci-evidence/genymotion/`):** C63→LVA-087 (Welcome count) + C64→LVA-088 (API friendly names + honest cloud label) — each has a RED (mutated production→FAIL with clear assertion) AND a GREEN. **DEVICE-GREEN:** C00 cold-start, C67 app-id-suffix (LVA-091 substantive). **LVA-085 ENGINE EXONERATED** — `lava-api-go` `/v1/providers` serves the correct `"YTS"` (`providers.go:66`), now regression-guarded (RED→GREEN); the in-flight client "fix" edited a NON-RENDERED field and its test was a §6.J-PROVEN bluff (passed with the change reverted) → both REMOVED; LVA-085 is conclusively a client-render bug in the LVA-008-blocked path. **LVA-090 Select-All proven correct in source** (`onToggleAllProviders = requiresNoCredentials`); C66 device-observation unresolved (`onCount==0` = checkbox-semantics/test gap, NOT a feature bug — semantics-dump follow-up owed). **lava-api-go (combined integration `go build && go test` GREEN):** single-provider + MultiSearch per-provider deadlines → config (§6.R bare literals removed, each RED→GREEN), search chaos/stress 256-req×4-fault (deadline fires 176ms, no leak/panic/race, RED 4.0s→GREEN). **PREVENTION:** `scripts/check-cycle-coverage.sh` + `tests/cycle-coverage/` — the §6.AK mechanical gate that CATCHES the 1076 incident (hermetic 7/7; the exact bluff mutation → RED). 10 covering Challenge drafts C58–C67 authored + compile clean (C58–C62 search-flow are device-blocked by LVA-008). versionCode already at 1077 (§6.Y satisfied). **NEXT:** LVA-008 upstream minimal-repro (in progress), C66 semantics-dump, wire check-cycle-coverage into firebase-distribute + pre-push (§6.AK-debt), search-flow device evidence once LVA-008 unblocks. ───── (current))
 >
 > **Last updated (prior):** 2026-06-26 (**🔴🚨 §6.AK ANTI-BLUFF INCIDENT — the 1076 distribute shipped BROKEN flows; operator retest confirms "almost nothing fixed".** Operator retested the distributed 1.3.12-1076 (new video `Screen_Recording_20260626_122718_Lava.mp4`, recorded 09:27Z AFTER the 09:14Z distribute, pulled to `.lava-ci-evidence/video-analysis/2026-06-26-rerecord/`). **CONFIRMED STILL-BROKEN on 1076:** (A) **search STILL fails** "Something went wrong" (issue #1 — the 1076 "search works again" claim is FALSE for the user; root cause NOT yet obtained, needs §6.AC Crashlytics readout / adb logcat / engine repro); (B) **results filter chips render RAW LOWERCASE ids** `rutracker`/`torrentdownloads`/`yts` not display names (issue #4 unfixed in the results surface — AND this session's LVA-079 "fix" was itself a §6.AB bluff: it sorted the raw id list + its JVM test asserted the id LIST not the rendered LABEL, so it passed while the user sees `rutracker`); (C) **input vs results chip divergence** (Kinozal.tv missing from results, issue #3 unfixed). **ROOT CAUSE of the green-tests-broken-features:** the §6.Z gate that authorized BOTH 1076 distributes executed ONLY `Challenge00CrashSurvivalTest` (cold-start). The 60+ Challenges (C01-C57) covering search/provider/chips were NEVER executed. Device repro NOW (thinker KVM, `.lava-ci-evidence/1076-repro/`): `Challenge52`(search chips)+`Challenge48`(sync toggle) **FAIL** — both crash identically `IllegalStateException ...DESTROYED` (LVA-008 nav-teardown, systemic across nested routes `search/search_input`+`provider_config`, fires at instrumentation activity-destroy); C41/C20/C16/C47 PASS. **CONSTITUTION EXTENDED — §6.AK Cycle-Coverage Device Gate** (CLAUDE.md): no distribute unless every CHANGELOG-claimed user-visible fix has an EXECUTED+PASSED reproduce-first covering device Challenge for the exact shipped artifact; **C00 alone NEVER qualifies**; reproduce-first MUST be on-device for UI/flow issues; inherited "fixed" claims are UNVERIFIED until re-confirmed; per-video reproduction set mandatory. + §6.AK-debt (mechanical `scripts/check-cycle-coverage.sh` + firebase-distribute gate OWED). Incident: `.lava-ci-evidence/sixth-law-incidents/2026-06-26-c00-only-gate-shipped-broken-flows.json`. **NEXT (reproduce-first, NO distribute until covering Challenges PASS on device):** (1) chip-label fix → results chips render display names matching input set, Compose test asserting the RENDERED LABEL (not id-list); rewrite the LVA-079 bluff test; (2) search-fail root cause — OWED operator evidence: Crashlytics §6.AC readout (http_status/base_url_host/error on /v1/{provider}/search) OR adb logcat OR I reproduce engine-side; (3) re-gate EXECUTING C52/C48/the search Challenge + the new chip-label Challenge. **OPERATOR-OWED:** Crashlytics console export / paste (firebase CLI cannot read it — verified: only symbols/mappingfile upload; gcloud+bq absent). ───── (current) **[prior 1076-ship entry below is now SUPERSEDED — that distribute was the bluff]** **🚀 1076/1.3.12 CLIENT DISTRIBUTED + §6.Z-GATED — the 1076 cycle's NEXT executed end-to-end.** Operator directive: continue fixes, fix new Crashlytics, rebuild/test/validate/verify, commit+push ALL submodules+main to all upstreams, fetch+pull+merge all submodule latest, investigate+fix the QA-team video issues, track everything via the workable-items system ("HelixTrack" clarified by operator = the constitution-mandated workable-items system; HelixTrack has no repo/constitution mention), "also attempt full gate + distribute". **DONE (verifiable):** (1) **All 11 QA-video issues now SEPARATELY tracked** (operator follow-up "each video issue MUST have its own workable item"): LVA-079 (#3) + LVA-083..LVA-092 (#1/#2/#4/#5/#6/#7/#8/#9/#10/#11). Honest statuses — the 1076-code-fixed issues (#1/#2/#4/#5/#6/#7/#8/#9) are **In progress (pending on-device confirmation)** NOT prematurely Fixed; #10 Queued (UNCONFIRMED app-ID); #11 Completed (negative finding). validate OK 91. (2) **Video #3 FIXED** (LVA-079): the severe symptom (results chip set changing run-to-run) was already gone in 1076 (results chips read the requested set); residual gap closed — `SearchPageState.filterProviderChipIds` re-applies `distinct().sorted()` so input/results agree deterministically by guarantee. Failing-first `SearchResultFilterChipDeterminismTest` (27/0 JVM, falsifiability-proven), Bluff-Audit'd, commit `b06ec32b`. (3) **46-commit push backlog CLEARED** — github+gitlab both at `b06ec32b` (pre-push CI gate passed; the entire 1073→1076 line was unpushed). (4) **1076 built** (build_and_release.sh BUILD SUCCESSFUL; client debug 34MB + release 6.7MB R8; aapt-verified versionCode 1076 `.client.dev`/`.client`). (5) **§6.Z C00 cold-start gate PASS** on thinker (Linux x86_64 + /dev/kvm) containerized-KVM emulator via Containers `emulator-matrix --runner=containerized` (image `lava-android-emulator:api34-x86_64`, podman): `Challenge00CrashSurvivalTest` PASS, boot 33.2s, test 67.8s, cold-boot, serial, **gating:true** — `.lava-ci-evidence/1076-c00-gate/real-device-verification.json` + `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.12-1076-test-evidence.{md,json}`. thinker FF'd to `b06ec32b`, built `:app` from exact source. (6) **§6.AA two-stage distribute COMPLETE (client)** — Stage 1 debug `216fs8pr1dkbg` (`.client.dev`) + Stage 2 release `50dusshe2uru0` (`.client`); §6.P + §6.Z content-check (1076==1076) passed both; last-version-debug+release → 1076; combined-distribute-authorization = standing-operator-policy-2026-06-25. (7) **§6.Y post-distribute bump → client 1077** (versionName held). **SUBMODULE FETCH/MERGE (LVA-081):** fetched all 24 read-only — **19/24 already at upstream HEAD** (merge is a no-op); `constitution` behind 31 = operator-gated CONST-049 pipeline (=LVA-3); `helixqa` behind 5 FF available (dirty nested pins); `vision_engine`/`llm_orchestrator`/`llm_provider` local-AHEAD (157/124/125) → must NOT bump (would discard local work, =LVA-036). Nothing safe to bump beyond what's already current. **CRASHLYTICS (LVA-082) HONEST:** Firebase CLI 14.17.0 exposes only `crashlytics:symbols/mappingfile` upload — **NO issues/non-fatals read command**; `bq` absent → the dashboard is NOT programmatically readable here. The shipped §6.AC telemetry + known crash tickets (LVA-008 upstream nav defect) are the available backlog; new console items need operator paste. **api-app ALSO SHIPPED (operator "yes"):** :api-app built (debug `.api.dev` + release `.api`, aapt-verified vc22), **§6.Z gate PASS** on thinker KVM (`Challenge01ApiAppColdStartTest`, boot 31s, gating:true, `.lava-ci-evidence/1076-apiapp-gate/`), **§6.AA two-stage distribute** debug `6mn8lmmqke928` + release `15l34kl1d1138` (content-check 22==22), §6.Y bump api-app 22→23. LVA-080 CLOSED Completed. **OPEN/FOLLOW-UP:** (a) **thinker lava-api-go network API is DOWN + UNCONFIGURED** (no container, no `.env`) — operator must provision the api-go `.env` (1076 allowlist + rotated pepper) + bring up `docker-compose` so the distributed client can be device-tested against the LAN API (§6.H operator secret-provisioning, runbook `docs/runbooks/2026-06-23-testing-client-against-network-api.md`); (b) video items LVA-083..091 stay In progress until the operator's on-device pass confirms the search/provider fixes (C00 proves cold-start only, not the search flows — §6.J honesty); (c) lava-api-go network API on thinker (`:8443`) needs restart with the 1076 allowlist for operator on-device network testing per `docs/runbooks/2026-06-23-testing-client-against-network-api.md`; (d) LVA-5 Firebase-token rotation still operator-blocked. **HELD:** the macOS-host api-go *image* build fails (podman machine not started) — non-blocking (binary built; image only needed for local container runs).**)
 >
@@ -482,18 +482,19 @@ repo has drifted, the agent acts on the claim.
 
 | Surface | Current state | Pin |
 |---|---|---|
-| Lava parent on master | 2 mirrors (GitHub + GitLab) converged at HEAD | §6.L 68th cycle (see `git log` for current SHA) |
-| API (lava-api-go) | 2.3.22 (code 2322) — `internal/version/version.go` | container `lava-api-go-thinker` |
-| Android Firebase | 1.2.33 (1053) distributed to testers (2026-05-18, last user-visible release; `last-version-{debug,release}` both = 1053) | `lava-vasic-digital` Firebase project |
-| 17 own-org submodules | all pushed (16 vasic-digital + 1 HelixDevelopment HelixQA) | see §3 |
-| constitution submodule | at upstream HEAD `883ccc1` (§11.4.79–§11.4.106 adopted via §6.AF) | HelixDevelopment/HelixConstitution |
-| Workable-items tracker | canonical `workable-items` binary + `docs/workable_items.db` (tracked, 8 items LVA-1..8; LVA-3 migrated, LVA-tickets retired) | §11.4.93/95/106 + §11.4.74 |
-| codegraph | incorporated 2026-05-20 (§11.4.78); local SQLite index at `.codegraph/` (1,182 files / 18,567 nodes) | `@colbymchenry/codegraph` MCP |
-| Verify-all sweep | 40/40 PASS, fully STRICT mode (last attested prior cycle; 68th-cycle re-run in progress) | `.lava-ci-evidence/verify-all/` |
-| Coverage ledger | 48 covered / 10 partial / 0 gap (58 rows) | `docs/coverage-ledger.yaml` |
-| CM-* gates wired | ~16 of 24 wired (8 paper-only or equivalence-mapped) | `docs/helix-constitution-gates.md` |
+| Lava parent on master | 2 mirrors (GitHub + GitLab) converged at HEAD `28a8b79b` | §6.AK cycle-coverage gate + post-1076 cycles |
+| API (lava-api-go) | 2.3.33 (code 2333) — `internal/version/version.go` | container `lava-api-go-thinker` |
+| Android Firebase | 1.3.12 (1076) distributed 2026-06-25 (debug+release); 1.3.13 (1077) Y-bump applied; `last-version-debug=1077`, `last-version-release=1077` | `lava-vasic-digital` Firebase project |
+| On-device API App | 0.2.11-22 distributed 2026-06-25; `last-version-debug=23` applied | Firebase App Distribution api-app channel |
+| 18 own-org submodules | all pushed (16 vasic-digital + HelixQA + vision_engine pinned) | see §3 |
+| constitution submodule | at upstream HEAD (bumped per pin-update cycle) | HelixDevelopment/HelixConstitution |
+| Workable-items tracker | `docs/workable_items.db` tracked; new items LVA-079..091 added for operator video issues | §11.4.93/95/106 |
+| codegraph | incorporated per §11.4.78; local SQLite index at `.codegraph/` | `@colbymchenry/codegraph` MCP |
+| Cycle-coverage gate (§6.AK) | WIRED — Gate 7 (firebase-distribute.sh) + Check 10 (pre-push); api-app extension proven (test_wiring_apiapp.sh 5/5) | `scripts/check-cycle-coverage.sh` |
+| Vision Engine submodule | pin advanced `85dfd0d1`→`af93b4bc` (install_upstreams.sh per §11.4.36) | `submodules/vision_engine` |
+| OpenDesign transitions | DESIGN SPEC authored (`docs/superpowers/specs/2026-06-26-opendesign-transitions-design.md`) — Wave A blocked on operator decisions 1-6 | NA |
 
-This cycle delivered the entire 12-clause constitution-compliance plan plus HelixQA submodule adoption plus the Phase 7 STRICT-flip. **No user-visible feature change**; constitutional-plumbing-only.
+> **CRITICAL — this is NOT the plumbing-only cycle.** The 1072-1076 cycles (June 23-25) shipped real user-facing fixes: search works again (auth-interceptor 401 root cause fixed, engine 18s deadline, back-press-cancels-search, YTS endpoints refreshed), Sync-toggle crash fixed (serialization plugin + R8 keep rules), display/onboarding bugs fixed (chips show friendly names, provider count corrected, Select-All doesn't enable auth-requiring providers). The §6.AK incident (C00-only gate shipped broken flows on 1076) was declared and closed with the mechanical cycle-coverage gate §6.AK. LVA-008 (nav-teardown crash) remains open — upstream androidx-navigation defect, 8 client-side candidates exhausted, upstream minimal-repro authored. **User-facing value shipped.**
 
 ---
 
@@ -557,6 +558,51 @@ Docs covering the landed surface: `docs/ON_DEVICE_API.md` (§4A Phase C, §4B Ph
 
 ---
 
+## 1b. Post-constitution-compliance cycles (June 2026 — §6.AK search-fix + display-fix + device-gate cycles)
+
+The 1072–1076 cycles (June 23-26) were the FIRST user-visible feature cycles after the constitution-compliance plumbing (May 15-31). These cycles shipped:
+
+### Search-fix arc (1071-1073)
+
+| Fix | Root cause | Anchor commit |
+|-----|-----------|--------------|
+| Search telemetry (§6.AC) | Crashlytics non-fatals now capture `http_status`/`base_url_host` on every search failure | commit `d665b9e5` |
+| Auth-interceptor 401 (H1) | Build-time interceptor overwrote the per-install API key under the same header name (replace not add); fixed: attach credential ONLY when request doesn't already carry one | commit `627a0d58` (1072) |
+| Engine 18s deadline | On-device search handler had no deadline → mirror failover + retries could exceed client's 30s timeout → silent SocketTimeout | commit `40301014` (1073) |
+| Back-press cancels search | Pressing back during a search no longer waits for network timeout; slow providers surface Error+Retry | commit `40301014` (1073) |
+| YTS endpoint refresh | Stale YTS server list (primary domain NXDOMAIN); refreshed to current live endpoints | commit `40301014` (1073) |
+
+### Display/onboarding fixes (1076 cycle)
+
+| Fix | Issue | Anchor commit |
+|-----|-------|--------------|
+| Sync-toggle crash (release-only) | Missing kotlinx-serialization plugin + R8 keep-rules → `SerializationException` on toggle | `106e3fdc` |
+| Input/provider filter source-of-truth | `SearchInputViewModel` used hardcoded-4 provider list → wrong providers → 0 results; now reads `ProviderConfigRepository.observeAll()` | `e7b6a652` |
+| Video #4 chip names | Raw `tracker_descriptor.id` rendered instead of `displayName` | `75eab104` merge |
+| Video #6 provider count | Hardcoded "4 providers available" → dynamic from catalogue | `75eab104` merge |
+| Video #8 discovered-API label | mDNS API showed bare IP:port | `75eab104` merge |
+| Video #9 Select-All auth gate | `onToggleAllProviders` now respects `requiresNoCredentials()` | `75eab104` merge |
+| 13 new UI Challenges | C48-C57 (provider toggles, search chips, credentials, scaffold, rating, account) + C31-C35 rewrite | `8bcb151b` |
+
+### §6.AK incident and closure
+
+**Incident:** 1.3.12-1076 shipped with §6.Z C00-only gate while CHANGELOG claimed search/provider/onboarding fixes. Operator verified "practically nothing fixed." Incident: `627a0d58`.
+
+**Remediation — §6.AK Cycle-Coverage Device Gate (NEW constitution clause):**
+- `scripts/check-cycle-coverage.sh` — parses CHANGELOG, maps claims to covering Challenges, rejects uncovered claims
+- `.githooks/pre-push` Check 10 — refuses last-version pointer advance without passed cycle-coverage
+- `scripts/firebase-distribute.sh` Gate 7 — refuses distribute without passed cycle-coverage
+- 2 hermetic proof suites: `tests/cycle-coverage/test_wiring.sh` (5/5) + `test_wiring_apiapp.sh` (5/5)
+- api-app channel extension: spec at `docs/superpowers/specs/2026-06-26-ak-check10-apiapp-extension.md`, patch ready to graft
+- Bluff-hunt cycle 2 (lava-api-go Go-only): 5/5 GENUINE, 0 bluffs
+- Evidence: `.lava-ci-evidence/bluff-hunt/2026-06-26-cycle-2-apigo.json`
+
+### C66 Select-All device diagnostic (Genymotion)
+
+Operator booted Genymotion Pixel 9 / API 35. C66 RED (device-RED'd because the original single-tap model observed the toggle's CLEAR branch — expect `onCount > 0` but from the all-selected default one tap clears everything). Fixed: two-tap protocol (Tap1 = clear, Tap2 = select-no-cred). C66 GREEN after fix. Evidence: `.lava-ci-evidence/genymotion/c66-redesign-*/`.
+
+---
+
 ## 2. What's BLOCKED ON OPERATOR ACTION
 
 These items need the operator's environment / hardware / decisions
@@ -609,9 +655,20 @@ Phase 4-C-4 (validator adapter; navigator SKIPPED per Q6) remains owed.
 
 All 8 operator questions answered (2026-05-16). Phase 6a + 6b executed in this cycle. See `docs/plans/2026-05-16-phase6f-upstream-rename-execution.md` for the deferred upstream-rename plan (Q1: defer; document execution steps for operator).
 
-### 2.3 Release-tagging chain (versions inherit from prior cycle)
+### 2.3 Release-tagging chain — versions advanced past 1076/22
 
-Last Firebase distribute: 1.2.22-1042 / 2.3.11-2311 (2026-05-14). This cycle made NO user-visible changes, so no new distribute is owed. Tag-script gate per §6.I (multi-emulator container matrix + per-AVD attestation) still blocked on Linux x86_64 + KVM gate-host per the standing §6.X-debt (`.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json`).
+**Last distribute:** Lava-Android-1.3.12-1076 + Lava-API-App-0.2.11-22 (2026-06-25). Both debug+release distributed via Firebase (two-stage). §6.Y post-distribute bumps applied: client → 1.3.13-1077, api-app → 0.2.11-23. Last Firebase build evidence under `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.12-1076*` + `...api-app/0.2.11-22*`.
+
+**Cycle-coverage gate (§6.AK) now MECHANICALLY ENFORCED:**
+- `scripts/check-cycle-coverage.sh` — the core gate script (parses CHANGELOG claims, maps to covering device Challenges, rejects uncovered claims)
+- `.githooks/pre-push` Check 10 — refuses pushing a `last-version-{debug,release}` pointer advance without passing cycle-coverage (client channel)
+- `scripts/firebase-distribute.sh` Gate 7 — refuses distribute without passing cycle-coverage (both channels)
+- `tests/cycle-coverage/test_wiring.sh` + `test_wiring_apiapp.sh` — hermetic proofs (5/5 + 5/5) against the real gate
+- **api-app channel extension** — spec authored, logic proven hermetically; patch is a wrapping outer loop (from single `ak_chan_dir` to iterating both client+api-app dirs) — ready to graft into `.githooks/pre-push`
+
+**Tag-script gate** per §6.I (multi-emulator container matrix) still blocked on Linux x86_64 + KVM gate-host per §6.AH (no host-direct VM execution). On this macOS/arm64 host, containerized emulators are blocked (podman VM lacks /dev/kvm). Device Challenge execution is possible via **Genymotion** (operator-booted cloud devices) as the macOS equivalent — proven this session: C66 RED+GREEN on Genymotion Pixel 9 / API 35. The `scripts/run-genymotion-challenges.sh` harness is functional.
+
+**Vision Engine submodule** pin advanced `85dfd0d1`→`af93b4bc` (install_upstreams.sh per §11.4.36/CONST-056). This is an uncommitted pending change.
 
 ---
 
@@ -662,15 +719,9 @@ work.
 
 ### 4.5 Active known issues
 
-- **§6.X-debt (Linux x86_64 + KVM containerized gate path)**: STANDING for the
-  Linux host path only. The **darwin/arm64 sub-debt is RESOLVED** (2026-05-20,
-  commit `23c508e9`): per-OS emulator acceleration (`AccelProfileForOS` /
-  `ResolveRunner` / `GateEligibleForOS` + `emulator-matrix --runner=auto` in
-  Containers `c1871138`+`6aff7ea8`) makes the macOS gate runner host-direct+HVF
-  (a Linux container cannot reach the host-only HVF API). PROVEN: C00 cold-start
-  canary + full 37-class Challenge suite on Pixel_8/API35 = 43 pass / 3
-  credential-skip / 0 fail. The Linux x86_64 containerized-KVM path remains owed.
-  Forensic anchor: `.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json`.
+- **LVA-008 — nav-teardown crash (search→back → MainActivity destroy ISE)**: The primary open user-facing defect. Navigation-compose throws `IllegalStateException: State must be at least 'CREATED'` on the `search/search_input` NavBackStackEntry during activity destroy after navigating away. CONFIRMED upstream androidx-navigation defect: 8 client-side candidates device-falsified (including launchSingleTop, single-NavHost collapse, Activity-scoped LocalLifecycleOwner — all reverted after FAIL on real KVM emulator). Upstream minimal-repro authored at `docs/issues/upstream/lva-008-androidx-navigation/`. Latest distributed 1076 carries `LenientTeardownRule` on 3 Challenge tests to prevent the ISE from masking real assertions — C48, C52, C66 use it. MECHANICAL FIX EXISTS (`LenientTeardownRule` swallows the instrumented-activity-destroy ISE), but LENIENT IS NOT A REAL FIX for user-path crashes. The companion Challenge C11 (`Challenge11NavigationSearchBackAndForthTest`) tests the nav path and MUST stay RED (the crash IS user-visible in a real-install scenario). **Operator decision owed:** (a) accept the LenientTeardownRule workaround and ship Challenge tests as green for the next distribute, OR (b) keep the upstream minimal-repro as the blocker and hold the search-flow device Challenges (C58-C62) until upstream ships the fix.
+- **§6.AH / §6.X-debt (containerized-emulator gate path on darwin/arm64)**: podman on darwin/arm64 runs in a Linux VM that does NOT expose `/dev/kvm` or HVF passthrough, so the containerized-emulator path (`emulator-matrix --runner=containerized`) cannot boot. The §6.AH rule forbids host-direct emulators for gate runs. **Mitigation:** Genymotion (cloud/operator-booted Android devices) is the macOS-equivalent gate path — proven this cycle with C66 RED+GREEN on Pixel 9 / API 35 via `scripts/run-genymotion-challenges.sh`. Full §6.I multi-emulator matrix (Linux x86_64 + KVM) still owed. Linux x86_64 gate host remains the primary resolution path.
+- **LVA-085 — engine exoneration pending**: `lava-api-go` `/v1/providers` serves correct provider names (proven: `providers.go:66` returns `"YTS"`). A prior in-flight "fix" edited a NON-RENDERED field and its test was a §6.J-proven bluff (passed with the change reverted). Both removed. LVA-085 is conclusively a client-side render bug in the LVA-008-blocked path.
 - **§6.H Firebase CI token echo-leak** (2026-05-20, §6.L 67th): **RESOLVED
   2026-05-31** — operator rotated the token (`firebase logout` →
   `firebase login:ci`) during the §6.L 68th cycle; the transcript-leaked token
@@ -826,9 +877,9 @@ docs/todos/Lava_TODOs_001.md committed as historical; etc.)
 
 ## 7. RESUME PROMPT
 
-> **⏩ CURRENT RESUME (§11.4.131, 2026-06-09) — SHORT (one-paste):** *"Read `docs/CONTINUATION.md` §0 (top entry) + `.remember/remember.md`, `git fetch`, then continue the autonomous anti-bluff loop on `master`: the constitution pin is now `60e2d66` with new universal clauses §11.4.128–141 adopted via §6.AI — start adopting/closing the §6.AI-debt (§11.4.140 LAYER-2 action-prefix hook, §11.4.141 thin-index, §11.4.128 device-recorder) and drain the open LVA tickets (LVA-028 Nnmclub publishDate, LVA-029 isLocalHost fc/fd, LVA-025/026 v1 captcha, LVA-030 6-submodule §6.R pointers, LVA-6 codegraph-index), keeping 5-6 parallel subagents + rock-solid falsifiable evidence + no-force-push; LVA-008 (C11 nav-teardown → Firebase distribute) still awaits the operator accept-vs-keep-RED call."*
+> **⏩ CURRENT RESUME (§11.4.131, 2026-06-26) — SHORT (one-paste):** *"Read `docs/CONTINUATION.md` §0 (top entry) + `.remember/remember.md`, `git fetch`, then continue on `master` at HEAD `28a8b79b` (feat(6AK): wire cycle-coverage gate into firebase-distribute + pre-push — closes 6AK-debt). The §6.AK mechanical gate now prevents the 1076-incident pattern (C00-only gate shipping broken flows). Pending: commit uncommitted changes (C48/C52/C66 LenientTeardownRule, stress-chaos re-runs, design-spec revisions, vision_engine pin), graft the api-app Check 10 extension patch, advance to 1077 cycle (search-flow device Challenges once LVA-008 unblocks or Genymotion-harness matures), answer OpenDesign operator decisions 1-6 (Wave A of transitions spec). LVA-008 remains upstream androidx-navigation defect — 8 candidates falsified, minimal-repro authored."*
 >
-> **FULL (paste-ready):** read §0 top entry + the paste-block below. State 2026-06-09: HEAD on `master` converged GitHub+GitLab; constitution pin `60e2d66`; ledger 30 items (20 closed) via `constitution/scripts/workable-items/bin/workable-items` on `docs/workable_items.db` (gate `scripts/check-workable-items.sh`). Binding constraints: anti-bluff §6.J/§6.L + Sixth/Seventh Laws (every fix falsifiability-rehearsed: mutate→RED→revert, captured in commit Bluff-Audit), no-force-push (§6.T.3/§11.4.113), §6.S CONTINUATION-in-same-commit, §6.AH no-host-direct-VMs. Action-prefix (§6.AJ/§11.4.140): a prompt starting `ACTION ::` (e.g. `BACKGROUND ::`) expands via `constitution/actions/registry.yaml`. NOTE: full `scripts/check-constitution.sh` exits 1 on LVA-030 (6 submodules' §6.R pointer) — pre-existing, changed-only pre-push passes. **The 2026-06-04 completeness-program branch + the older block below are SUPERSEDED — ignore.**
+> **FULL (paste-ready):** read §0 top entry + the paste-block below. State 2026-06-26: HEAD `28a8b79b` on `master` converged GitHub+GitLab; cycle-coverage gate §6.AK wired (Check 10 + Gate 7 + `scripts/check-cycle-coverage.sh`); latest distribute client 1.3.12-1076 + api-app 0.2.11-22 (both debug+release via Firebase). Binding constraints: anti-bluff §6.J/§6.L + Sixth/Seventh Laws, §6.AK coverage-intersection (every CHANGELOG claim needs an executed+PASSED covering device Challenge), no-force-push (§6.T.3/§11.4.113), §6.S CONTINUATION-in-same-commit, §6.AH no-host-direct-VMs (Genymotion is the macOS equivalent). Action-prefix (§6.AJ/§11.4.140) active via `.claude/settings.json` → `scripts/hooks/action-prefix-expand.sh`. **LVA-008 nav-teardown crash remains OPEN (upstream androidx-navigation defect, 8 candidates falsified, minimal-repro authored). PENDING: commit working-tree changes, graft the api-app Check 10 extension (spec at `docs/superpowers/specs/2026-06-26-ak-check10-apiapp-extension.md`, proven hermetically), advance to 1077 cycle, answer OpenDesign transitions decisions 1-6.**
 
 Paste the following into a new CLI agent session to continue this
 work. The agent needs no scrollback — everything it needs is in this
@@ -837,57 +888,48 @@ file plus the spec/plan/CLAUDE.md set referenced from it.
 ```
 Continue Lava project work. Read these in order before doing anything:
 
-  1. /Users/milosvasic/Projects/Lava/docs/CONTINUATION.md
-  2. /Users/milosvasic/Projects/Lava/CLAUDE.md
-  3. /Users/milosvasic/Projects/Lava/constitution/Constitution.md
-  4. /Users/milosvasic/Projects/Lava/docs/plans/2026-05-15-constitution-compliance.md
-  5. /Users/milosvasic/Projects/Lava/docs/helix-constitution-gates.md
-  6. /Users/milosvasic/Projects/Lava/docs/coverage-ledger.yaml (skim — generated)
-
+  1. /Volumes/T7/Projects/lava/docs/CONTINUATION.md
+  2. /Volumes/T7/Projects/lava/CLAUDE.md
+  3. /Volumes/T7/Projects/lava/constitution/Constitution.md
+  
 Then check the git state vs the CONTINUATION.md "Last updated" line.
 If new commits exist on master beyond what CONTINUATION.md describes,
 trust the commits and update CONTINUATION.md before proceeding (per §6.S).
 
-Active state per CONTINUATION.md §1 (2026-05-16):
-  - All 10 phases of the constitution-compliance plan DONE (Phases 1-9 closed).
-  - HelixQA submodule incorporated; Phase 4-debt CLOSED 2026-05-16.
-  - Verify-all sweep: 40/40 PASS in fully STRICT mode.
-  - 17/17 own-org submodules with helix-deps.yaml + install_upstreams.sh; zero waivers.
-  - Coverage ledger: 48 covered / 10 partial / 0 gap (58 rows).
-  - §6.L counter at 52; 53rd in-flight at the moment of this CONTINUATION.md refresh.
-  - 33 session commits §6.C-converged on GitHub + GitLab.
+Active state per CONTINUATION.md §0 (2026-06-26):
+  - HEAD at `28a8b79b` on master (GitHub + GitLab converged).
+  - Cycle-coverage gate §6.AK is WIRED (Check 10 pre-push + Gate 7 firebase-distribute).
+  - Last distribute: client 1.3.12-1076 + api-app 0.2.11-22 (2026-06-25).
+  - LVA-008 nav-teardown crash = OPEN (upstream androidx-navigation defect, 8 candidates falsified).
+  - Constitution, coverage ledger, submodules all up to date.
 
 Your default next action (priority order):
-  1. **Phase 4-C** (HelixQA Go-package linking): blocked on 10 operator open
-     questions at `docs/plans/2026-05-16-helixqa-go-package-linking-design.md`
-     §G. Surface the questions to the operator; do NOT proceed to 4-C-1.
-  2. **Phase 6a** (snake_case migration): blocked on 8 operator open questions
-     at `docs/plans/2026-05-16-snake_case-migration.md` §11. Surface the
-     questions to the operator; do NOT proceed to Phase 6a implementation.
-  3. **Crashlytics monitoring**: the last Firebase distribute was 1.2.22-1042
-     (2026-05-14); check Crashlytics for any new issues per §6.O closure
-     mandate.
-  4. **HelixQA pin freshness**: re-baseline `submodules/helixqa` from
-     upstream if operator approves; re-run the §6.W audit.
-  5. **Tag-script gate**: still blocked on §6.X-debt (Linux x86_64 + KVM
-     gate-host) for §6.I matrix attestation. No release tag this cycle.
+  1. **Commit pending working-tree changes** — C48/C52/C66 LenientTeardownRule refinements,
+     stress-chaos re-runs (timestamps), design-spec post-1076 revisions, vision_engine pin advance.
+  2. **Graft the api-app Check 10 extension** — the patch at
+     `docs/superpowers/specs/2026-06-26-ak-check10-apiapp-extension.md` wraps the existing
+     single-channel loop into a two-channel loop (client + api-app). Proven hermetically
+     at `tests/cycle-coverage/test_wiring_apiapp.sh` (5/5 PASS).
+  3. **Advance to 1077 cycle** — search-flow device Challenges (C58–C62)
+     once LVA-008 unblocks or Genymotion harness matures.
+  4. **OpenDesign transitions** — answer operator decisions 1-6 from the design spec;
+     Wave A (tokens.css + codegen + parity gate) is the foundation.
+  5. **LVA-008** — upstream minimal-repro authored; operator call needed:
+     file with Google vs live with the LENIENT_TEARDOWN_RULE workaround.
 
 Do NOT re-run completed phases — they are committed + pushed + sweep-verified.
 The git log is the authoritative record.
 
-Verify-all sweep evidence: `.lava-ci-evidence/verify-all/<UTC-timestamp>.json`
-Latest gates index: `docs/helix-constitution-gates.md`
-Coverage ledger: `docs/coverage-ledger.yaml`
-
 Constitutional bindings still in force (do not relax):
+  §6.AK (Cycle-Coverage Device Gate — every claim needs a covering Challenge)
   §6.J / §6.L (Anti-Bluff Functional Reality Mandate)
   §6.AB / §6.AC / §6.AE (anti-bluff scanners — STRICT)
-  §6.AD (HelixConstitution Inheritance) + §6.AD.3 (equivalence-mapping)
+  §6.AD (HelixConstitution Inheritance)
   §6.R (No-Hardcoding Mandate)
   §6.S (Continuation Document Maintenance — THIS file)
-  §6.W (GitHub + GitLab Only Remote Mandate; HELIX_DEV_OWNED exemption for HelixDevelopment org)
-  §6.X (Container-Submodule Emulator Wiring; PARTIAL — gate-host owed)
-  §11.4.25-§11.4.36 (12 new HelixConstitution clauses)
+  §6.W (GitHub + GitLab Only Remote Mandate)
+  §6.AH (no host-direct VMs — Genymotion is the macOS equivalent)
+  §6.AJ / §11.4.140 (action-prefix expansion via registry)
 
 The operator's standing §6.L wall is preserved verbatim in CLAUDE.md.
 Read it.
@@ -933,11 +975,18 @@ should preserve them.
 
 ## 9. Cross-references
 
-- **Plan docs (this cycle):**
-  - `docs/plans/2026-05-15-constitution-compliance.md` — master plan
+- **Plan docs (current cycle):**
+  - `docs/superpowers/specs/2026-06-26-ak-cycle-coverage-spec.md` — §6.AK gate design
+  - `docs/superpowers/specs/2026-06-26-ak-gate-wiring-integration.md` — §6.AK mechanical wiring
+  - `docs/superpowers/specs/2026-06-26-ak-check10-apiapp-extension.md` — api-app Check 10 extension
+  - `docs/superpowers/specs/2026-06-26-opendesign-transitions-design.md` — OpenDesign 5-wave plan
+  - `docs/superpowers/specs/2026-06-11-dynamic-provider-discovery-design.md` — dynamic discovery + post-1076 revisions
+  - `docs/superpowers/specs/2026-06-12-embedded-curated-providers-design.md` — curated providers + post-1076 revisions
+  - `docs/qa/2026-06-25-opendesign-transitions-scoping.md` — OpenDesign read-only audit
+  - `docs/scripts/check-cycle-coverage.sh.md` — cycle-coverage gate user guide
+- **Plan docs (prior cycle):**
+  - `docs/plans/2026-05-15-constitution-compliance.md` — master constitution-compliance plan (DONE)
   - `docs/plans/2026-05-16-helixqa-integration-design.md` — Option 1 wiring (DONE)
-  - `docs/plans/2026-05-16-helixqa-go-package-linking-design.md` — Option 2 design (DESIGN-ONLY; operator-blocked)
-  - `docs/plans/2026-05-16-snake_case-migration.md` — Phase 6 plan (PLAN-ONLY; operator-blocked)
 - **Gates inventory:** `docs/helix-constitution-gates.md`
 - **Coverage ledger:** `docs/coverage-ledger.yaml` + `docs/coverage-ledger.waivers.yaml`
 - **Constitution source-of-truth:** `constitution/` submodule (HelixConstitution at `464ada14`)

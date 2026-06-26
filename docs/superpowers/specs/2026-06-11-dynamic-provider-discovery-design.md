@@ -193,3 +193,48 @@ and may introduce new mandatory rules to adopt.
 Feature ships under the already-bumped next-cycle versions (client 1.3.3-1060, api-app 0.2.3-7,
 api-go 2.3.25-2325) with auth rotation + §6.AA two-stage + §6.Z device verification at distribute time,
 per the established release runbook. Distribute is a separate operator-gated step after the feature lands.
+
+---
+
+## Post-1076 Revision (2026-06-26)
+
+### 1076 Distribute Outcome
+
+Lava-Android-1.3.12-1076 + api-app 0.2.11-22 were distributed and reported to testers. The operator's post-distribute manual testing concluded "practically almost nothing has been fixed". Root cause: the §6.Z device gate executed **only Challenge00CrashSurvivalTest (C00)** while the cycle's CHANGELOG claimed fixes to search, provider-selection, onboarding, and display. The repo contains 60+ Challenge tests (C01–C57) covering those exact flows, and **none were executed** before distribute. The cold-start canary proved nothing about the shipped user-visible value. This is now a constitutionally prohibited pattern per **§6.AK** (Cycle-Coverage Device Gate, added 2026-06-26): a `Challenge00CrashSurvivalTest`-only gate NEVER satisfies the distribute requirement when the cycle claims flow/UI fixes.
+
+### Current State of `/v1/providers`
+
+The `GET /v1/providers` endpoint is live and working on the on-device api-app. The real catalogue exposes **12 providers** — 5 natives (rutracker, rutor, nnmclub, kinozal, archiveorg) + 7 curated (gutenberg, thepiratebay, yts, torrentscsv, knaben, nyaa, bitsearch, torrentdownloads — note gutenberg shipped before this spec was written). This exceeds the 7-jackett-estimate the original architecture section assumed; the dynamic-discovery mechanism is proven by the actual provider count. The 1077-dev cycle will reconcile the client's hardcoded "4 providers" welcome text to match reality.
+
+### Video-Issue Feedback (LVA-079–LVA-091)
+
+Ten open video issues from the operator's manual-testing session identify concrete problems that affect the spec's assumptions:
+
+- **Search broken** — multiple root causes identified: auth-interceptor overwriting the handoff key (H1, fixed in 1072 as commit `627a0d58`), engine 18s deadline vs client 30s read-timeout mismatch producing silent failures, partial-failure Error→Empty display path (fixed in `1cbf364c`). A dynamic provider that cannot complete search is not usable by the user regardless of catalogue correctness.
+- **Provider filter chips disagree** between search-input and results screens — the source-of-truth for which providers are active is not consistent. This affects the dynamic-discovery data flow (section 4.3) because `ApiBackedTrackerClient` routes through whichever provider ID the chip layer sends.
+- **Display labels raw/lowercased** — a provider's `displayName` from the DTO must be title-cased properly; the current rendering path on the client does not normalize backend labels.
+- **API selection screen mislabeled** — the on-device API discovery flow (ApiSelection step) uses a misleading label that confuses users.
+- **mDNS discovered API shows raw IP** — the network-discovered API surface presents the raw IPv4 address rather than a human-readable name.
+
+### §6.AK Impact on Testing Strategy
+
+Section 6's testing strategy must be updated to reflect the new §6.AK gate requirements. Every claimed fix for any issue affecting the dynamic discovery flow now demands an **EXECUTED + PASSED** covering device Challenge before the version can be distributed:
+
+- `Challenge39DynamicProviderDiscoveryTest` (described above) is mandatory before any distribute that claims dynamic-discovery fixes.
+- The falsifiability rehearsal for this Challenge must demonstrate a RED run against the pre-fix build (e.g. discovery fetch returns empty → test fails) before the GREEN run against the fix.
+- The `Challenge00CrashSurvivalTest` alone is NEVER sufficient (§6.AK clause 1). The §6.Z evidence file for any dynamic-discovery cycle must enumerate the executed Challenge FQNs matching the CHANGELOG claim-set.
+- The operator's video-issue backlog (LVA-079–LVA-091) must be addressed as a per-video reproduction set per §6.AK clause 5 before the next distribute that claims "search fixed" or "provider discovery fixed."
+
+### Known Issues Affecting Spec Assumptions
+
+- **LVA-008:** The `C11` ConnectedAndroidTest navigation-teardown crash blocks nested-route device Challenges. Until this is resolved, any device Challenge that navigates through multiple screens (like the dynamic-discovery full flow: onboarding → API selection → provider selection → search → results) risks producing a false-negative due to test-infrastructure flakiness rather than a production bug.
+- **Search engine timeout mismatch:** The engine's configured 18s deadline and the client's 30s read-timeout produce a window where the engine times out internally but the client keeps waiting. Dynamic providers whose search response takes >18s will fail even though the provider is correctly registered.
+- **AuthInterceptor handoff-key overwrite (H1):** Fixed in 1072, but the same class of middleware-state corruption could affect the dynamic provider's per-request authentication headers.
+- **Partial-failure Error→Empty display fix:** Landed in `1cbf364c`. Before this fix, a partial failure (some providers returning results, others erroring) rendered as an empty screen rather than showing the successful results alongside the error. This affects the user-visible quality of the dynamic-discovery search flow.
+
+### Updated Change History
+
+| Date | Author | Change |
+|------|--------|--------|
+| 2026-06-11 | Agent | Initial spec |
+| 2026-06-26 | Agent | Post-1076 revision: documented C00-only gate outcome, updated provider count to 12, added video-issue feedback, §6.AK testing gate, known issues, and this change history entry |

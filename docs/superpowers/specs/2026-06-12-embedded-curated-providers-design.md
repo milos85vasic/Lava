@@ -160,3 +160,56 @@ results until reachable), matching native behaviour. §6.AC: every error path ca
 on-device API — searchable with magnet links, no external Jackett required. This
 is a curated, growing set, not a full Jackett mirror; server deployments can still
 point at an external Jackett for the complete indexer catalogue."
+
+---
+
+## Post-1076 Revision (2026-06-26)
+
+### 1076 Distribute Outcome
+
+Lava-Android-1.3.12-1076 + api-app 0.2.11-22 were distributed and reported to testers. The operator's post-distribute manual testing concluded "practically almost nothing has been fixed". Root cause: the §6.Z device gate executed **only Challenge00CrashSurvivalTest (C00)** while the cycle's CHANGELOG claimed fixes to search, provider-selection, onboarding, and display. The curated-providers code path — which this spec governs — was never exercised on-device during the gate. This is now a constitutionally prohibited pattern per **§6.AK** (Cycle-Coverage Device Gate, added 2026-06-26): a `Challenge00CrashSurvivalTest`-only gate NEVER satisfies the distribute requirement when the cycle claims provider/UI fixes.
+
+### Curated Providers That Actually Shipped
+
+The on-device api-app now exposes **7 curated providers** (in addition to the 5 natives). These are the providers that shipped at 1076:
+
+1. **The Pirate Bay** (`thepiratebay`) — JSON API via `https://apibay.org/q.php?q=<query>&cat=0`. Phase 1, anonymous, no Cloudflare.
+2. **YTS** (`yts`) — JSON API via `https://yts.mx/api/v2/list_movies.json?query_term=<q>`. Phase 1.
+3. **Torrents-CSV** (`torrentscsv`) — added after the spec was written; supplements the Phase 1 set.
+4. **Knaben** (`knaben`) — added after the spec was written.
+5. **Nyaa** (`nyaa`) — added after the spec was written.
+6. **BitSearch** (`bitsearch`) — added after the spec was written.
+7. **TorrentDownloads** (`torrentdownloads`) — added after the spec was written.
+
+The original Phase 1 set (TPB, YTS, EZTV) was extended during implementation. **EZTV** was resolved to **SKIP**: the operator determined there is no honest anonymous-search path for EZTV on the on-device embed (the upstream requires either a Cloudflare-bypass seam or a registered account for consistent API access), so it was removed from the curated list rather than shipped with a broken search flow.
+
+### Phase 2 Cloudflare Status
+
+Phase 2 of the spec proposed **1337x** (`x1337`) as a Cloudflare-gated provider reusing the existing FlareSolverr seam. As of 1076, 1337x remains **blocked** — its upstream Cloudflare challenge is active and the FlareSolverr seam (`LAVA_API_FLARESOLVERR_URL`) exists in the codebase but is not yet registered as a routing path for the curated `x1337` provider. A dedicated FlareSolverr integration step is needed before 1337x can ship. The upstream `torrentgalaxy` Phase 2 candidate has not been implemented; it remains deferred.
+
+### Crashlytics Wiring
+
+The api-app Crashlytics non-fatal telemetry for curated providers (described in sections 5 and 7 as required per §6.AC) was completed in commit `07f83eef`. Every error path in each curated provider now records a non-fatal event with `{provider, operation, error_class}` context, landing in the same Firebase Crashlytics dashboard as the client-side events. This means operator visibility into upstream-failure patterns for curated providers is active.
+
+### §6.AK Impact on Testing Strategy
+
+Section 6's testing strategy must be updated to reflect the new §6.AK gate requirements. Every curated provider that ships in a distribute cycle now demands an **EXECUTED + PASSED** covering device Challenge before that version can be distributed:
+
+- The registry/catalogue test (section 6 item 3) must run on-device (not just JVM) as part of the §6.Z evidence file.
+- The registration parity test (section 6 item 4) must be linked to an attestation row captured from the actual api-app binary about to be distributed — compilation green is never sufficient.
+- Any new curated provider added after 1076 must have its falsifiability rehearsal recorded per §6.AK clause 2: the test fails RED against a deliberately broken provider (e.g., search returns empty, or the provider is absent from the registry) before the GREEN run against the fix. The RED run evidence must appear in the commit body (Bluff-Audit stamp).
+- The `Challenge00CrashSurvivalTest` alone is NEVER sufficient (§6.AK clause 1).
+
+### Known Issues Affecting Spec Assumptions
+
+- **LVA-008:** The `C11` ConnectedAndroidTest navigation-teardown crash blocks nested-route device Challenges. Curated-provider full-flow tests (navigate to search, select a curated provider from the dynamically-populated list, enter query, observe results) may produce false-negative test infrastructure failures until this is resolved.
+- **Search engine timeout mismatch:** The engine's 18s deadline vs client 30s read-timeout produces a window where the curated provider's upstream response arrives between 18-30s and is silently discarded. Curated providers with slower upstreams (e.g. The Pirate Bay's `apibay.org` under load) are more likely to hit this.
+- **AuthInterceptor handoff-key overwrite (H1):** Fixed in 1072. Curated providers are anonymous (no auth), but the per-request routing middleware still sends authentication headers; a middleware-state corruption could affect request routing for curated providers as well.
+- **Partial-failure Error→Empty display fix:** Landed in `1cbf364c`. Before this fix, if one curated provider returned an error and another succeeded, the screen rendered empty instead of showing the successful results. This directly affects the user-visible experience of the curated-provider search flow.
+
+### Updated Change History
+
+| Date | Author | Change |
+|------|--------|--------|
+| 2026-06-12 | Agent | Initial spec |
+| 2026-06-26 | Agent | Post-1076 revision: documented C00-only gate outcome, listed the 7 shipped curated providers, documented EZTV→SKIP, Cloudflare status for 1337x, Crashlytics wiring in `07f83eef`, §6.AK testing gate, known issues, and this change history entry |

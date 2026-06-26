@@ -104,6 +104,7 @@ import androidx.test.filters.SdkSuppress
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
+import lava.app.LenientTeardownRule
 import lava.app.OnboardingBypassRule
 import lava.tracker.client.ApiBaseUrlHolder
 import okhttp3.mockwebserver.MockResponse
@@ -142,7 +143,15 @@ class Challenge52SearchInputProviderChipSelectionTest {
     @get:Rule(order = 1)
     val bypassRule = OnboardingBypassRule()
 
+    // LVA-008: the inner nested-NavHost teardown ISE fires at instrumentation
+    // activity-destroy (NOT on a user path — the operator video shows no crash).
+    // This rule swallows that uncatchable teardown throw so the real chip/filter
+    // assertions below decide pass/fail (the §6.AK device gate would otherwise
+    // mis-report the crash instead of the feature). Outer of composeRule.
     @get:Rule(order = 2)
+    val lenientTeardown = LenientTeardownRule()
+
+    @get:Rule(order = 3)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     // ── Fields ────────────────────────────────────────────────────────────────

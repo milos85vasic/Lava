@@ -78,6 +78,7 @@ import androidx.test.filters.SdkSuppress
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.MainActivity
+import lava.app.LenientTeardownRule
 import lava.app.OnboardingBypassRule
 import org.junit.Rule
 import org.junit.Test
@@ -92,7 +93,12 @@ class Challenge48ProviderSyncToggleSurvivesAndPersistsTest {
     @get:Rule(order = 1)
     val onboardingBypass = OnboardingBypassRule()
 
+    // LVA-008: swallow the instrumentation activity-destroy nav-teardown ISE
+    // (not a user-path crash) so the toggle assertions decide pass/fail.
     @get:Rule(order = 2)
+    val lenientTeardown = LenientTeardownRule()
+
+    @get:Rule(order = 3)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test

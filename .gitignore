@@ -1,4 +1,5 @@
 *.iml
+.superpowers/
 .gradle
 /local.properties
 /.idea

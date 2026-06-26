@@ -1,0 +1,5 @@
+# Genymotion Challenge run — 20260626T190016Z
+device: 127.0.0.1:6555
+module: app  test-class: lava.app.challenges.Challenge66SelectAllDoesNotEnableAuthProvidersTest
+gradle exit: 0
+BUILD SUCCESSFUL in 3m 25s

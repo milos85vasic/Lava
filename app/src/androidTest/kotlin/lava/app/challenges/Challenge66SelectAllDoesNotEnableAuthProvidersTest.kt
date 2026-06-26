@@ -154,66 +154,72 @@ class Challenge66SelectAllDoesNotEnableAuthProvidersTest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
-        // The select-all control renders only when there are >= 2 providers
-        // (true for the production catalogue). Tap it.
+        // ── Real Select-All semantics (verified from OnboardingViewModel.kt) ──
+        // The picker loads with ALL providers selected (ProviderOnboardingItem.selected
+        // defaults to true, OnboardingState.kt:18). onToggleAllProviders is a TOGGLE
+        // (OnboardingViewModel.kt:591): when every NO-CRED provider is already selected
+        // (true at the all-selected default), one tap CLEARS everything; the next tap
+        // selects ONLY the no-credentials providers (auth-requiring stay off — the
+        // Issue-#9 / LVA-090 gate, requiresNoCredentials()). So from the default we tap
+        // TWICE to reach the select-only-no-cred state the operator's video #9 concerns.
+        // (The earlier single-tap model device-RED'd with onCount==0 — it was observing
+        // the toggle's CLEAR branch, not a broken Select-All; see the §6.AK c66 diag.)
+        val total = composeRule.onAllNodes(isToggleable()).fetchSemanticsNodes().size
+
+        // Tap 1 — from the all-selected default this CLEARS everything.
         composeRule.onNodeWithTag(SelectAllProvidersTestTag).performClick()
         composeRule.waitForIdle()
+        val afterClear = composeRule.onAllNodes(isToggleable().and(isOn)).fetchSemanticsNodes().size
 
-        // Count toggleable nodes (= every provider-row Checkbox + the select-all
-        // control Checkbox) and how many are ON after "Select all".
-        val total = composeRule.onAllNodes(isToggleable()).fetchSemanticsNodes().size
-        val onCount = composeRule.onAllNodes(isToggleable().and(isOn)).fetchSemanticsNodes().size
+        // Tap 2 — nothing is "all-no-cred-selected" now, so this selects ONLY the
+        // no-credentials providers.
+        composeRule.onNodeWithTag(SelectAllProvidersTestTag).performClick()
+        composeRule.waitForIdle()
+        val afterSelectNoCred = composeRule.onAllNodes(isToggleable().and(isOn)).fetchSemanticsNodes().size
 
-        // §6.AK diagnostic — capture WHAT the picker rendered after select-all so a
-        // device RED is self-explaining (total==1 → only the control is toggleable
-        // i.e. rows are not checkbox-semantic = test-query gap; total>=N but
-        // onCount==0 → select-all did not propagate to the checkboxes).
-        val archiveRows = composeRule.onAllNodesWithText("Internet Archive", substring = true).fetchSemanticsNodes().size
-        val gutenbergRows = composeRule.onAllNodesWithText("Gutenberg", substring = true).fetchSemanticsNodes().size
-        val rutrackerRows = composeRule.onAllNodesWithText("RuTracker", substring = true).fetchSemanticsNodes().size
-        val diag = "total=$total onCount=$onCount rows[Archive=$archiveRows Gutenberg=$gutenbergRows RuTracker=$rutrackerRows]"
+        val diag = "total=$total afterClear=$afterClear afterSelectNoCred=$afterSelectNoCred"
 
-        // PRIMARY ASSERTION (positive) — "Select all" actually selected the
-        // no-credentials providers, so the user makes progress.
+        // SECONDARY — the toggle's CLEAR branch: from the all-selected default, the
+        // first tap takes every checkbox OFF (documents the verified toggle semantics;
+        // an honest signal if the default ever stops being all-selected).
         assertTrue(
-            "After tapping 'Select all', at least one no-credentials provider " +
-                "must be selected (the Internet Archive / Project Gutenberg " +
-                "NONE-auth providers). DIAG: $diag",
-            onCount >= 1,
+            "From the all-selected default, the first 'Select all' tap must CLEAR " +
+                "every checkbox (verified toggle semantics). DIAG: $diag",
+            afterClear == 0,
         )
 
-        // PRIMARY ASSERTION (the LVA-090 gate) — NOT every provider got
-        // selected: the credential-required providers (RuTracker = CAPTCHA_LOGIN,
-        // Kinozal = FORM_LOGIN) must stay unselected, and the select-all control
-        // itself is OFF (not all selected). The pre-fix behavior selected
-        // everything, making onCount == total.
+        // PRIMARY (positive) — the select-no-cred gesture enables the usable
+        // (no-credentials) providers, so the user makes progress.
         assertTrue(
-            "'Select all' must NOT silently enable auth-requiring providers. " +
-                "After 'Select all', ON checkbox count ($onCount) must be " +
-                "STRICTLY LESS than the total toggleable count ($total) — at " +
-                "least one credential-required provider (and the select-all " +
-                "control) must remain unchecked. onCount == total means every " +
-                "provider was bulk-enabled (the LVA-090 defect).",
-            onCount < total,
+            "After the select-all-no-cred gesture, at least one no-credentials " +
+                "provider must be selected (Internet Archive / Project Gutenberg / " +
+                "RuTor). DIAG: $diag",
+            afterSelectNoCred >= 1,
         )
 
-        // Belt-and-braces user-visible cross-check: a known credential-required
-        // provider row is rendered on this screen (its presence is what the gate
-        // is protecting the user from auto-enabling).
-        composeRule.onAllNodesWithText("Captcha Login", substring = true)
-            .fetchSemanticsNodes()
-            .let { captchaSubtitleNodes ->
-                assertTrue(
-                    "Expected at least one credential-required provider " +
-                        "(a 'Captcha Login' or 'Form Login' subtitle) to be " +
-                        "present so the auth-gate is meaningful. Found none — " +
-                        "the catalogue under test may lack an auth-requiring " +
-                        "provider; the device-run operator must use a catalogue " +
-                        "that includes RuTracker / Kinozal.",
-                    captchaSubtitleNodes.isNotEmpty() ||
-                        composeRule.onAllNodesWithText("Form Login", substring = true)
-                            .fetchSemanticsNodes().isNotEmpty(),
-                )
-            }
+        // PRIMARY (the LVA-090 gate) — 'Select all' must NOT bulk-enable the
+        // auth-requiring providers: the ON count must be STRICTLY LESS than total
+        // (the credential-required providers + the select-all control stay off). The
+        // pre-Issue-9 defect selected EVERY provider unconditionally →
+        // afterSelectNoCred == total.
+        assertTrue(
+            "'Select all' must NOT silently enable auth-requiring providers. After " +
+                "the select-no-cred gesture, the ON count ($afterSelectNoCred) must be " +
+                "STRICTLY LESS than total ($total) — credential-required providers " +
+                "(RuTracker = Captcha, Kinozal = Form) must remain unchecked. " +
+                "afterSelectNoCred == total means every provider was bulk-enabled " +
+                "(the LVA-090 defect). DIAG: $diag",
+            afterSelectNoCred in 1 until total,
+        )
+
+        // Belt-and-braces — a credential-required provider row is actually present,
+        // so the gate above is meaningful (not vacuously true on an all-no-cred set).
+        assertTrue(
+            "Expected at least one credential-required provider ('Captcha Login' / " +
+                "'Form Login' subtitle) so the auth-gate is meaningful. Found none — " +
+                "the catalogue under test must include RuTracker / Kinozal.",
+            composeRule.onAllNodesWithText("Captcha Login", substring = true).fetchSemanticsNodes().isNotEmpty() ||
+                composeRule.onAllNodesWithText("Form Login", substring = true).fetchSemanticsNodes().isNotEmpty(),
+        )
     }
 }

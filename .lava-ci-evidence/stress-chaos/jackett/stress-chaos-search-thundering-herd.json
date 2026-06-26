@@ -3,7 +3,7 @@
   "amplification_note": "FACT not guarantee: production read-through has no singleflight; \u003e=1 expected, dedup not asserted",
   "amplification_x": 64,
   "calls_per_worker": 8,
-  "captured_at": "2026-06-26T17:02:32Z",
+  "captured_at": "2026-06-26T17:47:44Z",
   "clause": "HelixConstitution §11.4.85 (Stress + Chaos) + §6.J/§6.L Anti-Bluff",
   "convergence_pass": true,
   "dimension": "cache-thundering-herd (concurrent identical-key cache stampede)",
