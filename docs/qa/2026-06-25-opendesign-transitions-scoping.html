@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-25-opendesign-transitions-scoping</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="opendesign--smooth-transitions--look-and-feel-polish--scoping-doc">OpenDesign
++ Smooth-Transitions + Look-and-Feel Polish — Scoping Doc</h1>
+<p><strong>Date:</strong> 2026-06-25 <strong>Operator directive
+(2026-06-25):</strong> "Make transitions between all application's
+screens, fragments and views more smooth with some stunning visual
+effects! Do use heavily OpenDesign and fine tune and polish all existing
+look and feel! Cover all with additional tests!!!"
+<strong>Posture:</strong> READ-ONLY source inspection + WebFetch. No
+code changed, no builds, no commit. Anti-bluff (§6.J / §6.AB): every
+claim below cites the actual file/line read. "Fragments" = Compose
+screens/destinations (Lava is 100% Compose; no XML/Fragments).
+<strong>Constitution anchor:</strong> §11.4.162 (OpenDesign UI
+design-system mandate) — inherited via §6.AD from
+<code>constitution/</code>.</p>
+<hr />
+<h2 id="1-opendesign-reality-check-114162--not-integrated">1. OpenDesign
+reality check (§11.4.162) — <strong>NOT integrated</strong></h2>
+<p><strong>Finding: OpenDesign is NOT installed or wired into
+Lava.</strong> Grep across <code>gradle/libs.versions.toml</code>, every
+<code>build.gradle.kts</code>, and <code>core/designsystem/</code> for
+<code>open-design</code> / <code>opendesign</code> / <code>nexu</code>
+returns <strong>zero</strong> hits in Lava's own source. The only
+matches are:</p>
+<ul>
+<li><code>panoptic/CLAUDE.md:1496</code>,
+<code>panoptic/AGENTS.md:1543</code>,
+<code>panoptic/CONSTITUTION.md:1205</code> — these are a <strong>sibling
+project's</strong> copies of the §11.4.162 mandate text, not Lava
+wiring.</li>
+<li><code>submodules/helixqa/...</code> "nexus" hits are HelixQA's
+<code>pkg/nexus</code> browser package — unrelated to OpenDesign.</li>
+</ul>
+<p>So per §11.4.162 ("every project producing user-facing interfaces
+MUST use OpenDesign … install as a project dependency"), Lava is
+currently <strong>non-compliant</strong>, and OpenDesign integration is
+in-scope for this cycle.</p>
+<h3
+id="what-opendesign-actually-is-webfetch--githubcomnexu-io-blocked-resolved-via-websearch">What
+OpenDesign actually is (WebFetch — github.com/nexu-io blocked, resolved
+via WebSearch)</h3>
+<p>GitHub raw fetch is blocked by network policy; the facts below come
+from the public repo description + QUICKSTART via WebSearch:</p>
+<ul>
+<li>OpenDesign (<code>github.com/nexu-io/open-design</code>, current
+release <strong>0.7.0</strong>) is a <strong>local-first, open-source
+design-systems tool</strong>: a native desktop app + <strong>stdio MCP
+server</strong> + per-agent install scripts, shipping <strong>142+
+Design Systems</strong>. It is consumed by AI coding agents (Claude
+Code, Codex, Cursor, OpenCode, Qwen, Kimi, 16+ CLIs) over
+<strong>MCP</strong>.</li>
+<li>A "design system" in OpenDesign is a folder of:
+<code>manifest.json</code>, <code>DESIGN.md</code> (canonical design
+prose), <strong><code>tokens.css</code></strong> (compiled CSS custom
+properties — the canonical token artifact),
+<code>components.html</code>, <code>assets/</code>, <code>fonts/</code>,
+preview pages. Recent versions ship a <strong>structured
+<code>tokens.css</code> schema</strong> (default +
+<code>kami</code>).</li>
+<li><strong>Install:</strong> one-line per-agent —
+<code>od mcp install &lt;agent&gt;</code> — which drops
+<code>~/.config/&lt;agent&gt;/open-design.json</code> + an MCP snippet.
+Agents then query design systems by name (get tokens CSS, JSX
+components, entry HTML).</li>
+</ul>
+<h3 id="honest-integration-boundary-the-critical-caveat">Honest
+integration boundary (the critical caveat)</h3>
+<p><strong>OpenDesign is web/CSS-and-agent-oriented; it is NOT a
+Maven/Gradle artifact and NOT a Kotlin/Compose library.</strong> Its
+canonical output is <code>tokens.css</code> (CSS custom properties)
+consumed over MCP — there is <strong>no <code>androidx</code>-style
+dependency to add to <code>libs.versions.toml</code></strong>. Lava is
+Jetpack Compose (Kotlin). Therefore "use OpenDesign" in the Android
+context means, concretely:</p>
+<ol type="1">
+<li>Install the OpenDesign MCP server for the dev agents
+(<code>od mcp install claude-code</code>, etc.).</li>
+<li><strong>Adopt (or author, per §11.4.74 extend-don't-reimplement) a
+Lava-branded OpenDesign design system</strong> — <code>tokens.css</code>
+carrying the full light+dark palette, type scale, spacing scale,
+component tokens, sourced from Lava brand assets (§11.4.35).</li>
+<li><strong>Generate / sync the Compose token layer</strong>
+(<code>AppColors</code>, <code>AppTypography</code>,
+<code>AppSpaces</code>, <code>AppShapes</code>, …) <strong>from</strong>
+that <code>tokens.css</code> so OpenDesign is the source-of-truth and
+the hand-coded Kotlin tokens become generated artifacts. The
+<code>tokens.css</code> ↔︎ Kotlin sync is the load-bearing bridge and
+needs a small codegen/check step (Wave A deliverable).</li>
+</ol>
+<p><strong>Operator input needed (see §6):</strong> whether to (a)
+author a bespoke Lava design system inside OpenDesign vs adopt+rebrand
+one of the 142 shipped systems; (b) commit <code>tokens.css</code> into
+the repo as the tracked source-of-truth; (c) brand-asset palette/fonts
+to seed it.</p>
+<hr />
+<h2
+id="2-current-theming-state--already-a-real-token-system-hand-coded-dark-theme-complete">2.
+Current theming state — already a real token system, hand-coded,
+dark-theme-complete</h2>
+<p><code>core/designsystem/</code> (<code>LavaTheme</code>). Cited files
+below.</p>
+<ul>
+<li><strong>Theme entry:</strong> <code>theme/Theme.kt</code> —
+<code>LavaTheme(theme, isDark, isDynamic, content)</code>. Maps a
+<code>Theme</code> enum to a palette factory, builds a Material3
+<code>lightColorScheme</code>/<code>darkColorScheme</code>, and provides
+<code>LocalColors</code>. (<code>Theme.kt:14-72</code>)</li>
+<li><strong>Dark theme: YES, comprehensive.</strong> Every palette
+factory takes <code>isDark</code> and returns full dark + light
+variants; <code>isSystemInDarkTheme()</code> is the default.
+(<code>Theme.kt:17,27-37</code>)</li>
+<li><strong>8 named palettes + Material You:</strong>
+<code>yoleColors</code> (brand default), <code>draculaColors</code>,
+<code>solarizedColors</code>, <code>nordColors</code>,
+<code>monokaiColors</code>, <code>gruvboxColors</code>,
+<code>oneDarkColors</code>, <code>tokyoNightColors</code>, plus
+<code>DYNAMIC</code> (Material You, API 31+ via
+<code>isMaterialYouAvailable()</code>).
+(<code>Theme.kt:21-37,74-75</code>)</li>
+<li><strong>Brand colors:</strong> hand-coded Material tonal ramps in
+<code>theme/Colors.kt</code> — note the "Indigo*" ramp is actually the
+<strong>brand red</strong> (<code>Indigo40 = 0xFFB3261E</code>,
+<code>Indigo50 = 0xFFDE3730</code>); "Studio*" = purple secondary,
+"Lipstick*" = pink tertiary, plus custom green/red/orange/denim ramps.
+~180 lines of literal <code>Color(0xFF…)</code> constants.
+(<code>Colors.kt:1-180</code>)</li>
+<li><strong>Token classes already exist</strong> (this is the good news
+— Lava already has a design-token architecture, just not
+OpenDesign-sourced): <code>AppColors</code>, <code>AppTypography</code>,
+<code>AppShapes</code>, <code>AppSizes</code>, <code>AppSpaces</code>,
+<code>AppBorders</code>, <code>AppElevations</code>, surfaced through
+<code>AppTheme</code> object via <code>CompositionLocal</code>s.
+(<code>theme/AppTheme.kt:6-41</code>)</li>
+<li><strong>Typography:</strong> <code>AppTypography</code> is the full
+Material type scale (display/headline/title/body/label) — <strong>but
+every style uses <code>fontFamily = FontFamily.Default</code></strong>;
+there is <strong>no brand font</strong>.
+(<code>AppTypography.kt:11-117</code>). No
+<code>.ttf</code>/<code>.otf</code> font assets exist in Lava (only
+vendored ones under <code>submodules/helixqa/...</code>).</li>
+<li><strong>Components:</strong> ~25 design-system composables under
+<code>component/</code> (AppBar, Buttons, Dialog, TextField,
+NavigationBar, ModalBottomSheet, Placeholder, ProgressIndicator,
+Scaffold, Surface, Pagination, …).</li>
+<li><strong>Theming tests today:</strong>
+<code>PaletteContractTest.kt</code> (Robolectric) asserts all 8 palettes
+produce valid light+dark colors and <code>primary != surface</code>.
+<code>LavaIconsAppIconColorRegressionTest</code>,
+<code>A11yContentDescriptionTest</code>. <strong>No visual-regression /
+screenshot infra at all</strong> (no Paparazzi, no Roborazzi, no
+perceptual-diff — grep confirms none). This is the §11.4.162 "visual
+regression tests with per-pixel/perceptual diff" gap.</li>
+</ul>
+<p><strong>Implication:</strong> Lava does not need a token
+<em>architecture</em> built from scratch — it needs the existing
+hand-coded token classes <strong>re-sourced from OpenDesign
+<code>tokens.css</code></strong> + a brand font + visual-regression
+coverage.</p>
+<hr />
+<h2
+id="3-current-transition-state--a-system-exists-but-most-destinations-use-default--no-transition">3.
+Current transition state — a system exists, but most destinations use
+<code>Default</code> (= no transition)</h2>
+<p>The transition machinery lives in <code>core/navigation</code> and is
+wired per-destination in <code>:app</code>.</p>
+<ul>
+<li><strong>Animation model:</strong>
+<code>navigation/ui/NavigationAnimations.kt</code> —
+<code>NavigationAnimations(enter/exit/popEnter/popExit)</code> data
+class with presets:
+<ul>
+<li><code>Default</code> = all-null = <strong>NavHost default (no custom
+transition)</strong>. (<code>NavigationAnimations.kt:29</code>)</li>
+<li><code>ScaleInOutAnimation</code> = scaleIn+expandIn+fadeIn /
+fadeOut+shrinkOut+scaleOut. (<code>:30-49</code>)</li>
+<li><code>FadeInOutAnimations</code> = fadeIn / fadeOut.
+(<code>:50-55</code>)</li>
+<li><code>slideInLeft/slideOutLeft/slideInRight/slideOutRight</code>
+helpers. (<code>:57-60</code>)</li>
+</ul></li>
+<li><strong>Wiring:</strong> <code>NavigationHost.kt</code> plumbs these
+into Navigation-Compose <code>composable(... enterTransition=…)</code> /
+<code>navigation(...)</code>.
+(<code>NavigationHost.kt:42-56</code>)</li>
+<li><strong>Per-destination assignment</strong>
+(<code>app/.../navigation/MobileNavigation.kt</code>): | Destination |
+Animation | Notes | |---|---|---| | login, credentials,
+credentialsManager, providerConfig | <code>ScaleInOutAnimation</code> |
+(<code>:55-68</code>) | | category, topic |
+<code>ScaleInOutAnimation</code> | (<code>:97,105</code>) | |
+searchInput (top-level), searchResult (top-level) |
+<strong><code>Default</code> (none)</strong> | (<code>:76,88</code>) | |
+bottom-nav tabs (Search/Forum/Topics/Menu) | directional
+<code>slideIn/Out</code> by tab ordinal | polished —
+(<code>:329-350</code>) | | nested search graph: searchHistory
+<code>Default</code>, searchInput <code>FadeInOutAnimations</code>,
+searchResult <code>Default</code> | mixed | (<code>:178,186,194</code>)
+|</li>
+<li><strong>In-screen (non-nav) animations that DO exist:</strong>
+<ul>
+<li>Onboarding wizard: <code>AnimatedContent</code> with <strong>320ms
+<code>FastOutSlowInEasing</code> slide + 220ms
+<code>LinearOutSlowInEasing</code> fade</strong> between steps (the §6.L
+62nd polish). This is the current best-in-class example.
+(<code>feature/onboarding/.../OnboardingScreen.kt:109-132</code>)</li>
+<li>Topic: <code>fadeIn() + slideInVertically { it }</code> on a
+sub-element. (<code>feature/topic/.../TopicScreen.kt:393</code>)</li>
+</ul></li>
+<li><strong>What's ABSENT entirely:</strong>
+<ul>
+<li><strong>No shared-element / shared-bounds transitions</strong>
+anywhere (no <code>SharedTransitionLayout</code> /
+<code>sharedElement</code> usage — grep confirms none). E.g. tapping a
+search-result row → topic does a scale, not a shared poster/title
+morph.</li>
+<li><strong>The two highest-traffic transitions (search-input → results,
+results → topic at the top level) are <code>Default</code> = no
+animation</strong> → abrupt cuts, exactly the "abrupt changes" the
+directive targets.</li>
+<li>No global/consistent transition spec — easing/duration is ad-hoc per
+call site; only onboarding uses tuned <code>tween</code> specs.</li>
+</ul></li>
+</ul>
+<hr />
+<h2
+id="4-look-and-feel--polish-gaps-from-video-analysis--ui-coverage-audit">4.
+Look-and-feel / polish gaps (from video-analysis + UI-coverage
+audit)</h2>
+<p>From
+<code>.lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md</code>
+and <code>docs/qa/2026-06-25-ui-coverage-audit.md</code>. <strong>Honest
+split:</strong> several headline video issues are <em>functional</em>
+(search returns zero results, provider-set mismatch) and are OUT of
+scope for a UI-polish cycle — they belong to the separate
+search/provider-resolution fix track. The <strong>look-and-feel /
+visual</strong> subset that THIS cycle owns:</p>
+<ul>
+<li><strong>(video #5, HIGH) No loading indicator and no empty-state on
+search results</strong> — pure blank/black body for ~25 s, then a
+full-screen error; the "prince" query stays blank with no state at all.
+This is the single biggest <em>visual</em> defect: missing
+<code>Loading</code> (skeleton/spinner) and <code>Empty</code> ("No
+results") branches → perceived hang + abrupt jump to Error. (video lines
+52-59)</li>
+<li><strong>(video #4, HIGH) Provider chips render raw ids</strong>
+("torrentdownloads", "archiveorg", "kinozal", "yts") instead of display
+labels — same class as the §6.L 60th <code>displayLabel()</code>
+underscore bug. Look-and-feel/correctness. (video lines 43-50)</li>
+<li><strong>(video #8, MEDIUM) mDNS-discovered API shows bare
+<code>192.168.0.107:8443</code></strong> with no friendly name —
+cosmetic formatting. (video lines 79-86)</li>
+<li><strong>(video #6, MEDIUM) "4 providers available" copy</strong>
+wrong vs ~12 actual — first-run copy polish. (video lines 61-68)</li>
+<li><strong>Inconsistent spacing/typography/color application:</strong>
+the audit notes provider labels rendered inconsistently across surfaces
+(input chips vs results chips vs onboarding "All set"), and the theme
+tokens (<code>AppSpaces</code>/<code>AppTypography</code>) are applied
+ad-hoc — there is no enforced "one token, every surface" rule, which is
+precisely the §11.4.162 "elements MUST NOT overlap, labels MUST NOT
+overlay labels, consistent spacing/type" requirement.</li>
+<li><strong>Coverage gap that blocks "cover with tests":</strong>
+UI-coverage audit rates only <strong>~45% of screens</strong> with a
+behavior-asserting UI test, <strong>~25% WEAK</strong>
+(<code>Class.forName</code> reachable-only), <strong>~30% GAP</strong>.
+There is <strong>no visual-regression layer</strong> at all — so today
+there is nothing that would catch a theming/transition/overlap
+regression. (audit §1, §5)</li>
+</ul>
+<hr />
+<h2 id="5-phased-parallelizable-plan--5-waves">5. Phased, parallelizable
+plan — 5 waves</h2>
+<p>Each wave is scoped to disjoint files where possible so they can run
+as parallel agents. Every UI change MUST ship light+dark variants and a
+§6.AB.3 falsifiability rehearsal per new test (§11.4.162 + Sixth/Seventh
+Law).</p>
+<h3
+id="wave-a--opendesign-integration--token-source-of-truth-foundation-gate-for-bc">Wave
+A — OpenDesign integration + token source-of-truth (FOUNDATION; gate for
+B/C)</h3>
+<ul>
+<li>Install OpenDesign MCP for the dev agents
+(<code>od mcp install …</code>); document in
+<code>docs/CODEGRAPH.md</code>-style guide
+<code>docs/opendesign-integration.md</code>.</li>
+<li>Author/adopt a <strong>Lava OpenDesign design system</strong>
+(<code>tokens.css</code> + <code>DESIGN.md</code>) carrying light+dark
+palette (seeded from brand red <code>0xFFB3261E</code>), full type
+scale, spacing scale, component tokens. Commit <code>tokens.css</code>
+as tracked source-of-truth.</li>
+<li>Add a <strong><code>tokens.css</code> → Compose codegen/sync
+step</strong> that (re)generates <code>Colors.kt</code> /
+<code>AppColors</code> defaults, <code>AppTypography</code>,
+<code>AppSpaces</code>, <code>AppShapes</code> from the CSS tokens, plus
+a <code>scripts/check-opendesign-token-sync.sh</code> parity gate (CSS
+token ↔︎ Kotlin token; fails on drift — §6.A real-binary-contract
+discipline).</li>
+<li><strong>Deliverables:</strong>
+<code>design/lava-opendesign/tokens.css</code> + <code>DESIGN.md</code>;
+codegen script; parity check + hermetic test;
+<code>libs.versions.toml</code> unchanged (OpenDesign is MCP/CSS, not a
+Gradle dep — stated honestly in the doc).</li>
+<li><strong>Operator input:</strong> authored-vs-adopted design system;
+brand font choice.</li>
+</ul>
+<h3
+id="wave-b--shared-screen-transition-system-the-smooth--stunning-core">Wave
+B — Shared screen-transition system (the "smooth + stunning" core)</h3>
+<ul>
+<li>Add a <strong>global transition spec</strong> in
+<code>core/navigation</code>: a tuned <code>MotionScheme</code> (e.g.
+<code>enterSpec</code>/<code>exitSpec</code> as
+<code>tween</code>/spring with <code>FastOutSlowInEasing</code>,
+durations ~300/250ms) so every destination shares one tasteful timing,
+replacing ad-hoc per-call easing.</li>
+<li><strong>Replace the <code>Default</code> (no-transition)
+destinations</strong> — searchInput→results, results→topic top-level —
+with directional slide+fade (forward/back aware), matching the
+onboarding quality bar.</li>
+<li>Introduce <strong>shared-element transitions</strong>
+(<code>SharedTransitionLayout</code> +
+<code>sharedBounds</code>/<code>sharedElement</code>) for the
+highest-value morphs: search-result row → topic detail (poster/title),
+provider card → provider config. Tasteful, ≤350ms, reduced-motion
+aware.</li>
+<li>Honour <code>prefers-reduced-motion</code> / animator-duration-scale
+(disable/shorten when the OS animation scale is 0) — accessibility, not
+jank.</li>
+<li><strong>Deliverables:</strong> <code>NavigationAnimations</code>
+extended with shared <code>MotionScheme</code> presets; per-destination
+reassignment in <code>app/.../MobileNavigation.kt</code>; shared-element
+wiring in search_result/topic + provider_config.</li>
+</ul>
+<h3
+id="wave-c--per-feature-look-and-feel-polish-via-opendesign-tokens-lightdark">Wave
+C — Per-feature look-and-feel polish via OpenDesign tokens
+(light+dark)</h3>
+<ul>
+<li>Sweep every <code>feature/*</code> screen to consume
+<code>AppTheme.colors/typography/spaces/shapes</code>
+(OpenDesign-sourced after Wave A) instead of ad-hoc literals; enforce
+consistent spacing/type.</li>
+<li><strong>Fix the visual defects this cycle owns:</strong> add
+<strong>Loading skeleton + Empty state</strong> to
+<code>feature/search_result</code> (video #5); route provider chips
+through <code>displayLabel()</code>/<code>displayName</code> (video #4);
+friendly mDNS API name + remote-vs-network label (video #8); correct
+provider-count copy (video #6).</li>
+<li>Add a brand font (Wave A asset) to <code>AppTypography</code>.</li>
+<li>Verify <strong>no overlap / no label collision / no font
+collision</strong> per §11.4.162 across all screens, light+dark.</li>
+<li><strong>Deliverables:</strong> polished screens; search
+Loading/Empty composables; label fixes; brand-font wiring.</li>
+</ul>
+<h3
+id="wave-d--visual-regression--transition--theming-test-infrastructure">Wave
+D — Visual-regression + transition + theming test infrastructure</h3>
+<ul>
+<li>Stand up a <strong>screenshot/visual-regression harness</strong>
+(Roborazzi or Paparazzi — JVM, no device, fits Local-Only CI/CD)
+producing per-pixel/perceptual-diff PASS/FAIL golden images,
+<strong>light AND dark</strong>, for every design-system component + key
+screens. This is the §11.4.162 mandated "visual regression test" layer
+that does not exist today.</li>
+<li><strong>Transition tests:</strong> Compose UI tests asserting the
+new transitions actually run (enter/exit progress, shared-element
+presence) and reduced-motion path; falsifiability per §6.AB.3 (break the
+spec → test fails).</li>
+<li><strong>Theming tests:</strong> extend
+<code>PaletteContractTest</code> to assert OpenDesign-token parity +
+contrast (WCAG, §11.4.107) for light+dark; <strong>overlap/collision
+assertions</strong> (§11.4.162: no node bounds overlap, no
+label-over-label).</li>
+<li><strong>Deliverables:</strong> Roborazzi/Paparazzi golden suite
+(light+dark); transition Compose UI tests; extended
+palette/contrast/overlap tests; <code>scripts/ci.sh</code> wiring.</li>
+</ul>
+<h3
+id="wave-e--close-the-ui-coverage-gaps-the-audit-named-concurrent-with-d">Wave
+E — Close the UI-coverage gaps the audit named (concurrent with D)</h3>
+<ul>
+<li>Per <code>docs/qa/2026-06-25-ui-coverage-audit.md §5</code>: upgrade
+the 5 WEAK <code>Class.forName</code> reachable challenges (C31–C35) to
+behavior+visual tests, and fill the GAP screens (account, main,
+search_input chips, credentials_manager) — now also screenshot-covered
+via the Wave D harness.</li>
+<li><strong>Deliverables:</strong> rewritten C31–C35; new
+behavior+screenshot challenges for gap screens.</li>
+</ul>
+<p><strong>Execution note (§6.X-debt / §6.AH):</strong> the rendered-UI
+Challenge + screenshot golden RUNS are gated by the standing
+darwin/arm64 emulator/KVM gap. Roborazzi/Paparazzi are JVM
+(Robolectric-backed) so the <em>visual-regression</em> layer runs
+host-side without an emulator — a real advantage. Full on-device
+Challenge execution remains operator-run on a Linux x86_64+KVM or
+container/VM gate-host. State this honestly in each test KDoc.</p>
+<hr />
+<h2 id="6-what-needs-operator-input-decisions-before-wave-a-starts">6.
+What needs operator input (decisions before Wave A starts)</h2>
+<ol type="1">
+<li><strong>OpenDesign design system:</strong> author a bespoke
+Lava-branded system, or adopt+rebrand one of the 142 shipped systems?
+(§11.4.74 extend-don't-reimplement favors authoring a Lava system that
+extends a base.)</li>
+<li><strong>Brand assets:</strong> the canonical brand palette source +
+a <strong>brand font</strong> (none exists today — all
+<code>FontFamily.Default</code>). Needed to seed <code>tokens.css</code>
++ <code>AppTypography</code>.</li>
+<li><strong><code>tokens.css</code> as tracked source-of-truth:</strong>
+confirm committing it + the generated Compose tokens, with the parity
+gate as the contract.</li>
+<li><strong>OpenDesign account/license:</strong> OpenDesign 0.7.0 is
+open-source/local-first (MCP server + CLI), so <strong>no paid account
+expected</strong> — but confirm <code>od</code> CLI availability on the
+gate host.</li>
+<li><strong>Visual-regression tool:</strong> Roborazzi vs Paparazzi
+(both JVM/local-CI-compatible; Roborazzi integrates with Compose UI
+tests, Paparazzi is render-only). Recommendation:
+<strong>Roborazzi</strong> (reuses the existing Compose test
+wiring).</li>
+<li><strong>Scope confirmation:</strong> the video's CRITICAL items (#1
+zero-results, #2/#3 provider-set mismatch) are <strong>functional
+bugs</strong>, not look-and-feel — confirm they stay in the separate
+search-fix track and this cycle owns the <em>visual/transition</em>
+subset (#4, #5, #6, #8) + the global polish.</li>
+</ol>
+<hr />
+<h2 id="7-bottom-line">7. Bottom line</h2>
+<ul>
+<li><strong>OpenDesign: ABSENT</strong> in Lava (present only in
+<code>panoptic/</code> constitution copies) → §11.4.162 non-compliant;
+integration is a real deliverable. It is an <strong>MCP/CSS-token tool,
+not a Gradle/Kotlin library</strong> — integration = adopt an OpenDesign
+design system + generate the existing Compose token layer from its
+<code>tokens.css</code>.</li>
+<li><strong>Theming: mature but hand-coded.</strong> Full light+dark, 8
+palettes + Material You, real token classes
+(<code>AppColors</code>/<code>AppTypography</code>/<code>AppSpaces</code>/…)
+— but literal-sourced, <strong>no brand font</strong>, <strong>no
+visual-regression tests</strong>.</li>
+<li><strong>Transitions: a system exists but is under-used.</strong>
+Onboarding is polished (320ms slide+fade); bottom-nav slides; but
+<strong>the top-level search→results→topic path uses
+<code>Default</code> = no transition</strong>, and <strong>no
+shared-element transitions exist anywhere</strong>.</li>
+<li><strong>Polish gaps owned by this cycle:</strong> missing search
+Loading/Empty states (blank screens), raw provider-id labels, raw IP
+display, wrong provider-count copy, inconsistent token application, ~55%
+of screens lacking a behavior-asserting UI test and 0% visual-regression
+coverage.</li>
+<li><strong>Plan:</strong> 5 waves — (A) OpenDesign integration + token
+source-of-truth, (B) shared/stunning transition system incl.
+shared-elements, (C) per-feature polish + visual-defect fixes via
+OpenDesign tokens (light+dark), (D) visual-regression + transition +
+theming test infra (Roborazzi/Paparazzi), (E) close audit UI-coverage
+gaps. Waves B/D/E parallelize after A; C depends on A.</li>
+</ul>
+<p><strong>Sources (OpenDesign):</strong> <a
+href="https://github.com/nexu-io/open-design">nexu-io/open-design</a>,
+<a
+href="https://github.com/nexu-io/open-design/blob/main/QUICKSTART.md">QUICKSTART.md</a>,
+<a
+href="https://github.com/nexu-io/open-design/blob/main/design-systems/README.md">design-systems/README.md</a>
+— (GitHub direct WebFetch blocked by network policy; facts via WebSearch
+result snippets, 2026-06-25).</p>
+</body>
+</html>

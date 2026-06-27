@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-14-lifecycle-ordering-bug-class-audit</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="lifecycle-init-ordering-bug-class-audit--apikeyprovider-sibling-hunt">Lifecycle
+init-ordering bug-class audit — ApiKeyProvider sibling hunt</h1>
+<p><strong>Date:</strong> 2026-06-14 <strong>Trigger:</strong> Severe
+production bug in <code>api-app/.../handoff/ApiKeyProvider.kt</code> —
+its <code>onCreate()</code> cached the key/port lambdas gated on
+<code>ApiApplication.controllerHolder/ keyStoreHolder != null</code>, on
+the FALSE comment "ContentProvider.onCreate() runs AFTER
+Application.onCreate()". Android runs
+<code>ContentProvider.onCreate()</code> BEFORE
+<code>Application.onCreate()</code>, so the holders (populated in
+<code>ApiApplication.onCreate()</code>) were always null → cache stayed
+<code>{ null }</code> → empty cursor forever → every auth-gated
+<code>/v1/{provider}</code> search 401'd. (Already fixed at source — see
+verdict #1.)</p>
+<p><strong>Scope:</strong> all <code>ContentProvider</code> subclasses,
+companion/global holders handed off across components, and
+once-snapshot-from-later-mutable-state patterns, across
+<code>api-app</code> + client <code>app</code>.</p>
+<h2
+id="documented-android-init-order-the-contract-every-finding-is-measured-against">Documented
+Android init order (the contract every finding is measured against)</h2>
+<pre><code>Application.attachBaseContext(base)
+  → [each &lt;provider&gt;] ContentProvider.onCreate()      ← runs HERE, FIRST
+Application.onCreate()                                  ← runs AFTER all providers
+  → Activity / Service lifecycles</code></pre>
+<p>Source: Android <code>ActivityThread.handleBindApplication</code>
+calls <code>installContentProviders()</code> (which invokes each
+provider's <code>onCreate()</code>) BEFORE
+<code>mInstrumentation.callApplicationOnCreate()</code>. Consequence:
+any <code>ContentProvider.onCreate()</code> that reads state written in
+<code>Application.onCreate()</code> reads it as still-uninitialised.</p>
+<h2 id="candidates-audited">Candidates audited</h2>
+<h3 id="1-api-apphandoffapikeyproviderkt--the-original-bug-fixed">1.
+<code>api-app/.../handoff/ApiKeyProvider.kt</code> — the original bug
+(FIXED)</h3>
+<ul>
+<li><strong>Holders read:</strong>
+<code>ApiApplication.controllerHolder</code> (:83),
+<code>keyStoreHolder</code> (:84),
+<code>controllerHolder?.state?.value</code> (:90) — all populated in
+<code>ApiApplication.onCreate()</code> (:49-50).</li>
+<li><strong>Init order:</strong> provider <code>onCreate()</code> (:57)
+runs BEFORE <code>ApiApplication.onCreate()</code>.</li>
+<li><strong>Verdict:</strong> was BUG (cache-in-onCreate of
+later-populated holders); now <strong>SAFE/FIXED.</strong> The
+production default lambdas (:46 <code>keyProvider</code>, :53
+<code>portProvider</code>) resolve the holders + the
+<code>Running</code> state LAZILY per <code>query()</code> via
+<code>resolveRunningKey()</code> (:82) /
+<code>resolveRunningPort()</code> (:89). <code>onCreate()</code>
+(:57-78) now caches nothing and just <code>return true</code>. Because
+<code>state</code> is a live <code>MutableStateFlow</code>
+(<code>ApiEngineController.kt:44-45</code>) read by <code>.value</code>
+on every query, it is also clause-3 safe (no stale snapshot).</li>
+<li><strong>Fix pattern (canonical):</strong> resolve lazily per-use;
+never cache in <code>onCreate</code> from later-populated state.</li>
+</ul>
+<h3 id="2-apphandoffapikeyclientkt--client-side-reader">2.
+<code>app/.../handoff/ApiKeyClient.kt</code> — client-side reader</h3>
+<ul>
+<li>Queries the provider lazily on every <code>read()</code> call
+(:37-72) via <code>context.contentResolver.query(...)</code>. Holds NO
+companion state; the only companion member is a <code>const TAG</code>
+(:74-78).</li>
+<li><strong>Init order:</strong> N/A — no early caching; resolves at
+call time.</li>
+<li><strong>Verdict:</strong> <strong>SAFE.</strong></li>
+</ul>
+<h3
+id="3-apiapplication-companion-holders-controllerholder-keystoreholder">3.
+<code>ApiApplication</code> companion holders
+(<code>controllerHolder</code>, <code>keyStoreHolder</code>)</h3>
+<ul>
+<li><code>@Volatile var ... = null</code>, <code>private set</code>, set
+only in <code>onCreate()</code> (:49-50) +
+<code>@VisibleForTesting setHoldersForTest</code> (:101).</li>
+<li><strong>Only reader in the entire repo:</strong>
+<code>ApiKeyProvider</code> (verified by repo-wide grep — no other
+<code>*.kt</code> reads either holder). Since the sole reader now reads
+lazily, the hand-off has no remaining null-at-read window in
+production.</li>
+<li><strong>Verdict:</strong> <strong>SAFE</strong> (given finding #1's
+fix).</li>
+</ul>
+<h3 id="4-appmainactivitykt--theme--showonboarding">4.
+<code>app/.../MainActivity.kt</code> — <code>theme</code> /
+<code>showOnboarding</code></h3>
+<ul>
+<li><code>var theme/showOnboarding by mutableStateOf(null)</code> are
+LOCAL vars inside <code>onCreate()</code> (:101-102), collected live
+from flows in two <code>repeatOnLifecycle</code> blocks (:119-129). They
+are not companion/global holders and not read by any earlier
+component.</li>
+<li><strong>Verdict:</strong> <strong>SAFE</strong> (live flow
+collection, not an early snapshot).</li>
+</ul>
+<h3 id="5-appcrashnavteardowncrashreporterkt">5.
+<code>app/.../crash/NavTeardownCrashReporter.kt</code></h3>
+<ul>
+<li><code>install()</code> (:69) reads
+<code>Thread.getDefaultUncaughtExceptionHandler()</code> at install time
+and chains it; <code>uncaughtException</code> resolves
+<code>previous</code> at crash time. No Application-scoped state cached
+early. Companion holds only constants (:52-61).</li>
+<li><strong>Verdict:</strong> <strong>SAFE.</strong></li>
+</ul>
+<h3 id="6-applavaapplicationkt">6.
+<code>app/.../LavaApplication.kt</code></h3>
+<ul>
+<li>No companion holders published for earlier components; companion
+holds only <code>TAG</code> (:108). Reads its own <code>@Inject</code>
+deps inside <code>onCreate()</code> (correct — Hilt-injected by
+then).</li>
+<li><strong>Verdict:</strong> <strong>SAFE.</strong></li>
+</ul>
+<h3 id="7-api-app-mainactivity--apiengineservice-oncreate">7. api-app
+<code>MainActivity</code> / <code>ApiEngineService</code>
+<code>onCreate()</code></h3>
+<ul>
+<li>Neither reads
+<code>controllerHolder</code>/<code>keyStoreHolder</code>
+(grep-verified). Activities/Services run AFTER
+<code>Application.onCreate()</code> regardless, so even if they did it
+would be ordered correctly.</li>
+<li><strong>Verdict:</strong> <strong>SAFE.</strong></li>
+</ul>
+<h2
+id="negative-space-checks-patterns-deliberately-searched-for-none-found">Negative-space
+checks (patterns deliberately searched for, none found)</h2>
+<ul>
+<li><strong>AndroidX App Startup
+<code>Initializer&lt;&gt;</code>:</strong> none in
+<code>api-app</code>/<code>app</code> (grep
+<code>: Initializer&lt;</code> empty). No
+<code>androidx.startup.InitializationProvider</code> in either
+manifest.</li>
+<li><strong><code>attachBaseContext</code> overrides:</strong> none
+(grep empty).</li>
+<li><strong><code>by lazy</code> snapshots of holder/engine/state in
+main source:</strong> none (grep empty).</li>
+<li><strong>Other <code>ContentProvider</code> subclasses:</strong> only
+<code>ApiKeyProvider</code> (production) + <code>FileProvider</code>
+(framework, no custom caching) + the test <code>FakeKeyProvider</code>
+stub. The <code>app</code> manifest <code>&lt;provider&gt;</code> is
+just <code>androidx.core.content.FileProvider</code>.</li>
+<li><strong>Other companion <code>var ...Holder</code> published across
+components:</strong> only the two <code>ApiApplication</code> holders
+(grep-verified).</li>
+</ul>
+<h2 id="test-bluff-note-why-the-original-bug-shipped-green">Test-bluff
+note (why the original bug shipped green)</h2>
+<p><code>app/src/test/.../ApiKeyClientTest.kt</code> is a CLIENT-side
+test that registers a <code>FakeKeyProvider</code> stub (:93) via
+<code>ShadowContentResolver</code> and exercises
+<code>ApiKeyClient.read()</code>. It NEVER instantiates the real
+<code>ApiKeyProvider</code>, never drives its <code>onCreate()</code>,
+and never touches <code>ApiApplication</code>'s holder hand-off. So the
+failing component's real lifecycle path
+(<code>ApiKeyProvider.onCreate()</code> → holder read) was entirely
+outside any test's reach — the canonical §6.J bluff: the test that
+"covers the handoff" structurally cannot fail when the provider half of
+the handoff breaks. A real-stack test must instantiate
+<code>ApiKeyProvider</code>, populate holders only AFTER
+<code>attachInfo</code>/onCreate (simulating real ordering), and assert
+<code>query()</code> returns the row once the engine reaches
+<code>Running</code> — i.e. assert the LAZY resolution, not a
+<code>withFakes</code>-substituted lambda. (Recommended; not implemented
+in this read-only audit.)</p>
+<h2 id="bottom-line">Bottom line</h2>
+<p><code>ApiKeyProvider</code> is an <strong>ISOLATED case</strong> of
+the inverted-lifecycle / cache-in-onCreate bug class. Repo-wide there is
+exactly ONE cross-component companion hand-off
+(<code>ApiApplication</code> holders → <code>ApiKeyProvider</code>), and
+after the source fix its sole reader resolves lazily, closing the
+null-at-read window. No sibling ContentProvider, App Startup
+Initializer, <code>attachBaseContext</code>, or <code>by lazy</code>
+snapshot reads Application-scoped state early. <strong>No further
+lazy-resolution fixes are required.</strong> The remaining gap is a test
+gap, not a code gap: the broken path had no real-stack test (item
+above).</p>
+</body>
+</html>

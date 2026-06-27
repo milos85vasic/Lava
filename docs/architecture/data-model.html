@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>data-model</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="architecture-data-model-android-room--lava-api-go-sql">Architecture:
+Data model (Android Room + lava-api-go SQL)</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-08T00:00:00Z <strong>Classification:</strong>
+project-specific</p>
+<p>Two independent persistence layers. Every claim below is read from
+real schema files (§11.4.6 no-guessing).</p>
+<h2
+id="1-android-client--room-sqlite-lavadatabaseappdatabase-schema-v11">1.
+Android client — Room (SQLite), <code>lava.database.AppDatabase</code>,
+schema <strong>v11</strong></h2>
+<p>Source of truth:
+<code>core/database/schemas/lava.database.AppDatabase/11.json</code>
+(Room-generated; checked in). 20 tables in v11:</p>
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Tables</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Search &amp; history</td>
+<td><code>Search</code>, <code>Suggest</code>,
+<code>HistoryTopic</code>, <code>FavoriteSearch</code>,
+<code>FavoriteTopic</code>, <code>Bookmark</code></td>
+</tr>
+<tr>
+<td>Forum</td>
+<td><code>ForumCategoryEntity</code>, <code>ForumMetadata</code>,
+<code>forum_provider_selections</code>,
+<code>search_provider_selections</code></td>
+</tr>
+<tr>
+<td>Endpoints / discovery</td>
+<td><code>Endpoint</code></td>
+</tr>
+<tr>
+<td>Provider config &amp; credentials</td>
+<td><code>provider_configs</code>, <code>provider_credentials</code>,
+<code>provider_credential_binding</code>,
+<code>provider_sync_toggle</code>, <code>credentials_entry</code></td>
+</tr>
+<tr>
+<td>Cloned providers / mirrors</td>
+<td><code>cloned_provider</code>, <code>tracker_mirror_health</code>,
+<code>tracker_mirror_user</code></td>
+</tr>
+<tr>
+<td>Sync</td>
+<td><code>sync_outbox</code></td>
+</tr>
+</tbody>
+</table>
+<p>Schema history: <code>5.json</code> → <code>10.json</code> →
+<code>11.json</code> (the v10→v11 migration added the
+<code>use_anonymous</code> column to provider config — the fix from the
+prior completeness cycle). Migrations are Room <code>Migration</code>
+objects in <code>core/database</code>; schemas are validated against the
+checked-in JSON.</p>
+<pre class="mermaid"><code>erDiagram
+    provider_configs ||--o{ provider_credential_binding : &quot;binds&quot;
+    provider_credentials ||--o{ provider_credential_binding : &quot;used-by&quot;
+    provider_configs ||--o{ provider_sync_toggle : &quot;sync flag&quot;
+    cloned_provider ||--o{ provider_configs : &quot;clone of&quot;
+    Search ||--o{ search_provider_selections : &quot;scoped to&quot;
+    ForumCategoryEntity ||--o{ forum_provider_selections : &quot;scoped to&quot;
+    tracker_mirror_health }o--|| Endpoint : &quot;health of&quot;</code></pre>
+<p>(Relations inferred from table names + the provider-config feature;
+column-level FKs are documented in <code>11.json</code> — read it for
+exact columns/indices.)</p>
+<h2 id="2-lava-api-go--sql-postgres-or-sqlite-schema-lava_api">2.
+lava-api-go — SQL (Postgres or SQLite), schema
+<code>lava_api</code></h2>
+<p>Storage is <strong>pluggable</strong>
+(<code>lava-api-go/internal/storage/{factory,sqlite}.go</code> — SQLite
+for local/dev, Postgres for the deployed stack). DDL source of truth:
+<code>lava-api-go/migrations/*.up.sql</code> (golang-migrate). Real
+tables (verbatim from the migration files):</p>
+<p><strong><code>lava_api.response_cache</code></strong> (0001 +
+realigned 0005 — must match <code>submodules/cache/pkg/postgres</code>'s
+<code>(cache_key, value, expires_at)</code> INSERT shape; a 2.0.0
+mismatch silently cached nothing — forensic note in 0001):</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> lava_api.response_cache (</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    cache_key   TEXT <span class="kw">PRIMARY</span> <span class="kw">KEY</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">value</span>       BYTEA <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    expires_at  TIMESTAMPTZ</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<p><strong><code>lava_api.request_audit</code></strong> (0002):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> lava_api.request_audit (</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> BIGSERIAL <span class="kw">PRIMARY</span> <span class="kw">KEY</span>, received_at TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now(),</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">method</span> TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>, path TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>, <span class="kw">query</span> TEXT, client_ip INET,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    auth_realm_hash TEXT, upstream_status <span class="dt">SMALLINT</span>, upstream_ms <span class="dt">INTEGER</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    cache_outcome TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>, bytes_out <span class="dt">INTEGER</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<p><strong><code>lava_api.rate_limit_bucket</code></strong> (0003) —
+token-bucket per (client_ip, route_class):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> lava_api.rate_limit_bucket (</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    client_ip INET <span class="kw">NOT</span> <span class="kw">NULL</span>, route_class TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    tokens <span class="dt">DOUBLE</span> <span class="dt">PRECISION</span> <span class="kw">NOT</span> <span class="kw">NULL</span>, last_refill_at TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">PRIMARY</span> <span class="kw">KEY</span> (client_ip, route_class)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<p><strong><code>lava_api.login_attempt</code></strong> (0004) —
+usernames stored only as <code>username_hash</code> (§6.H):</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> lava_api.login_attempt (</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">id</span> BIGSERIAL <span class="kw">PRIMARY</span> <span class="kw">KEY</span>, client_ip INET <span class="kw">NOT</span> <span class="kw">NULL</span>, username_hash TEXT <span class="kw">NOT</span> <span class="kw">NULL</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    succeeded <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span>, attempted_at TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now()</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<p><strong><code>lava_api.provider_credentials</code></strong> (0006) —
+secrets stored <strong>encrypted at the application layer</strong>
+before insert
+(<code>encrypted_password</code>/<code>encrypted_token</code>/<code>encrypted_api_key</code>/<code>encrypted_api_secret</code>);
+plaintext never persisted (§6.H):</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="cf">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> lava_api.provider_credentials (</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    provider_id TEXT <span class="kw">PRIMARY</span> <span class="kw">KEY</span>, auth_type TEXT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="st">&#39;none&#39;</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    username TEXT, encrypted_password TEXT, encrypted_token TEXT,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    encrypted_api_key TEXT, encrypted_api_secret TEXT, cookie_value TEXT,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    expires_at TIMESTAMPTZ, is_active <span class="dt">BOOLEAN</span> <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> <span class="kw">true</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    last_used_at TIMESTAMPTZ, created_at TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now(),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    updated_at TIMESTAMPTZ <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">DEFAULT</span> now()</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<p><strong><code>lava_api.provider_configs</code></strong> (0007) —
+per-provider timeouts / mirror / capability toggles
+(<code>timeout_ms</code>, <code>preferred_mirror_url</code>,
+<code>is_enabled</code>, <code>search_enabled</code>,
+<code>browse_enabled</code>, …; read the full file for the complete
+column set).</p>
+<blockquote>
+<p>Migration 0005 is intentionally destructive on
+<code>response_cache</code> (a response cache repopulates on demand;
+<code>request_audit</code> is preserved separately) — see the file
+header.</p>
+</blockquote>
+<h2 id="3-notes">3. Notes</h2>
+<ul>
+<li>The two layers are <strong>independent</strong>: the Android Room DB
+is the app's local state; <code>lava_api</code> is the server's
+cache/audit/rate-limit/credential store. They are not replicated into
+each other.</li>
+<li><code>provider_credentials</code> exists in <strong>both</strong>
+layers with different intent: Room stores the user's local credential
+entries (device-side); <code>lava_api.provider_credentials</code> stores
+server-side encrypted creds for the API's own multi-provider auth.</li>
+<li><strong>UNCONFIRMED:</strong> exact Room column types/indices per
+table (documented in <code>11.json</code>, not re-typed here); the
+Jackett sidecar adds no schema (it owns its own <code>/config</code>
+store outside <code>lava_api</code>).</li>
+</ul>
+<h2 id="sources-verified">Sources verified</h2>
+<ul>
+<li><code>core/database/schemas/lava.database.AppDatabase/11.json</code>
+(20 tables, v11).</li>
+<li><code>lava-api-go/migrations/000{1..7}_*.up.sql</code> (verbatim DDL
+above).</li>
+<li><code>lava-api-go/internal/storage/{factory,sqlite}.go</code>
+(pluggable SQLite/Postgres).</li>
+</ul>
+</body>
+</html>

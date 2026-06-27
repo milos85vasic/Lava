@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-24-search-timeout-coordination-analysis</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="2026-06-24--search-timeout-coordination-analysis">2026-06-24 —
+Search Timeout Coordination Analysis</h1>
+<p>Read-only investigation supporting the concurrent fix streams:</p>
+<ul>
+<li><strong>Engine fix:</strong> add a per-handler deadline so
+<code>GET /v1/{provider}/search</code> always returns before the client
+read-timeout fires.</li>
+<li><strong>Client fix:</strong> make the in-flight search job
+cancellable on back-press.</li>
+</ul>
+<p>This document establishes the <strong>exact numbers</strong>,
+<strong>scope verdict</strong>, and <strong>recommended coordinated
+timeout values</strong> with file:line evidence for every claim.</p>
+<hr />
+<h2
+id="1-scope-verdict-yts-specific-bug-or-general-slow-provider-bug">1.
+Scope verdict: yts-specific bug or general slow-provider bug?</h2>
+<p><strong>Verdict: GENERAL — any provider whose upstream is reachable
+but slow from the phone's mobile network can trigger the same
+SocketTimeoutException.</strong></p>
+<p>Evidence:</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th><code>DefaultTimeout</code></th>
+<th>mirrors</th>
+<th><code>perAttemptTimeout</code></th>
+<th>Can exceed 30s?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>YTS</td>
+<td>20s (<code>:yts/client.go:46</code>)</td>
+<td>4 (<code>:yts/client.go:35-40</code>)</td>
+<td>8s (<code>:yts/client.go:51</code>)</td>
+<td>YES — 4 × 8s = 32s theoretical</td>
+</tr>
+<tr>
+<td>ThePirateBay</td>
+<td>20s (<code>:thepiratebay/client.go:59</code>)</td>
+<td>1 (<code>:thepiratebay/client.go:51-53</code>)</td>
+<td>8s (<code>:thepiratebay/client.go:64</code>)</td>
+<td>No (1 × 8s ≤ 20s ≤ 30s)</td>
+</tr>
+<tr>
+<td>TorrentsCSV</td>
+<td>20s (<code>:torrentscsv/client.go:66</code>)</td>
+<td>1 (<code>:torrentscsv/client.go:55-57</code>)</td>
+<td>8s (<code>:torrentscsv/client.go:71</code>)</td>
+<td>No (1 × 8s ≤ 20s ≤ 30s)</td>
+</tr>
+<tr>
+<td>BitSearch</td>
+<td>20s (<code>:bitsearch/client.go:36</code>)</td>
+<td>1</td>
+<td>— (no mirror failover)</td>
+<td>No (20s ≤ 30s)</td>
+</tr>
+<tr>
+<td>Knaben</td>
+<td>20s (<code>:knaben/client.go:43</code>)</td>
+<td>1</td>
+<td>—</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Nyaa</td>
+<td>20s (<code>:nyaa/client.go:39</code>)</td>
+<td>1</td>
+<td>—</td>
+<td>No</td>
+</tr>
+<tr>
+<td>TokyoToshokan</td>
+<td>20s (<code>:tokyotosho/client.go:49</code>)</td>
+<td>1</td>
+<td>—</td>
+<td>No</td>
+</tr>
+<tr>
+<td>TorrentDownloads</td>
+<td>20s (<code>:torrentdownloads/client.go:37</code>)</td>
+<td>1</td>
+<td>—</td>
+<td>No</td>
+</tr>
+<tr>
+<td>rutracker</td>
+<td>30s (<code>:rutracker/client.go:163</code>)</td>
+<td>N/A (single)</td>
+<td>—</td>
+<td>YES — 30s == client timeout (zero slack)</td>
+</tr>
+<tr>
+<td>kinozal</td>
+<td>30s (<code>:kinozal/client.go:117</code>)</td>
+<td>N/A</td>
+<td>—</td>
+<td>YES — 30s == client timeout</td>
+</tr>
+<tr>
+<td>nnmclub</td>
+<td>30s (<code>:nnmclub/client.go:113</code>)</td>
+<td>N/A</td>
+<td>—</td>
+<td>YES — 30s == client timeout</td>
+</tr>
+<tr>
+<td>archiveorg</td>
+<td>30s (<code>:archiveorg/client.go:34</code>)</td>
+<td>N/A</td>
+<td>—</td>
+<td>YES — zero slack</td>
+</tr>
+<tr>
+<td>gutenberg</td>
+<td>30s (<code>:gutenberg/client.go:42</code>)</td>
+<td>N/A</td>
+<td>—</td>
+<td>YES — zero slack</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why YTS surfaces this first:</strong> YTS has 4 mirrors
+iterated sequentially, and the primary mirror <code>yts.mx</code> was
+observed NXDOMAIN on public DNS on 2026-06-13
+(<code>lava-api-go/internal/provider/curated/yts/client.go:28-30</code>).
+On a mobile network, DNS resolution + TCP handshake + slow/blocked
+yts.mx can consume the full <code>perAttemptTimeout=8s</code> before
+failing over to the next mirror, accumulating ≈8s × N-slow-mirrors of
+latency before a working mirror responds.</p>
+<p>The 5 non-curated providers (rutracker, kinozal, nnmclub, archiveorg,
+gutenberg) all use <code>http.Client.Timeout=30s</code> with zero
+handler-level deadline — a single slow upstream response hits the
+Android client 30s read timeout exactly, with no margin.</p>
+<p><strong>Conclusion:</strong> The bug class is "provider upstream
+slow/stale from a mobile network hits the Android OkHttp read timeout."
+YTS triggered it first due to its 4-mirror failover + a known stale
+primary domain; the same failure mode applies to any single-provider
+search (<code>GET /v1/{provider}/search</code>) against a slow provider.
+The <code>GET /v1/multi</code> path (SSE streaming) is a separate
+concern documented in §4 below.</p>
+<hr />
+<h2 id="2-full-timeout-chain-end-to-end">2. Full timeout chain, end to
+end</h2>
+<h3 id="android-client-layer">Android client layer</h3>
+<p>File:
+<code>core/network/impl/src/main/kotlin/lava/network/di/NetworkModule.kt</code></p>
+<pre><code>.connectTimeout(30, TimeUnit.SECONDS)   // line 173
+.readTimeout(30, TimeUnit.SECONDS)      // line 174
+.writeTimeout(30, TimeUnit.SECONDS)     // line 175</code></pre>
+<p>This is the <code>@Named("lan")</code> <code>OkHttpClient</code> used
+for all calls to the mDNS- discovered local engine. No
+<code>callTimeout()</code> is configured (a <code>callTimeout</code>
+would cap the entire roundtrip including connection; its absence means
+the only bound is the per-phase
+readTimeout/writeTimeout/connectTimeout). The client is shared by all
+API calls including <code>GET /v1/{provider}/search</code> and
+<code>GET /v1/multi</code>.</p>
+<h3 id="http2-server-layer">HTTP/2 server layer</h3>
+<p>File: <code>lava-api-go/internal/server/server.go</code></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ReadHeaderTimeout<span class="op">:</span> <span class="dv">5</span> <span class="op">*</span> time<span class="op">.</span>Second<span class="op">,</span>   <span class="co">// line 83 (h2srv) and line 88 (metrics srv)</span></span></code></pre></div>
+<p><code>ReadHeaderTimeout=5s</code> applies only to reading the
+incoming request headers from the Android client. There is
+<strong>no</strong> <code>ReadTimeout</code>, <code>WriteTimeout</code>,
+or <code>IdleTimeout</code> on the server — response time is unbounded
+at the transport layer. The 5s header-read guard is appropriate; the
+missing response deadline is the gap.</p>
+<h3
+id="single-provider-search-handler-get-v1providersearch">Single-provider
+search handler: <code>GET /v1/{provider}/search</code></h3>
+<p>File: <code>lava-api-go/internal/handlers/v1/search.go</code></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>result<span class="op">,</span> err <span class="op">:=</span> p<span class="op">.</span>Search<span class="op">(</span>c<span class="op">.</span>Request<span class="op">.</span>Context<span class="op">(),</span> opts<span class="op">,</span> creds<span class="op">)</span>   <span class="co">// line 64</span></span></code></pre></div>
+<p><code>c.Request.Context()</code> is the raw Gin request context — it
+carries the HTTP transport's context (which cancels on client
+disconnect) but <strong>no additional deadline</strong>. If the client
+stays connected (which it does until OkHttp fires its own readTimeout),
+<code>p.Search()</code> runs until the provider's own
+<code>http.Client.Timeout</code> expires. There is no handler-level
+<code>context.WithTimeout</code> wrapping the call.</p>
+<h3 id="multi-search-handler-get-v1multi">Multi-search handler:
+<code>GET /v1/multi</code></h3>
+<p>File: <code>lava-api-go/internal/handlers/v1/search.go</code></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ctx<span class="op">,</span> cancel <span class="op">:=</span> context<span class="op">.</span>WithTimeout<span class="op">(</span>c<span class="op">.</span>Request<span class="op">.</span>Context<span class="op">(),</span> <span class="dv">30</span><span class="op">*</span>time<span class="op">.</span>Second<span class="op">)</span>   <span class="co">// line 201</span></span></code></pre></div>
+<p>The multi-search handler does apply a per-provider deadline of 30s.
+However this is sequential (providers are processed one at a time inside
+<code>c.Stream()</code> at line 156). See §4 for the
+streaming/architecture analysis.</p>
+<h3 id="yts-provider-layer">YTS provider layer</h3>
+<p>File:
+<code>lava-api-go/internal/provider/curated/yts/client.go</code></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> DefaultTimeout    <span class="op">=</span> <span class="dv">20</span> <span class="op">*</span> time<span class="op">.</span>Second   <span class="co">// line 46  (entire http.Client cap)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> perAttemptTimeout <span class="op">=</span>  <span class="dv">8</span> <span class="op">*</span> time<span class="op">.</span>Second   <span class="co">// line 51  (per-mirror failover cap)</span></span></code></pre></div>
+<p>With 4 mirrors (lines 35-40) and the primary <code>yts.mx</code>
+DNS-dead or slow, the worst-case path:</p>
+<pre><code>attempt 1 (yts.mx):  8s timeout fires → fail, continue
+attempt 2 (yts.bz):  8s timeout fires → fail, continue
+attempt 3 (yts.lt):  http.Client.Timeout=20s remaining cap; if &lt; 20s elapsed, 
+                     this attempt gets a bounded context; if &gt; 20s elapsed,
+                     ctx is already cancelled
+attempt 4 (yts.am):  similar</code></pre>
+<p>The <code>http.Client.Timeout=20s</code> wraps the ENTIRE
+<code>Search()</code> call (the whole mirror loop, not per attempt). The
+<code>perAttemptTimeout=8s</code> bounds each mirror individually
+<strong>only when len(baseURLs) &gt; 1</strong> (line 150). So maximum
+total latency from the yts <code>Search()</code> call is bounded at
+<code>DefaultTimeout=20s</code> by the
+<code>http.Client.Timeout</code>.</p>
+<p>However, <code>http.Client.Timeout</code> is enforced by the Go HTTP
+runtime, which cancels the context after 20s. The handler at line 64 has
+<strong>no additional deadline</strong> — so the 20s yts timeout is the
+only bound. Since <code>20s &lt; 30s</code>, yts alone cannot exceed the
+client read timeout in theory.</p>
+<p><strong>What actually causes the &gt;30s
+SocketTimeoutException:</strong></p>
+<p>The <code>http.Client.Timeout</code> on the <code>http.Client</code>
+value at
+<code>lava-api-go/internal/provider/curated/yts/client.go:92</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>http<span class="op">:</span> <span class="op">&amp;</span>http<span class="op">.</span>Client<span class="op">{</span>Timeout<span class="op">:</span> DefaultTimeout<span class="op">},</span>   <span class="co">// line 92</span></span></code></pre></div>
+<p>...only applies when the <code>Search()</code> call uses that
+<code>http.Client</code> directly. The <code>perAttemptTimeout</code> is
+a <code>context.WithTimeout</code> wrapping each mirror attempt (line
+151). BUT the outer handler context at <code>search.go:64</code>
+(<code>c.Request.Context()</code>) is passed <strong>into</strong>
+<code>p.Search()</code> as the parent context. If
+<code>c.Request.Context()</code> itself has a long-lived deadline (it
+doesn't — it's the raw Gin/HTTP2 context), the
+<code>http.Client.Timeout</code> is the true bound.</p>
+<p><strong>The real failure scenario</strong> confirmed by the
+Crashlytics <code>SocketTimeoutException</code> at
+<code>Http2Stream.takeHeaders</code> (not at <code>read</code> or
+<code>write</code>): the problem is that OkHttp sent the HTTP/2 headers
+for <code>GET /v1/yts/search</code> and then waited 30s for the response
+headers — the Go server accepted the connection but the
+<code>Search()</code> call took close to or over 20s (e.g. attempting
+dead mirrors, or slow from this specific HUAWEI device's mobile
+network), causing OkHttp's <code>readTimeout</code> to fire first.</p>
+<p>The 30s OkHttp readTimeout == 20s provider timeout + ~10s network
+overhead headroom is razor-thin on a slow mobile network. Any
+combination of:</p>
+<ul>
+<li>slow DNS for one mirror</li>
+<li>TCP SYN timeout (often 30s on mobile carriers)</li>
+<li>slow TLS handshake</li>
+<li>HTTP keep-alive reuse with a stale server connection</li>
+</ul>
+<p>...can push the actual elapsed response time past 30s before Go
+delivers the response headers.</p>
+<p><strong>Summary of where the &gt;30s comes from:</strong></p>
+<pre><code>Android OkHttp readTimeout:          30s  (NetworkModule.kt:174)
+Go handler deadline:                 NONE (search.go:64)
+YTS http.Client.Timeout:            20s  (yts/client.go:46)
+YTS perAttemptTimeout:               8s  (yts/client.go:51)
+YTS mirrors:                         4   (yts/client.go:35-40)
+Go server ReadHeaderTimeout:         5s  (server.go:83, inbound only)
+Network overhead (mobile):           variable
+
+Worst case: 20s (yts search) + variable network jitter &gt; 30s OkHttp readTimeout
+            → SocketTimeoutException at Http2Stream.takeHeaders</code></pre>
+<hr />
+<h2 id="3-recommended-coordinated-timeout-values">3. Recommended
+coordinated timeout values</h2>
+<p>The root problem is zero margin between the engine's max response
+time and the client's read timeout. The fix must establish a strict
+ordering:</p>
+<pre><code>provider_http_timeout &lt; handler_deadline &lt; client_readTimeout</code></pre>
+<h3 id="recommended-values">Recommended values</h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Current</th>
+<th>Recommended</th>
+<th>File</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>YTS <code>DefaultTimeout</code></td>
+<td>20s</td>
+<td><strong>15s</strong></td>
+<td><code>yts/client.go:46</code></td>
+<td>Reduces max yts search time; 4 × 8s perAttempt = 32s but outer cap
+at 15s keeps total bounded</td>
+</tr>
+<tr>
+<td>YTS <code>perAttemptTimeout</code></td>
+<td>8s</td>
+<td><strong>5s</strong></td>
+<td><code>yts/client.go:51</code></td>
+<td>4 mirrors × 5s = 20s max failover still within 15s outer cap; dead
+mirrors fail fast</td>
+</tr>
+<tr>
+<td>TPB/TorrentsCSV <code>perAttemptTimeout</code></td>
+<td>8s</td>
+<td><strong>5s</strong></td>
+<td>respective client.go</td>
+<td>Align with YTS; single-mirror providers are unaffected in
+practice</td>
+</tr>
+<tr>
+<td><code>GetSearch</code> handler deadline</td>
+<td>none</td>
+<td><strong>20s</strong></td>
+<td><code>search.go:64</code></td>
+<td><code>context.WithTimeout(c.Request.Context(), 20*time.Second)</code>
+before <code>p.Search()</code> — guarantees engine returns within 20s
+with result or error, leaving 10s slack below client timeout</td>
+</tr>
+<tr>
+<td><code>GetMultiSearch</code> per-provider deadline</td>
+<td>30s</td>
+<td><strong>20s</strong></td>
+<td><code>search.go:201</code></td>
+<td>Match the single-provider handler deadline; reduces max per-provider
+wait in SSE stream</td>
+</tr>
+<tr>
+<td>Android OkHttp <code>readTimeout</code> (LAN)</td>
+<td>30s</td>
+<td><strong>45s</strong></td>
+<td><code>NetworkModule.kt:174</code></td>
+<td>Raise above the engine's 20s handler deadline + 10s+ network margin;
+avoids client firing before engine can respond</td>
+</tr>
+<tr>
+<td>Android OkHttp <code>callTimeout</code> (LAN)</td>
+<td>none</td>
+<td><strong>120s</strong></td>
+<td><code>NetworkModule.kt</code> (new)</td>
+<td>For multi-search SSE with N providers × 20s, add a callTimeout to
+cap the total connection lifetime; prevents infinite hangs if SSE stream
+stalls</td>
+</tr>
+<tr>
+<td>Go server <code>WriteTimeout</code></td>
+<td>none</td>
+<td><strong>25s</strong></td>
+<td><code>server.go</code></td>
+<td>Cap the server's response-writing side to match; prevents zombie
+connections</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The key invariant:</strong></p>
+<pre><code>engine handler deadline (20s) + network round-trip margin (5-10s) &lt; client readTimeout (45s)</code></pre>
+<p>With these values:</p>
+<ul>
+<li>A dead provider times out in the engine at 20s, the engine returns a
+<code>provider_error</code>, and the client receives the response at
+~20s + network latency — well under 45s.</li>
+<li>The client <code>readTimeout=45s</code> fires only if the engine
+itself hangs (which is now bounded by the handler deadline and the
+server WriteTimeout).</li>
+<li>The <code>callTimeout=120s</code> on the Android LAN client caps
+multi-search SSE at 120s total regardless of how many providers are
+selected.</li>
+</ul>
+<h3 id="whether-to-add-android-calltimeout">Whether to add Android
+<code>callTimeout</code></h3>
+<p>A <code>callTimeout</code> in OkHttp limits the entire call (connect
++ send + receive). For SSE (multi-search), this is appropriate because
+the stream is open for N × 20s. For single-provider search,
+<code>callTimeout=120s</code> is a safety backstop only — the handler
+deadline of 20s dominates. Adding <code>callTimeout</code> is LOW RISK
+and HIGH VALUE for the long-running SSE case.</p>
+<hr />
+<h2
+id="4-on-device-reachability-is-yts-or-other-providers-reachable-from-a-typical-mobile-network">4.
+On-device reachability: is YTS (or other providers) reachable from a
+typical mobile network?</h2>
+<h3 id="cloudflare--flaresolverr-wiring">Cloudflare / FlareSolverr
+wiring</h3>
+<p>All 8 curated providers are documented as <strong>"anonymous, no
+Cloudflare"</strong> in their package comments:</p>
+<ul>
+<li><code>bitsearch/client.go:2</code> — "anonymous, no Cloudflare"</li>
+<li><code>knaben/client.go:3</code> — "no Cloudflare challenge"</li>
+<li><code>nyaa/client.go:2</code> — "anonymous, no Cloudflare"</li>
+<li><code>thepiratebay/client.go:2</code> — "anonymous, no
+Cloudflare"</li>
+<li><code>tokyotosho/client.go:3</code> — "no Cloudflare, no login"</li>
+<li><code>torrentdownloads/client.go:3</code> — "no Cloudflare
+challenge"</li>
+<li><code>torrentscsv/client.go:3</code> — "no Cloudflare"</li>
+<li><code>yts/client.go:2</code> — "anonymous, no Cloudflare"</li>
+</ul>
+<p>The <code>lava-api-go/internal/provider/flaresolverr/</code> package
+exists and is implemented (with <code>DefaultMaxTimeout=60000ms</code>
+and <code>DefaultTimeout=90s</code>) but is <strong>not wired to any
+currently active provider</strong>. It is reserved for future CF-gated
+providers (e.g. 1337x). YTS does NOT need FlareSolverr.</p>
+<h3 id="mobile-network-reachability">Mobile network reachability</h3>
+<p>The YTS primary mirror <code>yts.mx</code> was observed NXDOMAIN on
+public DNS on 2026-06-13 (<code>yts/client.go:28-30</code>; forensic
+evidence at
+<code>.lava-ci-evidence/bluff-hunt/2026-06-13-yts-domain-failover.json</code>).
+Mobile ISPs in Russia (where the operator's testers are) may
+additionally apply DNS-level blocking for torrent sites. The 4-mirror
+failover (<code>yts.mx</code>, <code>yts.bz</code>, <code>yts.lt</code>,
+<code>yts.am</code>) mitigates this — <code>yts.lt</code> and
+<code>yts.am</code> were confirmed serving HTTP 200 on 2026-06-13.</p>
+<p><strong>Implication for UX:</strong> if the phone's DNS blocks all 4
+mirrors, the correct UX is a FAST "provider unavailable" message (not a
+30s hang). The recommended 20s handler deadline + 5s
+<code>perAttemptTimeout</code> means a fully-blocked YTS produces an
+error in ~20s (4 mirrors × 5s) rather than silently hanging until OkHttp
+fires. <strong>Further improvement</strong> (out of scope for the
+immediate fix): a fast pre-flight DNS check or a configurable "skip
+unreachable providers" flag in the API-app preferences — returning
+"provider unavailable" in &lt;1s for DNS-blocked domains.</p>
+<h3 id="knaben-note">knaben note</h3>
+<p><code>knaben/client.go:3</code> notes "no Cloudflare challenge" but
+also "indirectly reaches CF-gated aggregated trackers" — Knaben
+aggregates other trackers, some of which use Cloudflare. This does not
+affect Knaben's own API reachability but may affect result quality if
+the aggregated trackers are blocked.</p>
+<hr />
+<h2 id="5-streaming-assessment-get-v1providersearch-vs-get-v1multi">5.
+Streaming assessment: <code>GET /v1/{provider}/search</code> vs
+<code>GET /v1/multi</code></h2>
+<h3 id="single-provider-search-getsearch">Single-provider search
+(<code>GetSearch</code>)</h3>
+<p>File:
+<code>lava-api-go/internal/handlers/v1/search.go:33-76</code></p>
+<p>Response mode: <strong>ALL-AT-ONCE JSON</strong> — the handler calls
+<code>p.Search()</code> at line 64, then
+<code>json.Marshal(result)</code> at line 69, then
+<code>c.Data(http.StatusOK, ...)</code> at line 75. No chunked transfer
+encoding, no streaming. The client waits for the complete
+<code>200 OK</code> with the full JSON body before OkHttp delivers it to
+the app.</p>
+<p>This means: if <code>p.Search()</code> takes 20s, the Android client
+sees 20s of silence (no response headers, no body) before the complete
+response arrives. OkHttp's <code>readTimeout</code> fires if this
+silence exceeds 30s.</p>
+<h3 id="multi-search-getmultisearch">Multi-search
+(<code>GetMultiSearch</code>)</h3>
+<p>File:
+<code>lava-api-go/internal/handlers/v1/search.go:115-~260</code></p>
+<p>Response mode: <strong>SSE (Server-Sent Events)</strong> —
+<code>text/event-stream</code> header at line 146; events flushed via
+<code>streamEvent()</code> which calls <code>f.Flush()</code> at
+<code>search.go:93</code> after each event. Events emitted:
+<code>provider_start</code>, <code>results</code>,
+<code>provider_done</code>, <code>provider_error</code>,
+<code>stream_end</code>.</p>
+<p>In SSE mode, each flushed event resets OkHttp's read-idle timer.
+However <strong>processing is sequential</strong> (line 156:
+<code>for _, pid := range providerIDs</code>). A slow first provider
+delays the <code>provider_start</code> event for the second provider;
+the Android client sees a stream of events but with gaps up to 30s
+between them.</p>
+<h3 id="would-streaming-improve-ux-for-single-provider-search">Would
+streaming improve UX for single-provider search?</h3>
+<p>Yes, but it is architectural work. Options in order of
+complexity:</p>
+<ol type="1">
+<li><strong>Immediate (fix in scope):</strong> Add a
+<code>context.WithTimeout</code> deadline in the handler (20s) so
+<code>p.Search()</code> is bounded. Return fast error, not hang.</li>
+<li><strong>Near-term:</strong> Convert <code>GetSearch</code> to stream
+results as they arrive from the provider (not applicable for yts which
+returns all results in one JSON response — only relevant for providers
+that paginate server-side).</li>
+<li><strong>Longer-term:</strong> Parallelize multi-search providers in
+<code>GetMultiSearch</code> — run all providers concurrently (fan-out)
+instead of sequentially. With N providers and 20s per-provider deadline,
+sequential = N × 20s; parallel = max(20s). For 13 providers: 260s
+sequential vs 20s parallel.</li>
+</ol>
+<p>The <strong>immediate fix</strong> (adding the 20s handler deadline)
+is the right scope for the current fix streams. It eliminates the
+SocketTimeoutException while keeping the response shape identical.</p>
+<hr />
+<h2 id="6-three-strongest-fileline-citations">6. Three strongest
+file:line citations</h2>
+<ol type="1">
+<li><p><strong><code>core/network/impl/src/main/kotlin/lava/network/di/NetworkModule.kt:174</code></strong>
+— <code>readTimeout(30, TimeUnit.SECONDS)</code> — the Android LAN
+client's 30s read timeout that fires before the engine
+responds.</p></li>
+<li><p><strong><code>lava-api-go/internal/handlers/v1/search.go:64</code></strong>
+— <code>result, err := p.Search(c.Request.Context(), opts, creds)</code>
+— the single- provider handler calls Search with no deadline; this is
+the missing <code>context.WithTimeout</code> that the engine-side fix
+must add.</p></li>
+<li><p><strong><code>lava-api-go/internal/provider/curated/yts/client.go:46,51</code></strong>
+— <code>DefaultTimeout = 20s</code> /
+<code>perAttemptTimeout = 8s</code> — YTS's mirror-failover arithmetic
+(4 mirrors × 8s = 32s possible but bounded at 20s by http.Client)
+clarifies why mobile network jitter pushes total latency over
+30s.</p></li>
+</ol>
+<hr />
+<h2 id="summary">Summary</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Scope verdict</strong></td>
+<td>GENERAL — any provider whose upstream is slow from the phone's
+mobile network; YTS surfaces it first due to 4-mirror failover +
+DNS-dead primary mirror</td>
+</tr>
+<tr>
+<td><strong>Recommended engine handler deadline
+(<code>GetSearch</code>)</strong></td>
+<td><strong>20s</strong> (<code>context.WithTimeout</code> added at
+<code>search.go:64</code>)</td>
+</tr>
+<tr>
+<td><strong>Recommended engine per-provider deadline
+(<code>GetMultiSearch</code>)</strong></td>
+<td><strong>20s</strong> (reduce from 30s at
+<code>search.go:201</code>)</td>
+</tr>
+<tr>
+<td><strong>Recommended Android LAN
+<code>readTimeout</code></strong></td>
+<td><strong>45s</strong> (raise from 30s at
+<code>NetworkModule.kt:174</code>)</td>
+</tr>
+<tr>
+<td><strong>Recommended Android LAN
+<code>callTimeout</code></strong></td>
+<td><strong>120s</strong> (new; add to <code>NetworkModule.kt</code>
+builder)</td>
+</tr>
+<tr>
+<td><strong>YTS <code>DefaultTimeout</code></strong></td>
+<td><strong>15s</strong> (lower from 20s)</td>
+</tr>
+<tr>
+<td><strong>YTS/TPB/TorrentsCSV
+<code>perAttemptTimeout</code></strong></td>
+<td><strong>5s</strong> (lower from 8s)</td>
+</tr>
+<tr>
+<td><strong>FlareSolverr needed for YTS?</strong></td>
+<td>No — YTS is "anonymous, no Cloudflare"</td>
+</tr>
+<tr>
+<td><strong>Single-provider search response mode</strong></td>
+<td>All-at-once JSON (no streaming)</td>
+</tr>
+<tr>
+<td><strong>Multi-search response mode</strong></td>
+<td>SSE streaming, sequential per-provider</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

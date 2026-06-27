@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-14-search-provider-residuals-audit</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="search--api-app--provider-residuals-audit-2026-06-14">Search /
+api-app / Provider Residuals Audit (2026-06-14)</h1>
+<p><strong>Scope:</strong> residual, unverified, and OWED items around
+search, onboarding, the api-app, and providers AFTER the 5-layer search
+fix shipped (client 1.3.9-1066 + api-app 0.2.9-14). Read-only audit;
+evidence-cited per §11.4.6 (no guessing — claims are anchored to source
+or marked <code>UNVERIFIED</code> / <code>OWED</code>).</p>
+<p><strong>Headline (the question the master plan must answer):</strong>
+On-device search is PROVEN only for <strong>Internet Archive</strong>
+(<code>archiveorg</code>, <code>AuthType=AuthNone</code>). It is
+<strong>NOT proven for RuTracker / YTS / Kinozal</strong>. The 5-layer
+fix is provider-agnostic for the <em>transport + Lava-Auth key
+delivery</em>, but auth-required providers need a SECOND credential (the
+provider login session, delivered via the <code>Auth-Token</code>
+header) that the dynamic <code>ApiBackedTrackerClient</code> search path
+<strong>does not attach today</strong>. See Item 1 — it is the largest
+gap and a likely P0 for "search works for the providers the operator
+originally reported."</p>
+<hr />
+<h2 id="residuals-table">Residuals table</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Status</th>
+<th>Sev</th>
+<th>What's needed</th>
+<th>Acceptance criteria</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Auth-provider search: <code>Auth-Token</code> provider
+credential not attached on dynamic
+<code>/v1/{provider}/search</code></strong></td>
+<td>OWED + UNVERIFIED on-device</td>
+<td><strong>P0</strong></td>
+<td><code>ApiBackedTrackerClient.withAuth()</code> attaches ONLY the
+<code>Lava-Auth</code> per-instance key
+(<code>ApiBackedTrackerClient.kt:80-81</code>); it never sends the
+<code>Auth-Token</code> provider-login header. Go
+<code>parseCredentials(c)</code> reads <code>Auth-Token</code>
+(<code>handlers.go:118</code>, <code>multiprovider.go:90</code>) → for
+an auth provider the server gets <code>Type:"none"</code> (anonymous) →
+rutracker/kinozal <code>Search</code> runs token-less → upstream returns
+login/empty. Need: (a) persist the provider login session from the
+dynamic login flow, (b) attach it as
+<code>Auth-Token: {provider}:cookie:...</code> on the
+<code>streamMultiSearch</code>/<code>ApiBackedTrackerClient</code>
+search request, (c) wire <code>AUTH_REQUIRED</code> capability + the
+provider-login step for dynamic (<code>RemoteTrackerDescriptor</code>)
+providers.</td>
+<td>On a real device, fresh onboard of RuTracker (or Kinozal) + login
+with real creds → <code>streamMultiSearch</code> →
+<code>GET /v1/rutracker/search</code> carries BOTH
+<code>Lava-Auth</code> and a non-empty
+<code>Auth-Token: rutracker:cookie:...</code> → HTTP 200 + real result
+rows render. Falsifiability: drop the <code>Auth-Token</code> attach →
+search returns empty/401 for the auth provider.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>YTS / curated-provider search on-device</strong></td>
+<td>UNVERIFIED</td>
+<td><strong>P1</strong></td>
+<td>YTS is a curated provider (no auth). Transport fix applies, but it
+was never run on-device end-to-end — only <code>archiveorg</code> was.
+Confirm the dynamic descriptor for YTS declares <code>SEARCH</code>,
+routes to <code>/v1/yts/search</code>, and renders rows.</td>
+<td>On a real device, onboard YTS → search → real YTS rows render,
+<code>/v1/yts/search</code> → 200.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Existing-install key-restore: api-app
+uninstalled</strong></td>
+<td>OWED</td>
+<td><strong>P1</strong></td>
+<td><code>ApiKeyClient.read()</code> returns null when the api-app
+provider is absent (<code>ApiKeyClient.kt:65-71</code>) → keyless
+endpoint → <code>/v1</code> ops 401 until re-onboard. The L3 cold-start
+restore (<code>21031f2a</code>) heals a keyless mDNS endpoint only when
+the key is still readable; an uninstalled api-app yields a silent
+keyless state with no user-visible recovery prompt.</td>
+<td>App detects null key on a GoApi endpoint at search time → surfaces a
+re-onboard / "API app not running" prompt instead of a bare "Something
+went wrong" 401. Test asserts the user-visible recovery path.</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Remote (non-local) LAN api-app: local ApiKeyClient key is
+wrong for a remote endpoint</strong></td>
+<td>OWED + UNVERIFIED</td>
+<td><strong>P1</strong></td>
+<td><code>withLocalApiKeyIfMissing</code> (OnboardingViewModel:382,
+<strong>no covering tests</strong> per codegraph) reads the LOCAL
+on-device api-app key. For a remote/LAN api-app instance (a different
+device's api-app), the local key does not authenticate the remote
+endpoint → 401. The key-restore + onboarding key-attach paths assume the
+active GoApi is the co-installed local api-app.</td>
+<td>A remote LAN api-app endpoint either (a) carries its own
+per-instance key from the mDNS/discovery record, or (b) is explicitly
+out-of-scope and the local-key read is gated on "endpoint host ==
+loopback". Test covers the remote-endpoint case.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong><code>READ_API_KEY</code> permission name variant-suffix
+(L4)</strong></td>
+<td>OWED (MEDIUM / QA-fidelity)</td>
+<td><strong>P2</strong></td>
+<td>Per
+<code>docs/issues/2026-06-14-readapikey-permission-variant-analysis.md</code>
+§2c: the permission name is a fixed literal in both manifests
+(<code>api-app/.../AndroidManifest.xml:11-13,93</code>;
+<code>app/.../AndroidManifest.xml:9</code>) while every other cross-app
+id is variant-suffixed. Mixed debug+release co-install →
+<code>INSTALL_FAILED_DUPLICATE_PERMISSION</code> → grant denied (test-VM
+artifact). Production matched-pair is SAFE (§2a/d). Fix: make the name a
+<code>${apiKeyPermission}</code> manifest placeholder + per-variant
+value + BuildConfig (§6.R) on BOTH apps.</td>
+<td>After the suffix, debug defines <code>…dev.READ_API_KEY</code> /
+release <code>…READ_API_KEY</code>; a mixed-install VM grants each its
+own permission. Manifest + <code>app</code>/<code>api-app</code>
+<code>build.gradle.kts</code> placeholders updated; no source literal
+(§6.R).</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Dead <code>/v1/search</code> SSE — server-side
+aggregator</strong></td>
+<td>CLOSED (consumer removed) / OPTIONAL feature</td>
+<td><strong>P2</strong></td>
+<td>The dead <code>observeSseSearch</code> → <code>/v1/search</code>
+consumer was removed (<code>addaacd0</code>); no backend serves
+<code>/v1/search</code>. The Go server DOES have a
+<code>MultiSearchHandler</code> SSE aggregator
+(<code>search.go:114</code> <code>GetMultiSearch</code>), but the client
+uses client-side <code>streamMultiSearch</code> fan-out, which is
+sufficient. A server-side aggregator is an efficiency optimization, not
+a correctness gap.</td>
+<td>Decision only: either wire the existing <code>GetMultiSearch</code>
+SSE route + a client consumer (efficiency), or document client-side
+fan-out as the intended design. No correctness requirement.</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Watchable issue-videos re-record (operator task
+#24)</strong></td>
+<td>OWED</td>
+<td><strong>P1</strong></td>
+<td>Prior 4 "success videos" FAILED HelixQA
+<code>recording-analyzer</code> liveness (issue3=1 frame, issue4=1.7s,
+issue1/2 frozen) — instrumentation recordings finish &lt;1s then idle.
+issue3 (search) could NOT be recorded because search was broken;
+<strong>now search works</strong>, so a paced real-app search e2e
+walkthrough + the refreshed set are owed to <code>~/Downloads</code>.
+Evidence:
+<code>.lava-ci-evidence/video-analysis/2026-06-14-issue-videos.md</code>.</td>
+<td>4 paced real-app walkthrough videos (incl. issue3 = on-device search
+returning rows) PASS HelixQA <code>recording-analyzer</code> liveness +
+delivered to <code>~/Downloads</code>.</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>§6.AC telemetry coverage gap on the key/search error
+paths</strong></td>
+<td>OWED (PARTIAL)</td>
+<td><strong>P2</strong></td>
+<td>Telemetry exists on the client <code>ApiKeyClient.read()</code>
+paths (logcat-only <code>Log.w</code>, NOT
+<code>recordNonFatal</code>/<code>recordWarning</code> → not in
+Crashlytics — <code>ApiKeyClient.kt:48,63,69</code>). The api-app
+<code>ApiKeyProvider.query()</code> empty-cursor path
+(<code>ApiKeyProvider.kt:101-107</code>) records NOTHING when it serves
+an empty cursor (the exact L5 defect surface). The Go multi-search
+per-provider error is <code>no-telemetry</code> by design (SSE is the
+surface). Gap: the client key-read failures should route through
+<code>AnalyticsTracker.recordWarning</code> (not just logcat) so a field
+recurrence of the keyless-endpoint 401 is visible in Crashlytics; the
+api-app empty-cursor should record a non-fatal.</td>
+<td>Client <code>ApiKeyClient</code> null/denied/empty-cursor reads call
+<code>recordWarning(...)</code> with non-secret attrs (§6.H); api-app
+empty-cursor <code>query()</code> records a non-fatal. Both visible in
+Crashlytics.</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong><code>apiKeyReader</code> no-arg refactor ripple +
+<code>currentEndpointIsGoApi</code> removal</strong></td>
+<td>DONE (verify clean)</td>
+<td><strong>P2</strong></td>
+<td><code>addaacd0</code> dropped the ignored <code>apiKeyReader</code>
+authority param + the dead SSE path.
+<code>MainActivity.buildApiKeyReader</code> returns
+<code>{ -&gt; client.read()?.key }</code> (no authority arg — the §6.J
+meta-lesson in the root-cause doc §8). Confirm no remaining call sites
+pass an authority that is silently ignored, and that the
+<code>currentEndpointIsGoApi</code> removal left no stale branch.</td>
+<td>grep/codegraph confirms zero call sites threading an ignored
+authority; no dead <code>currentEndpointIsGoApi</code> references.</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>L5 real-holder regression test (retire the
+<code>withFakes</code> bluff)</strong></td>
+<td>OWED</td>
+<td><strong>P1</strong></td>
+<td>The <code>withFakes</code> seam (<code>ApiKeyProvider.kt:135</code>)
+bypassed the real <code>onCreate</code>→holder lifecycle where the L5
+bug lived (root-cause doc §8 + §6.J). A real-holder regression test
+(<code>running_engine_exposes_real_key_via_holders</code> /
+<code>engine_not_running_exposes_empty_cursor_via_holders</code> appear
+in codegraph) must drive the real lifecycle ordering, no
+<code>withFakes</code>. Confirm it exists and is
+falsifiability-rehearsed (caching-version FAILS, lazy-version
+PASSES).</td>
+<td>A regression test drives the production <code>onCreate</code>
+ordering (no <code>withFakes</code>); RED on the caching variant, GREEN
+on lazy. Bluff-Audit stamp in commit.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="evidence-index">Evidence index</h2>
+<table>
+<thead>
+<tr>
+<th>Claim</th>
+<th>Cite</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client search attaches only <code>Lava-Auth</code>, not
+<code>Auth-Token</code></td>
+<td><code>core/tracker/client/.../ApiBackedTrackerClient.kt:80-81,87-100,214-224</code></td>
+</tr>
+<tr>
+<td>Go reads provider creds from <code>Auth-Token</code> header</td>
+<td><code>lava-api-go/internal/handlers/v1/handlers.go:118-124</code>;
+<code>lava-api-go/internal/auth/multiprovider.go:35-93</code></td>
+</tr>
+<tr>
+<td>Go search runs provider with parsed creds (anonymous if no
+<code>Auth-Token</code>)</td>
+<td><code>lava-api-go/internal/handlers/v1/search.go:32-75,192</code></td>
+</tr>
+<tr>
+<td>rutracker provider is <code>AuthCaptchaLogin</code></td>
+<td><code>lava-api-go/internal/rutracker/provider.go:59</code></td>
+</tr>
+<tr>
+<td>rutracker Kotlin search needs a token</td>
+<td><code>core/tracker/rutracker/.../feature/RuTrackerSearch.kt:31</code></td>
+</tr>
+<tr>
+<td>On-device search verified only for Internet Archive</td>
+<td><code>docs/CONTINUATION.md:14</code>;
+<code>.lava-ci-evidence/search-verification/2026-06-14-fresh-onboard-search.md</code></td>
+</tr>
+<tr>
+<td>L4 permission variant analysis</td>
+<td><code>docs/issues/2026-06-14-readapikey-permission-variant-analysis.md</code></td>
+</tr>
+<tr>
+<td>L5 root cause + <code>withFakes</code> bluff lesson</td>
+<td><code>docs/issues/2026-06-14-search-multilayer-rootcause.md</code>
+§6,§8; <code>api-app/.../handoff/ApiKeyProvider.kt:57-108</code></td>
+</tr>
+<tr>
+<td><code>withLocalApiKeyIfMissing</code> has no covering tests</td>
+<td>codegraph blast-radius (<code>OnboardingViewModel.kt:382</code>, 1
+caller, no tests)</td>
+</tr>
+<tr>
+<td>Client key-read telemetry is logcat-only</td>
+<td><code>app/.../handoff/ApiKeyClient.kt:48,63,69</code></td>
+</tr>
+<tr>
+<td>Issue-videos liveness failure</td>
+<td><code>.lava-ci-evidence/video-analysis/2026-06-14-issue-videos.md</code>;
+<code>docs/CONTINUATION.md:20</code></td>
+</tr>
+<tr>
+<td>Dead <code>/v1/search</code> removed; server SSE aggregator
+exists</td>
+<td><code>docs/issues/2026-06-14-search-multilayer-rootcause.md</code>
+§2; <code>lava-api-go/internal/handlers/v1/search.go:114</code></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

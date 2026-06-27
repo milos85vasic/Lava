@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-14-defect-b-telemetry-attribution-findings</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="defect-b--api-app-crashlytics-telemetry-misattribution-findings">Defect
+B — api-app Crashlytics telemetry misattribution (findings)</h1>
+<p>Date: 2026-06-14 Scope: investigation + prepared remediation (no
+build change applied, no rebuild, no secret committed) Classification:
+project-specific (Lava api-app Firebase wiring)</p>
+<h2 id="symptom">Symptom</h2>
+<p>Crashlytics crashes and non-fatals originating from the standalone
+<strong>api-app</strong> (<code>digital.vasic.lava.api</code> /
+<code>.api.dev</code>) report under the <strong>client</strong> Firebase
+app in the Firebase console instead of the api-app's own Firebase
+app.</p>
+<h2 id="root-cause--confirmed">Root cause — CONFIRMED</h2>
+<p><code>api-app/google-services.json</code> (tracked, on disk) maps the
+api-app package names to the <strong>client app's</strong>
+<code>mobilesdk_app_id</code> values. The <code>google-services</code>
+Gradle plugin selects the <code>client[]</code> entry by matching
+<code>package_name</code>, then bakes that entry's
+<code>mobilesdk_app_id</code> into the APK. Because the api-app's
+package_name entry carries the client app's app id, the api-app
+registers with Firebase as the client app, and all its
+Crashlytics/Analytics telemetry lands under the client app id. This is
+the misattribution.</p>
+<h3
+id="evidence-current-on-disk-file-vs-firebase-authoritative-truth">Evidence
+(current on-disk file vs. Firebase authoritative truth)</h3>
+<p>api-app applicationId is confirmed in
+<code>api-app/build.gradle.kts</code>:
+<code>digital.vasic.lava.api</code> (release), <code>+ ".dev"</code>
+suffix → <code>digital.vasic.lava.api.dev</code> (debug).</p>
+<p>Firebase project <code>lava-vasic-digital</code> registered Android
+apps (via Firebase MCP <code>firebase_list_apps</code> /
+<code>firebase_get_sdk_config</code>):</p>
+<table>
+<thead>
+<tr>
+<th>mobilesdk_app_id (suffix)</th>
+<th>Firebase displayName</th>
+<th>real package_name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>...456475e2ef4039d8cfd20a</code></td>
+<td>Lava Android</td>
+<td><code>digital.vasic.lava.client</code></td>
+</tr>
+<tr>
+<td><code>...54ca2ca31e6c4f42cfd20a</code></td>
+<td>Lava Android (Debug)</td>
+<td><code>digital.vasic.lava.client.dev</code></td>
+</tr>
+<tr>
+<td><code>...d57b960e955645f6cfd20a</code></td>
+<td>Lava API (release)</td>
+<td><code>digital.vasic.lava.api</code></td>
+</tr>
+<tr>
+<td><code>...2932451e07ca80a7cfd20a</code></td>
+<td>Lava API (debug)</td>
+<td><code>digital.vasic.lava.api.dev</code></td>
+</tr>
+</tbody>
+</table>
+<p>Current on-disk <code>api-app/google-services.json</code>
+contains:</p>
+<table>
+<thead>
+<tr>
+<th>package_name in file</th>
+<th>mobilesdk_app_id in file</th>
+<th>what that app id ACTUALLY is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>digital.vasic.lava.api</code></td>
+<td><code>...456475e2ef4039d8cfd20a</code></td>
+<td><strong>client release app</strong> (WRONG)</td>
+</tr>
+<tr>
+<td><code>digital.vasic.lava.api.dev</code></td>
+<td><code>...54ca2ca31e6c4f42cfd20a</code></td>
+<td><strong>client debug app</strong> (WRONG)</td>
+</tr>
+</tbody>
+</table>
+<p>The correct app ids for the api-app are
+<code>...d57b960e955645f6cfd20a</code> (release) and
+<code>...2932451e07ca80a7cfd20a</code> (debug) — i.e. the "Lava API
+(release)" / "Lava API (debug)" Firebase apps. These match the app ids
+recorded in the session notes.</p>
+<p>The two real api-app Firebase apps <strong>exist</strong> in the
+project (no <code>firebase_create_app</code> needed).</p>
+<h2 id="remediation-prepared-not-yet-applied">Remediation (prepared, not
+yet applied)</h2>
+<p>A corrected <code>google-services.json</code> has been generated to a
+non-committed staging path so it cannot be accidentally committed:</p>
+<pre><code>/tmp/api-app-google-services.corrected.json</code></pre>
+<p>It contains exactly two <code>client[]</code> entries:</p>
+<ul>
+<li><code>digital.vasic.lava.api</code> →
+<code>1:815513478335:android:d57b960e955645f6cfd20a</code></li>
+<li><code>digital.vasic.lava.api.dev</code> →
+<code>1:815513478335:android:2932451e07ca80a7cfd20a</code></li>
+</ul>
+<p>(Same <code>project_info</code>, same shared Android API key already
+present in the tracked file — apiKeyId <code>56cefd24-...</code>, shared
+across all four apps in this project; no new secret introduced.)</p>
+<h3 id="steps-to-apply">Steps to apply</h3>
+<ol type="1">
+<li>Copy the staged file over the tracked one:
+<code>cp /tmp/api-app-google-services.corrected.json api-app/google-services.json</code>
+(NOTE: <code>api-app/google-services.json</code> is gitignored per §6.H
+— it is replaced on disk only, never committed.)</li>
+<li>Rebuild the api-app (debug first per §6.AA): the google-services
+plugin will bake <code>...d57b960e955645f6cfd20a</code> /
+<code>...2932451e07ca80a7cfd20a</code> into the APK.</li>
+<li>Verify on device: trigger a non-fatal from the api-app and confirm
+it lands under "Lava API (release/debug)" in the Firebase console, not
+"Lava Android".</li>
+</ol>
+<h2 id="go--no-go">GO / NO-GO</h2>
+<p><strong>GO.</strong> Both correct api-app Firebase apps already
+exist; the corrected config is staged at
+<code>/tmp/api-app-google-services.corrected.json</code> and is ready to
+drop in + rebuild. No operator Firebase action (no
+<code>firebase_create_app</code>) is required.</p>
+</body>
+</html>

@@ -44,6 +44,11 @@ ZERO_SHA='0000000000000000000000000000000000000000000000000000000000000000'
 # manual review — automation MUST NOT silently extend this list.
 declare -A PERMITTED_PLACEHOLDERS=(
     [alpine-edge-riscv64]=1
+    # android-35-phone: §6.AF-debt placeholder. macOS host-direct+HVF gate
+    # runner has the image pre-installed; hasExtractedSystemImage short-circuits
+    # before cache fetch consults the SHA. Containerized (Linux/KVM) path will
+    # replace with the real upstream SHA when provisioned.
+    [android-35-phone]=1
 )
 
 failures=0

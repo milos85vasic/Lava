@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="lava-deployment-guide">Lava Deployment Guide</h1>
+<p>This guide covers building and deploying the three Lava
+artifacts:</p>
+<ol type="1">
+<li><strong>lava-api-go</strong> — the Go API service (OCI image +
+binary).</li>
+<li><strong>Android client app</strong> (<code>:app</code>,
+<code>digital.vasic.lava.client</code>).</li>
+<li><strong>On-device API app</strong> (<code>:api-app</code>,
+<code>digital.vasic.lava.api</code>).</li>
+</ol>
+<p>Everything here is derived from the actual scripts/files in the repo:
+<code>build_and_release.sh</code>, <code>lava-api-go/Makefile</code>,
+<code>lava-api-go/docker/Dockerfile</code>,
+<code>docker-compose.yml</code>, <code>start.sh</code> /
+<code>stop.sh</code>, and <code>scripts/firebase-distribute.sh</code>.
+Where a step is not backed by a script flag, it is marked
+<code>UNCONFIRMED:</code>.</p>
+<blockquote>
+<p><strong>Local-Only CI/CD.</strong> Lava forbids hosted CI. Every
+build/test/release step runs on a developer machine or a self-hosted
+local runner. See the root <code>CLAUDE.md</code> "Local-Only CI/CD"
+section.</p>
+</blockquote>
+<hr />
+<h2 id="1-prerequisites">1. Prerequisites</h2>
+<ul>
+<li>A rootless container runtime: <strong>Podman</strong> (preferred) or
+<strong>Docker</strong> (<code>build_and_release.sh:123-136</code>
+auto-detects either; <code>start.sh</code> delegates to
+<code>tools/lava-containers</code>, which auto-detects). No
+<code>sudo</code> (root <code>CLAUDE.md</code> §6.U).</li>
+<li>Go toolchain (the Dockerfile build stage uses
+<code>golang:1.26-alpine</code>, <code>Dockerfile:24</code>;
+<code>lava-api-go/CLAUDE.md</code> states Go 1.24+).</li>
+<li>JDK + Android SDK for the Gradle builds (the <code>./gradlew</code>
+wrapper drives them).</li>
+<li>A repo-root <code>.env</code> (gitignored) — see §6.
+<code>.env.example</code> documents the keys.</li>
+</ul>
+<hr />
+<h2 id="2-lava-api-go--build">2. lava-api-go — build</h2>
+<h3 id="21-makefile-targets">2.1 Makefile targets</h3>
+<p>From <a
+href="../../lava-api-go/Makefile"><code>lava-api-go/Makefile</code></a>:</p>
+<table>
+<thead>
+<tr>
+<th>Target</th>
+<th>Command it runs</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>make all</code></td>
+<td><code>build</code> + <code>test</code></td>
+<td>Default.</td>
+</tr>
+<tr>
+<td><code>make build</code></td>
+<td><code>go build -o bin/lava-api-go ./cmd/lava-api-go</code> and
+<code>go build -o bin/healthprobe ./cmd/healthprobe</code></td>
+<td>Build the two binaries.</td>
+</tr>
+<tr>
+<td><code>make test</code></td>
+<td><code>go test -race -count=1 ./...</code></td>
+<td>Unit/contract/e2e/parity (no external deps).</td>
+</tr>
+<tr>
+<td><code>make vet</code></td>
+<td><code>GOMAXPROCS=2 go vet ./...</code></td>
+<td>Built-in correctness analyzer.</td>
+</tr>
+<tr>
+<td><code>make lint</code></td>
+<td><code>./scripts/golangci-lint.sh</code></td>
+<td>golangci-lint (containerized; exit 3 = tool unavailable).</td>
+</tr>
+<tr>
+<td><code>make cover</code></td>
+<td><code>GOMAXPROCS=2 go test ./... -coverprofile=coverage.out -covermode=atomic</code>
+then <code>go tool cover -func</code></td>
+<td>Coverage rollup (real-Postgres integration tests are NOT in this
+default rollup).</td>
+</tr>
+<tr>
+<td><code>make ci</code></td>
+<td><code>./scripts/ci.sh</code></td>
+<td>Local CI entry point.</td>
+</tr>
+<tr>
+<td><code>make generate</code></td>
+<td><code>./scripts/generate.sh</code></td>
+<td>Regenerate oapi-codegen output.</td>
+</tr>
+<tr>
+<td><code>make migrate-up</code></td>
+<td><code>./scripts/migrate.sh up</code></td>
+<td>Apply migrations.</td>
+</tr>
+<tr>
+<td><code>make migrate-down</code></td>
+<td><code>./scripts/migrate.sh down</code></td>
+<td>Roll back migrations.</td>
+</tr>
+<tr>
+<td><code>make image</code></td>
+<td><code>docker build -f docker/Dockerfile -t lava-api-go:dev .</code></td>
+<td>Build the OCI image (dev tag).</td>
+</tr>
+<tr>
+<td><code>make clean</code></td>
+<td><code>rm -rf bin/ coverage.* *.out</code></td>
+<td>Clean.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Per <code>lava-api-go/CLAUDE.md</code> §6.K, the constitutional
+<strong>gate</strong> build of a release artifact runs through the
+<code>vasic-digital/Containers</code> orchestration; the host
+<code>make build</code> / <code>make image</code> are permitted for
+iteration. The release-artifact binary build done by
+<code>build_and_release.sh</code> (§5) uses
+<code>CGO_ENABLED=0 go build -trimpath -ldflags='-s -w'</code>
+(<code>build_and_release.sh:74</code>).</p>
+</blockquote>
+<h3 id="22-oci-image-multi-stage-dockerfile">2.2 OCI image (multi-stage
+Dockerfile)</h3>
+<p>From <a
+href="../../lava-api-go/docker/Dockerfile"><code>lava-api-go/docker/Dockerfile</code></a>,
+build context is the <strong>project root</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Base</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>build</code></td>
+<td><code>golang:1.26-alpine</code></td>
+<td>statically links <code>lava-api-go</code> + <code>healthprobe</code>
+(<code>CGO_ENABLED=0</code>, <code>GOOS=linux</code>,
+<code>GOARCH=amd64</code>).</td>
+</tr>
+<tr>
+<td><code>migrate</code></td>
+<td><code>golang:1.26-alpine</code></td>
+<td>installs <code>golang-migrate</code>; ENTRYPOINT runs
+<code>migrate -path .../migrations -database "$LAVA_API_PG_URL" up</code>
+(shell-form so <code>$LAVA_API_PG_URL</code> expands).</td>
+</tr>
+<tr>
+<td><code>runtime</code></td>
+<td><code>gcr.io/distroless/static-debian12:nonroot</code></td>
+<td>ships both binaries; <code>EXPOSE 8443/udp 8443/tcp</code>;
+<code>HEALTHCHECK --interval=10s --retries=6 CMD ["/usr/local/bin/healthprobe"]</code>;
+<code>ENTRYPOINT ["/usr/local/bin/lava-api-go"]</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>The runtime image is distroless (no <code>/bin/sh</code>), which is
+why the <code>HEALTHCHECK</code> uses exec/JSON-array form. Build with
+<code>--format=docker</code> (not OCI) so the <code>HEALTHCHECK</code>
+survives in the image config — <code>build_and_release.sh</code> and
+<code>start.sh</code> both export <code>BUILDAH_FORMAT=docker</code> for
+exactly this reason (<code>build_and_release.sh:100</code>,
+<code>start.sh:114</code>; forensic anchor 2026-04-29 in both).</p>
+<hr />
+<h2 id="3-lava-api-go--run">3. lava-api-go — run</h2>
+<h3 id="31-docker-compose-profiles">3.1 docker-compose profiles</h3>
+<p><a
+href="../../docker-compose.yml"><code>docker-compose.yml</code></a>
+defines these profiles:</p>
+<table>
+<thead>
+<tr>
+<th>Profile</th>
+<th>Services</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>api-go</code> (default)</td>
+<td><code>lava-postgres</code> (postgres:16-alpine) →
+<code>lava-migrate</code> (one-shot) → <code>lava-api-go</code></td>
+</tr>
+<tr>
+<td><code>observability</code></td>
+<td>Prometheus (v2.51.0), Loki (2.9.6), Promtail (2.9.6), Tempo (2.4.0),
+Grafana (10.4.2)</td>
+</tr>
+<tr>
+<td><code>dev-docs</code></td>
+<td>Swagger UI (v5.17.14) serving <code>api/openapi.yaml</code> at
+<code>127.0.0.1:8081</code></td>
+</tr>
+</tbody>
+</table>
+<p>Service wiring:</p>
+<ul>
+<li><code>lava-postgres</code> — DB <code>lava_api</code>, user
+<code>lava</code>, password from <code>${LAVA_PG_PASSWORD}</code>
+(required); published to <code>127.0.0.1:8432</code> → container
+<code>5432</code>; healthcheck
+<code>pg_isready -U lava -d lava_api</code>.</li>
+<li><code>lava-migrate</code> — built from the Dockerfile
+<code>migrate</code> stage; depends on <code>lava-postgres</code>
+healthy; runs migrations against
+<code>postgres://lava:${LAVA_PG_PASSWORD}@lava-postgres:5432/lava_api?sslmode=disable</code>;
+<code>restart: "no"</code> (one-shot).</li>
+<li><code>lava-api-go</code> — built from the Dockerfile
+<code>runtime</code> stage; depends on <code>lava-migrate</code>
+completing successfully;
+<strong><code>network_mode: host</code></strong> so mDNS reaches the
+LAN. Key env (<code>docker-compose.yml:64-83</code>):
+<code>LAVA_API_PG_URL</code>, <code>LAVA_API_LISTEN=":8443"</code>,
+<code>LAVA_API_METRICS_LISTEN=":9091"</code>,
+<code>LAVA_API_TLS_CERT</code> / <code>LAVA_API_TLS_KEY</code> (mounted
+from <code>./lava-api-go/docker/tls</code>),
+<code>LAVA_API_OTLP_ENDPOINT</code>, and the <code>LAVA_AUTH_*</code>
+set (field name, HMAC secret, active/retired client lists, min-supported
+version, trusted proxies). No compose <code>healthcheck:</code> block —
+the Dockerfile's <code>HEALTHCHECK</code> is relied on (the runtime
+image is sh-less; see the comment at
+<code>docker-compose.yml:86-98</code>).</li>
+</ul>
+<blockquote>
+<p><strong>Do not bring the compose file up directly</strong>
+(<code>docker-compose.yml:19-20</code>). Orchestration is owned by
+<code>tools/lava-containers</code>.</p>
+</blockquote>
+<h3 id="32-startsh--stopsh-the-supported-entry-point">3.2 start.sh /
+stop.sh (the supported entry point)</h3>
+<p><a href="../../start.sh"><code>start.sh</code></a> delegates to the
+Lava-domain CLI <code>tools/lava-containers/bin/lava-containers</code>
+(building it on first run, <code>start.sh:70-76</code>). It also:
+provisions TLS material via <code>lava-api-go/scripts/gen-cert.sh</code>
+if absent (<code>start.sh:79-81</code>); appends a default
+<code>LAVA_PG_PASSWORD</code> to <code>.env</code> if missing
+(<code>start.sh:86-89</code>); and exports
+<code>BUILDAH_FORMAT=docker</code> (<code>start.sh:114</code>).</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./start.sh</span>                                  <span class="co"># profile=api-go (default)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./start.sh</span> <span class="at">--with-observability</span>             <span class="co"># + observability profile</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./start.sh</span> <span class="at">--dev-docs</span>                       <span class="co"># + Swagger UI (dev-docs profile)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">./start.sh</span> <span class="at">--with-observability</span> <span class="at">--dev-docs</span>  <span class="co"># combine</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./stop.sh</span>                                   <span class="co"># stop + remove the container</span></span></code></pre></div>
+<p>Flags map 1:1 onto the <code>lava-containers</code>
+<code>-profile</code> / <code>-with-observability</code> /
+<code>-dev-docs</code> flags (<code>start.sh:57-58</code>). Runtime
+status:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./tools/lava-containers/bin/lava-containers</span> <span class="at">-cmd</span><span class="op">=</span>status   <span class="co"># runtime, health, advertised IPs</span></span></code></pre></div>
+<p>(from root <code>CLAUDE.md</code> Commands section).</p>
+<h3 id="33-migrations">3.3 Migrations</h3>
+<p>Applied automatically by the <code>lava-migrate</code> one-shot
+service before <code>lava-api-go</code> starts (§3.1). Manually:
+<code>make migrate-up</code> / <code>make migrate-down</code>
+(<code>Makefile:35-39</code>, wrapping <code>scripts/migrate.sh</code>).
+Migration SQL lives in <code>lava-api-go/migrations/0001..0009</code>;
+see <a href="../db/schema.md"><code>docs/db/schema.md</code></a>.</p>
+<hr />
+<h2 id="4-android-client-app-app--build-sign-distribute">4. Android
+client app (<code>:app</code>) — build, sign, distribute</h2>
+<h3 id="41-identity--signing">4.1 Identity &amp; signing</h3>
+<p>From <code>app/build.gradle.kts</code>:</p>
+<ul>
+<li><code>applicationId = "digital.vasic.lava.client"</code>; debug
+build adds <code>applicationIdSuffix = ".dev"</code>.</li>
+<li><code>versionName</code> / <code>versionCode</code> are declared in
+<code>app/build.gradle.kts</code> (read by
+<code>build_and_release.sh:21-22</code> and
+<code>scripts/firebase-distribute.sh</code>).</li>
+<li>Signing configs read keystore password + dir from <code>.env</code>
+(<code>KEYSTORE_PASSWORD</code>, <code>KEYSTORE_ROOT_DIR</code>, default
+<code>keystores</code>): <code>keystores/debug.keystore</code> (alias
+<code>debug</code>) and <code>keystores/release.keystore</code> (alias
+<code>release</code>). The <code>keystores/</code> dir is gitignored
+(§6.H).</li>
+<li>Release build: <code>isMinifyEnabled = true</code>,
+<code>isObfuscate = false</code> (root <code>CLAUDE.md</code> "Release
+build quirks"); debug build <code>isMinifyEnabled = false</code>.</li>
+<li>The build also expects <code>app/google-services.json</code>
+(gitignored) for Firebase.</li>
+</ul>
+<p>Direct Gradle builds (root <code>CLAUDE.md</code> Commands):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> :app:assembleDebug      <span class="co"># debug APK (applicationIdSuffix .dev)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> :app:assembleRelease    <span class="co"># release APK (signed via keystores/)</span></span></code></pre></div>
+<h3 id="42-build_and_releasesh">4.2 build_and_release.sh</h3>
+<p><a
+href="../../build_and_release.sh"><code>build_and_release.sh</code></a>
+builds all artifacts and copies them into <code>releases/</code>:</p>
+<ol type="1">
+<li><code>./gradlew clean</code></li>
+<li><code>:app:assembleDebug</code>,
+<code>:app:assembleRelease</code></li>
+<li><code>:api-app:assembleDebug</code>,
+<code>:api-app:assembleRelease</code></li>
+<li>lava-api-go static binary
+(<code>CGO_ENABLED=0 go build -trimpath -ldflags='-s -w'</code>)</li>
+<li>Saves the lava-api-go OCI image tarball (docker-format) if a runtime
+exists.</li>
+</ol>
+<p>Outputs:</p>
+<ul>
+<li><code>releases/&lt;APP_VERSION&gt;/android-debug/digital.vasic.lava.client-&lt;ver&gt;-debug.apk</code></li>
+<li><code>releases/&lt;APP_VERSION&gt;/android-release/digital.vasic.lava.client-&lt;ver&gt;-release.apk</code></li>
+<li><code>releases/&lt;APP_VERSION&gt;/api-go/lava-api-go-&lt;APIGO_VERSION&gt;</code>
+(+ <code>.image.tar</code> if built)</li>
+<li><code>releases/api-app/&lt;API_APP_VERSION&gt;/android-{debug,release}/digital.vasic.lava.api-&lt;ver&gt;-{debug,release}.apk</code></li>
+</ul>
+<h3 id="43-firebase-app-distribution--two-stage-6aa">4.3 Firebase App
+Distribution — two-stage (§6.AA)</h3>
+<p><a
+href="../../scripts/firebase-distribute.sh"><code>scripts/firebase-distribute.sh</code></a>
+uploads built APKs to Firebase App Distribution. The default mode is
+<strong>debug-only</strong> (Stage 1); release (Stage 2) must
+follow.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/firebase-distribute.sh</span>                    <span class="co"># default: debug only (MODE=debug)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/firebase-distribute.sh</span> <span class="at">--debug-only</span>       <span class="co"># Stage 1: debug APK</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/firebase-distribute.sh</span> <span class="at">--release-only</span>      <span class="co"># Stage 2: release APK (requires Stage 1 first)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/firebase-distribute.sh</span> <span class="at">--debug-and-release</span> <span class="co"># legacy combined (NOT recommended)</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/firebase-distribute.sh</span> <span class="at">--release-notes</span> <span class="st">&quot;&lt;text&gt;&quot;</span>   <span class="co"># custom notes</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/firebase-distribute.sh</span> <span class="at">--app</span> api-app      <span class="co"># distribute the on-device API app instead</span></span></code></pre></div>
+<p>(Flags from <code>firebase-distribute.sh:52-61</code>.
+<code>--app</code> is <code>client</code> (default) or
+<code>api-app</code>, <code>firebase-distribute.sh:80-106</code>.)</p>
+<p>The script enforces these gates <strong>before</strong> uploading
+(refuses on failure):</p>
+<ul>
+<li><strong>§6.P Gate 1</strong> — versionCode strictly greater than the
+last distributed code for the channel (per-channel pointers
+<code>last-version-debug</code> / <code>last-version-release</code>,
+<code>firebase-distribute.sh:167-196</code>).</li>
+<li><strong>§6.AA Gate</strong> — <code>--release-only</code> requires
+the debug stage to have already distributed this versionCode
+(<code>firebase-distribute.sh:204-214</code>).</li>
+<li><strong>§6.P Gate 2</strong> — <code>CHANGELOG.md</code> contains an
+entry for this version
+(<code>firebase-distribute.sh:217-221</code>).</li>
+<li><strong>§6.P Gate 3</strong> — a per-version snapshot file exists at
+<code>.lava-ci-evidence/distribute-changelog/&lt;channel&gt;/&lt;ver&gt;-&lt;code&gt;.md</code>
+(<code>firebase-distribute.sh:223-229</code>); shipped as the release
+notes.</li>
+<li><strong>Phase 1 Gates 4+5</strong> (client only) — fresh
+<code>LAVA_AUTH_OBFUSCATION_PEPPER</code> (no reuse across releases) and
+<code>LAVA_AUTH_CURRENT_CLIENT_NAME == android-&lt;ver&gt;-&lt;code&gt;</code>
+present in <code>LAVA_AUTH_ACTIVE_CLIENTS</code>
+(<code>firebase-distribute.sh:261-306</code>).</li>
+</ul>
+<p>It then calls
+<code>firebase appdistribution:distribute &lt;apk&gt; --app &lt;app-id&gt; --project &lt;project&gt; --testers &lt;testers&gt; --release-notes &lt;notes&gt;</code>
+(<code>firebase-distribute.sh:396-401</code>). Firebase config (token,
+project id, app ids, tester list) comes from <code>.env</code> via
+<code>scripts/firebase-env.sh</code>.</p>
+<blockquote>
+<p>§6.Z requires the corresponding tests/Challenges to have been
+<strong>executed</strong> against the exact artifact before
+distributing; §6.AA requires operator real-device verification of the
+Stage-1 debug build before Stage 2. See root <code>CLAUDE.md</code> §6.Z
+/ §6.AA. A manual sideload of a built APK is possible via
+<code>adb install &lt;path-to.apk&gt;</code> (standard Android tooling),
+but the supported distribution channel is Firebase.
+<code>UNCONFIRMED:</code> no <code>adb install</code> wrapper exists in
+the repo scripts.</p>
+</blockquote>
+<hr />
+<h2 id="5-on-device-api-app-api-app--build--distribute">5. On-device API
+app (<code>:api-app</code>) — build &amp; distribute</h2>
+<p>The on-device API server app runs the lava-api-go engine in-process
+on an Android device (the embed router,
+<code>lava-api-go/internal/router/router.go:6</code>).</p>
+<p>From <code>api-app/build.gradle.kts</code>:</p>
+<ul>
+<li><code>applicationId = "digital.vasic.lava.api"</code> (namespace
+<code>lava.api.app</code>); debug build adds
+<code>applicationIdSuffix = ".dev"</code>.</li>
+<li>Same <code>.env</code>-driven signing as <code>:app</code>
+(<code>keystores/debug.keystore</code>,
+<code>keystores/release.keystore</code>).</li>
+</ul>
+<p>Build (via <code>build_and_release.sh</code>, §4.2, or directly):</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> :api-app:assembleDebug</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> :api-app:assembleRelease</span></code></pre></div>
+<p>Distribute via the same script with <code>--app api-app</code>
+(<code>firebase-distribute.sh --app api-app</code>). The api-app uses a
+separate Firebase channel
+(<code>firebase-app-distribution-api-app</code>) and separate app-id env
+vars (<code>LAVA_FIREBASE_API_APP_DEV_APP_ID</code> /
+<code>LAVA_FIREBASE_API_APP_ID</code>,
+<code>firebase-distribute.sh:96-97</code>). Phase 1 client-auth gates
+(pepper / client name) are <strong>skipped</strong> for the api-app (it
+is the server side of the auth scheme,
+<code>firebase-distribute.sh:252-262</code>).</p>
+<hr />
+<h2 id="6-configuration-env">6. Configuration (.env)</h2>
+<p>Signing + Firebase + service config come from a gitignored repo-root
+<code>.env</code> (<code>.env.example</code> documents the keys).
+Notable keys referenced by the scripts and compose file:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Used by</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>KEYSTORE_PASSWORD</code>, <code>KEYSTORE_ROOT_DIR</code></td>
+<td><code>app</code> / <code>api-app</code> Gradle signing</td>
+<td>Default <code>keystores</code>.</td>
+</tr>
+<tr>
+<td><code>LAVA_PG_PASSWORD</code></td>
+<td><code>lava-postgres</code> / <code>lava-migrate</code> /
+<code>lava-api-go</code> compose</td>
+<td>Required; <code>start.sh</code> writes a LAN default if absent.</td>
+</tr>
+<tr>
+<td><code>LAVA_AUTH_FIELD_NAME</code></td>
+<td><code>lava-api-go</code> auth middleware</td>
+<td>The <code>Lava-Auth</code> header name (not hardcoded, §6.R).</td>
+</tr>
+<tr>
+<td><code>LAVA_AUTH_HMAC_SECRET</code>,
+<code>LAVA_AUTH_ACTIVE_CLIENTS</code>,
+<code>LAVA_AUTH_RETIRED_CLIENTS</code></td>
+<td>auth middleware</td>
+<td>Client-attestation allowlists.</td>
+</tr>
+<tr>
+<td><code>LAVA_AUTH_MIN_SUPPORTED_VERSION_NAME</code> /
+<code>_CODE</code></td>
+<td>auth middleware</td>
+<td>Returned in the <code>426</code> body (defaults <code>1.2.6</code> /
+<code>1026</code>).</td>
+</tr>
+<tr>
+<td><code>LAVA_AUTH_OBFUSCATION_PEPPER</code>,
+<code>LAVA_AUTH_CURRENT_CLIENT_NAME</code></td>
+<td><code>firebase-distribute.sh</code> Gates 4/5</td>
+<td>Client APK auth rotation.</td>
+</tr>
+<tr>
+<td><code>LAVA_FIREBASE_TOKEN</code>,
+<code>LAVA_FIREBASE_PROJECT_ID</code>,
+<code>LAVA_FIREBASE_*_APP_ID</code>,
+<code>LAVA_FIREBASE_TESTERS</code></td>
+<td><code>firebase-distribute.sh</code></td>
+<td>Distribution. Tokens never echoed (§6.H).</td>
+</tr>
+</tbody>
+</table>
+<p>Never commit <code>.env</code>, <code>keystores/</code>, or
+<code>app/google-services.json</code> (root <code>CLAUDE.md</code> §6.H;
+pre-push rejects).</p>
+<hr />
+<h2 id="7-release-tagging">7. Release tagging</h2>
+<p><code>scripts/tag.sh</code> tags each app/service as
+<code>Lava-&lt;App&gt;-&lt;versionName&gt;-&lt;versionCode&gt;</code>
+and refuses to operate without local CI evidence + the §6.I/§6.AE
+real-device attestation (root <code>CLAUDE.md</code> "Release tagging
+gate"). The lava-api-go version lives in
+<code>lava-api-go/internal/version/version.go</code> (<code>Name</code>
+/ <code>Code</code>); the Android versions in the respective
+<code>build.gradle.kts</code>.</p>
+<hr />
+<h2 id="8-cross-references">8. Cross-references</h2>
+<ul>
+<li>API reference: <a
+href="../api/README.md"><code>docs/api/README.md</code></a></li>
+<li>Database schema: <a
+href="../db/schema.md"><code>docs/db/schema.md</code></a></li>
+<li>Firebase distribution detail: <a
+href="../FIREBASE.md"><code>docs/FIREBASE.md</code></a></li>
+<li>Architecture: <a
+href="../ARCHITECTURE.md"><code>docs/ARCHITECTURE.md</code></a></li>
+<li>Build &amp; release script: <a
+href="../../build_and_release.sh"><code>build_and_release.sh</code></a></li>
+<li>Container CLI glue: <code>tools/lava-containers/</code> (driven by
+<code>start.sh</code> / <code>stop.sh</code>)</li>
+</ul>
+</body>
+</html>

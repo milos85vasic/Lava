@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-05-31-choose-api-two-sections</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="spec--choose-your-api-two-section-onboarding-operator-request-2026-05-31">Spec
+— "Choose your API" two-section onboarding (operator request
+2026-05-31)</h1>
+<p><code>Classification:</code> project-specific.</p>
+<h2 id="goal">Goal</h2>
+<p>The onboarding "Choose your API" step
+(<code>feature/onboarding/.../steps/ApiSelectionStep.kt</code>) gets TWO
+sections:</p>
+<ol type="1">
+<li><strong>On your network</strong> (existing) — mDNS-discovered local
+<code>Endpoint.GoApi</code> instances.</li>
+<li><strong>Cloud / remote server</strong> (NEW):
+<ul>
+<li>a manual entry field: address + port → user adds a remote API,</li>
+<li>a list of pre-installed default options; we have none yet, so ONE
+placeholder: <code>https://lava.app:7777</code>.</li>
+</ul></li>
+</ol>
+<ul>
+<li>Titles/descriptions updated for the two-section layout.</li>
+<li>UX: user continues with exactly ONE chosen API (local OR cloud), one
+selected instance.</li>
+</ul>
+<h2 id="established-contracts-researched-2026-05-31">Established
+contracts (researched 2026-05-31)</h2>
+<ul>
+<li><code>Endpoint</code> (core/models
+<code>lava.models.settings.Endpoint</code>):
+<ul>
+<li><code>data class GoApi(host: String, port: Int = 8443)</code> —
+HTTPS host:port. <strong>Cloud uses this.</strong></li>
+<li><code>data class Mirror(host: String)</code> — rutracker mirror (NOT
+for cloud API).</li>
+</ul></li>
+<li>Selection flow (OnboardingViewModel):
+<ul>
+<li><code>OnboardingAction.SelectApi(endpoint)</code> →
+<code>onSelectApi</code>:
+<code>connectionService.isReachable(endpoint)</code> → on success
+<code>endpointsRepository.add(endpoint)</code> then
+<code>step = Providers</code>; on fail
+<code>apiConnectivity = Failure(reason)</code>. <strong>Cloud reuses
+this verbatim — no new persist/probe.</strong></li>
+<li><code>RetryApiProbe</code> re-probes
+<code>state.selectedApi</code>.</li>
+<li>Screen call site: <code>OnboardingScreen.kt</code> lines ~92-100
+wires <code>ApiSelectionStep(...)</code>.</li>
+</ul></li>
+<li>§6.R: <code>lava.app</code> + <code>7777</code> must NOT be source
+literals. Pattern = <code>.env</code> → <code>buildConfigField</code>
+(see app/build.gradle.kts lines 47-52). Add:
+<ul>
+<li><code>.env.example</code>:
+<code>LAVA_DEFAULT_CLOUD_API=https://lava.app:7777</code> (placeholder,
+committed).</li>
+<li><code>app/build.gradle.kts</code>:
+<code>buildConfigField("String","DEFAULT_CLOUD_API","\"${env["LAVA_DEFAULT_CLOUD_API"].orEmpty()}\"")</code>.</li>
+<li>A small parser maps <code>https://host:port</code> →
+<code>Endpoint.GoApi(host,port)</code> (strip scheme, split host:port;
+default port 8443 if absent). Lives in a testable pure function (e.g.
+<code>CloudApiDefaults.parse</code>).</li>
+</ul></li>
+</ul>
+<h2 id="implementation-steps">Implementation steps</h2>
+<h3 id="stream-a--core-feature-single-writer-one-coherent-change">Stream
+A — core feature (SINGLE-WRITER; one coherent change)</h3>
+<p>Files (all
+<code>feature/onboarding/src/main/kotlin/lava/onboarding/</code>):</p>
+<ol type="1">
+<li><code>OnboardingState.kt</code>: add cloud-section UI state:
+<code>val cloudAddressInput: String = ""</code>,
+<code>val cloudDefaults: List&lt;Endpoint&gt; = emptyList()</code>,
+<code>val cloudAddressError: String? = null</code>.</li>
+<li><code>OnboardingAction.kt</code>: add
+<code>data class CloudAddressChanged(val value: String)</code>,
+<code>data object AddCloudApi</code> (parse cloudAddressInput →
+Endpoint.GoApi → SelectApi path), (default-option tap reuses existing
+<code>SelectApi(endpoint)</code>).</li>
+<li><code>OnboardingViewModel.kt</code>:
+<ul>
+<li>inject the default-cloud config (a provider reading
+BuildConfig.DEFAULT_CLOUD_API; provide via Hilt so tests can fake it).
+Populate <code>cloudDefaults</code> on entry (parse the configured
+default; empty list if blank).</li>
+<li>handle <code>CloudAddressChanged</code> (reduce input + clear
+error).</li>
+<li>handle <code>AddCloudApi</code>: parse input; on parse-fail set
+<code>cloudAddressError</code>; on success call
+<code>onSelectApi(parsed)</code>.</li>
+</ul></li>
+<li><code>steps/ApiSelectionStep.kt</code>: render two titled sections.
+Section 1 = existing discovered list (title "On your network"). Section
+2 = "Cloud / remote server": a text field bound to
+<code>cloudAddressInput</code> + "Add" button (→ AddCloudApi) + the
+<code>cloudDefaults</code> rendered as ApiRow tappable (→ onSelect).
+Update headline/subtitle copy. Keep §6.Q (no LazyColumn in
+verticalScroll). Add contentDescription tags: "api-cloud-input",
+"api-cloud-add", "api-cloud-default", "api-cloud-error".</li>
+<li><code>OnboardingScreen.kt</code>: wire the new state + callbacks
+into <code>ApiSelectionStep(...)</code>.</li>
+<li><code>OnboardingHiltModule.kt</code>: bind the default-cloud-config
+provider.</li>
+</ol>
+<h3
+id="stream-b--6r-wiring-independent-ish-touches-envexample--appbuildgradlekts--a-parser">Stream
+B — §6.R wiring (independent-ish; touches .env.example +
+app/build.gradle.kts + a parser)</h3>
+<ul>
+<li><code>.env.example</code> line + <code>app/build.gradle.kts</code>
+buildConfigField + <code>CloudApiDefaults</code> parser (pure,
+unit-tested).</li>
+</ul>
+<h3 id="stream-c--tests-after-ab-compile">Stream C — tests (after A+B
+compile)</h3>
+<ul>
+<li><code>feature/onboarding/src/test/.../OnboardingViewModelTest.kt</code>:
+add cases — CloudAddressChanged updates input; AddCloudApi with valid
+<code>https://h:port</code> → probe→persist→Providers (real VM + fakes);
+AddCloudApi with garbage → cloudAddressError set, no advance;
+default-option tap → same success path. Falsifiability rehearsal
+recorded.</li>
+<li><code>CloudApiDefaults</code> parser unit test (host/port
+extraction, default port, reject malformed).</li>
+<li>New Compose Challenge
+<code>app/src/androidTest/.../ChallengeNNCloudApiSelectionTest.kt</code>:
+drives the cloud section on a real emulator — types an address, taps Add
+(fake probe success) → asserts advance; taps the default option →
+asserts advance; asserts the two section titles render. KDoc
+FALSIFIABILITY REHEARSAL block. Pattern: copy
+Challenge26ApiDiscoveryAndConnectivityTest.kt harness (TestOnboarding
+Hilt fakes).</li>
+</ul>
+<h3
+id="stream-d--build--6z-execute--distribute-serial-after-c-green">Stream
+D — build + §6.Z execute + distribute (serial, after C green)</h3>
+<ul>
+<li>§6.Y bump 1.2.34-1054 → 1.2.35-1055 (app/build.gradle.kts) +
+lava-api-go 2.3.23 → 2.3.24 if touched.</li>
+<li>Auth rotation for new versionCode: fresh pepper +
+<code>android-1.2.35-1055</code> client + UUID in .env (§6.AA). NOTE
+Gate-4 is now version-aware (commit 010c9ecc) — debug+release of 1055
+share one pepper.</li>
+<li>build_and_release.sh (T7-backed; .containerignore now excludes
+.git-backup*+releases/).</li>
+<li>§6.Z EXECUTE on Pixel_8/API35 host-direct+HVF: C00 + C01 + the new
+Cloud Challenge + Challenge26 (existing discovery still works). Real
+attestations.</li>
+<li>§6.AA two-stage Firebase: --debug-only → --release-only. CHANGELOG
+1.2.35-1055 entry + snapshot + evidence.</li>
+<li>Commit + push all (submodules + main) to github+gitlab;
+converge.</li>
+</ul>
+<h2 id="parallelism-balance-honest">Parallelism balance (honest)</h2>
+<p>Stream A is single-writer (5 interdependent files). B's parser + C's
+tests + the Challenge are the genuinely-parallel pieces once A's public
+shape (actions/state names) is fixed. Recommended: land A's state+action
+shape first, then fan out B (parser+buildConfig) and C (3 test files) to
+subagents.</p>
+<h2 id="channel-caveat">Channel caveat</h2>
+<p>Bash channel garbles/cancels large parallel batches on this host; the
+<code>sync</code> alias fires the push hook. Work in small single calls;
+route output to /tmp; verify HEAD + last-version via
+<code>git ls-remote</code>. Restore byte-churn before commits:
+<code>git checkout -- '*.pdf' '*.html' docs/workable_items.db constitution ; rm -rf constitution/scripts/workable-items/bin</code>.</p>
+</body>
+</html>

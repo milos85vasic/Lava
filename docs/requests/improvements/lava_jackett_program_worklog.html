@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lava_jackett_program_worklog</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="lava--jackett--comprehensive-qa-program-worklog">Lava — Jackett
+/ Comprehensive-QA Program Worklog</h1>
+<blockquote>
+<p>Source request:
+<code>docs/requests/improvements/lava_request_jackett.md</code>
+(credentials redacted out of it 2026-06-08 per §6.H). This worklog is
+the durable record of the program (§6.S spirit). It carries <strong>no
+credentials</strong>. Started: 2026-06-08.</p>
+</blockquote>
+<h2 id="0-program-scope-from-the-operator-request">0. Program scope
+(from the operator request)</h2>
+<ol type="1">
+<li>Fetch/pull latest constitution + all submodules; verify full
+compliance.</li>
+<li>Add <strong>all supported test types</strong> that, per supported
+provider: onboard → search (that provider only) → browse results →
+validate/verify content → <strong>confirm a real, working download
+option</strong>: a valid (non-broken) download link, a really-downloaded
+<strong>non-empty valid <code>.torrent</code></strong>, OR a
+<strong>100%-valid magnet</strong>. Replace manual human testing.</li>
+<li>Enumerate + test <strong>every real-human use case</strong>,
+variations, edge cases.</li>
+<li><strong>HelixQA</strong>: already a submodule — build comprehensive
+test banks + <strong>autonomous per-provider QA sessions</strong>
+(browse/search/obtain-download). Provide a <strong>Claude↔︎HelixQA model
+bridge</strong> (LLM/Vision) + real-time monitoring.</li>
+<li><strong>Jackett</strong>: deep analysis; ideally submodule +
+reference (decision pending — language boundary); else port providers,
+all fully test-covered.</li>
+<li>Use the <strong>4 provider credentials</strong> (RuTracker, RuTor,
+IPTorrents, NNMClub); incorporate unsupported ones fully. No leaks via
+git/logs.</li>
+<li><strong>Full decoupling</strong> — providers easily pluggable;
+future <strong>Android-extension-APK</strong> providers.</li>
+<li>Maximally extend all docs/diagrams/SQL/architecture.</li>
+<li>Regular commit+push of all submodules + main to all upstreams
+(GitHub+GitLab per §6.W).</li>
+<li><strong>Maximal test coverage</strong>, all test types, every line.
+<strong>Real evidence only — zero bluffs.</strong></li>
+</ol>
+<h2 id="1-done-verifiable">1. Done (verifiable)</h2>
+<ul>
+<li><strong>§6.H credential safety</strong>: redacted 4 cred lines from
+the request md (untracked, but <code>docs/</code> not gitignored). Leak
+scan: <code>nobody85perf*</code> exists in git only in already-recorded
+forensic files (2026-05-17 incident JSON + CLAUDE/CHANGELOG anchors). No
+new leak.</li>
+<li><strong><code>.env</code></strong> (gitignored): added
+<code>RUTOR_*</code>, <code>IPTORRENTS_*</code>; RuTracker/NNMClub
+already matched provided values. Honest header note added;
+<strong>RuTracker password remains UNROTATED</strong> (standing §6.H
+operator action).</li>
+<li><strong><code>.env.example</code></strong> (tracked): added
+<code>RUTOR_*</code> + <code>IPTORRENTS_*</code> placeholders
+(§6.R).</li>
+<li><strong>Submodules fetched.</strong> Divergence: constitution −12,
+helixqa −16, challenges −3, containers −1, security −2; rest current.
+<strong>Pin bumps deferred</strong> until recon agents (reading current
+pins) finish.</li>
+</ul>
+<h2 id="2-wave-1-recon-findings">2. Wave-1 recon findings</h2>
+<h3 id="agent-1--provider-inventory-complete">Agent 1 — Provider
+inventory (COMPLETE)</h3>
+<p>6 providers today:</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Auth</th>
+<th>.torrent</th>
+<th>Magnet</th>
+<th>§6.E status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rutracker</td>
+<td>CAPTCHA_LOGIN</td>
+<td>✓</td>
+<td>async-only (sync returns null)</td>
+<td>PARTIAL</td>
+</tr>
+<tr>
+<td>rutor</td>
+<td>FORM_LOGIN</td>
+<td>✓</td>
+<td>sync from search HTML</td>
+<td>PARTIAL (sync getMagnetLink null)</td>
+</tr>
+<tr>
+<td>kinozal</td>
+<td>FORM_LOGIN</td>
+<td>✓</td>
+<td><strong>null</strong> (but present in search HTML)</td>
+<td><strong>CONFIRMED GAP / bluff-risk</strong></td>
+</tr>
+<tr>
+<td>nnmclub</td>
+<td>FORM_LOGIN</td>
+<td>✓</td>
+<td><strong>null</strong> (but present in search HTML)</td>
+<td><strong>CONFIRMED GAP / bluff-risk</strong></td>
+</tr>
+<tr>
+<td>archiveorg</td>
+<td>NONE</td>
+<td>HTTP file (not torrent)</td>
+<td>n/a</td>
+<td>correct by design</td>
+</tr>
+<tr>
+<td>gutenberg</td>
+<td>NONE</td>
+<td>HTTP e-book (not .torrent)</td>
+<td>n/a</td>
+<td><strong>TORRENT_DOWNLOAD label mismatch</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Registration: <code>DefaultTrackerRegistry.register(factory)</code>
+(core/tracker/client/di/TrackerClientModule.kt:270-275) →
+<code>LavaTrackerSdk</code> → <code>factory.create(config)</code>.
+Capability gate: <code>TrackerClient.getFeature(KClass)</code> reads
+<code>descriptor.capabilities</code> (§6.E).</p>
+<p>Download URLs (cited):</p>
+<ul>
+<li>rutor <code>https://d.rutor.info/download/{id}</code>
+(RuTorDownload.kt:38)</li>
+<li>kinozal <code>https://kinozal.tv/download.php?id={id}</code>
+(KinozalDownload.kt:29)</li>
+<li>nnmclub <code>https://nnmclub.to/forum/download.php?id={id}</code>
+(NnmclubDownload.kt:29)</li>
+<li>archiveorg <code>https://archive.org/download/{id}/{file}</code>
+(ArchiveOrgDownload.kt:48)</li>
+<li>gutenberg Gutendex <code>https://gutendex.com/books/{id}/</code>
+(GutenbergDownload.kt:44)</li>
+</ul>
+<p><strong>§6.R</strong>: all 6 base URLs hardcoded literals in
+descriptors (rutracker:13, rutor:25, kinozal:19, nnmclub:19,
+archiveorg:23, gutenberg:24). Clone-override path partially mitigates
+(download impls accept ctor baseUrl override) but descriptor mirror
+lists are static.</p>
+<p><strong>Derived workable items (evidence-backed):</strong></p>
+<ul>
+<li>W1. Wire kinozal magnet through (data in KinozalSearchParser.kt:52)
++ regression test (falsifiable).</li>
+<li>W2. Wire nnmclub magnet through (NnmclubSearchParser.kt:52) +
+regression test.</li>
+<li>W3. Resolve gutenberg capability label (TORRENT_DOWNLOAD →
+HTTP_DOWNLOAD or correct semantics).</li>
+<li>W4. Resolve rutracker/rutor sync-magnet-null vs declared MAGNET_LINK
+(per §6.E).</li>
+<li>W5. §6.R base-URL config-driving (broad; coordinate with mirror
+manager).</li>
+</ul>
+<h3 id="agent-2--test-infrastructure-complete">Agent 2 — Test
+infrastructure (COMPLETE)</h3>
+<p>127 test files (3 Android unit + 45 Challenges + Go
+contract/e2e/integration/parity/load/qa + panoptic). <strong>The
+operator's core ask has ~zero real coverage:</strong></p>
+<ul>
+<li>Deep Android flows (search → topic → download → bencode-validate →
+magnet-validate) are MISSING or were gutted to "shallow" by a
+<strong>nav-compose 2.9.0 lifecycle bug</strong> (C04-C08 + deep C11;
+see
+<code>.lava-ci-evidence/sp3a-challenges/C4-thru-C8-2026-05-04-shallow-redesign.json</code>).</li>
+<li>Go e2e <code>/download/{id}</code> returns a
+<strong>synthetic</strong> payload
+<code>d8:announce10:fake-trackere</code> (e2e_test.go:280) — validates
+wire contract, NOT real bencode/magnet.</li>
+<li><strong>GAP-5/6</strong>: no bencode <code>.torrent</code>
+structural validation, no magnet-format validation anywhere.</li>
+<li>Creds injected via BuildConfig from <code>.env</code>
+(app/build.gradle.kts), gated by <code>assumeTrue()</code> (honest SKIP,
+not false PASS).</li>
+</ul>
+<h3 id="agent-3--helixqa-complete">Agent 3 — HelixQA (COMPLETE)</h3>
+<p>Go autonomous-QA framework. <strong>Claude↔︎HelixQA bridge ALREADY
+EXISTS</strong>: <code>pkg/llm/bridge_provider.go</code>
+<code>BridgedCLIProvider</code> shells to the <code>claude</code> CLI as
+an LLM/Vision <code>Provider</code> (Chat/Vision/Name/SupportsVision).
+Vision: <code>pkg/vision/cheaper</code>, nav:
+<code>pkg/visionnav</code>. 4-phase autonomous session
+(setup→doc-verify→curiosity→report) w/ video + ADB nav + issue-detect +
+ticket-gen. Banks = YAML (≥30 floor). <strong>Lava wires today</strong>:
+qa/detector, qa/evidence, qa/validator, qa/ticket.
+<strong>Missing</strong>: LLM/vision/navigator(Q6 skipped) wiring, NO
+Lava-Android banks, no per-provider session multiplexing, no autonomous
+run against the Lava app.</p>
+<h3 id="agent-4--jackett-decision-matrix-complete">Agent 4 — Jackett
+decision matrix (COMPLETE)</h3>
+<p>Jackett = C#/.NET proxy; tracker coverage = <strong>Cardigann
+YAML</strong> defs (<code>src/Jackett.Common/Definitions/</code>, schema
+v1-v11, ~500+ indexers, shared w/ Prowlarr/Indexers) interpreted by a C#
+engine. <strong>No in-process cross-language reuse</strong> (CLR vs
+JVM/Go). Consumed via <strong>Torznab HTTP</strong>
+(<code>/api/v2.0/indexers/&lt;id&gt;/results/torznab/api</code>):
+RSS+<code>torznab:attr</code> → <code>&lt;enclosure&gt;</code> .torrent
+URL + <code>magneturl</code> + <code>infohash</code> per
+<code>&lt;item&gt;</code>. <strong>License = GPL-2.0</strong>
+(decisive):</p>
+<ul>
+<li>Option A run-as-service (Torznab sidecar) — GPL arm's-length SAFE;
+server-side only (no on-device APK); effort LOW; anti-bluff evidence
+EXCELLENT.</li>
+<li>Option B port interpreter+YAML to Kotlin/Go — on-device capable +
+APK-ready, but <strong>GPL-2.0 contaminates the distributed APK</strong>
+(Play-Store friction); effort HIGH; needs legal sign-off.</li>
+<li>Option C hybrid — A now for breadth + clean-room non-GPL interpreter
+later for on-device.</li>
+</ul>
+<p>UNCONFIRMED/legal: exact YAML-only count; Prowlarr/Indexers exact
+license (GPL-family); vasic-digital policy on GPL submodule;
+browse/forum flows vs Torznab search-centric mapping.</p>
+<h2 id="synthesized-program-direction">Synthesized program
+direction</h2>
+<ul>
+<li><strong>Required 4 trackers</strong>: rutracker ✓, rutor ✓, nnmclub
+✓ already native; <strong>IPTorrents = NEW native provider</strong>
+(safe, on-device-ready, no GPL) — proceed regardless of Jackett
+choice.</li>
+<li><strong>Existing-provider hardening</strong> (the heart of the
+request): validators + magnet §6.E fixes + real-network download/magnet
+verification + HelixQA banks — in flight, no operator gate.</li>
+<li><strong>Jackett mass-tracker breadth</strong>: pending operator
+decision (A/B/C) — GPL + on-device-APK fork.</li>
+<li><strong>nav-compose 2.9.0</strong> → bump to 2.9.1 (root cause
+confirmed; apply in integration pass; device-verify when Genymotion VM
+booted).</li>
+<li><strong>kinozal/nnmclub magnet §6.E bluffs</strong>: fixes in flight
+(TDD + Bluff-Audit).</li>
+</ul>
+<h3 id="agent-5--decoupling--apk-feasibility-complete">Agent 5 —
+Decoupling + APK feasibility (COMPLETE)</h3>
+<p>Clean compile-time plugin abstraction (PluginFactory / getFeature<T>
+/ 7 feature interfaces). <strong>But hard-coupled registration</strong>:
+<code>TrackerClientModule.provideTrackerRegistry()</code>
+(core/tracker/client/di/TrackerClientModule.kt:260-276) manually
+injects+registers each factory — no service-loader/reflection. To add a
+provider: new <code>core/tracker/&lt;id&gt;/</code> module
+(descriptor+client+factory+feature files+fixtures+tests+Challenge) +
+edit <code>settings.gradle.kts</code> + edit that one registry method.
+<strong>Android-extension-APK</strong>: ~4-6wk refactor — needs
+<code>core/tracker/extension-api/</code> (Parcelable manifest +
+ContentProvider/AIDL IPC), secondary runtime registry, per-extension
+test duplication. Tachiyomi/Mihon model cited UNCONFIRMED.</p>
+<h3 id="agent-6--constitution-compliance-complete">Agent 6 —
+Constitution compliance (COMPLETE)</h3>
+<p>Governing: §6.D/6.E/6.G (coverage+capability honesty+provider E2E),
+§6.H/§11.4.10 (creds), §6.R (no-hardcode), §6.I/6.V/6.X/6.AE/6.AH
+(emulator-in-container/VM matrix), §6.W (mirrors), §6.S (CONTINUATION),
+§6.O (Crashlytics), §6.P (versioning), §11.4.6 (no-guessing), §11.4.76
+(forbidden emulator cmds). <strong>§6.AH-debt reportedly resolved
+2026-06-06 via Genymotion VM + S23 Ultra</strong> — but VM not live now
+(verified: adb 0 devices, :6555 closed). Per-new-provider checklist:
+capability-honesty unit test, §6.D behavioral test, §6.G auth-honesty +
+real-stack + falsifiability + Challenge, §6.R no-hardcode, per-AVD
+attestation on VM/device.</p>
+<h2 id="3-known-blockers-honest">3. Known blockers (honest)</h2>
+<ul>
+<li><strong>§6.AH-debt / §6.X-debt</strong>: container/VM
+Android-emulator gate does NOT boot on this macOS host (no
+<code>/dev/kvm</code>, no HVF-in-container). Device-level Challenge
+evidence blocked here. Real download/magnet proof to be driven at Go-API
++ JVM + real-network layers (fetch real <code>.torrent</code>, assert
+non-empty valid bencode; validate magnet structure) — no bluffed device
+PASS.</li>
+</ul>
+<h2 id="4-wave-2--verified--committed-2026-06-08">4. Wave-2 — VERIFIED +
+COMMITTED (2026-06-08)</h2>
+<p>Independently re-verified by forced <code>--rerun-tasks</code> (not
+agent-trusted): <code>core:common:test</code> +
+<code>core:tracker:kinozal:test</code> +
+<code>core:tracker:nnmclub:test</code> → BUILD SUCCESSFUL 35s;
+<code>TorrentFileValidatorTest</code> 11/0/0,
+<code>MagnetLinkValidatorTest</code> 9/0/0,
+<code>KinozalDownloadTest</code> 2/0/0,
+<code>NnmclubMagnetExposureTest</code> 3/0/0. Spotless clean.</p>
+<p>Committed to master (NOT yet pushed — batching with rutor fix):</p>
+<ul>
+<li><code>776dc934</code> feat(core/common): bencode + magnet validation
+library
+(<code>lava.common.torrent.{Bencode,TorrentFileValidator,MagnetLinkValidator}</code>).</li>
+<li><code>6fa31ad2</code> fix(core/tracker/kinozal): §6.E magnet
+exposure via KinozalMagnetCache.</li>
+<li><code>13703bc8</code> fix(core/tracker/nnmclub): §6.E magnet
+exposure via NnmclubMagnetCache.</li>
+</ul>
+<p>In flight: rutor magnet §6.E fix (same pattern), Jackett local-stack
+deep research (→ docs/qa/jackett-local-stack-research.md).</p>
+<h2 id="5-operator-decisions-captured">5. Operator decisions
+captured</h2>
+<ul>
+<li><strong>Credentials</strong> (all 5): in gitignored
+<code>.env</code> (RuTracker, RuTor, IPTorrents, NNMClub,
+<strong>Kinozal updated to nobody85perf/01G…</strong>).
+<code>.env.example</code> carries placeholders. NEVER committed.</li>
+<li><strong>Jackett = Option 1 (Torznab sidecar)</strong> BUT must run
+as part of the <strong>Lava local stack</strong> (mDNS-discovered local
+API, same model as lava-api-go; NOT in the APK). Deep research first (in
+flight).</li>
+<li><strong>IPTorrents</strong> = NEW native provider (the one of the 4
+required trackers not yet supported).</li>
+</ul>
+<h2 id="6-pending-workable-items-backlog">6. Pending workable items
+(backlog)</h2>
+<ul>
+<li>W4: rutracker/rutor sync-magnet §6.E (rutor fix in flight; rutracker
+has async GetMagnetLinkUseCase — verify honest).</li>
+<li>W3: gutenberg TORRENT_DOWNLOAD label vs HTTP e-book — resolve
+capability semantics.</li>
+<li>nav-compose 2.9.0→2.9.1 bump (apply + compile-verify; device-verify
+when Genymotion VM booted).</li>
+<li>Real-network per-provider download/magnet verification tests (the
+manual-testing replacement) using the new validators, gated
+<code>-PrealTrackers</code>, real <code>.env</code> creds.</li>
+<li>IPTorrents native provider (after Jackett/FlareSolverr research
+informs Cloudflare handling).</li>
+<li>HelixQA binary won't build — <code>submodules/helixqa/go.mod</code>
+has git conflict markers (L124/131/138); bump pin (always-track Q9) to
+fix.</li>
+<li>Jackett sidecar local-stack implementation (after research).</li>
+<li>Submodule pin bumps (constitution −12, challenges −3, containers −1,
+security −2) — deliberate, after current wave settles.</li>
+<li>Push wave-2+rutor batch to GitHub+GitLab (§6.W).</li>
+</ul>
+</body>
+</html>

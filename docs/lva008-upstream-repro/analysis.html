@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>analysis</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="lva-008--root-cause-analysis">LVA-008 — root-cause analysis</h1>
+<p>This is the in-depth analysis backing the filing-ready report in
+<code>README.md</code> and the standalone sample in
+<code>MinimalRepro.kt</code>. Every claim is anchored to in-repo device
+evidence; nothing here is surmised (§11.4.6). Where a thing is not
+confirmed it is marked <code>UNCONFIRMED:</code> explicitly.</p>
+<h2 id="1-what-the-bug-is">1. What the bug is</h2>
+<p><code>androidx.navigation:navigation-compose</code> crashes the
+process at <strong>Activity destroy</strong> when a <strong>nested
+<code>NavHost</code></strong> (mounted from a parent
+<code>NavBackStackEntry</code>, the bottom-nav pattern) has a child
+entry that is still <code>INITIALIZED</code>:</p>
+<pre><code>java.lang.IllegalStateException: State must be at least &#39;CREATED&#39; to be moved to &#39;DESTROYED&#39;,
+    but was &#39;INITIALIZED&#39; in component
+    NavBackStackEntry(route=search/search_input?query={query}&amp;categories={categories}
+        &amp;author_name={author_name}&amp;author_id={author_id}&amp;sort={sort}&amp;order={order}&amp;period={period})
+  at androidx.lifecycle.LifecycleRegistry.checkLifecycleStateTransition(LifecycleRegistry.kt:92)
+  at androidx.navigation.NavBackStackEntry... updateState
+  at androidx.navigation.internal.NavControllerImpl ... lifecycleObserver   // host ON_DESTROY observer</code></pre>
+<p>Rethrown as
+<code>RuntimeException: Unable to destroy activity MainActivity</code>
+inside <code>ActivityThread.performDestroyActivity</code>.</p>
+<h2 id="2-the-lifecycle-ordering-root-cause">2. The lifecycle-ordering
+root cause</h2>
+<p><code>NavBackStackEntry.effectiveState = min(hostLifecycleState, maxLifecycle)</code>,
+ordinals
+<code>DESTROYED(0) &lt; INITIALIZED(1) &lt; CREATED(2) &lt; STARTED(3) &lt; RESUMED(4)</code>.</p>
+<ol type="1">
+<li>The outer <code>NavHost</code> is on a graph destination (a
+bottom-nav tab). That parent entry reaches <code>RESUMED</code> and
+composes the <strong>inner <code>NavHost</code></strong> (start =
+<code>list</code>).</li>
+<li>The user navigates the inner host
+<code>list -&gt; search_input</code>. The inner controller now tracks
+<code>list</code> (stopped) plus <code>search_input</code>.</li>
+<li>Because of how the nested controller restores/transitions entries, a
+<code>search_input</code> entry can be <strong>tracked while still
+<code>INITIALIZED</code></strong> — queued/restored but never driven up
+to <code>CREATED</code> (the not-yet-promoted / restored / transitioning
+copy that survives after the user's composed instance was popped).</li>
+<li>The <strong>Activity is destroyed</strong>. The parent
+<code>NavBackStackEntry</code> (the inner host's
+<code>LifecycleOwner</code>) collapses <strong>directly to
+<code>DESTROYED</code></strong> — it does not walk its nested children
+RESUMED-&gt;STARTED-&gt;CREATED-&gt;DESTROYED.</li>
+<li>The inner controller's host observer calls
+<code>updateState()</code> / <code>maxLifecycle = DESTROYED</code> on
+the <code>INITIALIZED</code> <code>search_input</code> entry.
+<code>LifecycleRegistry.checkLifecycleStateTransition</code> rejects it:
+<strong>there is no lifecycle event that moves an owner down from
+<code>INITIALIZED</code></strong> — <code>ON_DESTROY</code> requires at
+least <code>CREATED</code>. It throws.</li>
+</ol>
+<p>This is the <code>INITIALIZED</code>-has-no-downward-event invariant
+(umbrella b/244910446, sibling b/178029606), surfaced via the
+<strong>nested-host + Activity-destroy</strong> path.</p>
+<h2
+id="3-why-it-surfaces-in-tests-but-is-a-real-bug-not-a-test-artifact">3.
+Why it surfaces in tests but is a real bug (not a test artifact)</h2>
+<p>Instrumentation (<code>ActivityScenario</code> /
+<code>connectedAndroidTest</code>) does a rapid create -&gt; drive -&gt;
+<strong>destroy</strong> of <code>MainActivity</code>, which reliably
+destroys the Activity while the inner <code>search_input</code> entry is
+still <code>INITIALIZED</code>. That is the <em>trigger</em>, not the
+<em>cause</em>:</p>
+<ul>
+<li>The stranded entry persists <code>INITIALIZED</code> for the
+<strong>whole session</strong> after the composed instance is popped —
+confirmed by the candidate-2 experiment (section 4 item 4).</li>
+<li>The same destroy path is crossed by real users on rotation /
+dark-mode / locale change / "Don't keep activities" / process death
+after using search.</li>
+<li><strong>Crashlytics confirms it live in the field</strong>: FATAL, 4
+events / 4 users on 1.3.11-1075 (per
+<code>docs/CONTINUATION.md</code>).</li>
+<li>It reproduces on clean cold-boot device runs,
+version-independently.</li>
+</ul>
+<p>So the test environment makes a genuine lifecycle-ordering defect
+deterministic.</p>
+<h2 id="4-falsified-fix-ledger-8-device-verified-dead-ends">4.
+Falsified-fix ledger (8 device-verified dead ends)</h2>
+<p>All speculative changes were REVERTED per section 6.T.1. Evidence
+under <code>.lava-ci-evidence/genymotion/</code> and the per-candidate
+gate dirs.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Hypothesis</th>
+<th>Result</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Bump nav <code>2.9.1 -&gt; 2.9.8</code></td>
+<td>FALSIFIED — identical ISE</td>
+<td><code>.lava-ci-evidence/genymotion/c11-nav298-r2-20260608T165908Z/</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Bump nav <code>2.10.0-alpha04/05</code></td>
+<td>FALSIFIED — identical ISE</td>
+<td>release-notes diff (no fix listed)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>LenientTeardownRule</code> / try-catch (walk cause chain)</td>
+<td><strong>Structurally impossible</strong> — rethrown as
+<code>RuntimeException("Unable to destroy activity")</code> in
+<code>Instrumentation.callActivityOnDestroy</code> -&gt;
+<code>ActivityThread.performDestroyActivity</code>; process death, never
+propagates synchronously</td>
+<td><code>.lava-ci-evidence/genymotion/c11-fix-20260608T171332Z/</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Move route to the OUTER NavHost</td>
+<td>FALSIFIED — crash <strong>moved</strong> to the outer
+<code>search_input</code> (route <code>search_input</code>, no
+<code>search/</code> prefix) but <strong>still fired</strong> -&gt;
+disproves "nesting strictly required"; bug is intrinsic to an
+<code>INITIALIZED</code> entry</td>
+<td><code>.lava-ci-evidence/genymotion/lva008-cand2-*</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Atomic-replace nav (<code>popUpTo(current){inclusive=true}</code> +
+<code>navigate()</code>)</td>
+<td>FALSIFIED — entry still tracked <code>INITIALIZED</code> at
+host-destroy</td>
+<td><code>.lava-ci-evidence/genymotion/c11-atomicfix-r2-20260608T172702Z/</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>NavTeardownGuard</code>: on <code>ON_STOP</code> force-advance
+<code>INITIALIZED</code> entries in <code>currentBackStack.value</code>
+to <code>CREATED</code></td>
+<td>FALSIFIED — the phantom entry is <strong>not in the public
+<code>currentBackStack</code> StateFlow</strong>; it lives in
+<code>@RestrictTo</code> internals (back-queue / transitions-in-progress
+/ saved-state-restore), reflection-only, not shipped</td>
+<td><code>.lava-ci-evidence/genymotion/lva008-teardownguard-*</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>Activity-scoped inner <code>LocalLifecycleOwner</code> (keep
+ViewModelStore/SavedStateRegistry on parent entry)</td>
+<td>FALSIFIED on the section 6.Z gate 2026-06-25 — C06 + C11 both
+reproduce 3x ISE on build 1074 @ <code>1310a922</code>; reverted</td>
+<td><code>.lava-ci-evidence/1074-gate/{GATE-SUMMARY.json,C06,C11}</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>launchSingleTop</code> dedupe on the search_input
+navigation</td>
+<td>FALSIFIED — C06 + C11 FAIL</td>
+<td><code>.lava-ci-evidence/lva008-cand8-gate/{c06,c11}/</code></td>
+</tr>
+</tbody>
+</table>
+<p>Latest re-confirmation: <code>.lava-ci-evidence/1076-repro/</code> —
+<code>Challenge52</code> (search chips) and <code>Challenge48</code>
+(sync toggle) both crash with the identical ISE, showing the defect is
+<strong>systemic across nested routes</strong>
+(<code>search/search_input</code> <em>and</em>
+<code>provider_config</code>), firing at instrumentation
+activity-destroy.</p>
+<h2 id="5-why-each-class-of-fix-fails-the-structural-reasons">5. Why
+each class of "fix" fails (the structural reasons)</h2>
+<ul>
+<li><strong>AndroidX version bump fails</strong> because no released
+<code>navigation-compose</code> (through 2.9.8 / 2.10.0-alpha05) changes
+the <code>INITIALIZED -&gt; DESTROYED</code> rejection in the nested
+host-observer walk. The fix has to land upstream.</li>
+<li><strong><code>onException</code> / <code>LenientTeardownRule</code>
+/ any TestRule fails</strong> because the ISE is raised on the
+<strong>main-thread Looper</strong> inside
+<code>ActivityThread.performDestroyActivity</code> and rethrown as
+<code>RuntimeException("Unable to destroy activity")</code>. It is never
+an exception the JUnit statement chain or a
+<code>Thread.UncaughtExceptionHandler</code> can intercept synchronously
+— the instrumentation process simply dies ("Instrumentation run failed
+due to Process crashed"). It is, by construction, test-side
+uncatchable.</li>
+<li><strong>App-level NavHost guards fail</strong> because the stranded
+entry is not reachable through any public API at the moment teardown
+runs (item 6 — not in <code>currentBackStack</code>; in
+<code>@RestrictTo</code> internals). A reflection-based prune would be
+fragile and break across nav releases, so it is not shipped.</li>
+</ul>
+<h2 id="6-candidate-real-fixes">6. Candidate real fixes</h2>
+<ol type="1">
+<li><strong>AndroidX upstream fix (correct fix).</strong>
+<code>NavControllerImpl</code>'s host-lifecycle observer should no-op
+(or first drive up to <code>CREATED</code>) when asked to move an
+<code>INITIALIZED</code> nested entry to <code>DESTROYED</code>, instead
+of calling <code>LifecycleRegistry</code> with an illegal transition.
+File the report in <code>README.md</code> (+ attach
+<code>MinimalRepro.kt</code>); track against b/244910446.</li>
+<li><strong>AndroidX Test Orchestrator process-isolation (test-side
+mitigation only).</strong> Running each test in its own process would
+contain the process-death so one teardown crash does not poison the run
+— but it does <strong>not fix the user-facing crash</strong>, and the
+Orchestrator/services APKs are <strong>NOT cached offline</strong> on
+the gate host, so it cannot be adopted under the Local-Only CI/CD
+constraint without a network fetch the operator must authorize.
+Mitigation, not a fix.</li>
+<li><strong>Single-NavHost refactor (app-side, large blast
+radius).</strong> Collapse the nested <code>search</code> graph so
+<code>search_input</code> lives on one flat host, eliminating the
+parent-entry-as-LifecycleOwner pre-condition. This is the only app-side
+avenue not yet fully shipped; the candidate-7 "single-NavHost collapse"
+partial was device-tested
+(<code>.lava-ci-evidence/lva008-cand7-gate/</code>) and C06/C11 still
+FAILED for that partial, so a <em>correct</em> full refactor would have
+to remove <strong>every</strong> nested host on the failing paths — high
+risk, operator-gated.</li>
+</ol>
+<h2 id="7-current-disposition">7. Current disposition</h2>
+<ul>
+<li>Accepted as an <strong>upstream androidx-navigation defect</strong>;
+instrumented in production via <code>NavTeardownCrashReporter</code>
+(chained uncaught-exception handler in
+<code>LavaApplication.onCreate</code>) which tags the known ISE with
+section 6.AC Crashlytics context (<code>feature=navigation</code>,
+<code>operation=activity-teardown</code>,
+<code>screen=search_input</code>, <code>lva_id=LVA-008</code>) before
+the process dies — it instruments, never swallows.</li>
+<li>The upstream report (this directory) is ready to file; the operator
+files it (Google sign-in required).</li>
+<li>Workable item <strong>LVA-008</strong> remains OPEN until an
+upstream fix or the full single-NavHost refactor lands and C06 + C11
+pass on the device gate.</li>
+</ul>
+</body>
+</html>

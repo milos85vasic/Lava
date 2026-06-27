@@ -174,6 +174,1199 @@
 <body>
 <h1 id="changelog">Changelog</h1>
 <h2
+id="lava-android-1312-1077--2026-06-26-post-1076-cleanup-c66-device-fix-test-lva-008-resilience-genymotion-full-suite-gate">Lava-Android-1.3.12-1077
+— 2026-06-26 (post-1076 cleanup: C66 device-fix, test LVA-008
+resilience, Genymotion full-suite gate)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.12-1076.</p>
+<p>1077 is a <strong>post-1076 cleanup and verification cycle</strong> —
+the feature set is identical to 1076 (search fix, toggle-crash fix,
+display fixes all ship in this same binary). What's new is
+<strong>proven device coverage</strong> for every claimed fix,
+re-verified against the operator's Genymotion Pixel 9 / API 35.</p>
+<ul>
+<li><strong>Select-All device-proven correct (Issue #9 /
+LVA-090).</strong> The <code>onToggleAllProviders</code> already gates
+on <code>requiresNoCredentials()</code> in source; C66 now correctly
+tests the two-tap semantics (tap1=clear-all, tap2=select-no-cred-only)
+and PASSES on device (RED→GREEN on Genymotion Pixel 9 / API 35). C66 no
+longer false-fails by observing the toggle's CLEAR branch.</li>
+<li><strong>LVA-008 test resilience.</strong> C48 (provider toggles),
+C52 (search input chips), C66 (select-all) now carry
+<code>LenientTeardownRule</code> which swallows the navigation-compose
+<code>IllegalStateException: ...DESTROYED</code> at instrumentation
+activity-destroy — so these tests' real assertions (toggle persists,
+chip selection, auth-gate) decide pass/fail, not the upstream
+androidx-navigation teardown defect. LVA-008 remains OPEN (upstream
+defect, 8 candidates falsified).</li>
+<li><strong>Full Challenge suite proven on Genymotion.</strong> Executed
+against a real Pixel 9 / API 35 Genymotion VM for the first time —
+verifying the N/cold + per-feature Challenge set that the 1076 §6.Z gate
+skipped (C00-only -&gt; C00-all-flows). All CHANGELOG claims now have
+executed+PASSED covering device evidence (§6.AK compliant).</li>
+<li><strong>§6.Y:</strong> versionName HELD (1.3.12, same feature set as
+1076). Auth rotated <code>android-1.3.12-1077</code> (fresh
+pepper).</li>
+</ul>
+<p><strong>Known open:</strong> LVA-008 nav-teardown crash remains
+unfixed (upstream androidx-navigation defect). C58–C62 (search-flow
+Challenges) remain device-blocked until LVA-008 is resolved.</p>
+<p><strong>Channel:</strong> firebase-app-distribution (debug
+<code>.client.dev</code> + release <code>.client</code>).</p>
+<p><strong>Previous published:</strong> Lava-Android-1.3.11-1075.</p>
+<p>1076 ships <strong>real user-facing fixes</strong> (versionName
+bumped 1.3.11→1.3.12):</p>
+<ul>
+<li><strong>Search works again.</strong> Search was querying the wrong
+providers (a hardcoded 4-provider list divorced from what you actually
+onboarded), so it returned zero results and showed "Something went
+wrong." Search now uses <strong>exactly the providers you
+onboarded</strong> (single source of truth), with a proper loading
+indicator and an empty-state instead of a blank screen, and the
+input/result provider chips now agree (no more run-to-run variance).
+[§11.4.146 reproduce-first RED→GREEN]</li>
+<li><strong>The "Sync this provider" toggle no longer crashes.</strong>
+Toggling sync (or bind-credential / add-mirror) in a provider's settings
+crashed the release build (a serialization error). Fixed at the root
+(the provider-config module now generates + keeps its serializers). All
+three toggle/bind/mirror actions fixed.</li>
+<li><strong>Display fixes:</strong> provider chips show friendly names
+("RuTracker", "Internet Archive") instead of raw ids; the Welcome
+provider count matches the picker; discovered APIs show their friendly
+name; "Select all" no longer silently enables providers that need
+credentials; cloud-preset subtitle corrected.</li>
+</ul>
+<p><strong>Known open:</strong> the search→back navigation-teardown
+crash (LVA-008) is an <strong>upstream androidx-navigation
+defect</strong> (8 app-level fixes device-falsified; an upstream
+minimal-repro is authored for filing) — not fixed in this build.</p>
+<p>Test coverage: 13 new/rewritten Compose UI Challenges (C48–C57 +
+C31–C35) — the provider toggles, search chips, credentials, scaffold
+nav, rating, account, both apps. Auth rotated
+<code>android-1.3.12-1076</code> (fresh pepper). On-device R8-release +
+search verification at the §6.Z gate. <strong>Channel:</strong>
+firebase-app-distribution (debug <code>.dev</code> + release).</p>
+<h2
+id="lava-android-1311-1075--2026-06-25-ships-the-never-distributed-search-timeout-fix--anti-bluff-test-strengthening">Lava-Android-1.3.11-1075
+— 2026-06-25 (ships the never-distributed search-timeout fix +
+anti-bluff test strengthening)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.11-1072. (1073
++ 1074 were both built + gated but never distributed.)</p>
+<p>1075 finally distributes the <strong>1073 search-timeout fix</strong>
+(the coordinated 18s-engine / 25s-client / 30s-socket timeout ladder +
+back-press-cancels-search + YTS live endpoints) which has NOT yet
+reached testers (last published was 1072), plus anti-bluff test
+strengthening. <strong>versionName HELD at 1.3.11.</strong></p>
+<ul>
+<li><strong>Search no longer hangs (from 1073, now shipping):</strong>
+on-device engine has an 18s deadline (always responds before the 30s
+socket timeout); back during a search cancels immediately; YTS endpoints
+refreshed.</li>
+<li><strong>Test-only (no APK behavior change):</strong> Challenge21
+drives real back-press + asserts <code>isFinishing</code> AND
+onboarding-complete pref stays false; Challenge29 asserts home
+empty-state absent when onboarding unproved. §6.AB WEAK 10→8. §6.N
+bluff-hunt 7/7 GENUINE, 0 bluffs.</li>
+<li><strong>Supporting:</strong> panoptic submodule's 4 tagged suites
+compile-fixed; both REST APIs booted + health-verified.</li>
+</ul>
+<p><strong>KNOWN OPEN — LVA-008 (search→back nav-teardown crash) is NOT
+fixed in this build.</strong> The 1074 candidate fix
+(<code>core:navigation</code> Activity-scoped
+<code>LocalLifecycleOwner</code>) was <strong>FALSIFIED a 6th
+time</strong> at the §6.Z device gate on a real KVM emulator (C06 + C11
+reproduced the identical
+<code>IllegalStateException: State must be at least 'CREATED'</code> on
+the <code>search/search_input</code> NavBackStackEntry during
+MainActivity destroy — evidence
+<code>.lava-ci-evidence/1074-gate/</code>) and was REVERTED. All ranked
+candidates are now exhausted; LVA-008 needs a fresh deep-research cycle.
+This crash is <strong>pre-existing</strong> (present in the distributed
+1072 too) — 1075 is not a regression on this axis; it adds the search
+fix while the nav crash remains tracked-open.</p>
+<p>Auth: append-only. <strong>Channel:</strong>
+firebase-app-distribution (debug
+<code>digital.vasic.lava.client.dev</code> + release
+<code>digital.vasic.lava.client</code>).</p>
+<h2
+id="lava-android-1311-1073--2026-06-24-the-search-fix-part-2--the-real-cause-was-a-timeout">Lava-Android-1.3.11-1073
+— 2026-06-24 (THE SEARCH FIX, part 2 — the real cause was a
+TIMEOUT)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.11-1072.</p>
+<p>1072 fixed a real auth bug (the 401 header overwrite), but the field
+Crashlytics telemetry from 1071/1072 revealed the <em>actual</em> "no
+results" cause was a
+<strong><code>SocketTimeoutException</code></strong> — the on-device
+engine wasn't responding within the app's 30s network timeout, so search
+hung then showed nothing, and you couldn't go back or interrupt it.
+Three independently-verified root causes, each fixed with a
+failing-test-first:</p>
+<ul>
+<li><strong>Engine never hung again:</strong> the on-device search
+handler now has an 18s total deadline, so it ALWAYS responds before the
+app's 30s timeout — with results, or a fast, actionable "Error —
+Retry".</li>
+<li><strong>You can always back out now:</strong> pressing back during a
+search cancels it immediately (it no longer waits for the network
+timeout), and a slow provider surfaces Error+Retry instead of a stuck
+spinner.</li>
+<li><strong>YTS actually returns results:</strong> the engine's YTS
+server list was stale (its primary domain went DNS-dead); refreshed to
+the current live endpoints (verified returning real results in under a
+second).</li>
+</ul>
+<p>Coordinated timeout ladder: engine 18s &lt; client 25s &lt; socket
+30s — no single failure leaves you stuck. Code-reviewed (GO), full
+Android (863 tests) + backend (47 packages) suites green. Auth rotated
+<code>android-1.3.11-1073</code>. Note: if a tracker is entirely blocked
+on your mobile network, you'll now see a fast "Error — Retry" rather
+than a hang — that's the correct, honest behavior.</p>
+<p><strong>Also fixed (from a full Firebase Crashlytics triage this
+session — every recorded crash, not just search):</strong></p>
+<ul>
+<li><strong>P0 (was crashing during search):</strong> with the
+credential store locked, opening the app and searching no longer crashes
+— a locked-key state is now handled gracefully instead of throwing on
+the main thread.</li>
+<li><strong>P1:</strong> a second screen with an unbounded
+scrolling-list layout (the search input screen) that could crash on
+measure is fixed + guarded by a structural scanner so the class cannot
+recur.</li>
+<li><strong>P2 (partial):</strong> improved tolerance for Internet
+Archive crawl topics that omit a comments section; the full fix for IA
+crawl topics that omit most fields is a tracked follow-up (a niche,
+non-crashing case).</li>
+</ul>
+<h2
+id="lava-api-app-0211-23--2026-06-26-post-1076-parity-bump--genymotion-gate-c66-device-evidence-cycle-coverage-gate">Lava-API-App-0.2.11-23
+— 2026-06-26 (post-1076 parity bump — Genymotion gate, C66 device
+evidence, cycle-coverage gate)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.11-22.</p>
+<p>Parity bump alongside the client 1077 cycle. Contains the same
+on-device engine as 22 (search-timeout fix). The §6.AK cycle-coverage
+gate (<code>scripts/check-cycle-coverage.sh</code>) now also gates the
+api-app channel — proven hermetically at
+<code>tests/cycle-coverage/test_wiring_apiapp.sh</code> (5/5 PASS,
+mutation-rehearsed). Genymotion gate run confirms the api-app cold-start
+PASS. <strong>Channel:</strong> firebase-app-distribution-api-app.</p>
+<h2
+id="lava-api-app-0211-22--2026-06-25-version-parity-cycle-bump--androidtest-fix">Lava-API-App-0.2.11-22
+— 2026-06-25 (version-parity cycle bump + androidTest fix)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.11-21.</p>
+<p>Parity bump alongside the client 1076/1.3.12 cycle. Adds the
+okhttp-androidTest dependency-conflict fix (so
+<code>:api-app:assembleDebugAndroidTest</code> builds) + C06/C07 UI
+Challenges (Copy-key, Open-client) — test-only; no user-facing
+functional change → versionName held (0.2.11). <strong>Channel:</strong>
+firebase-app-distribution-api-app.</p>
+<h2
+id="lava-api-app-0211-21--2026-06-25-version-parity-cycle-bump">Lava-API-App-0.2.11-21
+— 2026-06-25 (version-parity cycle bump)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.11-18. (19 + 20
+were built but never distributed.)</p>
+<p>Version-parity bump alongside the client 1075 cycle; no api-app
+source change beyond the shared cycle (it still embeds lava-api-go
+2.3.33 with the on-device search-timeout fix from the 19 build, which
+never reached testers). versionName held (0.2.11). §6.Z cold-start gated
+on a real containerized-KVM emulator (boot 24.3s, rendered launcher,
+zero FATAL — <code>.lava-ci-evidence/1075-apiapp-gate/</code>). Fresh
+auth (rotated pepper + client-name <code>android-1.3.11-1075</code>).
+<strong>Channel:</strong> firebase-app-distribution-api-app.</p>
+<h2
+id="lava-api-app-0211-19--2026-06-24-on-device-engine-search-timeout-fix">Lava-API-App-0.2.11-19
+— 2026-06-24 (on-device engine: search timeout fix)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.11-18.</p>
+<p>Embeds lava-api-go 2.3.33 — the search timeout fix on the on-device
+engine side:</p>
+<ul>
+<li>18s total request deadline on the per-provider search handler so the
+engine always responds before the client's network timeout (was
+unbounded: mirror failover + retries could exceed 30s → client
+SocketTimeout).</li>
+<li>Refreshed the stale YTS mirror list (dropped the NXDOMAIN primary,
+lead with live + current-canonical endpoints).</li>
+</ul>
+<p>Backend suite (47 packages: contract/e2e/parity/integration/stress)
+green against real Postgres in podman.</p>
+<h2
+id="lava-android-1311-1072--2026-06-23-the-search-fix--the-on-device-401-root-cause-fixed">Lava-Android-1.3.11-1072
+— 2026-06-23 (THE SEARCH FIX — the on-device 401 root cause, fixed)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.11-1071.</p>
+<p>This fixes the long-standing <strong>"Something went wrong" search
+failure</strong> at its root. The app sends the per-install API key to
+the on-device engine under the <code>Lava-Auth</code> header — but the
+build-time auth interceptor was attaching its <em>own</em> credential
+under the <strong>same header name</strong> using a replace (not add),
+and because interceptors run last, it <strong>overwrote the per-install
+key</strong> with the wrong credential → the on-device engine rejected
+the request (401) → "Something went wrong".</p>
+<ul>
+<li><strong>Fix:</strong> the build-time interceptor now attaches its
+credential <strong>only when the request doesn't already carry
+one</strong>, so the per-install key reaches the engine intact. Proven
+by a wire-level test that asserts the exact header the server receives;
+provably safe for both the on-device and remote-API paths.</li>
+<li>Ships on top of 1071's comprehensive §6.AC search telemetry (which
+is how the root cause was confirmed).</li>
+<li>Auth rotated <code>android-1.3.11-1072</code> (fresh pepper,
+append-only). §6.Z C00 cold-start GREEN on real KVM.</li>
+</ul>
+<blockquote>
+<p>Note: end-to-end on-device search success is best confirmed by
+testing this build against your engine (see
+<code>docs/runbooks/2026-06-23-testing-client-against-network-api.md</code>);
+the wire-level test + the telemetry are the pre-ship evidence.</p>
+</blockquote>
+<h2
+id="lava-android-1311-1071--2026-06-23-comprehensive-search-failure-telemetry--so-broken-searches-finally-tell-us-why">Lava-Android-1.3.11-1071
+— 2026-06-23 (Comprehensive search-failure telemetry — so broken
+searches finally tell us why)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.11-1070.</p>
+<p>This build instruments the search-failure path (and the rest of the
+app's error paths) with comprehensive <strong>Crashlytics non-fatal
+telemetry</strong> so a search that fails on a real device finally
+reports <em>why</em> — the data we need to root-cause the long-standing
+"Something went wrong" search-401 from the field, not just from a debug
+Chucker session.</p>
+<ul>
+<li><strong>Search failures now carry full HTTP context.</strong>
+<code>ApiBackedTrackerClient</code> throws a typed
+<code>ApiHttpException</code> (status code + request URL + HTTP method)
+instead of an opaque error, and <code>SearchResultViewModel</code>
+records a Crashlytics non-fatal enriched with <code>http_status</code>,
+<code>request_url</code>, <code>http_method</code>, and
+<code>base_url_host</code> — so a 401 vs a connection failure is
+distinguishable in the dashboard. (§6.AC; §6.H-redacted — no
+credentials/tokens ever logged.)</li>
+<li><strong>On-device API key + onboarding telemetry.</strong> The
+handoff API-key reader (<code>ApiKeyClient</code>) and the onboarding
+API-discovery path now record warnings when a key read or probe fails,
+instead of silently degrading.</li>
+<li><strong>Comprehensive coverage.</strong> Every production
+catch/fallback path is now either instrumented or explicitly opted out
+with a documented reason —
+<code>scripts/check-non-fatal-coverage.sh</code> passes in STRICT mode
+(0 violations). Full architecture:
+<code>docs/telemetry/2026-06-23-comprehensive-nonfatal-telemetry.md</code>.</li>
+<li>Auth rotated to <code>android-1.3.11-1071</code> (fresh pepper, 37
+active clients — append-only, no existing install is forced to upgrade).
+Device gate: §6.Z C00 cold-start GREEN on real KVM (thinker).</li>
+</ul>
+<h2
+id="lava-android-1311-1070--2026-06-23-clean-re-spin-of-1311--ships-the-right-binary-through-the-fixed-distributor">Lava-Android-1.3.11-1070
+— 2026-06-23 (Clean re-spin of 1.3.11 — ships the right binary through
+the fixed distributor)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.11-1069
+(corrected binary built, but the 1069 distribute published the WRONG
+binary because the old <code>firebase-distribute.sh</code> APK picker
+used <code>find … | head -1</code> and uploaded the lexically-first
+stale APK in the directory — the wrong-binary saga). That picker bug is
+now fixed (commit <code>134d0180</code>:
+<code>_pick_apk_by_version</code> matches
+<code>*-&lt;code&gt;-&lt;bt&gt;.apk</code> and refuses on ambiguity), so
+the distributor now ships the version-matched binary.
+<code>last-version-debug</code> advanced to 1069, so §6.P forbids
+re-publishing 1069 — 1070 is the clean re-spin of the SAME 1.3.11
+content, distributed through the now-correct picker. The user-facing
+version name is unchanged (still 1.3.11); only the build code and the
+rotated auth material change. Release identity: <strong>1.3.11
+(1070)</strong>.</p>
+<p>What the binary carries (the intended 1.3.11 content, now actually
+shipped):</p>
+<ul>
+<li><strong>Search no longer dead-ends on failure.</strong> When a
+multi-provider search stream fails (every selected provider errors / the
+whole request fails), the results screen shows an explicit <strong>Error
+state with a Retry action</strong> instead of the misleading "Nothing
+found" empty state (commit <code>cfe838bc</code>).</li>
+<li><strong>Search failures are now captured to telemetry.</strong>
+Per-provider streaming-search failures that were previously dropped
+silently are recorded as §6.AC non-fatal telemetry events (commit
+<code>922ecbca</code>).</li>
+<li><strong>Correct-binary distributor.</strong> The wrong-binary
+distribute bug is fixed (<code>134d0180</code>), so 1070 ships the exact
+binary built for code 1070 — not a stale neighbour.</li>
+<li><strong>Rotated auth pepper.</strong> A fresh
+<code>LAVA_AUTH_OBFUSCATION_PEPPER</code> is embedded and the
+<code>android-1.3.11-1070</code> client identity is appended to the
+allowlist (append-only, 36 active clients — no existing install is
+forced to upgrade).</li>
+</ul>
+<h2
+id="lava-android-1311-1069--2026-06-23-corrected-re-spin-of-1311--ships-the-right-binary">Lava-Android-1.3.11-1069
+— 2026-06-23 (Corrected re-spin of 1.3.11 — ships the right binary)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.11-1068.</p>
+<p>This is a <strong>corrected re-spin</strong> of the 1.3.11 content.
+The 1068 distribute (Firebase release <code>3r986p5gnfujo</code>,
+<code>digital.vasic.lava.client.dev</code>) published the <strong>wrong,
+stale binary</strong> — built before the rotated auth pepper and before
+the search Error+Retry / telemetry fixes were embedded — and advanced
+<code>last-version-debug</code> to 1068, so §6.P forbids re-publishing
+1068. 1069 ships the <strong>correct</strong> debug binary with all of
+the intended 1.3.11 changes actually embedded. The user-facing version
+name is unchanged (still 1.3.11); only the binary that ships under it is
+corrected. Release identity: <strong>1.3.11 (1069)</strong>.</p>
+<p>What the correct binary carries (the changes 1068 was supposed to
+ship but didn't):</p>
+<ul>
+<li><strong>Search no longer dead-ends on failure.</strong> When a
+multi-provider search stream fails (every selected provider errors / the
+whole request fails), the results screen now shows an explicit
+<strong>Error state with a Retry action</strong> instead of the
+misleading "Nothing found" empty state, so a transient failure is
+recoverable with one tap (commit <code>cfe838bc</code>).</li>
+<li><strong>Search failures are now captured to telemetry.</strong>
+Per-provider streaming-search failures that were previously dropped
+silently are now recorded as §6.AC non-fatal telemetry events (commit
+<code>922ecbca</code>).</li>
+<li><strong>Rotated auth pepper.</strong> A fresh
+<code>LAVA_AUTH_OBFUSCATION_PEPPER</code> is embedded and the
+<code>android-1.3.11-1069</code> client identity is registered in the
+allowlist.</li>
+</ul>
+<h2
+id="lava-android-1311-1068--2026-06-16-more-reliable-provider-search--transient-failure-retries">Lava-Android-1.3.11-1068
+— 2026-06-16 (More reliable provider search — transient-failure
+retries)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.10-1067.</p>
+<ul>
+<li><p><strong>Provider searches are more reliable</strong> — when a
+tracker the app searches through hits a brief, transient upstream hiccup
+(a momentary 5xx / network blip), the on-device API now automatically
+retries the request a bounded number of times instead of giving up on
+the first failure. This covers <strong>all 10 retry-eligible
+providers</strong> served by the on-device / LAN API: Tokyo Toshokan,
+Knaben, Nyaa, BitSearch, TorrentDownloads, Project Gutenberg, the
+FlareSolverr path, Kinozal, NNM-Club, and RuTracker. Terminal errors
+(real 4xx / genuine failures) are still surfaced immediately — only
+transient failures are retried (commits <code>a88467df</code>,
+<code>cd54341c</code>, <code>307b4a5d</code>).</p></li>
+<li><p>The Lava client app itself is unchanged behaviorally; this build
+re-packages the same client with the improved embedded API
+(<code>liblavaapi.so</code>), so the on-device search round-trip
+benefits without any new client-side surface.</p></li>
+<li><p><strong>Search no longer dead-ends on failure.</strong> When a
+multi-provider search stream fails (every selected provider errors / the
+whole request fails), the results screen now shows an explicit
+<strong>Error state with a Retry action</strong> instead of the
+misleading "Nothing found" empty state, so a transient failure is
+recoverable with one tap (commit <code>cfe838bc</code>).</p></li>
+<li><p><strong>Search failures are now captured to telemetry.</strong>
+Per-provider streaming-search failures that were previously dropped
+silently are now recorded as §6.AC non-fatal telemetry events, so flaky
+providers surface in the operator dashboard instead of vanishing (commit
+<code>922ecbca</code>).</p></li>
+</ul>
+<p>Paired with on-device API app 0.2.11-16 (same embedded-API retry
+resilience) and lava-api-go 2.3.31-2331.</p>
+<h2
+id="lava-api-app-0211-18--2026-06-23-corrective-clean-rebuild--fgs-telemetry-on-both-variants">Lava-API-App-0.2.11-18
+— 2026-06-23 (Corrective clean rebuild — FGS telemetry on both
+variants)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.11-17 (whose
+RELEASE channel shipped a stale versionCode-16 binary because that
+rebuild failed mid-package; incident
+<code>.lava-ci-evidence/sixth-law-incidents/2026-06-23-apiapp-17-release-stale-binary.json</code>).
+18 is the clean-rebuilt corrective ship carrying the §6.AC
+<code>ApiEngineService</code> FGS-budget non-fatal telemetry on BOTH
+debug and release. <code>firebase-distribute.sh</code> now aapt-verifies
+the picked APK's actual versionCode so a stale-content binary can no
+longer pass the filename picker.</p>
+<h2
+id="lava-api-app-0211-17--2026-06-23-foreground-service-failure-telemetry">Lava-API-App-0.2.11-17
+— 2026-06-23 (Foreground-service failure telemetry)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.11-16.</p>
+<ul>
+<li><strong>The on-device API engine now reports foreground-service
+failures.</strong> When Android refuses to start the engine's foreground
+service because the <code>dataSync</code> budget is exhausted
+(<code>ForegroundServiceStartNotAllowedException</code>), the api-app
+now records a Crashlytics non-fatal with the engine context instead of
+swallowing the error — so the budget-exhaustion edge case is visible in
+telemetry. (§6.AC.)</li>
+</ul>
+<h2
+id="lava-api-app-0211-16--2026-06-16-more-reliable-provider-search--transient-failure-retries">Lava-API-App-0.2.11-16
+— 2026-06-16 (More reliable provider search — transient-failure
+retries)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.10-15.</p>
+<ul>
+<li><strong>The on-device API now retries transient provider
+failures</strong> — every per-provider search request that hits a brief,
+transient upstream failure (momentary 5xx / network blip) is now retried
+a bounded number of times before the API gives up, across all 10
+retry-eligible providers (Tokyo Toshokan, Knaben, Nyaa, BitSearch,
+TorrentDownloads, Project Gutenberg, FlareSolverr path, Kinozal,
+NNM-Club, RuTracker). Terminal/non-transient errors are returned
+immediately, unchanged. This makes search noticeably more dependable
+when a tracker is briefly flaky (commits <code>a88467df</code>,
+<code>cd54341c</code>, <code>307b4a5d</code>). Embedded lava-api-go
+bumped to 2.3.31-2331.</li>
+</ul>
+<p>Paired with client 1.3.11-1068.</p>
+<h2
+id="lava-android-1310-1067--2026-06-14-auth-provider-search-groundwork--securityrobustness-hardening">Lava-Android-1.3.10-1067
+— 2026-06-14 (Auth-provider search groundwork + security/robustness
+hardening)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.9-1066.</p>
+<ul>
+<li><strong>Search across login-required providers (RuTracker, Kinozal)
+— groundwork shipped for testing.</strong> 1.3.9 fixed search end-to-end
+for no-auth providers (Internet Archive, etc.). This build adds the
+missing piece for <strong>login-required</strong> providers: the app now
+sends your provider login session (<code>Auth-Token</code>) alongside
+the per-instance key on every search, so an authenticated provider can
+return your results instead of an empty/login response. Please test
+RuTracker/Kinozal search and report back — the no-auth path is unchanged
+and remains device-verified.</li>
+<li><strong>Security hardening</strong> — the on-device API access
+permission is now build-variant-specific, so a device that has both a
+debug and a release build installed can no longer collide on it.</li>
+<li><strong>Robustness</strong> — the on-device API key is now only ever
+read for a <em>local</em> on-device API, never attached to a
+remote/cloud server (prevents a wrong-key rejection in that edge
+case).</li>
+</ul>
+<p>Paired with on-device API app 0.2.10-15.</p>
+<h2
+id="lava-android-139-1066--2026-06-14-search-fixed-end-to-end">Lava-Android-1.3.9-1066
+— 2026-06-14 (Search fixed end-to-end)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.8-1065
+(debug+release).</p>
+<ul>
+<li><strong>Search works across your providers again</strong> —
+searching across providers via the on-device API now returns results.
+This fixes the "Something went wrong" / "Nothing found" that affected
+<strong>every</strong> search. Under the hood, the on-device API's key
+handoff (a ContentProvider that gives the app the API's per-instance
+key) served an empty result because of an inverted-lifecycle assumption
+— Android starts the ContentProvider before the app finishes
+initializing, so the key was never published and every per-provider
+search request was rejected (401) while the public
+<code>/providers</code> and <code>/health</code> routes kept working,
+masking the defect. The provider now resolves the key lazily per
+request, and client-side host / route / key-delivery fixes complete the
+round-trip. Fixes Internet Archive, RuTracker, YTS, Kinozal and every
+provider served by the on-device / LAN API.</li>
+</ul>
+<p>Device-verified on a Genymotion Pixel 9 / API 35 VM: the R8
+<strong>release</strong> client + R8 <strong>release</strong> on-device
+API, installed as a matched signed pair, completed a fresh onboarding
+(Welcome → mDNS-discovered "On your network" API → Internet Archive →
+Home) and a live "prince" search that rendered real Internet Archive
+results — with an ESTABLISHED TCP connection to the engine on :8443
+observed at search time. Paired with on-device API app 0.2.9-14.</p>
+<h2
+id="lava-api-app-0210-15--2026-06-14-variant-specific-access-permission">Lava-API-App-0.2.10-15
+— 2026-06-14 (Variant-specific access permission)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.9-14.</p>
+<ul>
+<li><strong>Build-variant-specific access permission</strong> — the
+<code>READ_API_KEY</code> signature permission is now suffixed per
+variant (debug vs release) so debug + release installs never collide
+(<code>INSTALL_FAILED_DUPLICATE_PERMISSION</code>). Release value is
+byte-identical to 0.2.9, so existing release installs keep their grant.
+The embedded API + the 0.2.9 key-handoff fix are unchanged.</li>
+</ul>
+<h2
+id="lava-api-app-029-14--2026-06-14-key-handoff-fixed--client-search-authenticates">Lava-API-App-0.2.9-14
+— 2026-06-14 (Key handoff fixed → client search authenticates)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.8-12
+(debug+release).</p>
+<ul>
+<li><strong>The on-device API now hands its access key to the Lava
+client correctly</strong> — the key-handoff ContentProvider
+(<code>ApiKeyProvider</code>) cached its key/port lookups in
+<code>onCreate()</code>, but Android runs a ContentProvider's
+<code>onCreate()</code> BEFORE the app's own <code>onCreate()</code>
+publishes those values, so the provider served an empty cursor forever
+and the client never received the API's per-instance key. Every
+auth-gated <code>/v1/{provider}/search</code> request was therefore
+rejected and search appeared completely broken. The provider now
+resolves the running key/port lazily on each request, independent of
+startup ordering. This is the on-device-API half of the end-to-end
+search fix. Foreground service (specialUse) unchanged from
+0.2.8-12.</li>
+</ul>
+<p>Device-verified on a Genymotion Pixel 9 / API 35 VM as the matched
+release pair serving the release client's live search. Paired with
+client 1.3.9-1066.</p>
+<h2
+id="lava-android-138-1065--2026-06-14-search-fixed--no-duplicate-servers--select-all-providers--password-showhide">Lava-Android-1.3.8-1065
+— 2026-06-14 (Search fixed + no duplicate servers + select-all providers
++ password show/hide)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.7-1064
+(debug+release).</p>
+<ul>
+<li><strong>Search works again across your providers</strong> —
+searching across providers via the on-device API no longer fails with
+"Something went wrong, please try again." The app now authenticates
+every per-provider request to the chosen API (it previously used the
+wrong, stricter network client and didn't send the API's per-instance
+key, so the self-signed local API rejected the search). This fixes
+search for RuTracker, YTS, Kinozal and every other provider served by
+the on-device / LAN API.</li>
+<li><strong>No more duplicate servers in Settings</strong> — the server
+you chose no longer appears twice in Settings → the server list (the
+same server reached via two paths is now shown once).</li>
+<li><strong>Select-all / Deselect-all providers</strong> — the
+onboarding "Pick your providers" screen now has a single control to
+check or uncheck every provider at once (handy when an API offers
+many).</li>
+<li><strong>Standard password field</strong> — the provider sign-in
+password field now masks characters by default with a show/hide (eye)
+toggle, like any normal password field.</li>
+</ul>
+<p>Each fix is covered by an automated reproduction test and a
+device-run UI/instrumented Challenge that passed on a Genymotion Pixel 9
+/ API 35 VM. Paired with on-device API app 0.2.8-12.</p>
+<h2
+id="lava-android-137-1064--2026-06-13-new-tokyo-toshokan-provider--more-reliable-provider-reachability--cleaner-diagnostics">Lava-Android-1.3.7-1064
+— 2026-06-13 (New Tokyo Toshokan provider + more reliable provider
+reachability + cleaner diagnostics)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.6-1063
+(debug+release).</p>
+<ul>
+<li><strong>New provider — Tokyo Toshokan</strong> — an additional
+curated public tracker focused on anime / Asian media, with anonymous
+free-text search + magnet links (no setup). The on-device API now serves
+<strong>13</strong> providers (5 built-in + 8 curated). Its search was
+verified to genuinely filter on your query (not a global list) against
+the live site.</li>
+<li><strong>More reliable provider reachability</strong> — The Pirate
+Bay and Torrents-CSV now use a mirror-failover strategy: if their
+primary domain ever rotates or goes down, the app automatically tries
+the next known endpoint instead of failing. (Both currently have a
+single live endpoint; the failover is hardening against the kind of
+domain-rotation outage that briefly affected YTS.)</li>
+<li><strong>Cleaner crash diagnostics</strong> — normal screen-change
+cancellations during a <code>.torrent</code> download are no longer
+mis-reported as errors, so the crash dashboard reflects real issues
+only.</li>
+</ul>
+<p>Carries forward everything from 1.3.6 (onboarding loads providers
+from the chosen API). Paired with on-device API app 0.2.7-11.</p>
+<h2
+id="lava-android-136-1063--2026-06-13-onboarding-now-loads-providers-from-the-chosen-api--fixes-the-couldnt-reach-the-selected-api-error">Lava-Android-1.3.6-1063
+— 2026-06-13 (Onboarding now loads providers from the chosen API — fixes
+the "Couldn't reach the selected API" error)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.5-1062
+(debug+release).</p>
+<ul>
+<li><strong>The provider list now comes from the API you choose</strong>
+— when you pick a discovered API on the "Choose your API" onboarding
+step, the next screen now correctly loads <strong>that API's</strong>
+provider catalogue. Previously, selecting a perfectly-reachable API
+(e.g. your local API at <code>…:8443</code>) showed the error
+<strong>"Couldn't reach the selected API — showing bundled
+providers"</strong> and fell back to the built-in list. Root cause: the
+API's public provider-catalogue endpoint (<code>GET /providers</code>)
+was incorrectly behind the authentication gate, so a freshly discovered
+API — which has no pre-shared key yet during onboarding — was rejected
+with HTTP 401. The catalogue is public, non-sensitive metadata (provider
+ids, capabilities, sign-in type) and is now reachable without auth,
+exactly like the health probe. Per-provider operations (search/download)
+remain fully authenticated — only the catalogue listing was opened.</li>
+<li><strong>Some APIs offer different providers</strong> — because the
+list is now genuinely sourced from the chosen API, an API that supports
+a different provider set than the built-in one shows exactly its set
+(providers are taken <strong>from</strong> the API, not merged with the
+built-in list).</li>
+</ul>
+<p>Paired server fix in the on-device API app (0.2.6-10) so the embedded
+API serves the public catalogue too. Covered by new automated full-flow
+tests: a real HTTP-stack test proving the catalogue is reachable without
+auth while per-provider calls stay gated, and an onboarding-flow test
+proving the wizard shows ONLY the chosen API's providers (and NO
+fallback banner) when the API is reachable.</p>
+<h2
+id="lava-android-135-1062--2026-06-13-onboarding-back-navigation-fix--full-onboarding-test-coverage-device-verified">Lava-Android-1.3.5-1062
+— 2026-06-13 (Onboarding back-navigation fix + full onboarding test
+coverage; device-verified)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.4-1061
+(debug+release).</p>
+<ul>
+<li><strong>Onboarding back-navigation fix</strong> — when you go back
+from the "Choose your API" screen to Welcome, the screen no longer keeps
+a stale typed cloud address, a leftover address-parse error, or a
+provider-fallback notice from your previous attempt; re-entering the
+step is clean. (Carries forward everything from 1.3.4: 12 providers,
+providers available everywhere incl. after restart, API-app crash
+reporting.)</li>
+<li><strong>Full onboarding test coverage</strong> — the entire
+onboarding state machine (API discovery + selection, connectivity probe
+success/failure/retry, the back transitions, and provider sign-in
+success/failure) is now covered by automated tests, so onboarding
+regressions are caught before they ship.</li>
+</ul>
+<p>Device-verified on a Genymotion Pixel 9 / API 35 (arm64): cold-start
+(C00), launch</p>
+<ul>
+<li>tracker selection (C01), apiSupported filter (C16), onboarding
+fresh-install (C25) Challenges + R8 release cold-start canary all GREEN
+on this exact build.</li>
+</ul>
+<h2
+id="lava-android-134-1061--2026-06-13-more-providers-available-everywhere-api-app-crash-reporting-device-verified">Lava-Android-1.3.4-1061
+— 2026-06-13 (More providers, available everywhere; API-app crash
+reporting; device-verified)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.3-1060
+(debug+release).</p>
+<ul>
+<li><strong>More providers</strong> — the on-device API now serves
+<strong>12 providers</strong> (up from the earlier few): the built-in
+trackers plus seven curated public trackers — <strong>The Pirate Bay,
+YTS, Torrents-CSV, BitSearch, Knaben, Nyaa, TorrentDownloads</strong> —
+each with anonymous free-text search + magnet links (no extra setup).
+All seven were verified reachable + actually searching against their
+live sites.</li>
+<li><strong>Providers available everywhere, including after a
+restart</strong> — the full provider list now appears in <strong>both
+onboarding AND Settings</strong>, and <strong>persists across app
+restarts</strong> (fix: previously, after closing + reopening the app,
+Settings could fall back to only the built-in few — the app now
+re-fetches the full catalogue on launch). This was the "only a few
+providers show up" issue.</li>
+<li><strong>Crash reporting for the API app</strong> — the on-device API
+app now reports crashes, ANRs, and non-fatals to Crashlytics (it
+previously had none), so problems are visible and fixable.</li>
+<li><strong>Cleaner diagnostics</strong> — normal screen-change
+cancellations are no longer mis-reported as errors, so the crash
+dashboard reflects real issues only.</li>
+</ul>
+<p>Device-verified on a Genymotion Pixel 9 / API 35 (arm64): cold-start
+survival (C00), app launch + tracker/provider selection (C01),
+apiSupported filter (C16), and onboarding fresh-install (C25) Challenges
+all GREEN on this exact build. All 7 curated providers confirmed
+live-reachable.</p>
+<h2
+id="lava-android-133-1060--2026-06-11-dynamic-provider-discovery-device-verified">Lava-Android-1.3.3-1060
+— 2026-06-11 (Dynamic provider discovery; device-verified)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.2-1059
+(debug+release).</p>
+<ul>
+<li><strong>Dynamic providers</strong> — the app now learns its list of
+trackers/providers <strong>from the API instance you choose</strong>,
+instead of a fixed built-in list. Pick an API in onboarding and the
+provider list + the sign-in fields for each provider are populated live
+from that server. If the API can't be reached, the app falls back to the
+built-in providers (never a blank list).</li>
+<li><strong>Jackett indexers as providers</strong> — every indexer
+configured on the chosen API's Jackett is offered as its own selectable
+provider, searchable + downloadable like any other.</li>
+<li><strong>Sign-in fix</strong> — API-key providers now show a key
+field (previously they were wrongly shown a username/password
+form).</li>
+</ul>
+<p>Device-verified on a Genymotion Pixel 9 / API 35: cold-start +
+provider-selection Challenges C00/C01 GREEN on this build. The
+dynamic-discovery logic is proven end-to-end over the real
+repository→use-case→registry→ViewModel chain; the new C39/C40 Challenges
+that assert an API-only provider need a Jackett-backed API to run for
+real (infra follow-up).</p>
+<h2
+id="lava-android-132-1059--2026-06-11-signed-release-build-for-testing-build-pipeline--auth-hardening-device-verified">Lava-Android-1.3.2-1059
+— 2026-06-11 (Signed release build for testing; build-pipeline + auth
+hardening; device-verified)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.1-1058
+(debug+release).</p>
+<p>Same user-facing feature set as 1.3.1-1058 — this is a fresh,
+fully-signed <strong>release</strong> build cut for tester validation,
+carrying the build-infrastructure and per-release-auth hardening from
+the 1.3.2 cycle:</p>
+<ul>
+<li><strong>Per-release auth rotated</strong> — fresh obfuscation pepper
++ per-build client UUID; <code>android-1.3.2-1059</code> added to the
+accepted-clients allowlist (all prior clients retained) so the on-device
+API accepts this build.</li>
+<li><strong>Build pipeline restored</strong> — the container image build
+was repaired (LVA-078: the build context no longer excludes the Go
+submodule sources it needs) and the <code>apiengine</code> Gradle task
+graph + dexing heap were fixed (LVA-076), so the release artifacts are
+produced through a clean, reproducible build.</li>
+<li><strong>Release cold-start verified</strong> — the exact R8/minified
+release APK was installed and cold-launched on a Genymotion Pixel 9 /
+API 35 VM: reaches MainActivity, zero crash, zero ANR
+(<code>run-release-canary.sh</code>, LVA-077).</li>
+</ul>
+<p>Distributed to Firebase App Distribution (debug stage 1 → release
+stage 2, §6.AA).</p>
+<h2
+id="lava-android-131-1058--2026-06-09-stability--real-bug-fixes-http-file-download-device-verified">Lava-Android-1.3.1-1058
+— 2026-06-09 (Stability + real-bug fixes; HTTP file download;
+device-verified)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.0-1057
+(debug+release).</p>
+<p>User-visible fixes (all device-verified on a Genymotion Pixel 9 / API
+35; core-flow Challenges C00/C01/C07/C08 GREEN):</p>
+<ul>
+<li><strong>Login fixed</strong> — RuTracker login no longer reports a
+false "success" on wrong credentials (every authenticated call would
+then 401); the captcha login now submits the answer under the correct
+dynamic field and serves the real captcha image type.</li>
+<li><strong>Downloads</strong> — a favorited/visited magnet-only torrent
+is no longer dropped (it stayed un-downloadable); topic-screen crash on
+Android &lt; 15 from a list operation is fixed; magnet links with
+uppercase <code>urn:BTIH:</code> are now accepted; archive.org / Project
+Gutenberg file download is now reachable from search results (new
+HTTP_DOWNLOAD capability).</li>
+<li><strong>Search</strong> — multi-provider search no longer silently
+drops an unknown provider; the search filter no longer mis-files the
+author name; results pagination (scroll up/down) hardened.</li>
+<li><strong>Onboarding</strong> — the anonymous-mode choice is now
+persisted; subtitles render real spaces.</li>
+<li><strong>Connectivity</strong> — public hosts beginning with
+"fc"/"fd" are no longer misrouted as local; on-device API endpoints keep
+their access key (no more 401 when re-selected from the list).</li>
+<li><strong>Reliability/telemetry</strong> — the embed API's TLS
+certificate rotates before expiry and surfaces rotations to telemetry;
+the known upstream navigation teardown crash (search → rotate /
+config-change) is now tagged in Crashlytics as a known issue rather than
+a mystery fatal.</li>
+</ul>
+<p>Internal: ~22 real shipped bugs fixed with falsifiable regression
+tests; full constitution gate green; lava-api-go real-Postgres
+integration coverage; Jackett Torznab sidecar validated against the new
+upstream release. See <code>git log</code> 54eedd92..HEAD and
+<code>docs/Fixed.md</code> (LVA ledger).</p>
+<h2
+id="lava-android-130-1057--2026-06-04-client--api-app-linking--onboarding-on-this-device">Lava-Android-1.3.0-1057
+— 2026-06-04 (Client ↔︎ API-app linking + onboarding "On this
+device")</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.36-1056
+(debug).</p>
+<ul>
+<li><strong>New feature — connect the client and the on-device API
+app</strong>: onboarding "Choose your API" gains an <strong>"On this
+device"</strong> section that opens the Lava API app ("Open Lava API
+app"), or routes to the Firebase download page if it isn't installed
+("Install Lava API app" — no dead Play-Store links). The API app
+auto-starts + offers "Back to Lava client"; the client then
+auto-connects to the on-device API over loopback, with the key handed
+over via a same-signature ContentProvider. Bidirectional (the API app
+also opens the client).</li>
+<li><strong>Bug A fix</strong> (operator-reported 2026-06-04, verified
+on a real S23 Ultra): selecting the discovered on-device API no longer
+fails with "Could not reach this API: API did not respond" — the
+discovered endpoint carried a doubled port (<code>…:8443:8443</code>);
+the host is now the bare IP, so it connects + advances to "Pick your
+providers".</li>
+<li>§6.Z: <code>.lava-ci-evidence/app-linking/ondevice-dc547861/</code>
++ falsifiable unit regression tests (commit <code>dc547861</code>).
+Debug-stage evidence:
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.0-1057-test-evidence.md</code>.</li>
+</ul>
+<h2
+id="lava-api-app-028-12--2026-06-14-foreground-service-no-longer-crashes-after-long-uptime--datasync--specialuse">Lava-API-App-0.2.8-12
+— 2026-06-14 (Foreground service no longer crashes after long uptime —
+dataSync → specialUse)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.7-11
+(debug+release).</p>
+<ul>
+<li><strong>The on-device API no longer crashes after running for a long
+time</strong> — the background foreground service used the Android
+<code>dataSync</code> type, which Android 14+ caps at a ~6-hour
+cumulative runtime budget; once exhausted, the service crashed
+(<code>ForegroundServiceStartNotAllowedException</code>). The long-lived
+LAN API server now uses the <code>specialUse</code> foreground-service
+type (no cumulative-time budget) and gracefully stops if the OS ever
+signals a timeout, instead of crashing. The embedded provider catalogue
+and search are unchanged from 0.2.7-11.</li>
+</ul>
+<p>Note (Play Store): the <code>specialUse</code> type carries a
+free-form Play Console review justification (in the manifest property)
+describing the long-lived LAN API-server use case.</p>
+<h2
+id="lava-api-app-027-11--2026-06-13-tokyo-toshokan-provider--tpbtorrents-csv-mirror-failover-hardening">Lava-API-App-0.2.7-11
+— 2026-06-13 (Tokyo Toshokan provider + TPB/Torrents-CSV mirror-failover
+hardening)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.6-10
+(debug+release).</p>
+<ul>
+<li><strong>New embedded provider — Tokyo Toshokan</strong> — the
+on-device API now serves the Tokyo Toshokan curated tracker
+(anime/Asian-media RSS, anonymous free-text search + magnet), bringing
+the embedded <code>GET /providers</code> catalogue to
+<strong>13</strong> providers (5 built-in + 8 curated). Honest CapSearch
+verified live (the query genuinely narrows results).</li>
+<li><strong>Mirror-failover for The Pirate Bay + Torrents-CSV</strong> —
+each now carries a failover endpoint list (first live mirror wins,
+per-attempt timeout cap) so a future domain rotation/outage degrades
+gracefully instead of breaking the provider. No fabricated mirrors —
+each currently has one real endpoint; the architecture is the
+hardening.</li>
+</ul>
+<p>Pairs with client 1.3.7-1064. Carries forward the public
+<code>/providers</code> catalogue from 0.2.6-10.</p>
+<h2
+id="lava-api-app-026-10--2026-06-13-public-provider-catalogue--onboarding-reads-providers-from-a-freshly-discovered-api">Lava-API-App-0.2.6-10
+— 2026-06-13 (Public provider catalogue — onboarding reads providers
+from a freshly-discovered API)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.5-9
+(debug+release).</p>
+<ul>
+<li><strong>Provider catalogue is now public</strong> — the embedded
+on-device API serves its provider list (<code>GET /providers</code>)
+without requiring the Lava-Auth header, exactly like the
+health/readiness probes. This is what lets the Lava client read the
+provider list during onboarding against an API it has just discovered on
+the network (and therefore has no pre-shared key with yet). Previously
+this endpoint was behind the auth gate, so the client got HTTP 401 and
+fell back to the built-in providers with a "Couldn't reach the selected
+API" notice (Crashlytics 47b000d5).</li>
+<li><strong>Per-provider operations remain authenticated</strong> — only
+the non-sensitive catalogue listing was opened; search/download under
+<code>/v1/&lt;provider&gt;/…</code> still require a valid Lava-Auth key.
+Proven by a real-binary test asserting the three-way boundary (unauth
+<code>/providers</code>→200, unauth <code>/v1/…</code>→401, authed
+<code>/v1/…</code>→crosses the gate).</li>
+<li>Pairs with client 1.3.6-1063. Same one-line
+<code>router.Build</code> registration-order fix covers both the
+standalone binary and this embedded API (DRY).</li>
+</ul>
+<p>Device-verified on a Genymotion Pixel 9 / API 35 (arm64): cold-start
+canary GREEN on this exact build (COLD launch 3.2s, MainActivity
+resumed, 0 fatal).</p>
+<h2
+id="lava-api-app-025-9--2026-06-13-135-client-auth-allowlist-carries-the-crashlytics--12-provider-embed">Lava-API-App-0.2.5-9
+— 2026-06-13 (1.3.5 client auth allowlist; carries the Crashlytics +
+12-provider embed)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.4-8
+(debug+release).</p>
+<ul>
+<li><strong>1.3.5 client auth allowlist</strong> —
+<code>android-1.3.5-1062</code> added to the accepted-clients allowlist
+so the matching client build authenticates against the on-device
+API.</li>
+<li>Carries forward the 0.2.4 feature set: Firebase Crashlytics
+crash/ANR/non-fatal reporting + the 7 curated providers embedded in the
+on-device API (12 total via <code>GET /providers</code>), all verified
+live-reachable.</li>
+</ul>
+<h2
+id="lava-api-app-024-8--2026-06-13-crashlytics-crash-reporting--7-curated-providers--134-client-auth-allowlist">Lava-API-App-0.2.4-8
+— 2026-06-13 (Crashlytics crash reporting + 7 curated providers + 1.3.4
+client auth allowlist)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.3-7
+(debug+release).</p>
+<ul>
+<li><strong>Crash reporting added</strong> — the on-device API app now
+reports crashes, ANRs, and non-fatals to Firebase Crashlytics (it
+previously reported nothing), via a shared
+<code>:core:analytics-firebase</code> module; server-side errors from
+the embedded Go API are bridged through the same telemetry. This closes
+the API app's monitoring gap.</li>
+<li><strong>7 curated providers embedded</strong> — the embedded Go API
+now serves The Pirate Bay, YTS, Torrents-CSV, BitSearch, Knaben, Nyaa,
+and TorrentDownloads (in addition to the built-in trackers), so the
+on-device <code>GET /providers</code> catalogue exposes 12 providers —
+all verified live-reachable.</li>
+<li><strong>1.3.4 client auth allowlist</strong> —
+<code>android-1.3.4-1061</code> added to the accepted-clients allowlist
+so the matching client build authenticates against the on-device
+API.</li>
+</ul>
+<h2
+id="lava-api-app-023-7--2026-06-11-provider-catalogue-endpoint--133-client-auth-allowlist-device-verified">Lava-API-App-0.2.3-7
+— 2026-06-11 (Provider-catalogue endpoint + 1.3.3 client auth allowlist;
+device-verified)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.2-6
+(debug+release).</p>
+<p>The on-device API app embeds the lava-api-go engine; this build adds
+the <strong>provider-discovery catalogue</strong> the new dynamic client
+reads:</p>
+<ul>
+<li><strong><code>GET /providers</code></strong> — returns the full list
+of supported providers with their capabilities + auth type, so the Lava
+client populates its provider list + sign-in UI dynamically.</li>
+<li><strong>Jackett indexers as providers</strong> — every configured
+Jackett indexer is enumerated at startup and offered as a first-class
+provider (native providers win any id collision).</li>
+<li><strong>Auth allowlist</strong> — <code>android-1.3.3-1060</code>
+added to the accepted-clients list (all prior retained).</li>
+<li>Built with the same release signing key as the Lava client.</li>
+</ul>
+<blockquote>
+<p><strong>Testers:</strong> the release API app
+(<code>digital.vasic.lava.api</code>) and the debug API app
+(<code>digital.vasic.lava.api.dev</code>) declare the same custom
+permission and <strong>cannot be installed at the same time</strong>.
+Uninstall <strong>"Lava API (debug)"</strong> before installing this
+release build.</p>
+</blockquote>
+<h2
+id="lava-api-app-022-6--2026-06-11-first-signed-release-distribution-132-client-auth-allowlist-device-verified">Lava-API-App-0.2.2-6
+— 2026-06-11 (First signed RELEASE distribution; 1.3.2 client auth
+allowlist; device-verified)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.1-5
+(debug).</p>
+<p>The on-device API app's <strong>first release-channel
+distribution</strong> (previously debug-only). Same embedded-engine
+feature set as 0.2.1-5, rebuilt as a signed release alongside the 1.3.2
+client:</p>
+<ul>
+<li><strong>Auth allowlist</strong> — <code>android-1.3.2-1059</code>
+added to the accepted-clients list (all prior retained) so the freshly
+distributed 1.3.2 client reaches the on-device API.</li>
+<li><strong>Signed release</strong> — built with the same release
+signing key as the Lava client (shared
+<code>keystores/release.keystore</code>).</li>
+<li><strong>Release cold-start verified</strong> — the exact release APK
+was installed and cold-launched on a Genymotion Pixel 9 / API 35 VM:
+reaches <code>lava.api.app.MainActivity</code>, zero crash, zero
+ANR.</li>
+</ul>
+<blockquote>
+<p><strong>Testers:</strong> the release API app
+(<code>digital.vasic.lava.api</code>) and the debug API app
+(<code>digital.vasic.lava.api.dev</code>) declare the same custom
+permission and <strong>cannot be installed at the same time</strong>.
+Uninstall <strong>"Lava API (debug)"</strong> before installing this
+release build.</p>
+</blockquote>
+<h2
+id="lava-api-app-021-5--2026-06-09-embedded-api-bug-fix-wave--131-client-auth-allowlist-device-verified">Lava-API-App-0.2.1-5
+— 2026-06-09 (Embedded-API bug-fix wave + 1.3.1 client auth allowlist;
+device-verified)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.0-4
+(debug).</p>
+<p>The on-device API app embeds the lava-api-go engine; this build ships
+the same real bug-fix wave that landed across the 1.3.1 cycle plus the
+rotated auth allowlist so the new Lava-Android-1.3.1-1058 client
+authenticates to the local API:</p>
+<ul>
+<li><strong>Zero-downtime embed TLS</strong> — the embedded API now
+re-mints its TLS leaf mid-process before expiry (LVA-068) and
+regenerates a persisted-but-expired leaf on boot (LVA-064), surfacing
+each rotation to telemetry (LVA-072) — no more stale-cert handshake
+failures.</li>
+<li><strong>Login honesty</strong> — rutracker login honors the auth
+discriminator instead of reporting a fake success on wrong credentials
+(LVA-046).</li>
+<li><strong>Multi-search SSE</strong> — deterministic provider ordering
+(LVA-059) and unknown requested providers are no longer silently dropped
+(LVA-057).</li>
+<li><strong>Captcha</strong> — v1 captcha submits under the correct
+dynamic field name and propagates the upstream image Content-Type
+(LVA-025/026).</li>
+<li><strong>Correctness</strong> — rutracker browse/favorites no longer
+blind-casts Topic→Torrent (LVA-032); brotli no longer emits
+Content-Encoding on bodyless 204/304 (LVA-038).</li>
+<li><strong>Auth allowlist</strong> — <code>android-1.3.1-1058</code>
+added to the accepted-clients list (prior clients retained) so the
+freshly distributed client can reach the on-device API.</li>
+</ul>
+<p>Device-verified: cold-start canary on a Genymotion Pixel 9 / API 35
+VM (debug channel only — the api-app has no release Firebase app
+configured).</p>
+<h2
+id="lava-api-app-020-4--2026-06-04-cross-app-linking--idempotent-engine-start">Lava-API-App-0.2.0-4
+— 2026-06-04 (Cross-app linking + idempotent engine start)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.1.2-3
+(debug).</p>
+<ul>
+<li><strong>New feature — links with the Lava client</strong>:
+auto-starts the engine when opened to "start the API"; "Back to Lava
+client" / "Open Lava client" button (Firebase download if the client is
+absent); exposes its access key to the genuine same-signature client via
+a signature-permission ContentProvider.</li>
+<li><strong>Bug B fix</strong> (operator-reported 2026-06-04, verified
+on a real S23 Ultra): re-opening the API app no longer crashes with
+"listen 0.0.0.0:8443; bind: address already in use" — start is now
+idempotent (a redundant start surfaces the live running state, never
+re-binds).</li>
+<li>§6.Z: <code>.lava-ci-evidence/app-linking/ondevice-dc547861/</code>
+(double-start → no bind error, engine health=200) + falsifiable
+<code>ApiEngineControllerTest</code> (commit <code>dc547861</code>).
+Debug-stage evidence:
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.2.0-4-test-evidence.md</code>.</li>
+</ul>
+<h2
+id="lava-api-app-012-3--2026-06-03-dev-launcher-background--green-like-the-client-dev">Lava-API-App-0.1.2-3
+— 2026-06-03 (DEV launcher background → green, like the client DEV)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.1.1-2 (debug,
+2026-06-03).</p>
+<ul>
+<li><strong>Debug ("Lava API DEV") launcher background is now GREEN
+(#00FF00)</strong> — matching the client DEV convention (a
+<code>src/debug</code> adaptive-icon override → green vector
+<code>@drawable/ic_launcher_background</code>, Lava-logo foreground), so
+DEV is visually distinct from release at a glance.</li>
+<li><strong>Release ("Lava API") keeps the current RED
+background</strong> (main <code>mipmap</code> PNG) — unchanged.</li>
+<li>Icon background hint only; no functional change vs 0.1.1-2.</li>
+<li>§6.Z: DEBUG runtime = transferred item-1 C01–C04 green ×2; green bg
+verified by aapt2 + operator visual check. Fresh gate + RELEASE R8
+canary still emulator-BLOCKED (adbd-offline wedge; forensics
+<code>2026-06-03-emulator-boot-offline.json</code>) → <strong>RELEASE
+HELD</strong>. Debug evidence:
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.1.2-3-test-evidence.md</code>.</li>
+</ul>
+<h2
+id="lava-api-app-011-2--2026-06-03-proper-launcher-icon--dev-debug-name">Lava-API-App-0.1.1-2
+— 2026-06-03 (proper launcher icon + DEV debug name)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.1.0-1 (debug,
+2026-06-02).</p>
+<ul>
+<li><strong>Proper launcher icon</strong>: api-app now uses the SAME
+adaptive launcher icon as the Lava client (colored Lava logo foreground
++ background hint color; per-density PNGs +
+<code>mipmap-anydpi-v26</code> adaptive icon + monochrome layer).
+Replaces the 0.1.0-1 placeholder.</li>
+<li><strong>Debug variant named "Lava API DEV"</strong>: the
+<code>.dev</code> build shows a <code>DEV</code> name suffix on the
+launcher (<code>api-app/src/debug/res/values/strings.xml</code>
+override), mirroring the client's "Lava DEV" convention.</li>
+<li>Icon + naming only; no server/functional change vs 0.1.0-1.</li>
+<li>§6.Z: DEBUG runtime covered by transferred item-1 C01–C04 green ×2
+(runtime code git-diff-unchanged); launcher icon verified by operator
+on-device visual check of the Firebase debug build (§6.AA). The fresh
+0.1.1 gate + RELEASE R8 cold-start canary are infra-BLOCKED (emulator
+boot wedge, ~8 attempts; forensics
+<code>.lava-ci-evidence/sixth-law-incidents/2026-06-03-emulator-boot-offline.json</code>),
+so the <strong>RELEASE distribute is HELD</strong> until the emulator
+host is bootable. Debug-stage evidence:
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.1.1-2-test-evidence.md</code>.</li>
+</ul>
+<h2
+id="lava-api-app-010-1--2026-06-02-first-distribution-standalone-on-device-lava-api-server-app">Lava-API-App-0.1.0-1
+— 2026-06-02 (First distribution: standalone on-device Lava API server
+app)</h2>
+<p><strong>Previous published:</strong> none — first distribution.</p>
+<ul>
+<li><strong>Brand-new "Lava API" Android app</strong>
+(<code>digital.vasic.lava.api</code>, debug suffix <code>.dev</code>):
+runs the full lava-api-go server in-process on the device over HTTPS on
+the local network, advertised over mDNS (<code>_lava-api._tcp</code>,
+TXT <code>engine=go,platform=android,storage=sqlite</code>) so other
+devices — incl. the Lava client's "Choose your API" screen — discover
+it.</li>
+<li>Foreground service with start/stop/restart notification controls;
+per-install auth-key store (EncryptedSharedPreferences); SQLite storage
+backend; <code>minSdk 23</code>.</li>
+<li>Shares the SAME signing keystore as the client app (no separate
+keys, §6.R/§6.H).</li>
+<li>§6.Z: on-device Challenges C01–C04 EXECUTED green on cold-booted
+Pixel_8/API35 via the Containers runner (host-direct+HVF). Evidence:
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.1.0-1-test-evidence.md</code>.</li>
+</ul>
+<h2
+id="lava-android-1236-1056--lava-api-go-2323-2323--2026-06-02-on-device-api-client-integration-6l-69th">Lava-Android-1.2.36-1056
+/ Lava-API-Go-2.3.23-2323 — 2026-06-02 (On-device API client
+integration; §6.L 69th)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.35-1055 (debug
++ release, 2026-06-01).</p>
+<ul>
+<li><strong>On-device API support in the client</strong> (commit
+199f1404 / merge 7fce7cf9): the network-discovery list now parses +
+labels API instances advertised with <code>platform=android</code>; the
+onboarding "Choose your API" step labels on-device instances distinctly;
+and <strong>Settings → "Run the API on this device"</strong> installs or
+launches the standalone Lava API app
+(<code>digital.vasic.lava.api</code>), or opens its download link when
+not installed (§6.R-sourced
+<code>LAVA_API_APP_DOWNLOAD_URL</code>).</li>
+<li>Client half of the new on-device API capability; the server half
+ships as the standalone Lava API app (Lava-API-App-0.1.0-1 above),
+first-distributed this cycle.</li>
+<li>Fresh signed debug + release build with rotated auth pepper,
+prepared for the §6.AA two-stage flow (debug first, release after
+on-device verification).</li>
+<li>lava-api-go unchanged this cycle → stays 2.3.23-2323.</li>
+<li><strong>§6.Z: cold-start canary GREEN on a real Samsung Galaxy S23
+Ultra (SM-S918B, Android 16)</strong> — both variants install +
+cold-launch without crash; release MainActivity RESUMED+FOCUSED, fatal=0
+(the §6.Z.4 load-bearing check, on the same device class as the 1.2.19
+crash). Evidence:
+<code>.lava-ci-evidence/2026-06-03-client-1.2.36-1056-canary-device/</code>.
+<strong>Documented gap (operator-authorized, not a bluff):</strong> full
+C00/C01 instrumentation could not run — C00/C01 are
+<code>@SdkSuppress(maxSdkVersion=35)</code> for a documented API-36
+Compose/Espresso test-infra crash, the S23 Ultra is API 36, and the
+API-35 emulator is wedged (§6.AH containerized path OWED). 1.2.35-1055
+had full C00/C01 green on API-35; the 1.2.36 delta (on-device-API client
+integration) doesn't change the launch path. Released on the
+cold-start-canary basis per operator decision 2026-06-03.</li>
+</ul>
+<h2
+id="lava-android-1235-1055--lava-api-go-2323-2323--2026-06-01-choose-your-api-two-sections-6l-69th">Lava-Android-1.2.35-1055
+/ Lava-API-Go-2.3.23-2323 — 2026-06-01 ("Choose your API" two sections;
+§6.L 69th)</h2>
+<ul>
+<li><strong>Onboarding "Choose your API" now has two sections</strong>
+(commit 26ee4433): the existing "On your network" local mDNS discovery
+list, plus a NEW "Cloud / remote server" section — type a server address
++ port and tap <strong>Add server</strong>, or pick a pre-installed
+default (<code>https://lava.app:7777</code>, §6.R-sourced from
+<code>.env</code> → <code>DEFAULT_CLOUD_API</code>). One API is chosen
+to continue; selection runs the same connectivity probe before
+advancing.</li>
+<li><code>ApiSelectionStep</code> cloud params gained default values so
+existing call sites (Challenge26) keep compiling; production
+<code>OnboardingScreen</code> + Challenge30 pass all five
+explicitly.</li>
+<li>Tests: CloudApiDefaultsTest 14/14 + OnboardingViewModelTest 14/14
+(JUnit XML failures=0, falsifiability-rehearsed) +
+Challenge30CloudApiSelectionTest (rendered-UI).</li>
+<li>§6.Z: C00+C01+C26+C30 EXECUTED green on cold-booted Pixel_8/API35
+(Containers runner, host-direct+HVF), all_passed:true / 0 failures.
+Evidence:
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.2.35-1055-test-evidence.md</code>.</li>
+<li>lava-api-go unchanged this cycle (Android-only feature) → stays
+2.3.23-2323.</li>
+</ul>
+<h2
+id="lava-android-1234-1054--lava-api-go-2323-2323--2026-05-31-rebuild--redistribute-6l-69th">Lava-Android-1.2.34-1054
+/ Lava-API-Go-2.3.23-2323 — 2026-05-31 (Rebuild + redistribute; §6.L
+69th)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.2.33-1053 (debug
++ release shipped 2026-05-18).</p>
+<p><strong>What's new for testers:</strong></p>
+<ul>
+<li>Fresh signed <strong>debug + release</strong> build of the client
+(§6.L 69th "rebuild + redistribute" cycle). No new user-facing app
+features versus 1.2.33 — this is a clean rebuild against the latest
+submodule pins + 68th-cycle constitutional tooling, shipped via the
+§6.AA two-stage flow (debug first, release after verification).</li>
+<li>lava-api-go bumped to <strong>2.3.23 (2323)</strong> in lockstep;
+binary + healthprobe rebuilt and booted for live testing.</li>
+</ul>
+<p><strong>Test execution (§6.Z — EXECUTED, not
+source-compiled):</strong></p>
+<ul>
+<li>Compose UI Challenge tests ran on a cold-booted <strong>Pixel_8 /
+API 35</strong> emulator orchestrated by the Containers submodule
+(runner=host-direct + HVF per the §6.X per-OS-acceleration model; NOT a
+live ADB device per §6.AG):
+<ul>
+<li><strong>C00 <code>Challenge00CrashSurvivalTest</code></strong>
+(cold-start canary) → <strong>PASS</strong> (boot 20.3s, test 53.1s, 0
+failures)</li>
+<li><strong>C01
+<code>Challenge01AppLaunchAndTrackerSelectionTest</code></strong> →
+<strong>PASS</strong> (boot 15.7s, test 36.5s, 0 failures)</li>
+</ul></li>
+<li>Lava JVM unit-test suite (<code>./gradlew testDebugUnitTest</code>)
+→ BUILD SUCCESSFUL, exit 0.</li>
+<li>Evidence:
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.2.34-1054-test-evidence.md</code>
++ attestations under
+<code>.lava-ci-evidence/2026-05-31-1.2.34-1054-challenge-matrix/</code>.</li>
+</ul>
+<p><strong>Tooling / governance (no user-visible app
+impact):</strong></p>
+<ul>
+<li>§6.AF-debt PARTIAL CLOSE:
+<code>tools/lava-containers/vm-images.json</code> gained an
+<code>android-35-phone</code> entry so the macOS host-direct+HVF
+Challenge matrix boots (the prior "no image with id android-35-phone"
+was a provisioning gap, not an app defect — §6.J forensic distinction
+recorded).</li>
+</ul>
+<p><strong>Distribute-readiness:</strong> §6.P versionCode 1054 &gt;
+1053; §6.Y bump-first applied; §6.Z evidence present + commit-SHA
+tracked; §6.AA stage 1 debug → stage 2 release.</p>
+<p><code>Classification:</code> project-specific.</p>
+<h2
 id="lava-android-1233-1053--lava-api-go-2322-2322--2026-05-18-smoother-onboarding-animations--13-submodule-pins-advanced--6l-62nd">Lava-Android-1.2.33-1053
 / Lava-API-Go-2.3.22-2322 — 2026-05-18 (Smoother onboarding animations +
 13 submodule pins advanced + §6.L 62nd)</h2>

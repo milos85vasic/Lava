@@ -1,0 +1,1810 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-26-ak-cycle-coverage-spec</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="stream-b--6ak-compliant-video-issue-fix-spec-device-gate-coverage-for-every-claimed-fix">Stream
+B — §6.AK-Compliant Video-Issue Fix Spec: Device-Gate Coverage for Every
+Claimed Fix</h1>
+<p><strong>Date:</strong> 2026-06-26 <strong>Status:</strong> Draft
+<strong>Operator directive:</strong> "No distribute unless every
+CHANGELOG-claimed user-visible fix has an EXECUTED+PASSED covering
+device Challenge for the exact shipped artifact." <strong>Relationship
+to §6.AK:</strong> This spec implements §6.AK clauses 1–7 as a
+mechanical per-cycle workflow. The incident that birthed the clause:
+<code>627a0d58</code> (1076 shipped C00-only; operator confirmed all
+video issues still broken post-distribute). Forensic anchor at
+<code>.lava-ci-evidence/sixth-law-incidents/2026-06-26-c00-only-gate-shipped-broken-flows.json</code>.</p>
+<p><code>Classification:</code> project-specific (the cycle-coverage
+gate pattern is reusable across any HelixConsumption project that ships
+device-tested artifacts; the specific issue IDs LVA-079..LVA-091 and
+CHANGELOG conventions are Lava-specific).</p>
+<hr />
+<h2 id="1-6ak-gate-requirements-summary">1. §6.AK Gate Requirements
+Summary</h2>
+<p>§6.AK (added 2026-06-26, commit <code>627a0d58</code>) establishes a
+<strong>coverage-intersection gate</strong> that no artifact may be
+distributed unless every CHANGELOG-claimed user-visible fix and every
+operator-reported issue addressed in that cycle has an EXECUTED+PASSED
+covering device Challenge for the EXACT artifact being shipped. The
+seven clauses:</p>
+<h3 id="11-coverage-intersection-gate-clause-1">1.1
+Coverage-Intersection Gate (clause 1)</h3>
+<p><code>scripts/firebase-distribute.sh</code> MUST refuse unless the
+§6.Z evidence file enumerates, <strong>per CHANGELOG-claimed
+user-visible fix</strong>, the covering Challenge FQN + its device PASS
+row from the same-SHA gate run. A claimed fix with no executed+passed
+covering Challenge is a distribute-blocker. The CHANGELOG's user-visible
+bullets are the claim-set; the gate's executed-PASS Challenge set MUST
+be a superset of the claim-set's covering Challenges.</p>
+<h3 id="12-reproduce-first-on-device-for-uiflow-issues-clause-2">1.2
+Reproduce-First ON DEVICE for UI/flow issues (clause 2)</h3>
+<p>For any user-reported issue whose surface is a screen/flow (search,
+onboarding, provider selection, rendering, navigation), the reproduction
+test MUST be a <strong>device Challenge that drives the same user
+journey</strong>, not a JVM unit test. The failing-first RED run against
+the un-fixed build MUST be recorded before the fix; the GREEN run
+against the fixed build is the acceptance evidence.</p>
+<h3
+id="13-crash-reproduction-must-match-the-obtained-stack-clause-3">1.3
+Crash reproduction MUST match the obtained stack (clause 3)</h3>
+<p>Every crash fix MUST be preceded by a device Challenge that
+reproduces the <strong>exact</strong> Crashlytics stack trace (class +
+top frame) the crash reported. If the Crashlytics data cannot be
+obtained, the crash is NOT reproducible and is NOT shippable as
+"fixed".</p>
+<h3 id="14-no-trusting-inherited-fixed-claims-clause-4">1.4 No trusting
+inherited "fixed" claims (clause 4)</h3>
+<p>A fix claimed by a prior session/commit that is carried into a
+distribute cycle is treated as <strong>UNVERIFIED</strong> until
+re-confirmed by an executed device Challenge in THIS cycle. An
+unverified inherited claim MUST NOT appear in the CHANGELOG as a fix,
+and its workable item stays open until its covering Challenge runs GREEN
+on the gate.</p>
+<h3 id="15-per-operator-video-reproduction-set-clause-5">1.5
+Per-operator-video reproduction set (clause 5)</h3>
+<p>When the operator provides a manual-testing video, EVERY distinct
+issue in the vision-analysis MUST gain a covering device Challenge that
+drives that issue's exact journey, reproduce-first (RED on the build the
+video was recorded against, GREEN on the fixed build). The matching
+workable item cannot move to a closeable state until that RED-then-GREEN
+device Challenge exists.</p>
+<h3
+id="16-the-gate-run-is-truth-the-changelog-is-the-claim-clause-6">1.6
+The gate run is truth; the CHANGELOG is the claim (clause 6)</h3>
+<p>If the executed-PASS Challenge set does not cover every CHANGELOG
+claim, the honest action is to EITHER run the missing Challenges (and
+fix what fails) OR strike the unverified claims from the CHANGELOG and
+hold them open — NEVER distribute the gap.</p>
+<h3 id="17-inheritance-clause-7">1.7 Inheritance (clause 7)</h3>
+<p>Applies recursively to every submodule, every feature, every
+artifact. Submodule constitutions MAY add stricter coverage requirements
+but MUST NOT relax this clause.</p>
+<hr />
+<h2 id="2-per-video-issue-coverage-map">2. Per-Video-Issue Coverage
+Map</h2>
+<p>All issues below are extracted from the workable items DB
+(<code>docs/workable_items.db</code>) for IDs LVA-079 through LVA-091,
+cross-referenced against the video
+<code>Screen_Recording_20260626_122718</code> (recorded against 1076)
+and the operator's vision analysis.</p>
+<p>The column "Covering Device Challenge FQN" names the Challenge that
+must be written or extended. "Reproduce-First Mutation" names the
+deliberate break and the expected failure message.</p>
+<h3
+id="21-lva-083-video-1--search-returns-zero-results-then-something-went-wrong">2.1
+LVA-083 (Video #1) — Search returns ZERO results then 'Something went
+wrong'</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>LVA-083</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>Video #1 — Search returns ZERO results then 'Something went wrong'
+Error (primary function unusable)</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>In progress</td>
+</tr>
+<tr>
+<td>Priority</td>
+<td><strong>P0</strong></td>
+</tr>
+<tr>
+<td>Root cause</td>
+<td>Multi-factorial. (a) 401 auth-header overwrite in
+<code>AuthInterceptor</code> (fixed in 1072 — shipped). (b) Engine
+response exceeds client readTimeout (30s) because the single-provider
+handler at <code>search.go:64</code> has NO
+<code>context.WithTimeout</code> deadline; fixed in 1073 but 1073 was
+never distributed (1075 branched from it but was also never distributed;
+1076 was built from a different branch that MISSED the handler-deadline
+fix). (c) Client-side partial-failure Error→Empty conversion fixed in
+<code>1cbf364c</code> (landed post-1076, never distributed).</td>
+</tr>
+<tr>
+<td>Fix landed?</td>
+<td><strong>Partial</strong> — <code>1cbf364c</code> (client-side
+Error→Empty) landed but NOT distributed. Engine handler-deadline fix not
+in <code>166ef2e7</code> (current HEAD is pre-fix).</td>
+</tr>
+<tr>
+<td>Covering device Challenge FQN</td>
+<td><strong><code>Challenge58SearchReturnsResults</code></strong> (new).
+Must drive: onboard one provider → navigate to search → enter query →
+submit → assert at least one result row is displayed (user-visible, not
+an Error or Empty screen).</td>
+</tr>
+<tr>
+<td>Reproduce-first protocol</td>
+<td><strong>Mutation:</strong> in <code>SearchResultViewModel</code>,
+make <code>streamSearch</code> always emit
+<code>SearchResultUiState.Error("Something went wrong")</code>
+immediately after submission, bypassing the real API call. <strong>RED
+run:</strong> Challenge58 must fail with assertion like
+<code>AssertionError: No SearchResultItem nodes found; expected at least 1 result</code>.
+<strong>GREEN run:</strong> after reverting the mutation, the Challenge
+must PASS against the real engine.</td>
+</tr>
+<tr>
+<td>LVA-008 blocker</td>
+<td>YES — Challenge58 navigates to <code>search_result</code> which is a
+nested route. If LVA-008 nav-teardown fires, the test crashes with
+<code>IllegalStateException: State must be at least 'CREATED'</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="22-lva-084-video-2--onboarded-provider-not-used-by-search-unconfigured-providers-active-as-filters">2.2
+LVA-084 (Video #2) — Onboarded provider NOT used by Search; unconfigured
+providers active as filters</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>LVA-084</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>Video #2 — Onboarded provider (YTS) is NOT the provider set used by
+Search; unconfigured providers active as filters</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>In progress</td>
+</tr>
+<tr>
+<td>Priority</td>
+<td><strong>P0</strong></td>
+</tr>
+<tr>
+<td>Root cause</td>
+<td><code>SearchInputViewModel.kt:45</code> initialized
+<code>selectedProviders = availableProviders</code> (ALL providers, not
+just onboarded ones). Fix landed in <code>8c795d22</code>:
+<code>keepOnlySearchEnabled</code> reconciler that filters search
+providers to the onboarded+enabled set.</td>
+</tr>
+<tr>
+<td>Fix landed?</td>
+<td><strong>YES</strong> — <code>8c795d22</code> committed but NOT
+distributed (post-1076).</td>
+</tr>
+<tr>
+<td>Covering device Challenge FQN</td>
+<td><strong><code>Challenge59SearchUsesOnboardedProviders</code></strong>
+(new). Must: onboard exactly one provider (e.g. YTS) → navigate to
+search → tap the provider filter chip → assert ONLY the onboarded
+provider appears as a selected/available chip. Assert the total chip
+count equals the onboarded count.</td>
+</tr>
+<tr>
+<td>LVA-008 blocker</td>
+<td>Partial — the search-input route (<code>search/search_input</code>)
+is also nested. If LVA-008 manifests in <code>search_input</code>, the
+chip assertions cannot even execute.</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="23-lva-079-video-3--search-input-chips-vs-results-filter-chips-disagree">2.3
+LVA-079 (Video #3) — Search-input chips vs results-filter chips
+disagree</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>LVA-079</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>Video #3 — search-input chips vs results-filter chips disagree +
+results chip set non-deterministic run-to-run</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>In progress</td>
+</tr>
+<tr>
+<td>Priority</td>
+<td><strong>P1</strong></td>
+</tr>
+<tr>
+<td>Root cause</td>
+<td>The input chips (what you see in <code>SearchInputScreen</code>) and
+the results filter chips (what renders in
+<code>SearchResultScreen</code>) are sourced from DIFFERENT
+repositories. The input chips come from
+<code>SearchInputViewModel.selectedProviders</code> (populated from
+<code>ProviderConfigRepository.observeSelected()</code> or its legacy
+path). The results chips come from <code>SearchResultViewModel</code>'s
+own provider-tracking (populated from the <code>multiSearch</code> SSE
+response's <code>provider_done</code>/<code>provider_error</code>
+events, NOT from the input selection). Non-determinism: the SSE response
+order depends on network latency; providers return in different order
+per run, creating a different chip order in results vs input.</td>
+</tr>
+<tr>
+<td>Fix scope remaining</td>
+<td>Add a <code>ResultsProviderFilterChipMapper</code> (or extend
+<code>SearchResultViewModel</code>) that sources the chip list from the
+SAME <code>selectedProviders</code> that the input chips use, not from
+the SSE event order. Store the intended provider order at submit-time so
+the results chip order is stable and matches input.</td>
+</tr>
+<tr>
+<td>Covering device Challenge FQN</td>
+<td><strong><code>Challenge60InputResultsChipsAgree</code></strong>
+(new). Must: onboard at least 2 providers → navigate to search → submit
+a query → wait for results → capture the list of provider chip labels
+from the input screen AND the results screen → assert they match (same
+set, same order).</td>
+</tr>
+<tr>
+<td>Flakiness guard</td>
+<td>THE INPUT CHIPS MAY CHANGE between navigation and submit. The
+Challenge must snapshot input chips at submit-time (not at
+navigation-time). The assertion is: input chips at submit-time ==
+results chips at first-results-time.</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="24-lva-085-video-4--provider-id-labels-shown-rawlowercased-in-results-filter-chips">2.4
+LVA-085 (Video #4) — Provider id labels shown raw/lowercased in results
+filter chips</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>LVA-085</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>Video #4 — Provider id labels shown raw/lowercased
+('torrentdownloads','archiveorg','kinozal','yts') in results filter
+chips</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>In progress (current HEAD <code>166ef2e7</code>)</td>
+</tr>
+<tr>
+<td>Priority</td>
+<td><strong>P1</strong></td>
+</tr>
+<tr>
+<td>Root cause</td>
+<td>Results filter chips render <code>provider.id</code> (raw lowercase
+id, e.g. <code>"yts"</code>, <code>"torrentdownloads"</code>) instead of
+<code>provider.displayName</code> (e.g. <code>"YTS"</code>,
+<code>"Torrent Downloads"</code>). The commit <code>166ef2e7</code>
+tracks LVA-085 in progress — a fix that sorts the provider IDs exists on
+the input-chip side but does NOT address the RESULTS-chip display-name
+mapping. Per commit body: the LVA-079 "fix" was itself a §6.AB bluff
+(sorted the raw id LIST; its JVM test asserted the id list, never the
+rendered LABEL).</td>
+</tr>
+<tr>
+<td>Fix scope</td>
+<td>Add <code>displayName</code> field to the chip-rendering data class
+in <code>SearchResultViewModel</code> (or wherever results chips are
+built). Wire it to <code>ProviderInfo.displayName</code> which already
+exists on the SDK-provided descriptor. The raw id should ONLY be used as
+an internal key, never as displayed text.</td>
+</tr>
+<tr>
+<td>Covering device Challenge FQN</td>
+<td><strong><code>Challenge61ResultsChipsShowDisplayNames</code></strong>
+(new). Must: onboard multiple providers that have different
+<code>id</code> vs <code>displayName</code> (rutracker→"RuTracker",
+kinozal→"Kinozal", archiveorg→"Internet Archive") → search → capture the
+results filter chip labels → assert each label equals the provider's
+<code>displayName</code> (not its <code>id</code>).</td>
+</tr>
+<tr>
+<td>Reproduce-first mutation</td>
+<td><strong>Mutation:</strong> in the chip-rendering code, force
+<code>text = provider.id</code> instead of
+<code>provider.displayName</code>. <strong>RED run:</strong> Challenge61
+fails with
+<code>AssertionError: expected "RuTracker" but found "rutracker"</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="25-lva-086-video-5--no-empty-state-and-no-loading-indicator-on-search-results">2.5
+LVA-086 (Video #5) — No empty-state and no loading indicator on search
+results</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>LVA-086</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>Video #5 — No empty-state and no loading indicator on search results
+(perceived hang)</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>In progress</td>
+</tr>
+<tr>
+<td>Priority</td>
+<td><strong>P1</strong></td>
+</tr>
+<tr>
+<td>Root cause</td>
+<td><code>SearchResultScreen</code> renders
+<code>CircularProgressIndicator</code> only during the initial loading
+phase. Once the search returns ZERO results (empty list), it renders
+nothing — a blank screen. There is no <code>EmptyState</code>
+composable, no "No results" text, no retry button. Since there is no
+empty-state and no loading indicator (and the search may appear to hang
+because there is no visible feedback), the user perceives the app is
+stuck.</td>
+</tr>
+<tr>
+<td>Fix scope</td>
+<td>Add <code>Loading</code> and <code>Empty</code> sealed variants to
+the <code>SearchResultUiState</code>. The <code>Loading</code> variant
+renders a <code>CircularProgressIndicator</code> + "Searching..." text
+(or a shimmer placeholders). The <code>Empty</code> variant renders an
+<code>EmptyState</code> composable ("No results found. Try a different
+query."). The <code>Error</code> variant already exists (from
+<code>1cbf364c</code>) — verify it includes a retry button.</td>
+</tr>
+<tr>
+<td>Covering device Challenge FQN</td>
+<td><strong><code>Challenge62SearchEmptyState</code></strong> (new).
+Must: onboard a provider → search for a nonsense query that is
+guaranteed to return zero results (e.g. "zxzxzxzxzxzxzxzx" on YTS) →
+wait for the search to complete → assert an EmptyState composable is
+displayed ("No results" text visible).</td>
+</tr>
+<tr>
+<td>Reproduce-first mutation</td>
+<td><strong>Mutation:</strong> in <code>SearchResultViewModel</code>,
+when the result list is empty, set state to <code>Idle</code> instead of
+<code>Empty</code>. <strong>RED run:</strong> Challenge62 fails with
+<code>AssertionError: No "No results" text found</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="26-lva-087-video-6--welcome-claims-4-providers-available-but-picker-lists-12">2.6
+LVA-087 (Video #6) — Welcome claims '4 providers available' but picker
+lists ~12</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>LVA-087</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>Video #6 — Welcome claims '4 providers available' but picker lists
+~12</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>In progress</td>
+</tr>
+<tr>
+<td>Priority</td>
+<td><strong>P2</strong></td>
+</tr>
+<tr>
+<td>Root cause</td>
+<td>The Welcome screen's header text has a hardcoded or stale count: "4
+providers available" (or similar). This was accurate when only 4
+built-in providers existed (rutracker, rutor, kinozal, nnmclub) but has
+not been updated to reflect the now ~12 available providers (5 built-in
++ 8 curated on-device + possible others).</td>
+</tr>
+<tr>
+<td>Fix scope</td>
+<td>Replace the hardcoded count with a live query:
+<code>providerRegistry.all().count { it.supported }</code> or
+equivalent, reading from the <code>ProviderCatalogRepository</code> at
+Welcome-screen load time. The count should update dynamically if
+providers are added/removed. Per §6.R, no hardcoded integer literal for
+the count.</td>
+</tr>
+<tr>
+<td>Covering device Challenge FQN</td>
+<td><strong><code>Challenge63WelcomeCountMatchesPicker</code></strong>
+(new). Must: navigate to the Welcome screen → read the header text that
+contains the provider count ("N providers available" or "N providers
+supported") → tap "Get Started" → on the Provider Picker screen, count
+the visible provider entries → assert the Welcome count matches the
+picker count.</td>
+</tr>
+<tr>
+<td>Reproduce-first mutation</td>
+<td><strong>Mutation:</strong> hardcode the Welcome count to
+<code>"4 providers available"</code>. <strong>RED run:</strong>
+Challenge63 fails with
+<code>AssertionError: expected "12" but found "4"</code> (or similar
+mismatch).</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="27-lva-088-video-7--choose-your-api-shows-lavaapp7777-preset--mislabeled-on-this-network">2.7
+LVA-088 (Video #7) — 'Choose your API' shows 'lava.app:7777' preset +
+mislabeled 'On this network'</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>LVA-088</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>Video #7 — 'Choose your API' shows 'lava.app:7777' preset +
+mislabeled 'On this network'</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>In progress</td>
+</tr>
+<tr>
+<td>Priority</td>
+<td><strong>P2</strong></td>
+</tr>
+<tr>
+<td>Root cause</td>
+<td>The API discovery screen (introduced via commit in the 60th §6.L
+cycle as <code>OnboardingStep.ApiSelection</code>) uses a preset text
+field that shows <code>"lava.app:7777"</code> as a placeholder. This is
+a legacy port from the old manual-entry API endpoint config. The
+mDNS-discovered APIs are labeled "On this network" rather than showing
+the discovered service name (e.g., "Lava API on My Desktop"). The port
+7777 does not match any running service (the on-device api-app uses 8543
+dev / 8443 prod; the proxy uses 8080).</td>
+</tr>
+<tr>
+<td>Fix scope</td>
+<td>Remove the <code>"lava.app:7777"</code> hard-coded preset
+placeholder. For mDNS-discovered APIs, use the service's advertised name
+(<code>NsdServiceInfo.getServiceName()</code>) as the display label
+instead of the generic "On this network" string. Preserve the
+manual-entry fallback for advanced users but with a better label ("Enter
+URL manually").</td>
+</tr>
+<tr>
+<td>Covering device Challenge FQN</td>
+<td><strong><code>Challenge64ApiDiscoveryScreenFriendlyNames</code></strong>
+(new). Must: navigate to the API selection screen → observe all listed
+APIs → assert no entry shows the raw string <code>"7777"</code> or
+<code>"lava.app"</code> → assert each mDNS-discovered entry shows a
+non-generic name (not "On this network").</td>
+</tr>
+<tr>
+<td>Reproduce-first mutation</td>
+<td><strong>Mutation:</strong> keep the <code>"lava.app:7777"</code>
+preset in the API selection screen. <strong>RED run:</strong>
+Challenge64 fails with
+<code>AssertionError: Found unexpected text "lava.app:7777"</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="28-lva-089-video-8--mdns-discovered-api-shows-raw-ip-with-no-friendly-name">2.8
+LVA-089 (Video #8) — mDNS-discovered API shows raw IP with no friendly
+name</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>LVA-089</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>Video #8 — mDNS-discovered API shows raw IP 192.168.0.107:8443 with
+no friendly name</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>In progress</td>
+</tr>
+<tr>
+<td>Priority</td>
+<td><strong>P2</strong></td>
+</tr>
+<tr>
+<td>Root cause</td>
+<td>The mDNS discovery flow (<code>LocalNetworkDiscoveryService</code> +
+<code>DiscoverLocalEndpointsUseCase</code>) returns discovered services
+with their <code>host.hostAddress</code> (raw IP) as the primary display
+field. The <code>Endpoint</code> sealed interface has a
+<code>name</code> property that is not populated from mDNS service
+attributes. The Friendly Name attribute
+(<code>_lava-api._tcp.local.</code>'s TXT record) is either not being
+parsed or not propagated to the UI.</td>
+</tr>
+<tr>
+<td>Fix scope</td>
+<td>In <code>DiscoverLocalEndpointsUseCase</code> (or the downstream
+mapper at <code>core/data/src/.../la/NetworkDiscoveryMapper.kt</code> if
+it exists), populate <code>Endpoint.name</code> from the
+<code>NsdServiceInfo</code> attributes (TXT record key
+<code>"name"</code>). Fallback: if TXT record is absent, use the service
+type + hostname ("lava-api at hostname.local"). NEVER display the raw IP
+as the primary name. Per §6.R: IP strings must not be hardcoded in
+display templates; use the resolved name.</td>
+</tr>
+<tr>
+<td>Covering device Challenge FQN</td>
+<td><strong><code>Challenge65MdnsShowsFriendlyName</code></strong>
+(new). Must: trigger mDNS discovery → when an API is discovered → assert
+the displayed name is NOT a raw IP address (does not match regex
+<code>^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+$</code>) → assert the name
+is a human-readable string ((&gt;)3 chars, no colon).</td>
+</tr>
+<tr>
+<td>Reproduce-first mutation</td>
+<td><strong>Mutation:</strong> in
+<code>DiscoverLocalEndpointsUseCase</code>, force the endpoint name to
+<code>host.hostAddress.toString()</code> (raw IP). <strong>RED
+run:</strong> Challenge65 fails because the displayed name matches the
+raw-IP regex.</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="29-lva-090-video-9--select-all-silently-enables-auth-requiring-providers">2.9
+LVA-090 (Video #9) — 'Select all' silently enables auth-requiring
+providers</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>LVA-090</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>Video #9 — Onboarding 'Select all' silently enables auth-requiring
+(Captcha/Form Login) providers</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>In progress</td>
+</tr>
+<tr>
+<td>Priority</td>
+<td><strong>P3</strong></td>
+</tr>
+<tr>
+<td>Root cause</td>
+<td>The "Select all" button in the Provider Picker toggles EVERY
+provider regardless of its <code>AuthType</code> — including
+<code>FORM_LOGIN</code> (rutracker, nnmclub) and <code>CAPTCHA</code>
+(kinozal) providers that require credentials. The selected set is used
+as the search filter set; auth-requiring providers that have NOT been
+configured with credentials cause search failures or errors
+downstream.</td>
+</tr>
+<tr>
+<td>Fix scope</td>
+<td>When "Select all" is clicked, filter the selection to only include
+providers where <code>authType == NONE</code> or where the user has
+already configured credentials. Add a warning subtitle when "Select all"
+is active: "Some providers requiring credentials were not selected
+automatically." Or disable "Select all" entirely and replace with a
+"Select all anonymous" option.</td>
+</tr>
+<tr>
+<td>Covering device Challenge FQN</td>
+<td><strong><code>Challenge66SelectAllDoesNotEnableAuthProviders</code></strong>
+(new). Must: navigate to the Provider Picker → tap "Select all" → assert
+that NO provider with <code>AuthType == FORM_LOGIN</code> or
+<code>AuthType == CAPTCHA</code> is selected (checked). Assert that all
+<code>AuthType == NONE</code> providers are selected.</td>
+</tr>
+<tr>
+<td>Reproduce-first mutation</td>
+<td><strong>Mutation:</strong> make "Select all" select every provider
+unconditionally, including auth-requiring ones. <strong>RED
+run:</strong> Challenge66 fails because a FORM_LOGIN provider is found
+in the selected state.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="210-lva-091-video-10--app-id-co-mingling-unconfirmed">2.10
+LVA-091 (Video #10) — App-ID co-mingling (UNCONFIRMED)</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>LVA-091</td>
+</tr>
+<tr>
+<td>Title</td>
+<td>Video #10 — App-ID co-mingling (debug .dev + release both labeled
+'Lava') — UNCONFIRMED in video</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>Queued</td>
+</tr>
+<tr>
+<td>Priority</td>
+<td><strong>P3</strong></td>
+</tr>
+<tr>
+<td>Root cause</td>
+<td><strong>UNCONFIRMED.</strong> The operator noted in the video that
+both the debug APK (applicationId
+<code>digital.vasic.lava.client.dev</code>) and the release APK
+(<code>digital.vasic.lava.client</code>) show the same display name
+"Lava" on the home screen. This may cause confusion when both are
+installed but is the expected Android behavior — application label from
+the manifest, not the app ID.</td>
+</tr>
+<tr>
+<td>Actions before closing</td>
+<td>(1) Confirm whether the two APKs actually install side-by-side on
+the S23 Ultra (test on real device). If they do, the "co-mingling" is
+cosmetic and expected. (2) If they don't install side-by-side,
+investigate <code>android:label</code> override logic or
+<code>installLocation</code> conflicts.</td>
+</tr>
+<tr>
+<td>Covering device Challenge FQN</td>
+<td>None needed if confirmed cosmetic. If a real conflict is found,
+<strong><code>Challenge67AppIdSeparation</code></strong> (new) must
+assert both APKs install on the same device without conflict.</td>
+</tr>
+<tr>
+<td>Priority override</td>
+<td>If confirmed NOT cosmetic, escalate to P1.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-coverage-intersection-gate-mapping">3. Coverage-Intersection
+Gate Mapping</h2>
+<p>This section defines how the mechanical
+<code>scripts/check-cycle-coverage.sh</code> (owed via §6.AK-debt) will
+map CHANGELOG claims to executed+passed device Challenge rows.</p>
+<h3 id="31-claim-to-challenge-mapping-mechanism">3.1 Claim-to-Challenge
+mapping mechanism</h3>
+<p>Each cycle's author (or the agent drafting the CHANGELOG) maintains a
+<strong><code>cycle-coverage-map</code></strong> — a lightweight
+key-value mapping that lives as a YAML block at the top of the CHANGELOG
+entry for that version, or as a standalone file at
+<code>.lava-ci-evidence/&lt;version&gt;/cycle-coverage-map.yaml</code>.
+Format:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;1.3.13-1077&quot;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">claims</span><span class="kw">:</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">bullet</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Search now returns real results (no more &#39;Something went wrong&#39;)&quot;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">covers_issues</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;LVA-083&quot;</span><span class="kw">]</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">covering_challenge</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Challenge58SearchReturnsResults&quot;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">bullet</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Search filters follow the providers you onboarded&quot;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">covers_issues</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;LVA-084&quot;</span><span class="kw">]</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">covering_challenge</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Challenge59SearchUsesOnboardedProviders&quot;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">bullet</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Provider chips show friendly names (RuTracker, Internet Archive) instead of raw ids&quot;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">covers_issues</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;LVA-085&quot;</span><span class="kw">]</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">covering_challenge</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Challenge61ResultsChipsShowDisplayNames&quot;</span></span></code></pre></div>
+<h3 id="32-gate-execution-flow">3.2 Gate execution flow</h3>
+<ol type="1">
+<li><code>scripts/firebase-distribute.sh</code> (Phase 1 Gate 6, or the
+new §6.AK Phase-1 Gate) loads the <code>cycle-coverage-map</code> for
+the CURRENT version.</li>
+<li>For each <code>covering_challenge</code> entry, the gate parses the
+§6.Z evidence file at
+<code>.lava-ci-evidence/distribute-changelog/&lt;channel&gt;/&lt;version&gt;-&lt;code&gt;-test-evidence.{md,json}</code>.</li>
+<li>It asserts that the evidence file contains an EXECUTED row for that
+Challenge FQN with a PASS verdict, that the row's commit SHA matches the
+working-tree HEAD, and that the row's timestamp is within 24h.</li>
+<li>If ANY covering Challenge is missing / failed / stale-SHA /
+stale-timestamp, the gate rejects with a directive naming the uncovered
+claim.</li>
+<li>On rejection, the distribute entry point writes a FATAL-level
+message to stderr and exits 1. It does NOT offer a bypass flag.</li>
+</ol>
+<h3 id="33-three-claimant-gate-minimum-mandatory">3.3 Three-claimant
+gate (minimum mandatory)</h3>
+<p>Even if a cycle has ZERO CHANGELOG claims (e.g. a hotfix for a single
+crash with no feature changes), the cold-start C00 Challenge is
+mandatory per §6.Z. The §6.AK gate therefore has a
+<strong>three-claimant minimum</strong>:</p>
+<ol type="1">
+<li><strong>C00</strong> — Cold-start crash survival (always mandatory
+per §6.G / §6.Z / §6.AK).</li>
+<li><strong>C01</strong> — App launch + tracker selection (always
+mandatory per §6.G).</li>
+<li><strong>The covering Challenge(s) for every user-visible fix in the
+CHANGELOG</strong> (zero or more).</li>
+</ol>
+<p>A distribute with C00 alone is ALWAYS a §6.AK violation unless the
+CHANGELOG is also empty.</p>
+<hr />
+<h2 id="4-reproduce-first-protocol-template">4. Reproduce-First Protocol
+Template</h2>
+<p>This template MUST be followed for every covering device Challenge
+written to meet §6.AK clause 2. Each Challenge file's KDoc MUST include
+a <code>FALSIFIABILITY REHEARSAL</code> block following this
+template.</p>
+<h3 id="41-template">4.1 Template</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"> * [Challenge name] — [one-line description of what user-visible behavior this verifies]</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"> * ## §6.AK Reproduce-First Protocol</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="al">###</span><span class="co"> RED run (before fix)</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"> * 1. Apply the mutation: [precise description of what to change in which production file(s)].</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"> * 2. Build the androidTest APK via `./gradlew :app:assembleDebugAndroidTest`.</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"> * 3. Install and run THIS Challenge only on the device:</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"> *    `adb shell am instrument -w -e class lava.app.challenges.[ChallengeName] digital.vasic.lava.client.dev.test/androidx.test.runner.AndroidJUnitRunner`</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co"> * 4. Expected failure: [copy-paste of the assertion failure message the test produces].</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="al">###</span><span class="co"> GREEN run (after fix)</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co"> * 5. Revert the mutation (git checkout the production file(s)).</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co"> * 6. Rebuild and re-run the identical Challenge.</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co"> * 7. Expected pass: [description of the user-visible state the test asserts].</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="al">###</span><span class="co"> Evidence file reference</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co"> * The RED and GREEN outputs are recorded at:</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co"> * `.lava-ci-evidence/reproduce-first/[YYYY-MM-DD]/[ChallengeName]-RED.txt`</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co"> * `.lava-ci-evidence/reproduce-first/[YYYY-MM-DD]/[ChallengeName]-GREEN.txt`</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="al">###</span><span class="co"> Mutation type</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co"> * [NON-CRASHING BREAK — the mutation causes incorrect user-visible behavior,</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co"> *  not a crash, per §6.AB.3]</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co"> * OR</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co"> * [CRASH REPRODUCTION — the mutation causes the exact Crashlytics stack trace</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="co"> *  from issue [issue-ID], per §6.AK clause 3]</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="al">###</span><span class="co"> LVA-008 dependency</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="co"> * This Challenge navigates to [route], which is a nested route. The §6.AK gate</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="co"> * requires this test to execute on-device; see docs/issues/2026-06-26-nav-teardown.md</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="co"> * for LVA-008 bypass/workaround status.</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span></code></pre></div>
+<h3 id="42-example-filled-in-template-for-challenge61">4.2 Example
+filled-in template for Challenge61</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"> * Challenge61 — Results filter chips show display names (not raw ids)</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"> * ## §6.AK Reproduce-First Protocol</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="al">###</span><span class="co"> RED run (before fix)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"> * 1. In SearchResultViewModel.kt, at the point where results chip labels are set,</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"> *    change `chipLabel = provider.displayName` to `chipLabel = provider.id`.</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"> * 2. Build androidTest APK.</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"> * 3. Run: `adb shell am instrument -w -e class lava.app.challenges.Challenge61 …`</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"> * 4. Expected failure: `AssertionError: expected &quot;RuTracker&quot; but found &quot;rutracker&quot;`</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"> *    (or for any displayName-id mismatch provider).</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="al">###</span><span class="co"> GREEN run (after fix)</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co"> * 5. Revert the mutation (git checkout SearchResultViewModel.kt).</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co"> * 6. Rebuild and re-run.</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co"> * 7. Expected pass: all chip labels equal the provider&#39;s displayName field, and</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co"> *    NOT equal the raw id.</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="al">###</span><span class="co"> Mutation type</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co"> * NON-CRASHING BREAK — the mutation causes incorrect user-visible text but no crash.</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span></code></pre></div>
+<hr />
+<h2 id="5-6ak-debt-spec">5. §6.AK-debt Spec</h2>
+<p>§6.AK-debt (commit <code>627a0d58</code>) names the mechanical
+enforcement tooling as OWED. This section defines it concretely.</p>
+<h3 id="51-scriptscheck-cycle-coveragesh">5.1
+<code>scripts/check-cycle-coverage.sh</code></h3>
+<p>A new script at <code>scripts/check-cycle-coverage.sh</code> with the
+following contract:</p>
+<p><strong>Purpose:</strong> Verify that every CHANGELOG-claimed
+user-visible fix for the current version has an EXECUTED+PASSED covering
+device Challenge in the matching §6.Z evidence file.</p>
+<p><strong>Arguments:</strong></p>
+<pre><code>--version  &lt;versionName-versionCode&gt;   # e.g. &quot;1.3.13-1077&quot; (default: auto-detect from app/build.gradle.kts)
+--channel  &lt;channel&gt;                   # &quot;debug&quot; or &quot;release&quot; (default: &quot;debug&quot;)
+--evidence-dir &lt;path&gt;                  # path to the evidence directory (default: auto-resolve from distribute-changelog)
+--map       &lt;path&gt;                     # path to the cycle-coverage-map YAML (default: auto-resolve from evidence dir)
+--strict                               # exit 1 on ANY uncovered claim (default: --strict in gate mode)</code></pre>
+<p><strong>Exit codes:</strong></p>
+<ul>
+<li><code>0</code> — All claims covered by executed+PASSED device
+Challenges.</li>
+<li><code>1</code> — One or more claims lack a covering executed+PASSED
+Challenge. Stderr names each uncovered claim.</li>
+<li><code>2</code> — Evidence file missing, cycle-coverage-map missing,
+or version/commit-SHA mismatch.</li>
+<li><code>3</code> — Internal error (malformed YAML, evidence parsing
+failure).</li>
+</ul>
+<p><strong>Steps:</strong></p>
+<ol type="1">
+<li>Resolve version, channel, evidence dir, and cycle-coverage-map
+path.</li>
+<li>Read the cycle-coverage-map YAML: extract
+<code>claims[].covering_challenge</code> for each claim whose
+<code>covers_issues</code> intersects the cycle's work (or ALL claims if
+no explicit issue mapping).</li>
+<li>Read the §6.Z evidence file for the matching
+version+channel+commit-SHA.</li>
+<li>For each covering_challenge, assert:
+<ul>
+<li>The evidence file contains a row for that Challenge FQN.</li>
+<li>That row's verdict is PASS (not FAIL, not SKIP).</li>
+<li>That row's device is a cold-booted emulator inside a container or a
+real device (runner != "host-direct").</li>
+<li>That row's timestamp is within 24h of the current time.</li>
+<li>That row's commit SHA equals the working-tree HEAD.</li>
+</ul></li>
+<li>If any assertion fails, exit 1 (or 2 for structural issues). If all
+pass, exit 0.</li>
+</ol>
+<h3 id="52-hermetic-test-fixtures">5.2 Hermetic test fixtures</h3>
+<p>Under <code>tests/cycle-coverage/</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Fixture</th>
+<th>Description</th>
+<th>Expected exit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>positive_all_covered/</code></td>
+<td>CHANGELOG claims 2 fixes; cycle-coverage-map lists 2 Challenges;
+evidence file has PASS rows for both.</td>
+<td>0</td>
+</tr>
+<tr>
+<td><code>negative_claim_missing_challenge/</code></td>
+<td>CHANGELOG claims 1 fix; cycle-coverage-map lists 0 covering
+Challenges (or the map entry is absent).</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>negative_challenge_compiled_not_executed/</code></td>
+<td>Cycle-coverage-map lists 1 Challenge; evidence file has its FQN but
+the verdict is SKIP (or row has no PASS).</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>negative_stale_evidence/</code></td>
+<td>Evidence file PASS rows exist but timestamp &gt; 24h from test
+time.</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>negative_wrong_sha/</code></td>
+<td>Evidence file PASS rows exist but commit SHA does not match
+working-tree HEAD.</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-phase-1-gate-in-scriptsfirebase-distributesh">5.3 Phase-1
+Gate in <code>scripts/firebase-distribute.sh</code></h3>
+<p>A new Phase 1 Gate (numbered Gate 7, following the existing §6.Z Gate
+6, or replacing Gate 6 by composing both) MUST be added to
+<code>scripts/firebase-distribute.sh</code>:</p>
+<pre><code># Phase 1 — Gate 7: §6.AK cycle-coverage check
+info &quot;Phase 1 — Gate 7: §6.AK cycle-coverage (claims × executed device Challenges)&quot;
+check-cycle-coverage.sh --version=&quot;${VERSION}&quot; --channel=&quot;${CHANNEL}&quot; --strict
+case $? in
+  0) info &quot;§6.AK gate PASS — all CHANGELOG claims covered by executed device Challenges&quot; ;;
+  1) fatal &quot;§6.AK gate FAIL — these CHANGELOG claims have no covering executed device Challenge&quot; ;;
+  2) fatal &quot;§6.AK gate FAIL — evidence or mapping file missing/stale&quot; ;;
+  3) fatal &quot;§6.AK gate FAIL — internal error in cycle-coverage scanner&quot; ;;
+esac</code></pre>
+<h3 id="54-pre-push-hook-integration">5.4 Pre-push hook integration</h3>
+<p><code>.githooks/pre-push</code> MUST grow a Check 10 (following
+§6.Z-debt's Check 9 pattern) that detects when the pushed commit would
+<code>advance</code> a version pointer in
+<code>.lava-ci-evidence/distribute-changelog/&lt;channel&gt;/last-version</code>.
+On detection, the hook runs
+<code>scripts/check-cycle-coverage.sh --strict</code> and rejects if it
+exits non-zero. This prevents pushing a version-advance (which signifies
+"ready to distribute") without the covering device evidence.</p>
+<hr />
+<h2 id="6-search-root-cause-continuation-plan">6. Search Root-Cause
+Continuation Plan</h2>
+<h3 id="61-current-state-as-of-166ef2e7-2026-06-26">6.1 Current state
+(as of <code>166ef2e7</code>, 2026-06-26)</h3>
+<p>The investigation from
+<code>docs/issues/2026-06-24-search-timeout-and-interrupt-rootcause.md</code>
+and
+<code>docs/issues/2026-06-24-search-timeout-coordination-analysis.md</code>
+has identified:</p>
+<p><strong>KNOWN ROOT CAUSES (proven by evidence):</strong></p>
+<ol type="1">
+<li><p><strong>H1 — 401 auth-header overwrite</strong>
+(<code>AuthInterceptor</code> at <code>NetworkModule.kt</code>
+overwrites the engine's API key with an empty or expired token before
+the search request reaches the server). Fix shipped in 1072. VERIFIED
+FIXED by the Crashlytics absence of 401-related SocketTimeout after
+1.3.11-1073. <strong>§6.AK status:</strong> Challenge58 covers this path
+— if auth overwrite recurs, search returns Error, not results.</p></li>
+<li><p><strong>H2 — Engine handler has NO deadline</strong>
+(<code>search.go:64</code> —
+<code>p.Search(c.Request.Context(), ...)</code> with no
+<code>context.WithTimeout</code>). <code>GetSearch</code> handler does
+not cap the search call, so a slow provider (YTS with 4 mirrors × 8s
+failover) can consume up to 32s, which exceeds the Android client's 30s
+<code>readTimeout</code>. Fix (the 18s handler deadline) landed in 1073
+but 1073 was never distributed to testers. <strong>1076 was built from a
+branch that MISSED this fix.</strong> <strong>§6.AK status:</strong> The
+engine-deadline fix MUST be in the next distribute. The
+<code>lava-api-go</code> handler test
+(<code>TestGetSearchHandler_Deadline</code>) must prove that
+<code>GET /v1/yts/search</code> returns within 20s even when YTS mirrors
+are all unreachable.</p></li>
+<li><p><strong>H3 — Client-side partial-failure Error→Empty
+conversion</strong> (<code>1cbf364c</code>). When a provider fails
+(timeout, 401, DNS error),
+<code>SearchResultViewModel.handleStreamEnd()</code> was converting
+partial failures into <code>SearchResultUiState.Empty</code> instead of
+<code>SearchResultUiState.Error</code>. This made "zero results"
+indistinguishable from "search failed." Fix landed in
+<code>1cbf364c</code> but NOT distributed. <strong>§6.AK
+status:</strong> The Error→Empty fix MUST be in the next distribute.
+Challenge58 covers this by asserting the search produces RESULTS (not
+Empty) when providers are healthy.</p></li>
+<li><p><strong>H4 — Back-press during search does not cancel</strong> —
+<code>SearchResultViewModel.onCreate</code> fires
+<code>observeStreamMultiSearch</code> which blocks on
+<code>sdk.streamMultiSearch(...).collect{}</code> for up to 30s. No
+<code>onBackClick</code> cancellation exists. Fix described in the
+root-cause doc (track the job and cancel on BackClick) but NOT YET
+IMPLEMENTED in any commit. <strong>§6.AK status:</strong> Fix OWED in
+this cycle.</p></li>
+</ol>
+<h3 id="62-remaining-unknowns">6.2 Remaining unknowns</h3>
+<table>
+<thead>
+<tr>
+<th>Unknown</th>
+<th>Evidence gap</th>
+<th>Next step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Which specific provider(s) caused the 1076 "Something went wrong"?
+1076 has the 401 auth fix (H1 shipped) but NOT the engine deadline (H2)
+nor the Error→Empty fix (H3).</td>
+<td>Operator must provide adb logcat from a 1076 debug APK, or
+Crashlytics non-fatals from the 1076 release. Without these, the exact
+failure path is UNKNOWN.</td>
+<td>Request operator to reinstall 1076 debug APK, reproduce the search
+failure, and share <code>adb logcat -b main -e lava</code>. Or wait for
+Crashlytics to receive events from the 1076 release (already
+distributed).</td>
+</tr>
+<tr>
+<td>Is YTS the only provider triggering the timeout, or do other curated
+providers also contribute?</td>
+<td>The Crashlytics sample from 1072 shows <code>provider=yts</code>.
+The coordination analysis shows YTS is the most likely due to 4-mirror
+failover, but any slow provider can trigger it.</td>
+<td>Once the engine deadline (H2) lands, even ALL providers slow would
+produce fast errors, not 30s hangs. Monitor Crashlytics after the next
+distribute for <code>error=timeout</code> with non-yts providers.</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="63-next-debugging-steps-if-search-still-fails-after-h2h3h4-land">6.3
+Next debugging steps (if search still fails after H2+H3+H4 land)</h3>
+<p>If, after landing the engine handler deadline (H2), the Error→Empty
+fix (H3), and the back-press cancellation (H4), the operator reports
+"search still returns no results on my device," the following diagnostic
+chain applies:</p>
+<ol type="1">
+<li><strong>Check Crashlytics non-fatals</strong> — the
+<code>SearchResultViewModel.recordProviderFailure</code> call (shipped
+in 1071/1072) writes per-provider failure diagnostics. If the non-fatals
+show <code>timeout</code> for YTS but the engine has the 18s deadline,
+the issue is likely in the on-device network path (DNS blocking, TLS
+interception, mobile carrier proxy). If non-fatals show <code>401</code>
+or <code>403</code>, the auth-key exchange flow is still broken.</li>
+<li><strong>Check adb logcat from the device</strong> — key markers to
+grep for:
+<ul>
+<li><code>lava_search_submit</code> — the search was initiated</li>
+<li><code>lava_search_result_count</code> — the number of results
+returned (0 = empty, N = results)</li>
+<li><code>lava_provider_error</code> — per-provider failure with
+cause</li>
+<li><code>lava_api_disconnected</code> — engine not reachable at
+all</li>
+</ul></li>
+<li><strong>If Crashlytics is silent (no non-fatals logged)</strong>,
+the engine may not be reachable from the device. Check mDNS discovery
+(<code>lava_mdns_resolved</code> log marker) and the API connectivity
+probe.</li>
+<li><strong>If Crashlytics shows engine errors but client shows
+Empty</strong>, verify the <code>1cbf364c</code> fix is present (client
+treats partial-failure as Error not Empty). If the fix IS present but
+Empty still appears, there is a SECOND path in the state machine that
+sets Empty instead of Error — investigate <code>handleStreamEnd()</code>
+in <code>SearchResultViewModel.kt</code> for all exit points.</li>
+</ol>
+<h3 id="64-engine-side-fix-checklist-lava-api-go">6.4 Engine-side fix
+checklist (lava-api-go)</h3>
+<p>From the coordination analysis (§3 recommended values):</p>
+<table>
+<thead>
+<tr>
+<th>Change</th>
+<th>File</th>
+<th>Current value</th>
+<th>Target value</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Add <code>context.WithTimeout</code> to <code>GetSearch</code>
+handler</td>
+<td><code>lava-api-go/internal/handlers/v1/search.go:64</code></td>
+<td>NONE (no deadline)</td>
+<td><code>20 * time.Second</code></td>
+<td><strong>OWED</strong></td>
+</tr>
+<tr>
+<td>Reduce <code>GetMultiSearch</code> per-provider deadline</td>
+<td><code>lava-api-go/internal/handlers/v1/search.go:201</code></td>
+<td><code>30 * time.Second</code></td>
+<td><code>20 * time.Second</code></td>
+<td>OWED (align with single-provider)</td>
+</tr>
+<tr>
+<td>Reduce YTS <code>DefaultTimeout</code></td>
+<td><code>lava-api-go/internal/provider/curated/yts/client.go:46</code></td>
+<td><code>20s</code></td>
+<td><code>15s</code></td>
+<td>OWED</td>
+</tr>
+<tr>
+<td>Reduce YTS <code>perAttemptTimeout</code></td>
+<td><code>lava-api-go/internal/provider/curated/yts/client.go:51</code></td>
+<td><code>8s</code></td>
+<td><code>5s</code></td>
+<td>OWED</td>
+</tr>
+<tr>
+<td>Reduce TPB/TorrentsCSV <code>perAttemptTimeout</code></td>
+<td>respective client.go</td>
+<td><code>8s</code></td>
+<td><code>5s</code></td>
+<td>OWED</td>
+</tr>
+<tr>
+<td>Go server <code>WriteTimeout</code></td>
+<td><code>lava-api-go/internal/server/server.go</code></td>
+<td>NONE</td>
+<td><code>25s</code></td>
+<td>OWED</td>
+</tr>
+<tr>
+<td>Engine-side coverage test (handler deadline)</td>
+<td><code>lava-api-go/internal/handlers/v1/search_test.go</code></td>
+<td>N/A</td>
+<td>NEW test: slow provider → handler returns by deadline</td>
+<td>OWED</td>
+</tr>
+</tbody>
+</table>
+<h3 id="65-client-side-fix-checklist">6.5 Client-side fix checklist</h3>
+<table>
+<thead>
+<tr>
+<th>Change</th>
+<th>File</th>
+<th>Current behavior</th>
+<th>Target behavior</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cancel in-flight search on BackClick</td>
+<td><code>SearchResultViewModel.kt</code></td>
+<td>No cancellation</td>
+<td>Track the streamMultiSearch job; cancel on BackClick side
+effect</td>
+<td><strong>OWED</strong></td>
+</tr>
+<tr>
+<td>Raise LAN readTimeout</td>
+<td><code>core/network/impl/.../NetworkModule.kt:174</code></td>
+<td><code>30s</code></td>
+<td><code>45s</code></td>
+<td>OWED</td>
+</tr>
+<tr>
+<td>Add LAN callTimeout</td>
+<td><code>core/network/impl/.../NetworkModule.kt</code></td>
+<td>NONE</td>
+<td><code>120s</code> (SSE multi-search safety backstop)</td>
+<td>OWED</td>
+</tr>
+<tr>
+<td>Client-side coverage test (back-press cancellation)</td>
+<td><code>feature/search_result/src/test/.../SearchResultViewModelTest.kt</code></td>
+<td>N/A</td>
+<td>NEW test: slow search → BackClick → search cancelled</td>
+<td>OWED</td>
+</tr>
+<tr>
+<td>Challenge58 (search returns results)</td>
+<td><code>app/src/androidTest/.../Challenge58SearchReturnsResultsTest.kt</code></td>
+<td>N/A</td>
+<td>NEW device Challenge</td>
+<td>OWED</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="7-implementation-phasing">7. Implementation Phasing</h2>
+<h3 id="phase-1-p0-fixes--covering-challenges--lva-008-workaround">Phase
+1: P0 fixes + covering Challenges + LVA-008 workaround</h3>
+<p><strong>Gate: device Challenges that prove search+filtering works
+end-to-end.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Workable ID</th>
+<th>Depends on</th>
+<th>Estimated effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Engine handler deadline (18s/20s) + per-attempt timeout
+reduction</td>
+<td>LVA-083 (H2)</td>
+<td>None (standalone Go change)</td>
+<td>1 session</td>
+</tr>
+<tr>
+<td>Go handler deadline test</td>
+<td>LVA-083</td>
+<td>Engine handler deadline change</td>
+<td>Same commit</td>
+</tr>
+<tr>
+<td>Client Error→Empty fix (already landed in
+<code>1cbf364c</code>)</td>
+<td>LVA-083 (H3)</td>
+<td>None — merge <code>1cbf364c</code> into the distribute branch</td>
+<td>Git-merge only (if not already in branch)</td>
+</tr>
+<tr>
+<td>Client back-press cancellation</td>
+<td>LVA-083 (H4)</td>
+<td>None (standalone ViewModel change)</td>
+<td>1 session</td>
+</tr>
+<tr>
+<td>Client search-cancellation ViewModel test</td>
+<td>LVA-083 (H4)</td>
+<td>Back-press cancellation change</td>
+<td>Same commit</td>
+</tr>
+<tr>
+<td>Search-filter reconcile (already landed in
+<code>8c795d22</code>)</td>
+<td>LVA-084</td>
+<td>None — merge <code>8c795d22</code> into distribute branch</td>
+<td>Git-merge only</td>
+</tr>
+<tr>
+<td><strong>Challenge58</strong> — search returns results (device)</td>
+<td>LVA-083</td>
+<td>LVA-008 workaround for nested-route navigation</td>
+<td>1-2 sessions (depends on LVA-008 status)</td>
+</tr>
+<tr>
+<td><strong>Challenge59</strong> — search uses onboarded providers
+(device)</td>
+<td>LVA-084</td>
+<td>LVA-008 workaround</td>
+<td>1 session</td>
+</tr>
+</tbody>
+</table>
+<p><strong>LVA-008 dependency for Phase 1:</strong> Both Challenge58 and
+Challenge59 navigate to nested routes (<code>search_result</code> and
+<code>search_input</code> respectively). If LVA-008 blocks all
+nested-route Challenges, Phase 1 cannot produce EXECUTED device
+attestations. Three options for the §6.AK gate:</p>
+<ol type="1">
+<li><strong>Fix LVA-008 first</strong> — the upstream navigation-defect
+workaround (Activity-scoped <code>LocalLifecycleOwner</code> or
+equivalent) in same cycle. This is the cleanest option but has been
+falsified 6+ times.</li>
+<li><strong>Workaround LVA-008 in the Challenge itself</strong> — e.g.,
+capture the search result screen content via
+<code>ComposeTestRule</code> before navigating back (avoiding the
+teardown race). Investigate if the crash only occurs on back-navigation,
+not on forward-navigation to the result screen.</li>
+<li><strong>Strike LVA-083 "search fixed" from CHANGELOG</strong> if
+device Challenges cannot execute due to LVA-008. This is the
+§6.AK-clause-6 honest option: "we believe the fix is correct but we
+cannot prove it on device because LVA-008 blocks all nested-route
+tests." The <code>lava-api-go</code> engine-side Go tests serve as
+partial unit evidence, but §6.AK clause 2 requires ON-DEVICE
+reproduction for UI/flow issues; the CHANGELOG would reflect
+SEARCH-FIX-PENDING (partial, unverified on device) rather than "search
+works again."</li>
+</ol>
+<h3 id="phase-2-p1-fixes--covering-challenges">Phase 2: P1 fixes +
+covering Challenges</h3>
+<p><strong>Gate: device Challenges that prove chip agreement,
+display-name rendering, and empty-state work.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Workable ID</th>
+<th>Depends on</th>
+<th>Estimated effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Results chip provider-order stability (source from same repo as
+input chips)</td>
+<td>LVA-079</td>
+<td>None (standalone ViewModel change)</td>
+<td>1 session</td>
+</tr>
+<tr>
+<td>JVM test for chip-order agreement</td>
+<td>LVA-079</td>
+<td>Chip-order fix</td>
+<td>Same commit</td>
+</tr>
+<tr>
+<td>Results chip display-name mapping</td>
+<td>LVA-085</td>
+<td>None (standalone mapping change)</td>
+<td>0.5 session</td>
+</tr>
+<tr>
+<td>JVM test for display-name rendering in chips</td>
+<td>LVA-085</td>
+<td>Display-name fix</td>
+<td>Same commit</td>
+</tr>
+<tr>
+<td><strong>Challenge60</strong> — input vs results chips agree
+(device)</td>
+<td>LVA-079</td>
+<td>LVA-008 workaround for nested routes</td>
+<td>1 session</td>
+</tr>
+<tr>
+<td><strong>Challenge61</strong> — results chips show display names
+(device)</td>
+<td>LVA-085</td>
+<td>LVA-008 workaround for nested routes</td>
+<td>1 session</td>
+</tr>
+<tr>
+<td><strong>Challenge62</strong> — search empty-state shown
+(device)</td>
+<td>LVA-086</td>
+<td>LVA-008 workaround</td>
+<td>1 session</td>
+</tr>
+<tr>
+<td>Loading indicator + EmptyState composable</td>
+<td>LVA-086</td>
+<td>None (standalone UI change)</td>
+<td>1 session</td>
+</tr>
+<tr>
+<td>ViewModel test for Empty state</td>
+<td>LVA-086</td>
+<td>EmptyState composable</td>
+<td>Same commit</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phase-3-p2-p3-fixes--covering-challenges">Phase 3: P2-P3 fixes +
+covering Challenges</h3>
+<p><strong>Gate: device Challenges that prove Welcome count, API
+discovery labels, mDNS names, and Select-All behavior are
+correct.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Workable ID</th>
+<th>Depends on</th>
+<th>Estimated effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dynamic Welcome provider count</td>
+<td>LVA-087</td>
+<td>None (standalone text change)</td>
+<td>0.5 session</td>
+</tr>
+<tr>
+<td>Remove hardcoded "lava.app:7777" preset</td>
+<td>LVA-088</td>
+<td>None (standalone UI text change)</td>
+<td>0.5 session</td>
+</tr>
+<tr>
+<td>mDNS friendly-name propagation</td>
+<td>LVA-089</td>
+<td>None (standalone UseCase/mapper change)</td>
+<td>1 session</td>
+</tr>
+<tr>
+<td>"Select all" skips auth-requiring providers</td>
+<td>LVA-090</td>
+<td>None (standalone picker filter logic)</td>
+<td>1 session</td>
+</tr>
+<tr>
+<td>LVA-091 confirmation (cosmetic vs real conflict)</td>
+<td>LVA-091</td>
+<td>Device test to install both APKs</td>
+<td>Investigation only</td>
+</tr>
+<tr>
+<td><strong>Challenge63</strong> — Welcome count matches picker
+(device)</td>
+<td>LVA-087</td>
+<td>None (Welcome + Picker are non-nested routes)</td>
+<td>0.5 session</td>
+</tr>
+<tr>
+<td><strong>Challenge64</strong> — API discovery labels (device)</td>
+<td>LVA-088</td>
+<td>None (API selection is early onboarding, non-nested)</td>
+<td>0.5 session</td>
+</tr>
+<tr>
+<td><strong>Challenge65</strong> — mDNS shows friendly name
+(device)</td>
+<td>LVA-089</td>
+<td>LVA-089 fix</td>
+<td>1 session</td>
+</tr>
+<tr>
+<td><strong>Challenge66</strong> — Select All does not enable auth
+providers (device)</td>
+<td>LVA-090</td>
+<td>LVA-090 fix</td>
+<td>0.5 session</td>
+</tr>
+<tr>
+<td><strong>Challenge67</strong> — App-ID separation (device, only if
+confirmed needed)</td>
+<td>LVA-091</td>
+<td>LVA-091 confirmation</td>
+<td>0.5 session</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-changelog-honesty-contract-for-the-next-distribute">8.
+CHANGELOG Honesty Contract for the Next Distribute</h2>
+<p>Per §6.AK clause 6, the CHANGELOG for the next distribute entry
+(target version after <code>166ef2e7</code>) MUST honestly reflect what
+the device gate actually proves. The template below shows the required
+structure. Any bullet whose covering Challenge did NOT execute and PASS
+on the gate is STRICKEN from the CHANGELOG before distribute.</p>
+<pre><code>## Lava-Android-1.3.13-1077 — 2026-06-26 (Phase 1: search+filtering + device gate)
+
+**Previous published:** Lava-Android-1.3.12-1076 (§6.AK incident — C00-only gate).
+
+1077 is the FIRST distribute that meets the §6.AK gate: every CHANGELOG claim has
+an EXECUTED+PASSED covering device Challenge. LVA-008 workaround: [describe method].
+
+- **Search actually returns results.** The engine now has an 18s handler deadline
+  (no more SocketTimeout), the partial-failure Error→Empty bug is fixed, and back
+  during a search cancels immediately. Verified by Challenge58 on device.
+  [§6.AK reproduce-first RED→GREEN recorded]
+- **Search filters match your onboarded providers.** Unconfigured providers no
+  longer appear as search filters. Verified by Challenge59 on device.
+- **[P1 claims only if Phase 2 also landed: ...]**
+- **[P2-P3 claims only if Phase 3 also landed: ...]**
+
+**Known open (not claimed as fixed):**
+- LVA-008 nav-teardown: still present on nested routes; device Challenges in this
+  cycle worked around it via [method]. Upstream minimal-repro authored.
+- LVA-079 chip agreement: P1, Phase 2 target.
+- LVA-085 display names: P1, Phase 2 target.
+- LVA-086 loading/empty state: P1, Phase 2 target.
+- LVA-087..LVA-091: P2-P3, Phase 3 targets.
+
+**Device gate evidence:**
+.lava-ci-evidence/distribute-changelog/debug/1.3.13-1077-test-evidence.json</code></pre>
+<hr />
+<h2 id="9-honest-scope-statement">9. Honest Scope Statement</h2>
+<p>"This cycle delivers a functioning search+filter experience (P0 video
+issues #1 and #2) with the first-ever mechanically enforced §6.AK device
+gate that proves each CHANGELOG claim on a real device. P1 and P2-P3
+issues (chip labels, empty state, Welcome copy, API discovery) are
+targeted for phases 2 and 3 respectively. The LVA-008 nav-teardown crash
+remains open; Phase 1 device Challenges work around it by [determined at
+implementation time]. The §6.AK-debt mechanical gate
+(<code>scripts/check-cycle-coverage.sh</code>) ships as a
+hermetic-test-proven scanner but the Phase-1 hook integration is
+OWED-until-implemented per the existing debt pattern."</p>
+<hr />
+<h2 id="10-constitutional-notes">10. Constitutional Notes</h2>
+<ul>
+<li><strong>§6.AK:</strong> This spec IS the implementation plan for
+§6.AK clauses 1-7 across the 10 open video issues. Every section above
+maps directly to one or more §6.AK clauses.</li>
+<li><strong>§6.AD.8 (HelixConstitution inheritance):</strong> The §6.AK
+clause is already present in root <code>CLAUDE.md</code> (added by
+commit <code>627a0d58</code>). This spec's per-issue coverage-maps and
+reproduce-first templates ARE the per-scope mechanical implementation.
+The §6.AK-propagation check
+(<code>CM-COVENANT-114-AK-PROPAGATION</code>) is owed via §6.AK-debt as
+part of the cycle-coverage scanner.</li>
+<li><strong>§6.Z:</strong> The §6.Z evidence file (per-distribute
+test-execution record) is the SOLE evidence source for §6.AK. No
+parallel evidence track. The Phase 1 Gate in §6.AK-debt reads the same
+file that §6.Z Gate 6 reads — they compose.</li>
+<li><strong>§6.AA (two-stage distribute):</strong> The §6.AK gate
+applies to BOTH stages. Debug stage 1 must have covering Challenges
+executed and passed. Release stage 2 must have the SAME covering
+Challenges executed and passed against the release APK (not just the
+debug APK). The cycle-coverage-map is shared; the evidence file is
+per-channel.</li>
+<li><strong>§6.AB (discrimination):</strong> Every covering Challenge in
+this spec has a documented <code>Reproduce-first mutation</code> (the
+NON-CRASHING BREAK or CRASH REPRODUCTION) per §6.AB.3. The Challenge is
+NOT complete until the mutation → RED → revert → GREEN cycle is
+recorded.</li>
+<li><strong>§6.R:</strong> No hardcoded provider counts, port numbers,
+or IP addresses in the fix code. All such values must come from the
+provider registry, config, or mDNS discovery — never as string/int
+literals.</li>
+<li><strong>§6.AC:</strong> All non-fatal error paths (search timeout,
+provider error, back-press-cancellation) must call
+<code>analytics.recordNonFatal</code> with
+<code>{feature: "search", operation, provider, screen: "search_result"}</code>.
+The Crashlytics non-fatal channel IS the §6.AK evidence for "crash was
+reproduced on device."</li>
+<li><strong>§6.Y (post-distribute version bump):</strong> After this
+cycle's distribute, the version MUST be bumped before any new code
+changes land. The next version's CHANGELOG entry must start with an
+empty-fill or the follow-up cycle's work.</li>
+</ul>
+</body>
+</html>

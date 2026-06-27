@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>action-prefix-slash-commands</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="action-prefix-slash-commands-114140-layer-2--generated-commands-half">Action-Prefix
+Slash Commands (§11.4.140 LAYER 2 — generated-commands half)</h1>
+<p>This doc records the Lava-side wiring of the universal action-prefix
+system (HelixConstitution §11.4.140, adopted by Lava §6.AI + recognized
+by §6.AJ) as <strong>Claude Code slash commands</strong>, and the honest
+status of the <code>.claude/commands/</code> tracking constraint.</p>
+<h2 id="what-is-already-wired-done">What is already wired (DONE)</h2>
+<ul>
+<li><strong>LAYER 1 (agent self-recognition).</strong> §6.AJ in root
+<code>CLAUDE.md</code> (and the mirror in <code>AGENTS.md</code> /
+<code>QWEN.md</code>) instructs the agent to recognize a
+<code>ACTION ::</code> first-line prefix, look it up in
+<code>constitution/actions/registry.yaml</code>, and
+expand-then-rescan.</li>
+<li><strong>LAYER 2 — the hook half.</strong>
+<code>.claude/settings.json</code> (tracked) registers a
+<code>UserPromptSubmit</code> hook pointing at
+<code>scripts/hooks/action-prefix-expand.sh</code>, which is thin Lava
+glue delegating to the canonical expander
+<code>constitution/scripts/hooks/action_prefix_expand.sh</code> (reads
+<code>constitution/actions/registry.yaml</code>). This makes
+<code>BACKGROUND :: &lt;task&gt;</code> expand automatically.</li>
+<li><strong>LAYER 2 — the generated-commands half for Gemini / Qwen /
+Codex.</strong> The pinned constitution submodule already ships
+generated slash commands under
+<code>constitution/actions/generated/{gemini,qwen,codex}/</code>
+(<code>background.toml</code> / <code>background.md</code>, plus
+<code>default-background</code> namespaced aliases), generated by
+<code>constitution/scripts/generate_agent_prefix_commands.sh</code>.</li>
+</ul>
+<h2
+id="what-this-doc-adds--the-claude-code-slash-command-background">What
+this doc adds — the Claude Code slash command
+(<code>/background</code>)</h2>
+<p>The constitution submodule's generator emits Gemini/Qwen/Codex
+commands but <strong>not</strong> a Claude Code command (Claude Code
+slash commands live in <code>.claude/commands/*.md</code>, an
+agent-local convention the canonical generator does not target). So Lava
+provides one:</p>
+<ul>
+<li><strong>File:</strong> <code>.claude/commands/background.md</code> —
+the bare slash form 3 (<code>/background &lt;task&gt;</code>). Its body
+is <strong>byte-identical</strong> to the canonical expansion rendered
+in <code>constitution/actions/generated/codex/background.md</code>
+(verified by <code>diff</code> — no §6.J drift bluff).
+<code>$ARGUMENTS</code> carries the task.</li>
+</ul>
+<p>Invoking <code>/background &lt;task&gt;</code> is equivalent to
+typing <code>BACKGROUND :: &lt;task&gt;</code>: the registered
+BACKGROUND action's expansion is prepended, instructing a
+subagent-driven, parallel, anti-bluff background work stream.</p>
+<h2
+id="tracking-constraint--why-claudecommandsbackgroundmd-is-not-committed-owed">Tracking
+constraint — why <code>.claude/commands/background.md</code> is NOT
+committed (OWED)</h2>
+<p><code>.gitignore</code> line 14 is a blanket <code>.claude/</code>
+ignore:</p>
+<pre><code>.claude/</code></pre>
+<p><code>git check-ignore -v .claude/commands/background.md</code> →
+<code>.gitignore:14: .claude/   .claude/commands/background.md</code>.</p>
+<p>Consequently <strong>the <code>.claude/commands/background.md</code>
+file cannot be tracked / committed</strong> without an explicit
+un-ignore exception. The file is created in the working tree so the
+<code>/background</code> command is reachable in THIS checkout, but it
+will not survive a fresh clone.</p>
+<h3 id="owed-follow-up-one-of">OWED follow-up (one of)</h3>
+<ol type="1">
+<li>Add a <code>.gitignore</code> negation so the command file is
+tracked, mirroring how <code>.claude/settings.json</code> was
+force-added:
+<pre><code>.claude/
+!.claude/commands/
+!.claude/commands/*.md</code></pre>
+then <code>git add -f .claude/commands/background.md</code>.</li>
+<li>OR extend
+<code>constitution/scripts/generate_agent_prefix_commands.sh</code>
+upstream to also emit a <code>claude/&lt;name&gt;.md</code> target + a
+Lava-side regenerate step that force-adds the result. (Upstream change —
+NOT done here per the no-edit-pinned-submodule constraint.)</li>
+</ol>
+<p>Until one of those lands, the Claude Code slash command is
+<strong>present in the working tree but untracked</strong> — recorded
+here as OWED under §6.AI-debt item 2. The <code>::</code>-prefix form
+(<code>BACKGROUND :: ...</code>) and the UserPromptSubmit hook remain
+fully functional and tracked, so the action is reachable regardless.</p>
+<h2 id="regenerating-after-a-registry-change">Regenerating after a
+registry change</h2>
+<p>The expansion text is sourced from
+<code>constitution/actions/registry.yaml</code> (action
+<code>BACKGROUND</code>). On any registry change, re-derive
+<code>.claude/commands/background.md</code> from
+<code>constitution/actions/generated/codex/background.md</code> (same
+body) and re-run the <code>diff</code> byte-identity check above.</p>
+<p><code>Classification:</code> project-specific (the Claude Code
+<code>.claude/commands/</code> target + the Lava <code>.gitignore</code>
+constraint are Lava's; the action registry + the generated
+Gemini/Qwen/Codex commands are universal, inherited from the
+constitution submodule).</p>
+</body>
+</html>

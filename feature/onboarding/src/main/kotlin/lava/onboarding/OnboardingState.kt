@@ -82,7 +82,7 @@ data class OnboardingState(
     // menu-side dedup `it == endpoint` relies on). So the name is threaded as a
     // display-only side map keyed by the same host:port the discovered Endpoint
     // carries — used by ApiSelectionStep to show "Lava API" instead of a raw
-    // "192.168.0.107:8443" as the primary label. Empty/absent → fall back to
+    // "<HOST>:<PORT>" as the primary label. Empty/absent → fall back to
     // host:port (still distinguishing). Not persisted; live-discovery hint only.
     val discoveredApiNames: Map<String, String> = emptyMap(),
     val apiDiscoveryRunning: Boolean = false,

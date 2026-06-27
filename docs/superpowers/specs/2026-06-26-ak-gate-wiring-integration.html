@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-26-ak-gate-wiring-integration</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="6ak-gate-wiring-integration-patch--exact-copy-pasteable">§6.AK
+Gate-Wiring Integration Patch — exact, copy-pasteable</h1>
+<p><strong>Date:</strong> 2026-06-26 <strong>Status:</strong> Ready to
+apply (logic proven hermetically — see §6 below)
+<strong>Closes:</strong> §6.AK-debt (the mechanical wiring of
+<code>scripts/check-cycle-coverage.sh</code> into the distribute gate +
+pre-push hook). <strong>Companion test:</strong>
+<code>tests/cycle-coverage/test_wiring.sh</code> (5/5 PASS against the
+real gate; mutation-rehearsal proven). <strong>Spec parent:</strong>
+<code>docs/superpowers/specs/2026-06-26-ak-cycle-coverage-spec.md</code>
+§5.3 + §5.4.</p>
+<p><code>Classification:</code> project-specific (the two insertion
+patches are Lava-file-specific; the
+gate-coverage-must-intersect-cycle-claims pattern is universal per
+§6.AK).</p>
+<blockquote>
+<p><strong>IMPORTANT — this document does NOT edit the live gate
+files.</strong> It is the precise patch the main stream applies later.
+The two target files (<code>scripts/firebase-distribute.sh</code>,
+<code>.githooks/pre-push</code>) are pushed-through-pre-push
+concurrently by the main stream; editing them here would corrupt an
+in-flight gate. Apply these patches only when the main stream is
+quiescent.</p>
+</blockquote>
+<hr />
+<h2 id="0-why-these-two-insertion-points">0. Why these two insertion
+points</h2>
+<p><code>scripts/check-cycle-coverage.sh</code> already exists and
+passes its own hermetic test
+(<code>tests/cycle-coverage/test_cycle_coverage.sh</code>, 7/7).
+§6.AK-debt names exactly two unwired call-sites:</p>
+<ol type="1">
+<li><strong><code>scripts/firebase-distribute.sh</code></strong> — a
+Phase-1 Gate that REFUSES the distribute at run time when the
+cycle-coverage gate fails (spec §5.3).</li>
+<li><strong><code>.githooks/pre-push</code></strong> — a Check that
+REJECTS a push which <em>advances a distribute <code>last-version</code>
+pointer</em> while the cycle-coverage gate fails (spec §5.4).</li>
+</ol>
+<p>Both call the SAME committed gate with the SAME evidence file; they
+compose, they do not duplicate.</p>
+<hr />
+<h2 id="1-patch-a--scriptsfirebase-distributesh-phase-1-gate-7">1. Patch
+A — <code>scripts/firebase-distribute.sh</code> (Phase-1 Gate 7)</h2>
+<h3 id="11-exact-insertion-point">1.1 Exact insertion point</h3>
+<p>Insert the new block <strong>immediately after the Phase-1 Gates 4+5
+block closes</strong> and <strong>before the
+<code># 2. Resolve git SHA</code> section comment</strong>. The anchor
+in the current file:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">304</span> else</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">305</span>     echo <span class="st">&quot;    Phase 1 Gates 4+5 skipped: .env not present (auth feature inert at runtime; runtime falls back to StubLavaAuthBlobProvider).&quot;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">306</span> fi</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">307</span>                        ← INSERT THE NEW BLOCK ON THIS BLANK LINE <span class="er">(</span><span class="ex">between</span> line 306 <span class="kw">`</span><span class="cf">fi</span><span class="kw">`</span> and line 308 comment<span class="kw">)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">308</span> <span class="co"># ----------------------------------------------------------------</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">309</span> <span class="co"># 2. Resolve git SHA + branch for the release notes</span></span></code></pre></div>
+<p>All variables the block references are already in scope at line 306:
+<code>MODE</code> (parsed @46–61), <code>SCRIPT_DIR</code> (@32),
+<code>APP_VERSION</code> / <code>APP_VERSION_CODE</code> (@113–116),
+<code>CHANGELOG_DIR</code> (@140, app-resolved). The block uses NO
+variable defined after line 306.</p>
+<h3 id="12-block-to-paste-between-line-306-and-line-308">1.2 Block to
+paste (between line 306 and line 308)</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># ----------------------------------------------------------------</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 1c. §6.AK Phase-1 Gate 7 — cycle-coverage (claims × executed device Challenges).</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Closes the firebase-distribute portion of §6.AK-debt. Refuses to distribute</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># unless EVERY CHANGELOG-claimed user-visible fix for this version has an</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># EXECUTED+PASSED covering device Challenge in the §6.Z evidence file for the</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># SAME commit SHA (spec §5.3). This is the gate that would have CAUGHT the 1076</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># incident (commit 627a0d58): a C00-only device gate while the CHANGELOG claimed</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># search / provider-selection / onboarding fixes.</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">NOTE</span><span class="co">: the gate&#39;s default --evidence-dir for the debug channel resolves to</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># .../firebase-app-distribution-dev, but the client+api-app distribute layout</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># keeps the §6.Z evidence in $CHANGELOG_DIR (firebase-app-distribution for</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co"># client, -api-app for api-app). We therefore pass --evidence-dir=&quot;$CHANGELOG_DIR&quot;</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co"># explicitly. The cycle-coverage-map auto-resolves to</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">#   $CHANGELOG_DIR/${APP_VERSION}-${APP_VERSION_CODE}-cycle-coverage-map.yaml</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># (the cycle author writes it alongside the §6.Z evidence).</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co"># This block also subsumes the still-OPEN §6.Z runtime gate (§6.Z-debt): the</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co"># cycle-coverage gate itself asserts evidence-presence + commit-SHA match +</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co"># ≤24h freshness (exit 2 / exit 1) before checking claim coverage.</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co"># ----------------------------------------------------------------</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="st">&quot;</span><span class="va">$MODE</span><span class="st">&quot;</span> <span class="kw">in</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="ss">release</span><span class="kw">)</span> <span class="va">AK_CHANNEL</span><span class="op">=</span><span class="st">&quot;release&quot;</span> <span class="cf">;;</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="pp">*</span><span class="kw">)</span>       <span class="va">AK_CHANNEL</span><span class="op">=</span><span class="st">&quot;debug&quot;</span>   <span class="cf">;;</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="cf">esac</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;    Phase 1 Gate 7 (§6.AK): cycle-coverage — CHANGELOG claims × executed device Challenges&quot;</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="va">ak_rc</span><span class="op">=</span>0</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$SCRIPT_DIR</span><span class="st">/check-cycle-coverage.sh&quot;</span> <span class="dt">\</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">--version</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$APP_VERSION</span><span class="st">-</span><span class="va">$APP_VERSION_CODE</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">--channel</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$AK_CHANNEL</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">--evidence-dir</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$CHANGELOG_DIR</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">--strict</span> <span class="kw">||</span> <span class="va">ak_rc</span><span class="op">=</span><span class="va">$?</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="st">&quot;</span><span class="va">$ak_rc</span><span class="st">&quot;</span> <span class="kw">in</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    <span class="ss">0</span><span class="kw">)</span> <span class="bu">echo</span> <span class="st">&quot;    §6.AK gate PASS — all CHANGELOG claims covered by executed device Challenges&quot;</span> <span class="cf">;;</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="ss">1</span><span class="kw">)</span> <span class="bu">echo</span> <span class="st">&quot;FATAL §6.AK: CHANGELOG claim(s) lack a covering executed+PASSED device Challenge for </span><span class="va">$APP_VERSION</span><span class="st">-</span><span class="va">$APP_VERSION_CODE</span><span class="st">.&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>       <span class="bu">echo</span> <span class="st">&quot;       Run the missing device Challenge(s) on the gate, OR strike the unverified claim(s) from CHANGELOG.md (§6.AK clause 6).&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>       <span class="bu">exit</span> 1 <span class="cf">;;</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    <span class="ss">2</span><span class="kw">)</span> <span class="bu">echo</span> <span class="st">&quot;FATAL §6.AK: §6.Z evidence or cycle-coverage-map missing / stale / wrong-SHA for </span><span class="va">$APP_VERSION</span><span class="st">-</span><span class="va">$APP_VERSION_CODE</span><span class="st">.&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>       <span class="bu">echo</span> <span class="st">&quot;       Re-run the device gate on THIS commit and write the cycle-coverage-map before distributing.&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>       <span class="bu">exit</span> 1 <span class="cf">;;</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    <span class="pp">*</span><span class="kw">)</span> <span class="bu">echo</span> <span class="st">&quot;FATAL §6.AK: internal error in cycle-coverage scanner (rc=</span><span class="va">$ak_rc</span><span class="st">).&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>       <span class="bu">exit</span> 1 <span class="cf">;;</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="cf">esac</span></span></code></pre></div>
+<h3 id="13-set--e-correctness-note-load-bearing">1.3 <code>set -e</code>
+correctness note (load-bearing)</h3>
+<p><code>firebase-distribute.sh</code> runs under
+<code>set -euo pipefail</code> (@30). The gate exits non-zero on a
+covered-claim failure; the <code>|| ak_rc=$?</code> idiom is what
+prevents <code>set -e</code> from aborting the script <em>before</em>
+the <code>case</code> can emit the §6.AK-specific FATAL message. Do
+<strong>not</strong> rewrite this as a bare
+<code>"$SCRIPT_DIR/check-cycle-coverage.sh" ...; case $? in</code> —
+under <code>set -e</code> the bare call would abort on a non-zero exit
+and the operator would never see the §6.AK directive. (This is exactly
+the idiom the wiring test proves in case
+<code>firebase_coverage_fail</code>.)</p>
+<h3 id="14-scope-applies-to-both-apps">1.4 Scope: applies to BOTH
+apps</h3>
+<p>The block uses <code>$CHANGELOG_DIR</code> (app-resolved in §0 of the
+script: <code>firebase-app-distribution</code> for
+<code>--app client</code>,
+<code>firebase-app-distribution-api-app</code> for
+<code>--app api-app</code>). It therefore gates <strong>both</strong>
+artifacts per §6.AK clause 7. Implication for the main stream:
+<strong>api-app distributes now also require</strong> a
+<code>${APP_VERSION}-${APP_VERSION_CODE}-test-evidence.{md,json}</code>
++
+<code>${APP_VERSION}-${APP_VERSION_CODE}-cycle-coverage-map.yaml</code>
+under the api-app channel dir. If the first post-graft api-app
+distribute has no claims, ship a map with the mandatory C00/C01 minimum
+per spec §3.3 (or an empty-CHANGELOG cycle records zero feature claims —
+but the map MUST still exist, else exit 2). If the main stream wants to
+defer api-app, wrap the block in
+<code>if [[ "$SELECTED_APP" == "client" ]]; then … fi</code> and record
+the api-app deferral as an explicit §6.AK-debt sub-item — but the
+constitutionally-correct default is universal.</p>
+<hr />
+<h2 id="2-patch-b--githookspre-push-check-10">2. Patch B —
+<code>.githooks/pre-push</code> (Check 10)</h2>
+<h3 id="21-exact-insertion-point">2.1 Exact insertion point</h3>
+<p>Insert the new Check <strong>immediately after Check 7's
+<code>for ptr … done</code> loop closes</strong> and <strong>before the
+<code># ===== Check 9</code> comment</strong>. The anchor in the current
+file:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">191</span>         fi</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">192</span>       fi</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">193</span>     done                          ← this <span class="kw">`</span><span class="cf">done</span><span class="kw">`</span> closes Check 7<span class="st">&#39;s `for ptr in last-version-debug last-version-release`</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="st">194                                   ← INSERT THE NEW CHECK 10 BLOCK ON THIS BLANK LINE (between 193 and 195)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="st">195     # ===== Check 9: §11.4.18 / CM-SCRIPT-DOCS-SYNC — script doc sync =====</span></span></code></pre></div>
+<p>The block lives inside the per-SHA
+<code>for sha in $range; do … done</code> loop (which spans lines
+58–261) and appends to the <code>violations</code> array exactly like
+every other Check. It reuses Check 7's proven advance-detection idiom
+(<code>new_val &gt; old_val</code> via
+<code>git show "$sha^:…"</code>).</p>
+<h3 id="22-block-to-paste-between-line-193-and-line-195">2.2 Block to
+paste (between line 193 and line 195)</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ===== Check 10: §6.AK cycle-coverage on distribute-advancing commits =====</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Closes the pre-push portion of §6.AK-debt (companion to firebase-</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># distribute.sh&#39;s Phase-1 Gate 7). When a commit ACTUALLY advances</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># last-version-debug or last-version-release (NEW &gt; OLD — same detection as</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Check 7), a pointer-advance signifies &quot;ready to distribute&quot;; the §6.AK</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># cycle-coverage gate MUST then pass for that version: every CHANGELOG-claimed</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># user-visible fix needs an executed+PASSED covering device Challenge in the</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># §6.Z evidence file. Pushing the advance without covering device evidence is</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># the 1076 incident shape (627a0d58: C00-only gate shipped broken flows).</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">#</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># </span><span class="al">NOTE</span><span class="co">: this mirrors Check 7&#39;s CLIENT-channel scope (firebase-app-distribution).</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># api-app pointer advances live under firebase-app-distribution-api-app and</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># are gated at distribute time by firebase-distribute.sh&#39;s Gate 7; extending</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Check 10 to the api-app channel is an owed follow-up (track under §6.AK-debt).</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="va">ak_chan_dir</span><span class="op">=</span><span class="st">&quot;.lava-ci-evidence/distribute-changelog/firebase-app-distribution&quot;</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> ptr <span class="kw">in</span> last-version-debug last-version-release<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>      <span class="va">ak_ptr_path</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${ak_chan_dir}</span><span class="st">/</span><span class="va">${ptr}</span><span class="st">&quot;</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">git</span> diff-tree <span class="at">--no-commit-id</span> <span class="at">--name-only</span> <span class="at">-r</span> <span class="st">&quot;</span><span class="va">$sha</span><span class="st">&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-qF</span> <span class="st">&quot;</span><span class="va">$ak_ptr_path</span><span class="st">&quot;</span> <span class="kw">||</span> <span class="cf">continue</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>      <span class="va">ak_old</span><span class="op">=</span><span class="va">$(</span><span class="fu">git</span> show <span class="st">&quot;</span><span class="va">$sha</span><span class="st">^:</span><span class="va">$ak_ptr_path</span><span class="st">&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">&#39; \n&#39;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;0&quot;</span><span class="va">)</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>      <span class="va">ak_new</span><span class="op">=</span><span class="va">$(</span><span class="fu">git</span> show <span class="st">&quot;</span><span class="va">$sha</span><span class="st">:</span><span class="va">$ak_ptr_path</span><span class="st">&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">|</span> <span class="fu">tr</span> <span class="at">-d</span> <span class="st">&#39; \n&#39;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;0&quot;</span><span class="va">)</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>      <span class="kw">[[</span> <span class="st">&quot;</span><span class="va">$ak_new</span><span class="st">&quot;</span> <span class="ot">=~</span> <span class="pp">^</span><span class="op">[</span><span class="ss">0</span><span class="op">-</span><span class="ss">9</span><span class="op">]</span><span class="pp">+</span><span class="op">$</span> <span class="kw">&amp;&amp;</span> <span class="st">&quot;</span><span class="va">$ak_old</span><span class="st">&quot;</span> <span class="ot">=~</span> <span class="pp">^</span><span class="op">[</span><span class="ss">0</span><span class="op">-</span><span class="ss">9</span><span class="op">]</span><span class="pp">+</span><span class="op">$</span> <span class="kw">&amp;&amp;</span> <span class="st">&quot;</span><span class="va">$ak_new</span><span class="st">&quot;</span> <span class="ot">-gt</span> <span class="st">&quot;</span><span class="va">$ak_old</span><span class="st">&quot;</span> <span class="kw">]]</span> <span class="kw">||</span> <span class="cf">continue</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="st">&quot;</span><span class="va">$ptr</span><span class="st">&quot;</span> <span class="kw">in</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        <span class="ss">last-version-debug</span><span class="kw">)</span>   <span class="va">ak_channel</span><span class="op">=</span><span class="st">&quot;debug&quot;</span> <span class="cf">;;</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        <span class="ss">last-version-release</span><span class="kw">)</span> <span class="va">ak_channel</span><span class="op">=</span><span class="st">&quot;release&quot;</span> <span class="cf">;;</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        <span class="pp">*</span><span class="kw">)</span>                    <span class="va">ak_channel</span><span class="op">=</span><span class="st">&quot;debug&quot;</span> <span class="cf">;;</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>      <span class="cf">esac</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Resolve versionName for this advance: per-version snapshot first</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>      <span class="co"># (firebase-distribute writes pointer + snapshot atomically), then fall</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>      <span class="co"># back to build.gradle.kts versionName at this commit.</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>      <span class="va">ak_vname</span><span class="op">=</span><span class="st">&quot;&quot;</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>      <span class="va">ak_snapshot</span><span class="op">=</span><span class="va">$(</span><span class="fu">ls</span> <span class="st">&quot;</span><span class="va">${ak_chan_dir}</span><span class="st">&quot;</span>/<span class="pp">*</span>-<span class="va">${ak_new}</span>.md <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> <span class="st">&#39;\-test-evidence\.md$&#39;</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-1</span> <span class="kw">||</span> <span class="fu">true</span><span class="va">)</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="kw">[[</span> <span class="ot">-n</span> <span class="st">&quot;</span><span class="va">$ak_snapshot</span><span class="st">&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        <span class="va">ak_vname</span><span class="op">=</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">&quot;</span><span class="va">$ak_snapshot</span><span class="st">&quot;</span> <span class="at">-</span><span class="va">${ak_new}</span><span class="at">.md</span><span class="va">)</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>      <span class="cf">else</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>        <span class="va">ak_vname</span><span class="op">=</span><span class="va">$(</span><span class="fu">git</span> show <span class="st">&quot;</span><span class="va">$sha</span><span class="st">:app/build.gradle.kts&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-oE</span> <span class="st">&#39;versionName[[:space:]]*=[[:space:]]*&quot;[^&quot;]+&quot;&#39;</span> <span class="kw">|</span> <span class="fu">head</span> <span class="at">-1</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="st">&#39;s/.*&quot;\([^&quot;]*\)&quot;.*/\1/&#39;</span> <span class="kw">||</span> <span class="bu">echo</span> <span class="st">&quot;&quot;</span><span class="va">)</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>      <span class="cf">fi</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>      <span class="kw">[[</span> <span class="ot">-n</span> <span class="st">&quot;</span><span class="va">$ak_vname</span><span class="st">&quot;</span> <span class="kw">]]</span> <span class="kw">||</span> <span class="cf">continue</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="kw">[[</span> <span class="ot">-x</span> ./scripts/check-cycle-coverage.sh <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>        <span class="va">ak_rc</span><span class="op">=</span>0</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>        <span class="ex">./scripts/check-cycle-coverage.sh</span> <span class="dt">\</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>          <span class="at">--version</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${ak_vname}</span><span class="st">-</span><span class="va">${ak_new}</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>          <span class="at">--channel</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$ak_channel</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>          <span class="at">--evidence-dir</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$ak_chan_dir</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>          <span class="at">--head</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$sha</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>          <span class="at">--strict</span> <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">||</span> <span class="va">ak_rc</span><span class="op">=</span><span class="va">$?</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">[[</span> <span class="st">&quot;</span><span class="va">$ak_rc</span><span class="st">&quot;</span> <span class="ot">-ne</span> 0 <span class="kw">]];</span> <span class="cf">then</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>          <span class="va">violations</span><span class="op">+=</span><span class="va">(</span><span class="st">&quot;</span><span class="va">$sha</span><span class="st">: §6.AK violation — advances </span><span class="va">$ptr</span><span class="st"> </span><span class="va">${ak_old}</span><span class="st">→</span><span class="va">${ak_new}</span><span class="st"> (</span><span class="va">${ak_vname}</span><span class="st">) but the cycle-coverage gate exits </span><span class="va">$ak_rc</span><span class="st">. A CHANGELOG claim lacks a covering executed+PASSED device Challenge (or the §6.Z evidence / cycle-coverage-map is missing / stale / wrong-SHA). Run the missing device Challenge(s) on the gate, OR strike the unverified claim(s) from CHANGELOG.md (§6.AK clause 6), before pushing the pointer advance.&quot;</span><span class="va">)</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>        <span class="cf">fi</span></span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>      <span class="cf">fi</span></span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">done</span></span></code></pre></div>
+<h3 id="23-sha-tie-caveat-must-be-understood-before-applying">2.3
+SHA-tie caveat (must be understood before applying)</h3>
+<p>Check 10 passes <code>--head="$sha"</code> (the advancing commit).
+<code>check-cycle-coverage.sh</code> therefore requires the §6.Z
+evidence file's <code>cycle-coverage:</code> header <code>commit=</code>
+to equal that advancing commit (else exit 2 → violation). This matches
+firebase-distribute.sh's existing <strong>atomic</strong>
+pointer+snapshot write (@484–512): the cycle author records the §6.Z
+evidence (with the build commit) in the <strong>same</strong> commit
+that advances the pointer. If a future workflow advances the pointer in
+a <em>separate</em> later commit from the one that wrote the evidence,
+the evidence <code>commit=</code> must be amended to that
+pointer-advancing commit, or Check 10 will (correctly, per §6.AK) reject
+the push. The <code>violations[]</code> message names this so the
+operator can act.</p>
+<h3
+id="24-6n12--check-9-obligations-on-the-graft-commit-do-not-skip">2.4
+§6.N.1.2 + Check 9 obligations on the GRAFT COMMIT (do not skip)</h3>
+<p>The commit that applies BOTH patches will itself trip the existing
+hook:</p>
+<ul>
+<li><strong>Check 4 / §6.N.1.2</strong> fires because the diff touches
+gate-shaping files (<code>.githooks/pre-push</code> AND
+<code>scripts/firebase-distribute.sh</code>, both in Check 4's list
+@97–98). The graft commit body MUST carry a <code>Bluff-Audit:</code>
+stamp that NAMES at least one file in the diff. Cite
+<code>tests/cycle-coverage/test_wiring.sh</code> as the rehearsal.
+Example stamp:
+<pre><code>Bluff-Audit: .githooks/pre-push + scripts/firebase-distribute.sh (§6.AK Check 10 + Gate 7)
+  Mutation: swallow the §6.AK refusal (firebase `exit 1` → no-op; pre-push `violations+=` → no-op)
+  Observed-Failure: tests/cycle-coverage/test_wiring.sh reports
+    &quot;FAIL [firebase_coverage_fail] exit=0 (expected 1)&quot; and
+    &quot;FAIL [prepush_advance_fail] exit=0 (expected 1)&quot; → RESULT: FAIL (exit 1);
+    the firebase stub even prints &quot;distribute would proceed&quot; after a failing gate.
+  Reverted: yes</code></pre></li>
+<li><strong>Check 9 / CM-SCRIPT-DOCS-SYNC</strong> fires because
+<code>docs/scripts/firebase-distribute.sh.md</code> already EXISTS — so
+the graft commit MUST also update that doc in the SAME commit (add a
+short "Phase 1 Gate 7 (§6.AK)" subsection).
+<code>.githooks/pre-push</code> is not under <code>scripts/*.sh</code>,
+so Check 9 does NOT apply to it.</li>
+<li><strong>Owed gap (flag, not blocking):</strong>
+<code>docs/scripts/check-cycle-coverage.sh.md</code> is ABSENT. Check 9
+only fires when <code>check-cycle-coverage.sh</code> is
+<em>modified</em> (we don't modify it here), so it does not block this
+graft — but the companion doc for that script is owed under
+CM-SCRIPT-DOCS-SYNC and should be authored next.</li>
+</ul>
+<hr />
+<h2 id="3-evidence-file--map-contract-the-cycle-author-must-satisfy">3.
+Evidence-file + map contract the cycle author must satisfy</h2>
+<p>For the Gate-7 / Check-10 pair to PASS on a real distribute, the
+cycle author writes two files under the channel dir
+(<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution/</code>
+for client):</p>
+<ol type="1">
+<li><strong><code>&lt;vname&gt;-&lt;code&gt;-test-evidence.md</code></strong>
+(the §6.Z device-gate evidence) containing:
+<ul>
+<li>exactly one header line:
+<code>cycle-coverage: version=&lt;vname&gt;-&lt;code&gt; commit=&lt;sha&gt; channel=&lt;debug|release&gt; timestamp=&lt;ISO-8601 ≤24h&gt;</code></li>
+<li>one <code>challenge:</code> line per executed Challenge:
+<code>challenge: fqn=&lt;FQN&gt; verdict=&lt;PASS|FAIL|SKIP&gt; runner=&lt;containers-submodule|genymotion-vm|…&gt;</code>
+(a covering Challenge counts only when <code>verdict=PASS</code> AND
+<code>runner != host-direct</code>, per §6.AH).</li>
+</ul></li>
+<li><strong><code>&lt;vname&gt;-&lt;code&gt;-cycle-coverage-map.yaml</code></strong>
+mapping each CHANGELOG user-visible bullet to its
+<code>covering_challenge</code> (spec §3.1).</li>
+</ol>
+<p>These are the same two file kinds the sibling gate test
+(<code>tests/cycle-coverage/test_cycle_coverage.sh</code>) and the
+wiring test (<code>tests/cycle-coverage/test_wiring.sh</code>)
+synthesize.</p>
+<hr />
+<h2 id="4-apply-order-recommended">4. Apply order (recommended)</h2>
+<ol type="1">
+<li>Verify the main stream is NOT mid-push (the two target files are
+pushed through pre-push concurrently).</li>
+<li>Apply Patch A (firebase-distribute.sh) + update
+<code>docs/scripts/firebase-distribute.sh.md</code>.</li>
+<li>Apply Patch B (.githooks/pre-push).</li>
+<li>Re-run <code>bash tests/cycle-coverage/test_wiring.sh</code> (must
+stay 5/5) and
+<code>bash tests/cycle-coverage/test_cycle_coverage.sh</code> (must stay
+7/7).</li>
+<li>Commit with the §3.4-style <code>Bluff-Audit:</code> stamp naming
+the gate-shaping files.</li>
+</ol>
+<hr />
+<h2 id="5-what-this-does-not-change">5. What this does NOT change</h2>
+<ul>
+<li><code>scripts/check-cycle-coverage.sh</code> — untouched (already
+committed + tested).</li>
+<li><code>tests/cycle-coverage/test_cycle_coverage.sh</code> —
+untouched.</li>
+<li>The §6.P / §6.AA / §6.Z gates already in firebase-distribute.sh —
+untouched; Gate 7 is additive and runs after them.</li>
+<li>Checks 1–9 in pre-push — untouched; Check 10 is additive.</li>
+</ul>
+<hr />
+<h2
+id="6-proof-the-wiring-logic-is-sound-hermetic-no-real-files-edited">6.
+Proof the wiring logic is sound (hermetic, no real files edited)</h2>
+<p><code>tests/cycle-coverage/test_wiring.sh</code> generates STUB
+wrappers whose grafted blocks are byte-identical to §1.2 and §2.2,
+invokes the REAL <code>scripts/check-cycle-coverage.sh</code> against
+synthetic §6.Z evidence + map fixtures (HEAD + now injected via
+<code>LAVA_CYCLE_COVERAGE_HEAD</code> /
+<code>LAVA_CYCLE_COVERAGE_NOW_EPOCH</code>), and asserts:</p>
+<pre><code>test: §6.AK GATE-WIRING contract (firebase-distribute Phase-1 Gate + pre-push Check 10)
+  PASS  [firebase_coverage_pass] exit=0 (expected 0) + matched &#39;§6.AK gate PASS&#39;
+  PASS  [firebase_coverage_fail] exit=1 (expected 1) + matched &#39;FATAL §6.AK&#39;
+  PASS  [prepush_advance_pass] exit=0 (expected 0) + matched &#39;Check 10 OK&#39;
+  PASS  [prepush_advance_fail] exit=1 (expected 1) + matched &#39;§6.AK violation&#39;
+  PASS  [prepush_no_advance] exit=0 (expected 0) + matched &#39;Check 10 OK&#39;
+-----------------------------------------------------------
+cases passed: 5   cases failed: 0
+RESULT: PASS — firebase Phase-1 Gate + pre-push Check 10 wiring proven against the real gate</code></pre>
+<p>Mutation rehearsal (swallow the refusal): the two negative cases flip
+to FAIL and the firebase stub prints "distribute would proceed" after a
+failing gate — the exact §6.AK incident shape the wiring exists to
+prevent. The wiring is therefore falsifiable and sound.</p>
+</body>
+</html>

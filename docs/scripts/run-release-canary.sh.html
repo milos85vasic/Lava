@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>run-release-canary.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="run-release-canarysh">run-release-canary.sh</h1>
+<p>§6.Z release-artifact cold-start canary (LVA-077).</p>
+<p>Script: <code>scripts/run-release-canary.sh</code></p>
+<h2 id="why-this-exists">Why this exists</h2>
+<p>§6.Z mandates that the EXACT artifact about to be distributed is
+<strong>executed</strong> (not source-compiled) on a real device/VM and
+observed to survive cold-start <strong>before</strong> distribute. The
+1.2.19-1039 forensic anchor was an R8-only crash
+(<code>painterResource</code> rejecting a
+<code>&lt;layer-list&gt;</code>) that the DEBUG variant never hit —
+proving the release (minified/R8) APK needs its own on-device
+canary.</p>
+<p><code>scripts/run-genymotion-challenges.sh</code> only runs the DEBUG
+variant via <code>connectedDebugAndroidTest</code> (there is no
+<code>connectedReleaseAndroidTest</code> — the app's
+<code>testBuildType</code> is debug). This script fills that gap.</p>
+<h2 id="what-it-does">What it does</h2>
+<ol type="1">
+<li>Resolves the Genymotion VM serial via the Containers-submodule
+genymotion CLI (thin glue, §6.AG — a §6.AH-authorized non-host-direct
+surface).</li>
+<li>Installs the exact RELEASE APK from
+<code>releases/&lt;version&gt;/android-release/</code> onto the VM.</li>
+<li>Cold-launches the app (<code>pm clear</code> then launch) and
+observes the process survives <code>onCreate</code> → first frame with
+NO fatal in logcat.</li>
+<li>Records the canary outcome as §6.Z evidence under
+<code>.lava-ci-evidence/release-canary/</code>.</li>
+</ol>
+<h2 id="usage">Usage</h2>
+<pre><code>./scripts/run-release-canary.sh            # default channel/version from releases/</code></pre>
+<h2 id="constitutional-bindings">Constitutional bindings</h2>
+<p>§6.Z (pre-distribute execution proof), §6.AA (release-stage canary),
+§6.AG/§6.AH (Containers-submodule-driven VM, never host-direct), §6.J
+(real cold-start observation, not a <code>podman ps</code> liveness
+bluff).</p>
+</body>
+</html>

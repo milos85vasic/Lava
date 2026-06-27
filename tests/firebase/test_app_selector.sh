@@ -63,6 +63,9 @@ SHAEOF
     chmod +x "$FAKE_BIN_DIR/sha256sum"
 fi
 
+# Capture the REAL commit SHA before fake git goes on PATH
+REAL_COMMIT_SHA="$(cd "$REPO_ROOT" && git rev-parse HEAD 2>/dev/null || echo deadbeef)"
+
 export PATH="$FAKE_BIN_DIR:$PATH"
 
 # --- Fake git (sha + branch queries) -----------------------------------------
@@ -70,12 +73,12 @@ cat > "$FAKE_BIN_DIR/git" <<'GITEOF'
 #!/usr/bin/env bash
 case "$*" in
     "rev-parse --short HEAD") echo "deadbeef" ;;
+    "rev-parse HEAD")         echo "deadbeef" ;;
     "rev-parse --abbrev-ref HEAD") echo "master" ;;
     *) command git "$@" ;;
 esac
 GITEOF
 chmod +x "$FAKE_BIN_DIR/git"
-
 # --- Fake Android SDK + aapt2 (for the §6.Z content-versionCode guard) --------
 # firebase-distribute.sh's §6.Z content-versionCode guard (added 2026-06-23)
 # resolves aapt2 from $ANDROID_SDK_ROOT/build-tools/*/aapt2 and runs
@@ -165,6 +168,26 @@ mkdir -p "$API_APP_CHAN"
 echo "Client snapshot 1.2.35-1055" > "$CLIENT_CHAN/1.2.35-1055.md"
 echo "API-App snapshot 0.1.0-1"    > "$API_APP_CHAN/0.1.0-1.md"
 
+# §6.AK cycle-coverage-map files (needed by Gate 7)
+cat > "$CLIENT_CHAN/cycle-coverage-map-1.2.35-1055.yaml" <<'MAPEOF'
+version: "1.2.35-1055"
+claims:
+  - fix: "Client app 1.2.35"
+    covering_challenges:
+      - "lava.app.challenges.Challenge00CrashSurvivalTest"
+MAPEOF
+cat > "$API_APP_CHAN/cycle-coverage-map-0.1.0-1.yaml" <<'MAPEOF'
+version: "0.1.0-1"
+claims:
+  - fix: "API app 0.1.0"
+    covering_challenges:
+      - "lava.app.challenges.Challenge00CrashSurvivalTest"
+MAPEOF
+
+# §6.Z test-evidence files (needed by §6.AK Gates 3-5)
+COMMIT_SHA="$(cd "$REPO_ROOT" && git rev-parse HEAD 2>/dev/null || echo \"deadbeef\")"
+echo '{"commit_sha": "'"$COMMIT_SHA"'", "version": "1.2.35-1055", "challenges": ["lava.app.challenges.Challenge00CrashSurvivalTest"], "passed": true}' > "$CLIENT_CHAN/1.2.35-1055-test-evidence.json"
+echo '{"commit_sha": "'"$COMMIT_SHA"'", "version": "0.1.0-1", "challenges": ["lava.app.challenges.Challenge00CrashSurvivalTest"], "passed": true}' > "$API_APP_CHAN/0.1.0-1-test-evidence.json"
 # Fake release APK trees. Each APK is seeded with a `versionCode='<code>'`
 # badging line so the §6.Z content-versionCode guard (via the fake aapt2 above)
 # resolves the EXPECTED code and PASSES — client code 1055, api-app code 1.
@@ -185,7 +208,18 @@ printf "package: name='digital.vasic.lava.api' versionCode='1' versionName='0.1.
 # Symlink the real scripts into the fake repo's scripts/ so sourcing works
 ln -sf "$ENV_SH"  "$FAKE_REPO/scripts/firebase-env.sh"
 ln -sf "$DIST_SH" "$FAKE_REPO/scripts/firebase-distribute.sh"
-
+CYCLE_SH="$(cd "$(dirname "$DIST_SH")/.." && pwd)/scripts/check-cycle-coverage.sh"
+if [[ -f "$CYCLE_SH" ]]; then
+    ln -sf "$CYCLE_SH" "$FAKE_REPO/scripts/check-cycle-coverage.sh"
+else
+    echo "WARN: check-cycle-coverage.sh not found; creating stub"
+    cat > "$FAKE_REPO/scripts/check-cycle-coverage.sh" <<STUBEOF
+#!/usr/bin/env bash
+echo "§6.AK stub PASS (hermetic context)"
+exit 0
+STUBEOF
+    chmod +x "$FAKE_REPO/scripts/check-cycle-coverage.sh"
+fi
 # ──────────────────────────────────────────────────────────────────────────────
 # Helper: run firebase-distribute.sh from the fake repo context.
 # ──────────────────────────────────────────────────────────────────────────────

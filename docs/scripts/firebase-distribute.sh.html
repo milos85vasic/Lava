@@ -175,9 +175,9 @@
 <h1
 id="scriptsfirebase-distributesh--user-guide"><code>scripts/firebase-distribute.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-05-15 (1.2.23 closure-cycle,
-§6.AD-debt task #61 backfill) <strong>Inheritance:</strong>
-HelixConstitution §11.4.18 (script documentation mandate)</p>
+<p><strong>Last verified:</strong> 2026-06-26 (§6.AK Phase-1 Gate 7
+wiring) <strong>Inheritance:</strong> HelixConstitution §11.4.18 (script
+documentation mandate)</p>
 <h2 id="overview">Overview</h2>
 <p>Stub doc generated from the script's in-source header comment. See
 <code>scripts/firebase-distribute.sh</code> for canonical behavior. This
@@ -215,6 +215,32 @@ Constitutional bindings:
 <h2 id="usage">Usage</h2>
 <p>See the script's in-source comment block (above) for canonical usage
 examples.</p>
+<h2 id="phase-1-gate-7-6ak-cycle-coverage--added-2026-06-26">Phase 1
+Gate 7 (§6.AK cycle-coverage) — added 2026-06-26</h2>
+<p>Closes the firebase-distribute portion of §6.AK-debt. After the
+§6.P/§6.AA/§6.Z Phase-1 gates, the script invokes
+<code>scripts/check-cycle-coverage.sh</code> for the version+channel
+being distributed (<code>--evidence-dir="$CHANGELOG_DIR"</code>,
+<code>--strict</code>) and <strong>refuses the distribute</strong>
+unless EVERY CHANGELOG-claimed user-visible fix has an EXECUTED+PASSED
+covering device Challenge in the §6.Z evidence file for the SAME commit
+SHA. This is the gate that would have caught the 1076 incident
+(<code>627a0d58</code>: a C00-only device gate while the CHANGELOG
+claimed search / provider-selection / onboarding fixes). Exit mapping:
+<code>0</code> PASS · <code>1</code> an uncovered claim · <code>2</code>
+evidence/map missing/stale/wrong-SHA. The <code>|| ak_rc=$?</code> idiom
+keeps <code>set -e</code> from aborting before the §6.AK FATAL directive
+prints. Gates BOTH apps (client + api-app) via the app-resolved
+<code>$CHANGELOG_DIR</code>. Companion hermetic test:
+<code>tests/cycle-coverage/test_wiring.sh</code> (5/5,
+mutation-rehearsal proven); the gate's own test is
+<code>tests/cycle-coverage/test_cycle_coverage.sh</code> (7/7). The
+cycle author must write
+<code>&lt;vname&gt;-&lt;code&gt;-test-evidence.{md,json}</code> (with
+the <code>cycle-coverage:</code> header + per-Challenge
+<code>challenge:</code> rows) and
+<code>&lt;vname&gt;-&lt;code&gt;-cycle-coverage-map.yaml</code> under
+the channel dir for this gate to pass on a real distribute.</p>
 <h2 id="maintenance">Maintenance</h2>
 <p>When this script is modified, update this document in the same commit
 (CM-SCRIPT-DOCS-SYNC requires it). Per §11.4.18, the documentation MUST

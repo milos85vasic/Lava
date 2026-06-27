@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>build-aar.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="build-aarsh">build-aar.sh</h1>
+<p>Builds the Android <code>.aar</code> library archive for the
+<code>lava-api-go</code> embedded server surface
+(<code>internal/mobile</code>) using <code>gomobile bind</code>. Phase
+B2 of the Lava API Android app plan.</p>
+<p>Script: <code>lava-api-go/scripts/build-aar.sh</code> Output:
+<code>lava-api-go/build/lavaapi.aar</code> (gitignored — never
+committed)</p>
+<h2 id="what-it-does">What it does</h2>
+<ol type="1">
+<li><p>Discovers the Android SDK (<code>ANDROID_HOME</code>) and NDK
+(<code>ANDROID_NDK_HOME</code>), preferring NDK
+<code>25.1.8937393</code>, then <code>21.4.7075529</code>, then any
+installed NDK.</p></li>
+<li><p>Installs <code>gomobile</code> + <code>gobind</code> user-locally
+(no <code>sudo</code>) if absent, then runs
+<code>gomobile init</code>.</p></li>
+<li><p>Runs:</p>
+<pre><code>gomobile bind -target=android -androidapi 28 \
+  -javapkg digital.vasic.lava.apigo \
+  -o build/lavaapi.aar ./internal/mobile</code></pre>
+<p>prefixed with <code>GOMAXPROCS=2 nice -n19</code> (§6.T.2 resource
+limits).</p></li>
+<li><p>Prints the resulting <code>.aar</code> size in bytes and
+sha256.</p></li>
+</ol>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> lava-api-go</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/build-aar.sh</span></span></code></pre></div>
+<h2 id="environment-overrides-all-optional">Environment overrides (all
+optional)</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ANDROID_HOME</code></td>
+<td><code>~/Library/Android/sdk</code></td>
+<td>Android SDK root</td>
+</tr>
+<tr>
+<td><code>ANDROID_NDK_HOME</code></td>
+<td>discovered under <code>$ANDROID_HOME/ndk</code></td>
+<td>NDK root for the cgo cross-compile</td>
+</tr>
+<tr>
+<td><code>LAVAAPI_JAVAPKG</code></td>
+<td><code>digital.vasic.lava.apigo</code></td>
+<td>Java package of generated bindings</td>
+</tr>
+<tr>
+<td><code>LAVAAPI_ANDROIDAPI</code></td>
+<td><code>28</code></td>
+<td>minSdk for the bind</td>
+</tr>
+</tbody>
+</table>
+<h2 id="exit-codes">Exit codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td><code>.aar</code> built; size + sha256 printed</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>bind ran but the <code>.aar</code> is missing (unexpected)</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>configuration error (SDK/NDK not found)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="generated-api">Generated API</h2>
+<p><code>gobind</code> exposes the <code>internal/mobile</code> package
+as a <code>Mobile</code> Java class under
+<code>digital.vasic.lava.apigo</code>:</p>
+<ul>
+<li><code>Mobile.start(String configJSON)</code> — throws on failure (Go
+<code>error</code>). <code>configJSON</code> is
+<code>{"bindAddr":"127.0.0.1","port":8099,"sqlitePath":"/data/x.db"}</code>.</li>
+<li><code>Mobile.stop()</code> — throws when nothing is running.</li>
+<li><code>Mobile.status()</code> — returns a JSON <code>String</code>
+<code>{"state","bindAddr","port","requestCount","backend","version"}</code>.</li>
+</ul>
+<p>Only <code>string</code>/<code>error</code> types cross the boundary,
+by design — gobind binds these cleanly to <code>java.lang.String</code>
+and Java exceptions.</p>
+<h2 id="constitutional-notes">Constitutional notes</h2>
+<ul>
+<li><strong>§6.T.2</strong> — the bind compile is resource-limited
+(<code>GOMAXPROCS=2 nice -n19</code>).</li>
+<li><strong>§6.U</strong> — no <code>sudo</code>/<code>su</code>;
+<code>gomobile</code>/<code>gobind</code> install to the user Go
+bin.</li>
+<li><strong>§6.R</strong> — NDK/SDK paths come from env vars with
+discovery fallbacks; no host-specific path is hardcoded in the
+script.</li>
+<li><strong>§11.4.18</strong> — this file is the mandated external doc
+for the script.</li>
+</ul>
+<h2 id="known-environment-requirement">Known environment
+requirement</h2>
+<p><code>gomobile bind</code> requires a working Android NDK with a C
+cross-compiler for the Android ABIs. If the bind fails, the verbatim
+error names the missing piece (NDK toolchain, <code>aar</code> packaging
+tool, etc.). The <code>internal/mobile</code> Go package is
+independently unit-tested (<code>go test ./internal/mobile/</code>) so
+the surface is verified even when the bind toolchain is unavailable on a
+given host.</p>
+<h2
+id="known-blocker-2026-06-02-gomobile-bind-vs-this-modules-dependency-graph">KNOWN
+BLOCKER (2026-06-02): gomobile bind vs. this module's dependency
+graph</h2>
+<p>On the development host, <code>gomobile bind</code> FAILS for this
+module. It is BLOCKED, not faked. The script + doc + the
+<code>internal/mobile</code> package still ship because the package is
+fully unit-tested independently of the bind toolchain.</p>
+<p>Verbatim failure (both NDK 25.1.8937393 AND NDK 21.4.7075529 tried;
+identical):</p>
+<pre><code>==&gt; gomobile bind
+gomobile: go mod tidy failed: exit status 1
+go: error reading go.mod: missing module declaration. To specify the module path:
+    go mod edit -module=example.com/mod</code></pre>
+<p>Diagnosis (with <code>gomobile bind -work</code>): gomobile writes a
+<strong>0-byte</strong> overlay <code>go.mod</code> into its temp work
+dir (<code>.../gomobile-work-XXXX/src-android-arm64/go.mod</code>) and
+then its internal <code>go mod tidy</code> chokes on the empty file.
+Confirmed:</p>
+<ul>
+<li><code>gomobile bind</code> succeeds on a TRIVIAL standalone module
+(produced a 1.5 MB <code>.aar</code>) with the SAME gomobile + NDK + Go
+1.26.2 toolchain — so the toolchain/NDK are healthy.</li>
+<li>It fails on <code>lava-api-go</code> because
+<code>internal/mobile</code> transitively imports
+<code>digital.vasic.cache</code> and
+<code>digital.vasic.observability</code>, which are behind 16 relative
+<code>replace</code> directives to <code>../submodules/*</code>.
+gomobile's overlay-module generation cannot reconstruct this
+<code>replace</code>-heavy graph (the temp work dir has no
+<code>../submodules</code>), and emits an empty overlay go.mod.</li>
+<li>Rewriting the relative replaces to ABSOLUTE paths did NOT help —
+gomobile still emits the 0-byte overlay go.mod, so the limitation is in
+gomobile's module-graph templating for <code>replace</code>-using
+modules, not the path form.</li>
+</ul>
+<p>gomobile version:
+<code>golang.org/x/mobile v0.0.0-20260529142300-ecb4cd65260a</code>.</p>
+<h3
+id="remediation-options-none-applied-yet--owed-to-a-follow-up-phase">Remediation
+options (none applied yet — owed to a follow-up phase)</h3>
+<ol type="1">
+<li><strong>Vendor / flatten the embed deps.</strong> Give
+<code>internal/mobile</code> its own minimal module (separate
+<code>go.mod</code>) that vendors only the storage + observability code
+it needs, so gomobile sees a self-contained module with no
+<code>../</code> replaces. Largest blast radius; cleanest
+long-term.</li>
+<li><strong>gomobile upstream fix / pin.</strong> Try an older gomobile
+pin known to handle <code>replace</code> modules, or file/track the
+upstream bug.</li>
+<li><strong>Manual cgo/JNI wrapper</strong> bypassing gomobile bind
+entirely.</li>
+</ol>
+<p>The exact reproduction commands are in this doc's "Usage" section;
+the diagnostic was
+<code>gomobile bind -work -target=android/arm64 ...</code> followed by
+inspecting the 0-byte <code>src-android-arm64/go.mod</code> in the
+printed <code>WORK=</code> dir.</p>
+</body>
+</html>

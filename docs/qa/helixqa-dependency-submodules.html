@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa-dependency-submodules</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="helixqa-own-org-dependency-submodules">HelixQA own-org
+dependency submodules</h1>
+<blockquote>
+<p>Created 2026-06-08 per operator directive: <em>"we MUST ADD all
+missing dependency Submodules which can be added from vasic-digital and
+HelixDevelopment orgs! Document this in project so we are aware of this
+fact!"</em></p>
+</blockquote>
+<h2 id="why-this-exists">Why this exists</h2>
+<p>HelixQA (<code>submodules/helixqa</code>, Go module
+<code>digital.vasic.helixqa</code>) is the autonomous-QA framework the
+operator wants running per-provider QA sessions against the Lava app.
+Its <code>go.mod</code> <strong><code>replace</code> directives point at
+sibling paths</strong> (<code>../X</code>) that resolve, when HelixQA is
+mounted under <code>submodules/helixqa</code>, to
+<strong><code>submodules/X</code></strong> in the Lava tree. HelixQA
+does <strong>not</strong> carry these own-org deps in its own
+<code>.gitmodules</code> — it expects the <strong>consuming project
+(Lava) to provide them as sibling submodules</strong>. Until they are
+present, <code>go build ./cmd/helixqa</code> fails ("reading
+../doc_processor/go.mod: no such file or directory"), and because
+<code>lava-api-go</code> does
+<code>replace digital.vasic.helixqa =&gt; ../submodules/helixqa</code>,
+a broken/missing HelixQA dep tree can break the Lava Go build too.</p>
+<h2 id="the-8-own-org-digitalvasic-sibling-modules-helixqa-requires">The
+8 own-org (<code>digital.vasic.*</code>) sibling modules HelixQA
+requires</h2>
+<p>Source of truth: <code>submodules/helixqa/go.mod</code>
+<code>replace</code> block.</p>
+<table>
+<thead>
+<tr>
+<th>Go module</th>
+<th>sibling path (Lava)</th>
+<th>vasic-digital repo</th>
+<th>status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>digital.vasic.challenges</code></td>
+<td><code>submodules/challenges</code></td>
+<td><code>challenges</code></td>
+<td>✅ already present</td>
+</tr>
+<tr>
+<td><code>digital.vasic.containers</code></td>
+<td><code>submodules/containers</code></td>
+<td><code>containers</code></td>
+<td>✅ already present</td>
+</tr>
+<tr>
+<td><code>digital.vasic.security</code></td>
+<td><code>submodules/security</code></td>
+<td><code>security</code></td>
+<td>✅ already present</td>
+</tr>
+<tr>
+<td><code>digital.vasic.docprocessor</code></td>
+<td><code>submodules/doc_processor</code></td>
+<td><strong>DocProcessor</strong></td>
+<td>➕ added 2026-06-08</td>
+</tr>
+<tr>
+<td><code>digital.vasic.llmorchestrator</code></td>
+<td><code>submodules/llm_orchestrator</code></td>
+<td><strong>LLMOrchestrator</strong></td>
+<td>➕ added 2026-06-08</td>
+</tr>
+<tr>
+<td><code>digital.vasic.llmprovider</code></td>
+<td><code>submodules/llm_provider</code></td>
+<td><strong>LLMProvider</strong></td>
+<td>➕ added 2026-06-08</td>
+</tr>
+<tr>
+<td><code>digital.vasic.llmsverifier</code></td>
+<td><code>submodules/llms_verifier</code> (module in
+<code>/llm-verifier</code>)</td>
+<td><strong>LLMsVerifier</strong></td>
+<td>➕ added 2026-06-08</td>
+</tr>
+<tr>
+<td><code>digital.vasic.visionengine</code></td>
+<td><code>submodules/vision_engine</code></td>
+<td><strong>VisionEngine</strong></td>
+<td>➕ added 2026-06-08</td>
+</tr>
+</tbody>
+</table>
+<p>All 5 new ones were added from
+<strong><code>git@github.com:vasic-digital/&lt;Repo&gt;.git</code></strong>
+(the same org + SSH scheme as the existing 3). Local paths are
+snake_case to match HelixQA's <code>replace</code> targets exactly.</p>
+<h2 id="not-added-deliberately-out-of-scope">NOT added (deliberately out
+of scope)</h2>
+<p>HelixQA's own <code>.gitmodules</code> lists <strong>dozens of
+third-party <code>tools/opensource/*</code> submodules</strong> (scrcpy,
+appium, chroma, perfetto, ui-tars, moondream, mem0, leakcanary,
+docker-android, midscene, marker, unstructured, signoz, redroid, …).
+These are <strong>third-party</strong> repos (Genymobile, bytedance,
+google, square, etc.), <strong>not</strong> vasic-digital /
+HelixDevelopment, so they are explicitly <strong>excluded</strong> from
+this addition per the operator's "from vasic-digital and
+HelixDevelopment orgs" scope. They are runtime tools the full autonomous
+binary may need; provisioning them is a separate, later task
+(<code>git -C submodules/helixqa submodule update --init &lt;path&gt;</code>
+for the specific tools actually required at run time).</p>
+<h2 id="pin-policy">Pin policy</h2>
+<p>Per the §6.AD Q9 waiver, the HelixQA ecosystem tracks upstream. The
+HelixQA pin itself was bumped <code>5112906</code> →
+<code>dd3cf1d</code> on 2026-06-08 to escape a broken pinned commit
+whose <code>go.mod</code> contained <strong>unresolved git conflict
+markers</strong> (L124/131/138) that broke the Go build. The 5 new
+sibling submodules were added at their current upstream HEAD; record
+their pins in <code>docs/CONTINUATION.md</code> §3.</p>
+<h2 id="verification-owed">Verification owed</h2>
+<ul class="task-list">
+<li><label><input
+type="checkbox" /><code>cd submodules/helixqa &amp;&amp; go build ./cmd/helixqa</code>
+succeeds (or surfaces the next missing own-org dep — repeat the add
+until only third-party <code>tools/opensource/*</code>
+remain).</label></li>
+<li><label><input
+type="checkbox" /><code>cd lava-api-go &amp;&amp; go build ./...</code>
+still green (confirmed green after the pin bump).</label></li>
+<li><label><input type="checkbox" />§6.W: ensure each new submodule
+mirrors to GitHub <strong>and</strong> GitLab (own-org mirror
+mandate).</label></li>
+</ul>
+</body>
+</html>

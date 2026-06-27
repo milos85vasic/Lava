@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-14-remaining-work-zero-issues-master-plan</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="master-plan--finish-everything-zero-issues-2026-06-14">Master
+Plan — Finish Everything, Zero Issues (2026-06-14)</h1>
+<blockquote>
+<p>Operator directive (2026-06-14): "what is left unfinished and what
+are (known) issues we (may) have, prepare comprehensive details and add
+it in subagents-driven working plan so nothing is left unfinished with
+zero issues when we finally finish."</p>
+</blockquote>
+<p>This plan is <strong>evidence-backed</strong>, not from memory —
+every item traces to one of three audits run 2026-06-14 (each a
+committed, file-cited findings doc):</p>
+<ul>
+<li><code>docs/audits/2026-06-14-governance-debt-audit.md</code>
+(<code>173e9747</code>) — constitution/CM-gate debt</li>
+<li><code>docs/audits/2026-06-14-search-provider-residuals-audit.md</code>
+(<code>e92590a7</code>) — search/api-app/providers</li>
+<li><code>docs/audits/2026-06-14-product-known-issues-audit.md</code>
+(<code>6293ab62</code>) — field/Crashlytics/incidents</li>
+</ul>
+<p><strong>Shipped baseline (done, device-verified):</strong> client
+<strong>1.3.9-1066</strong> + api-app <strong>0.2.9-14</strong> — the
+5-layer search cascade fixed for <strong>no-auth providers</strong>
+(Internet Archive proven on-device, <code>/v1/{provider}/search</code> →
+200, real results). Both §6.AA stages distributed; mirrors at
+<code>357f867a</code>. <strong>Shipped builds have ZERO Crashlytics
+field events</strong> (newest field = 1.3.5/0.2.6); no open crash is on
+the shipped builds.</p>
+<p><strong>"Definition of Done" (zero issues):</strong> every P0+P1 item
+below CLOSED with captured anti-bluff proof (device run / falsifiability
+RED→GREEN / field-confirm), every operator-owed decision made, working
+tree clean, docs in sync. P2 + infra hardening tracked but not
+release-blocking.</p>
+<hr />
+<h2 id="p0--release-blocking--breaks-the-operators-actual-report">P0 —
+release-blocking / breaks the operator's actual report</h2>
+<h3
+id="p0-1--auth-provider-search-rutracker--kinozal--auth-token-not-attached">P0-1
+· Auth-provider search (RuTracker / Kinozal) — <code>Auth-Token</code>
+not attached</h3>
+<p><strong>Status:</strong> OPEN, code-confirmed. The operator reported
+search across <strong>RuTracker + YTS + Kinozal</strong>. The 5-layer
+fix repaired the <code>Lava-Auth</code> per-instance key (so the request
+reaches the server), but <code>ApiBackedTrackerClient.withAuth()</code>
+(<code>core/tracker/client/.../ApiBackedTrackerClient.kt:80-81</code>)
+attaches <strong>only</strong> <code>Lava-Auth</code>, never the
+provider <strong>login session</strong> <code>Auth-Token</code>
+(<code>provider:cookie:bb_session=…</code>, parsed server-side in
+<code>lava-api-go/internal/handlers/handlers.go:118</code>). So
+<code>/v1/rutracker/search</code> arrives anonymous
+(<code>Type:"none"</code>) → RuTracker/Kinozal return login/empty. YTS
+is curated/no-auth → unaffected. <strong>So search is fixed for no-auth
+providers only.</strong> <strong>Work:</strong> (a) persist the dynamic
+provider login session when the user logs in
+(onboarding/provider-config); (b) thread it as <code>Auth-Token</code>
+onto <code>ApiBackedTrackerClient</code> search/browse/topic/download
+requests; (c) wire <code>AUTH_REQUIRED</code> + the login step for
+<code>RemoteTrackerDescriptor</code> (dynamic) providers.
+<strong>Acceptance:</strong> fresh on-device onboard of RuTracker (+
+Kinozal) with <strong>real <code>.env</code> creds</strong> → login OK →
+search "prince" → the search request carries BOTH <code>Lava-Auth</code>
++ <code>Auth-Token</code> → HTTP 200 + real rows on screen.
+<strong>Anti-bluff gate:</strong> falsifiability — drop
+<code>Auth-Token</code> → auth-provider search goes empty/login; restore
+→ results. A real end-to-end test
+(holder→factory→<code>Auth-Token</code> on the wire) like
+<code>ApiAuthKeyEndToEndWiringTest</code> for the session header.
+<strong>Stream:</strong> auth-provider-search (code + tests, then device
+verify with creds). <strong>Effort:</strong> L. <strong>Blocks:</strong>
+"search works for the providers reported."</p>
+<h3
+id="p0-2--lva-008--search_input-navbackstackentry-teardown-crash">P0-2 ·
+LVA-008 — <code>search_input</code> NavBackStackEntry teardown
+crash</h3>
+<p><strong>Status:</strong> OPEN, CRITICAL, gate-RED. Confirmed UPSTREAM
+androidx-navigation defect; <strong>5 app-level fix classes
+device-FALSIFIED</strong> (nav-bump, LenientTeardownRule, nested-host
+move, atomic popUpTo, NavTeardownGuard). Real impact:
+search-then-activity-destroy (rotate / dark-mode / locale /
+process-death) crashes; gates C06 + C11. Incident:
+<code>.lava-ci-evidence/sixth-law-incidents/2026-06-08-navbackstackentry-teardown-crash-2.9.1-incomplete.json</code>.
+<strong>OPERATOR DECISION OWED (cannot be subagent-resolved):</strong>
+either (i) file an androidx upstream repro + wait, or (ii)
+accept-with-§6.AC-telemetry (record the non-fatal, ship) — the 5 in-app
+fixes are exhausted. <strong>Acceptance:</strong> operator picks
+(i)/(ii); if (ii), the telemetry + a tracked-issue citation land +
+C06/C11 documented as upstream-blocked. <strong>Stream:</strong>
+operator-decision → then telemetry impl. <strong>Effort:</strong> S
+(impl) once decided.</p>
+<h3
+id="p0-3--macos-emulator-containervm-path-6ah--6x-debt--gates-run-host-direct">P0-3
+· macOS emulator container/VM path (§6.AH / §6.X-debt) — gates run
+host-direct</h3>
+<p><strong>Status:</strong> OPEN, BLOCKING (governance audit #1).
+<code>containerized.go:19-21</code> hard-requires <code>/dev/kvm</code>;
+<code>scripts/run-challenge-matrix.sh:215</code> resolves
+macOS→<code>host-direct</code>. Every device gate this session ran
+host-direct (a §6.AH violation — emulators must run in a container/VM).
+Blocks the §6.AE matrix / §6.Z release canary / tag attestation from
+being constitution-clean on the operator's darwin/arm64 host.
+<strong>Work:</strong> add a no-KVM/TCG (or QEMU full-system) runner to
+<code>submodules/containers/pkg/emulator</code> that boots on macOS;
+flip
+<code>run-challenge-matrix.sh</code>/<code>run-release-canary.sh</code>
+to <code>--runner=containerized|vm</code> with NO host-direct fallback.
+<strong>Acceptance:</strong> the C00 canary boots + passes via the
+container/VM runner on macOS; attestation row
+<code>runner: containers-submodule</code>. <strong>Anti-bluff
+gate:</strong> a real boot inside the container/VM + a captured per-AVD
+attestation (not host-direct). <strong>Stream:</strong>
+containers-submodule (Go, cross-repo pin bump). <strong>Effort:</strong>
+L.</p>
+<hr />
+<h2 id="p1--high-correctness--operator-requested-deliverables">P1 — high
+(correctness / operator-requested deliverables)</h2>
+<h3
+id="p1-1--watchable-issue-videos--downloads-operator-asked-repeatedly">P1-1
+· Watchable issue-videos → <code>~/Downloads</code> (operator asked
+repeatedly)</h3>
+<p><strong>Status:</strong> UNDELIVERED. The product audit confirms
+<strong>none of the 4 issue videos are in
+<code>~/Downloads</code></strong>. issue1/2/4 were re-recorded
+analyzer-PASS earlier but against 1.3.8 (search broken), so
+<strong>issue3 (search) was honestly not producible</strong> — search
+NOW WORKS, so the full set is producible. (Note: an earlier stream
+reported delivering issue1/2/4; the audit says they're absent —
+<strong>verify + (re)deliver</strong>, don't assume.)
+<strong>Work:</strong> re-record paced real-app walkthroughs for issue1
+(select-all), issue2 (password eye), issue3 (<strong>search "prince" →
+real results</strong>, now possible), issue4 (server-list de-dup) on the
+VM; validate each through HelixQA <code>recording-analyzer</code>
+(liveness PASS); copy the PASS set to <code>$HOME/Downloads/</code> +
+<code>$HOME/</code>. <strong>Acceptance:</strong> 4 analyzer-PASS mp4s
+present in <code>~/Downloads</code> (verified <code>ls</code> + analyzer
+verdict committed to evidence). <strong>Anti-bluff gate:</strong>
+analyzer liveness PASS per video + the on-screen content matches the
+named flow. <strong>Stream:</strong> video (VM).
+<strong>Effort:</strong> M.</p>
+<h3 id="p1-2--yts--curated-search--on-device-verification">P1-2 · YTS /
+curated search — on-device verification</h3>
+<p><strong>Status:</strong> UNVERIFIED on-device (only
+<code>archiveorg</code> was run). Curated = no-auth, so the transport
+fix should apply, but unproven. <strong>Acceptance:</strong> on-device
+onboard YTS → search → real rows (or honest "provider returns nothing
+for this query" with a different query that has hits).
+<strong>Stream:</strong> device-verify (folds into P0-1's run).
+<strong>Effort:</strong> S.</p>
+<h3 id="p1-3--api-app-uninstalled--silent-401-something-went-wrong">P1-3
+· api-app-uninstalled → silent 401 ("Something went wrong")</h3>
+<p><strong>Status:</strong> OPEN. If the api-app is uninstalled,
+<code>ApiKeyClient.read()</code> → null → keyless → silent 401 with only
+the generic error; no user-visible recovery prompt.
+<strong>Work:</strong> detect the keyless/uninstalled state on a search
+failure → surface an actionable prompt ("Start/install the on-device
+API" or re-onboard). <strong>Acceptance:</strong> device repro
+(uninstall api-app, search) → actionable UI, not a bare error.
+<strong>Stream:</strong> client UX + telemetry. <strong>Effort:</strong>
+M.</p>
+<h3
+id="p1-4--remote-lan-api-app--wrong-key-withlocalapikeyifmissing">P1-4 ·
+Remote LAN api-app → wrong-key
+(<code>withLocalApiKeyIfMissing</code>)</h3>
+<p><strong>Status:</strong> OPEN, <strong>no covering tests</strong>
+(<code>OnboardingViewModel.kt:382</code>). The helper reads the LOCAL
+api-app key, which is wrong for a remote/non-loopback api endpoint →
+401. <strong>Work:</strong> only read the local key when the endpoint is
+the local on-device api-app (host == loopback/own-IP); for remote
+endpoints, don't attach the local key. Add tests.
+<strong>Acceptance:</strong> unit test — remote GoApi endpoint keyless →
+helper does NOT attach the local key (falsifiability: attach-anyway →
+wrong-key assertion fails). <strong>Stream:</strong> onboarding code +
+tests. <strong>Effort:</strong> S.</p>
+<h3
+id="p1-5--rutracker-credential-rotation-security-6h--operator-owed">P1-5
+· RuTracker credential rotation (security, §6.H) — OPERATOR-OWED</h3>
+<p><strong>Status:</strong> OWED. Historical git-history leak
+(<code>nobody85perfect</code>/<code>ironman1985</code> +
+RuTor/Kinozal/NNMClub); live surface redacted (<code>d7d4572a</code>),
+working tree clean — but per §6.H clause 6 the <strong>operator must
+rotate</strong> the RuTracker (+ siblings) passwords; the git-history
+purge (§6.T.3 force-push) is also pending operator authorization. (The
+separate 67th-cycle Firebase-token echo leak is RESOLVED.)
+<strong>Acceptance:</strong> operator rotates creds + updates
+<code>.env</code>; optional history purge with explicit authorization.
+<strong>Stream:</strong> operator action (+ I can prep the history-purge
+plan). <strong>Effort:</strong> operator.</p>
+<hr />
+<h2 id="p2--hardening--fidelity--debt-not-release-blocking">P2 —
+hardening / fidelity / debt (not release-blocking)</h2>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>item</th>
+<th>source</th>
+<th>acceptance</th>
+<th>effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P2-1</td>
+<td><strong>L4 <code>READ_API_KEY</code> variant-suffix</strong>
+(<code>${apiKeyPermission}</code> placeholder both apps) so
+debug+release never collide → test VM exercises the production grant
+path</td>
+<td>residuals #5</td>
+<td>manifests+build.gradle, clean-install grant test</td>
+<td>S-M</td>
+</tr>
+<tr>
+<td>P2-2</td>
+<td><strong>§6.AC telemetry comprehensive</strong> — client key-read
+failures are logcat-only (not <code>recordWarning</code>→Crashlytics);
+api-app empty-cursor <code>query()</code> records nothing; Go side has
+zero non-fatal enforcement</td>
+<td>residuals #8, gov §6.AC-debt</td>
+<td><code>recordNonFatal</code>/<code>recordWarning</code> on the error
+paths + lint</td>
+<td>M</td>
+</tr>
+<tr>
+<td>P2-3</td>
+<td><strong>§6.AB-debt</strong> Detekt/go-vet per-feature anti-bluff
+completeness rule</td>
+<td>gov</td>
+<td>rule + hermetic test</td>
+<td>M</td>
+</tr>
+<tr>
+<td>P2-4</td>
+<td><strong>§6.Z-debt residual</strong> — runtime Gate 6 INSIDE
+<code>firebase-distribute.sh</code> (SHA/24h/BUILD-SUCCESSFUL), not only
+pre-push</td>
+<td>gov</td>
+<td>gate + <code>tests/firebase/</code></td>
+<td>M</td>
+</tr>
+<tr>
+<td>P2-5</td>
+<td><strong>2 FGS Crashlytics issues</strong>
+(<code>9ba8502e</code>+<code>b9baeaede</code>) console close-mark —
+AFTER 0.2.9 field-confirm</td>
+<td>product #4</td>
+<td>field-confirm 0.2.9 no-FGS → operator close-marks</td>
+<td>operator</td>
+</tr>
+<tr>
+<td>P2-6</td>
+<td><strong>§6.AF chaos/stress (LVA-7)</strong> beyond phase-1 + wire
+into verify-all</td>
+<td>gov</td>
+<td>runnable chaos suite</td>
+<td>M</td>
+</tr>
+<tr>
+<td>P2-7</td>
+<td><strong>Server-side <code>/v1/search</code> SSE aggregator</strong>
+— OPTIONAL (client fan-out sufficient); Go has an unused
+<code>MultiSearchHandler.GetMultiSearch</code></td>
+<td>residuals #6</td>
+<td>decision: implement or delete the dead Go route</td>
+<td>S</td>
+</tr>
+<tr>
+<td>P2-8</td>
+<td><strong>§6.AI</strong> thin-index CLAUDE.md restructure + token
+harness; device-recorder layout; action-prefix LAYER-2 verify</td>
+<td>gov</td>
+<td>per-clause</td>
+<td>S-L</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2
+id="doc-correction-cheap-do-first--the-docs-lie-about-being-behind">Doc-correction
+(cheap, do first — the docs lie about being behind)</h2>
+<p>The governance audit found <strong>9 debts marked OPEN in
+<code>CLAUDE.md</code> that are actually CLOSED</strong> (§6.Y-debt
+pre-push Check 6 live; §6.AA-debt default flipped
+<code>firebase-distribute.sh:46</code>; §6.AD scanners exist +
+verify-all-wired; §6.AE strict-flip
+<code>check-challenge-coverage.sh:39</code>;
+<code>CM-COVERAGE-LEDGER</code> strict; LVA-6 codegraph submodules;
+§6.AI action-prefix hook).
+<strong><code>docs/helix-constitution-gates.md</code> is stale
+(2026-05-16).</strong> <strong>Work:</strong> correct the stale "open"
+markers in <code>CLAUDE.md</code> + refresh
+<code>helix-constitution-gates.md</code>. <strong>Acceptance:</strong>
+every debt marker in CLAUDE.md matches verified reality.
+<strong>Effort:</strong> S. <strong>Stream:</strong> docs.</p>
+<h2 id="working-tree-hygiene">Working-tree hygiene</h2>
+<p><code>git status</code> carries 18 entries:
+<code>core/apiengine/.../api-source.hash</code> (1-line regen),
+<code>submodules/tracker_sdk</code> pointer moved (decide intended-bump
+vs reset — pins frozen by default), 5
+<code>.lava-ci-evidence/stress-chaos/jackett/*.json</code> (regen
+churn), untracked raw challenge-video + video-analysis mp4 dirs
+(curate/gitignore per §11.4.128, never commit raw).
+<strong>Work:</strong> commit/reset the intended bits, gitignore the raw
+recordings. <strong>Effort:</strong> S.</p>
+<hr />
+<h2
+id="operator-owed-decisions-cannot-be-subagent-resolved--surface--wait">Operator-owed
+decisions (CANNOT be subagent-resolved — surface + wait)</h2>
+<ol type="1">
+<li><strong>LVA-008</strong> (P0-2): file androidx upstream repro OR
+accept-with-telemetry + distribute.</li>
+<li><strong>RuTracker credential rotation</strong> (P1-5) + optional
+git-history purge authorization (§6.T.3 force-push).</li>
+<li><strong>FGS Crashlytics console close-marks</strong> (P2-5) after
+0.2.9 field-confirm.</li>
+<li><strong>Auth-provider login UX</strong> (P0-1): confirm the intended
+login surface for dynamic auth providers (onboarding step vs
+provider-config) before the implementation locks the flow.</li>
+</ol>
+<hr />
+<h2
+id="execution-shape-subagents-driven-parallel-where-non-conflicting">Execution
+shape (subagents-driven, parallel where non-conflicting)</h2>
+<ul>
+<li><strong>Wave 1 (parallel, non-conflicting):</strong> doc-correction
+(docs) ‖ P1-4 remote-key guard+tests (onboarding) ‖ P2-1 L4
+permission-suffix (manifests) ‖ working-tree hygiene. All small,
+disjoint file sets.</li>
+<li><strong>Wave 2 (P0 code):</strong> P0-1 auth-provider
+<code>Auth-Token</code> threading (the headline) — code + tests, then a
+single device-verify run that ALSO covers P1-2 YTS + P1-1 issue3 video
+(one VM session). P0-3 containers-runner in parallel (cross-repo,
+Go).</li>
+<li><strong>Wave 3 (hardening):</strong> P2-2 telemetry ‖ P2-3 Detekt ‖
+P2-4 distribute gate ‖ P2-6 chaos.</li>
+<li><strong>Gate before "finished":</strong> all P0+P1 closed with
+captured proof; operator decisions made; a final clean build + full
+device gate (preferably via the P0-3 container runner) + a release if
+auth-provider search shipped.</li>
+</ul>
+<p><strong>Anti-bluff invariant (every item):</strong> no item is "done"
+without captured physical evidence — a device run showing the
+user-visible outcome, OR a falsifiability RED→GREEN with the assertion
+message, OR a field-confirm. "Compiles / test green against a mock" is
+never sufficient (this cycle removed 5 such bluffs).</p>
+</body>
+</html>

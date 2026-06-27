@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-13-additional-curated-provider-candidates-round2</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="additional-curated-provider-candidates--round-2-live-probe-research-2026-06-13">Additional
+Curated Provider Candidates — Round 2 Live-Probe Research
+(2026-06-13)</h1>
+<p>Round-2 research feeding <strong>Defect B</strong> (on-device api-app
+embeds curated Go providers in
+<code>lava-api-go/internal/provider/curated/</code>).</p>
+<p><strong>Already shipped (6) — NOT re-proposed here:</strong> The
+Pirate Bay (<code>apibay.org</code>), YTS (<code>yts.mx</code>),
+Torrents-CSV (<code>torrents-csv.com</code>), BitSearch
+(<code>bitsearch.eu</code>), Knaben (<code>api.knaben.org</code>), Nyaa
+(<code>nyaa.si</code> RSS).</p>
+<p><strong>Already rejected with evidence (round 1 + prior) — NOT
+re-probed:</strong> EZTV (keyword no-op), 1337x (CF challenge),
+TorrentGalaxy (DNS dead), SolidTorrents (= BitSearch backend), Torlock
+(HTML timeout), torrent-api-py (404).</p>
+<p>All probes were live, server-side <code>curl</code> GETs from a macOS
+host on 2026-06-13 (~09:38–11:50 UTC), bounded ≤18s each, default UA
+<code>Mozilla/5.0 (compatible; LavaResearchBot/1.0)</code> unless noted.
+Per §11.4.6 no-guessing vocabulary: only captured facts are stated;
+anything not directly probed is marked <code>UNCONFIRMED:</code>.</p>
+<h2 id="the-bar-all-must-hold-each-proven-with-a-captured-probe">The bar
+(ALL must hold, each PROVEN with a captured probe)</h2>
+<ol type="1">
+<li>Free-text query genuinely FILTERS — two distinct queries return
+DIFFERENT result sets that each contain the query term (the EZTV no-op
+test).</li>
+<li>Anonymous — no API key, no login, no cookie.</li>
+<li>NOT Cloudflare-challenge-gated for a plain server-side Go GET (no
+HTTP 403 + <code>cf-mitigated: challenge</code> / "Just a moment").</li>
+<li>Returns an <code>info_hash</code> or magnet.</li>
+<li>Stable JSON (preferred) or RSS / trivially parseable response.</li>
+</ol>
+<hr />
+<h2 id="candidate-results">Candidate results</h2>
+<h3
+id="1-torrentdownloads-torrentdownloadspro--viable-white_check_mark-top-pick">1.
+TorrentDownloads (<code>torrentdownloads.pro</code>) — VIABLE ✅ (TOP
+PICK)</h3>
+<ul>
+<li><strong>Search endpoint:</strong>
+<code>GET https://www.torrentdownloads.pro/rss.xml?type=search&amp;search=&lt;query&gt;</code>
+(a <code>www.torrentdownloads.pro</code> host; the bare host issues a
+redirect — follow it / pin <code>www.</code>).</li>
+<li><strong>Live probe:</strong> <code>HTTP 200</code>, body is RSS XML
+(<code>&lt;?xml ... &lt;rss version='2.0'&gt;</code>),
+<code>bytes≈26627</code> for q=ubuntu. <code>server: cloudflare</code>
+present but <strong><code>cf-mitigated</code> ABSENT</strong> — passive
+CDN, NOT a challenge gate. Works with a plain non-browser UA
+(<code>LavaServerBot/1.0</code> → 50 items), so no UA-gating.</li>
+<li><strong>Auth:</strong> anonymous; no key/cookie.</li>
+<li><strong>info_hash / magnet:</strong> YES — dedicated
+<code>&lt;info_hash&gt;</code> element, 40-hex lowercase (e.g.
+<code>19987310611f0fae3b2c9678601b92967d938aff</code>). Magnet is built
+client-side from the hash + the curated public-tracker list (same
+pattern as the Nyaa provider).</li>
+</ul>
+<p><strong>2-query filter-difference proof (the EZTV no-op test) —
+PASSES decisively:</strong></p>
+<pre><code>Q1 search=ubuntu → 50 items; 50/50 &lt;title&gt; contain &quot;ubuntu&quot;
+   (&quot;Ubuntu 12 10 Server 64 Bit&quot;, &quot;Ubuntu 10 10 i386 v14 2 5&quot;, ...)
+Q2 search=debian → 50 items; 50/50 &lt;title&gt; contain &quot;debian&quot;
+overlap between the two title sets: 0</code></pre>
+<p><strong>Field mapping (RSS <code>&lt;item&gt;</code> →
+provider.SearchItem):</strong></p>
+<table>
+<thead>
+<tr>
+<th>RSS element</th>
+<th>provider.SearchItem</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;title&gt;</code></td>
+<td><code>Title</code></td>
+<td>plain text</td>
+</tr>
+<tr>
+<td><code>&lt;info_hash&gt;</code></td>
+<td><code>InfoHash</code></td>
+<td>40-hex lowercase; build magnet from it</td>
+</tr>
+<tr>
+<td><code>&lt;size&gt;</code></td>
+<td><code>SizeBytes</code></td>
+<td>integer bytes (e.g. <code>24898149</code>)</td>
+</tr>
+<tr>
+<td><code>&lt;seeders&gt;</code></td>
+<td><code>Seeders</code></td>
+<td>integer (e.g. <code>978</code>)</td>
+</tr>
+<tr>
+<td><code>&lt;leechers&gt;</code></td>
+<td><code>Leechers</code></td>
+<td>integer (e.g. <code>30</code>)</td>
+</tr>
+<tr>
+<td><code>&lt;pubDate&gt;</code></td>
+<td><code>Date</code></td>
+<td>RFC-1123 (<code>Mon, 21 Oct 2013 13:20:49 +0200</code>)</td>
+</tr>
+<tr>
+<td><code>&lt;link&gt;</code></td>
+<td>(detail URL)</td>
+<td>site-relative <code>/torrent/&lt;id&gt;/&lt;slug&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>VERDICT: VIABLE.</strong> Best round-2 candidate — full field
+set (the ONLY round-2 candidate with native
+<code>&lt;info_hash&gt;</code> + <code>&lt;seeders&gt;</code> +
+<code>&lt;leechers&gt;</code> + <code>&lt;size&gt;</code> all in the
+feed), clean filter, passive CF, no UA-gating. General-purpose corpus
+(complements the niche providers). Maps cleanly onto the
+<code>nyaa</code> RSS provider shape. <strong>Caveat
+(UNCONFIRMED:):</strong> <code>.pro</code> is one of several rotating
+TorrentDownloads mirror TLDs; long-term host stability of
+<code>.pro</code> specifically is not proven beyond today's probe.</p>
+<hr />
+<h3
+id="2-tokyo-toshokan-tokyotoshoinfo--viable-white_check_mark-animeniche-no-seeders">2.
+Tokyo Toshokan (<code>tokyotosho.info</code>) — VIABLE ✅ (anime/niche,
+no seeders)</h3>
+<ul>
+<li><strong>Search endpoint:</strong>
+<code>GET https://www.tokyotosho.info/rss.php?terms=&lt;query&gt;</code></li>
+<li><strong>Live probe:</strong> <code>HTTP 200</code>,
+<code>content-type: application/rss+xml; charset=utf-8</code>.
+<code>server: cloudflare</code>, <code>cf-mitigated</code> ABSENT —
+passive CDN.</li>
+<li><strong>Auth:</strong> anonymous.</li>
+<li><strong>info_hash / magnet:</strong> YES — each item's
+<code>&lt;description&gt;</code> (CDATA) embeds a full
+<code>magnet:?xt=urn:btih:&lt;BASE32-40&gt;&amp;tr=...</code> link (e.g.
+<code>magnet:?xt=urn:btih:AIHBWH5HWF2UQCHMDT2D3O6TP63HBLNX&amp;tr=...</code>).
+Note the btih is <strong>base32</strong> (32 chars), not 40-hex — the
+provider must accept the magnet as-is OR base32-decode → hex.</li>
+</ul>
+<p><strong>2-query filter-difference proof — PASSES:</strong></p>
+<pre><code>Q1 terms=naruto → 139 items; first content titles on-topic
+   (&quot;Cutie Kuromi - Naruto chan.zip&quot;, &quot;...(NARUTO -ナルト-).zip&quot;, ...)
+Q2 terms=bleach → 146 items; on-topic
+   (&quot;Bleach The new Gotei-13 law - Final [ENG].zip&quot;, &quot;...(Bleach)...&quot;, ...)
+disjoint, query-specific result sets.</code></pre>
+<p><strong>Field mapping (RSS <code>&lt;item&gt;</code> →
+provider.SearchItem):</strong></p>
+<table>
+<thead>
+<tr>
+<th>RSS element</th>
+<th>provider.SearchItem</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;title&gt;</code></td>
+<td><code>Title</code></td>
+<td>plain text</td>
+</tr>
+<tr>
+<td><code>magnet:</code> URL inside
+<code>&lt;description&gt;</code></td>
+<td><code>InfoHash</code> / magnet</td>
+<td>base32 btih; regex-extract from CDATA</td>
+</tr>
+<tr>
+<td><code>Size: NNN MB</code> inside
+<code>&lt;description&gt;</code></td>
+<td><code>SizeBytes</code></td>
+<td>human-readable; must parse "113.89MB"</td>
+</tr>
+<tr>
+<td><code>&lt;pubDate&gt;</code></td>
+<td><code>Date</code></td>
+<td>RFC-1123 GMT</td>
+</tr>
+<tr>
+<td><code>&lt;category&gt;</code></td>
+<td>(category)</td>
+<td>e.g. "Other", "Hentai (Manga)"</td>
+</tr>
+<tr>
+<td>seeders / leechers</td>
+<td>— (ABSENT)</td>
+<td><strong>NOT in the feed</strong> → emit 0/unknown</td>
+</tr>
+</tbody>
+</table>
+<p><strong>VERDICT: VIABLE.</strong> Honest CapSearch (genuine filter),
+anonymous, magnet present. <strong>Two caveats:</strong> (a) NO
+seeders/leechers in the feed (must surface as 0/unknown — UI honesty);
+(b) btih is base32, and size needs human-string parsing. Niche
+(anime/Japanese media) — overlaps Nyaa's domain but draws a distinct
+corpus + different uploaders. Lower priority than TorrentDownloads
+because of the missing seeders + base32 + the adult-heavy default result
+mix.</p>
+<hr />
+<h3
+id="3-limetorrents-limetorrentslol--fun--viable-warning-redirect--indirect-hash">3.
+LimeTorrents (<code>limetorrents.lol</code> → <code>.fun</code>) —
+VIABLE ⚠️ (redirect + indirect hash)</h3>
+<ul>
+<li><strong>Search endpoint:</strong>
+<code>GET https://www.limetorrents.lol/searchrss/&lt;query&gt;/</code> —
+issues
+<code>HTTP 301 → https://www.limetorrents.fun/searchrss/&lt;query&gt;/</code>
+(final host serves the RSS). <strong>Must follow the redirect</strong>
+(the <code>.lol</code>/<code>.fun</code> TLD rotates; pinning a single
+TLD is fragile).</li>
+<li><strong>Live probe (final host):</strong> <code>HTTP 200</code>, RSS
+XML, <code>server: cloudflare</code>, <code>cf-mitigated</code> ABSENT —
+passive CDN.</li>
+<li><strong>Auth:</strong> anonymous.</li>
+<li><strong>info_hash / magnet:</strong> INDIRECT — no
+<code>&lt;info_hash&gt;</code> element and no magnet; the 40-hex hash is
+embedded in the <code>&lt;enclosure url&gt;</code> pointing to
+<code>https://itorrents.net/torrent/&lt;40HEX&gt;.torrent</code> (e.g.
+<code>itorrents.net/torrent/232CD67EB3FFBD7C37BF9EC3EE887417E5AE1EE6.torrent</code>).
+Must regex-extract the <code>[A-F0-9]{40}</code> and build the magnet
+client-side.</li>
+</ul>
+<p><strong>2-query filter-difference proof — PASSES:</strong></p>
+<pre><code>Q1 searchrss/ubuntu/ → 40 items; 41 &lt;title&gt; lines incl. ubuntu (41 = 40 items + feed header)
+Q2 searchrss/debian/ → 40 items; 41 &lt;title&gt; lines incl. debian
+overlap between the two title sets: 0</code></pre>
+<p><strong>Field mapping (RSS <code>&lt;item&gt;</code> →
+provider.SearchItem):</strong></p>
+<table>
+<thead>
+<tr>
+<th>RSS element</th>
+<th>provider.SearchItem</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;title&gt;</code></td>
+<td><code>Title</code></td>
+<td>plain text</td>
+</tr>
+<tr>
+<td><code>&lt;enclosure url&gt;</code> (itorrents)</td>
+<td><code>InfoHash</code></td>
+<td>extract <code>[A-F0-9]{40}</code> from URL; build magnet</td>
+</tr>
+<tr>
+<td><code>&lt;size&gt;</code></td>
+<td><code>SizeBytes</code></td>
+<td>integer bytes</td>
+</tr>
+<tr>
+<td><code>Seeds: N , Leechers M</code> in
+<code>&lt;description&gt;</code></td>
+<td><code>Seeders</code>/<code>Leechers</code></td>
+<td>regex-parse the description string</td>
+</tr>
+<tr>
+<td><code>&lt;pubDate&gt;</code></td>
+<td><code>Date</code></td>
+<td>e.g. <code>12 Dec 2025 10:15:20 +0200</code> (non-standard, no
+weekday)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>VERDICT: VIABLE (lowest of the three).</strong> Genuine
+filter, passive CF, hash + seeders recoverable — but two friction points
+lower its rank: (a) hard dependency on a <code>.lol → .fun</code>
+redirect on a rotating-TLD host (the most fragile of the three); (b)
+hash is indirect (URL-embedded, uppercase hex) and seeders/leechers need
+free-text regex out of <code>&lt;description&gt;</code>. Acceptable as a
+later addition, behind TorrentDownloads + TokyoTosho.</p>
+<hr />
+<h2 id="rejected-candidates-each-with-captured-evidence">REJECTED
+candidates (each with captured evidence)</h2>
+<h3
+id="glodls-glodlsto--gtorrentssite--rejected-eztv-class-no-op">GloDLS
+(<code>glodls.to</code> → <code>gtorrents.site</code>) — REJECTED
+(EZTV-class no-op)</h3>
+<ul>
+<li><code>GET https://glodls.to/rss.php?q=&lt;query&gt;</code> →
+<code>302 → gtorrents.site/rss.php</code>, final <code>HTTP 200</code>,
+<code>application/xhtml+xml</code>.</li>
+<li><strong>Filter is a NO-OP</strong> (the canonical EZTV trap):
+<code>q=ubuntu</code> and <code>q=debian</code> returned the
+<strong>byte-identical 50-item "latest torrents" feed</strong> —
+<code>&lt;guid&gt;</code> lists diff'd IDENTICAL; 0/50 titles contained
+the query term in either feed (first item for both was "Iron Maiden -
+Virtual XI ... [FLAC]"). The <code>q</code> parameter is ignored.
+<strong>Fails bar #1.</strong></li>
+</ul>
+<h3
+id="torrent-paradise-ml--org--eu--rejected-dead--parked">Torrent-Paradise
+(<code>.ml</code> / <code>.org</code> / <code>.eu</code>) — REJECTED
+(dead / parked)</h3>
+<ul>
+<li><code>torrent-paradise.ml/api/search?q=ubuntu</code> →
+<code>HTTP 200</code> but <code>content-type: text/html</code> serving a
+<strong>Hungarian online-casino spam page</strong> ("Magyar online
+kaszinók 2026 ...") — the domain has been repurposed; the JSON API is
+gone. <code>torrent-paradise.org</code> and
+<code>torrent-paradise.eu</code> →
+<code>curl (6) Could not resolve host</code>. <strong>Fails bar #1/#5
+(no API).</strong></li>
+</ul>
+<h3
+id="academictorrents-academictorrentscom--rejected-no-per-query-search-feed">AcademicTorrents
+(<code>academictorrents.com</code>) — REJECTED (no per-query search
+feed)</h3>
+<ul>
+<li>The site explicitly <strong>blocks browse-scraping</strong>
+(<code>browse.php</code> → <code>307</code> → <code>checkb.htm</code>,
+an HTML page that says: <em>"Hello if you are reading this you may be
+trying to scrape the browse page ... we instead ask you to search an XML
+file (in RSS format)"</em>). The offered feeds — <code>rss.xml</code>
+(recent) and <code>database.xml</code> (full DB dump) — take <strong>NO
+query parameter</strong>: <code>rss.xml</code> returns a fixed 44 KB
+"Recent Torrents" list regardless of input.
+<code>apiv2/.../search</code> → <code>404</code>. There is no anonymous
+free-text-filtering endpoint. <strong>Fails bar #1.</strong></li>
+</ul>
+<h3 id="anidex-anidexinfo--rejected-unstable--down">Anidex
+(<code>anidex.info</code>) — REJECTED (unstable / down)</h3>
+<ul>
+<li><code>GET https://anidex.info/rss/?q=naruto</code> → first attempt
+<code>curl (28)</code> timeout (15 s, 0 bytes); retry with a browser UA
+→ <code>HTTP 502</code> (Cloudflare error page "Error 502"). The origin
+is unreachable/unstable. <strong>Fails bar #3/#5.</strong></li>
+</ul>
+<h3 id="extto-extto-extratorrent-mirror--rejected-403">ext.to
+(<code>ext.to</code>, ExtraTorrent mirror) — REJECTED (403)</h3>
+<ul>
+<li><code>GET https://ext.to/rss/?q=ubuntu</code> →
+<code>HTTP 403</code> (<code>text/html</code>). Server-side GET is
+refused. <strong>Fails bar #3.</strong></li>
+</ul>
+<h3 id="idope-idopese--rejected-dead">iDope (<code>idope.se</code>) —
+REJECTED (dead)</h3>
+<ul>
+<li><code>GET https://idope.se/torrent-list/ubuntu/?r=1</code> →
+<code>curl (28)</code> connection timeout (12 s). Host unreachable.
+<strong>Fails bar #5.</strong></li>
+</ul>
+<h3
+id="snowfl-snowflcom--rejected-token-gated-not-anonymous-stable">Snowfl
+(<code>snowfl.com</code>) — REJECTED (token-gated, not
+anonymous-stable)</h3>
+<ul>
+<li><code>GET https://snowfl.com/index1.php?ubuntu&amp;&lt;token&gt;&amp;...</code>
+→ <code>HTTP 404</code> "Error". Snowfl's search requires a per-session
+token minted by its JS bundle; there is no stable anonymous query
+endpoint a plain Go GET can hit. <strong>Fails bar #2/#5.</strong></li>
+</ul>
+<h3
+id="bitmagnet-public-instances--rejected-no-stable-public-host">Bitmagnet
+public instances — REJECTED (no stable public host)</h3>
+<ul>
+<li><code>bitmagnet.io/graphql</code> → <code>404</code>;
+<code>demo.bitmagnet.io</code> → DNS does not resolve. Bitmagnet is
+self-host software, not a public aggregator with a stable anonymous
+endpoint to pin. <strong>Fails bar #5.</strong></li>
+</ul>
+<h3 id="btdigg-btdigcom--rejected-unreachable">BTDigg
+(<code>btdig.com</code>) — REJECTED (unreachable)</h3>
+<ul>
+<li><code>GET https://btdig.com/search?q=ubuntu&amp;api=1</code> →
+<code>curl (28)</code> timeout (12 s). <strong>Fails bar
+#5.</strong></li>
+</ul>
+<hr />
+<h2 id="ranked-viable-shortlist-ready-to-implement">Ranked VIABLE
+shortlist (ready to implement)</h2>
+<table>
+<thead>
+<tr>
+<th>Rank</th>
+<th>Provider</th>
+<th>Endpoint</th>
+<th>info_hash</th>
+<th>Seeders/Leechers</th>
+<th>Filter proof</th>
+<th>Friction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td><strong>TorrentDownloads</strong></td>
+<td><code>GET …torrentdownloads.pro/rss.xml?type=search&amp;search=&lt;q&gt;</code></td>
+<td>native <code>&lt;info_hash&gt;</code> 40-hex</td>
+<td>YES (native
+<code>&lt;seeders&gt;</code>/<code>&lt;leechers&gt;</code>)</td>
+<td>50/50 on-topic, 0 overlap</td>
+<td>follow bare→<code>www</code> redirect; rotating-TLD (UNCONFIRMED:
+longevity)</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td><strong>Tokyo Toshokan</strong></td>
+<td><code>GET …tokyotosho.info/rss.php?terms=&lt;q&gt;</code></td>
+<td>magnet (base32 btih) in <code>&lt;description&gt;</code></td>
+<td>NO (absent)</td>
+<td>139/146 disjoint, on-topic</td>
+<td>base32 hash; size as human string; no seeders; adult-heavy mix</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td><strong>LimeTorrents</strong></td>
+<td><code>GET …limetorrents.lol/searchrss/&lt;q&gt;/</code> (→
+<code>.fun</code>)</td>
+<td>indirect (40-hex in itorrents enclosure URL)</td>
+<td>YES (regex from <code>&lt;description&gt;</code>)</td>
+<td>40/40 on-topic, 0 overlap</td>
+<td><code>.lol→.fun</code> redirect on rotating-TLD host; indirect
+hash</td>
+</tr>
+</tbody>
+</table>
+<p>All three: anonymous, passive-Cloudflare (no
+<code>cf-mitigated</code> challenge), RSS, implementable against the
+<code>internal/provider/curated/nyaa</code> RSS pattern.</p>
+<h2 id="single-best-next-to-implement">Single best
+next-to-implement</h2>
+<p><strong>TorrentDownloads
+(<code>torrentdownloads.pro</code>).</strong> Strongest evidence
+line:</p>
+<blockquote>
+<p><code>search=ubuntu</code> and <code>search=debian</code> each return
+50 RSS items, 50/50 titles on-topic, <strong>0 overlap</strong>, with a
+native <code>&lt;info_hash&gt;</code> 40-hex element plus
+<code>&lt;seeders&gt;</code>/<code>&lt;leechers&gt;</code>/<code>&lt;size&gt;</code>/<code>&lt;pubDate&gt;</code>
+— and <code>server: cloudflare</code> with <code>cf-mitigated</code>
+ABSENT, served identically to a plain <code>LavaServerBot/1.0</code> UA
+(no browser/UA gating).</p>
+</blockquote>
+<p>It is the only round-2 candidate that ships a complete native field
+set (hash + seeders + leechers + size + date) in the feed, making it the
+cleanest drop-in clone of the existing Nyaa provider.</p>
+</body>
+</html>

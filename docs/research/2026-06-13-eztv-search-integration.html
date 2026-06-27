@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-13-eztv-search-integration</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="eztv-free-text-search-integration-research">EZTV Free-Text
+Search Integration Research</h1>
+<p><strong>Date:</strong> 2026-06-13 <strong>Author:</strong> research
+subagent (lava-api-go curated-providers stream) <strong>Scope:</strong>
+Determine the <em>honest</em> way to make EZTV usable as a
+free-text-searchable curated provider in <code>lava-api-go</code>, or
+prove it cannot be done anonymously and recommend the alternative.
+<strong>Constitutional frame:</strong> §6.E (Capability Honesty — a
+declared SEARCH capability MUST genuinely filter by the query) + §6.L /
+§6.J (no bluff: a search that ignores the query is forbidden). §11.4.6
+no-guessing vocabulary applied throughout — captured facts are stated as
+facts; anything not directly observed is marked
+<code>UNCONFIRMED:</code>.</p>
+<hr />
+<h2 id="1-probes-run-literal-commands--captured-output-excerpts">1.
+Probes run (literal commands + captured-output excerpts)</h2>
+<p>All probes are bounded single <code>curl</code>/<code>python3</code>
+invocations (no loops), run live on 2026-06-13.</p>
+<h3 id="probe-1--2--keywords-param-is-silently-ignored-re-confirm">Probe
+1 + 2 — <code>keywords=</code> param is silently ignored
+(re-confirm)</h3>
+<pre><code>curl -s &quot;https://eztvx.to/api/get-torrents?limit=5&amp;page=1&amp;keywords=ironman&quot;
+curl -s &quot;https://eztvx.to/api/get-torrents?limit=5&amp;page=1&amp;keywords=batman&quot;</code></pre>
+<p>Both responses begin <strong>identically</strong>:</p>
+<pre><code>keywords=ironman → {&quot;torrents_count&quot;:1055208,&quot;limit&quot;:5,&quot;page&quot;:1,&quot;torrents&quot;:[{&quot;id&quot;:3110192,...,&quot;title&quot;:&quot;Iron Man and His Awesome Friends S01E28 720p WEB H264-AFO EZTV&quot;,...},{...Deadliest.Catch.S22E06...}]}
+keywords=batman  → {&quot;torrents_count&quot;:1055208,&quot;limit&quot;:5,&quot;page&quot;:1,&quot;torrents&quot;:[{&quot;id&quot;:3110192,...,&quot;title&quot;:&quot;Iron Man and His Awesome Friends S01E28 720p WEB H264-AFO EZTV&quot;,...},{...Deadliest.Catch.S22E06...}]}</code></pre>
+<p><strong>FACT:</strong> <code>torrents_count</code> is
+<code>1055208</code> for both; the first torrent for
+<code>keywords=batman</code> is <em>"Iron Man and His Awesome
+Friends"</em> — the global latest-torrents list, unfiltered. The
+<code>keywords</code> param is a no-op. (Matches the main stream's
+earlier finding; count moved 1,055,207 → 1,055,208 only because the
+global feed grew by one row between sessions.)</p>
+<h3 id="probe-7--q-and-search-aliases-are-also-ignored">Probe 7 —
+<code>?q=</code> and <code>?search=</code> aliases are ALSO ignored</h3>
+<pre><code>curl -s &quot;https://eztvx.to/api/get-torrents?limit=1&amp;q=batman&quot;      | grep -o &#39;&quot;torrents_count&quot;:[0-9]*&#39;   → &quot;torrents_count&quot;:1055208
+curl -s &quot;https://eztvx.to/api/get-torrents?limit=1&amp;search=batman&quot; | grep -o &#39;&quot;torrents_count&quot;:[0-9]*&#39;   → &quot;torrents_count&quot;:1055208</code></pre>
+<p><strong>FACT:</strong> Neither <code>q</code> nor <code>search</code>
+filters; both return the same global count. There is no free-text param
+on the JSON API under any of the three names tried.</p>
+<h3
+id="probe-3--4--11--imdb_id-param-genuinely-filters-but-is-tv-only-and-zero-pad-sensitive">Probe
+3 + 4 + 11 — <code>imdb_id=</code> param GENUINELY filters (but is
+TV-only and zero-pad-sensitive)</h3>
+<pre><code>curl -s &quot;https://eztvx.to/api/get-torrents?limit=3&amp;imdb_id=0372784&quot;   (Batman Begins, a film) → {&quot;imdb_id&quot;:&quot;0372784&quot;,&quot;torrents_count&quot;:0,...}
+curl -s &quot;https://eztvx.to/api/get-torrents?limit=3&amp;imdb_id=0944947&quot;   (Game of Thrones)       → {&quot;imdb_id&quot;:&quot;0944947&quot;,&quot;torrents_count&quot;:146,&quot;torrents&quot;:[{...,&quot;title&quot;:&quot;Game of Thrones S01E10 2160p UHD BluRay x265-SCOTLUHD EZTV&quot;,&quot;imdb_id&quot;:&quot;0944947&quot;,...}]}</code></pre>
+<p>Zero-padding is <strong>load-bearing</strong>:</p>
+<pre><code>curl -s &quot;.../get-torrents?limit=1&amp;imdb_id=944947&quot;  → &quot;torrents_count&quot;:0
+curl -s &quot;.../get-torrents?limit=1&amp;imdb_id=0944947&quot; → &quot;torrents_count&quot;:146</code></pre>
+<p><strong>FACT:</strong> <code>imdb_id</code> is a real filter. All
+returned rows for GoT are titled "Game of Thrones". A film (Batman
+Begins) returns 0 → EZTV is a TV-only catalogue. The id MUST be the
+zero-padded 7-digit form (<code>0944947</code>), not the
+integer-stripped form (<code>944947</code>). IMDb's own
+<code>ttXXXXXXX</code> id already carries this padding; the correct
+transform is <code>strip("tt")</code>, NOT <code>int()</code>.</p>
+<h3
+id="probe-5--html-search-page-searchquery-is-hard-cloudflare-gated">Probe
+5 — HTML search page <code>/search/&lt;query&gt;</code> is HARD
+Cloudflare-gated</h3>
+<pre><code>curl -s -A &quot;Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36&quot; &quot;https://eztvx.to/search/game-of-thrones&quot; -D -</code></pre>
+<p>Response headers + body:</p>
+<pre><code>HTTP/2 403
+cf-mitigated: challenge
+server: cloudflare
+content-security-policy: ... https://challenges.cloudflare.com ...
+server-timing: chlray;desc=&quot;a0afb7828c2776ef&quot;
+--- body markers found: &quot;Just a moment&quot;, &quot;challenge-platform&quot;, &quot;cloudflare&quot;
+--- count of &quot;game of thrones&quot; in body: 0
+--- body size: 5536 bytes (the CF interstitial, not a results page)</code></pre>
+<p><strong>FACT:</strong> The HTML search page returns <strong>HTTP 403
+with <code>cf-mitigated: challenge</code></strong> ("Just a moment…" JS
+challenge) to an anonymous client. The query term does not appear in the
+body — no results are served. This path requires solving a Cloudflare
+Turnstile/JS challenge (headless browser or a CF-bypass service), which
+a Go HTTP client cannot do anonymously.</p>
+<h3 id="probe-6--the-json-api-itself-is-not-cloudflare-gated">Probe 6 —
+the JSON API itself is NOT Cloudflare-gated</h3>
+<pre><code>curl -s -o /dev/null -w &quot;http_code=%{http_code}&quot; &quot;.../api/get-torrents?limit=1&amp;imdb_id=0944947&quot;  → http_code=200</code></pre>
+<p><strong>FACT:</strong> <code>/api/get-torrents</code> returns 200
+anonymously (no CF challenge). Only the HTML site surface is gated. So
+the JSON <code>imdb_id</code> path is the only anonymous, machine-usable
+surface.</p>
+<h3 id="probe-8--9--anonymous-no-key-titleimdb-resolver-exists">Probe 8
++ 9 — anonymous, no-key title→IMDb resolver EXISTS</h3>
+<pre><code>curl -s -A &quot;Mozilla/5.0&quot; &quot;https://v3.sg.media-imdb.com/suggestion/x/game%20of%20thrones.json&quot;</code></pre>
+<p>Parsed (<code>tt</code>-prefixed entries):</p>
+<pre><code>tt0944947  | Game of Thrones          | TV series | 2011
+tt11198330 | House of the Dragon      | TV series | 2022
+tt2653350  | Game of Thrones: Costumes| video     | 2011</code></pre>
+<p><strong>FACT:</strong> IMDb's public suggestion endpoint
+<code>https://v3.sg.media-imdb.com/suggestion/x/&lt;query&gt;.json</code>
+returns title→<code>ttXXXXXXX</code> mappings <strong>with no API key
+and no auth</strong> (just a browser UA). It is the autocomplete backend
+of imdb.com. It distinguishes <code>q:"TV series"</code> from
+films/videos, which lets us pick the TV entry EZTV actually carries.
+(Contrast: OMDb and TMDb both require an API key → would violate the
+anonymous/no-credentials property of curated providers, so they are
+rejected.)</p>
+<h3
+id="probe-10--12--full-chain-works-mechanically-but-has-a-false-match-defect">Probe
+10 + 12 — full chain works mechanically, but has a FALSE-MATCH
+defect</h3>
+<pre><code># Game of Thrones: tt0944947 → strip tt → 0944947 → EZTV 146 rows, all &quot;Game of Thrones&quot;. CORRECT.
+
+# Breaking Bad:
+W=$(curl ... suggestion .../breaking%20bad.json | pick first TV-series tt)   → tt0903747
+curl &quot;.../get-torrents?limit=2&amp;imdb_id=0903747&quot;
+  → &quot;torrents_count&quot;:77
+  → &quot;title&quot;:&quot;Breaking Brad S02E02 ... EZTV&quot;
+  → &quot;title&quot;:&quot;Breaking Brad S09E02 ... EZTV&quot;</code></pre>
+<p><strong>FACT — IMPORTANT DEFECT:</strong> The IMDb-suggest top "TV
+series" hit for "breaking bad" resolved to <code>tt0903747</code>, and
+EZTV returned <strong>77 rows titled "Breaking <em>Brad</em>" — a
+different show</strong>, not "Breaking Bad". Two non-exclusive
+explanations, neither yet isolated:</p>
+<ul>
+<li><code>UNCONFIRMED:</code> the IMDb suggest API returned a
+wrong/ambiguous id for the bare query "breaking bad" (the canonical
+Breaking Bad id is <code>tt0903747</code> per common knowledge, so the
+id may be right and EZTV's per-row <code>imdb_id</code> tagging may be
+wrong);</li>
+<li><code>UNCONFIRMED:</code> EZTV's per-torrent <code>imdb_id</code>
+field is operator-supplied and sometimes mis-tagged, so an
+<code>imdb_id</code> query can surface mislabeled rows.</li>
+</ul>
+<p>The honesty consequence is the same regardless of cause: <strong>the
+title→imdb→get-torrents chain can return results that do not match the
+user's typed title.</strong> This is a §6.E/§6.L risk surface that any
+shipped implementation MUST mitigate (e.g. post-filter returned rows by
+fuzzy title match against the query, and/or pin to a curated id map
+rather than live-resolving).</p>
+<h3
+id="probe-13--replacement-candidate-torrents-csv-has-genuine-free-text-search-re-confirm">Probe
+13 — replacement candidate <code>torrents-csv</code> has genuine
+free-text search (re-confirm)</h3>
+<pre><code>curl -s &quot;https://torrents-csv.com/service/search?q=batman&amp;size=2&quot;
+  → {&quot;torrents&quot;:[{&quot;infohash&quot;:&quot;0c23e50e...&quot;,&quot;name&quot;:&quot;The Batman (2022) [1080p] [WEBRip] [5.1] [YTS.MX]&quot;,&quot;seeders&quot;:357,...},{...}]}</code></pre>
+<p><strong>FACT:</strong>
+<code>torrents-csv.com/service/search?q=</code> genuinely filters by
+free text (batman → "The Batman (2022)", with real seeder counts),
+anonymously, JSON, no key. This is the already-shipped 2nd curated
+provider in lava-api-go.</p>
+<hr />
+<h2 id="2-findings-table">2. Findings table</h2>
+<table>
+<thead>
+<tr>
+<th>Endpoint / approach</th>
+<th>Anonymous?</th>
+<th>Cloudflare-gated?</th>
+<th>Genuinely filters by free-text title?</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /api/get-torrents?keywords=&lt;q&gt;</code></td>
+<td>Yes</td>
+<td>No (200)</td>
+<td><strong>NO</strong> — param ignored</td>
+<td>Probe 1/2: <code>ironman</code> and <code>batman</code> both return
+count 1055208 + identical first row</td>
+</tr>
+<tr>
+<td><code>GET /api/get-torrents?q=&lt;q&gt;</code></td>
+<td>Yes</td>
+<td>No</td>
+<td><strong>NO</strong> — ignored</td>
+<td>Probe 7: count 1055208</td>
+</tr>
+<tr>
+<td><code>GET /api/get-torrents?search=&lt;q&gt;</code></td>
+<td>Yes</td>
+<td>No</td>
+<td><strong>NO</strong> — ignored</td>
+<td>Probe 7: count 1055208</td>
+</tr>
+<tr>
+<td><code>GET /api/get-torrents?imdb_id=&lt;padded7&gt;</code></td>
+<td>Yes</td>
+<td>No (200)</td>
+<td><strong>Partial</strong> — filters by IMDb id, NOT free text;
+TV-only; needs zero-pad; can mis-match</td>
+<td>Probe 3/4/11/12</td>
+</tr>
+<tr>
+<td><code>GET /search/&lt;query&gt;</code> (HTML)</td>
+<td>No (needs CF solve)</td>
+<td><strong>YES — 403 <code>cf-mitigated: challenge</code></strong></td>
+<td>n/a (blocked)</td>
+<td>Probe 5: 403, "Just a moment", 0 hits in body</td>
+</tr>
+<tr>
+<td>IMDb suggest
+<code>v3.sg.media-imdb.com/suggestion/x/&lt;q&gt;.json</code></td>
+<td>Yes (no key)</td>
+<td>No</td>
+<td>title→<code>tt</code> id (resolver only, not a tracker)</td>
+<td>Probe 8/9</td>
+</tr>
+<tr>
+<td><strong>Chain:</strong> IMDb-suggest → strip <code>tt</code> →
+<code>imdb_id=</code></td>
+<td>Yes</td>
+<td>No</td>
+<td><strong>Approximate</strong> — works for GoT; FALSE-MATCHED
+"breaking bad"→"Breaking Brad"</td>
+<td>Probe 10/12</td>
+</tr>
+<tr>
+<td>Jackett's own EZTV definition (<code>eztv.yml</code>)</td>
+<td>—</td>
+<td>—</td>
+<td>Scrapes the <strong>HTML <code>search/&lt;kw&gt;</code>
+page</strong> (the CF-gated one)</td>
+<td>§3 below</td>
+</tr>
+<tr>
+<td><code>torrents-csv.com/service/search?q=</code> (replacement)</td>
+<td>Yes (no key)</td>
+<td>No</td>
+<td><strong>YES</strong></td>
+<td>Probe 13</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-how-mature-integrations-jackett-do-eztv-title-search">3. How
+mature integrations (Jackett) do EZTV title search</h2>
+<p>Jackett's current EZTV indexer is a <strong>Cardigann YAML
+definition</strong>, not the JSON API. Fetched live from
+<code>https://raw.githubusercontent.com/Jackett/Jackett/master/src/Jackett.Common/Definitions/eztv.yml</code>:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">caps</span><span class="kw">:</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">modes</span><span class="kw">:</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">search</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">q</span><span class="kw">]</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tv-search</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">q</span><span class="kw">,</span><span class="at"> season</span><span class="kw">,</span><span class="at"> ep</span><span class="kw">]</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">search</span><span class="kw">:</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">paths</span><span class="kw">:</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;{{ if .Keywords }}search/{{ .Keywords }}{{ else }}home{{ end }}&quot;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">keywordsfilters</span><span class="kw">:</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> re_replace</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">args</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;</span><span class="sc">\\</span><span class="st">bS</span><span class="sc">\\</span><span class="st">d{2,3}</span><span class="sc">\\</span><span class="st">b&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;&quot;</span><span class="kw">]</span><span class="co">   # strip season tag — search doesn&#39;t support it</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> trim</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> replace</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">args</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;-&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;&quot;</span><span class="kw">]</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> replace</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">args</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot; &quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;-&quot;</span><span class="kw">]</span><span class="co">                # spaces → hyphens</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> replace</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">args</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;&amp;&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;&quot;</span><span class="kw">]</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">headers</span><span class="kw">:</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">cookie</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;sort_no=100; q_filter=all; ... layout=def_wlinks&quot;</span><span class="kw">]</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">rows</span><span class="kw">:</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">selector</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;table.forum_header_border:contains(&#39;Latest&#39;) tr[name=&#39;hover&#39;]... :has(a.magnet), ...:contains(&#39;Releases&#39;)...&quot;</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">filters</span><span class="kw">:</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> andmatch</span><span class="co">        # client-side AND-match of keyword terms against parsed rows</span></span></code></pre></div>
+<p><strong>FACT:</strong> Jackett does <strong>NOT</strong> use the JSON
+API for EZTV search and does <strong>NOT</strong> use
+<code>imdb_id</code>. It requests the <strong>HTML page</strong>
+<code>https://&lt;eztv-mirror&gt;/search/&lt;hyphenated-keywords&gt;</code>,
+parses the results <code>&lt;table&gt;</code> rows, and applies a
+client-side <code>andmatch</code> keyword filter on the parsed titles.
+EZTV's own search "doesn't support" season tags (Jackett strips them),
+confirming EZTV HTML search is a crude substring-on-title match.</p>
+<p><strong>Consequence for lava-api-go:</strong> Jackett's path is
+exactly the surface Probe 5 proved is <strong>Cloudflare-challenge-gated
+(403)</strong> for an anonymous HTTP client. Jackett works because it
+(a) runs with a configurable FlareSolverr/Cloudflare-bypass proxy and/or
+per-user mirror selection, and (b) is a user-hosted app, not an
+anonymous server-side scraper. lava-api-go curated providers are
+anonymous, no-bypass, server-side Go HTTP — they cannot reproduce
+Jackett's path honestly. <code>UNCONFIRMED:</code> whether specific
+listed mirrors (<code>eztv.wf</code>, <code>eztv.tf</code>,
+<code>eztv.yt</code>, <code>eztv1.xyz</code>) are un-gated; the primary
+<code>eztvx.to</code> is gated. Mirror-roulette is not a stable basis
+for a shipped capability.</p>
+<hr />
+<h2 id="4-titleimdb-resolver-evaluation-task-3">4. Title→IMDb resolver
+evaluation (task 3)</h2>
+<ul>
+<li><strong>IMDb suggest API</strong>
+(<code>v3.sg.media-imdb.com/suggestion/x/&lt;q&gt;.json</code>):
+anonymous, no key, returns title→<code>tt</code> id + media-type.
+<strong>Viable as a resolver.</strong> Risks: (a) it is an undocumented
+endpoint that could change/rate-limit without notice
+(<code>UNCONFIRMED:</code> long-term stability); (b) ambiguous queries
+resolve to the wrong id (Probe 12 "breaking bad"→"Breaking Brad" false
+match); (c) adds an extra network hop + external dependency into every
+EZTV search.</li>
+<li><strong>OMDb / TMDb:</strong> both require an API key →
+<strong>REJECTED</strong> — violates the anonymous/no-credentials
+property that defines a curated provider in this project (§6.H
+credential-inviolability + the curated-provider design contract).</li>
+<li><strong>Net:</strong> a key-free resolver exists, but the chain's
+free-text fidelity is only <em>approximate</em> and demonstrably wrong
+for at least one common query. Shipping it as a free-text
+<code>CapSearch</code> would be borderline-bluff under §6.E unless
+paired with a strict post-filter (returned-row title must fuzzy-match
+the user query) — and even then it cannot find shows EZTV failed to
+imdb-tag.</li>
+</ul>
+<hr />
+<h2 id="5-recommendation">5. RECOMMENDATION</h2>
+<p><strong>Primary: <code>[skip EZTV]</code> as a free-text-search
+curated provider.</strong></p>
+<p>Rationale (all captured, not surmised):</p>
+<ol type="1">
+<li>EZTV's JSON API has <strong>no working free-text param</strong> —
+<code>keywords</code>, <code>q</code>, <code>search</code> are all
+silently ignored (Probe 1/2/7). Declaring a free-text SEARCH capability
+against it is the exact §6.E/§6.L "search ignores the query" bluff that
+is STRICTLY FORBIDDEN here.</li>
+<li>The only genuine HTML title-search surface is <strong>hard
+Cloudflare-challenge-gated (HTTP 403,
+<code>cf-mitigated: challenge</code>)</strong> for anonymous clients
+(Probe 5) — the same surface Jackett uses, which is why Jackett needs a
+CF-bypass and a user host. lava-api-go anonymous server-side Go cannot
+replicate it honestly.</li>
+<li>The <code>imdb_id</code> workaround is <strong>not free-text
+search</strong>: it is TV-only, zero-pad-sensitive, requires an external
+IMDb-suggest hop, and <strong>produced a false match</strong> ("breaking
+bad" → "Breaking Brad", Probe 12). It cannot honestly back a free-text
+<code>CapSearch</code>.</li>
+</ol>
+<p><strong>Strongest single piece of evidence for the
+recommendation:</strong> Probe 1/2 — <code>keywords=ironman</code> and
+<code>keywords=batman</code> return the <strong>byte-identical</strong>
+global list (<code>torrents_count:1055208</code>, first row "Iron Man
+and His Awesome Friends" for <em>both</em> queries). The query has zero
+effect on the JSON API output. Any free-text SEARCH capability declared
+against this endpoint is provably non-functional, i.e. a constitutional
+bluff.</p>
+<h3 id="acceptable-honest-alternatives-in-priority-order">Acceptable
+honest alternatives, in priority order</h3>
+<ul>
+<li><strong>(A)
+<code>[replace EZTV with another free-text JSON tracker]</code> —
+RECOMMENDED concrete action.</strong> The already-probed,
+already-shipped <code>torrents-csv.com/service/search?q=</code> (Probe
+13) and apibay.org (The Pirate Bay) both have genuine anonymous key-free
+free-text JSON search and <strong>already cover TV content</strong>
+(Probe 13's batman result set includes TV-style releases). EZTV adds no
+honest free-text capability the existing two providers lack. Net: do not
+add EZTV; the curated set's free-text search is already satisfied by TPB
++ torrents-csv.</li>
+<li><strong>(B)
+<code>[ship EZTV honestly with imdb-id-only, no free-text CapSearch]</code>
+— only if a <em>browse/by-show</em> capability is explicitly
+wanted.</strong> EZTV could be exposed as an <strong>IMDb-id / by-show
+browse</strong> provider that does NOT declare free-text
+<code>CapSearch</code>. The <code>imdb_id</code> filter is genuine
+(Probe 4: 146 real GoT rows). This is honest <em>only</em> if the
+capability surfaced to the user is "browse a show by its IMDb id", not
+"free-text search". It would still require: zero-padding the id, and (if
+title-driven) a strict post-filter on returned-row titles to defend
+against the Probe-12 false-match class. This is more wiring for a
+narrower, non-free-text capability — recommend only on explicit product
+demand.</li>
+<li><strong>(C) <code>[ship EZTV honestly with HTML-search parse]</code>
+— REJECTED.</strong> Blocked by Cloudflare (Probe 5). Would require a
+CF-bypass dependency, violating the anonymous/no-credentials
+curated-provider contract. Do not pursue.</li>
+</ul>
+<p><strong>Bottom line:</strong> Nothing on EZTV gives anonymous,
+server-side, genuine free-text title search. Recommend <strong>skipping
+EZTV</strong> and relying on the two providers that already have honest
+free-text JSON search (The Pirate Bay + Torrents-CSV). If a by-show
+capability is later wanted, option (B) (imdb-id browse, no free-text
+CapSearch, with title post-filter) is the only honest EZTV path.</p>
+</body>
+</html>

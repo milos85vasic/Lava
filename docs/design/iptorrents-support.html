@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>iptorrents-support</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="design-iptorrents-support-via-the-jackett-sidecar--flaresolverr">Design:
+IPTorrents support (via the Jackett sidecar + FlareSolverr)</h1>
+<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
+2026-06-08T00:00:00Z <strong>Status:</strong> design proposal
+<strong>Classification:</strong> project-specific</p>
+<blockquote>
+<p>IPTorrents is one of the operator's 4 required trackers and is
+<strong>not yet supported</strong>. It is a <strong>private English
+tracker behind Cloudflare</strong>.</p>
+</blockquote>
+<h2
+id="1-why-a-native-kotlin-provider-cannot-honestly-support-iptorrents-today">1.
+Why a NATIVE Kotlin provider cannot honestly support IPTorrents
+today</h2>
+<p>The Lava tracker SDK's providers use <strong>OkHttp + Jsoup</strong>
+(plain HTTP client + HTML parser). IPTorrents gates every request behind
+<strong>Cloudflare's JS/Turnstile challenge</strong>, which a plain HTTP
+client cannot pass — it requires a real browser engine to execute the
+challenge JS and obtain the clearance cookie.</p>
+<p>Two hard consequences (stated as fact, not guess — §11.4.6):</p>
+<ol type="1">
+<li><strong>No reachable HTML to parse.</strong> From an OkHttp client
+the IPTorrents pages return the Cloudflare interstitial, not the tracker
+HTML. The dossier (<code>docs/qa/jackett-local-stack-research.md</code>)
+documents FlareSolverr as the required Cloudflare-bypass for exactly
+this class of tracker.</li>
+<li><strong>Parsers would be guesses.</strong> Writing
+<code>IPTorrentsSearchParser</code>/<code>…TopicParser</code> without
+real, reachable fixture HTML means hand-fabricating selectors against
+HTML we cannot fetch — a <strong>§11.4 PASS-bluff by
+construction</strong> (tests would assert against invented HTML, proving
+nothing about the real site). This is forbidden.</li>
+</ol>
+<p>Therefore a native provider is <strong>not</strong> the honest
+path.</p>
+<h2
+id="2-recommended-path--iptorrents-via-the-jackett-sidecar--flaresolverr">2.
+Recommended path — IPTorrents via the Jackett sidecar +
+FlareSolverr</h2>
+<p>Jackett already ships an <strong>IPTorrents Cardigann
+definition</strong> and drives <strong>FlareSolverr</strong> to clear
+the Cloudflare challenge. Lava already speaks Jackett's
+<strong>Torznab</strong> API via <code>lava-api-go</code>
+(<code>internal/jackett</code> client + <code>GET /jackett/search</code>
+route, landed <code>05ecd014</code>). So IPTorrents is reachable through
+the existing sidecar with <strong>no new HTML parser</strong>:</p>
+<pre class="mermaid"><code>flowchart LR
+    App[&quot;Lava Android app&quot;] --&gt;|&quot;search&quot;| API[&quot;lava-api-go&lt;br/&gt;GET /jackett/search?indexer=iptorrents&quot;]
+    API --&gt;|&quot;Torznab HTTP + apikey&quot;| J[&quot;Jackett sidecar&lt;br/&gt;(IPTorrents Cardigann def)&quot;]
+    J --&gt;|&quot;Cloudflare challenge&quot;| FS[&quot;FlareSolverr&lt;br/&gt;(headless browser)&quot;]
+    FS --&gt;|&quot;clearance cookie&quot;| J
+    J --&gt;|&quot;authenticated request&quot;| IPT[&quot;IPTorrents.com&quot;]
+    IPT --&gt;|&quot;results HTML&quot;| J
+    J --&gt;|&quot;Torznab RSS:&lt;br/&gt;enclosure .torrent + magneturl + infohash&quot;| API
+    API --&gt;|&quot;SearchResult JSON&quot;| App</code></pre>
+<p>The app sees <strong>one endpoint</strong>
+(<code>lava-api-go</code>); Jackett + FlareSolverr + the IPTorrents
+credentials all stay server-side in the local stack.</p>
+<h2 id="3-lava-side-work-this-needs">3. Lava-side work this needs</h2>
+<ol type="1">
+<li><strong>Jackett-backed provider surface.</strong> A
+<code>TrackerDescriptor</code> for IPTorrents whose data routes through
+<code>lava-api-go</code>'s Torznab proxy rather than a native HTML
+client. Two options:
+<ul>
+<li>(a) <strong>Server-only</strong>: IPTorrents exists only as a
+Jackett indexer; the app reaches it via the
+<code>/jackett/search?indexer=iptorrents</code> route — no Lava
+<code>core/tracker/iptorrents</code> module at all.</li>
+<li>(b) <strong>Thin descriptor</strong>: a minimal
+<code>core/tracker/iptorrents</code> descriptor (authType=FORM_LOGIN,
+capabilities SEARCH+TORRENT_DOWNLOAD+MAGNET_LINK,
+<code>apiSupported=true</code>) whose <code>TrackerClient</code>
+delegates <code>search</code>/<code>download</code>/<code>magnet</code>
+to the Jackett route — so it appears in the provider list and reuses the
+app's existing search UI. <strong>Recommended</strong> for UX
+parity.</li>
+</ul></li>
+<li><strong>Credentials (§6.H).</strong> IPTorrents username/password go
+into <strong>Jackett's gitignored <code>/config</code> volume</strong>
+(where Jackett stores per-indexer creds), never into Lava source or the
+app. The operator-provided creds are already staged in the gitignored
+<code>.env</code>
+(<code>IPTORRENTS_USERNAME</code>/<code>IPTORRENTS_PASSWORD</code>) for
+the eventual Jackett-config automation.</li>
+<li><strong>FlareSolverr profile.</strong> Enable the
+<code>cloudflare</code> compose profile
+(<code>docker-compose.jackett.yml</code>) so FlareSolverr runs alongside
+Jackett (RAM-heavy headless Chromium — off by default, on for Cloudflare
+trackers).</li>
+<li><strong>Per-provider verification (§6.G).</strong> A real-stack test
+that, with the sidecar running, does
+<code>GET /jackett/search?indexer=iptorrents&amp;q=&lt;query&gt;</code>
+and asserts a real result carrying a valid <code>.torrent</code>
+enclosure URL and/or <code>magneturl</code>/<code>infohash</code> —
+validated by the same <code>lava.common.torrent</code> validators / the
+Go Torznab parser. Honest SKIP when the sidecar isn't running (§11.4.3).
+This is the IPTorrents analogue of the rutor crown-jewel proof.</li>
+</ol>
+<h2
+id="4-alternative-considered--native-provider--embedded-flaresolverr-call-from-kotlin">4.
+Alternative considered — native provider + embedded FlareSolverr call
+from Kotlin</h2>
+<p>Rejected. It would couple the Android APK (or a per-provider
+extension) to a running FlareSolverr service anyway (headless browser
+can't ship in the APK), is heavier than the sidecar, duplicates what
+Jackett already does (Cardigann def + FlareSolverr orchestration), and
+still cannot run fully on-device. The sidecar path reuses Jackett's
+maintained IPTorrents definition and keeps the Cloudflare complexity
+server-side.</p>
+<h2 id="5-recommendation">5. Recommendation</h2>
+<p><strong>IPTorrents = Jackett-backed (option 3b: thin descriptor
+delegating to the <code>/jackett/search</code> route), with FlareSolverr
+enabled.</strong> It is the only honest, testable path (real Torznab
+results, real <code>.torrent</code>/magnet, validatable evidence) given
+Cloudflare — and it generalizes to the other ~500 Jackett indexers for
+free.</p>
+<h2 id="sources-verified">Sources verified</h2>
+<ul>
+<li><code>docs/qa/jackett-local-stack-research.md</code> (FlareSolverr
+required for IPTorrents' Cloudflare; GPL-2.0; multi-arch image).</li>
+<li><code>lava-api-go/internal/jackett/</code> +
+<code>internal/handlers/v1/jackett.go</code> +
+<code>internal/router/router.go</code>
+<ul>
+<li><code>internal/config/config.go</code> (the Torznab client +
+<code>/jackett/search</code> route, landed <code>05ecd014</code>).</li>
+</ul></li>
+<li><code>tools/lava-containers/docker-compose.jackett.yml</code>
+(jackett + flaresolverr <code>cloudflare</code> profile).</li>
+<li><code>core/tracker/api/{TrackerDescriptor,TrackerCapability,AuthType}.kt</code>
+(the descriptor surface).</li>
+</ul>
+</body>
+</html>

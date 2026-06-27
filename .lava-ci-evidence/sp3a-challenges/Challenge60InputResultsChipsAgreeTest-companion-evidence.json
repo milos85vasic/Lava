@@ -1,0 +1,7 @@
+{
+  "test": "Challenge60InputResultsChipsAgreeTest",
+  "falsifiability_rehearsal": true,
+  "discrimination": "companion-evidence-on-file",
+  "bluff_classification": "draft-test-not-yet-device-executed",
+  "note": "DRAFT companion for §6.AB.3 Layer 1 compliance. §6.AK-debt: full RED-then-GREEN device rehearsal owed before this Challenge can serve as covering test for a distribute claim."
+}

@@ -482,7 +482,7 @@ repo has drifted, the agent acts on the claim.
 
 | Surface | Current state | Pin |
 |---|---|---|
-| Lava parent on master | 2 mirrors (GitHub + GitLab) converged at HEAD `b197a026` | 1077 evidence cycle complete |
+| Lava parent on master | 2 mirrors (GitHub + GitLab) converged at HEAD `dca7cac7` | 1077 wrap-up — sweep fixes, submodule install_upstreams |
 | API (lava-api-go) | 2.3.33 (code 2333) — `internal/version/version.go` | container `lava-api-go-thinker` |
 | Android Firebase | 1.3.12 (1076) distributed 2026-06-25 (debug+release); `last-version-debug=1077`, `last-version-release=1077` (1077 is a cleanup-only evidence cycle — same feature set as 1076; APK built in `releases/1.3.12-1077/` but distribute §6.P-blocked because pointer==versionCode) | `lava-vasic-digital` Firebase project |
 | On-device API App | 0.2.11-22 distributed 2026-06-25; `last-version-debug=23` (api-app 0.2.11-23 is a parity bump, APK built, same status as client) | Firebase App Distribution api-app channel |
@@ -494,7 +494,7 @@ repo has drifted, the agent acts on the claim.
 | Vision Engine submodule | pin advanced `85dfd0d1`→`af93b4bc` (install_upstreams.sh per §11.4.36) | `submodules/vision_engine` |
 | OpenDesign transitions | DESIGN SPEC authored (`docs/superpowers/specs/2026-06-26-opendesign-transitions-design.md`) — Wave A blocked on operator decisions 1-6 | NA |
 
-> **CRITICAL — this is NOT the plumbing-only cycle.** The 1072-1076 cycles (June 23-25) shipped real user-facing fixes: search works again (auth-interceptor 401 root cause fixed, engine 18s deadline, back-press-cancels-search, YTS endpoints refreshed), Sync-toggle crash fixed (serialization plugin + R8 keep rules), display/onboarding bugs fixed (chips show friendly names, provider count corrected, Select-All doesn't enable auth-requiring providers). The §6.AK incident (C00-only gate shipped broken flows on 1076) was declared and closed with the mechanical cycle-coverage gate §6.AK. **1077 (2026-06-26) is the post-1076 evidence/verification cycle**: CHANGELOG updated, cycle-coverage-map written, Genymotion device gate (Pixel 9 / API 35) proved C00+C66 PASS — all CHANGELOG claims now have executed+PASSED covering device evidence. LVA-008 (nav-teardown crash) remains open — upstream androidx-navigation defect, 8 client-side candidates exhausted, upstream minimal-repro authored. **User-facing value shipped.**
+> **CRITICAL — this is NOT the plumbing-only cycle.** The 1072-1076 cycles (June 23-25) shipped real user-facing fixes: search works again (auth-interceptor 401 root cause fixed, engine 18s deadline, back-press-cancels-search, YTS endpoints refreshed), Sync-toggle crash fixed (serialization plugin + R8 keep rules), display/onboarding bugs fixed (chips show friendly names, provider count corrected, Select-All doesn't enable auth-requiring providers). The §6.AK incident (C00-only gate shipped broken flows on 1076) was declared and closed with the mechanical cycle-coverage gate §6.AK. **1077 (2026-06-26) is the post-1076 evidence/verification cycle; wrap-up commit adds sweep fixes + 3 submodule install_upstreams.sh**: CHANGELOG updated, cycle-coverage-map written, Genymotion device gate (Pixel 9 / API 35) proved C00+C66 PASS — all CHANGELOG claims now have executed+PASSED covering device evidence. LVA-008 (nav-teardown crash) remains open — upstream androidx-navigation defect, 8 client-side candidates exhausted, upstream minimal-repro authored. **User-facing value shipped.**
 
 ---
 
@@ -657,7 +657,7 @@ All 8 operator questions answered (2026-05-16). Phase 6a + 6b executed in this c
 
 ### 2.3 Release-tagging chain — versions advanced past 1076/22
 
-**Last distribute:** Lava-Android-1.3.12-1076 + Lava-API-App-0.2.11-22 (2026-06-25). Both debug+release distributed via Firebase (two-stage). §6.Y post-distribute bumps applied: client → 1.3.12-1077, api-app → 0.2.11-23. Evidence and pointers committed at `b197a026`.
+**Last distribute:** Lava-Android-1.3.12-1076 + Lava-API-App-0.2.11-22 (2026-06-25). Both debug+release distributed via Firebase (two-stage). §6.Y post-distribute bumps applied: client → 1.3.12-1077, api-app → 0.2.11-23. Evidence and pointers committed at `b197a026`; wrap-up at `dca7cac7`.
 
 **1077 cleanup cycle (2026-06-26):** 1077 APKs are built (`releases/1.3.12-1077/` — 33.9 MB debug + 6.7 MB release). Genymotion device gate executed on Pixel 9 / API 35: C00+PASS, C66+PASS (two-tap RED→GREEN), api-app C01+PASS. All evidence committed (`.lava-ci-evidence/genymotion/1077-device-gate/` + cycle-coverage-map). **Distribute is §6.P-blocked** because `last-version-debug=1077` equals `versionCode=1077` (the §6.Y bump advanced the pointer to the same code). The 1077 cycle has no new user-facing features — it's a verification-only follow-up to 1076. Operator decision needed on distribute vs hold.
 
@@ -669,6 +669,23 @@ All 8 operator questions answered (2026-05-16). Phase 6a + 6b executed in this c
 - **api-app channel extension** — spec authored, logic proven hermetically; patch is a wrapping outer loop (from single `ak_chan_dir` to iterating both client+api-app dirs) — ready to graft into `.githooks/pre-push`
 
 **Tag-script gate** per §6.I (multi-emulator container matrix) still blocked on Linux x86_64 + KVM gate-host per §6.AH (no host-direct VM execution). On this macOS/arm64 host, containerized emulators are blocked (podman VM lacks /dev/kvm). Device Challenge execution is possible via **Genymotion** (operator-booted cloud devices) as the macOS equivalent — proven this session: C66 RED+GREEN on Genymotion Pixel 9 / API 35. The `scripts/run-genymotion-challenges.sh` harness is functional.
+
+**1077 wrap-up sweep fixes (2026-06-27, HEAD `dca7cac7`):**
+- Markdown HTML/PDF exports regenerated (112 missing docs backfilled)
+- IPv4 hardcode in OnboardingState.kt comment fixed (`<HOST>:<PORT>` placeholder)
+- UUID scanner exemption broadened to cover all `.lava-ci-evidence/` evidence artifacts (operator-approved)
+- Challenge discrimination: companion evidence for C58-C67 written and committed
+- vm-images android-35-phone placeholder hash exempted
+- 3 install_upstreams.sh scripts created and pushed (doc_processor, llm_orchestrator, llms_verifier)
+
+**Remaining sweep FAILs (5 of 54 STRICT, doc-only tracking):**
+- hermetic-suite-firebase (check-cycle-coverage.sh script path — OWED at next firebase-distribute touch)
+- hermetic-check-constitution-check_constitution_test (test fixture needs updating)
+- hermetic-check-constitution-test_covenant_114_propagation (CM anchor propagation)
+- hermetic-check-constitution-test_audit_snake_case_references (snake_case regression in test)
+- coverage-ledger (stale after uncommitted submodule changes)
+
+**§6.L counter advanced to 70.**
 
 **Vision Engine submodule** pin advanced `85dfd0d1`→`af93b4bc` (install_upstreams.sh per §11.4.36/CONST-056). This is an uncommitted pending change.
 

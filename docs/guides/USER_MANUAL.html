@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>USER_MANUAL</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="lava-client--user-manual">Lava Client — User Manual</h1>
+<blockquote>
+<p>A task-by-task guide to the Lava Android client, derived from the
+actual feature modules and screens in the repository. UI labels quoted
+below are taken from the real Compose screens / string resources (source
+files named per section). Anything not verifiable from the repo is
+marked <code>UNCONFIRMED:</code>.</p>
+<p><code>Classification:</code> project-specific.</p>
+</blockquote>
+<h2 id="what-lava-is">What Lava is</h2>
+<p>Lava is an unofficial Android client for popular Russian torrent
+trackers. It ships with a pluggable Tracker SDK that supports multiple
+content providers (see <a href="#supported-providers">Supported
+providers</a>). You search and browse trackers, view topic detail and
+comments, download <code>.torrent</code> files or open magnet links, and
+manage favorites, bookmarks, and history — all from one app. (Source: <a
+href="../../README.md"><code>README.md</code></a>.)</p>
+<p>A companion <strong>Lava API</strong> service does the actual
+scraping and exposes a JSON API to the app. You can connect the client
+to a Lava API on your local network, a cloud/remote server, or one
+running <strong>on this very device</strong> — see <a
+href="#on-device-api">On-device API</a>.</p>
+<h2 id="supported-providers">Supported providers</h2>
+<p>Six providers are wired through the Tracker SDK. Verified from each
+provider's <code>TrackerDescriptor</code> under
+<code>core/tracker/&lt;id&gt;/</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Provider (display name)</th>
+<th>Tracker id</th>
+<th>Auth type</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RuTracker.org</td>
+<td><code>rutracker</code></td>
+<td><code>CAPTCHA_LOGIN</code></td>
+<td>Login + captcha (full capability set incl. forum, favorites,
+upload)</td>
+</tr>
+<tr>
+<td>RuTor.info</td>
+<td><code>rutor</code></td>
+<td><code>FORM_LOGIN</code></td>
+<td>Anonymous by default</td>
+</tr>
+<tr>
+<td>Internet Archive</td>
+<td><code>archiveorg</code></td>
+<td><code>NONE</code></td>
+<td>Anonymous — no credentials needed</td>
+</tr>
+<tr>
+<td>Project Gutenberg</td>
+<td><code>gutenberg</code></td>
+<td><code>NONE</code></td>
+<td>Anonymous — no credentials needed</td>
+</tr>
+<tr>
+<td>Kinozal.tv</td>
+<td><code>kinozal</code></td>
+<td><code>FORM_LOGIN</code></td>
+<td>Credentials</td>
+</tr>
+<tr>
+<td>NNM-Club</td>
+<td><code>nnmclub</code></td>
+<td><code>FORM_LOGIN</code></td>
+<td>Credentials</td>
+</tr>
+</tbody>
+</table>
+<p>Auth types come from <code>AuthType</code>
+(<code>core/tracker/api/.../AuthType.kt</code>): <code>NONE</code>,
+<code>FORM_LOGIN</code>, <code>CAPTCHA_LOGIN</code>, <code>OAUTH</code>,
+<code>API_KEY</code>. A <code>NONE</code> provider is always anonymous;
+a <code>FORM_LOGIN</code>/<code>CAPTCHA_LOGIN</code> provider that
+<code>supportsAnonymous</code> shows an anonymous toggle, otherwise it
+requires credentials (<code>TrackerDescriptor.kt</code> KDoc table).</p>
+<blockquote>
+<p><code>UNCONFIRMED:</code> the <code>README.md</code> "Supported
+trackers" table lists only RuTracker + RuTor (it dates to 1.2.0). The
+six descriptors above are present in the source tree today; the README
+table is stale relative to them.</p>
+</blockquote>
+<h2 id="install--setup">Install / setup</h2>
+<p>Lava is distributed to testers via <strong>Firebase App
+Distribution</strong> (the project's distribution channel per the §6.P /
+§6.Z release process and the distribute logs under
+<code>.lava-ci-evidence/distribute-changelog/</code>). You receive a
+Firebase invitation, accept it, and install the APK from the link.</p>
+<blockquote>
+<p><code>UNCONFIRMED:</code> <code>README.md</code> also shows Google
+Play / GitHub / RuStore badges for the client app. The active,
+repo-verified distribution path is Firebase App Distribution; whether
+the public store listings are live is not determinable from the
+repository.</p>
+</blockquote>
+<p>The client comes in two variants you can install side by side: a
+dev/debug build with the <code>.dev</code> application-id suffix and a
+release build. (Source: root <code>CLAUDE.md</code> commands
+section.)</p>
+<h3 id="on-device-api-install-no-play-store">On-device API install (no
+Play Store)</h3>
+<p>If you choose to run the API <strong>on this device</strong>, the
+client links to the separate <strong>Lava API app</strong>. From
+onboarding's "On this device" section (or <strong>Settings → Run the API
+on this device</strong>), the button reads <strong>"Install Lava API
+app"</strong> when it is not installed and <strong>"Open Lava API
+app"</strong> when it is (source: <a
+href="../../feature/onboarding/src/main/kotlin/lava/onboarding/steps/ApiSelectionStep.kt"><code>feature/onboarding/.../steps/ApiSelectionStep.kt</code></a>,
+lines 204-210). When not installed, the client uses a <strong>Firebase
+download fallback — there are no dead Play-Store links</strong> (source:
+<a href="../CONTINUATION.md"><code>docs/CONTINUATION.md</code></a>
+linking-feature entry, 2026-06-04).</p>
+<h2 id="onboarding">Onboarding</h2>
+<p>The onboarding flow is a stepped wizard (source: <a
+href="../../feature/onboarding/src/main/kotlin/lava/onboarding/OnboardingScreen.kt"><code>feature/onboarding/.../OnboardingScreen.kt</code></a>,
+steps
+<code>Welcome → ApiSelection → Providers → Configure → Summary</code>).</p>
+<ol type="1">
+<li><strong>Welcome</strong> — brand logo, the heading <strong>"Welcome
+to Lava"</strong>, a "<em>N</em> providers available" line, and a
+<strong>"Get Started"</strong> button. (Source:
+<code>WelcomeStep.kt</code>.)</li>
+<li><strong>Choose your API</strong> (<code>ApiSelectionStep</code>) —
+heading <strong>"Choose your API"</strong> with three sections (source:
+<code>ApiSelectionStep.kt</code>):
+<ul>
+<li><strong>On your network</strong> — auto-discovers Lava APIs over
+mDNS. Shows "Searching for APIs on your network…" while scanning, then
+"Found <em>N</em> API(s):" or "No APIs discovered on your network." Tap
+a discovered entry to run a connectivity probe; on success onboarding
+advances, on failure it shows "Could not reach this API: …" with a
+<strong>"Try again"</strong> button. A <strong>"Search again"</strong>
+button rescans.</li>
+<li><strong>On this device</strong> — <strong>"Install Lava API
+app"</strong> / <strong>"Open Lava API app"</strong> (see above).</li>
+<li><strong>Cloud / remote server</strong> — pick a preset or type a
+server address into the <strong>"Server address
+(https://host:port)"</strong> field and tap <strong>"Add
+server"</strong>.</li>
+</ul></li>
+<li><strong>Pick your providers</strong> (<code>ProvidersStep</code>) —
+heading <strong>"Pick your providers"</strong>, "Select one or more
+content providers to configure." Each provider row shows a colored dot,
+its display name, its auth type (e.g. "Form Login"), and a checkbox. The
+<strong>"Next"</strong> button is enabled once at least one is selected.
+(Source: <code>ProvidersStep.kt</code>.)</li>
+<li><strong>Configure</strong> — per-provider configuration (credentials
+/ anonymous toggle). See <a href="#provider-configuration">Provider
+configuration</a>.</li>
+<li><strong>Summary</strong> — review and finish.</li>
+</ol>
+<h2 id="provider-configuration">Provider configuration</h2>
+<p>Source: <a
+href="../../feature/provider_config/src/main/kotlin/lava/provider/config/ProviderConfigScreen.kt"><code>feature/provider_config/.../ProviderConfigScreen.kt</code></a>.</p>
+<p>The provider-config screen composes sections including a
+<strong>Sync</strong> section and — only when
+<code>descriptor.supportsAnonymous == true</code> — an
+<strong>Anonymous</strong> section toggle. Credentials for login-based
+providers are entered through the credentials / login screens (see <a
+href="#login">Login</a>).</p>
+<h2 id="search">Search</h2>
+<p>Source: <a
+href="../../feature/search_input/src/main/kotlin/lava/search/input/SearchInputScreen.kt"><code>feature/search_input/.../SearchInputScreen.kt</code></a>,
+<a
+href="../../feature/search_result/src/main/kotlin/lava/search/result/SearchResultScreen.kt"><code>feature/search_result/.../SearchResultScreen.kt</code></a>.</p>
+<ol type="1">
+<li>Open the search input. It shows a search field (the hint comes from
+the designsystem <code>designsystem_hint_search</code> string) with a
+clear (×) action.</li>
+<li>A <strong>provider chip bar</strong> (<code>ProviderChipBar</code>)
+lets you toggle which configured providers the search runs against.
+(Source: <code>SearchInputScreen.kt</code> lines 92-94.)</li>
+<li>Submit the query to see results in <code>SearchResultScreen</code>.
+Results carry a <strong>filter</strong> affordance and a category row
+that starts with <strong>"All"</strong> followed by per-category chips.
+(Source: <code>SearchResultScreen.kt</code>.)</li>
+<li>If a provider requires login for search, instead of a misleading
+"Nothing found" the results show a <strong>Login required</strong>
+empty-state with a <strong>Login</strong> button (SP-3.2 change; source
+comment in <code>SearchResultScreen.kt</code> lines 280-293).</li>
+</ol>
+<h2 id="browse--categories">Browse / categories</h2>
+<p>Source: <a
+href="../../feature/category/src/main/kotlin/lava/forum/category/CategoryScreen.kt"><code>feature/category/.../CategoryScreen.kt</code></a>,
+<a
+href="../../feature/forum/src/main/kotlin/lava/forum/ForumScreen.kt"><code>feature/forum/.../ForumScreen.kt</code></a>,
+<a
+href="../../feature/search_result/src/main/kotlin/lava/search/result/categories/CategorySelectionScreen.kt"><code>feature/search_result/.../categories/CategorySelectionScreen.kt</code></a>.</p>
+<p>Browse the tracker's category / forum tree. Category and forum
+entries render by name. If a forum requires login to browse/search, a
+<strong>"Login required"</strong> dialog appears with
+<strong>Login</strong> / cancel actions (source:
+<code>CategoryScreen.kt</code> lines 258-271).</p>
+<h2 id="view-a-topic--comments--download">View a topic + comments +
+download</h2>
+<p>Source: <a
+href="../../feature/topic/src/main/kotlin/lava/topic/TopicScreen.kt"><code>feature/topic/.../TopicScreen.kt</code></a>
+and <code>feature/topic/src/main/res/values/strings.xml</code>.</p>
+<p>The topic screen shows the topic title, poster image, and content,
+with a share action and a paginated comments list. Verified actions:</p>
+<ul>
+<li><strong>Magnet</strong> button (<code>topic_action_magnet</code> =
+"Magnet") — opens a magnet dialog with share / open / cancel actions.
+Shown only when the topic carries a non-blank magnet link.</li>
+<li><strong>Torrent</strong> button (<code>topic_action_torrent</code> =
+"Torrent") — downloads the <code>.torrent</code> file. If you are not
+authorized, a <strong>"Login required"</strong> dialog appears: <em>"To
+download the torrent file you need to be authorized. If you do not have
+an account you can use a magnet link."</em>
+(<code>topics_login_required_for_download</code>).</li>
+<li><strong>Download</strong> requires storage permission; if not
+granted, a rationale dialog <strong>"Grant access to storage?"</strong>
+is shown (<code>permission_write_storage_rationale_title</code>).</li>
+<li><strong>Add a comment</strong> — opens an "Add a comment" dialog
+with a "Write your message…" placeholder and send / cancel actions
+(<code>topic_add_comment_title</code> /
+<code>topic_add_comment_placeholder</code>). Writing comments requires
+authorization.</li>
+<li>A favorite toggle is available on the topic.</li>
+</ul>
+<h2 id="login">Login</h2>
+<p>Source: <a
+href="../../feature/login/src/main/kotlin/lava/login/LoginScreen.kt"><code>feature/login/.../LoginScreen.kt</code></a>,
+<a
+href="../../feature/login/src/main/kotlin/lava/login/ProviderLoginScreen.kt"><code>feature/login/.../ProviderLoginScreen.kt</code></a>.</p>
+<p>For providers with <code>FORM_LOGIN</code> or
+<code>CAPTCHA_LOGIN</code> auth, the login screens let you enter
+credentials (and, for RuTracker, solve a captcha). Anonymous-capable
+providers can be used without credentials. Credentials are stored
+securely and never logged (per §6.H — see <a
+href="../security/README.md"><code>docs/security/README.md</code></a>).</p>
+<blockquote>
+<p><code>UNCONFIRMED:</code> exact on-screen field labels for the login
+screens were not read line-by-line in this pass; the behavioral contract
+(form login vs. captcha vs. anonymous) is derived from the descriptors
+and <code>AuthType</code>.</p>
+</blockquote>
+<h2 id="favorites-bookmarks-history">Favorites, bookmarks, history</h2>
+<p>Sources: <a
+href="../../feature/favorites/src/main/kotlin/lava/favorites/FavoritesScreen.kt"><code>feature/favorites/.../FavoritesScreen.kt</code></a>,
+<a
+href="../../feature/bookmarks/src/main/kotlin/lava/forum/bookmarks/BookmarksScreen.kt"><code>feature/bookmarks/.../BookmarksScreen.kt</code></a>,
+<code>feature/visited/</code>.</p>
+<ul>
+<li><strong>Favorites</strong> — topics you have favorited (toggled from
+the topic screen).</li>
+<li><strong>Bookmarks</strong> — bookmarked forums/categories.</li>
+<li><strong>History (visited)</strong> — recently visited items.</li>
+</ul>
+<p>Each of these has its own periodic <strong>sync</strong> setting in
+the menu (see below), with configurable sync periods.</p>
+<h2 id="settings-menu">Settings menu</h2>
+<p>Source: <a
+href="../../feature/menu/src/main/kotlin/lava/menu/MenuScreen.kt"><code>feature/menu/.../MenuScreen.kt</code></a></p>
+<ul>
+<li><code>feature/menu/src/main/res/values/strings.xml</code>. Verified
+rows include:</li>
+</ul>
+<ul>
+<li><strong>Settings</strong> section: <strong>Theme</strong> selector;
+the connection/endpoint selection item; <strong>"Run the API on this
+device"</strong> row; <strong>"Provider Credentials"</strong>;
+per-feature sync periods (Favorites / Bookmarks / History /
+Credentials).</li>
+<li><strong>Data</strong> section: clear history, clear bookmarks, clear
+favorites.</li>
+<li><strong>Misc</strong> section: rights, privacy, contacts,
+<strong>About</strong>.</li>
+<li>A <strong>Sign out</strong> confirmation flow.</li>
+</ul>
+<h2 id="on-device-api">On-device API</h2>
+<p>The client can connect to a Lava API running on your own
+phone/tablet. See the dedicated guide: <a
+href="ON_DEVICE_API_USER_GUIDE.md"><code>docs/guides/ON_DEVICE_API_USER_GUIDE.md</code></a>
+(start/stop/restart, the access key/pairing, mDNS discovery, the
+persistent notification, privacy notes, and its own troubleshooting
+table). Not duplicated here.</p>
+<h2 id="tv-support">TV support</h2>
+<p>Lava ships a <code>TvActivity</code> (leanback) entry point alongside
+the phone/tablet <code>MainActivity</code> (source:
+<code>app/src/main/AndroidManifest.xml</code>,
+<code>&lt;activity android:name=".TvActivity"&gt;</code> with
+<code>LEANBACK_LAUNCHER</code>). The manifest declares
+<code>android.software.leanback</code> and
+<code>android.hardware.touchscreen</code> as <strong>not
+required</strong>, so the app installs on TV-class devices.</p>
+<h2 id="deep-links">Deep links</h2>
+<p>The manifest registers <code>rutracker.org</code> deep links for
+<code>viewtopic.php</code>, <code>viewforum.php</code>, and
+<code>tracker.php</code> (both <code>http</code> and
+<code>https</code>), so tapping a RuTracker URL can open it directly in
+Lava (source: <code>app/src/main/AndroidManifest.xml</code>
+<code>MainActivity</code> intent filter).</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>What to check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Onboarding can't find an API ("No APIs discovered")</td>
+<td>Ensure a Lava API is running on the same Wi-Fi and your router
+allows multicast; tap <strong>"Search again"</strong>. Or use
+<strong>Cloud / remote server</strong> (enter
+<code>https://host:port</code>) or <strong>On this device</strong>.
+(Source: <code>ApiSelectionStep.kt</code>.)</td>
+</tr>
+<tr>
+<td>"Could not reach this API" after selecting one</td>
+<td>The connectivity probe failed; tap <strong>"Try again"</strong> or
+pick a different API.</td>
+</tr>
+<tr>
+<td>Search shows <strong>Login required</strong></td>
+<td>The selected provider needs credentials for search/download — tap
+<strong>Login</strong> and sign in (RuTracker also needs a
+captcha).</td>
+</tr>
+<tr>
+<td><code>.torrent</code> download blocked / "Login required"</td>
+<td>Authorize the provider, or use the <strong>Magnet</strong> link
+instead (RuTracker download requires login).</td>
+</tr>
+<tr>
+<td>"Grant access to storage?" before download</td>
+<td>Grant the storage permission so the <code>.torrent</code> can be
+written to your download folder.</td>
+</tr>
+<tr>
+<td>Provider missing from the search chip bar</td>
+<td>Configure/enable it in onboarding or <strong>Provider
+Credentials</strong>; only configured providers appear.</td>
+</tr>
+<tr>
+<td>Cloud API returns 401</td>
+<td>The cloud server must register your client build's identity.
+(Source: <code>docs/CONTINUATION.md</code> "cloud-search auth lag" entry
+— a known operator-side step.)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="see-also">See also</h2>
+<ul>
+<li>Security posture: <a
+href="../security/README.md"><code>docs/security/README.md</code></a></li>
+<li>On-device API user guide: <a
+href="ON_DEVICE_API_USER_GUIDE.md"><code>docs/guides/ON_DEVICE_API_USER_GUIDE.md</code></a></li>
+<li>SDK developer guide (adding a provider): <a
+href="../sdk-developer-guide.md"><code>docs/sdk-developer-guide.md</code></a></li>
+<li>Architecture: <a
+href="../ARCHITECTURE.md"><code>docs/ARCHITECTURE.md</code></a></li>
+<li>Local network discovery: <a
+href="../LOCAL_NETWORK_DISCOVERY.md"><code>docs/LOCAL_NETWORK_DISCOVERY.md</code></a></li>
+</ul>
+</body>
+</html>

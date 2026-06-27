@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-12-embedded-curated-providers-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="defect-b--embedded-curated-indexer-providers-design">Defect B —
+Embedded Curated Indexer Providers (design)</h1>
+<p><strong>Date:</strong> 2026-06-12 <strong>Status:</strong> design
+(operator-approved approach: "curated Go providers first")
+<strong>Operator directive:</strong> "On device api app MUST have
+Jackett embedded same we have the API itself" + "Client app has only 4
+providers in onboarding wizard! We do support now many many more via
+Jackett!" <strong>Relationship to Defect A:</strong> Defect A (fixed in
+<code>0deb54e7</code>) made the client correctly fetch <em>whatever the
+api-app serves</em>. This (Defect B) makes the api-app <em>serve more
+than the ~7 natives</em> — without an external Jackett sidecar — so the
+on-device experience shows many providers.</p>
+<p><code>Classification:</code> project-specific.</p>
+<h2 id="1-problem">1. Problem</h2>
+<p>The on-device api-app (<code>digital.vasic.lava.api</code>) embeds
+<code>lava-api-go</code> as a c-shared <code>liblavaapi.so</code>. Its
+<code>GET /providers</code> catalogue is built from
+<code>provider.ProviderRegistry.All()</code>, which on the embedded path
+(<code>internal/mobile/mobile.go</code>
+<code>newProductionScraperDeps</code>) registers only the compiled-in
+native providers (rutracker, nnmclub, kinozal, archiveorg, gutenberg).
+The "many more via Jackett" providers require an EXTERNAL Jackett
+sidecar (<code>internal/jackett/client.go</code> →
+<code>LAVA_API_JACKETT_URL</code>), which cannot run inside the
+on-device embed: Jackett is .NET and cannot be cgo-embedded "same as the
+API itself".</p>
+<h2 id="2-goal--non-goals">2. Goal / non-goals</h2>
+<p><strong>Goal:</strong> the on-device api-app's
+<code>/providers</code> exposes a growing, curated set of popular PUBLIC
+trackers as first-class providers (SEARCH + MAGNET_LINK), each a
+compiled-in Go <code>provider.Provider</code>, with zero external
+dependency and zero config, covered by falsifiable real-stack tests.</p>
+<p><strong>Non-goals (explicitly, anti-bluff honesty):</strong></p>
+<ul>
+<li>NOT a generic Cardigann YAML engine (operator-deferred; that is the
+"from scratch engine" option not chosen).</li>
+<li>NOT "all 500 Jackett indexers". A curated subset. The §6.J-honest
+framing: every provider that appears in <code>/providers</code> MUST
+actually work end-to-end; we add them as they are built + tested, never
+as empty declarations (§6.E).</li>
+<li>The external Jackett sidecar path (<code>internal/jackett/</code>)
+stays UNCHANGED for server deployments that want the full Jackett
+catalogue.</li>
+</ul>
+<h2 id="3-architecture">3. Architecture</h2>
+<p>Each curated provider is an independent Go package under
+<code>internal/provider/curated/&lt;name&gt;/</code> implementing
+<code>provider.Provider</code> by embedding
+<code>provider.BaseProvider</code> (for the catalogue-metadata defaults)
+and overriding only what differs. Registration happens in BOTH startup
+paths that build the registry, exactly where the natives register
+today:</p>
+<ul>
+<li><code>internal/mobile/mobile.go</code> →
+<code>newProductionScraperDeps</code> (embedded on-device).</li>
+<li><code>cmd/lava-api-go/main.go</code> (standalone server
+binary).</li>
+</ul>
+<p>No router changes: the existing <code>/providers</code> handler + the
+per-provider <code>/v1/{id}/{op}</code> routes already iterate the
+registry, so a registered curated provider is automatically discoverable
++ searchable.</p>
+<pre><code>GET /providers                 → registry.All() → [natives…, curated…]   (catalogue)
+GET /v1/{curatedId}/search?q=… → registry.Get(id).Search(...)            (results)</code></pre>
+<h3 id="31-provider-unit-contract">3.1 Provider unit contract</h3>
+<p>Each provider package exposes <code>New() provider.Provider</code>
+(and an internal <code>Client</code> with an injectable
+<code>*http.Client</code> + base URL so tests substitute a
+<code>httptest.Server</code>). It implements:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Curated behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ID()</code></td>
+<td>stable lowercase id, e.g. <code>"thepiratebay"</code>,
+<code>"yts"</code>, <code>"eztv"</code></td>
+</tr>
+<tr>
+<td><code>DisplayName()</code></td>
+<td>human label, e.g. <code>"The Pirate Bay"</code></td>
+</tr>
+<tr>
+<td><code>Kind()</code></td>
+<td><code>"native"</code> (compiled-in; honest — not a remote jackett
+indexer)</td>
+</tr>
+<tr>
+<td><code>SupportsAnonymous()</code></td>
+<td><code>true</code> (no login)</td>
+</tr>
+<tr>
+<td><code>AuthType()</code></td>
+<td><code>provider.AuthNone</code></td>
+</tr>
+<tr>
+<td><code>Encoding()</code></td>
+<td><code>"UTF-8"</code></td>
+</tr>
+<tr>
+<td><code>Capabilities()</code></td>
+<td><code>{CapSearch, CapMagnetLink}</code> (+
+<code>CapTorrentDownload</code> only where the tracker serves a real
+<code>.torrent</code>)</td>
+</tr>
+<tr>
+<td><code>BaseURLs()</code></td>
+<td>the canonical site URL(s) for informational display</td>
+</tr>
+<tr>
+<td><code>Search(ctx, opts, cred)</code></td>
+<td>real HTTP GET to the tracker's JSON/HTML API; parse →
+<code>[]SearchItem{Title, InfoHash, MagnetLink, SizeBytes, Seeders, Leechers, …}</code></td>
+</tr>
+<tr>
+<td><code>GetTorrent</code> / <code>DownloadFile</code></td>
+<td><code>ErrUnsupported</code> for magnet-only trackers (§6.E:
+capability NOT declared)</td>
+</tr>
+<tr>
+<td>all other extended methods</td>
+<td><code>ErrUnsupported</code></td>
+</tr>
+<tr>
+<td><code>Login</code> / <code>CheckAuth</code> /
+<code>FetchCaptcha</code></td>
+<td>anonymous: <code>Login</code> no-op success, <code>CheckAuth</code>
+true, <code>FetchCaptcha</code> <code>ErrUnsupported</code></td>
+</tr>
+<tr>
+<td><code>HealthCheck(ctx)</code></td>
+<td>lightweight GET to the API root/health</td>
+</tr>
+</tbody>
+</table>
+<p>Magnet construction: from the BitTorrent v1 <code>infoHash</code> +
+<code>magnet:?xt=urn:btih:&lt;hash&gt;&amp;dn=&lt;title&gt;&amp;tr=&lt;trackers…&gt;</code>
+using the well-known public trackers list (a package constant — protocol
+data, not a deployment address).</p>
+<h2 id="4-phase-plan">4. Phase plan</h2>
+<p><strong>Phase 1 — JSON-API, anonymous, no Cloudflare (highest value /
+lowest risk / real-testable now):</strong></p>
+<ol type="1">
+<li><code>thepiratebay</code> —
+<code>https://apibay.org/q.php?q=&lt;query&gt;&amp;cat=0</code> → JSON
+array <code>[{name, info_hash, seeders, leechers, size, …}]</code>.
+Magnet from <code>info_hash</code>.</li>
+<li><code>yts</code> —
+<code>https://yts.mx/api/v2/list_movies.json?query_term=&lt;q&gt;</code>
+→ JSON; each movie's <code>torrents[]</code> carry <code>hash</code> →
+magnet.</li>
+<li><code>eztv</code> —
+<code>https://eztvx.to/api/get-torrents?limit=…&amp;keywords=&lt;q&gt;</code>
+→ JSON <code>torrents[]</code> with <code>magnet_url</code>,
+<code>seeds</code>, <code>size_bytes</code>.</li>
+</ol>
+<p><strong>Phase 2 — Cloudflare-gated HTML (reuses the existing
+FlareSolverr seam):</strong> 4. <code>x1337</code> (1337x) — HTML search
++ per-row magnet page; via FlareSolverr when the site is
+Cloudflare-challenged. 5. <code>torrentgalaxy</code> — HTML;
+FlareSolverr as needed.</p>
+<p>Phase 1 ships first as independent, separately-committable providers.
+Each provider is one commit (impl + tests + registration), so the
+catalogue grows incrementally and every increment is releasable.</p>
+<h2 id="5-error-contract">5. Error contract</h2>
+<p><code>Search</code> maps upstream failures to the package sentinels
+(<code>ErrNotFound</code>/<code>ErrForbidden</code>/<code>ErrNoData</code>/<code>ErrUnknown</code>)
+— never panics. A provider whose upstream is unreachable returns an
+error from <code>Search</code>; the registry + <code>/providers</code>
+catalogue still lists it (the descriptor is static), so a transiently
+down tracker does not remove the provider from onboarding (it just
+returns no results until reachable), matching native behaviour. §6.AC:
+every error path calls <code>observability.RecordNonFatal</code> with
+<code>{provider, operation, error_class}</code>.</p>
+<h2 id="6-testing-anti-bluff-pact--per-provider-all-mandatory">6.
+Testing (Anti-Bluff Pact — per provider, all mandatory)</h2>
+<ol type="1">
+<li><strong>Fixture parser test</strong>
+(<code>&lt;name&gt;_test.go</code>): a captured REAL upstream response
+in <code>testdata/</code> → drive <code>Client.Search</code> against an
+<code>httptest.Server</code> serving the fixture → assert mapped
+<code>SearchItem</code> fields (title, infoHash, magnet contains the
+hash, sizeBytes, seeders). FALSIFIABILITY: mutate the field-mapping
+(e.g. read <code>seeders</code> from the wrong JSON key) → the assertion
+fails with a clear message. Recorded in the Bluff-Audit stamp.</li>
+<li><strong>Real-network test</strong>
+(<code>//go:build realtrackers</code>): hit the LIVE API with a stable
+query (e.g. "ubuntu") → assert ≥1 result with a non-empty 40-hex
+infoHash + a magnet. Gated so default <code>go test ./...</code> makes
+no outbound calls (mirrors <code>-PrealTrackers</code>).</li>
+<li><strong>Registry/catalogue test</strong>
+(<code>internal/provider</code> or <code>internal/handlers</code>):
+after registering the curated providers, <code>GET /providers</code>
+body contains the new ids, each with <code>kind:"native"</code>,
+<code>authType:"NONE"</code>, <code>capabilities</code> ⊇
+<code>["SEARCH","MAGNET_LINK"]</code>, and
+<code>len(providers) &gt; nativeCount</code>. This is the load-bearing
+"more than the natives" assertion the operator's bug is about — on
+user-visible wire state.</li>
+<li><strong>Registration parity test:</strong> assert the EMBEDDED path
+(<code>mobile.go</code>) and the STANDALONE path (<code>main.go</code>)
+register the SAME curated set (a regression guard so the on-device app
+never silently lacks a provider the server has — the §6.J
+"module-green-but-app-broken" class).</li>
+</ol>
+<h2 id="7-constitutional-notes">7. Constitutional notes</h2>
+<ul>
+<li><strong>§6.R:</strong> API base URLs follow the EXISTING native
+pattern — a canonical-domain constant per provider package (the same
+shape as
+<code>rutracker.NewClient("https://rutracker.org/forum")</code>). These
+are the provider's own identity (protocol endpoints), not deployment
+addresses; consistent with how all 5 natives already encode their base.
+No ports/IPs/secrets hardcoded.</li>
+<li><strong>§6.H:</strong> all Phase-1 providers are anonymous — zero
+credentials. Phase-2 stays anonymous (public trackers); FlareSolverr URL
+comes from config (<code>LAVA_API_FLARESOLVERR_URL</code>).</li>
+<li><strong>§6.E:</strong> capabilities declared == methods implemented;
+unsupported → <code>ErrUnsupported</code>.</li>
+<li><strong>§6.Z / §6.AA / §6.Y:</strong> shipping these to the
+on-device app is a new api-app + embed build → version bump + the §6.Z
+device-test gate + two-stage distribute apply at distribute time
+(separate from landing the code).</li>
+<li><strong>api-source.hash:</strong> every change to
+<code>lava-api-go</code> source drifts the embed hash;
+<code>scripts/compute-api-source-hash.sh &gt; core/apiengine/src/main/resources/api-source.hash</code>
+runs after each provider lands (the SourceHash contract gate).</li>
+</ul>
+<h2 id="8-honest-scope-statement-for-changelog--release-notes">8. Honest
+scope statement (for CHANGELOG / release notes)</h2>
+<p>"Adds <N> built-in public-tracker providers (The Pirate Bay, YTS,
+EZTV, …) to the on-device API — searchable with magnet links, no
+external Jackett required. This is a curated, growing set, not a full
+Jackett mirror; server deployments can still point at an external
+Jackett for the complete indexer catalogue."</p>
+<hr />
+<h2 id="post-1076-revision-2026-06-26">Post-1076 Revision
+(2026-06-26)</h2>
+<h3 id="1076-distribute-outcome">1076 Distribute Outcome</h3>
+<p>Lava-Android-1.3.12-1076 + api-app 0.2.11-22 were distributed and
+reported to testers. The operator's post-distribute manual testing
+concluded "practically almost nothing has been fixed". Root cause: the
+§6.Z device gate executed <strong>only Challenge00CrashSurvivalTest
+(C00)</strong> while the cycle's CHANGELOG claimed fixes to search,
+provider-selection, onboarding, and display. The curated-providers code
+path — which this spec governs — was never exercised on-device during
+the gate. This is now a constitutionally prohibited pattern per
+<strong>§6.AK</strong> (Cycle-Coverage Device Gate, added 2026-06-26): a
+<code>Challenge00CrashSurvivalTest</code>-only gate NEVER satisfies the
+distribute requirement when the cycle claims provider/UI fixes.</p>
+<h3 id="curated-providers-that-actually-shipped">Curated Providers That
+Actually Shipped</h3>
+<p>The on-device api-app now exposes <strong>7 curated
+providers</strong> (in addition to the 5 natives). These are the
+providers that shipped at 1076:</p>
+<ol type="1">
+<li><strong>The Pirate Bay</strong> (<code>thepiratebay</code>) — JSON
+API via <code>https://apibay.org/q.php?q=&lt;query&gt;&amp;cat=0</code>.
+Phase 1, anonymous, no Cloudflare.</li>
+<li><strong>YTS</strong> (<code>yts</code>) — JSON API via
+<code>https://yts.mx/api/v2/list_movies.json?query_term=&lt;q&gt;</code>.
+Phase 1.</li>
+<li><strong>Torrents-CSV</strong> (<code>torrentscsv</code>) — added
+after the spec was written; supplements the Phase 1 set.</li>
+<li><strong>Knaben</strong> (<code>knaben</code>) — added after the spec
+was written.</li>
+<li><strong>Nyaa</strong> (<code>nyaa</code>) — added after the spec was
+written.</li>
+<li><strong>BitSearch</strong> (<code>bitsearch</code>) — added after
+the spec was written.</li>
+<li><strong>TorrentDownloads</strong> (<code>torrentdownloads</code>) —
+added after the spec was written.</li>
+</ol>
+<p>The original Phase 1 set (TPB, YTS, EZTV) was extended during
+implementation. <strong>EZTV</strong> was resolved to
+<strong>SKIP</strong>: the operator determined there is no honest
+anonymous-search path for EZTV on the on-device embed (the upstream
+requires either a Cloudflare-bypass seam or a registered account for
+consistent API access), so it was removed from the curated list rather
+than shipped with a broken search flow.</p>
+<h3 id="phase-2-cloudflare-status">Phase 2 Cloudflare Status</h3>
+<p>Phase 2 of the spec proposed <strong>1337x</strong>
+(<code>x1337</code>) as a Cloudflare-gated provider reusing the existing
+FlareSolverr seam. As of 1076, 1337x remains <strong>blocked</strong> —
+its upstream Cloudflare challenge is active and the FlareSolverr seam
+(<code>LAVA_API_FLARESOLVERR_URL</code>) exists in the codebase but is
+not yet registered as a routing path for the curated <code>x1337</code>
+provider. A dedicated FlareSolverr integration step is needed before
+1337x can ship. The upstream <code>torrentgalaxy</code> Phase 2
+candidate has not been implemented; it remains deferred.</p>
+<h3 id="crashlytics-wiring">Crashlytics Wiring</h3>
+<p>The api-app Crashlytics non-fatal telemetry for curated providers
+(described in sections 5 and 7 as required per §6.AC) was completed in
+commit <code>07f83eef</code>. Every error path in each curated provider
+now records a non-fatal event with
+<code>{provider, operation, error_class}</code> context, landing in the
+same Firebase Crashlytics dashboard as the client-side events. This
+means operator visibility into upstream-failure patterns for curated
+providers is active.</p>
+<h3 id="6ak-impact-on-testing-strategy">§6.AK Impact on Testing
+Strategy</h3>
+<p>Section 6's testing strategy must be updated to reflect the new §6.AK
+gate requirements. Every curated provider that ships in a distribute
+cycle now demands an <strong>EXECUTED + PASSED</strong> covering device
+Challenge before that version can be distributed:</p>
+<ul>
+<li>The registry/catalogue test (section 6 item 3) must run on-device
+(not just JVM) as part of the §6.Z evidence file.</li>
+<li>The registration parity test (section 6 item 4) must be linked to an
+attestation row captured from the actual api-app binary about to be
+distributed — compilation green is never sufficient.</li>
+<li>Any new curated provider added after 1076 must have its
+falsifiability rehearsal recorded per §6.AK clause 2: the test fails RED
+against a deliberately broken provider (e.g., search returns empty, or
+the provider is absent from the registry) before the GREEN run against
+the fix. The RED run evidence must appear in the commit body
+(Bluff-Audit stamp).</li>
+<li>The <code>Challenge00CrashSurvivalTest</code> alone is NEVER
+sufficient (§6.AK clause 1).</li>
+</ul>
+<h3 id="known-issues-affecting-spec-assumptions">Known Issues Affecting
+Spec Assumptions</h3>
+<ul>
+<li><strong>LVA-008:</strong> The <code>C11</code> ConnectedAndroidTest
+navigation-teardown crash blocks nested-route device Challenges.
+Curated-provider full-flow tests (navigate to search, select a curated
+provider from the dynamically-populated list, enter query, observe
+results) may produce false-negative test infrastructure failures until
+this is resolved.</li>
+<li><strong>Search engine timeout mismatch:</strong> The engine's 18s
+deadline vs client 30s read-timeout produces a window where the curated
+provider's upstream response arrives between 18-30s and is silently
+discarded. Curated providers with slower upstreams (e.g. The Pirate
+Bay's <code>apibay.org</code> under load) are more likely to hit
+this.</li>
+<li><strong>AuthInterceptor handoff-key overwrite (H1):</strong> Fixed
+in 1072. Curated providers are anonymous (no auth), but the per-request
+routing middleware still sends authentication headers; a
+middleware-state corruption could affect request routing for curated
+providers as well.</li>
+<li><strong>Partial-failure Error→Empty display fix:</strong> Landed in
+<code>1cbf364c</code>. Before this fix, if one curated provider returned
+an error and another succeeded, the screen rendered empty instead of
+showing the successful results. This directly affects the user-visible
+experience of the curated-provider search flow.</li>
+</ul>
+<h3 id="updated-change-history">Updated Change History</h3>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Author</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-06-12</td>
+<td>Agent</td>
+<td>Initial spec</td>
+</tr>
+<tr>
+<td>2026-06-26</td>
+<td>Agent</td>
+<td>Post-1076 revision: documented C00-only gate outcome, listed the 7
+shipped curated providers, documented EZTV→SKIP, Cloudflare status for
+1337x, Crashlytics wiring in <code>07f83eef</code>, §6.AK testing gate,
+known issues, and this change history entry</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

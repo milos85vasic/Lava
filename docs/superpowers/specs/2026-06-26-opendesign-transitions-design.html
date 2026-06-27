@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-26-opendesign-transitions-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="stream-a--opendesign-integration--smooth-transitions--look-and-feel-polish-design">Stream
+A — OpenDesign Integration + Smooth Transitions + Look-and-Feel Polish
+(design)</h1>
+<p><strong>Date:</strong> 2026-06-26 <strong>Status:</strong> DRAFT —
+operator decisions on 6 questions required before Wave A execution (see
+§6) <strong>Operator directive (2026-06-25):</strong> "Make transitions
+between all application's screens, fragments and views more smooth with
+some stunning visual effects! Do use heavily OpenDesign and fine tune
+and polish all existing look and feel! Cover all with additional
+tests!!!" <strong>Relationship to specs:</strong> Standalone UI/UX
+stream. Complements the search/provider-resolution functional bugfix
+track (separate operator directive); the video's CRITICAL functional
+items (#1 zero-results, #2/#3 provider-set mismatch) are OUT of scope
+and belong to that track. <strong>Constitution anchor:</strong>
+§11.4.162 (OpenDesign UI design-system mandate) — inherited via §6.AD
+from <code>constitution/</code>. <strong>Anti-bluff
+classification:</strong> <code>Classification:</code> universal
+(OpenDesign compliance + visual-regression + transition discipline
+pattern is reusable across any Helix-constitution-consuming Android
+project; the specific 5-wave plan, file paths, and test names are
+project-specific).</p>
+<hr />
+<h2 id="1-current-state-audit">1. Current state audit</h2>
+<p>All claims below cite the specific files and line ranges read in the
+scoping analysis
+(<code>docs/qa/2026-06-25-opendesign-transitions-scoping.md</code>). No
+code was changed — this is a read-only audit.</p>
+<h3 id="11-opendesign-compliance-114162--not-integrated">1.1 OpenDesign
+compliance (§11.4.162) — NOT integrated</h3>
+<p><strong>Finding:</strong> OpenDesign is absent from Lava. A grep
+across <code>gradle/libs.versions.toml</code>, every
+<code>build.gradle.kts</code>, and <code>core/designsystem/</code> for
+<code>open-design</code> / <code>opendesign</code> / <code>nexu</code>
+returns zero hits in Lava's own source. The only matches are sibling
+project copies (<code>panoptic/CLAUDE.md</code>,
+<code>panoptic/AGENTS.md</code>, <code>panoptic/CONSTITUTION.md</code> —
+not Lava). Lava is §11.4.162 non-compliant.</p>
+<p><strong>What OpenDesign actually is:</strong></p>
+<ul>
+<li>OpenDesign (<code>github.com/nexu-io/open-design</code>, v0.7.0) is
+a <strong>local-first, open-source design-systems tool</strong>: a
+native desktop app + stdio MCP server + per-agent install scripts,
+shipping 142+ design systems.</li>
+<li>A "design system" in OpenDesign is a folder of:
+<code>manifest.json</code>, <code>DESIGN.md</code> (canonical design
+prose), <code>tokens.css</code> (compiled CSS custom properties — the
+canonical token artifact), <code>components.html</code>,
+<code>assets/</code>, <code>fonts/</code>, preview pages.</li>
+<li><strong>It is NOT a Maven/Gradle artifact and NOT a Kotlin/Compose
+library.</strong> There is no <code>androidx</code>-style dependency to
+add to <code>libs.versions.toml</code>.</li>
+<li>"Use OpenDesign" in the Android context means: (1) install the MCP
+server (<code>od mcp install claude-code</code>), (2) author/adopt a
+Lava-branded design system with <code>tokens.css</code> as the canonical
+token artifact, (3) generate/sync the Compose token layer
+(<code>AppColors</code>, <code>AppTypography</code>,
+<code>AppSpaces</code>, <code>AppShapes</code>) <strong>from</strong>
+that <code>tokens.css</code>.</li>
+</ul>
+<h3
+id="12-theming--mature-but-hand-coded-no-brand-font-no-visual-regression-tests">1.2
+Theming — mature but hand-coded, no brand font, no visual-regression
+tests</h3>
+<p><code>core/designsystem/</code> (<code>LavaTheme</code>):</p>
+<ul>
+<li><strong>Theme entry:</strong> <code>theme/Theme.kt:14-72</code> —
+<code>LavaTheme(theme, isDark, isDynamic, content)</code>. Maps a
+<code>Theme</code> enum to a palette factory, builds Material3
+<code>lightColorScheme</code>/<code>darkColorScheme</code>, provides
+<code>LocalColors</code>.</li>
+<li><strong>Dark theme: YES, comprehensive.</strong> Every palette
+factory takes <code>isDark</code> and returns full dark+light variants;
+<code>isSystemInDarkTheme()</code> is the default
+(<code>:17,27-37</code>).</li>
+<li><strong>8 named palettes + Material You:</strong>
+<code>yoleColors</code>, <code>draculaColors</code>,
+<code>solarizedColors</code>, <code>nordColors</code>,
+<code>monokaiColors</code>, <code>gruvboxColors</code>,
+<code>oneDarkColors</code>, <code>tokyoNightColors</code>, plus
+<code>DYNAMIC</code> (API 31+ via
+<code>isMaterialYouAvailable()</code>). (<code>:21-37,74-75</code>)</li>
+<li><strong>Brand colors:</strong> hand-coded Material tonal ramps in
+<code>theme/Colors.kt:1-180</code> — ~180 lines of literal
+<code>Color(0xFF…)</code> constants. Note: the "Indigo*" ramp is the
+brand red (<code>Indigo40 = 0xFFB3261E</code>,
+<code>Indigo50 = 0xFFDE3730</code>); "Studio*" = purple secondary;
+"Lipstick*" = pink tertiary.</li>
+<li><strong>Token classes already exist:</strong>
+<code>AppColors</code>, <code>AppTypography</code>,
+<code>AppShapes</code>, <code>AppSizes</code>, <code>AppSpaces</code>,
+<code>AppBorders</code>, <code>AppElevations</code> in
+<code>theme/AppTheme.kt:6-41</code>.</li>
+<li><strong>Typography:</strong> full Material type scale — <strong>but
+every style uses <code>fontFamily = FontFamily.Default</code></strong>
+(<code>AppTypography.kt:11-117</code>). No brand font. No
+<code>.ttf</code>/<code>.otf</code> assets in Lava.</li>
+<li><strong>Components:</strong> ~25 design-system composables under
+<code>component/</code> (AppBar, Buttons, Dialog, TextField,
+NavigationBar, ModalBottomSheet, Placeholder, ProgressIndicator,
+Scaffold, Surface, Pagination, etc.).</li>
+<li><strong>Theming tests:</strong> <code>PaletteContractTest.kt</code>
+(Robolectric) — asserts 8 palettes produce valid light+dark colors,
+<code>primary != surface</code>.
+<code>LavaIconsAppIconColorRegressionTest</code>,
+<code>A11yContentDescriptionTest</code>. <strong>No visual-regression /
+screenshot infra</strong> (no Paparazzi, no Roborazzi, no
+perceptual-diff — grep confirms none). This is the §11.4.162 "visual
+regression tests with per-pixel/perceptual diff" gap.</li>
+</ul>
+<h3
+id="13-transitions--a-system-exists-but-most-destinations-use-default--no-transition">1.3
+Transitions — a system exists, but most destinations use
+<code>Default</code> (= no transition)</h3>
+<p>The transition machinery lives in <code>core/navigation</code> and is
+wired per-destination in <code>:app</code>:</p>
+<ul>
+<li><strong>Animation model:</strong>
+<code>navigation/ui/NavigationAnimations.kt</code> —
+<code>NavigationAnimations(enter/exit/popEnter/popExit)</code> data
+class with presets.
+<ul>
+<li><code>Default</code> = all-null = <strong>NavHost default (no custom
+transition)</strong> (<code>:29</code>).</li>
+<li><code>ScaleInOutAnimation</code> = scaleIn+expandIn+fadeIn /
+fadeOut+shrinkOut+scaleOut (<code>:30-49</code>).</li>
+<li><code>FadeInOutAnimations</code> = fadeIn / fadeOut
+(<code>:50-55</code>).</li>
+<li><code>slideInLeft/slideOutLeft/slideInRight/slideOutRight</code>
+helpers (<code>:57-60</code>).</li>
+</ul></li>
+<li><strong>Wiring:</strong> <code>NavigationHost.kt:42-56</code> plumbs
+these into Navigation-Compose.</li>
+<li><strong>Per-destination assignment</strong>
+(<code>app/.../navigation/MobileNavigation.kt</code>): | Destination |
+Current animation | Status | |---|---|---| | login, credentials,
+credentialsManager, providerConfig | <code>ScaleInOutAnimation</code>
+(<code>:55-68</code>) | OK | | category, topic |
+<code>ScaleInOutAnimation</code> (<code>:97,105</code>) | OK | |
+searchInput (top-level), searchResult (top-level) |
+<strong><code>Default</code> (none)</strong> (<code>:76,88</code>) |
+<strong>GAP — abrupt cut</strong> | | bottom-nav tabs | directional
+<code>slideIn/Out</code> by tab ordinal (<code>:329-350</code>) | OK | |
+nested search graph: searchHistory <code>Default</code>, searchInput
+<code>FadeInOutAnimations</code>, searchResult <code>Default</code> |
+mixed (<code>:178,186,194</code>) | PARTIAL |</li>
+<li><strong>In-screen animations that DO exist:</strong>
+<ul>
+<li>Onboarding: <code>AnimatedContent</code> with 320ms
+<code>FastOutSlowInEasing</code> slide + 220ms fade
+(<code>feature/onboarding/.../OnboardingScreen.kt:109-132</code>) — the
+current best-in-class.</li>
+<li>Topic: <code>fadeIn() + slideInVertically { it }</code> on a
+sub-element (<code>feature/topic/.../TopicScreen.kt:393</code>).</li>
+</ul></li>
+<li><strong>What's ABSENT entirely:</strong>
+<ul>
+<li><strong>No shared-element / shared-bounds transitions</strong>
+anywhere (grep confirms zero <code>SharedTransitionLayout</code> /
+<code>sharedElement</code> usage). Tapping a search-result row → topic
+does a scale, not a morph.</li>
+<li><strong>The two highest-traffic transitions (search-input → results,
+results → topic at the top level) are <code>Default</code> = no
+animation</strong> — abrupt cuts.</li>
+<li>No global/consistent transition spec — easing/duration is ad-hoc per
+call site.</li>
+</ul></li>
+</ul>
+<h3
+id="14-ui-coverage-audit-from-docsqa2026-06-25-ui-coverage-auditmd">1.4
+UI-coverage audit (from
+<code>docs/qa/2026-06-25-ui-coverage-audit.md</code>)</h3>
+<ul>
+<li>~45% of screens have a behavior-asserting UI test (Challenge)</li>
+<li>~25% WEAK (reachable-only via <code>Class.forName</code>, no
+behavior assertion)</li>
+<li>~30% GAP (no UI test at all)</li>
+<li><strong>0%</strong> visual-regression (no
+golden-image/perceptual-diff infra)</li>
+<li>This spec's Wave D + Wave E close these gaps.</li>
+</ul>
+<hr />
+<h2 id="2-problem">2. Problem</h2>
+<p><strong>Lava's UI is §11.4.162 non-compliant</strong> — OpenDesign is
+not integrated, visual-regression tests do not exist, and transition
+quality is inconsistent. End users experience:</p>
+<ol type="1">
+<li><strong>Abrupt screen transitions on high-traffic paths.</strong>
+The search-input → results and results → topic top-level destinations
+use <code>Default</code> (= no animation), producing cuts that feel
+unpolished. Compare with the polished onboarding (320ms slide+fade) —
+the gap is jarring.</li>
+<li><strong>No shared-element transitions anywhere.</strong> Tapping a
+search-result row replays a generic scale animation instead of morphing
+the poster/title to the topic detail. This is the single biggest
+"stunning visual" gap.</li>
+<li><strong>Missing loading/empty states on search results.</strong> The
+#1 visual defect from the operator's video: search shows a blank/black
+body for ~25 s then jumps to a full-screen error. No skeleton, no
+spinner, no "No results" state.</li>
+<li><strong>Raw provider IDs shown instead of display labels.</strong>
+Chips render "torrentdownloads", "archiveorg", "kinozal" instead of
+human-readable names — same class as the §6.L 60th
+<code>displayLabel()</code> underscore bug.</li>
+<li><strong>mDNS-discovered API shows bare IP:port</strong> with no
+friendly name.</li>
+<li><strong>"4 providers available" copy is wrong</strong> vs ~12
+actual.</li>
+<li><strong>Inconsistent token application</strong> across screens —
+<code>AppSpaces</code>/<code>AppTypography</code> are applied ad-hoc,
+not enforced by a single source-of-truth.</li>
+<li><strong>No brand font</strong> — all
+<code>FontFamily.Default</code>.</li>
+<li><strong>No visual-regression layer</strong> — a
+theming/transition/overlap regression is invisible to the test
+suite.</li>
+</ol>
+<p><strong>Each of these is independently user-visible, independently
+testable via device Challenge, and independently fixable.</strong> The
+spec addresses all of them across 5 waves.</p>
+<hr />
+<h2 id="3-goal--non-goals">3. Goal / non-goals</h2>
+<h3 id="goal">Goal</h3>
+<p>Make Lava's look-and-feel <strong>§11.4.162 compliant</strong>:
+OpenDesign-sourced design tokens, smooth and tasteful screen transitions
+including shared-element morphs, consistent spacing/typography/color
+across all surfaces, a brand font, and a visual-regression test layer
+that prevents regressions. Every UI change is covered by a falsifiable
+covering device Challenge.</p>
+<h3 id="non-goals-explicitly-per-anti-bluff-6j-honesty">Non-goals
+(explicitly, per anti-bluff §6.J honesty)</h3>
+<ol type="1">
+<li><strong>NOT a general UI rewrite.</strong> The existing
+<code>AppColors</code>/<code>AppTypography</code>/<code>AppSpaces</code>
+architecture is kept; only its <em>source</em> changes (from hand-coded
+literals to OpenDesign-generated). No composable replacement, no screen
+redesign.</li>
+<li><strong>NOT Google's Material Motion library adoption.</strong> Lava
+uses Navigation-Compose's
+<code>enterTransition</code>/<code>exitTransition</code> API augmented
+with <code>SharedTransitionLayout</code> (Compose Foundation) — no extra
+dependency.</li>
+<li><strong>NOT fixing functional bugs</strong> (#1 zero-results, #2/#3
+provider-set mismatch from the video). Those are the separate
+search/provider-resolution track. This spec owns
+<em>visual/transition</em> defects (#4 loading/empty states, #5 raw IDs,
+#8 IP display, #6 provider count) + the global polish.</li>
+<li><strong>NOT a full Roborazzi/Paparazzi campaign across every
+screen.</strong> Wave D targets design-system components + key screens
+(the ~45% that have behavior tests today); Wave E then extends coverage
+to the 30% GAP. The visual-regression layer grows incrementally.</li>
+<li><strong>NOT a runtime dependency on OpenDesign.</strong>
+<code>tokens.css</code> is committed to the repo as the SSoT; the
+Compose codegen produces Kotlin token classes from it. The OpenDesign
+MCP server is a <em>development-time</em> tool (agent-side), not a
+runtime dependency on users' devices.</li>
+<li><strong>NOT fully on-device executable on darwin/arm64.</strong>
+Rendered-UI Challenges on real emulators remain gated by the standing
+§6.AH/§6.X-debt gap. Visual-regression tests (Roborazzi/Paparazzi) run
+host-side JVM. All new Challenges document their gating status in the
+KDoc.</li>
+</ol>
+<hr />
+<h2 id="4-architecture">4. Architecture</h2>
+<h3 id="41-token-pipeline-tokenscss--compose-codegen--parity-gate">4.1
+Token pipeline: <code>tokens.css</code> → Compose codegen → parity
+gate</h3>
+<pre><code>                          ┌─────────────────────────┐
+                          │  OpenDesign MCP server   │
+                          │  (dev agent only)        │
+                          └─────────┬───────────────┘
+                                    │ od get design-system lava/tokens
+                                    ▼
+                    ┌───────────────────────────────┐
+                    │  design/lava-opendesign/       │  ← TRACKED IN GIT
+                    │    tokens.css                  │     (canonical SSoT)
+                    │    DESIGN.md                   │
+                    └─────────┬─────────────────────┘
+                              │ scripts/generate-opendesign-tokens.sh
+                              ▼
+            ┌─────────────────────────────────────────┐
+            │  core/designsystem/theme/Colors.kt      │  ← GENERATED
+            │  core/designsystem/theme/AppTypography.kt│     (wave A)
+            │  core/designsystem/theme/AppSpaces.kt   │
+            │  core/designsystem/theme/AppShapes.kt   │
+            └─────────┬───────────────────────────────┘
+                      │ scripts/check-opendesign-token-sync.sh
+                      │ (parity gate: CSS token ↔ Kotlin token)
+                      ▼
+            ┌─────────────────────────────────────────┐
+            │  Pre-push hook rejects on drift          │
+            └─────────────────────────────────────────┘</code></pre>
+<p>Key properties:</p>
+<ul>
+<li><code>tokens.css</code> is the <strong>single source of
+truth</strong> for all design tokens. Hand-coded Kotlin
+color/type/space/shape literals are replaced by codegen output.</li>
+<li>The codegen script
+(<code>scripts/generate-opendesign-tokens.sh</code>) is a thin block of
+Kotlin script or Python that parses CSS custom properties and emits
+Kotlin source. It runs on demand (after <code>tokens.css</code> changes)
+and is checked into git alongside its output.</li>
+<li>The parity gate
+(<code>scripts/check-opendesign-token-sync.sh</code>) verifies that the
+committed Kotlin tokens match the CSS tokens exactly — fails on drift.
+This is the §6.A real-binary contract discipline applied to design
+tokens.</li>
+<li><strong>No runtime dependency on OpenDesign.</strong> The MCP server
+is only used by the agent during development.</li>
+</ul>
+<h3 id="42-transition-architecture">4.2 Transition architecture</h3>
+<pre><code>┌─────────────────────────────────────────────────────┐
+│  core/navigation/ui/NavigationAnimations.kt         │
+│                                                     │
+│  LavaMotionScheme (new)                             │
+│    .forward:  slideInRight + fadeIn                 │
+│                (tween 300ms FastOutSlowIn)          │
+│    .backward: slideInLeft + fadeIn                  │
+│                (tween 300ms FastOutSlowIn)          │
+│    .scale:    scaleIn + fadeIn (for dialogs)        │
+│    .fade:     fadeIn only                           │
+│                                                     │
+│  LavaSharedElementPresets (new)                     │
+│    searchResultRow → topicDetail:                   │
+│      SharedTransitionLayout → sharedBounds          │
+│      poster + title morph 350ms tween               │
+│    providerCard → providerConfig:                   │
+│      card bounds morph 300ms spring                 │
+│                                                     │
+│  ReducedMotionAware wrapper (new)                   │
+│    reads animatorDurationScale from                  │
+│    Settings.Global.ANIMATOR_DURATION_SCALE           │
+│    → 0: no animation, &lt;1: shortened duration        │
+└───────────────────────┬─────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────┐
+│  app/.../navigation/MobileNavigation.kt             │
+│  Per-destination assignment:                        │
+│    searchInput → searchResult: LavaMotionScheme.fwd │
+│    searchResult → topic:        shared-element      │
+│    onboarding:                  LavaMotionScheme.fwd│
+│    (all non-null destinations)                      │
+└─────────────────────────────────────────────────────┘</code></pre>
+<h3 id="43-visual-regression-architecture-wave-d">4.3 Visual-regression
+architecture (Wave D)</h3>
+<pre><code>┌─────────────────────────────────────────────────────┐
+│  core/designsystem/src/test/.../screenshot/         │
+│                                                     │
+│  DesignSystemScreenshots.kt (Roborazzi)             │
+│    @Test fun appBar_light() → captureScreenshot()   │
+│    @Test fun appBar_dark()  → captureScreenshot()   │
+│    @Test fun button_light() → captureScreenshot()   │
+│    ...  (every component, light+dark)               │
+│                                                     │
+│  TransitionScreenshots.kt (Roborazzi)               │
+│    navigateTo → assert transition frames            │
+│    reducedMotion → assert no animation              │
+│                                                     │
+│  ThemeOverlapScreenshots.kt (Roborazzi)             │
+│    assert no node bounds overlap                   │
+│    assert no label-over-label                       │
+│    assert contrast ratio ≥ 4.5:1 (§11.4.107)       │
+└─────────────────────────────────────────────────────┘</code></pre>
+<p>Roborazzi is the recommended tool (reuses existing Compose test
+wiring). Both Roborazzi and Paparazzi are JVM-native
+(Robolectric-backed), so this layer runs host-side without an emulator.
+See §6 decision #5 for operator confirmation.</p>
+<hr />
+<h2 id="5-6ak-compliance--per-wave-device-challenge-requirements">5.
+§6.AK compliance — per-wave device Challenge requirements</h2>
+<p>Per §6.AK (Cycle-Coverage Device Gate, added 2026-06-26), every
+user-visible fix claimed in the CHANGELOG MUST have a covering device
+Challenge that (a) was reproduce-first proven (RED on the unfixed build,
+GREEN on the fixed build), and (b) was EXECUTED on the §6.Z device gate
+against the EXACT artifact being shipped.</p>
+<p>The table below defines per-wave Challenge requirements. These are
+<strong>minimum requirements</strong> — additional Challenges may be
+added during implementation. Each Challenge's KDoc MUST include a
+<code>FALSIFIABILITY REHEARSAL</code> block naming the deliberate
+mutation and the expected failure message.</p>
+<table>
+<thead>
+<tr>
+<th>Wave</th>
+<th>Claimed user-visible fix</th>
+<th>Covering Challenge</th>
+<th>Mutation for RED run</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>OpenDesign tokens applied, visual tokens match CSS SSoT</td>
+<td><code>scripts/check-opendesign-token-sync.sh</code> parity gate
+(hermetic test)</td>
+<td>Remove a color from <code>tokens.css</code>, run parity gate → EXIT
+1 with drift report</td>
+</tr>
+<tr>
+<td>B</td>
+<td>searchInput → searchResult has smooth slide+fade transition</td>
+<td>C-XX (new)
+<code>ChallengeSearchInputToResultsTransitionTest</code></td>
+<td>Replace <code>LavaMotionScheme.forward</code> with
+<code>Default</code> in <code>MobileNavigation.kt</code>, re-run →
+asserts <code>enterTransition != null</code> for the top-level
+searchResult route, FAILS</td>
+</tr>
+<tr>
+<td>B</td>
+<td>searchResult → topic shared-element morph of poster/title</td>
+<td>C-XX (new)
+<code>ChallengeSearchResultToTopicSharedElementTest</code></td>
+<td>Comment out <code>sharedElement()</code>/<code>sharedBounds()</code>
+in the topic composable, re-run → golden-image visual diff detects
+missing morph region, FAILS</td>
+</tr>
+<tr>
+<td>B</td>
+<td>Reduced-motion mode disables animations</td>
+<td>C-XX (new) <code>ChallengeReducedMotionTransitionTest</code></td>
+<td>Override <code>animatorDurationScale</code> to <code>1</code> when
+<code>0</code> is requested, re-run → transition frames are captured,
+FAILS (expected: no frames)</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Search results show Loading skeleton + Empty state (video #5)</td>
+<td>C-XX (new) <code>ChallengeSearchResultLoadingEmptyTest</code></td>
+<td>Remove the <code>if (loading)</code> branch from
+<code>SearchResultScreen</code>, re-run → skeleton composable absent,
+FAILS</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Provider chips show display labels, not IDs (video #4)</td>
+<td>C-XX (new) <code>ChallengeProviderChipDisplayLabelTest</code></td>
+<td>Revert <code>displayLabel()</code> to <code>name.lowercase()</code>,
+re-run → chip text contains raw id "torrentdownloads", FAILS</td>
+</tr>
+<tr>
+<td>C</td>
+<td>mDNS API shows friendly name, not bare IP (video #8)</td>
+<td>C-XX (new) <code>ChallengeMdnsFriendlyNameTest</code></td>
+<td>Return <code>""</code> from friendly-name resolver, re-run → screen
+shows bare IP:port, FAILS</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Provider count copy is correct (video #6)</td>
+<td>C-XX (new) <code>ChallengeProviderCountLabelTest</code></td>
+<td>Hardcode count to "4", re-run → label reads "4 providers available",
+FAILS on wrong count</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Brand font renders in typography</td>
+<td>C-XX (new) <code>ChallengeBrandFontAppliedTest</code></td>
+<td>Revert to <code>FontFamily.Default</code>, re-run →
+visual-regression golden detects different font metrics, FAILS</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Visual-regression golden tests catch rendering break</td>
+<td>Existing C-XX design-system golden tests</td>
+<td>Flip a color value in <code>Colors.kt</code> (e.g.,
+<code>primary = Color.Red</code>), re-run → golden perceptual-diff &gt;
+threshold, FAILS</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Transition tests assert animation presence</td>
+<td>Transition-specific golden tests</td>
+<td>Remove <code>enterTransition</code> assignment, re-run → assertion
+on null transition, FAILS</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Contrast/overlap tests detect overlap</td>
+<td>Theme-overlap test</td>
+<td>Add overlapping composable, re-run → overlap assertion FAILS</td>
+</tr>
+<tr>
+<td>E</td>
+<td>Rewritten C31-C35 behave correctly</td>
+<td>New C31-C35 with behavior + visual assertions</td>
+<td>Per-Challenge mutation in KDoc falsifiability block</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Per-wave <code>git diff</code> validation:</strong> Before
+each wave's coverage is accepted, the implementer MUST confirm that
+every file touched in the wave's commits is covered by at least one of
+the wave's Challenges. Uncovered file modifications are a §6.AK
+violation.</p>
+<hr />
+<h2
+id="6-decision-framework--operator-input-needed-before-wave-a-execution">6.
+Decision framework — operator input needed before Wave A execution</h2>
+<p>Six decisions are blocking Wave A. Each is formulated as a question
+with a recommendation.</p>
+<h3 id="decision-1-author-vs-adopt-design-system">Decision 1: Author vs
+adopt design system</h3>
+<p><strong>Question:</strong> Should Lava author a bespoke OpenDesign
+design system from the brand palette (<code>0xFFB3261E</code> red), or
+adopt+rebrand one of the 142 shipped systems?
+<strong>Recommendation:</strong> <strong>Author a bespoke Lava
+system</strong> (<code>design/lava-opendesign/</code>) that extends a
+minimal base (e.g., Material 3). Per §11.4.74 extend-don't-reimplement:
+authoring a Lava-specific system is the correct choice because Lava's
+brand palette (red secondary, purple tertiary, pink accent) is
+distinctive, and the ~25 existing composables encode Lava-specific
+layouts that a generic system would not match. <strong>Operator needs
+to:</strong> Confirm the brand palette is correct (canonical hex values
+for the 3 brand colors). Provide any brand color guidance beyond what
+<code>Colors.kt</code> already encodes.</p>
+<h3 id="decision-2-brand-font">Decision 2: Brand font</h3>
+<p><strong>Question:</strong> Lava has no brand typography — every style
+is <code>FontFamily.Default</code>. Which brand font should Lava use?
+<strong>Recommendation:</strong> <strong>Use a libre/open-source
+font</strong> to avoid licensing friction. Recommended candidates:
+<strong>Inter</strong> (sans-serif, excellent legibility,
+variable-weight support, OFL license) or <strong>Manrope</strong>
+(modern geometric sans, OFL). Both have variable <code>.ttf</code> that
+works on Android. Inter is the safer choice (broader character support,
+extensive weight range). <strong>Operator needs to:</strong> Choose a
+font (or confirm "Inter") and provide a
+<code>.ttf</code>/<code>.otf</code> file path or source URL. The font
+asset is placed at <code>core/designsystem/src/main/assets/fonts/</code>
+and wired in <code>AppTypography.kt</code>.</p>
+<h3 id="decision-3-tokenscss-as-tracked-ssot">Decision 3:
+<code>tokens.css</code> as tracked SSoT</h3>
+<p><strong>Question:</strong> Should <code>tokens.css</code> be
+committed to the repo as the canonical token SSoT, with the parity gate
+as the contract? <strong>Recommendation:</strong> <strong>Yes.</strong>
+This is the standard pattern for OpenDesign integration in non-web
+projects. Committing <code>tokens.css</code> makes it versioned,
+diffable, and accessible to all agents regardless of MCP server
+availability. The parity gate
+(<code>check-opendesign-token-sync.sh</code>) prevents drift.
+<strong>Operator needs to:</strong> Confirm. No further action.</p>
+<h3 id="decision-4-od-cli-availability">Decision 4: <code>od</code> CLI
+availability</h3>
+<p><strong>Question:</strong> Is the OpenDesign CLI (<code>od</code>)
+available on the gate host? If not, who installs it?
+<strong>Recommendation:</strong> OpenDesign 0.7.0 is
+open-source/local-first, so no paid account is needed. The installation
+is a one-liner per agent (<code>od mcp install claude-code</code>). The
+<code>tokens.css</code> can also be authored/edited manually without the
+<code>od</code> CLI — the MCP server is a development convenience, not a
+gate dependency. <strong>Operator needs to:</strong> Confirm that
+<code>od</code> is available on the primary development machine. The
+parity gate runs regardless of <code>od</code> presence (it compares
+committed files).</p>
+<h3
+id="decision-5-visual-regression-tool--roborazzi-vs-paparazzi">Decision
+5: Visual-regression tool — Roborazzi vs Paparazzi</h3>
+<p><strong>Question:</strong> Which JVM-compatible visual-regression
+library should Lava adopt? Both run on Robolectric (no device needed),
+both fit Local-Only CI/CD. <strong>Recommendation:</strong>
+<strong>Roborazzi.</strong> It integrates directly with Compose UI tests
+(reuses the existing <code>createComposeRule()</code> pattern in
+<code>core:testing</code>), supports <code>captureScreenshot()</code> as
+a composable test assertion, and has an active maintenance cadence.
+Paparazzi is render-only (no interaction) and would require a separate
+test harness. <strong>Operator needs to:</strong> Confirm. If Roborazzi
+is chosen, the implementer will add <code>robolectric</code> +
+<code>roborazzi</code> dependencies to <code>libs.versions.toml</code>
+and <code>core/designsystem/build.gradle.kts</code>.</p>
+<h3 id="decision-6-scope-boundary--visual-vs-functional-fixes">Decision
+6: Scope boundary — visual vs functional fixes</h3>
+<p><strong>Question:</strong> The operator's video contains both visual
+defects (this cycle's ownership) and functional bugs (#1 zero-results,
+#2/#3 provider-set mismatch). Should the functional bugs block Wave C
+(which touches <code>search_result</code> and provider-related screens)?
+<strong>Recommendation:</strong> <strong>No — keep them separate
+tracks.</strong> Wave C's <code>feature/search_result</code> changes
+(Loading/Empty states, chip labels) are new composables and label
+mappings. They do not fix the search-zero-results functional bug, but
+they <em>improve the visual experience regardless</em> (a blank screen
+becomes a skeleton; raw IDs become display names). The functional search
+fix track is a separate operator directive and lands independently.
+<strong>Operator needs to:</strong> Confirm this split. If Wave C should
+additionally fix the functional search bug, the scope expands and this
+spec's timeline changes.</p>
+<hr />
+<h2 id="7-5-wave-implementation-plan">7. 5-Wave implementation plan</h2>
+<p>Each wave is scoped to disjoint files where possible so waves can run
+as parallel agents. Every commit MUST land light+dark variants and carry
+a §6.AB.3 falsifiability rehearsal in the commit body. Dependencies: A →
+B (A's transition spec informs B's easing), A → C (C consumes A's
+tokens). D and E parallelize after A.</p>
+<h3
+id="wave-a--opendesign-integration--token-source-of-truth-foundation">Wave
+A — OpenDesign integration + token source-of-truth (FOUNDATION)</h3>
+<p><strong>Depends on:</strong> Operator decisions 1–4 (design system,
+brand font, <code>tokens.css</code>, <code>od</code> CLI)</p>
+<p><strong>Files created:</strong></p>
+<ul>
+<li><code>design/lava-opendesign/tokens.css</code> — canonical CSS
+custom properties (light+dark palette, type scale, spacing, shapes,
+component tokens)</li>
+<li><code>design/lava-opendesign/DESIGN.md</code> — design narrative per
+OpenDesign convention</li>
+<li><code>design/lava-opendesign/manifest.json</code> — OpenDesign
+manifest</li>
+<li><code>design/lava-opendesign/components.html</code> — component
+listing (minimal, generated)</li>
+<li><code>core/designsystem/src/main/assets/fonts/&lt;brand-font&gt;.ttf</code>
+— brand font asset</li>
+<li><code>scripts/generate-opendesign-tokens.sh</code> — codegen: parses
+<code>tokens.css</code> → emits <code>Colors.kt.update</code>,
+<code>AppTypography.kt.update</code>, <code>AppSpaces.kt.update</code>,
+<code>AppShapes.kt.update</code></li>
+<li><code>scripts/check-opendesign-token-sync.sh</code> — parity gate:
+exits non-zero if CSS token ≠ Kotlin token</li>
+<li><code>scripts/install-opendesign.sh</code> — one-shot MCP server
+installer for agents (<code>od mcp install claude-code</code>,
+etc.)</li>
+<li><code>docs/opendesign-integration.md</code> — companion guide
+(mirroring <code>docs/CODEGRAPH.md</code> style)</li>
+</ul>
+<p><strong>Files modified:</strong></p>
+<ul>
+<li><code>core/designsystem/theme/Colors.kt</code> — generated section
+replaces hand-coded literals (hand-coded section preserved with
+<code>// region HandCraftedOverrides</code> for overrides)</li>
+<li><code>core/designsystem/theme/AppTypography.kt</code> —
+<code>FontFamily.Default</code> → brand font, generated from
+<code>tokens.css</code></li>
+<li><code>core/designsystem/theme/AppSpaces.kt</code> — generated from
+<code>tokens.css</code></li>
+<li><code>core/designsystem/theme/AppShapes.kt</code> — generated from
+<code>tokens.css</code></li>
+<li><code>.lava-ci-evidence/verify-all/</code> — parity gate
+registration for sweep</li>
+</ul>
+<p><strong>Tests created:</strong></p>
+<ul>
+<li><code>tests/designsystem/test-token-parity.sh</code> — hermetic test
+of <code>check-opendesign-token-sync.sh</code> (positive: matching
+tokens → EXIT 0; negative: drift → EXIT 1; falsifiability: mutate CSS,
+confirm gate fails)</li>
+</ul>
+<p><strong>Operator action required before execution:</strong> Decisions
+1–4.</p>
+<h3
+id="wave-b--shared-screen-transition-system-the-smooth--stunning-core">Wave
+B — Shared screen-transition system (the "smooth + stunning" core)</h3>
+<p><strong>Depends on:</strong> Wave A (for the motion design language
+informant). No code dependency — easing constants are independent of
+<code>tokens.css</code>.</p>
+<p><strong>Files created:</strong></p>
+<ul>
+<li><code>core/navigation/ui/LavaMotionScheme.kt</code> —
+<code>LavaMotionScheme</code> object with
+<code>forward</code>/<code>backward</code>/<code>scale</code>/<code>fade</code>
+specs (300ms tween, <code>FastOutSlowInEasing</code>)</li>
+<li><code>core/navigation/ui/LavaSharedElementPresets.kt</code> —
+shared-element configs for searchResult→topic (poster+tile morph, 350ms)
+and providerCard→providerConfig (card morph, 300ms spring)</li>
+<li><code>core/navigation/ui/ReducedMotionAwareTransition.kt</code> —
+wrapper that reads <code>ANIMATOR_DURATION_SCALE</code> and returns
+<code>null</code> (no animation) when scale == 0, shortened duration
+when scale &lt; 1</li>
+<li><code>core/designsystem/src/test/.../transition/LavaMotionSchemeTest.kt</code>
+— unit tests: asserts easing constants, duration ranges, scale
+order</li>
+</ul>
+<p><strong>Files modified:</strong></p>
+<ul>
+<li><code>app/.../navigation/MobileNavigation.kt</code> — replace
+<code>Default</code> assignments:
+<ul>
+<li>Line 76: <code>searchInput</code> (top-level) →
+<code>LavaMotionScheme.forward</code></li>
+<li>Line 88: <code>searchResult</code> (top-level) →
+<code>LavaMotionScheme.forward</code></li>
+<li>Line 178: nested <code>searchHistory</code> →
+<code>LavaMotionScheme.fade</code></li>
+<li>Line 186: nested <code>searchInput</code> →
+<code>LavaMotionScheme.forward</code></li>
+<li>Line 194: nested <code>searchResult</code> →
+<code>LavaMotionScheme.forward</code></li>
+<li>Lines 97, 105: <code>category</code>, <code>topic</code> →
+<code>LavaMotionScheme.scale</code> (keep existing ScaleInOut semantics
+but with tuned easing)</li>
+</ul></li>
+<li><code>feature/search_result/.../SearchResultScreen.kt</code> — add
+<code>sharedBounds</code> on result row poster/title</li>
+<li><code>feature/topic/.../TopicScreen.kt</code> — add
+<code>sharedElement</code> on poster/title to receive the morph</li>
+<li><code>feature/search_input/.../SearchInputScreen.kt</code> — no
+change (it's the origin, kept clean)</li>
+<li><code>feature/provider_config/.../ProviderConfigScreen.kt</code> —
+add <code>sharedElement</code> for card morph (receiving end)</li>
+</ul>
+<p><strong>New Challenges (device, gated per §6.AH):</strong></p>
+<ul>
+<li><code>C-XX-ChallengeSearchInputToResultsTransitionTest</code> —
+drives searchInput → searchResult; asserts <code>enterTransition</code>
+is not null for the result route</li>
+<li><code>C-XX-ChallengeSearchResultToTopicSharedElementTest</code> —
+drives searchResult → topic; captures screenshot of transition
+mid-frame; asserts shared-element bounds match</li>
+<li><code>C-XX-ChallengeReducedMotionTransitionTest</code> — sets
+<code>ANIMATOR_DURATION_SCALE</code> to 0; drives a nav destination;
+asserts no animation composables appear</li>
+</ul>
+<h3 id="wave-c--per-feature-polish-via-opendesign-tokens">Wave C —
+Per-feature polish via OpenDesign tokens</h3>
+<p><strong>Depends on:</strong> Wave A (consumes generated
+<code>AppColors</code>/<code>AppTypography</code>/<code>AppSpaces</code>).
+Some items (chip labels, friendly name, provider count) are
+token-independent and can start before Wave A.</p>
+<p><strong>Files modified:</strong></p>
+<ul>
+<li><code>feature/search_result/.../SearchResultScreen.kt</code> — add
+Loading skeleton composable (when <code>state.isLoading</code>) + Empty
+state composable (when
+<code>state.results.isEmpty() &amp;&amp; !state.isLoading</code>); wire
+to <code>AppTheme.colors/typography/spaces</code></li>
+<li><code>feature/search_result/.../SearchResultViewModel.kt</code> —
+ensure <code>state.isLoading</code> is exposed for the skeleton; ensure
+empty-state distinction (no results vs error)</li>
+<li><code>core/designsystem/component/LoadingSkeleton.kt</code> — new
+composable: shimmer/skeleton placeholder matching OpenDesign token
+specs</li>
+<li><code>core/designsystem/component/EmptyState.kt</code> — new
+composable: icon + message + optional action button,
+OpenDesign-token-driven</li>
+<li><code>feature/search_input/.../SearchInputProviderChip.kt</code> —
+route chip label through
+<code>displayLabel()</code>/<code>displayName()</code> from the provider
+descriptor (fix video #4)</li>
+<li><code>core/data/.../LocalNetworkDiscoveryService.kt</code> or
+consuming screen — add friendly-name resolution (prefer mDNS service
+name over bare IP; label as "Remote" vs "Local network") (fix video
+#8)</li>
+<li><code>feature/onboarding/.../ProviderCountSection.kt</code> — fix
+<code>"4 providers available"</code> to count dynamically from
+<code>availableProviders.size</code> (fix video #6)</li>
+<li><code>core/designsystem/theme/AppTypography.kt</code> — brand font
+already wired from Wave A</li>
+</ul>
+<p><strong>Tests created:</strong></p>
+<ul>
+<li><code>tests/designsystem/test-loading-skeleton-contract.kt</code> —
+JVM test: assert skeleton renders in both themes, has proper colors,
+does not overlap</li>
+<li><code>tests/designsystem/test-empty-state-contract.kt</code> — JVM
+test: assert empty state renders icon + message, theme colors
+correct</li>
+</ul>
+<p><strong>New Challenges (device, gated per §6.AH):</strong></p>
+<ul>
+<li><code>C-XX-ChallengeSearchResultLoadingEmptyTest</code> — search
+with a query that returns no results; assert Empty state visible; assert
+skeleton appears during loading</li>
+<li><code>C-XX-ChallengeProviderChipDisplayLabelTest</code> — open
+search input; assert every provider chip's text does not match its raw
+<code>tracker_descriptor.id</code> (i.e., it displays label, not
+id)</li>
+<li><code>C-XX-ChallengeMdnsFriendlyNameTest</code> — with a mock/known
+mDNS API response; assert the friendly service name is shown, not the
+bare IP:port (requires mock mDNS or the
+<code>TestLocalNetworkDiscoveryService</code>)</li>
+<li><code>C-XX-ChallengeProviderCountLabelTest</code> — navigate to
+onboarding → provider discovery; assert the count label reads
+<code>N providers available</code> where N &gt; 4 (the old hardcoded
+value)</li>
+</ul>
+<h3
+id="wave-d--visual-regression--transition--theming-test-infrastructure">Wave
+D — Visual-regression + transition + theming test infrastructure</h3>
+<p><strong>Depends on:</strong> Decision 5 (Roborazzi vs Paparazzi).
+Parallelizes with B and C.</p>
+<p><strong>Files created:</strong></p>
+<ul>
+<li><code>core/designsystem/src/test/.../screenshot/DesignSystemScreenshots.kt</code>
+— golden-screenshot test for every design-system composable (~25),
+light+dark</li>
+<li><code>core/designsystem/src/test/.../screenshot/TransitionScreenshots.kt</code>
+— assert navigation transition frames via Roborazzi
+<code>captureTransitionScreenshot()</code> (if available) or custom
+<code>Animatable</code> snapshot</li>
+<li><code>core/designsystem/src/test/.../screenshot/ThemeOverlapScreenshots.kt</code>
+— assert no node bounds overlap, no label-over-label, contrast &gt;=
+4.5:1 (§11.4.107)</li>
+<li><code>core/designsystem/src/test/.../screenshot/PaletteOpenDesignParityTest.kt</code>
+— assert every palette's token values match the CSS declarations</li>
+<li><code>core/designsystem/src/test/.../screenshot/ReducedMotionTest.kt</code>
+— JVM test: set <code>isEnabled = false</code> on the motion scheme,
+assert transition specs resolve to null</li>
+</ul>
+<p><strong>Files modified:</strong></p>
+<ul>
+<li><code>scripts/ci.sh</code> — register the visual-regression suite
+(<code>./gradlew :core:designsystem:testDebugUnitTest</code> with
+Roborazzi tasks)</li>
+<li><code>scripts/check-opendesign-token-sync.sh</code> — extended to
+also verify golden images are fresh (compare golden file timestamps
+against source file timestamps)</li>
+</ul>
+<p><strong>Golden image management:</strong></p>
+<ul>
+<li>Goldens live at
+<code>core/designsystem/src/test/.../screenshot/goldens/</code> (light)
+and <code>.../goldens-dark/</code> (dark), tracked in git.</li>
+<li>Roborazzi <code>--update-goldens</code> mode for development;
+<code>--verify</code> mode for CI.</li>
+<li>The parity gate (Wave A) is extended in Wave D to also validate that
+goldens were regenerated when tokens.css changes — preventing
+stale-golden bluff.</li>
+</ul>
+<h3 id="wave-e--close-ui-coverage-audit-gaps">Wave E — Close UI-coverage
+audit gaps</h3>
+<p><strong>Depends on:</strong> Wave D (the screenshot harness is reused
+for the new Challenges). Can start independently using existing
+<code>ComposeTestRule</code> assertion patterns.</p>
+<p><strong>Files modified:</strong></p>
+<ul>
+<li><code>app/src/androidTest/kotlin/lava/app/challenges/C31-35*Test.kt</code>
+— rewrite the 5 WEAK <code>Class.forName</code> reachable-only
+Challenges (C31, C32, C33, C34, C35) with actual behavior assertions +
+screenshot capture (Wave D harness)</li>
+</ul>
+<p><strong>New Challenges for GAP screens:</strong></p>
+<ul>
+<li><code>app/src/androidTest/kotlin/lava/app/challenges/C-XX-ChallengeAccountScreenTest.kt</code>
+— GAP: Account screen had no UI test</li>
+<li><code>app/src/androidTest/kotlin/lava/app/challenges/C-XX-ChallengeMainScreenTest.kt</code>
+— GAP: Main screen post-login had no UI test</li>
+<li><code>app/src/androidTest/kotlin/lava/app/challenges/C-XX-ChallengeSearchInputChipsTest.kt</code>
+— WEAK: search_input had reachable-only test; add behavior assertions
+for chip selection/deselection</li>
+<li><code>app/src/androidTest/kotlin/lava/app/challenges/C-XX-ChallengeCredentialsManagerTest.kt</code>
+— GAP: credentials_manager had no UI test</li>
+</ul>
+<hr />
+<h2 id="8-6ab-discrimination-requirements-per-wave">8. §6.AB
+discrimination requirements per wave</h2>
+<p>Per §6.AB.3 (the discrimination test for every Challenge before it is
+declared "covers the feature"), the implementer MUST perform the
+mutation-rehearsal protocol on every new Challenge before the wave's
+code is committed:</p>
+<p><strong>Protocol (mirrors Sixth Law clause 2):</strong></p>
+<ol type="1">
+<li>Write the Challenge with behavior assertion on user-visible
+state.</li>
+<li>Run against the broken production code (the mutation from the table
+in §5). Confirm it FAILS with a clear assertion message.</li>
+<li>Revert the mutation.</li>
+<li>Run against the fixed production code. Confirm it PASSES.</li>
+<li>Record both outcomes in the commit body's Bluff-Audit stamp.</li>
+</ol>
+<p><strong>Per-wave mutation classes:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Wave</th>
+<th>Challenge</th>
+<th>Mutation class</th>
+<th>Expected failure signal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>token parity gate</td>
+<td>Remove a CSS token value</td>
+<td><code>exit 1: Drift detected at token '--lava-color-primary-40'</code></td>
+</tr>
+<tr>
+<td>B</td>
+<td>transition Challenge</td>
+<td>Replace <code>LavaMotionScheme.forward</code> with
+<code>Default</code></td>
+<td><code>AssertionError: expected enterTransition != null but was null</code></td>
+</tr>
+<tr>
+<td>B</td>
+<td>shared-element Challenge</td>
+<td>Remove <code>sharedElement</code>/<code>sharedBounds</code>
+modifiers</td>
+<td>Golden perceptual-diff &gt; threshold: missing shared-element
+region</td>
+</tr>
+<tr>
+<td>B</td>
+<td>reduced-motion Challenge</td>
+<td>Override scale to 1 at 0</td>
+<td>Transition frames captured but should be empty</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Loading/Empty Challenge</td>
+<td>Remove loading branch</td>
+<td>Skeleton composable not found on screen</td>
+</tr>
+<tr>
+<td>C</td>
+<td>chip label Challenge</td>
+<td>Revert <code>displayLabel()</code></td>
+<td>Chip text matches raw id</td>
+</tr>
+<tr>
+<td>C</td>
+<td>mDNS name Challenge</td>
+<td>Return empty friendly name</td>
+<td>Screen shows bare IP:port</td>
+</tr>
+<tr>
+<td>C</td>
+<td>provider count Challenge</td>
+<td>Hardcode count</td>
+<td>Label reads <code>4</code> instead of dynamic count</td>
+</tr>
+<tr>
+<td>C</td>
+<td>brand font Challenge</td>
+<td>Revert to <code>Default</code></td>
+<td>Screenshot golden diff</td>
+</tr>
+<tr>
+<td>D</td>
+<td>visual-regression golden</td>
+<td>Flip a color value</td>
+<td>Golden perceptual-diff &gt; threshold</td>
+</tr>
+<tr>
+<td>D</td>
+<td>transition test</td>
+<td>Remove <code>enterTransition</code></td>
+<td>Assertion on null transition fails</td>
+</tr>
+<tr>
+<td>D</td>
+<td>overlap test</td>
+<td>Add overlapping composable</td>
+<td>Overlap assertion fails</td>
+</tr>
+<tr>
+<td>E</td>
+<td>rewritten C31-C35</td>
+<td>Per-Challenge mutation in KDoc</td>
+<td>Per-Challenge assertion message</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="9-file-impact-map">9. File impact map</h2>
+<p>Every file that will be created or modified across the 5 waves. File
+paths are relative to repo root.</p>
+<h3 id="wave-a--opendesign-integration-create--modify">Wave A —
+OpenDesign integration (CREATE + MODIFY)</h3>
+<p><strong>Create:</strong></p>
+<pre><code>design/lava-opendesign/tokens.css
+design/lava-opendesign/DESIGN.md
+design/lava-opendesign/manifest.json
+design/lava-opendesign/components.html
+core/designsystem/src/main/assets/fonts/&lt;brand-font&gt;.ttf
+scripts/generate-opendesign-tokens.sh
+scripts/check-opendesign-token-sync.sh
+scripts/install-opendesign.sh
+docs/opendesign-integration.md
+tests/designsystem/test-token-parity.sh</code></pre>
+<p><strong>Modify:</strong></p>
+<pre><code>core/designsystem/theme/Colors.kt           ← generated section replaces literals
+core/designsystem/theme/AppTypography.kt     ← brand font + generated from tokens.css
+core/designsystem/theme/AppSpaces.kt         ← generated from tokens.css
+core/designsystem/theme/AppShapes.kt         ← generated from tokens.css</code></pre>
+<h3 id="wave-b--transition-system-create--modify">Wave B — Transition
+system (CREATE + MODIFY)</h3>
+<p><strong>Create:</strong></p>
+<pre><code>core/navigation/ui/LavaMotionScheme.kt
+core/navigation/ui/LavaSharedElementPresets.kt
+core/navigation/ui/ReducedMotionAwareTransition.kt
+core/designsystem/src/test/.../transition/LavaMotionSchemeTest.kt
+app/src/androidTest/kotlin/lava/app/challenges/C-XX-ChallengeSearchInputToResultsTransitionTest.kt
+app/src/androidTest/kotlin/lava/app/challenges/C-XX-ChallengeSearchResultToTopicSharedElementTest.kt
+app/src/androidTest/kotlin/lava/app/challenges/C-XX-ChallengeReducedMotionTransitionTest.kt</code></pre>
+<p><strong>Modify:</strong></p>
+<pre><code>app/.../navigation/MobileNavigation.kt          ← replace Default assignments
+feature/search_result/.../SearchResultScreen.kt ← add sharedBounds
+feature/topic/.../TopicScreen.kt               ← add sharedElement
+feature/provider_config/.../ProviderConfigScreen.kt ← add sharedElement</code></pre>
+<h3 id="wave-c--polish-create--modify">Wave C — Polish (CREATE +
+MODIFY)</h3>
+<p><strong>Create:</strong></p>
+<pre><code>core/designsystem/component/LoadingSkeleton.kt
+core/designsystem/component/EmptyState.kt
+tests/designsystem/test-loading-skeleton-contract.kt
+tests/designsystem/test-empty-state-contract.kt
+app/src/androidTest/kotlin/lava/app/challenges/C-XX-ChallengeSearchResultLoadingEmptyTest.kt
+app/src/androidTest/kotlin/lava/app/challenges/C-XX-ChallengeProviderChipDisplayLabelTest.kt
+app/src/androidTest/kotlin/lava/app/challenges/C-XX-ChallengeMdnsFriendlyNameTest.kt
+app/src/androidTest/kotlin/lava/app/challenges/C-XX-ChallengeProviderCountLabelTest.kt
+app/src/androidTest/kotlin/lava/app/challenges/C-XX-ChallengeBrandFontAppliedTest.kt</code></pre>
+<p><strong>Modify:</strong></p>
+<pre><code>feature/search_result/.../SearchResultScreen.kt   ← Loading skeleton + Empty state
+feature/search_result/.../SearchResultViewModel.kt ← expose isLoading state
+feature/search_input/.../SearchInputProviderChip.kt ← displayLabel() wiring
+core/data/.../LocalNetworkDiscoveryService.kt       ← friendly-name resolution
+feature/onboarding/.../ProviderCountSection.kt       ← dynamic count</code></pre>
+<h3 id="wave-d--visual-regression-test-infra-create--modify">Wave D —
+Visual-regression test infra (CREATE + MODIFY)</h3>
+<p><strong>Create:</strong></p>
+<pre><code>core/designsystem/src/test/.../screenshot/
+  DesignSystemScreenshots.kt
+  TransitionScreenshots.kt
+  ThemeOverlapScreenshots.kt
+  PaletteOpenDesignParityTest.kt
+  ReducedMotionTest.kt
+  goldens/                                     ← golden images (light)
+  goldens-dark/                                ← golden images (dark)</code></pre>
+<p><strong>Modify:</strong></p>
+<pre><code>scripts/ci.sh                                   ← register visual-regression suite
+scripts/check-opendesign-token-sync.sh           ← golden-freshness check</code></pre>
+<h3 id="wave-e--coverage-gap-closure-modify--create">Wave E — Coverage
+gap closure (MODIFY + CREATE)</h3>
+<p><strong>Modify:</strong></p>
+<pre><code>app/src/androidTest/kotlin/lava/app/challenges/
+  C31-ChallengeXxxTest.kt                     ← rewrite with behavior assertions
+  C32-ChallengeXxxTest.kt                     ← rewrite
+  C33-ChallengeXxxTest.kt                     ← rewrite
+  C34-ChallengeXxxTest.kt                     ← rewrite
+  C35-ChallengeXxxTest.kt                     ← rewrite</code></pre>
+<p><strong>Create:</strong></p>
+<pre><code>app/src/androidTest/kotlin/lava/app/challenges/
+  C-XX-ChallengeAccountScreenTest.kt          ← GAP
+  C-XX-ChallengeMainScreenTest.kt             ← GAP
+  C-XX-ChallengeSearchInputChipsTest.kt       ← WEAK upgrade
+  C-XX-ChallengeCredentialsManagerTest.kt     ← GAP</code></pre>
+<hr />
+<h2 id="10-honest-blockers">10. Honest blockers</h2>
+<h3 id="101-darwinarm64-emulator-gap-6ah--6x-debt">10.1 Darwin/arm64
+emulator gap (§6.AH / §6.X-debt)</h3>
+<p>Full on-device Challenge execution (C-XX-* from waves B–E) requires
+an Android emulator booted INSIDE a podman/docker container managed by
+the <code>submodules/containers</code> submodule. The macOS/arm64 host's
+podman VM does NOT expose <code>/dev/kvm</code> or HVF passthrough, so
+the containerized-emulator path is blocked.</p>
+<p><strong>Status:</strong> The §6.X macOS allowance was revoked by
+§6.AH (added 2026-06-03). Host-direct emulator execution is FORBIDDEN
+for gate runs. The container/VM path on macOS requires either (a) TCG
+software emulation support in
+<code>submodules/containers/pkg/emulator/</code> (not yet implemented),
+or (b) a Linux x86_64 gate host (the primary resolution path).</p>
+<p><strong>Impact on this spec:</strong></p>
+<ul>
+<li><strong>Visual-regression layer (Wave D) runs host-side JVM</strong>
+— NOT blocked. Roborazzi/Paparazzi are Robolectric-backed and need no
+emulator. This is a major advantage: the visual-regression suite can
+catch regressions even without emulator access.</li>
+<li><strong>Device Challenge execution (waves B–E) is BLOCKED on
+macOS</strong> unless the operator provisions a Linux x86_64 gate host.
+Each Challenge's KDoc MUST declare its gating status:
+<code>@DeviceGate(required = true, note = "Container/VM requirement per §6.AH; run on Linux x86_64 gate host")</code>.</li>
+<li><strong>§6.Z distribute gate is BLOCKED</strong> until the §6.AK
+coverage-intersection gate is satisfied (per-claim covering Challenge
+must execute PASS on device).</li>
+</ul>
+<p><strong>Honest statement:</strong></p>
+<blockquote>
+<p>Wave D's visual-regression infrastructure runs on any host with a JDK
+(including macOS). Device Challenges from waves B, C, and E require a
+container-booted Android emulator and are executed against the artifact
+on a Linux x86_64 gate host. The implementer writes the Challenges and
+confirms they compile; the operator runs them on the gate host before
+the distribute tag.</p>
+</blockquote>
+<h3 id="102-tokenscss--compose-mapping-complexity">10.2
+<code>tokens.css</code> ↔︎ Compose mapping complexity</h3>
+<p>CSS custom properties and Compose
+<code>Color</code>/<code>Dp</code>/<code>Shape</code> values do not have
+a 1:1 mapping. The codegen script
+(<code>scripts/generate-opendesign-tokens.sh</code>) must handle:</p>
+<ul>
+<li>CSS <code>--lava-color-primary-40: #B3261E</code> → Kotlin
+<code>val primary40 = Color(0xFFB3261E)</code></li>
+<li>CSS <code>--lava-space-md: 16px</code> → Kotlin
+<code>val md = 16.dp</code></li>
+<li>CSS <code>--lava-shape-corner-small: 8px</code> → Kotlin
+<code>val small = 8.dp</code></li>
+<li>CSS font-family strings → Kotlin <code>FontFamily</code>
+constructor</li>
+<li>Media queries (<code>prefers-color-scheme: dark</code>) → Kotlin
+<code>isDark</code> parameter</li>
+</ul>
+<p><strong>Mitigation:</strong> The parity gate only needs to verify the
+TOKENS THAT EXIST match. The codegen script starts with the subset that
+maps cleanly (colors, spacing, shapes, border-radii, elevations) and
+skips unparseable tokens with a WARNING. The remaining tokens are
+hand-mapped in a dedicated <code>// region HandCraftedOverrides</code>
+section of the generated file, with a comment linking to the CSS line
+they derive from.</p>
+<h3
+id="103-roborazzi-may-not-exist-in-the-compose-bom-or-may-conflict-with-existing-dependencies">10.3
+Roborazzi may not exist in the Compose BOM or may conflict with existing
+dependencies</h3>
+<p>Roborazzi is a third-party library
+(<code>io.github.takahirom.roborazzi</code>). If it conflicts with the
+existing Compose/Robolectric versions, Wave D may need to:</p>
+<ul>
+<li>Pin a specific compatible version</li>
+<li>Fall back to Paparazzi (which has fewer integration points but is
+more self-contained)</li>
+<li>Use a custom <code>takeScreenshot()</code> helper with
+<code>drawToBitmap()</code> + perceptual-diff</li>
+</ul>
+<p><strong>Mitigation:</strong> The spec names both options; decision #5
+delegates the choice. Wave D's first task is a compile-check with
+Roborazzi; if it fails, fall back to Paparazzi in the same wave.</p>
+<hr />
+<h2 id="11-risks-and-mitigations">11. Risks and mitigations</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Risk</th>
+<th>Likelihood</th>
+<th>Impact</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Operator decisions 1–4 delayed past Wave A start</td>
+<td>High (decisions need human input)</td>
+<td>Blocking</td>
+<td>Spec marks STARTUS DRAFT and enumerates decisions clearly. Draft the
+codegen script with placeholder tokens as a pre-work task so Wave A is
+partly executable without decisions.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>tokens.css</code> → Compose mapping incomplete for complex
+tokens</td>
+<td>Medium</td>
+<td>Codegen generates overridable sections</td>
+<td>HandCraftedOverrides region with CSS-line cross-references. Parity
+gate only checks token set intersection.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Roborazzi version conflicts</td>
+<td>Low–Medium</td>
+<td>Wave D may need Paparazzi fallback</td>
+<td>Both tools evaluated; Paparazzi is the fallback (more
+self-contained).</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Shared-element transitions degrade scrolling performance on low-end
+devices</td>
+<td>Low</td>
+<td>Perceived jank</td>
+<td>Shared-element transitions are bounded to 350ms and only fire on
+navigation (not scrolling). Reduced-motion mode disables them entirely.
+Test on API 28 emulator in the matrix.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>New Challenges (waves B–E) do not run on macOS (container gap)</td>
+<td>High (blocking)</td>
+<td>Operator must run on Linux x86_64 gate host</td>
+<td>Documented honestly per §10.1. The Challenges compile and the test
+APK builds on macOS; only execution is gated.</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Existing tests are flaky due to animation changes</td>
+<td>Medium</td>
+<td>False negatives in CI</td>
+<td>Add <code>ComposeTestRule.waitForIdle()</code> before all assertions
+that follow navigation, per the existing <code>C27</code> fix pattern.
+Reduced-motion-aware test harness.</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Brand font increases APK size</td>
+<td>Low</td>
+<td>~200 KB for a variable <code>.ttf</code></td>
+<td>Acceptable. If operator objects, subset the font via
+<code>fonttools</code> to latin + cyrillic (Lava's primary
+scripts).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="12-execution-order-and-parallelism">12. Execution order and
+parallelism</h2>
+<pre><code>Operator decisions (§6)
+        │
+        ▼
+    Wave A ──────────────────────────────────────► (foundation)
+        │                                            │
+        ├── Wave B (transitions, after easing info) ◄─┘ (no code dependency)
+        │
+        ├── Wave C (polish, depends on A&#39;s tokens)
+        │
+        ├── Wave D (visual-regression, after decision 5)
+        │
+        └── Wave E (coverage, after D&#39;s harness or independently)</code></pre>
+<ul>
+<li>Waves B and D can start <strong>immediately after Wave A's first
+commit</strong> (they depend on the directory structure existing, not on
+token completeness).</li>
+<li>Wave C depends on Wave A's generated token classes — but
+chips/mDNS/count fixes do NOT depend on tokens and can start in
+parallel.</li>
+<li>Wave E depends on Wave D's screenshot harness for the screenshot
+assertions; the behavior assertions can be written before Wave D
+lands.</li>
+<li><strong>Recommended agent dispatch order:</strong>
+<ol type="1">
+<li>Agent 1: Wave A (tokens.css + codegen + parity gate + docs)</li>
+<li>Agent 2: Wave B (transition spec + shared-elements + Challenges),
+starts after Wave A's first commit</li>
+<li>Agent 3: Wave C chip/mDNS/count fixes (token-independent items),
+then Loading/Empty (token-dependent after Wave A)</li>
+<li>Agents 2 and 3 can run simultaneously with Agent 1 after the initial
+token infrastructure lands</li>
+<li>Agent 4: Wave D (Roborazzi setup + golden screenshots), after
+decision 5</li>
+<li>Agent 5: Wave E (rewrite C31–C35 + GAP screens), after Wave D's
+harness or standalone with existing assertions</li>
+</ol></li>
+</ul>
+<hr />
+<h2 id="13-constitutional-notes">13. Constitutional notes</h2>
+<ul>
+<li><strong>§11.4.162:</strong> This spec IS the compliance plan. Wave A
+makes Lava formally compliant; Wave D adds the mandated
+visual-regression tests.</li>
+<li><strong>§6.R:</strong> No hardcoded values in the codegen output —
+<code>tokens.css</code> is the SSoT, and the parity gate enforces it.
+The codegen script itself does not hardcode colors/typography/spaces
+(only CSS-parsing logic).</li>
+<li><strong>§6.AK:</strong> The per-wave Challenge table in §5 is the
+coverage-intersection contract. Every wave's CHANGELOG entry MUST be
+matched by the executed Challenges listed there. The implementer MUST
+run the RED-then-GREEN protocol before claiming a wave is complete.</li>
+<li><strong>§6.AB:</strong> Every new Challenge carries the
+falsifiability rehearsal KDoc block. Every transition/shared-element
+mutation must be tested with the mutation-rehearsal protocol.</li>
+<li><strong>§6.AH / §6.X-debt:</strong> Device Challenges are
+container-bound per §6.AH. On macOS they are honestly blocked; on Linux
+x86_64 they run. The visual-regression layer (Wave D) is JVM-native and
+runs everywhere. Honest gating per §10.1.</li>
+<li><strong>§6.Z / §6.AA:</strong> Shipping these changes to users
+requires the §6.Z pre-distribute device gate AND the §6.AA two-stage
+distribute. Until the §6.AK coverage-intersection gate is closed, the
+operator manually verifies per-claim coverage at distribute time.</li>
+<li><strong>§6.P:</strong> Every distribute of this work MUST have a
+CHANGELOG entry listing the per-wave user-visible changes AND citing the
+covering Challenge test names. Version bump per §6.Y applies.</li>
+<li><strong>§6.W:</strong> No new remotes needed. The
+<code>tokens.css</code> file is committed to this repo (GitHub +
+GitLab); the OpenDesign MCP server is a development tool, not a new
+remote.</li>
+<li><strong>§6.U:</strong> No <code>sudo</code>/<code>su</code>. The
+parity gate and codegen script run with user-level permissions. Font
+assets are placed in
+<code>core/designsystem/src/main/assets/fonts/</code> (standard Android
+resource path).</li>
+</ul>
+</body>
+</html>

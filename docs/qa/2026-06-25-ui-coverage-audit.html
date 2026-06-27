@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-25-ui-coverage-audit</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="uiux-test-coverage-audit--lava-app-client--api-app">UI/UX
+Test-Coverage Audit — Lava <code>:app</code> (client) +
+<code>:api-app</code></h1>
+<p><strong>Date:</strong> 2026-06-25 <strong>Scope:</strong> Read-only
+source inspection of every client <code>feature/*</code> module + the
+<code>api-app</code> UI, mapped against existing Compose UI Challenge
+Tests (<code>app/src/androidTest/...</code>,
+<code>api-app/src/androidTest/...</code>) and per-feature ViewModel/unit
+tests (<code>feature/*/src/test/</code>,
+<code>api-app/src/test/</code>). <strong>Posture:</strong> Anti-bluff
+(§6.AB / §6.J). GREEN = a test that drives the production code path and
+asserts on user-visible state (rendered text, persisted row, behavior).
+WEAK = a test exists but asserts presence/classpath only, not behavior.
+GAP = no UI test for that surface.</p>
+<blockquote>
+<p><strong>Honesty note:</strong> "GREEN" here means the test is
+<em>written</em> to assert user-visible state. Per the repo-wide
+§6.X-debt, the <code>:app</code> client Challenge Tests have NOT been
+executed on an emulator on the current darwin/arm64 host (only the
+api-app tests use test-tags and have a documented run path). This audit
+rates the <em>design quality</em> of the assertions from source, not a
+green run. Where execution status matters it is called out.</p>
+</blockquote>
+<hr />
+<h2 id="1-headline-coverage-stats">1. Headline coverage stats</h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client feature modules</td>
+<td>19</td>
+</tr>
+<tr>
+<td>User-facing screens (client)</td>
+<td>~22 (incl. onboarding 5 steps as one wizard)</td>
+</tr>
+<tr>
+<td>api-app screens</td>
+<td>1 (<code>ApiControlScreen</code>)</td>
+</tr>
+<tr>
+<td>Distinct high-risk interactive components
+(toggles/switches/dialogs/text-fields)</td>
+<td>~30</td>
+</tr>
+<tr>
+<td>Client Challenge Tests (<code>Challenge*Test.kt</code>)</td>
+<td>48 files</td>
+</tr>
+<tr>
+<td>api-app Challenge Tests</td>
+<td>5 files (C01–C05)</td>
+</tr>
+<tr>
+<td>Per-feature ViewModel/unit test files (client)</td>
+<td>38</td>
+</tr>
+<tr>
+<td>api-app unit test files</td>
+<td>9</td>
+</tr>
+<tr>
+<td>Features with ≥1 GREEN behavior-driving UI test</td>
+<td>~9 / 19</td>
+</tr>
+<tr>
+<td>Features WEAK only (Class.forName / reachable-marker)</td>
+<td>5 (visited, favorites, bookmarks, category, connection)</td>
+</tr>
+<tr>
+<td>Features with <strong>GAP</strong> (no direct UI test)</td>
+<td>account, main, search_input, credentials_manager,
+rating(partial)</td>
+</tr>
+<tr>
+<td><strong>% of screens with a behavior-asserting UI test</strong></td>
+<td><strong>~45%</strong></td>
+</tr>
+<tr>
+<td><strong>% with only WEAK / classpath UI test</strong></td>
+<td><strong>~25%</strong></td>
+</tr>
+<tr>
+<td><strong>% GAP (no UI test)</strong></td>
+<td><strong>~30%</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Bottom line: coverage is thin and uneven.</strong>
+Onboarding, search, topic, and the api-app control screen are genuinely
+well-covered. The high-risk <strong>provider_config
+toggles/switches/serialization</strong> are covered only at the
+<strong>unit (ViewModel) layer</strong> — there is <strong>no end-to-end
+UI Challenge that taps a Switch and asserts persisted+re-rendered
+state</strong>. Five "reachable" screens have only
+<code>Class.forName</code> assertions (WEAK bluffs by §6.AB.3). Several
+screens have no UI test at all.</p>
+<hr />
+<h2 id="2-highest-risk-gaps-toggles--serialization--state-machines">2.
+Highest-risk gaps (toggles / serialization / state-machines)</h2>
+<p>Ranked by the crash-class risk model (toggle/switch + serialization =
+highest, then state-machine flows, then static rendering):</p>
+<h3
+id="r1--provider_config-switches--mirrorclone-serialization-highest--the-just-found-crash-class">R1
+— provider_config Switches + Mirror/Clone serialization (HIGHEST — the
+just-found crash class)</h3>
+<p><code>feature/provider_config/sections/</code>:
+<code>SyncSection</code> (<code>Switch</code> →
+<code>ToggleSync</code>), <code>AnonymousSection</code>
+(<code>Switch</code> → <code>ToggleAnonymous</code>),
+<code>MirrorsSection</code> (TextField →
+<code>AddMirror</code>/<code>RemoveMirror</code>/<code>ProbeMirror</code>),
+<code>CloneSection</code> + <code>CredentialsSection</code> +
+<code>RemoveCloneSection</code> (dialogs, bind/unbind).</p>
+<ul>
+<li><strong>Unit layer:</strong> GREEN —
+<code>ProviderConfigViewModelTest</code> covers Finding-1
+(ToggleAnonymous persistence across VM recreation), Finding-10
+(ToggleSync DAO-flip race), AddMirror malformed-URL rejection + toast.
+Solid, falsifiability-stamped.</li>
+<li><strong>UI/Challenge layer:</strong> <strong>GAP.</strong>
+<code>Challenge04ProviderRowOpensConfigTest</code> only opens the screen
+and asserts <code>"Sync this provider"</code> is <em>displayed</em> — it
+never <code>performClick()</code>s the Switch, never asserts the
+persisted toggle survives, never exercises Mirror add / Clone create /
+Credential bind via the rendered UI. <strong>The toggle/serialization
+crash class can only be caught end-to-end here, and no UI test does
+it.</strong></li>
+</ul>
+<h3
+id="r2--api-app-copy-key--openclient-buttons-high--serializationclipboard--cross-app-launch">R2
+— api-app Copy-key + OpenClient buttons (HIGH — serialization/clipboard
++ cross-app launch)</h3>
+<p><code>ApiControlScreen</code>: <code>CopyKeyClicked(key)</code>
+(clipboard + key string), <code>OpenClient</code> (SiblingAppLauncher
+intent / Firebase fallback).</p>
+<ul>
+<li>C01–C05 GREEN-drive Start/Stop/Restart (via
+<code>TAG_START</code>/<code>TAG_STOP</code> test tags).
+<strong>GAP:</strong> no challenge taps Copy-key or Open-client and
+asserts the side effect.</li>
+</ul>
+<h3
+id="r3--search_input-providerchipbar-selection-high--filterchip-toggle-drives-which-providers-get-searched-prior-bug-all-selected-by-default">R3
+— search_input ProviderChipBar selection (HIGH — FilterChip toggle
+drives which providers get searched; prior bug:
+all-selected-by-default)</h3>
+<p><code>SearchInputScreen</code> +
+<code>components/ProviderChipBar.kt</code> (FilterChips). <strong>GAP —
+<code>search_input</code> has 0 direct challenge refs.</strong> Search
+<em>result</em> flows are covered, but the chip-selection→submit
+boundary (a known prior defect surface) has only
+<code>SearchInputViewModelTest</code> at unit level.</p>
+<h3
+id="r4--onboarding-state-machine-medium--well-covered-keep-as-reference-pattern">R4
+— onboarding state-machine (MEDIUM — well covered, keep as reference
+pattern)</h3>
+<p>GREEN. 7 challenges (C20–C29, C37, C41, C42) + 6 unit tests cover
+wizard flow, back-press, anonymous provider, password masking,
+finish-requires-proved-provider, select-all. This is the
+<strong>reference quality bar</strong> other features should match.</p>
+<h3
+id="r5--credentials--credentials_manager-dialogs-medium--textfield--alertdialog--secret-handling">R5
+— credentials / credentials_manager dialogs (MEDIUM — TextField +
+AlertDialog + secret handling)</h3>
+<p><code>CredentialEditDialog</code> (TextField, save/cancel),
+<code>CredentialsManagerScreen</code> (TextField, dialogs). Unit tests
+exist (<code>CredentialsViewModelTest</code>,
+<code>CredentialsManagerViewModelTest</code>). UI: C47
+(<code>CredentialsLockedSearchSurvives</code>) touches credentials
+indirectly. <strong>WEAK/GAP</strong> for the dialog edit→save→persist
+UI path and password-field masking in the manager.</p>
+<h3
+id="r6--rating-dialog--menu-sign-out-medium--dialog-state-machine">R6 —
+rating dialog + menu sign-out (MEDIUM — dialog state-machine)</h3>
+<p><code>RatingDialog</code>, <code>MenuScreen</code> sign-out
+AlertDialog. C30(rating reachable), C24(menu sign-out) exist — C24 GREEN
+(sign-out flow), C30 likely WEAK (reachable).</p>
+<hr />
+<h2 id="3-coverage-matrix-featurescreen--component--test-status">3.
+Coverage matrix (feature/screen × component × test status)</h2>
+<p>Legend: <strong>G</strong> GREEN (behavior asserted) ·
+<strong>W</strong> WEAK (presence/classpath only) · <strong>—</strong>
+GAP.</p>
+<table>
+<thead>
+<tr>
+<th>Feature / Screen</th>
+<th>Key interactive components</th>
+<th>UI-test?</th>
+<th>Unit-test?</th>
+<th>Use-cases covered</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>onboarding</strong>
+(Welcome/ApiSelection/Configure/Providers/Summary)</td>
+<td>TextFields, Switch (anon), provider toggles, nav buttons,
+back-press</td>
+<td><strong>G</strong> (C20–29,37,41,42)</td>
+<td>G (6 files)</td>
+<td>full wizard, back, anon, password mask, finish-gate, select-all</td>
+<td><strong>GREEN</strong></td>
+</tr>
+<tr>
+<td><strong>provider_config</strong>
+(<code>ProviderConfigScreen</code>)</td>
+<td><strong>Switch ×2 (Sync/Anon)</strong>, TextField (mirror),
+AlertDialogs (clone/remove/bind)</td>
+<td><strong>W</strong> (C04 opens screen, asserts label only)</td>
+<td><strong>G</strong> (toggle persist, AddMirror)</td>
+<td>open-screen render; toggle persist (unit only)</td>
+<td><strong>WEAK-UI / GAP for toggle-click E2E</strong></td>
+</tr>
+<tr>
+<td><strong>search</strong> (<code>SearchScreen</code>)</td>
+<td>search box, nav</td>
+<td><strong>G</strong> (C02,03,09–12,38,40,44,46)</td>
+<td>G</td>
+<td>authed/anon search many providers</td>
+<td><strong>GREEN</strong></td>
+</tr>
+<tr>
+<td><strong>search_result</strong> (<code>SearchResultScreen</code> +
+Filter* + CrossTrackerFallbackModal)</td>
+<td>FilterChips, dropdowns, fallback modal accept/dismiss</td>
+<td><strong>G</strong> (C07,08,16,39,43)</td>
+<td>G (6 files)</td>
+<td>fallback accept/dismiss, api-filter, dedupe, streaming, retry,
+cancel</td>
+<td><strong>GREEN</strong></td>
+</tr>
+<tr>
+<td><strong>search_input</strong> (<code>SearchInputScreen</code> +
+ProviderChipBar)</td>
+<td><strong>FilterChip provider selection</strong>, text field,
+submit</td>
+<td><strong>—</strong></td>
+<td>G (VM + nav roundtrip)</td>
+<td>chip default-selection (unit only)</td>
+<td><strong>GAP (UI)</strong></td>
+</tr>
+<tr>
+<td><strong>topic</strong> (<code>TopicScreen</code>)</td>
+<td>download button, add-comment TextField, dialog</td>
+<td><strong>G</strong> (C05,06,37)</td>
+<td>G (3 files)</td>
+<td>view detail, download .torrent, add comment</td>
+<td><strong>GREEN</strong></td>
+</tr>
+<tr>
+<td><strong>login</strong>
+(<code>LoginScreen</code>/<code>ProviderLoginScreen</code>/<code>OnboardingScreen</code>)</td>
+<td>TextFields, Switch, submit, captcha</td>
+<td><strong>G</strong> (C02,36)</td>
+<td>G (4 files)</td>
+<td>login, service-unavailable accurate msg</td>
+<td><strong>GREEN</strong></td>
+</tr>
+<tr>
+<td><strong>menu</strong> (<code>MenuScreen</code>)</td>
+<td>nav rows, sign-out AlertDialog</td>
+<td><strong>G</strong> (C24 sign-out)</td>
+<td>G (3 files)</td>
+<td>sign-out flow, observe settings, sibling-app launch</td>
+<td><strong>GREEN</strong></td>
+</tr>
+<tr>
+<td><strong>topic/connection</strong>
+(<code>ConnectionItem</code>/<code>ConnectionsList</code>)</td>
+<td>TextField, dialog</td>
+<td><strong>W</strong> (C35 reachable)</td>
+<td>G (ConnectionsVM)</td>
+<td>item reachable (classpath)</td>
+<td><strong>WEAK</strong></td>
+</tr>
+<tr>
+<td><strong>category</strong> (<code>CategoryScreen</code>)</td>
+<td>dialog, list nav</td>
+<td><strong>W</strong> (C34 nav reachable)</td>
+<td>G</td>
+<td>navigation reachable</td>
+<td><strong>WEAK</strong></td>
+</tr>
+<tr>
+<td><strong>forum</strong> (<code>ForumScreen</code>)</td>
+<td>list nav</td>
+<td>partial <strong>G</strong> (C34?)</td>
+<td>G</td>
+<td>tree nav (unit)</td>
+<td><strong>WEAK/GREEN-partial</strong></td>
+</tr>
+<tr>
+<td><strong>bookmarks</strong> (<code>BookmarksScreen</code>)</td>
+<td>list, item actions</td>
+<td><strong>W</strong> (C33 reachable)</td>
+<td>G</td>
+<td>screen reachable (classpath)</td>
+<td><strong>WEAK</strong></td>
+</tr>
+<tr>
+<td><strong>favorites</strong> (<code>FavoritesScreen</code>)</td>
+<td>list, item actions</td>
+<td><strong>W</strong> (C32 reachable)</td>
+<td>G</td>
+<td>screen reachable (classpath)</td>
+<td><strong>WEAK</strong></td>
+</tr>
+<tr>
+<td><strong>visited</strong> (<code>VisitedScreen</code>)</td>
+<td>list, item nav</td>
+<td><strong>W</strong> (C31 Class.forName)</td>
+<td>G</td>
+<td>classpath-only</td>
+<td><strong>WEAK</strong></td>
+</tr>
+<tr>
+<td><strong>rating</strong> (<code>RatingDialog</code>)</td>
+<td>dialog buttons</td>
+<td><strong>W</strong> (C30 reachable)</td>
+<td>G</td>
+<td>dialog reachable</td>
+<td><strong>WEAK</strong></td>
+</tr>
+<tr>
+<td><strong>credentials</strong>
+(<code>CredentialsScreen</code>/<code>CredentialEditDialog</code>)</td>
+<td>TextField, AlertDialog save/cancel, secret field</td>
+<td>partial (C47 indirect)</td>
+<td>G</td>
+<td>locked-search survives</td>
+<td><strong>WEAK/GAP for edit-dialog</strong></td>
+</tr>
+<tr>
+<td><strong>credentials_manager</strong>
+(<code>CredentialsManagerScreen</code>)</td>
+<td>TextField, dialogs</td>
+<td><strong>—</strong></td>
+<td>G</td>
+<td>none direct</td>
+<td><strong>GAP (UI)</strong></td>
+</tr>
+<tr>
+<td><strong>account</strong> (<code>AccountItem</code>)</td>
+<td>dialog</td>
+<td><strong>—</strong></td>
+<td>G (AccountVM)</td>
+<td>none direct</td>
+<td><strong>GAP (UI)</strong></td>
+</tr>
+<tr>
+<td><strong>main</strong> (<code>MainScreen</code>)</td>
+<td>host/nav scaffold</td>
+<td><strong>—</strong> (covered transitively by launch challenges)</td>
+<td>G (MainVM)</td>
+<td>transitive only</td>
+<td><strong>GAP (direct)</strong></td>
+</tr>
+<tr>
+<td><strong>api-app</strong> (<code>ApiControlScreen</code>)</td>
+<td>Start/Stop/Restart buttons, <strong>Copy-key</strong>,
+<strong>Open-client</strong></td>
+<td><strong>G</strong> (C01–05 drive Start/Stop/Restart)</td>
+<td>G (5 VM tests + status labels)</td>
+<td>boot/serve/stop/restart/notif/embed-hash</td>
+<td><strong>GREEN (Copy/OpenClient = GAP)</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-prioritized-gap-list">4. Prioritized gap list</h2>
+<ol type="1">
+<li><strong>provider_config toggle/serialization E2E UI</strong> (R1) —
+tap Sync Switch → assert persisted + re-rendered; tap Anonymous Switch;
+AddMirror via TextField → assert row/toast in rendered UI; Clone dialog
+create→confirm; Credential bind→unbind. <em>Crash class. No UI test
+exists.</em></li>
+<li><strong>search_input ProviderChipBar</strong> (R3) — toggle provider
+chips → submit → assert only-selected providers searched (prior bug
+surface).</li>
+<li><strong>api-app Copy-key + Open-client</strong> (R2) — drive both
+buttons, assert clipboard set / launch side effect.</li>
+<li><strong>5 WEAK "reachable" screens</strong> (visited, favorites,
+bookmarks, category, connection) — upgrade from
+<code>Class.forName</code> to render-and-interact: open screen, assert
+empty-state OR list rows, tap an item, assert nav/side-effect.</li>
+<li><strong>credentials / credentials_manager dialogs</strong> —
+edit-dialog TextField→save→persist; password masking in manager.</li>
+<li><strong>account, main, rating</strong> — direct render +
+primary-action tests (account dialog; main scaffold renders nav; rating
+submit persists rating).</li>
+</ol>
+<hr />
+<h2 id="5-dispatch-plan--6-parallelizable-waves">5. Dispatch plan — 6
+parallelizable waves</h2>
+<p>Each wave is independent (touches disjoint feature modules + disjoint
+<code>Challenge*Test.kt</code> files), so all 6 can run as parallel
+gap-filling agents. Every new test MUST: drive the real screen,
+primary-assert on user-visible state (§6.AB clause 1
+rendering-correctness + clause 3 state-machine + clause 2 gating), and
+carry a §6.AB.3 non-crashing FALSIFIABILITY REHEARSAL block.</p>
+<h3
+id="wave-1--provider_config-toggle--serialization-e2e-highest-risk">Wave
+1 — provider_config toggle + serialization E2E (HIGHEST RISK)</h3>
+<ul>
+<li><code>Challenge48ProviderConfigSyncTogglePersistsTest</code> — open
+ProviderConfig, <code>performClick</code> the "Sync this provider"
+<code>Switch</code>, assert checked-state flips AND (recreate/return)
+the persisted value is reflected.</li>
+<li><code>Challenge49ProviderConfigAnonymousTogglePersistsTest</code> —
+same for Anonymous switch.</li>
+<li><code>Challenge50ProviderConfigAddMirrorUiTest</code> — type a valid
+URL in the mirror TextField, submit, assert the mirror row renders; type
+malformed URL, assert corrective toast + no row.</li>
+<li><code>Challenge51ProviderConfigCloneDialogTest</code> — open clone
+dialog, enter name+URL, confirm, assert cloned provider appears.</li>
+<li>Falsifiability: revert each toggle handler to no-op; assert the new
+test fails on the re-render assertion.</li>
+</ul>
+<h3
+id="wave-2--search_input-chip-selection-high-risk-prior-defect-surface">Wave
+2 — search_input chip selection (HIGH RISK, prior defect surface)</h3>
+<ul>
+<li><code>Challenge52SearchInputProviderChipSelectionTest</code> —
+render SearchInput, assert default-selected set matches onboarded
+providers (NOT all), toggle a chip off, submit, assert the de-selected
+provider is excluded from the search dispatch.</li>
+<li>Falsifiability: hardcode
+<code>selectedProviders = availableProviders</code>; assert test
+fails.</li>
+</ul>
+<h3 id="wave-3--upgrade-5-weak-reachable-screens-to-behavior-tests">Wave
+3 — upgrade 5 WEAK reachable screens to behavior tests</h3>
+<ul>
+<li>Rewrite C31 (visited), C32 (favorites), C33 (bookmarks), C34
+(category), C35 (connection) from <code>Class.forName</code> →
+<code>createAndroidComposeRule</code>, navigate to the screen, assert
+empty-state OR ≥1 list row renders, tap an item, assert the resulting
+nav/side-effect (user-visible).</li>
+<li>Falsifiability: break the nav entry; assert the render/empty-state
+assertion fails.</li>
+</ul>
+<h3 id="wave-4--api-app-copy-key--open-client-ui">Wave 4 — api-app
+Copy-key + Open-client UI</h3>
+<ul>
+<li><code>Challenge06ApiAppCopyKeyTest</code> — boot+start, tap Copy on
+the access key, assert clipboard contains the key (or the confirmation
+side effect renders).</li>
+<li><code>Challenge07ApiAppOpenClientTest</code> — tap "Open Lava
+client", assert the <code>LaunchClient</code> side effect intent is
+produced (installed vs Firebase fallback path).</li>
+<li>Falsifiability: make <code>CopyKeyClicked</code> a no-op; assert
+test fails.</li>
+</ul>
+<h3 id="wave-5--credentials--credentials_manager-dialogs">Wave 5 —
+credentials + credentials_manager dialogs</h3>
+<ul>
+<li><code>Challenge53CredentialEditDialogSavePersistsTest</code> — open
+edit dialog, type into username/password TextFields, save, assert the
+credential persists and re-renders; assert password field is
+masked.</li>
+<li><code>Challenge54CredentialsManagerAddDeleteTest</code> — add a
+credential via dialog, assert it lists; delete it, assert it's
+gone.</li>
+<li>Falsifiability: drop the save handler; assert test fails.</li>
+</ul>
+<h3 id="wave-6--account-main-rating-direct-render--primary-action">Wave
+6 — account, main, rating direct render + primary action</h3>
+<ul>
+<li><code>Challenge55AccountScreenRendersAndActsTest</code> — render
+account, trigger its primary dialog/action, assert user-visible
+outcome.</li>
+<li><code>Challenge56MainScaffoldRendersNavTest</code> — assert
+MainScreen renders the bottom-nav entries (not transitive-only).</li>
+<li><code>Challenge57RatingDialogSubmitPersistsTest</code> — open rating
+dialog, select a rating, submit, assert persisted/side-effect (upgrade
+C30 from reachable→behavior).</li>
+<li>Falsifiability per test as above.</li>
+</ul>
+<hr />
+<h2 id="6-notes-for-the-dispatching-stream">6. Notes for the dispatching
+stream</h2>
+<ul>
+<li><strong>Onboarding (C20–29 etc.), search/search_result, topic,
+login, menu, api-app Start/Stop</strong> are the GREEN reference
+patterns — copy their assertion style
+(<code>onNodeWithText(...).performClick()</code> →
+<code>waitUntil</code> → <code>assertIsDisplayed</code>/persisted-row
+check), NOT the <code>Class.forName</code> anti-pattern from
+C31–C35.</li>
+<li>All new client Challenge Tests share the §6.X-debt execution caveat:
+source-written + scanner-verified on darwin/arm64, EXECUTED on a Linux
+x86_64 + KVM gate-host (or per §6.AH container/VM path). State this
+honestly in each test's KDoc.</li>
+<li>The unit (ViewModel) layer is comparatively strong (38 client + 9
+api-app test files). The gap is overwhelmingly at the <strong>end-to-end
+rendered-UI layer</strong>, which is exactly where the
+toggle/serialization crash class lives.</li>
+</ul>
+</body>
+</html>

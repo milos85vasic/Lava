@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>jackett-sidecar</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="enabling-the-optional-jackett-sidecar">Enabling the Optional
+Jackett Sidecar</h1>
+<!-- §11.4.44 revision header -->
+
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Document</td>
+<td><code>docs/guides/jackett-sidecar.md</code></td>
+</tr>
+<tr>
+<td>Revision</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Last updated</td>
+<td>2026-06-08</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>Current</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td>Operator guide to running the optional Jackett (+ FlareSolverr)
+sidecar behind <code>lava-api-go</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Grounded in <code>lava-api-go/internal/config/config.go</code>,
+<code>lava-api-go/internal/router/router.go</code>,
+<code>lava-api-go/internal/handlers/v1/jackett.go</code>,
+<code>tools/lava-containers/docker-compose.jackett.yml</code>, and
+<code>docs/requests/improvements/lava_jackett_program_worklog.md</code>.
+Not-yet-wired items are marked PENDING (§11.4.6 — no guessing).</p>
+</blockquote>
+<hr />
+<h2 id="what-the-jackett-sidecar-is">What the Jackett sidecar is</h2>
+<p><a href="https://github.com/Jackett/Jackett">Jackett</a> is a Torznab
+indexer proxy: it turns dozens of tracker sites into a single normalized
+search API. Lava can run Jackett as an <strong>optional sidecar</strong>
+so that <code>lava-api-go</code> can search indexers Lava has no native
+scraper for.</p>
+<p><strong>Key topology rule (from
+<code>docker-compose.jackett.yml</code>):</strong> the Android app
+<strong>never talks to Jackett directly.</strong> Jackett (port
+<code>9117</code>) and FlareSolverr (port <code>8191</code>) stay on the
+internal <code>lava-net</code> bridge and are <strong>not</strong>
+published to the LAN. The app sees exactly one endpoint —
+<code>lava-api-go</code> (<code>_lava-api._tcp</code>,
+<code>:8443</code>) — and <code>lava-api-go</code> proxies Torznab
+server-side, holding the Jackett <code>api_key</code> so the secret
+never reaches the device (§6.H).</p>
+<pre><code>Android app ──mDNS(_lava-api._tcp)──▶ lava-api-go (:8443, host-net, TLS+HMAC)
+                                           │  (server-side HTTP, holds api_key)
+                                           ▼
+                                      jackett (:9117)   ── lava-net, NOT advertised
+                                           │
+                             (only when profile=cloudflare)
+                                           ▼
+                                   flaresolverr (:8191) ── lava-net</code></pre>
+<hr />
+<h2 id="the-configuration-knobs">The configuration knobs</h2>
+<p><code>lava-api-go</code> reads four env vars at boot
+(<code>internal/config/config.go</code>). The route is <strong>OFF by
+default</strong> (§6.R — nothing hardcoded, sidecar is opt-in):</p>
+<table>
+<thead>
+<tr>
+<th>Env var</th>
+<th>Config field</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LAVA_API_JACKETT_ENABLED</code></td>
+<td><code>JackettEnabled</code></td>
+<td><code>false</code></td>
+<td>Turns the <code>/jackett/search</code> route on.</td>
+</tr>
+<tr>
+<td><code>LAVA_API_JACKETT_URL</code></td>
+<td><code>JackettBaseURL</code></td>
+<td>(empty)</td>
+<td>Sidecar base, e.g. <code>http://lava-jackett:9117</code>.</td>
+</tr>
+<tr>
+<td><code>LAVA_API_JACKETT_APIKEY</code></td>
+<td><code>JackettAPIKey</code></td>
+<td>(empty)</td>
+<td>Jackett <code>api_key</code> — <strong>server-side secret
+only</strong> (§6.H).</td>
+</tr>
+<tr>
+<td><code>LAVA_API_JACKETT_DEFAULT_INDEXER</code></td>
+<td><code>JackettDefaultIndexer</code></td>
+<td><code>all</code></td>
+<td>Indexer id used when a request omits <code>indexer</code>
+(<code>all</code> = every configured indexer).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Validation (config.go):</strong> when
+<code>LAVA_API_JACKETT_ENABLED=true</code>, both
+<code>LAVA_API_JACKETT_URL</code> <strong>and</strong>
+<code>LAVA_API_JACKETT_APIKEY</code> must be set, or boot fails with:
+<code>config: LAVA_API_JACKETT_URL and LAVA_API_JACKETT_APIKEY are required when LAVA_API_JACKETT_ENABLED=true</code>.</p>
+<blockquote>
+<p><strong>PENDING:</strong> these four <code>LAVA_API_JACKETT_*</code>
+vars are <strong>not yet present in <code>.env.example</code></strong>
+at the time of writing — only the compose-glue vars below are documented
+there. Set them in your gitignored <code>.env</code> directly.</p>
+</blockquote>
+<hr />
+<h2 id="the-single-route-the-app-uses">The single route the app
+uses</h2>
+<p>From <code>internal/router/router.go</code>, the route is registered
+<strong>only</strong> when the sidecar is enabled and a client can be
+built:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> deps<span class="op">.</span>Cfg <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> deps<span class="op">.</span>Cfg<span class="op">.</span>JackettEnabled <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> jc<span class="op">,</span> err <span class="op">:=</span> jackett<span class="op">.</span>NewClient<span class="op">(...);</span> <span class="op">...</span> <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        jh <span class="op">:=</span> v1handlers<span class="op">.</span>NewJackettHandler<span class="op">(</span>jc<span class="op">,</span> deps<span class="op">.</span>Cfg<span class="op">.</span>JackettDefaultIndexer<span class="op">)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        engine<span class="op">.</span>GET<span class="op">(</span><span class="st">&quot;/jackett/search&quot;</span><span class="op">,</span> jh<span class="op">.</span>GetSearch<span class="op">)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>GET /jackett/search</code> (handler
+<code>jackett.go</code>):</p>
+<ul>
+<li><strong>Query params:</strong> <code>q</code> (required),
+<code>indexer</code> (optional — defaults to the configured default
+indexer / <code>all</code>).</li>
+<li><strong>Responses:</strong> <code>200</code> JSON (mapped into the
+same <code>provider.SearchResult</code> DTO every other Lava search
+surface returns, stamped with provider id <code>jackett</code>),
+<code>400</code> if <code>q</code> is missing, <code>502</code> on a
+sidecar error.</li>
+</ul>
+<p>The app therefore consumes Jackett results exactly like any native
+provider's results — it has no awareness of Jackett at all.</p>
+<hr />
+<h2 id="bringing-the-sidecar-up">Bringing the sidecar up</h2>
+<p>Orchestration is owned by
+<code>tools/lava-containers/cmd/lava-containers</code>. Do
+<strong>not</strong> bring <code>docker-compose.jackett.yml</code> up on
+its own — merge it with the root compose (per the file's own
+header):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose <span class="at">-f</span> ../../docker-compose.yml <span class="at">-f</span> docker-compose.jackett.yml <span class="dt">\</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--profile</span> api-go <span class="at">--profile</span> jackett config        <span class="co"># verify the merged config</span></span></code></pre></div>
+<p>Two compose profiles (from
+<code>docker-compose.jackett.yml</code>):</p>
+<ul>
+<li><strong><code>jackett</code></strong> — brings up
+<code>lava-jackett</code> only.</li>
+<li><strong><code>cloudflare</code></strong> — additionally brings up
+<code>lava-flaresolverr</code>.</li>
+</ul>
+<h3 id="the-lava-jackett-service">The <code>lava-jackett</code>
+service</h3>
+<ul>
+<li>Image: <code>${LAVA_JACKETT_IMAGE}</code> (digest-pin in
+<code>.env</code>; LinuxServer multi-arch).</li>
+<li>Exposed only on the bridge (<code>expose: 9117</code>) — <strong>no
+<code>ports:</code> mapping to the LAN</strong>.</li>
+<li>Env: <code>PUID</code>/<code>PGID</code>/<code>TZ</code>
+(<code>LAVA_JACKETT_*</code>), <code>AUTO_UPDATE: false</code>
+(self-update would drift the digest pin).</li>
+<li>Healthcheck is a real <strong>Torznab <code>t=caps</code>
+probe</strong> (HTTP 200 + parseable body), not a bare TCP check — so it
+also validates the <code>api_key</code>, not just liveness (§6.B).
+<code>start_period</code> is 40s for the .NET cold load.</li>
+</ul>
+<h3 id="where-the-api_key-lives">Where the api_key lives</h3>
+<p>The Jackett <code>api_key</code> is <strong>generated on first
+run</strong> into the gitignored <code>/config</code> volume's
+<code>ServerConfig.json</code>
+(<code>${LAVA_JACKETT_CONFIG_DIR:-./.jackett-config}:/config</code>).
+The Containers glue reads it from there and injects it into
+<code>lava-api-go</code> as <code>LAVA_API_JACKETT_APIKEY</code>. It is
+<strong>never committed, never logged, never sent to the device</strong>
+(§6.H). The <code>/config</code> volume is a secrets store and its host
+path MUST be gitignored.</p>
+<hr />
+<h2 id="cloudflare-protected-trackers-flaresolverr">Cloudflare-protected
+trackers (FlareSolverr)</h2>
+<p>Some indexers (notably <strong>IPTorrents</strong>) sit behind a
+Cloudflare / DDoS-Guard challenge. <strong>FlareSolverr</strong> solves
+these by running a headless Chromium per concurrent challenge. Because
+that is the heaviest component in the stack, it is profiled
+<strong>off</strong> by default — only bring it up
+(<code>--profile cloudflare</code>) when you have an indexer that needs
+it.</p>
+<h3 id="the-lava-flaresolverr-service">The
+<code>lava-flaresolverr</code> service</h3>
+<ul>
+<li>Image: <code>${LAVA_FLARESOLVERR_IMAGE}</code>.</li>
+<li>Exposed only on the bridge (<code>expose: 8191</code>) — never
+published to the LAN.</li>
+<li>Env: <code>LOG_LEVEL</code>, <code>HOST=0.0.0.0</code>,
+<code>PORT=8191</code>, <code>HEADLESS=true</code>.</li>
+<li>Healthcheck POSTs <code>{"cmd":"sessions.list"}</code> to
+<code>/v1</code> (FlareSolverr has no <code>/health</code>; a bare TCP
+check would be a bluff because the Python proxy binds before Chromium is
+ready). <code>start_period</code> is 60s for Chromium warm-up.</li>
+<li><strong>Wiring:</strong> Jackett is pointed at FlareSolverr
+(<code>http://lava-flaresolverr:8191</code>) at
+<strong>indexer-provisioning time</strong> inside Jackett's own config —
+not via a Lava env var.</li>
+</ul>
+<blockquote>
+<p>Keep the <code>cloudflare</code> profile <strong>off</strong> for
+RuTracker / RuTor / NNM-Club-only sessions — those do not need
+FlareSolverr, and the Chromium process is RAM-heavy.</p>
+</blockquote>
+<hr />
+<h2 id="compose-glue-env-vars-in-envexample">Compose-glue env vars (in
+<code>.env.example</code>)</h2>
+<p>These configure the containers (distinct from the
+<code>LAVA_API_JACKETT_*</code> vars that configure
+<code>lava-api-go</code> itself). All are §6.R-injected — no literals in
+the compose file:</p>
+<table>
+<thead>
+<tr>
+<th>Env var</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LAVA_JACKETT_IMAGE</code></td>
+<td>Digest-pinned Jackett image.</td>
+</tr>
+<tr>
+<td><code>LAVA_FLARESOLVERR_IMAGE</code></td>
+<td>Digest-pinned FlareSolverr image.</td>
+</tr>
+<tr>
+<td><code>LAVA_JACKETT_PUID</code> / <code>LAVA_JACKETT_PGID</code> /
+<code>LAVA_JACKETT_TZ</code></td>
+<td>Container user / timezone.</td>
+</tr>
+<tr>
+<td><code>LAVA_JACKETT_CONFIG_DIR</code></td>
+<td>Host path for the <code>/config</code> secrets volume
+(gitignored).</td>
+</tr>
+<tr>
+<td><code>LAVA_JACKETT_API_KEY</code></td>
+<td>Read from <code>/config</code>, used by the healthcheck probe and
+injected into <code>lava-api-go</code>.</td>
+</tr>
+<tr>
+<td><code>LAVA_JACKETT_HEALTH_INDEXER</code></td>
+<td>Indexer id used by the caps healthcheck (default
+<code>all</code>).</td>
+</tr>
+<tr>
+<td><code>LAVA_FLARESOLVERR_LOG_LEVEL</code></td>
+<td>FlareSolverr log verbosity.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="step-by-step-enable-jackett">Step-by-step: enable Jackett</h2>
+<ol type="1">
+<li>Set the four <code>LAVA_API_JACKETT_*</code> vars in your gitignored
+<code>.env</code> (<code>LAVA_API_JACKETT_ENABLED=true</code>,
+<code>LAVA_API_JACKETT_URL=http://lava-jackett:9117</code>,
+<code>LAVA_API_JACKETT_APIKEY=&lt;from /config&gt;</code>, optionally
+<code>LAVA_API_JACKETT_DEFAULT_INDEXER</code>).</li>
+<li>Set the compose-glue vars (<code>LAVA_JACKETT_IMAGE</code>,
+<code>LAVA_JACKETT_CONFIG_DIR</code>, <code>LAVA_JACKETT_API_KEY</code>,
+etc.) in <code>.env</code>.</li>
+<li>Bring up the <code>jackett</code> profile (merged with the root
+compose, via the <code>lava-containers</code> CLI). On first run, open
+the Jackett WebUI <strong>from the host</strong> (it is
+bridge-internal), add indexers, and copy the generated
+<code>api_key</code> from <code>ServerConfig.json</code> into
+<code>LAVA_API_JACKETT_APIKEY</code> /
+<code>LAVA_JACKETT_API_KEY</code>.</li>
+<li>For a Cloudflare-protected indexer (e.g. IPTorrents), also bring up
+the <code>cloudflare</code> profile and point that indexer at
+<code>http://lava-flaresolverr:8191</code> inside Jackett.</li>
+<li>Restart <code>lava-api-go</code> so it picks up the new env and
+registers <code>/jackett/search</code>. The app's searches now include
+Jackett results.</li>
+</ol>
+</body>
+</html>

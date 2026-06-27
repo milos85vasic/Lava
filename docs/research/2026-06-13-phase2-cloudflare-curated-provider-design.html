@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-13-phase2-cloudflare-curated-provider-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="phase-2-defect-b--cloudflare-gated-curated-provider-design">Phase 2
+(Defect B) — Cloudflare-Gated Curated Provider Design</h1>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Date</td>
+<td>2026-06-13</td>
+</tr>
+<tr>
+<td>Author</td>
+<td>research+design subagent</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>DESIGN — research/evidence + proposed structure; NO code
+written</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td>Add a Cloudflare-gated curated provider (1337x canonical) routed
+through a FlareSolverr seam</td>
+</tr>
+<tr>
+<td>Classification</td>
+<td>project-specific (Lava curated-provider feature; the
+FlareSolverr-client pattern is reusable but the 1337x parser is
+Lava-domain)</td>
+</tr>
+<tr>
+<td>Constraint compliance</td>
+<td>No code edited; no <code>curated.go</code> /
+<code>api-source.hash</code> touched; no push; bounded curls only</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>§11.4.6 no-guessing:</strong> every load-bearing claim below
+is backed by a captured command output OR explicitly marked
+<code>UNCONFIRMED:</code> with what is needed to confirm it. The 1337x
+results-table selectors are <code>UNCONFIRMED:</code> because the page
+is unreachable without FlareSolverr (proven below).</p>
+</blockquote>
+<hr />
+<h2 id="0-verdict-read-first">0. Verdict (read first)</h2>
+<p><strong>BLOCKED — not ready to implement as-is.</strong></p>
+<p>The single most important seam fact: <strong>the existing
+FlareSolverr integration is entirely Jackett-internal — there is NO Go
+code in <code>lava-api-go</code> that talks to FlareSolverr.</strong>
+lava-api-go talks <strong>Torznab to Jackett</strong>
+(<code>internal/jackett/client.go</code>); <strong>Jackett</strong>
+holds the FlareSolverr URL in its own config and calls FlareSolverr's
+<code>/v1</code> API behind the scenes. The "seam" a curated CF provider
+needs — an <strong>arbitrary-URL HTML fetch through FlareSolverr from
+Go</strong> — <strong>does not exist yet and must be built.</strong></p>
+<p>What blocks implementation:</p>
+<ol type="1">
+<li><strong>No Go FlareSolverr client.</strong> A new
+<code>internal/provider/flaresolverr</code> package (or similar) must be
+written: POST <code>/v1</code>
+<code>{"cmd":"request.get","url":...}</code>, parse the
+<code>solution.response</code> HTML. This is net-new Go code, not a
+generalization of an existing function.</li>
+<li><strong>1337x results-table selectors are UNCONFIRMED.</strong> The
+real results page is CF-gated (proven §2) — I cannot fetch it without a
+running FlareSolverr to read the live HTML and pin the goquery
+selectors. Selectors in §3 are derived from 1337x's well-known
+historical structure and marked <code>UNCONFIRMED:</code>.</li>
+<li><strong>Runtime dependency on a sidecar contradicts the
+curated-provider thesis.</strong> Phase-1 curated providers are "zero
+external dependency, compiled into <code>liblavaapi.so</code>"
+(<code>curated.go</code> package doc). A CF-gated provider needs a live
+FlareSolverr container (heavy headless Chromium). That is an
+<strong>architectural decision for the operator</strong>, not a
+mechanical add — see §4.</li>
+</ol>
+<p>If the operator accepts the FlareSolverr runtime dependency for
+curated providers, the implementation path is clear and is specified in
+§3 + §5.</p>
+<hr />
+<h2 id="1-the-existing-flaresolverr-seam--precise-map">1. The existing
+FlareSolverr seam — precise map</h2>
+<h3 id="11-what-actually-exists-evidence">1.1 What actually exists
+(evidence)</h3>
+<p><code>grep</code> for <code>flaresolverr</code> across
+<code>lava-api-go/internal/</code> returns <strong>zero Go source
+hits</strong> — only comments in curated clients noting "no Cloudflare".
+The only <code>flaresolverr</code> references in tracked code are:</p>
+<ul>
+<li><code>.env.example</code> (image + host/port/log-level env
+knobs)</li>
+<li><code>tools/lava-containers/docker-compose.jackett.yml</code> (the
+<code>lava-flaresolverr</code> service)</li>
+<li>docs (<code>docs/guides/jackett-sidecar.md</code>,
+<code>docs/qa/jackett-local-stack-research.md</code>)</li>
+</ul>
+<p><strong>There is no <code>request.get</code> /
+<code>sessions.create</code> call anywhere in Go.</strong></p>
+<h3 id="12-the-jackett-seam-what-lava-api-go-does-talk-to">1.2 The
+Jackett seam (what lava-api-go DOES talk to)</h3>
+<p><code>lava-api-go/internal/jackett/client.go</code>:</p>
+<ul>
+<li><code>type Config { BaseURL, APIKey string; Timeout time.Duration }</code>
+— both injected at runtime (§6.R); <code>LAVA_API_JACKETT_URL</code>
+(default <code>http://127.0.0.1:9117</code>) +
+<code>LAVA_API_JACKETT_APIKEY</code> from <code>.env</code>.</li>
+<li><code>Client.Search(ctx, indexerID, query) ([]Result, error)</code>
+— GET
+<code>&lt;base&gt;/api/v2.0/indexers/&lt;id&gt;/results/torznab/api?apikey=&amp;t=search&amp;q=</code>,
+parses Torznab XML (<code>ParseResults</code>).</li>
+<li><code>Client.Download(ctx, downloadURL)</code> — resolves a Torznab
+item's <code>/dl/</code> link; the HTTP client uses
+<code>CheckRedirect: ErrUseLastResponse</code> to capture a
+<code>302 → Location: magnet:...</code> instead of following it.</li>
+</ul>
+<p><strong>FlareSolverr is invisible to this code.</strong> Per
+<code>docs/qa/jackett-local-stack-research.md</code> §4 + the compose
+fragment comments: Jackett is pointed at
+<code>http://lava-flaresolverr:8191</code> <strong>inside Jackett's own
+config</strong> (<code>POST .../indexers/&lt;id&gt;/config</code> at
+provisioning time, or global config). When an indexer is CF-gated,
+<strong>Jackett</strong> calls FlareSolverr; lava-api-go just sees
+Torznab results.</p>
+<h3 id="13-the-flaresolverr-v1-api-what-a-new-go-client-would-call">1.3
+The FlareSolverr <code>/v1</code> API (what a NEW Go client would
+call)</h3>
+<p>Captured from
+<code>docs/qa/jackett-local-stack-research.md:212-213</code> +
+<code>docs/guides/jackett-sidecar.md:149</code> + the compose
+healthcheck:</p>
+<ul>
+<li>FlareSolverr is its own container on port <strong>8191</strong>,
+JSON POST API at <strong><code>/v1</code></strong>.</li>
+<li>Commands: <code>request.get</code>, <code>request.post</code>,
+<code>sessions.create</code> / <code>sessions.list</code> /
+<code>sessions.destroy</code>.</li>
+<li>Healthcheck (compose, verified working 2026-06-08): POST
+<code>/v1</code> <code>{"cmd":"sessions.list"}</code> → HTTP 200. The
+image ships <code>curl</code> but <strong>not</strong> <code>wget</code>
+(forensic note in the compose file, line 132-134).</li>
+</ul>
+<p><strong><code>request.get</code> request/response shape</strong>
+(FlareSolverr public API; the de-facto contract Jackett uses):</p>
+<pre class="jsonc"><code>// POST http://&lt;flaresolverr&gt;:8191/v1
+// Content-Type: application/json
+{
+  &quot;cmd&quot;: &quot;request.get&quot;,
+  &quot;url&quot;: &quot;https://1337x.to/search/ubuntu/1/&quot;,
+  &quot;maxTimeout&quot;: 60000,           // ms; Chromium challenge-solve budget
+  &quot;session&quot;: &quot;lava-1337x&quot;        // optional; reuse a warm Chromium session
+}
+
+// 200 response (abbreviated)
+{
+  &quot;status&quot;: &quot;ok&quot;,
+  &quot;message&quot;: &quot;Challenge solved!&quot;,
+  &quot;solution&quot;: {
+    &quot;url&quot;: &quot;https://1337x.to/search/ubuntu/1/&quot;,
+    &quot;status&quot;: 200,
+    &quot;response&quot;: &quot;&lt;!DOCTYPE html&gt; ... full solved HTML ... &lt;/html&gt;&quot;,
+    &quot;cookies&quot;: [ { &quot;name&quot;: &quot;cf_clearance&quot;, ... } ],
+    &quot;userAgent&quot;: &quot;Mozilla/5.0 ...&quot;
+  }
+}</code></pre>
+<blockquote>
+<p><code>UNCONFIRMED:</code> the exact JSON field names above
+(<code>solution.response</code>, <code>solution.status</code>) are from
+the FlareSolverr public API documentation, NOT captured from a live
+response in this repo (no FlareSolverr is running on this host). They
+are stable across FlareSolverr v3.x but MUST be verified against the
+pinned <code>${LAVA_FLARESOLVERR_IMAGE}</code> before the parser depends
+on them — capture one real <code>request.get</code> response and pin the
+struct to it.</p>
+</blockquote>
+<h3
+id="14-the-curated-provider-contract-what-a-new-provider-must-satisfy">1.4
+The curated-provider contract (what a new provider must satisfy)</h3>
+<p>From
+<code>internal/provider/curated/thepiratebay/{client,provider}.go</code>
++ <code>internal/provider/provider.go</code>:</p>
+<ul>
+<li>Each provider is a <code>provider.Provider</code> (interface at
+<code>provider.go:244</code>), conventionally split into a
+<code>Client</code> (HTTP + parse) and a <code>ProviderAdapter</code>
+embedding <code>provider.BaseProvider</code>.</li>
+<li>Registered with one line in <code>curated.go</code>
+<code>RegisterAll</code> (the §6.J registration-parity guard — one site
+feeds both <code>internal/mobile</code> embed and
+<code>cmd/lava-api-go</code>).</li>
+<li>Capability constants (<code>provider.go:43-50</code>):
+<code>CapSearch = "SEARCH"</code>,
+<code>CapMagnetLink = "MAGNET_LINK"</code>. AuthType
+(<code>provider.go:61</code>): <code>AuthNone = "NONE"</code>.</li>
+<li><code>Search(ctx, query, page) (*provider.SearchResult, error)</code>
+returns
+<code>[]provider.SearchItem{ ID, Title, InfoHash, MagnetLink, SizeBytes, Seeders, Leechers, Date, Category }</code>.</li>
+<li>Magnet built from info_hash + name + <code>publicTrackers</code>
+commons (TPB pattern).</li>
+<li>Error mapping: <code>provider.ErrNoData</code>,
+<code>ErrNotFound</code>, <code>ErrForbidden</code>,
+<code>ErrUnknown</code>.</li>
+</ul>
+<hr />
+<h2 id="2-1337x-cloudflare-proof-captured-2026-06-13">2. 1337x
+Cloudflare proof (captured 2026-06-13)</h2>
+<p>A plain GET of the search path <strong>and</strong> the homepage is
+blocked by a CF interactive challenge — proven, not assumed:</p>
+<pre class="text"><code>$ curl -sS -A &quot;Mozilla/5.0 ... Chrome/120.0 Safari/537.36&quot; \
+    &quot;https://1337x.to/search/ubuntu/1/&quot;
+HTTP_CODE=403
+
+# response headers:
+HTTP/2 403
+cf-mitigated: challenge
+server: cloudflare
+cf-ray: a0aff2583c2d5ebd-OSL
+
+# response body (5617 bytes):
+&lt;title&gt;Just a moment...&lt;/title&gt;
+Enable JavaScript and cookies
+_cf_chl            (×8)
+challenge-platform
+
+$ curl ... &quot;https://1337x.to/&quot;        # homepage too
+HTTP/2 403
+cf-mitigated: challenge
+server: cloudflare</code></pre>
+<p><strong>Conclusion (CONFIRMED):</strong> 1337x serves the Cloudflare
+"Just a moment..." JS/cookie interstitial (HTTP 403,
+<code>cf-mitigated: challenge</code>, <code>challenge-platform</code>,
+<code>_cf_chl</code>) on every plain GET. A curated provider
+<strong>cannot</strong> use a direct <code>http.Get</code> like the
+Phase-1 providers; it MUST route through a challenge-solver
+(FlareSolverr). This is exactly the IPTorrents class
+<code>.env.example:38</code> describes.</p>
+<blockquote>
+<p>Note on TorrentGalaxy: per the task brief it is DNS-dead —
+<strong>skip it</strong>. 1337x is the canonical Phase-2 candidate. Not
+re-verified here (out of scope).</p>
+</blockquote>
+<hr />
+<h2 id="3-proposed-provider-design">3. Proposed provider design</h2>
+<p>Two new packages (mirroring the Client / Adapter split, plus the
+missing seam):</p>
+<pre><code>internal/provider/flaresolverr/         # NEW — the missing seam (reusable)
+    client.go        # FlareSolverrClient: POST /v1 request.get → solved HTML
+internal/provider/curated/onethreethreesevenx/   # NEW curated provider
+    client.go        # Search: build URL → FlareSolverr fetch → goquery parse
+    provider.go      # ProviderAdapter: SEARCH + MAGNET_LINK, AuthNone, Kind native</code></pre>
+<p>(Package name <code>onethreethreesevenx</code> because a Go
+identifier cannot start with a digit; <code>providerID = "1337x"</code>
+is the stable catalogue id, set as a string constant — same split TPB
+uses between package name and <code>providerID</code>.)</p>
+<h3
+id="31-the-flaresolverr-go-client-internalproviderflaresolverrclientgo">3.1
+The FlareSolverr Go client
+(<code>internal/provider/flaresolverr/client.go</code>)</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Config <span class="kw">struct</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    BaseURL    <span class="dt">string</span>        <span class="co">// LAVA_API_FLARESOLVERR_URL, e.g. http://127.0.0.1:8191 (§6.R, NEW env var)</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    Timeout    time<span class="op">.</span>Duration <span class="co">// bounds the Go-side request; default 70s (&gt; maxTimeout)</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    MaxTimeout time<span class="op">.</span>Duration <span class="co">// FlareSolverr&#39;s own Chromium budget; default 60s</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Get solves the CF challenge for url and returns the solved HTML + status.</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Client<span class="op">)</span> Get<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> url <span class="dt">string</span><span class="op">)</span> <span class="op">(</span>html <span class="dt">string</span><span class="op">,</span> status <span class="dt">int</span><span class="op">,</span> err <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">//   POST {BaseURL}/v1  {&quot;cmd&quot;:&quot;request.get&quot;,&quot;url&quot;:url,&quot;maxTimeout&quot;:&lt;ms&gt;,&quot;session&quot;:&quot;lava-1337x&quot;}</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">//   on resp.status==&quot;ok&quot; &amp;&amp; solution.status==200 → return solution.response</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">//   else → provider.ErrUnknown (or ErrForbidden if solution.status==403)</span></span></code></pre></div>
+<ul>
+<li><strong>§6.R:</strong> <code>LAVA_API_FLARESOLVERR_URL</code> is a
+NEW <code>.env</code> knob (the <code>LAVA_FLARESOLVERR_*</code> vars
+today only feed the compose container; the Go consumer URL is net-new,
+mirroring how <code>LAVA_API_JACKETT_URL</code> differs from
+<code>LAVA_JACKETT_*</code>). Default <code>http://127.0.0.1:8191</code>
+per the loopback-publish topology.</li>
+<li><strong>§6.B:</strong> an optional <code>Health(ctx)</code> posting
+<code>{"cmd":"sessions.list"}</code> (the same probe the compose
+healthcheck uses) so the provider's <code>HealthCheck</code> honestly
+reports <code>Healthy:false</code> when FlareSolverr is down.</li>
+<li><strong>§6.AC:</strong> on any solve failure,
+<code>observability.RecordNonFatal(ctx, err, attrs)</code> with
+<code>module="flaresolverr"</code>,
+<code>operation="request.get"</code>, <code>error_class</code>, redacted
+<code>url</code>.</li>
+</ul>
+<h3 id="32-the-1337x-provider-client-onethreethreesevenxclientgo">3.2
+The 1337x provider client
+(<code>.../onethreethreesevenx/client.go</code>)</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> DefaultBaseURL <span class="op">=</span> <span class="st">&quot;https://1337x.to&quot;</span>   <span class="co">// §6.R: this provider&#39;s fixed upstream identity</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> searchPathFmt  <span class="op">=</span> <span class="st">&quot;/search/%s/%d/&quot;</span>      <span class="co">// /search/&lt;query&gt;/&lt;page&gt;/</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>c <span class="op">*</span>Client<span class="op">)</span> Search<span class="op">(</span>ctx<span class="op">,</span> query <span class="dt">string</span><span class="op">,</span> page <span class="dt">int</span><span class="op">)</span> <span class="op">(*</span>provider<span class="op">.</span>SearchResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> page <span class="op">&lt;</span> <span class="dv">1</span> <span class="op">{</span> page <span class="op">=</span> <span class="dv">1</span> <span class="op">}</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    u <span class="op">:=</span> c<span class="op">.</span>baseURL <span class="op">+</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span>searchPathFmt<span class="op">,</span> url<span class="op">.</span>PathEscape<span class="op">(</span>query<span class="op">),</span> page<span class="op">)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    html<span class="op">,</span> status<span class="op">,</span> err <span class="op">:=</span> c<span class="op">.</span>flare<span class="op">.</span>Get<span class="op">(</span>ctx<span class="op">,</span> u<span class="op">)</span>     <span class="co">// &lt;-- the seam: FlareSolverr, NOT http.Get</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// map status → provider.Err*</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    items <span class="op">:=</span> parseSearchHTML<span class="op">(</span>html<span class="op">)</span>                <span class="co">// goquery</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 1337x search rows DO NOT carry the magnet — only a detail-page link +</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// seeders/leechers/size. Two-step is required (see §3.4).</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="33-goquery-selectors--unconfirmed">3.3 goquery selectors —
+<code>UNCONFIRMED:</code></h3>
+<blockquote>
+<p><strong><code>UNCONFIRMED:</code></strong> The real solved HTML is
+unreachable from this host (no FlareSolverr running — §2 proves the page
+is CF-gated). The selectors below are 1337x's well-known historical
+results-table structure; they MUST be pinned against a captured solved
+page before the parser is trusted. <strong>To confirm:</strong> bring up
+the <code>cloudflare</code> compose profile, run one
+<code>request.get</code> for <code>/search/ubuntu/1/</code>, save
+<code>solution.response</code> to <code>testdata/</code>, and verify
+each selector against it.</p>
+</blockquote>
+<p>Search results table (<code>UNCONFIRMED:</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Selector (relative to <code>table.table-list tbody tr</code>)</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Row</td>
+<td><code>table.table-list tbody tr</code></td>
+<td>one torrent per row</td>
+</tr>
+<tr>
+<td>Title + detail link</td>
+<td><code>td.coll-1.name a:nth-of-type(2)</code></td>
+<td><code>href="/torrent/&lt;id&gt;/&lt;slug&gt;/"</code>; text = title.
+(first <code>a</code> is a category icon)</td>
+</tr>
+<tr>
+<td>Seeders</td>
+<td><code>td.coll-2.seeds</code></td>
+<td>integer text</td>
+</tr>
+<tr>
+<td>Leechers</td>
+<td><code>td.coll-3.leeches</code></td>
+<td>integer text</td>
+</tr>
+<tr>
+<td>Date added</td>
+<td><code>td.coll-date</code></td>
+<td>display date</td>
+</tr>
+<tr>
+<td>Size</td>
+<td><code>td.coll-4.size</code></td>
+<td>e.g. "3.2 GB"; contains a nested <code>&lt;span&gt;</code>
+seeders-dup — take the direct text node</td>
+</tr>
+</tbody>
+</table>
+<p>Detail page (<code>UNCONFIRMED:</code>) — for the magnet (search rows
+lack it):</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Selector</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Magnet</td>
+<td><code>a[href^="magnet:"]</code></td>
+<td>the magnet URI is on the torrent detail page, not the results
+row</td>
+</tr>
+<tr>
+<td>Info hash</td>
+<td>parse <code>xt=urn:btih:&lt;hash&gt;</code> from the magnet</td>
+<td>OR <code>div.infohash-box span</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="34-capability-honesty-6e--important-caveat">3.4 Capability
+honesty (§6.E) — important caveat</h3>
+<p>1337x search rows do <strong>not</strong> embed the magnet (unlike
+apibay/TPB). The magnet is on the <strong>detail page</strong>.
+Therefore an honest 1337x provider has two options:</p>
+<ul>
+<li><strong>(A) Two-step in Search:</strong> for each results row, do a
+second FlareSolverr <code>request.get</code> on the detail page to
+extract the magnet. <strong>Cost:</strong> N+1 headless- Chromium solves
+per search — very heavy (FlareSolverr runs Chromium per request). Likely
+too slow for a live search.</li>
+<li><strong>(B) Defer the magnet to
+<code>GetTopic</code>/<code>GetTorrent</code>:</strong> Search returns
+rows with <code>ID = detailPath</code>, Title, Seeders, Leechers, Size,
+<strong>but no MagnetLink</strong>; the magnet is resolved lazily when
+the user taps a result (<code>GetTopic</code>). This means the provider
+declares <code>CapSearch + CapTopic + CapMagnetLink</code> and Search
+items carry an empty <code>MagnetLink</code> until topic
+resolution.</li>
+</ul>
+<blockquote>
+<p><strong>§6.E capability honesty:</strong> Option B is the correct
+anti-bluff shape — declaring <code>CapMagnetLink</code> while Search
+returns empty magnets would be dishonest unless the capability is
+understood as "magnet available via topic resolution". The design
+recommends <strong>Option B</strong>:
+<code>Capabilities() = [CapSearch, CapTopic, CapMagnetLink]</code>,
+<code>GetTopic</code> does the single detail-page FlareSolverr solve and
+returns the magnet. This keeps a search to ONE solve and defers the
+second solve to an explicit user tap. The
+<code>_ provider.ErrUnsupported</code> stubs for
+<code>GetTopic</code>/<code>GetTorrent</code> that TPB uses are REPLACED
+with a real <code>GetTopic</code> here.</p>
+</blockquote>
+<h3 id="35-providergo-adapter-mirrors-tpb-deltas-only">3.5 provider.go
+adapter (mirrors TPB, deltas only)</h3>
+<ul>
+<li><code>providerID = "1337x"</code>,
+<code>DisplayName() = "1337x"</code>,
+<code>canonicalSite = "https://1337x.to"</code>.</li>
+<li><code>AuthType() = provider.AuthNone</code>,
+<code>SupportsAnonymous() = true</code>, <code>Kind()</code> inherits
+"native".</li>
+<li><code>Capabilities() = [CapSearch, CapTopic, CapMagnetLink]</code>
+(per §3.4 Option B).</li>
+<li><code>Search</code> delegates to <code>client.Search</code>;
+<code>GetTopic</code> delegates to <code>client.GetTopic</code>
+(detail-page solve → magnet). All other methods return
+<code>provider.ErrUnsupported</code> (TPB pattern).</li>
+<li><code>HealthCheck</code> → <code>client.Health</code> →
+<code>flare.Health</code> (FlareSolverr
+<code>sessions.list</code>).</li>
+<li>Registration: <strong>one</strong> line added to
+<code>curated.go</code> <code>RegisterAll</code>
+(<code>r.Register(onethreethreesevenx.New(flareClient))</code>).
+<strong>Out of scope for this doc — do NOT touch <code>curated.go</code>
+per the constraint; this is the implementation step.</strong></li>
+</ul>
+<hr />
+<h2 id="4-seam-generalization-assessment">4. Seam-generalization
+assessment</h2>
+<p><strong>Q: Does the existing seam support an arbitrary-URL fetch
+(what a curated CF provider needs), or is it
+Jackett-specific?</strong></p>
+<p><strong>A: It is 100% Jackett-specific. There is NO reusable
+arbitrary-URL FlareSolverr fetch in Go at all.</strong>
+Specifically:</p>
+<ol type="1">
+<li><code>internal/jackett/client.go</code> only knows Torznab — it
+builds <code>/api/v2.0/indexers/.../torznab/api</code> URLs and GETs
+Jackett. It cannot fetch an arbitrary URL, and it never touches
+FlareSolverr.</li>
+<li>FlareSolverr is reached <strong>only by Jackett's own .NET
+process</strong>, configured via Jackett's indexer/global config
+(<code>http://lava-flaresolverr:8191</code>). No Go code posts to
+<code>/v1</code>.</li>
+<li>The compose fragment brings FlareSolverr up under the
+<code>cloudflare</code> profile, but nothing in <code>lava-api-go</code>
+consumes it directly.</li>
+</ol>
+<p><strong>Minimal generalization needed</strong> (the net-new
+work):</p>
+<ul>
+<li><strong>Write
+<code>internal/provider/flaresolverr/client.go</code></strong> — a
+small, reusable Go client:
+<code>Get(ctx, url) → (html, status, err)</code> over POST
+<code>/v1</code> <code>request.get</code>, plus <code>Health</code> over
+<code>sessions.list</code>. ~80-120 lines. This IS the seam; it is the
+prerequisite for ANY curated CF provider (1337x, and later any other CF
+tracker).</li>
+<li><strong>Add <code>LAVA_API_FLARESOLVERR_URL</code> to
+config</strong> — <code>internal/config/config.go</code> +
+<code>.env.example</code> (the Go consumer URL; distinct from the
+<code>LAVA_FLARESOLVERR_*</code> container knobs, exactly as
+<code>LAVA_API_JACKETT_URL</code> is distinct from
+<code>LAVA_JACKETT_*</code>).</li>
+<li><strong>Decide the runtime-dependency posture (operator
+call).</strong> Phase-1 curated providers are explicitly "zero external
+dependency, compiled into liblavaapi.so" (<code>curated.go</code> doc).
+A CF-gated curated provider breaks that invariant — it needs a live
+FlareSolverr sidecar (heavy Chromium). Options:
+<ul>
+<li><strong>Gate it behind availability:</strong> register the 1337x
+provider only when <code>LAVA_API_FLARESOLVERR_URL</code> is set +
+<code>Health</code> passes; otherwise it is absent from the catalogue
+(honest — §6.E: no provider listed that cannot complete its flow). This
+is the recommended posture.</li>
+<li>This is a <strong>design decision</strong>, not a mechanical add —
+it determines whether 1337x ships in the always-on curated set or as an
+opt-in CF set.</li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="5-ready-to-implement-checklist">5. Ready-to-implement
+checklist</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Prove 1337x needs FlareSolverr</td>
+<td>✅ CONFIRMED (§2: 403 + cf-mitigated + Just-a-moment)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Map the existing seam</td>
+<td>✅ CONFIRMED (§1: seam is Jackett-internal; no Go FlareSolverr
+client exists)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>FlareSolverr <code>/v1</code> <code>request.get</code> response
+field names</td>
+<td>⚠️ <code>UNCONFIRMED:</code> — pin against a captured live response
+from <code>${LAVA_FLARESOLVERR_IMAGE}</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>1337x results-table goquery selectors</td>
+<td>⚠️ <code>UNCONFIRMED:</code> — pin against a captured solved page
+(needs FlareSolverr up)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>New <code>internal/provider/flaresolverr</code> Go client</td>
+<td>❌ Net-new code (the missing seam)</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>LAVA_API_FLARESOLVERR_URL</code> config +
+<code>.env.example</code></td>
+<td>❌ Net-new env knob</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Operator decision: runtime FlareSolverr dependency for curated
+set</td>
+<td>❌ BLOCKING design decision (§4)</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Magnet via two-step (§3.4 Option B: Search + GetTopic)</td>
+<td>⚠️ design recommends B; implementation choice</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Verdict: BLOCKED.</strong> Three things gate implementation:
+(a) the FlareSolverr Go client + config knob do not exist and must be
+built; (b) two selector/field sets are <code>UNCONFIRMED:</code> and
+need a live FlareSolverr to pin; (c) the operator must accept (or scope)
+the FlareSolverr runtime dependency for the curated set. Once the
+operator green-lights (c) and a FlareSolverr container is up to confirm
+(3) and (4), the implementation path in §3 is concrete and follows the
+established TPB Client/Adapter pattern with one real delta (the
+FlareSolverr seam + two-step magnet).</p>
+<hr />
+<h3 id="anti-bluff-falsifiability-note-per-6j--6l">Anti-bluff
+falsifiability note (per §6.J / §6.L)</h3>
+<p>This is a design doc, not code, so no test mutation applies. The
+honesty load-bearing claims are: the §2 CF proof is a real captured curl
+(not assumed), and the §4 "no Go FlareSolverr client exists" claim is a
+real <code>grep</code> result (zero source hits). Both are reproducible:
+re-run the §2 curl and re-run
+<code>grep -rn flaresolverr lava-api-go/internal/ --include='*.go' | grep -v _test</code>.</p>
+</body>
+</html>

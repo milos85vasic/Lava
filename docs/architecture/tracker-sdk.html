@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>tracker-sdk</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="tracker-sdk--provider-abstraction-architecture">Tracker SDK —
+Provider Abstraction Architecture</h1>
+<blockquote>
+<p><strong>Status:</strong> descriptive architecture reference. Every
+box, arrow, and symbol below corresponds to a real file in the working
+tree (cited inline). Anything not yet implemented is marked <strong>NOT
+IMPLEMENTED</strong>. Per HelixConstitution §11.4.6 (no-guessing
+vocabulary), nothing here is inferred — it is read from source.</p>
+<p><strong>Companion docs:</strong> <a
+href="../ARCHITECTURE.md"><code>docs/ARCHITECTURE.md</code></a>
+(overview), <a
+href="../sdk-developer-guide.md"><code>docs/sdk-developer-guide.md</code></a>
+(the 7-step recipe</p>
+<ul>
+<li>the magnet-cache + download-validator patterns), <a
+href="local-stack-topology.md"><code>docs/architecture/local-stack-topology.md</code></a>
+(server-side deployment).</li>
+</ul>
+</blockquote>
+<hr />
+<h2 id="1-the-abstraction-in-one-diagram">1. The abstraction in one
+diagram</h2>
+<p>The Tracker SDK is a capability-gated plugin system. A feature
+ViewModel talks only to <code>LavaTrackerSdk</code>; the SDK routes the
+call through the active tracker's
+<code>TrackerClient.getFeature&lt;T&gt;()</code>, which returns a
+feature-interface implementation <strong>only when the descriptor
+declares the matching capability</strong> (constitutional clause 6.E,
+"Capability Honesty").</p>
+<pre class="mermaid"><code>graph TD
+    VM[&quot;feature:* ViewModels&lt;br/&gt;(search_result, topic, login,&lt;br/&gt;provider_config, menu …)&quot;]
+    SDK[&quot;LavaTrackerSdk @Singleton&lt;br/&gt;core/tracker/client/…/LavaTrackerSdk.kt&quot;]
+    REG[&quot;TrackerRegistry / DefaultTrackerRegistry&lt;br/&gt;core/tracker/registry/…/DefaultTrackerRegistry.kt&quot;]
+    FAC[&quot;TrackerClientFactory (per provider)&lt;br/&gt;core/tracker/registry/…/TrackerClientFactory.kt&quot;]
+    CLIENT[&quot;TrackerClient (active)&lt;br/&gt;core/tracker/api/…/TrackerClient.kt&quot;]
+    DESC[&quot;TrackerDescriptor&lt;br/&gt;core/tracker/api/…/TrackerDescriptor.kt&quot;]
+    CAP[&quot;TrackerCapability enum&lt;br/&gt;core/tracker/api/…/TrackerCapability.kt&quot;]
+    GATE{&quot;getFeature&amp;lt;T&amp;gt;(KClass&amp;lt;T&amp;gt;)&lt;br/&gt;capability ∈ descriptor.capabilities?&quot;}
+    FEAT[&quot;TrackerFeature impls&lt;br/&gt;core/tracker/api/…/feature/*.kt&quot;]
+
+    VM --&gt;|&quot;inject @Singleton&quot;| SDK
+    SDK --&gt;|&quot;registry.get(id, config)&quot;| REG
+    REG --&gt;|&quot;create(config)&quot;| FAC
+    FAC --&gt;|&quot;returns&quot;| CLIENT
+    CLIENT --&gt;|&quot;val descriptor&quot;| DESC
+    DESC --&gt;|&quot;capabilities: Set&quot;| CAP
+    SDK --&gt;|&quot;client.getFeature(SearchableTracker::class) …&quot;| GATE
+    GATE --&gt;|&quot;declared → impl&quot;| FEAT
+    GATE --&gt;|&quot;not declared → null&lt;br/&gt;(Failure outcome, never throws)&quot;| SDK</code></pre>
+<p>Grounding:</p>
+<ul>
+<li><code>LavaTrackerSdk</code> —
+<code>core/tracker/client/src/main/kotlin/lava/tracker/client/LavaTrackerSdk.kt</code></li>
+<li><code>TrackerClient.getFeature</code> —
+<code>core/tracker/api/src/main/kotlin/lava/tracker/api/TrackerClient.kt</code></li>
+<li><code>TrackerDescriptor</code> —
+<code>core/tracker/api/src/main/kotlin/lava/tracker/api/TrackerDescriptor.kt</code></li>
+<li><code>TrackerCapability</code> —
+<code>core/tracker/api/src/main/kotlin/lava/tracker/api/TrackerCapability.kt</code></li>
+<li><code>TrackerClientFactory</code> /
+<code>DefaultTrackerRegistry</code> —
+<code>core/tracker/registry/src/main/kotlin/lava/tracker/registry/</code></li>
+</ul>
+<hr />
+<h2 id="2-the-contract-surface-coretrackerapi">2. The contract surface
+(<code>core:tracker:api</code>)</h2>
+<h3 id="21-trackerdescriptor">2.1 <code>TrackerDescriptor</code></h3>
+<p>A descriptor is the provider's identity + honesty contract. The
+fields below are verbatim from <code>TrackerDescriptor.kt</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>trackerId</code> (= <code>id</code>)</td>
+<td><code>String</code></td>
+<td>Stable id, e.g. <code>"rutracker"</code>, <code>"rutor"</code>,
+<code>"kinozal"</code>, <code>"nnmclub"</code>. Extends
+<code>lava.sdk.api.HasId</code>.</td>
+</tr>
+<tr>
+<td><code>displayName</code></td>
+<td><code>String</code></td>
+<td>Human-readable name shown in UI.</td>
+</tr>
+<tr>
+<td><code>baseUrls</code></td>
+<td><code>List&lt;MirrorUrl&gt;</code></td>
+<td>Primary + mirror URLs; first <code>isPrimary=true</code> is
+canonical. <code>MirrorUrl</code> is a <code>lava.sdk.api</code>
+primitive from the Tracker-SDK submodule.</td>
+</tr>
+<tr>
+<td><code>capabilities</code></td>
+<td><code>Set&lt;TrackerCapability&gt;</code></td>
+<td>What the tracker <strong>actually</strong> supports (clause 6.E —
+declarations of fact, not intent).</td>
+</tr>
+<tr>
+<td><code>authType</code></td>
+<td><code>AuthType</code></td>
+<td>Auth mechanism (<code>AuthType.kt</code>).</td>
+</tr>
+<tr>
+<td><code>encoding</code></td>
+<td><code>String</code></td>
+<td>e.g. <code>"UTF-8"</code>, <code>"Windows-1251"</code>.</td>
+</tr>
+<tr>
+<td><code>expectedHealthMarker</code></td>
+<td><code>String</code></td>
+<td>Substring that must appear on the root page for a HEALTHY
+probe.</td>
+</tr>
+<tr>
+<td><code>verified</code></td>
+<td><code>Boolean</code> (default <code>false</code>)</td>
+<td>Clause 6.G gate — <code>true</code> only with a passing Challenge
+Test. Fail-closed: hidden from the provider list until earned.</td>
+</tr>
+<tr>
+<td><code>supportsAnonymous</code></td>
+<td><code>Boolean</code> (default <code>false</code>)</td>
+<td>Per-provider anonymous-browse capability (Phase 1.5,
+2026-05-04).</td>
+</tr>
+<tr>
+<td><code>apiSupported</code></td>
+<td><code>Boolean</code> (default <code>false</code>)</td>
+<td>Whether <code>lava-api-go</code> routes
+<code>/v1/{trackerId}/…</code> for this provider today (Phase 1
+α-hotfix, 2026-05-06).</td>
+</tr>
+</tbody>
+</table>
+<p>The three boolean flags (<code>verified</code>,
+<code>supportsAnonymous</code>, <code>apiSupported</code>) all default
+to <code>false</code> — a <strong>fail-closed</strong> posture so a
+half-wired provider never reaches users until each gate is explicitly
+satisfied.</p>
+<h3 id="22-trackercapability--the-single-source-of-truth">2.2
+<code>TrackerCapability</code> — the single source of truth</h3>
+<pre class="mermaid"><code>graph LR
+    subgraph &quot;TrackerCapability enum (13 values)&quot;
+        SEARCH; BROWSE; FORUM; TOPIC; COMMENTS; FAVORITES
+        TORRENT_DOWNLOAD; MAGNET_LINK; AUTH_REQUIRED
+        CAPTCHA_LOGIN; RSS; UPLOAD; USER_PROFILE
+    end</code></pre>
+<p>Verbatim from <code>TrackerCapability.kt</code>:
+<code>SEARCH, BROWSE, FORUM, TOPIC, COMMENTS, FAVORITES, TORRENT_DOWNLOAD, MAGNET_LINK, AUTH_REQUIRED, CAPTCHA_LOGIN, RSS, UPLOAD, USER_PROFILE</code>.</p>
+<p>The enum is the <strong>single source of truth</strong> that
+<code>TrackerDescriptor.capabilities</code> and
+<code>TrackerClient.getFeature&lt;T&gt;()</code> are gated on. Adding a
+feature interface without an enum entry makes the interface unreachable
+— a 6.E violation (see <code>core/CLAUDE.md</code> "Scoped clause for
+new feature interfaces").</p>
+<blockquote>
+<p><strong>Note on <code>RSS</code>, <code>UPLOAD</code>,
+<code>USER_PROFILE</code>:</strong> these enum values exist but have
+<strong>no dedicated <code>TrackerFeature</code> interface</strong> in
+<code>core/tracker/api/feature/</code> today — they are reserved
+capability slots, <strong>NOT IMPLEMENTED</strong> as feature
+interfaces. The seven implemented feature interfaces are listed in
+§2.3.</p>
+</blockquote>
+<h3 id="23-the-seven-feature-interfaces">2.3 The seven feature
+interfaces</h3>
+<p>Each interface extends the <code>TrackerFeature</code> marker
+(<code>core/tracker/api/…/TrackerFeature.kt</code>). Method signatures
+are verbatim from
+<code>core/tracker/api/src/main/kotlin/lava/tracker/api/feature/</code>:</p>
+<pre class="mermaid"><code>classDiagram
+    class TrackerFeature {
+        &lt;&lt;marker&gt;&gt;
+    }
+    class SearchableTracker {
+        +search(request, page) SearchResult
+    }
+    class BrowsableTracker {
+        +browse(category, page) BrowseResult
+        +getForumTree() ForumTree?
+    }
+    class TopicTracker {
+        +getTopic(id) TopicDetail
+        +getTopicPage(id, page) TopicPage
+    }
+    class CommentsTracker {
+        +getComments(topicId, page) CommentsPage
+        +addComment(topicId, message) Boolean
+    }
+    class FavoritesTracker {
+        +list() List~TorrentItem~
+        +add(id) Boolean
+        +remove(id) Boolean
+    }
+    class AuthenticatableTracker {
+        +login(req) LoginResult
+        +logout()
+        +checkAuth() AuthState
+    }
+    class DownloadableTracker {
+        +downloadTorrentFile(id) ByteArray
+        +getMagnetLink(id) String?
+    }
+    TrackerFeature &lt;|-- SearchableTracker
+    TrackerFeature &lt;|-- BrowsableTracker
+    TrackerFeature &lt;|-- TopicTracker
+    TrackerFeature &lt;|-- CommentsTracker
+    TrackerFeature &lt;|-- FavoritesTracker
+    TrackerFeature &lt;|-- AuthenticatableTracker
+    TrackerFeature &lt;|-- DownloadableTracker</code></pre>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>File</th>
+<th>Capability it answers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SearchableTracker</code></td>
+<td><code>feature/SearchableTracker.kt</code></td>
+<td><code>SEARCH</code></td>
+</tr>
+<tr>
+<td><code>BrowsableTracker</code></td>
+<td><code>feature/BrowsableTracker.kt</code></td>
+<td><code>BROWSE</code> / <code>FORUM</code></td>
+</tr>
+<tr>
+<td><code>TopicTracker</code></td>
+<td><code>feature/TopicTracker.kt</code></td>
+<td><code>TOPIC</code></td>
+</tr>
+<tr>
+<td><code>CommentsTracker</code></td>
+<td><code>feature/CommentsTracker.kt</code></td>
+<td><code>COMMENTS</code></td>
+</tr>
+<tr>
+<td><code>FavoritesTracker</code></td>
+<td><code>feature/FavoritesTracker.kt</code></td>
+<td><code>FAVORITES</code></td>
+</tr>
+<tr>
+<td><code>AuthenticatableTracker</code></td>
+<td><code>feature/AuthenticatableTracker.kt</code></td>
+<td><code>AUTH_REQUIRED</code> / <code>CAPTCHA_LOGIN</code></td>
+</tr>
+<tr>
+<td><code>DownloadableTracker</code></td>
+<td><code>feature/DownloadableTracker.kt</code></td>
+<td><code>TORRENT_DOWNLOAD</code> / <code>MAGNET_LINK</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>DownloadableTracker.getMagnetLink(id)</code> is the
+<strong>only non-suspend</strong> method on any feature interface, and
+its contract ("Returns null if the magnet URI is not synchronously
+available without an HTTP fetch") is the reason the per-provider
+<strong>magnet-cache pattern</strong> exists — see §6 and the developer
+guide.</p>
+<hr />
+<h2 id="3-capability-gate--getfeaturet">3. Capability gate —
+<code>getFeature&lt;T&gt;()</code></h2>
+<p><code>TrackerClient</code>
+(<code>core/tracker/api/…/TrackerClient.kt</code>) is the runtime
+enforcement point for clause 6.E:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">interface</span> TrackerClient <span class="op">:</span> <span class="dt">AutoCloseable</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> <span class="va">descriptor</span><span class="op">:</span> TrackerDescriptor</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    suspend <span class="kw">fun</span> <span class="fu">healthCheck</span><span class="op">():</span> <span class="dt">Boolean</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fun</span> <span class="op">&lt;</span><span class="dt">T</span> <span class="op">:</span> <span class="dt">TrackerFeature</span><span class="op">&gt;</span> <span class="fu">getFeature</span><span class="op">(</span><span class="va">featureClass</span><span class="op">:</span> <span class="dt">KClass</span>&lt;<span class="va">T</span>&gt;<span class="op">):</span> <span class="dt">T</span><span class="op">?</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>The contract, stated in the interface's KDoc: <em>"capability
+declared in descriptor ⇒ this returns non-null."</em> The inverse is the
+load-bearing honesty guarantee — a capability <strong>not</strong>
+declared returns <code>null</code>, and every SDK call site treats
+<code>null</code> as a typed failure outcome rather than throwing.</p>
+<pre class="mermaid"><code>sequenceDiagram
+    participant SDK as LavaTrackerSdk
+    participant C as TrackerClient (active)
+    participant D as TrackerDescriptor
+    participant F as SearchableTracker impl
+
+    SDK-&gt;&gt;C: getFeature(SearchableTracker::class)
+    C-&gt;&gt;D: SEARCH in descriptor.capabilities?
+    alt declared
+        D--&gt;&gt;C: true
+        C--&gt;&gt;SDK: SearchableTracker impl
+        SDK-&gt;&gt;F: search(request, page)
+        F--&gt;&gt;SDK: SearchResult
+    else not declared
+        D--&gt;&gt;C: false
+        C--&gt;&gt;SDK: null
+        Note over SDK: SearchOutcome.Failure&lt;br/&gt;(&quot;tracker X does not support SEARCH&quot;)&lt;br/&gt;— never throws
+    end</code></pre>
+<p>This pattern repeats for every capability across
+<code>LavaTrackerSdk</code> (<code>search</code>, <code>browse</code>,
+<code>getTopic</code>, <code>getCommentsPage</code>,
+<code>addComment</code>, <code>getFavorites</code>,
+<code>addFavorite</code>, <code>removeFavorite</code>,
+<code>login</code>, <code>checkAuth</code>, <code>logout</code>,
+<code>getMagnetLink</code>, <code>downloadTorrent</code>) — each does a
+<code>getFeature(...)</code> null-check and returns a
+<code>Failure</code>/<code>null</code>/<code>false</code> outcome
+instead of throwing (<code>LavaTrackerSdk.kt</code>).</p>
+<hr />
+<h2 id="4-registry--factory--how-a-provider-gets-wired">4. Registry +
+factory — how a provider gets wired</h2>
+<h3 id="41-registration-topology-hilt-coretrackerclient">4.1
+Registration topology (Hilt, <code>core:tracker:client</code>)</h3>
+<p>There is <strong>one</strong> Hilt module that builds the registry:
+<code>core/tracker/client/src/main/kotlin/lava/tracker/client/di/TrackerClientModule.kt</code>.
+Its <code>provideTrackerRegistry</code> <code>@Provides</code> function
+takes every provider's <code>TrackerClientFactory</code> as a
+constructor parameter and <code>register(...)</code>s each into a
+<code>DefaultTrackerRegistry</code>:</p>
+<pre class="mermaid"><code>graph TD
+    subgraph &quot;TrackerClientModule.provideTrackerRegistry (Hilt @Provides)&quot;
+        RR[&quot;RuTrackerClientFactory&quot;]
+        RT[&quot;RuTorClientFactory&quot;]
+        NN[&quot;NnmclubClientFactory&quot;]
+        KZ[&quot;KinozalClientFactory&quot;]
+        AO[&quot;ArchiveOrgClientFactory&quot;]
+        GB[&quot;GutenbergClientFactory&quot;]
+    end
+    REG[&quot;DefaultTrackerRegistry&lt;br/&gt;(register each factory)&quot;]
+    RR --&gt; REG
+    RT --&gt; REG
+    NN --&gt; REG
+    KZ --&gt; REG
+    AO --&gt; REG
+    GB --&gt; REG
+    REG --&gt;|&quot;exposes by descriptor.id&quot;| SDK[&quot;LavaTrackerSdk&quot;]</code></pre>
+<p>The six factories registered today (verbatim from
+<code>TrackerClientModule.kt</code>
+<code>provideTrackerRegistry</code>): <code>rutrackerFactory</code>,
+<code>rutorFactory</code>, <code>nnmclubFactory</code>,
+<code>kinozalFactory</code>, <code>archiveOrgFactory</code>,
+<code>gutenbergFactory</code>.</p>
+<blockquote>
+<p><strong>Doc-drift note:</strong>
+<code>docs/sdk-developer-guide.md</code> §2 Step 5 still describes a
+<code>@IntoSet</code>-multibinding registration style and §5 lists only
+RuTracker + RuTor. The <strong>actual</strong> wiring in
+<code>TrackerClientModule.kt</code> is explicit constructor injection of
+six factories into <code>provideTrackerRegistry</code> (no
+<code>@IntoSet</code>). This diagram reflects the code. The guide's Step
+5 is documentation that predates the additional providers.</p>
+</blockquote>
+<h3 id="42-trackerclientfactory--clone-aware-creation">4.2
+<code>TrackerClientFactory</code> — clone-aware creation</h3>
+<p><code>TrackerClientFactory</code>
+(<code>core/tracker/registry/…/TrackerClientFactory.kt</code>) extends
+the SDK primitive
+<code>PluginFactory&lt;TrackerDescriptor, TrackerClient&gt;</code> and
+exposes <code>create(config: PluginConfig): TrackerClient</code>.</p>
+<p>The <code>config</code> carries an optional clone base-URL override
+(<code>PluginConfig.cloneBaseUrlOverride</code>, read via
+<code>lava.tracker.registry.cloneBaseUrlOverride</code>). When present
+(SP-4 Phase F.2), <code>create</code> returns a
+<strong>per-call</strong> client routed at the clone's
+<code>primaryUrl</code>; otherwise it returns the shared
+<code>@Singleton</code> client. See <code>KinozalClientFactory.kt</code>
+for the canonical implementation — note it shares ONE
+<code>KinozalMagnetCache</code> between the clone's topic + download
+features (§6).</p>
+<hr />
+<h2 id="5-request-flow-app--sdk--client--feature">5. Request flow: app →
+SDK → client → feature</h2>
+<p>End-to-end search flow through the production classes:</p>
+<pre class="mermaid"><code>sequenceDiagram
+    actor User
+    participant VM as feature:search_result ViewModel
+    participant SDK as LavaTrackerSdk
+    participant REG as DefaultTrackerRegistry
+    participant FAC as KinozalClientFactory
+    participant C as KinozalClient
+    participant S as KinozalSearch (SearchableTracker)
+    participant MC as KinozalMagnetCache
+
+    User-&gt;&gt;VM: type query, tap Search
+    VM-&gt;&gt;SDK: multiSearch(request, providerIds)
+    SDK-&gt;&gt;REG: get(&quot;kinozal&quot;, config)
+    REG-&gt;&gt;FAC: create(config)
+    FAC--&gt;&gt;SDK: KinozalClient
+    SDK-&gt;&gt;C: getFeature(SearchableTracker::class)
+    C--&gt;&gt;SDK: KinozalSearch (capability declared)
+    SDK-&gt;&gt;S: search(request, page)
+    S-&gt;&gt;S: HTTP GET + parse rows
+    S-&gt;&gt;MC: put(torrentId, magnetUri) per row
+    S--&gt;&gt;SDK: SearchResult
+    SDK-&gt;&gt;SDK: DeduplicationEngine.deduplicate(...)
+    SDK--&gt;&gt;VM: UnifiedSearchResult
+    VM--&gt;&gt;User: render result rows</code></pre>
+<p>Grounding for the multi-provider path:
+<code>LavaTrackerSdk.multiSearch</code> / <code>streamMultiSearch</code>
+fan out across <code>providerIds</code> with parallel
+<code>async { … }.awaitAll()</code> (SP-4 Phase D), roll up per-provider
+statuses, and deduplicate via <code>DeduplicationEngine</code>
+(<code>core/tracker/client/…/dedup/DeduplicationEngine.kt</code>). The
+magnet-cache write on each search row (<code>S-&gt;&gt;MC: put</code>)
+is the real code in <code>NnmclubSearch.kt</code>
+(<code>result.items.forEach { magnetCache.put(it.torrentId, it.magnetUri) }</code>).</p>
+<h3 id="cross-tracker--mirror-fallback">Cross-tracker / mirror
+fallback</h3>
+<p>The single-active-tracker path (<code>search</code>,
+<code>browse</code>) additionally runs through
+<code>runWithMirrorFallback</code>, which (when mirror collaborators are
+wired) executes via a per-tracker <code>MirrorManager</code> and, on
+total mirror exhaustion, proposes a
+<code>CrossTrackerFallbackProposed</code> outcome via
+<code>CrossTrackerFallbackPolicy</code>
+(<code>core/tracker/client/…/CrossTrackerFallbackPolicy.kt</code>).
+There is <strong>no silent fallback</strong> — the UI shows a modal and
+the user accepts or dismisses (see <code>docs/ARCHITECTURE.md</code>
+"Cross-tracker fallback flow").</p>
+<blockquote>
+<p>The <code>switchTracker</code> / <code>activeTrackerId</code>
+single-active-tracker API is <code>@Deprecated</code> (SP-4 Phase D) in
+favor of <code>multiSearch</code> / <code>streamMultiSearch</code> with
+explicit provider lists (<code>LavaTrackerSdk.kt</code>).</p>
+</blockquote>
+<hr />
+<h2 id="6-the-magnet-cache-pattern-6e-capability-honesty">6. The
+magnet-cache pattern (§6.E Capability Honesty)</h2>
+<p><code>DownloadableTracker.getMagnetLink(id)</code> is
+<strong>non-suspend</strong>, so it cannot make an HTTP call. Its
+contract is to return the magnet <strong>only if synchronously
+available</strong>, else <code>null</code>. Three providers (kinozal,
+nnmclub, rutor) declare the <code>MAGNET_LINK</code> capability and back
+<code>getMagnetLink</code> with a <code>@Singleton</code> magnet cache
+that the suspend topic/search path populates from genuinely-parsed
+magnets:</p>
+<pre class="mermaid"><code>graph LR
+    subgraph &quot;write side (suspend, real fetch)&quot;
+        TOPIC[&quot;KinozalTopic.getTopic(id)&lt;br/&gt;parses topic page&quot;]
+        SEARCH[&quot;NnmclubSearch.search(...)&lt;br/&gt;parses result rows&quot;]
+    end
+    CACHE[&quot;@Singleton XxxMagnetCache&lt;br/&gt;ConcurrentHashMap&amp;lt;id, magnet&amp;gt;&quot;]
+    subgraph &quot;read side (non-suspend)&quot;
+        DL[&quot;KinozalDownload.getMagnetLink(id)&lt;br/&gt;magnetCache.get(id)&quot;]
+    end
+    TOPIC --&gt;|&quot;put(id, magnetUri)&quot;| CACHE
+    SEARCH --&gt;|&quot;put(torrentId, magnetUri)&quot;| CACHE
+    CACHE --&gt;|&quot;get(id) → real magnet OR null&quot;| DL</code></pre>
+<p>Real files implementing this pattern:</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Cache</th>
+<th>Writer(s)</th>
+<th>Reader</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kinozal</td>
+<td><code>kinozal/…/magnet/KinozalMagnetCache.kt</code></td>
+<td><code>KinozalTopic.getTopic</code></td>
+<td><code>KinozalDownload.getMagnetLink</code></td>
+</tr>
+<tr>
+<td>NNM-Club</td>
+<td><code>nnmclub/…/http/NnmclubMagnetCache.kt</code></td>
+<td><code>NnmclubTopic</code>, <code>NnmclubSearch</code></td>
+<td><code>NnmclubDownload.getMagnetLink</code></td>
+</tr>
+<tr>
+<td>RuTor</td>
+<td><code>rutor/…/magnet/RuTorMagnetCache.kt</code></td>
+<td>RuTor topic/search parsers</td>
+<td>RuTor download feature</td>
+</tr>
+</tbody>
+</table>
+<p>Why this is honest rather than a bluff: <code>get(id)</code> returns
+<code>null</code> when an id was never surfaced (an honest "not
+synchronously available" per the contract), and the cache is only ever
+populated with magnets that the <strong>production parser</strong>
+extracted from a real page — never fabricated. The cache is a
+<code>ConcurrentHashMap</code> (search + topic features may write from
+different coroutines while download reads). It is
+<code>@Singleton</code> so all features share one instance; the clone
+path passes an explicit shared instance
+(<code>KinozalClientFactory.create</code>, §4.2).</p>
+<p>The full author-facing recipe — including the
+<code>put</code>-on-parse wiring and the clone-path shared-instance rule
+— is documented in <a
+href="../sdk-developer-guide.md"><code>docs/sdk-developer-guide.md</code>
+§8</a>.</p>
+<hr />
+<h2 id="7-proving-a-download-is-real--the-torrent-validators">7. Proving
+a download is real — the torrent validators</h2>
+<p><code>core:common</code> ships two validators
+(<code>core/common/src/main/kotlin/lava/common/torrent/</code>) that
+turn "we returned bytes / a string" into "we returned a genuinely-usable
+download". Both produce a
+<code>DownloadValidationResult { valid, infoHashHex, reason }</code>
+keyed on the <strong>same</strong> lowercase 40-char info-hash, so a
+<code>.torrent</code> file and a magnet for the same content
+cross-check.</p>
+<pre class="mermaid"><code>graph TD
+    BYTES[&quot;.torrent bytes (ByteArray)&quot;]
+    MAGNET[&quot;magnet: URI (String)&quot;]
+    TFV[&quot;TorrentFileValidator.validate(bytes)&lt;br/&gt;bencode → info dict → SHA-1(info)&quot;]
+    MLV[&quot;MagnetLinkValidator.validate(uri)&lt;br/&gt;xt=urn:btih:&amp;lt;hex|base32&amp;gt; → 40-hex&quot;]
+    RES[&quot;DownloadValidationResult&lt;br/&gt;{ valid, infoHashHex, reason }&quot;]
+    BYTES --&gt; TFV --&gt; RES
+    MAGNET --&gt; MLV --&gt; RES
+    RES -.-&gt;|&quot;same content ⇒ same infoHashHex&quot;| RES</code></pre>
+<ul>
+<li><strong><code>TorrentFileValidator</code></strong> — parses the
+bytes as bencode (<code>Bencode.kt</code>), requires a top-level dict
+containing <code>info</code> with a non-empty <code>name</code>, a
+<code>piece length &gt; 0</code>, and <code>pieces</code> whose length
+is a positive multiple of 20 (each piece SHA-1 is 20 bytes). The
+info-hash is <code>SHA-1</code> over the <strong>verbatim</strong>
+bencoded <code>info</code> dict bytes (recovered via
+<code>valueRanges</code>), so it matches what a real BitTorrent client
+computes.</li>
+<li><strong><code>MagnetLinkValidator</code></strong> — requires an
+<code>xt=urn:btih:&lt;hash&gt;</code> where <code>&lt;hash&gt;</code> is
+40-char hex OR 32-char RFC-4648 base32; normalizes both to lowercase
+hex.</li>
+</ul>
+<p>These are the canonical anti-bluff way to assert a download feature
+actually works (clause 6.E + the Anti-Bluff Pact's "primary assertion on
+user-visible state"). See <a
+href="../sdk-developer-guide.md"><code>docs/sdk-developer-guide.md</code>
+§9</a>.</p>
+<hr />
+<h2 id="8-module-layout">8. Module layout</h2>
+<pre class="mermaid"><code>graph TD
+    API[&quot;core:tracker:api&lt;br/&gt;feature interfaces + capability enum + DTOs&quot;]
+    REG[&quot;core:tracker:registry&lt;br/&gt;TrackerRegistry over lava.sdk:registry&quot;]
+    CLIENT[&quot;core:tracker:client&lt;br/&gt;LavaTrackerSdk + Hilt module + persistence&quot;]
+    COMMON[&quot;core:common&lt;br/&gt;torrent validators + bencode&quot;]
+    subgraph &quot;per-provider plugins (core:tracker:*)&quot;
+        RUTRACKER[&quot;rutracker&quot;]
+        RUTOR[&quot;rutor&quot;]
+        KINOZAL[&quot;kinozal&quot;]
+        NNMCLUB[&quot;nnmclub&quot;]
+        ARCHIVEORG[&quot;archiveorg&quot;]
+        GUTENBERG[&quot;gutenberg&quot;]
+    end
+    SUB[&quot;submodules/tracker_sdk&lt;br/&gt;(vasic-digital/Tracker-SDK)&lt;br/&gt;MirrorUrl, PluginRegistry, PluginFactory&quot;]
+
+    RUTRACKER --&gt; API
+    RUTOR --&gt; API
+    KINOZAL --&gt; API
+    NNMCLUB --&gt; API
+    ARCHIVEORG --&gt; API
+    GUTENBERG --&gt; API
+    KINOZAL --&gt; COMMON
+    NNMCLUB --&gt; COMMON
+    RUTOR --&gt; COMMON
+    REG --&gt; API
+    REG --&gt; SUB
+    CLIENT --&gt; REG
+    CLIENT --&gt; RUTRACKER
+    CLIENT --&gt; RUTOR
+    CLIENT --&gt; KINOZAL
+    CLIENT --&gt; NNMCLUB
+    CLIENT --&gt; ARCHIVEORG
+    CLIENT --&gt; GUTENBERG
+    API --&gt; SUB</code></pre>
+<p>Generic primitives (<code>MirrorUrl</code>,
+<code>PluginRegistry</code>, <code>PluginFactory</code>,
+<code>MapPluginConfig</code>) live in the
+<code>vasic-digital/Tracker-SDK</code> submodule mounted at
+<code>submodules/tracker_sdk/</code> per the Decoupled Reusable
+Architecture rule; the pin is frozen by default.
+<code>DefaultTrackerRegistry</code> composes the SDK's
+<code>DefaultPluginRegistry</code> via Kotlin interface delegation (the
+SDK class is final) and adds
+<code>trackersWithCapability(...)</code>.</p>
+<hr />
+<h2 id="9-where-to-go-next">9. Where to go next</h2>
+<ul>
+<li><strong>Add a provider:</strong> <a
+href="../sdk-developer-guide.md"><code>docs/sdk-developer-guide.md</code></a>
+(7-step recipe + §8 magnet cache + §9 validators).</li>
+<li><strong>Server-side deployment / Jackett:</strong> <a
+href="local-stack-topology.md"><code>docs/architecture/local-stack-topology.md</code></a>.</li>
+<li><strong>mDNS discovery:</strong> <a
+href="../LOCAL_NETWORK_DISCOVERY.md"><code>docs/LOCAL_NETWORK_DISCOVERY.md</code></a>.</li>
+</ul>
+<p><em>Last updated: 2026-06-08. All symbols verified against the
+working tree.</em></p>
+</body>
+</html>

@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>kotlin-baseline-2026-06-04</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="kotlin-coverage-baseline--2026-06-04">Kotlin Coverage Baseline —
+2026-06-04</h1>
+<p>Phase-0 / §6.D behavioral-coverage baseline for the Kotlin (Android
+client + <code>api-app</code>) tree, captured by <strong>Kover
+0.9.1</strong> wired through the
+<code>StaticAnalysisConventionPlugin</code> buildSrc convention (applied
+to every module). Later completeness-program phases drive these numbers
+up; this file is the starting point against which progress is
+measured.</p>
+<h2 id="how-it-was-produced">How it was produced</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nice</span> <span class="at">-n</span> 19 ./gradlew <span class="at">--no-daemon</span> <span class="at">--max-workers</span><span class="op">=</span>2 <span class="at">--continue</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  koverXmlReport koverHtmlReport <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-x</span> :feature:credentials:testDebugUnitTest <span class="dt">\</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-x</span> :feature:credentials:testReleaseUnitTest</span></code></pre></div>
+<ul>
+<li>Real test execution → real coverage (Kover instruments the actual
+unit-test run).</li>
+<li>The two excluded <code>:feature:credentials</code> test tasks carry
+the <strong>pre-existing flaky</strong> test
+<code>CredentialsViewModelTest &gt; select provider updates selectedProvider</code>
+(<code>TurbineAssertionError: No value produced in 3s</code>) — the same
+timing flake the constitution's §6.L 68th-cycle note records as
+already-known. It is unrelated to this build-wiring change (which
+touches only <code>buildSrc/</code>, <code>gradle/</code>,
+<code>config/detekt/</code>). Excluding it lets the full tree's coverage
+report complete; <code>core/credentials</code> coverage below reflects
+its non-flaky tests that still ran.</li>
+<li>Raw per-module Kover XML reports archived at
+<code>.lava-ci-evidence/completeness-program/coverage/kotlin-baseline-2026-06-04/</code>.</li>
+</ul>
+<h2 id="headline-aggregate-across-all-55-modules">Headline (aggregate
+across all 55 modules)</h2>
+<table>
+<thead>
+<tr>
+<th>Counter</th>
+<th>Coverage</th>
+<th>Covered / Total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LINE</strong></td>
+<td><strong>18.65%</strong></td>
+<td>4709 / 25244</td>
+</tr>
+<tr>
+<td>BRANCH</td>
+<td>20.01%</td>
+<td>1692 / 8457</td>
+</tr>
+<tr>
+<td>INSTRUCTION</td>
+<td>15.91%</td>
+<td>35470 / 222985</td>
+</tr>
+<tr>
+<td>METHOD</td>
+<td>17.14%</td>
+<td>1189 / 6939</td>
+</tr>
+<tr>
+<td>CLASS</td>
+<td>16.91%</td>
+<td>508 / 3004</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>No root Kover aggregation project exists (there is no root
+<code>build.gradle.kts</code>, per the convention-plugin architecture),
+so these aggregate figures are summed from the 55 per-module
+<code>report.xml</code> counters. Per-module
+<code>koverHtmlReport</code> output lives under each module's
+<code>build/reports/kover/html/</code>.</p>
+</blockquote>
+<h2 id="per-module-line--branch-coverage">Per-module line + branch
+coverage</h2>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Line %</th>
+<th>Line cov/total</th>
+<th>Branch %</th>
+<th>Branch cov/total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>core/tracker/gutenberg</code></td>
+<td>95.41%</td>
+<td>208/218</td>
+<td>51.33%</td>
+<td>77/150</td>
+</tr>
+<tr>
+<td><code>core/tracker/archiveorg</code></td>
+<td>90.91%</td>
+<td>190/209</td>
+<td>47.31%</td>
+<td>88/186</td>
+</tr>
+<tr>
+<td><code>core/tracker/mirror</code></td>
+<td>88.89%</td>
+<td>8/9</td>
+<td>50.00%</td>
+<td>2/4</td>
+</tr>
+<tr>
+<td><code>core/tracker/rutor</code></td>
+<td>83.50%</td>
+<td>496/594</td>
+<td>56.84%</td>
+<td>245/431</td>
+</tr>
+<tr>
+<td><code>core/apiengine</code></td>
+<td>83.46%</td>
+<td>106/127</td>
+<td>36.36%</td>
+<td>32/88</td>
+</tr>
+<tr>
+<td><code>core/tracker/kinozal</code></td>
+<td>83.16%</td>
+<td>237/285</td>
+<td>41.18%</td>
+<td>56/136</td>
+</tr>
+<tr>
+<td><code>core/tracker/nnmclub</code></td>
+<td>82.34%</td>
+<td>289/351</td>
+<td>47.06%</td>
+<td>104/221</td>
+</tr>
+<tr>
+<td><code>core/tracker/registry</code></td>
+<td>75.00%</td>
+<td>3/4</td>
+<td>0.00%</td>
+<td>0/2</td>
+</tr>
+<tr>
+<td><code>core/sync</code></td>
+<td>65.22%</td>
+<td>15/23</td>
+<td>0.00%</td>
+<td>0/0</td>
+</tr>
+<tr>
+<td><code>core/credentials</code></td>
+<td>58.46%</td>
+<td>235/402</td>
+<td>59.68%</td>
+<td>74/124</td>
+</tr>
+<tr>
+<td><code>core/tracker/client</code></td>
+<td>49.82%</td>
+<td>410/823</td>
+<td>52.38%</td>
+<td>110/210</td>
+</tr>
+<tr>
+<td><code>core/tracker/rutracker</code></td>
+<td>43.53%</td>
+<td>632/1452</td>
+<td>30.14%</td>
+<td>211/700</td>
+</tr>
+<tr>
+<td><code>core/auth/impl</code></td>
+<td>40.62%</td>
+<td>26/64</td>
+<td>25.00%</td>
+<td>6/24</td>
+</tr>
+<tr>
+<td><code>core/network/impl</code></td>
+<td>37.43%</td>
+<td>189/505</td>
+<td>42.86%</td>
+<td>84/196</td>
+</tr>
+<tr>
+<td><code>core/tracker/api</code></td>
+<td>37.21%</td>
+<td>48/129</td>
+<td>15.60%</td>
+<td>34/218</td>
+</tr>
+<tr>
+<td><code>feature/onboarding</code></td>
+<td>30.22%</td>
+<td>243/804</td>
+<td>30.75%</td>
+<td>103/335</td>
+</tr>
+<tr>
+<td><code>feature/login</code></td>
+<td>28.76%</td>
+<td>266/925</td>
+<td>30.28%</td>
+<td>86/284</td>
+</tr>
+<tr>
+<td><code>core/tracker/testing</code></td>
+<td>28.57%</td>
+<td>24/84</td>
+<td>8.33%</td>
+<td>3/36</td>
+</tr>
+<tr>
+<td><code>core/testing</code></td>
+<td>26.77%</td>
+<td>34/127</td>
+<td>75.00%</td>
+<td>6/8</td>
+</tr>
+<tr>
+<td><code>api-app</code></td>
+<td>19.50%</td>
+<td>118/605</td>
+<td>19.28%</td>
+<td>32/166</td>
+</tr>
+<tr>
+<td><code>feature/credentials</code></td>
+<td>19.32%</td>
+<td>96/497</td>
+<td>16.55%</td>
+<td>24/145</td>
+</tr>
+<tr>
+<td><code>feature/menu</code></td>
+<td>18.27%</td>
+<td>129/706</td>
+<td>15.48%</td>
+<td>39/252</td>
+</tr>
+<tr>
+<td><code>feature/connection</code></td>
+<td>16.07%</td>
+<td>58/361</td>
+<td>20.00%</td>
+<td>22/110</td>
+</tr>
+<tr>
+<td><code>feature/provider_config</code></td>
+<td>15.00%</td>
+<td>81/540</td>
+<td>8.99%</td>
+<td>16/178</td>
+</tr>
+<tr>
+<td><code>core/preferences</code></td>
+<td>13.85%</td>
+<td>27/195</td>
+<td>22.67%</td>
+<td>17/75</td>
+</tr>
+<tr>
+<td><code>core/network/api</code></td>
+<td>13.71%</td>
+<td>41/299</td>
+<td>4.39%</td>
+<td>15/342</td>
+</tr>
+<tr>
+<td><code>feature/search_result</code></td>
+<td>11.04%</td>
+<td>146/1323</td>
+<td>8.02%</td>
+<td>49/611</td>
+</tr>
+<tr>
+<td><code>app</code></td>
+<td>9.45%</td>
+<td>52/550</td>
+<td>24.10%</td>
+<td>40/166</td>
+</tr>
+<tr>
+<td><code>core/models</code></td>
+<td>9.22%</td>
+<td>19/206</td>
+<td>71.43%</td>
+<td>30/42</td>
+</tr>
+<tr>
+<td><code>core/data</code></td>
+<td>6.84%</td>
+<td>62/906</td>
+<td>10.30%</td>
+<td>41/398</td>
+</tr>
+<tr>
+<td><code>core/domain</code></td>
+<td>6.75%</td>
+<td>86/1274</td>
+<td>15.00%</td>
+<td>24/160</td>
+</tr>
+<tr>
+<td><code>core/designsystem</code></td>
+<td>5.62%</td>
+<td>135/2400</td>
+<td>0.85%</td>
+<td>4/472</td>
+</tr>
+<tr>
+<td><code>core/auth/api</code></td>
+<td>0.00%</td>
+<td>0/4</td>
+<td>0.00%</td>
+<td>0/0</td>
+</tr>
+<tr>
+<td><code>core/common</code></td>
+<td>0.00%</td>
+<td>0/8</td>
+<td>0.00%</td>
+<td>0/0</td>
+</tr>
+<tr>
+<td><code>core/database</code></td>
+<td>0.00%</td>
+<td>0/3187</td>
+<td>0.00%</td>
+<td>0/428</td>
+</tr>
+<tr>
+<td><code>core/dispatchers</code></td>
+<td>0.00%</td>
+<td>0/11</td>
+<td>0.00%</td>
+<td>0/0</td>
+</tr>
+<tr>
+<td><code>core/downloads</code></td>
+<td>0.00%</td>
+<td>0/97</td>
+<td>0.00%</td>
+<td>0/59</td>
+</tr>
+<tr>
+<td><code>core/logger</code></td>
+<td>0.00%</td>
+<td>0/23</td>
+<td>0.00%</td>
+<td>0/0</td>
+</tr>
+<tr>
+<td><code>core/navigation</code></td>
+<td>0.00%</td>
+<td>0/309</td>
+<td>1.09%</td>
+<td>1/92</td>
+</tr>
+<tr>
+<td><code>core/notifications</code></td>
+<td>0.00%</td>
+<td>0/77</td>
+<td>0.00%</td>
+<td>0/6</td>
+</tr>
+<tr>
+<td><code>core/ui</code></td>
+<td>0.00%</td>
+<td>0/862</td>
+<td>0.33%</td>
+<td>1/307</td>
+</tr>
+<tr>
+<td><code>core/work/api</code></td>
+<td>0.00%</td>
+<td>0/0</td>
+<td>0.00%</td>
+<td>0/0</td>
+</tr>
+<tr>
+<td><code>core/work/impl</code></td>
+<td>0.00%</td>
+<td>0/270</td>
+<td>0.00%</td>
+<td>0/48</td>
+</tr>
+<tr>
+<td><code>feature/account</code></td>
+<td>0.00%</td>
+<td>0/115</td>
+<td>3.85%</td>
+<td>1/26</td>
+</tr>
+<tr>
+<td><code>feature/bookmarks</code></td>
+<td>0.00%</td>
+<td>0/159</td>
+<td>0.00%</td>
+<td>0/38</td>
+</tr>
+<tr>
+<td><code>feature/category</code></td>
+<td>0.00%</td>
+<td>0/297</td>
+<td>3.77%</td>
+<td>4/106</td>
+</tr>
+<tr>
+<td><code>feature/credentials_manager</code></td>
+<td>0.00%</td>
+<td>0/392</td>
+<td>0.75%</td>
+<td>1/134</td>
+</tr>
+<tr>
+<td><code>feature/favorites</code></td>
+<td>0.00%</td>
+<td>0/124</td>
+<td>2.50%</td>
+<td>1/40</td>
+</tr>
+<tr>
+<td><code>feature/forum</code></td>
+<td>0.00%</td>
+<td>0/229</td>
+<td>0.00%</td>
+<td>0/46</td>
+</tr>
+<tr>
+<td><code>feature/main</code></td>
+<td>0.00%</td>
+<td>0/42</td>
+<td>0.00%</td>
+<td>0/28</td>
+</tr>
+<tr>
+<td><code>feature/rating</code></td>
+<td>0.00%</td>
+<td>0/156</td>
+<td>2.22%</td>
+<td>1/45</td>
+</tr>
+<tr>
+<td><code>feature/search</code></td>
+<td>0.00%</td>
+<td>0/425</td>
+<td>0.71%</td>
+<td>1/140</td>
+</tr>
+<tr>
+<td><code>feature/search_input</code></td>
+<td>0.00%</td>
+<td>0/362</td>
+<td>0.00%</td>
+<td>0/148</td>
+</tr>
+<tr>
+<td><code>feature/topic</code></td>
+<td>0.00%</td>
+<td>0/1015</td>
+<td>1.88%</td>
+<td>5/266</td>
+</tr>
+<tr>
+<td><code>feature/visited</code></td>
+<td>0.00%</td>
+<td>0/83</td>
+<td>6.67%</td>
+<td>2/30</td>
+</tr>
+</tbody>
+</table>
+<h2 id="reading-the-baseline">Reading the baseline</h2>
+<ul>
+<li><strong>Best-covered:</strong> the tracker SDK plugin modules —
+<code>core/tracker/gutenberg</code> (95.41%),
+<code>core/tracker/archiveorg</code> (90.91%),
+<code>core/tracker/rutor</code> (83.50%),
+<code>core/tracker/kinozal</code> (83.16%),
+<code>core/tracker/nnmclub</code> (82.34%), and
+<code>core/apiengine</code> (83.46%). These are the §6.D
+behaviorally-tested surfaces.</li>
+<li><strong>0% modules</strong> are dominated by (a) generated code with
+no behavioral tests (<code>core/database</code> = 3187 lines of
+Room-generated DAOs/schema, <code>core/ui</code>,
+<code>core/navigation</code>) and (b) Compose feature screens whose only
+coverage path is the androidTest Challenge suite (NOT counted here —
+Kover's <code>koverXmlReport</code> measures JVM unit tests only;
+instrumentation coverage is a separate, later measurement).
+<code>feature/topic</code>, <code>feature/search</code>,
+<code>feature/category</code> etc. show 0% because their behavior is
+exercised by Compose UI Challenge Tests on the emulator matrix, not by
+JVM unit tests.</li>
+<li><strong>Drivers of the low aggregate:</strong>
+<code>core/designsystem</code> (2400 lines, 5.62%),
+<code>core/database</code> (3187 lines, 0%),
+<code>feature/search_result</code> (1323 lines, 11%),
+<code>core/domain</code> (1274 lines, 6.75%), and
+<code>feature/topic</code> (1015 lines, 0%) are the largest uncovered
+surfaces and the highest-leverage targets for later phases.</li>
+</ul>
+<h2
+id="phase-targets-informational--set-by-later-completeness-program-phases">Phase
+targets (informational — set by later completeness-program phases)</h2>
+<p>The completeness program drives LINE coverage up from this 18.65%
+baseline. The highest-leverage, lowest-risk targets (large +
+behaviorally-testable at the JVM unit level, not Compose-only):</p>
+<ol type="1">
+<li><code>core/domain</code> use cases (1274 lines, 6.75%) — pure
+Kotlin, ViewModel-reachable.</li>
+<li><code>core/data</code> repositories (906 lines, 6.84%) — fakes
+already exist in <code>core:testing</code>.</li>
+<li><code>core/network/impl</code> (505 lines, 37%) and
+<code>core/tracker/client</code> (823 lines, 50%).</li>
+<li><code>feature/*</code> ViewModels via <code>orbit-test</code> (wired
+in every feature, currently unused).</li>
+</ol>
+</body>
+</html>

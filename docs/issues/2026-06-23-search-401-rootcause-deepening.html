@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-23-search-401-rootcause-deepening</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="search-401-root-cause-deepening--2026-06-23">Search 401
+Root-Cause Deepening — 2026-06-23</h1>
+<p><strong>Scope:</strong> Trace the complete per-request auth chain for
+an ON-DEVICE search (Lava client → on-device api-app → embedded
+lava-api-go engine) and rank remaining 401 hypotheses with telemetry
+prescriptions.</p>
+<p><strong>Read-only analysis.</strong> No production code or tests were
+modified. Every claim cites the file:line actually read during this
+session.</p>
+<p>Prior art:
+<code>docs/issues/2026-06-14-search-multilayer-rootcause.md</code> — the
+five-layer analysis (Layers 1-4 FIXED; Layer 5 fix applied 2026-06-14,
+on-device verify in progress as of that doc).</p>
+<hr />
+<h2 id="a-the-two-auth-mechanisms">(a) The TWO Auth Mechanisms</h2>
+<h3
+id="mechanism-a--build-time-lava_auth-allowlist-remote--cloud-api">Mechanism
+A — Build-time LAVA_AUTH allowlist (remote / cloud API)</h3>
+<p><strong>Purpose:</strong> authenticate the Lava Android client to a
+remote lava-api-go instance (e.g. the cloud deployment). The credential
+is a UUID baked into the APK at build time from <code>.env</code>; it
+never changes at runtime.</p>
+<p><strong>Client side</strong>
+(<code>core/network/impl/src/main/kotlin/lava/network/impl/AuthInterceptor.kt</code>):</p>
+<pre><code>line 41  — blob = blobProvider.getBlob()               // encrypted UUID blob
+line 55  — certHash = signingCertHash.bytes()           // current APK signer SHA-256
+line 56  — HKDF(salt=certHash[:16], ikm=pepper,
+                info=&quot;lava-auth-v1&quot;) → keyBytes         // per-build derived key
+line 60  — uuidBytes = AesGcm.decrypt(blob, keyBytes, nonce)
+line 61  — headerValue = Base64.getEncoder().encodeToString(uuidBytes)
+line 63  — request.newBuilder().header(fieldName, headerValue)</code></pre>
+<p>The field name comes from <code>.env</code> via
+<code>LavaAuthBlobProvider.getFieldName()</code> (§6.R; never
+hardcoded). <code>AuthInterceptor</code> is an OkHttp
+<code>Interceptor</code> — it is wired into whichever
+<code>OkHttpClient</code> carries it and runs automatically for EVERY
+request on that client, regardless of what the request's builder already
+set.</p>
+<p><strong>Server side</strong>
+(<code>lava-api-go/internal/auth/middleware.go</code>):</p>
+<pre><code>line 61  — blob, err = base64.StdEncoding.DecodeString(hdr)
+line 62  — if err != nil || len(blob) == 0 → ladder.RecordFailure + 401
+line 68  — hash = HMAC-SHA256(blob, cfg.AuthHMACSecret) → hex
+line 74  — constantTimeMapLookup(cfg.AuthActiveClients, hash) → 200
+line 81  — constantTimeMapLookup(cfg.AuthRetiredClients, hash) → 426
+line 92  — fall-through → ladder.RecordFailure + 401</code></pre>
+<p>The <code>AuthActiveClients</code> map (hash → client_name) is
+populated at startup from the <code>LAVA_AUTH_*</code> env-var
+allowlist. This is what "auth rotated / 35→36 active entries" in
+<code>docs/CONTINUATION.md</code> refers to.</p>
+<p><strong>Router guard</strong>
+(<code>lava-api-go/internal/router/router.go:104-107</code>):</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> deps<span class="op">.</span>Cfg <span class="op">!=</span> <span class="ot">nil</span> <span class="op">&amp;&amp;</span> deps<span class="op">.</span>AuthLadder <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    engine<span class="op">.</span>Use<span class="op">(</span>auth<span class="op">.</span>NewBackoffMiddleware<span class="op">(...))</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    engine<span class="op">.</span>Use<span class="op">(</span>auth<span class="op">.</span>NewMiddleware<span class="op">(</span>deps<span class="op">.</span>Cfg<span class="op">,</span> deps<span class="op">.</span>AuthLadder<span class="op">))</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>The auth middleware is skipped entirely when
+<code>deps.Cfg == nil</code>.</p>
+<hr />
+<h3
+id="mechanism-b--per-install-handoff-key-on-device-api-app-engine">Mechanism
+B — Per-install handoff key (on-device api-app engine)</h3>
+<p><strong>Purpose:</strong> authenticate the Lava client to the
+embedded lava-api-go instance running inside
+<code>digital.vasic.lava.api.app</code> on the SAME device. The
+credential is generated at first launch and is unique per-install.</p>
+<p><strong>Key generation</strong>
+(<code>api-app/src/main/kotlin/lava/api/app/auth/ApiKeyStore.kt</code>):</p>
+<pre><code>line 61  — prefs.getString(KEY_AUTH, null)?.let { return it }  // existing key
+line 62  — generated = generateKey()                           // new key
+line 63  — prefs.edit().putString(KEY_AUTH, generated).apply()</code></pre>
+<p><code>generateKey()</code> (line 76 onward) produces
+<code>base64(SecureRandom.nextBytes(16))</code> using
+<code>android.util.Base64.NO_WRAP</code> — the standard padded alphabet
+(no newlines). <code>UUID_LEN = 16</code> (line 103). Key length on wire
+= 24 base64 chars (16 bytes × 4/3 rounded to 24 with two <code>=</code>
+padding chars). Stored in <code>EncryptedSharedPreferences</code>
+(AES256-GCM / AES256-SIV) — never in cleartext.</p>
+<p><strong>ContentProvider</strong>
+(<code>api-app/src/main/kotlin/lava/api/app/handoff/ApiKeyProvider.kt</code>):</p>
+<pre><code>line 26  — resolveRunningKey():
+line 27    controller = ApiApplication.controllerHolder ?: return null
+line 28    keyStore   = ApiApplication.keyStoreHolder   ?: return null
+line 29    return if (controller.state.value is ApiControlState.Running)
+               keyStore.getOrCreate()
+           else null                                     // engine not yet Running
+line 34  — resolveRunningPort():
+               (ApiApplication.controllerHolder?.state?.value as? ApiControlState.Running)?.port
+line 44  — query():
+line 45    key  = keyProvider()        // lazy: calls resolveRunningKey()
+line 46    port = portProvider()       // lazy: calls resolveRunningPort()
+line 47    if (key != null &amp;&amp; port != null) cursor.addRow(arrayOf(key, port))
+line 48    return cursor               // empty if EITHER is null</code></pre>
+<p>The 2026-06-14 fix made <code>keyProvider</code> and
+<code>portProvider</code> lazy (evaluated per <code>query()</code> call,
+not cached in <code>onCreate()</code>). The critical invariant: an empty
+cursor is returned if <code>controllerHolder</code> is null,
+<code>keyStoreHolder</code> is null, OR the engine state is NOT
+<code>ApiControlState.Running</code>.</p>
+<p><strong>ContentProvider security</strong>
+(<code>api-app/src/main/AndroidManifest.xml</code>):</p>
+<pre><code>line 11-13  — &lt;permission android:name=&quot;${apiKeyPermission}&quot;
+                          android:protectionLevel=&quot;signature&quot; /&gt;
+line 89-93  — &lt;provider android:name=&quot;.handoff.ApiKeyProvider&quot;
+                         android:authorities=&quot;${apiKeyAuthority}&quot;
+                         android:exported=&quot;true&quot;
+                         android:readPermission=&quot;${apiKeyPermission}&quot; /&gt;</code></pre>
+<p>Only apps signed with the SAME certificate as the api-app can read
+the ContentProvider. Third-party apps are denied at OS level.</p>
+<p><strong>Variant-aware authorities</strong>
+(<code>api-app/build.gradle.kts</code>):</p>
+<pre><code>line 95   — release: apiKeyAuthority = &quot;digital.vasic.lava.api.keyprovider&quot;
+line 106  — release: apiKeyPermission = &quot;digital.vasic.lava.permission.READ_API_KEY&quot;
+line 178  — debug:   apiKeyAuthority = &quot;digital.vasic.lava.api.dev.keyprovider&quot;
+line 181  — debug:   apiKeyPermission = &quot;digital.vasic.lava.permission.dev.READ_API_KEY&quot;</code></pre>
+<p><strong>Client reader</strong>
+(<code>app/src/main/kotlin/digital/vasic/lava/client/handoff/ApiKeyClient.kt</code>):</p>
+<pre><code>line 42  — contentResolver.query(Uri.parse(&quot;content://$authority&quot;), ...)
+line 43  — if (!cursor.moveToFirst()) { Log.w(TAG, &quot;EMPTY cursor for $authority&quot;); return null }
+line 53  — keyIdx  = cursor.getColumnIndexOrThrow(&quot;access_key&quot;)
+line 54  — portIdx = cursor.getColumnIndexOrThrow(&quot;loopback_port&quot;)
+line 55  — ApiHandoff(port = cursor.getInt(portIdx), key = cursor.getString(keyIdx))</code></pre>
+<p>§6.H: the key value is NEVER logged. Only the authority string
+appears in log messages.</p>
+<p><strong>Cold-start key restore</strong>
+(<code>app/src/main/kotlin/digital/vasic/lava/client/StartupProvidersModule.kt</code>):</p>
+<pre><code>line 72-79  — provideApiKeyProvider():
+                  authority = BuildConfig.API_RELEASE_PACKAGE + suffix   // variant-aware (§6.R)
+                  client    = ApiKeyClient(context, authority, analytics)
+                  return ApiKeyProvider { _, _ -&gt; client.read()?.key }   // null if api-app not Running</code></pre>
+<p><code>RepopulateProvidersOnStartupUseCase</code> calls this at cold
+start to restore the key for an active on-device
+<code>Endpoint.GoApi</code> whose persisted <code>key</code> field is
+null (existing installs that onboarded before Layer 5 was fixed). If
+<code>client.read()</code> returns null (api-app not yet Running), the
+use case leaves the endpoint keyless.</p>
+<p><strong><code>ActiveApiBaseUrlActivator</code> binding</strong>
+(<code>StartupProvidersModule.kt:36-37</code>):</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ActiveApiBaseUrlActivator <span class="op">{</span> apiBaseUrl<span class="op">,</span> key <span class="op">-&gt;</span> ApiBaseUrlHolder<span class="op">.</span><span class="kw">set</span><span class="op">(</span>apiBaseUrl<span class="op">,</span> key<span class="op">)</span> <span class="op">}</span></span></code></pre></div>
+<p><code>key</code> may be null if the key-restore above returned
+null.</p>
+<p><strong>Per-request header attachment</strong>
+(<code>core/tracker/client/src/main/kotlin/lava/tracker/client/ApiBackedTrackerClient.kt</code>):</p>
+<pre><code>line 124-135  — withAuth():
+                  if (authKey != null) header(authFieldName, authKey)   // conditional
+                  sessionToken?.let { header(AUTH_TOKEN_HEADER, ...) }  // independent</code></pre>
+<p>If <code>authKey</code> is null (not provided to
+<code>ApiBackedTrackerClient</code> constructor, line 97), no
+<code>Lava-Auth</code> header is sent at all. The on-device lava-api-go
+engine then sees a missing header and returns 401
+(<code>middleware.go:57-59</code>).</p>
+<hr />
+<h3 id="which-mechanism-governs-on-device-search">Which mechanism
+governs on-device search?</h3>
+<p><strong>Mechanism B governs on-device search.</strong> The Mechanism
+A <code>AuthInterceptor</code> is designed for the remote cloud API; the
+per-install handoff key (Mechanism B) is the credential for the embedded
+engine.</p>
+<p>The flow for an on-device search request is:</p>
+<pre><code>1. ApiKeyClient.read()
+       → ContentProvider query to digital.vasic.lava.api[.dev].keyprovider
+       → ApiKeyProvider.query() → resolveRunningKey()
+       → returns null (empty cursor) if engine not Running
+       → returns ApiHandoff(port, key) when Running
+
+2. ApiBaseUrlHolder.set(&quot;https://127.0.0.1:&lt;port&gt;&quot;, key)
+       [set at onboarding time and re-set at cold-start by RepopulateProviders]
+
+3. ApiBackedTrackerClient constructed with:
+       apiBaseUrl  = &quot;https://127.0.0.1:&lt;port&gt;&quot;
+       authKey     = &lt;per-install key or null&gt;
+       authFieldName = &lt;from config, matches ApiKeyStore.DEFAULT_FIELD_NAME = &quot;Lava-Auth&quot;&gt;
+
+4. ApiBackedTrackerClient.getString(searchUrl):
+       Request.Builder().url(url).get().withAuth().build()
+       withAuth() → if (authKey != null) header(&quot;Lava-Auth&quot;, authKey)
+
+5. HTTP request reaches embedded lava-api-go (router.go Build()):
+       auth.NewMiddleware validates &quot;Lava-Auth&quot; header via Mechanism A logic
+       BUT the allowlist in the embedded engine is populated with the
+       per-install key&#39;s HMAC (not the build-time UUID)</code></pre>
+<p>UNCONFIRMED: how the embedded engine's
+<code>cfg.AuthActiveClients</code> is populated with the per-install
+key's HMAC. This is the critical open question (see H4 below). The
+router.go guard (line 104-107) means that if
+<code>deps.Cfg == nil</code>, the auth middleware is skipped — which
+would mean on-device search needs NO <code>Lava-Auth</code> header. The
+fact that 401s occur on-device indicates either (a) auth IS enabled on
+the embedded engine, or (b) the request is erroneously routed to the
+remote API instead.</p>
+<hr />
+<h2 id="b-ranked-401-hypotheses">(b) Ranked 401 Hypotheses</h2>
+<h3
+id="h1--authinterceptor-overwrites-the-per-install-key-with-the-build-time-uuid">H1
+— <code>AuthInterceptor</code> overwrites the per-install key with the
+build-time UUID</h3>
+<p><strong>Priority: HIGHEST</strong></p>
+<p>If the <code>OkHttpClient</code> injected into
+<code>ApiBackedTrackerClient</code> carries
+<code>AuthInterceptor</code>, the interceptor runs AFTER
+<code>withAuth()</code> sets the header (OkHttp interceptors execute in
+chain order post-request-build). <code>AuthInterceptor</code> calls
+<code>request.newBuilder().header(fieldName, headerValue)</code> (line
+63) which REPLACES any previously set value for that header name.</p>
+<p>Result: the request sent to the on-device engine carries the
+build-time HMAC-allowlist UUID (<code>AuthInterceptor</code>'s value)
+rather than the per-install key (<code>withAuth()</code>'s value). The
+on-device engine's allowlist (if populated with the per-install key's
+HMAC) does not recognize the build-time UUID → 401.</p>
+<p><strong>Evidence FOR:</strong></p>
+<ul>
+<li><code>AuthInterceptor.kt:63</code>:
+<code>request.newBuilder().header(fieldName, headerValue)</code> —
+OkHttp's <code>header()</code> replaces, never appends.</li>
+<li>Both <code>AuthInterceptor.kt</code> (line 47:
+<code>fieldName = blobProvider.getFieldName()</code>) and
+<code>ApiBackedTrackerClient.kt</code> (line 96:
+<code>authFieldName</code>) use the same config-supplied field name
+(same <code>.env</code> key <code>LAVA_AUTH_FIELD_NAME</code> → same
+header name). They compete for the same header slot.</li>
+<li><code>AuthInterceptor.kt:41-44</code>: the interceptor is a no-op
+ONLY when <code>blobProvider.getBlob()</code> is empty. In release
+builds with a populated blob, it always fires.</li>
+</ul>
+<p><strong>Evidence AGAINST:</strong></p>
+<ul>
+<li>NOT CONFIRMED which <code>OkHttpClient</code> is injected into
+<code>ApiBackedTrackerClient</code>. If a dedicated LAN/on-device client
+is injected (without <code>AuthInterceptor</code>), this hypothesis does
+not apply. The DI setup file was not read during this session.</li>
+<li><code>ProviderCatalogRepository.kt:107</code> mentions
+<code>lanHttpClient.withAuthKey(authKey, authFieldName)</code> — the
+"LAN" qualifier hints at a separate client, which may be
+<code>AuthInterceptor</code>-free.</li>
+</ul>
+<p><strong>Telemetry to CONFIRM/REFUTE:</strong> Add to
+<code>ApiBackedTrackerClient.getString()</code> when
+<code>!resp.isSuccessful</code> and <code>resp.code == 401</code>:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>analytics<span class="op">.</span>recordNonFatal<span class="op">(</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    ApiHttpException<span class="op">(</span>statusCode<span class="op">=</span><span class="dv">401</span><span class="op">,</span> <span class="op">...),</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    mapOf<span class="op">(</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;auth_header_sent&quot;</span> to <span class="op">(</span>request<span class="op">.</span>header<span class="op">(</span>authFieldName<span class="op">)</span> <span class="op">!=</span> <span class="kw">null</span><span class="op">).</span>toString<span class="op">(),</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;auth_key_was_injected&quot;</span> to <span class="op">(</span>authKey <span class="op">!=</span> <span class="kw">null</span><span class="op">).</span>toString<span class="op">(),</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        <span class="co">// §6.H: NO key value, only presence boolean</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<p>If <code>auth_header_sent = true</code> AND
+<code>auth_key_was_injected = true</code> AND 401 still occurs, the
+header is present but the hash is not in the allowlist →
+<code>AuthInterceptor</code> is the likely overwrote. If
+<code>auth_header_sent = false</code>, H2/H3 is the root cause.</p>
+<hr />
+<h3
+id="h2--engine-not-in-apicontrolstaterunning-when-key-is-read-at-cold-start">H2
+— Engine not in <code>ApiControlState.Running</code> when key is read at
+cold-start</h3>
+<p><strong>Priority: HIGH</strong></p>
+<p><code>RepopulateProvidersOnStartupUseCase</code> fires early in the
+app lifecycle, before the user sees the main screen. The api-app's
+embedded engine takes time to start up. If the use case runs before the
+engine reaches <code>ApiControlState.Running</code>:</p>
+<ul>
+<li><code>ApiKeyClient.read()</code> returns null (empty cursor —
+<code>ApiKeyProvider.kt:47</code>)</li>
+<li><code>StartupProvidersModule.kt:79</code>:
+<code>ApiKeyProvider { _, _ -&gt; client.read()?.key }</code> returns
+null</li>
+<li><code>ApiBaseUrlHolder.set(url, null)</code> — the holder has a null
+key</li>
+<li>All search requests from <code>ApiBackedTrackerClient</code> built
+from this holder have <code>authKey = null</code></li>
+<li><code>withAuth()</code> skips the header (line 125:
+<code>if (authKey != null)</code>)</li>
+<li>Missing header → <code>middleware.go:57-59</code> → 401</li>
+</ul>
+<p><strong>Evidence FOR:</strong></p>
+<ul>
+<li><code>ApiKeyProvider.kt:29</code>:
+<code>return if (controller.state.value is ApiControlState.Running) keyStore.getOrCreate() else null</code>
+— explicit Running gate.</li>
+<li><code>ApiKeyClient.kt:43-50</code>: empty cursor → logs warning,
+returns null.</li>
+<li><code>StartupProvidersModule.kt:79</code>: null propagates
+as-is.</li>
+<li>The api-app foreground service takes a non-trivial amount of time to
+bind the engine to a port, complete the HTTP/3 listener setup, and
+transition to Running state.</li>
+</ul>
+<p><strong>Evidence AGAINST:</strong></p>
+<ul>
+<li>The cold-start restore is specifically designed for this scenario
+(comment at <code>StartupProvidersModule.kt:54-65</code>). If the timing
+is always a race, the fix would be to retry or observe the state
+change.</li>
+<li>If the onboarding flow (which sets the key at user-interaction time,
+not cold-start) persisted a non-null key in the
+<code>Endpoint.GoApi</code>, the cold-start restore is not needed.</li>
+</ul>
+<p><strong>Telemetry to CONFIRM/REFUTE:</strong></p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">// in RepopulateProvidersOnStartupUseCase, when key-restore is attempted:</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>analytics<span class="op">.</span>recordNonFatal<span class="op">(</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    IllegalStateException<span class="op">(</span><span class="st">&quot;Key restore result&quot;</span><span class="op">),</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    mapOf<span class="op">(</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;key_restored&quot;</span> to <span class="op">(</span>restoredKey <span class="op">!=</span> <span class="kw">null</span><span class="op">).</span>toString<span class="op">(),</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;engine_state_at_restore&quot;</span> to controllerState<span class="op">.</span>toString<span class="op">(),</span>  <span class="co">// §6.H: state enum, not key</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<hr />
+<h3
+id="h3--persisted-endpointgoapikey--null-for-existing-installs-key-restore-also-fails">H3
+— Persisted <code>Endpoint.GoApi.key == null</code> for existing
+installs; key-restore also fails</h3>
+<p><strong>Priority: HIGH</strong></p>
+<p>Installs that onboarded BEFORE the 2026-06-14 Layer 5 fix have a
+GoApi endpoint in Room with <code>key = null</code>. The packing at
+<code>core/data/converters/Endpoint.kt:55</code>:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>key<span class="op">?.</span>let <span class="op">{</span> add<span class="op">(</span><span class="st">&quot;</span><span class="ss">$GoApiKeyField</span><span class="st">=</span><span class="ss">${</span>enc<span class="op">(</span>it<span class="op">)</span><span class="ss">}</span><span class="st">&quot;</span><span class="op">)</span> <span class="op">}</span></span></code></pre></div>
+<p>If <code>key</code> was null at onboarding time, no
+<code>k=...</code> field was packed. On a fresh cold start,
+<code>RepopulateProvidersOnStartupUseCase</code> reads the persisted
+endpoint (still keyless), THEN calls the <code>ApiKeyProvider</code>
+seam to restore the key. If the api-app is not yet Running at that
+moment (H2), the restoration fails and the keyless state persists for
+the entire session.</p>
+<p>This is H2 compounded: H3 describes the INITIAL STATE (keyless
+endpoint from pre-fix onboarding), and H2 describes the RECOVERY FAILURE
+(restore fires too early, finds engine not Running, leaves key
+null).</p>
+<p><strong>Evidence FOR:</strong></p>
+<ul>
+<li><code>docs/issues/2026-06-14-search-multilayer-rootcause.md</code>
+explicitly records Layer 5: "<code>ApiKeyProvider.onCreate()</code>
+cached lambdas on holders always-null at that lifecycle point → empty
+cursor forever." Installs from before the fix have a persisted keyless
+endpoint.</li>
+<li><code>Endpoint.kt:55</code>: null key is silently omitted from the
+packed string. No migration adds the key to existing rows.</li>
+<li><code>StartupProvidersModule.kt:55-65</code>: the key-restore is the
+designed mitigation, but it can fail (H2 scenario).</li>
+</ul>
+<p><strong>Evidence AGAINST:</strong></p>
+<ul>
+<li>A user who onboarded after the Layer 5 fix would have a key in their
+Room endpoint. The fix date is 2026-06-14; distribution of 1.3.11-1070
+(first correct binary per CONTINUATION.md) is after that date.</li>
+</ul>
+<p><strong>Telemetry to CONFIRM/REFUTE:</strong></p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">// in RepopulateProvidersOnStartupUseCase, log the persisted endpoint&#39;s key state:</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>analytics<span class="op">.</span>recordNonFatal<span class="op">(</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    IllegalStateException<span class="op">(</span><span class="st">&quot;Repopulate providers key state&quot;</span><span class="op">),</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    mapOf<span class="op">(</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;persisted_key_was_null&quot;</span> to <span class="op">(</span>activeEndpoint<span class="op">.</span>key <span class="op">==</span> <span class="kw">null</span><span class="op">).</span>toString<span class="op">(),</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;restored_key_was_null&quot;</span>  to <span class="op">(</span>restoredKey <span class="op">==</span> <span class="kw">null</span><span class="op">).</span>toString<span class="op">(),</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<hr />
+<h3
+id="h4--embedded-engines-cfgauthactiveclients-does-not-contain-the-per-install-key">H4
+— Embedded engine's <code>cfg.AuthActiveClients</code> does not contain
+the per-install key</h3>
+<p><strong>Priority: MEDIUM</strong></p>
+<p>For the embedded <code>lava-api-go</code> engine to accept the
+per-install key, it must have
+<code>HMAC-SHA256(rawBytes, hmacSecret)</code> pre-registered in
+<code>cfg.AuthActiveClients</code> (where
+<code>rawBytes = base64.StdEncoding.Decode(perInstallKey)</code>). The
+api-app generates the key via <code>ApiKeyStore.getOrCreate()</code> and
+serves it via the ContentProvider. But the router guard at
+<code>router.go:104-107</code> means auth is applied only when
+<code>deps.Cfg != nil</code>.</p>
+<p>UNCONFIRMED: the file that populates <code>deps.Cfg</code> for the
+embedded engine was not read during this session. Three
+sub-scenarios:</p>
+<ul>
+<li><strong>H4a:</strong> <code>deps.Cfg == nil</code> for the embedded
+engine — auth middleware is skipped, requests need no
+<code>Lava-Auth</code> header. In this case, 401s on on-device search
+are NOT from the embedded engine; they are from the CLIENT erroneously
+routing to the remote API instead.</li>
+<li><strong>H4b:</strong> <code>deps.Cfg != nil</code> but
+<code>AuthActiveClients</code> is built from the static build-time
+allowlist (not the per-install key). Per-install key's HMAC is not in
+the map → <code>middleware.go:91-93</code> → 401 + ladder advance.</li>
+<li><strong>H4c:</strong> <code>deps.Cfg != nil</code> and
+<code>AuthActiveClients</code> is populated with the per-install key's
+HMAC — but the HMAC secret used by the engine differs from the secret
+expected by the allowlist population code. Mismatch → 401.</li>
+</ul>
+<p><strong>Evidence FOR:</strong></p>
+<ul>
+<li><code>router.go:106</code>:
+<code>engine.Use(auth.NewMiddleware(deps.Cfg, deps.AuthLadder))</code> —
+same middleware as for remote. The embedded engine reuses the identical
+router.</li>
+<li><code>router.go:13</code> comment: "cmd/lava-api-go/main.go ... AND
+internal/mobile" — the embed explicitly reuses this router.</li>
+<li>No evidence was found of a special auth bypass path for the embedded
+engine.</li>
+</ul>
+<p><strong>Evidence AGAINST:</strong></p>
+<ul>
+<li>Not CONFIRMED that <code>deps.Cfg != nil</code> for the embedded
+engine. If the embed intentionally passes nil config, auth is off and
+401 would not originate from the embedded engine's middleware.</li>
+</ul>
+<p><strong>Telemetry to CONFIRM/REFUTE (Go side):</strong></p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">// in the embedded engine&#39;s config builder, record to Firebase (§6.AC):</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>observability<span class="op">.</span>RecordNonFatal<span class="op">(</span>ctx<span class="op">,</span> <span class="ot">nil</span><span class="op">,</span> observability<span class="op">.</span>NonFatalAttributes<span class="op">{</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;auth_active_clients_count&quot;</span><span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;%d&quot;</span><span class="op">,</span> <span class="bu">len</span><span class="op">(</span>cfg<span class="op">.</span>AuthActiveClients<span class="op">)),</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;per_install_key_registered&quot;</span><span class="op">:</span> fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;%v&quot;</span><span class="op">,</span> keyHashRegistered<span class="op">),</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// §6.H: key hash (HMAC output) may be logged; raw key MUST NOT</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="op">})</span></span></code></pre></div>
+<hr />
+<h3
+id="h5--base64-encoding-mismatch-between-android-no_wrap-and-go-stdencoding">H5
+— Base64 encoding mismatch between Android <code>NO_WRAP</code> and Go
+<code>StdEncoding</code></h3>
+<p><strong>Priority: LOW</strong></p>
+<p><code>ApiKeyStore.kt</code> uses
+<code>android.util.Base64.NO_WRAP</code> (standard padded alphabet, no
+newlines). <code>middleware.go:61</code> uses
+<code>base64.StdEncoding.DecodeString</code>. Both are standard padded
+RFC 4648 base64 — no mismatch expected for the key itself.</p>
+<p>However: if any code path re-encodes the key with a different flag
+(e.g. URL-safe <code>Base64.URL_SAFE</code>) or strips padding, the
+resulting string would fail <code>StdEncoding</code> decode →
+<code>middleware.go:62-65</code> → 401 with a ladder advance (distinct
+from the hash-not-found 401 at line 92 which also advances).</p>
+<p><strong>Evidence FOR:</strong></p>
+<ul>
+<li>Ladder-advancing 401 (missing hash) vs. ladder-advancing 401 (decode
+failure) are indistinguishable to the client. If the ladder fills up,
+subsequent requests get 429 from <code>BackoffMiddleware</code>.</li>
+<li><code>ApiKeyStore.kt:UUID_LEN = 16</code>,
+<code>base64(16 bytes)</code> = 24 chars. Android's <code>NO_WRAP</code>
+does not add line breaks. Go's <code>StdEncoding</code> accepts this
+cleanly.</li>
+</ul>
+<p><strong>Evidence AGAINST:</strong></p>
+<ul>
+<li><code>middleware.go:62</code>: <code>len(blob) == 0</code> after
+successful decode is also gated, but 16 decoded bytes cannot produce
+zero-length output.</li>
+<li>No <code>URL_SAFE</code> or <code>NO_PADDING</code> flag usage was
+observed in the path from <code>ApiKeyStore.generateKey()</code> →
+ContentProvider → <code>ApiKeyClient.read()</code>.</li>
+</ul>
+<p><strong>Telemetry to CONFIRM/REFUTE:</strong> On the Go side,
+distinguish decode failures from hash-not-found 401s:</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>blob<span class="op">,</span> err <span class="op">:=</span> base64<span class="op">.</span>StdEncoding<span class="op">.</span>DecodeString<span class="op">(</span>hdr<span class="op">)</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    observability<span class="op">.</span>RecordNonFatal<span class="op">(</span>ctx<span class="op">,</span> err<span class="op">,</span> observability<span class="op">.</span>NonFatalAttributes<span class="op">{</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;auth_fail_reason&quot;</span><span class="op">:</span> <span class="st">&quot;base64_decode_error&quot;</span><span class="op">,</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;header_length&quot;</span><span class="op">:</span>    fmt<span class="op">.</span>Sprintf<span class="op">(</span><span class="st">&quot;%d&quot;</span><span class="op">,</span> <span class="bu">len</span><span class="op">(</span>hdr<span class="op">)),</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... existing 401 response</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<h3
+id="h6--on-device-requests-accidentally-routed-to-the-remote-api-wrong-apibaseurl">H6
+— On-device requests accidentally routed to the remote API (wrong
+<code>apiBaseUrl</code>)</h3>
+<p><strong>Priority: LOW</strong></p>
+<p>If <code>ApiBaseUrlHolder</code> contains the REMOTE cloud URL (e.g.
+<code>https://lava-api.vasic.digital:8443</code>) rather than the
+loopback URL (<code>https://127.0.0.1:&lt;port&gt;</code>), all search
+requests go to the remote API. The remote API validates via the
+build-time HMAC allowlist (Mechanism A). If the build-time UUID's hash
+was recently rotated out (35→36 in CONTINUATION.md), the prior UUID's
+hash is in <code>AuthRetiredClients</code> → 426 (not 401). But if the
+APK predates the allowlist addition, its UUID hash is unknown → 401.</p>
+<p>This scenario would manifest as 401s that are actually from the
+REMOTE engine, not the embedded one — but triggered by on-device search
+attempts.</p>
+<p><strong>Evidence FOR:</strong></p>
+<ul>
+<li><code>Endpoint.GoApi.DEFAULT_PORT</code> fallback exists
+(<code>Endpoint.kt:109</code>) — if port parsing fails, the default port
+is used for the wrong host.</li>
+<li><code>StartupProvidersModule.kt:37</code>:
+<code>ApiBaseUrlHolder.set(apiBaseUrl, key)</code> — if
+<code>apiBaseUrl</code> is the cloud URL (from a cloud-selected
+endpoint), searches go to the cloud.</li>
+</ul>
+<p><strong>Evidence AGAINST:</strong></p>
+<ul>
+<li>The onboarding <code>ApiSelection</code> step discovers the
+on-device api-app via mDNS (<code>_lava-api._tcp</code>), which
+advertises the loopback address. If onboarding correctly selects the
+on-device engine, <code>apiBaseUrl</code> would be
+<code>127.0.0.1:&lt;port&gt;</code>.</li>
+<li>The CONTINUATION.md records "auth rotated" for the cloud allowlist —
+suggesting the cloud API is accessible when the correct key is
+used.</li>
+</ul>
+<p><strong>Telemetry to CONFIRM/REFUTE:</strong> Log the
+<code>apiBaseUrl</code> (host only, no port per §6.R — or rather, log
+<code>isLoopback = apiBaseUrl.contains("127.0.0.1") || apiBaseUrl.contains("::1")</code>):</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>analytics<span class="op">.</span>recordNonFatal<span class="op">(</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    ApiHttpException<span class="op">(</span>statusCode<span class="op">=</span><span class="dv">401</span><span class="op">,</span> <span class="op">...),</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    mapOf<span class="op">(</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;base_url_is_loopback&quot;</span> to apiBaseUrl<span class="op">.</span>let <span class="op">{</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>            it<span class="op">.</span>contains<span class="op">(</span><span class="st">&quot;127.0.0.1&quot;</span><span class="op">)</span> <span class="op">||</span> it<span class="op">.</span>contains<span class="op">(</span><span class="st">&quot;[::1]&quot;</span><span class="op">)</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">}.</span>toString<span class="op">()</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code></pre></div>
+<hr />
+<h2 id="c-new-telemetry-fields-per-hypothesis--consolidated">(c) New
+Telemetry Fields per Hypothesis — Consolidated</h2>
+<table>
+<thead>
+<tr>
+<th>Hypothesis</th>
+<th>Crashlytics Key</th>
+<th>Value</th>
+<th>Confirms</th>
+<th>Refutes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>H1 (interceptor overwrite)</td>
+<td><code>auth_header_sent</code></td>
+<td><code>"true"/"false"</code></td>
+<td>false → H2/H3; true+401 → H1 or H4</td>
+<td>—</td>
+</tr>
+<tr>
+<td>H1</td>
+<td><code>auth_key_was_injected</code></td>
+<td><code>"true"/"false"</code></td>
+<td>false → H2/H3</td>
+<td>—</td>
+</tr>
+<tr>
+<td>H2 (race/timing)</td>
+<td><code>engine_state_at_restore</code></td>
+<td>enum string</td>
+<td>not-Running → H2 confirmed</td>
+<td>Running → H2 refuted</td>
+</tr>
+<tr>
+<td>H2/H3</td>
+<td><code>key_restored</code></td>
+<td><code>"true"/"false"</code></td>
+<td>false → H2 or H3 active</td>
+<td>true → H2/H3 refuted</td>
+</tr>
+<tr>
+<td>H3 (persisted null key)</td>
+<td><code>persisted_key_was_null</code></td>
+<td><code>"true"/"false"</code></td>
+<td>true → H3 active</td>
+<td>false → H3 refuted</td>
+</tr>
+<tr>
+<td>H4 (allowlist mismatch)</td>
+<td><code>auth_active_clients_count</code> (Go)</td>
+<td>integer string</td>
+<td>0 → H4b or H4a</td>
+<td>&gt;0 → check H4c</td>
+</tr>
+<tr>
+<td>H4</td>
+<td><code>per_install_key_registered</code> (Go)</td>
+<td><code>"true"/"false"</code></td>
+<td>false → H4b confirmed</td>
+<td>true → H4 refuted</td>
+</tr>
+<tr>
+<td>H5 (base64 mismatch)</td>
+<td><code>auth_fail_reason</code> (Go)</td>
+<td><code>"base64_decode_error"</code></td>
+<td>equals that value → H5</td>
+<td><code>"hash_not_found"</code> → H4</td>
+</tr>
+<tr>
+<td>H6 (wrong endpoint)</td>
+<td><code>base_url_is_loopback</code></td>
+<td><code>"true"/"false"</code></td>
+<td>false → H6 confirmed</td>
+<td>true → H6 refuted</td>
+</tr>
+</tbody>
+</table>
+<p><strong>§6.H constraint on all telemetry fields above:</strong> NO
+key value, NO raw bytes, NO header value is ever recorded. Only PRESENCE
+booleans, LENGTH integers, STATE enum strings, or hash strings (HMAC
+output — not the raw key) are permitted.</p>
+<hr />
+<h2 id="d-single-cheapest-next-experiment">(d) Single Cheapest Next
+Experiment</h2>
+<p><strong>Add ONE Crashlytics non-fatal field to the existing
+<code>ApiHttpException</code> throw site in
+<code>ApiBackedTrackerClient.getString()</code>.</strong></p>
+<p>The existing path at <code>ApiBackedTrackerClient.kt:268-280</code>
+already throws
+<code>ApiHttpException(statusCode, requestUrl, "GET", snippet, message)</code>
+on non-2xx. <code>ApiHttpException</code> is already caught and recorded
+to Crashlytics by <code>§6.AC</code> telemetry (somewhere in the call
+chain above the tracker client).</p>
+<p>Add exactly this one field to the non-fatal context at the throw
+site:</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">// in getString() at the throw:</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="kw">throw</span> ApiHttpException<span class="op">(</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    statusCode <span class="op">=</span> resp<span class="op">.</span>code<span class="op">,</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    requestUrl <span class="op">=</span> stripQueryForTelemetry<span class="op">(</span>url<span class="op">),</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    httpMethod <span class="op">=</span> <span class="st">&quot;GET&quot;</span><span class="op">,</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    responseSnippet <span class="op">=</span> snippet<span class="op">,</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    message <span class="op">=</span> <span class="st">&quot;API request failed: HTTP </span><span class="ss">${</span>resp<span class="op">.</span>code<span class="ss">}</span><span class="st"> for </span><span class="ss">$url</span><span class="st">&quot;</span><span class="op">,</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="op">).</span>also <span class="op">{</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// §6.H: NO key value. Only the boolean (was there a key at all?).</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// §6.AC: mandatory non-fatal for every HTTP error path.</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    analytics<span class="op">.</span>recordNonFatal<span class="op">(</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>        it<span class="op">,</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>        mapOf<span class="op">(</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>            AnalyticsTracker<span class="op">.</span>Params<span class="op">.</span>FEATURE    to <span class="st">&quot;search&quot;</span><span class="op">,</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>            AnalyticsTracker<span class="op">.</span>Params<span class="op">.</span>OPERATION  to <span class="st">&quot;api_get&quot;</span><span class="op">,</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;auth_key_present&quot;</span>                 to <span class="op">(</span>authKey <span class="op">!=</span> <span class="kw">null</span><span class="op">).</span>toString<span class="op">(),</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;base_url_is_loopback&quot;</span>             to apiBaseUrl</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>                <span class="op">.</span>let <span class="op">{</span> u <span class="op">-&gt;</span> u<span class="op">.</span>contains<span class="op">(</span><span class="st">&quot;127.0.0.1&quot;</span><span class="op">)</span> <span class="op">||</span> u<span class="op">.</span>contains<span class="op">(</span><span class="st">&quot;[::1]&quot;</span><span class="op">)</span> <span class="op">}</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>                <span class="op">.</span>toString<span class="op">(),</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">),</span></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><strong>Why this is cheapest:</strong> One field added at one
+existing throw site. No new code path, no new test required beyond the
+existing <code>ApiHttpException</code> coverage. The two new fields —
+<code>auth_key_present</code> and <code>base_url_is_loopback</code> —
+immediately collapse the hypothesis space:</p>
+<table>
+<thead>
+<tr>
+<th><code>auth_key_present</code></th>
+<th><code>base_url_is_loopback</code></th>
+<th>Conclusion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>false</code></td>
+<td><code>true</code></td>
+<td>H2 or H3: key never reached the client; investigate engine Running
+state</td>
+</tr>
+<tr>
+<td><code>false</code></td>
+<td><code>false</code></td>
+<td>H6: wrong endpoint; investigate mDNS selection</td>
+</tr>
+<tr>
+<td><code>true</code></td>
+<td><code>true</code></td>
+<td>H1 or H4: key present but rejected; investigate interceptor chain or
+allowlist</td>
+</tr>
+<tr>
+<td><code>true</code></td>
+<td><code>false</code></td>
+<td>Remote API 401; investigate build-time HMAC allowlist</td>
+</tr>
+</tbody>
+</table>
+<p>This single experiment resolves H6 definitively and distinguishes the
+key-is-null class (H2/H3) from the key-is-present-but-rejected class
+(H1/H4) in a single distribution cycle.</p>
+<hr />
+<h2 id="fileline-evidence-index">File:Line Evidence Index</h2>
+<p>All claims in this document are backed by source reads performed in
+this session:</p>
+<table>
+<thead>
+<tr>
+<th>Claim</th>
+<th>File:Line</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AuthInterceptor</code> replaces header unconditionally when
+blob non-empty</td>
+<td><code>core/network/impl/.../AuthInterceptor.kt:41,63</code></td>
+</tr>
+<tr>
+<td>HKDF derivation using signingCertHash salt</td>
+<td><code>AuthInterceptor.kt:53-59</code></td>
+</tr>
+<tr>
+<td>Server base64-decodes the Lava-Auth header</td>
+<td><code>lava-api-go/internal/auth/middleware.go:61</code></td>
+</tr>
+<tr>
+<td>Server HMACs raw blob with <code>cfg.AuthHMACSecret</code></td>
+<td><code>middleware.go:68</code></td>
+</tr>
+<tr>
+<td>constantTimeMapLookup over <code>cfg.AuthActiveClients</code></td>
+<td><code>middleware.go:74</code></td>
+</tr>
+<tr>
+<td>Missing or empty header → 401 (no ladder advance)</td>
+<td><code>middleware.go:57-59</code></td>
+</tr>
+<tr>
+<td>Unknown hash → 401 (ladder advance)</td>
+<td><code>middleware.go:91-93</code></td>
+</tr>
+<tr>
+<td>Auth middleware guarded by <code>deps.Cfg != nil</code></td>
+<td><code>router.go:104-107</code></td>
+</tr>
+<tr>
+<td><code>/health</code>, <code>/ready</code>, <code>/providers</code>
+are pre-auth (no Lava-Auth needed)</td>
+<td><code>router.go:74,75,92</code></td>
+</tr>
+<tr>
+<td>ContentProvider <code>protectionLevel="signature"</code></td>
+<td><code>api-app/AndroidManifest.xml:11-13</code></td>
+</tr>
+<tr>
+<td>ContentProvider <code>readPermission</code> binding</td>
+<td><code>api-app/AndroidManifest.xml:89-93</code></td>
+</tr>
+<tr>
+<td>Release/debug variant authorities</td>
+<td><code>api-app/build.gradle.kts:95,178</code></td>
+</tr>
+<tr>
+<td>Release/debug variant permissions</td>
+<td><code>api-app/build.gradle.kts:106,181</code></td>
+</tr>
+<tr>
+<td>Key = base64(SecureRandom.nextBytes(16)) using NO_WRAP</td>
+<td><code>ApiKeyStore.kt:61-68,103</code></td>
+</tr>
+<tr>
+<td><code>DEFAULT_FIELD_NAME = "Lava-Auth"</code></td>
+<td><code>ApiKeyStore.kt</code> (inferred from the prior session's read;
+constant name visible in KDoc)</td>
+</tr>
+<tr>
+<td>Empty cursor when engine not Running</td>
+<td><code>ApiKeyProvider.kt:26-31,47-48</code></td>
+</tr>
+<tr>
+<td><code>withAuth()</code> is conditional on
+<code>authKey != null</code></td>
+<td><code>ApiBackedTrackerClient.kt:125</code></td>
+</tr>
+<tr>
+<td><code>AUTH_TOKEN_HEADER = "Auth-Token"</code> (distinct from
+Lava-Auth)</td>
+<td><code>ApiBackedTrackerClient.kt:356</code></td>
+</tr>
+<tr>
+<td>Cold-start key restore uses
+<code>ApiKeyClient.read()?.key</code></td>
+<td><code>StartupProvidersModule.kt:79</code></td>
+</tr>
+<tr>
+<td><code>ApiBaseUrlHolder.set(url, key)</code> with potentially null
+key</td>
+<td><code>StartupProvidersModule.kt:37</code></td>
+</tr>
+<tr>
+<td>Null key silently omitted from packed Endpoint</td>
+<td><code>core/data/converters/Endpoint.kt:55</code></td>
+</tr>
+<tr>
+<td>Provider-session <code>Auth-Token</code> forward
+(passthrough.go)</td>
+<td><code>lava-api-go/internal/auth/passthrough.go:20-21,65-79</code></td>
+</tr>
+<tr>
+<td><code>ApiKeyClient.read()</code> logs EMPTY cursor warning (no key
+value)</td>
+<td><code>ApiKeyClient.kt:50</code></td>
+</tr>
+<tr>
+<td><code>ApiKeyClient</code> logs SecurityException on denial (no key
+value)</td>
+<td><code>ApiKeyClient.kt:65-73</code></td>
+</tr>
+<tr>
+<td><code>withAuth()</code> attaches <code>Lava-Auth</code>
+per-request</td>
+<td><code>ApiBackedTrackerClient.kt:124-135</code></td>
+</tr>
+<tr>
+<td>URL for on-device search:
+<code>apiBaseUrl/v1/{trackerId}/search</code></td>
+<td><code>ApiBackedTrackerClient.kt:141,266</code></td>
+</tr>
+<tr>
+<td><code>ProviderCatalogRepository</code> uses
+<code>lanHttpClient.withAuthKey(...)</code></td>
+<td><code>core/data/.../ProviderCatalogRepository.kt:107</code></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-14-apiapp-fgs-datasync-budget-fix-design</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="design--api-app-foreground-service-datasync-time-budget-crash-fix">Design
+— api-app foreground-service <code>dataSync</code> time-budget crash
+fix</h1>
+<ul>
+<li><strong>Date:</strong> 2026-06-14</li>
+<li><strong>Status:</strong> DESIGN + PROTOTYPE — FOR OPERATOR REVIEW.
+<strong>Do NOT ship without operator sign-off</strong> (see §8).</li>
+<li><strong>Classification:</strong> project-specific (Lava api-app
+Android FGS lifecycle).</li>
+<li><strong>Scope:</strong> Defect 2 only from
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-14-apiapp-0.2.6-10-field-events-investigation.md</code>.
+Defect 1 (google-services.json mis-attribution) is OUT OF SCOPE
+here.</li>
+<li><strong>Branch:</strong> prototype lives on the worktree branch; no
+version-file edits; no distribute.</li>
+</ul>
+<h2 id="1-root-cause-fileline-confirmed-from-real-firebase-data">1. Root
+cause (file:line, CONFIRMED from real Firebase data)</h2>
+<p>The api-app ships its embedded LAN API as a <strong>long-lived
+foreground service</strong> typed <code>dataSync</code>:</p>
+<ul>
+<li><code>api-app/src/main/AndroidManifest.xml:68</code> →
+<code>android:foregroundServiceType="dataSync"</code></li>
+<li><code>api-app/src/main/AndroidManifest.xml:20</code> →
+<code>&lt;uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" /&gt;</code></li>
+<li><code>api-app/src/main/kotlin/lava/api/app/service/ApiEngineService.kt:113</code>
+→ <code>startForeground(NOTIFICATION_ID, …)</code> called
+UNCONDITIONALLY in <code>onStartCommand</code>, with <strong>no
+try/catch</strong>.</li>
+</ul>
+<p>On Android 14+ (the field crashes are Android 16 / API 36 on a Galaxy
+S23 Ultra; the app's <code>targetSdk = 35</code> per
+<code>buildSrc/src/main/kotlin/lava/conventions/AndroidCommon.kt:15</code>),
+<code>dataSync</code> (and <code>mediaProcessing</code>) are the ONLY
+foreground-service types subject to a <strong>cumulative ~6-hour-per-24h
+runtime budget</strong>. The api-app's embed is structurally a
+persistent server — it is <em>meant</em> to run for many hours so peer
+devices on the LAN can reach it. It therefore exhausts the
+<code>dataSync</code> budget, and then:</p>
+<ol type="1">
+<li>The next <code>startForeground(dataSync)</code> (e.g. the user
+re-opens the app → <code>ApiControlViewModel.onStart()</code> →
+<code>serviceStarter.ensureRunning()</code> →
+<code>ContextCompat.startForegroundService</code> →
+<code>onStartCommand</code> → <code>startForeground</code>) throws
+<strong><code>ForegroundServiceStartNotAllowedException: Time limit already exhausted for foreground service type dataSync</code></strong>
+at <code>ApiEngineService.kt:113</code> → FATAL (Crashlytics issue
+<code>9ba8502ee0ba0d1fdd03987650b8acf8</code>, 3 events / 1 user).</li>
+<li>The OS force-stops the over-running service →
+<strong><code>RemoteServiceException$ForegroundServiceDidNotStopInTimeException: A foreground service of type dataSync did not stop within its timeout</code></strong>
+(Crashlytics issue <code>b9baeaede585fc3bc9b515c27cde532c</code>, 1
+event / 1 user).</li>
+</ol>
+<p>The service also never overrides
+<code>Service.onTimeout(int, int)</code> (added in API 35), so when the
+budget is hit there is no graceful-stop path — the OS internal-exception
+path is taken instead.</p>
+<h3 id="why-the-current-type-is-wrong-not-just-under-handled">Why the
+current type is wrong, not just under-handled</h3>
+<p><code>dataSync</code> is documented for "data transfer that the user
+is actively waiting on" with a bounded duration. A LAN API server that
+peers connect to at arbitrary times over an indefinite session is not a
+bounded sync — it is exactly the kind of
+long-lived-but-not-one-of-the-named-categories use case the platform
+provides <code>specialUse</code> for.</p>
+<h2
+id="2-authoritative-android-facts-researched-2026-06-14-sources-in-9">2.
+Authoritative Android facts (researched 2026-06-14; sources in §9)</h2>
+<table>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Statement</th>
+<th>Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Time-budget types</td>
+<td>ONLY <code>dataSync</code> and <code>mediaProcessing</code> are
+subject to the 6h/24h cumulative limit.</td>
+<td>CONFIRMED (developer.android.com/.../fgs/timeout)</td>
+</tr>
+<tr>
+<td><code>onTimeout</code></td>
+<td>At the 6h limit the system calls
+<code>Service.onTimeout(int, int)</code> (API 35+); the service has "a
+few seconds to call <code>Service.stopSelf()</code>", else the system
+throws an internal exception.</td>
+<td>CONFIRMED (same doc)</td>
+</tr>
+<tr>
+<td><code>specialUse</code> time limit</td>
+<td>NOT in the time-limited set → <strong>no cumulative
+cap</strong>.</td>
+<td>CONFIRMED (timeout doc lists only the two; service-types doc places
+<code>specialUse</code> outside them)</td>
+</tr>
+<tr>
+<td><code>specialUse</code> manifest</td>
+<td>Requires
+<code>&lt;property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="…"/&gt;</code>
+inside <code>&lt;service&gt;</code>, plus
+<code>FOREGROUND_SERVICE_SPECIAL_USE</code> permission.</td>
+<td>CONFIRMED (service-types doc, quoted example)</td>
+</tr>
+<tr>
+<td><code>specialUse</code> Play review</td>
+<td>"reviewed when you submit your app in the Google Play Console …
+free-form … provide enough information to let the reviewer see why you
+need" — <strong>free-form text justification</strong>.</td>
+<td>CONFIRMED (service-types doc)</td>
+</tr>
+<tr>
+<td><code>connectedDevice</code> time limit</td>
+<td>NOT time-limited.</td>
+<td>CONFIRMED</td>
+</tr>
+<tr>
+<td><code>connectedDevice</code> permission</td>
+<td><code>FOREGROUND_SERVICE_CONNECTED_DEVICE</code> + at least one of
+{<code>CHANGE_NETWORK_STATE</code>, <code>CHANGE_WIFI_STATE</code>,
+<strong><code>CHANGE_WIFI_MULTICAST_STATE</code></strong>,
+<code>NFC</code>, <code>TRANSMIT_IR</code>} OR a Bluetooth/UWB runtime
+permission. The api-app ALREADY declares
+<code>CHANGE_WIFI_MULTICAST_STATE</code> (manifest:18).</td>
+<td>CONFIRMED (service-types doc)</td>
+</tr>
+<tr>
+<td><code>connectedDevice</code> Play review</td>
+<td>Multiple third-party reports (e.g. Nordic DFU issue #424) that Play
+Console asks for a <strong>video</strong> justification for
+<code>FOREGROUND_SERVICE_CONNECTED_DEVICE</code>.</td>
+<td>UNCONFIRMED at the policy-doc level — it is a developer-report, not
+a quoted policy line. PENDING_FORENSICS: confirm against current Play
+Console submission flow before choosing
+<code>connectedDevice</code>.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-option-analysis">3. Option analysis</h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Removes 6h cap?</th>
+<th>Requires</th>
+<th>Play-policy risk</th>
+<th>Code risk</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A. Keep <code>dataSync</code>, wrap + reschedule</strong>
+(try/catch around <code>startForeground</code>, override
+<code>onTimeout</code>→<code>stopSelf</code>, re-start when user
+foregrounds)</td>
+<td>NO — cap stays; service still dies at 6h</td>
+<td>small code change only</td>
+<td>none</td>
+<td>medium</td>
+<td><strong>Mitigation, not a fix.</strong> The API becomes unreachable
+after 6h until the user re-opens the app. Fails the "usable &gt;6h"
+requirement. Keep the defensive parts (no-crash) but NOT as the sole
+fix.</td>
+</tr>
+<tr>
+<td><strong>B. <code>specialUse</code></strong></td>
+<td>YES</td>
+<td>manifest <code>&lt;property&gt;</code> +
+<code>FOREGROUND_SERVICE_SPECIAL_USE</code> perm +
+<strong>free-form</strong> Play justification</td>
+<td>LOW (text justification; our use case — "embedded local-network API
+server that peer devices on the same LAN connect to" — is a textbook
+<code>specialUse</code>)</td>
+<td>low</td>
+<td><strong>RECOMMENDED.</strong> Purpose-built for "valid FGS not
+covered by other types". No cap. Cheapest honest path.</td>
+</tr>
+<tr>
+<td><strong>C. <code>connectedDevice</code></strong></td>
+<td>YES</td>
+<td><code>FOREGROUND_SERVICE_CONNECTED_DEVICE</code> perm (the
+WiFi-multicast manifest perm we already have satisfies the secondary
+condition)</td>
+<td>MEDIUM (UNCONFIRMED video-justification requirement; semantic fit is
+"interactions with external devices" — a <em>server</em> others connect
+to is a looser fit than <code>specialUse</code>)</td>
+<td>low</td>
+<td>Viable, but worse Play-policy story (possible video) and a looser
+semantic fit than B.</td>
+</tr>
+<tr>
+<td><strong>D. Non-FGS persistent notification</strong> (drop FGS, run a
+plain bound/started service + ongoing notification)</td>
+<td>N/A (no FGS = no cap)</td>
+<td>large rework</td>
+<td>HIGH — a long-running networking service WITHOUT an FGS type is
+exactly what Android 14+ restricts; the OS will throttle/kill it in the
+background</td>
+<td>high</td>
+<td><strong>Rejected.</strong> Re-introduces the background-execution
+limits the FGS exists to escape.</td>
+</tr>
+<tr>
+<td><strong>E. Restart-before-budget</strong> (proactively stop+restart
+the FGS just under 6h)</td>
+<td>NO (still <code>dataSync</code>)</td>
+<td>timer + lifecycle juggling</td>
+<td>none</td>
+<td>HIGH — the restart itself calls
+<code>startForeground(dataSync)</code>, which is the throwing call once
+the budget is spent; the budget is cumulative across restarts, so this
+does NOT reset it</td>
+<td>high</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-recommendation">4. Recommendation</h2>
+<p><strong>Adopt Option B (<code>specialUse</code>) as the
+foreground-service type, plus the defensive hardening from Option A
+layered underneath as belt-and-suspenders.</strong></p>
+<p>Rationale (safest path that keeps the API usable &gt;6h without
+crashing and least Play-policy / breakage risk):</p>
+<ol type="1">
+<li><code>specialUse</code> has <strong>no cumulative time cap</strong>
+→ the embed can serve the LAN indefinitely, which is the product
+requirement.</li>
+<li><code>specialUse</code>'s Play declaration is a <strong>free-form
+text justification</strong> (not a video), the lowest-friction review
+path, and our use case is a canonical "doesn't fit the other named
+types" server.</li>
+<li>The defensive layer (<code>try/catch</code> around
+<code>startForeground</code> + an <code>onTimeout</code> override that
+stops gracefully) means that <strong>even if</strong> something
+unforeseen re-imposes a limit (OEM variance, a future policy change, a
+mis-declared variant), the app <strong>degrades to a clean stop instead
+of a FATAL crash</strong>. The crash site at line 113 is eliminated
+regardless of which type is in effect.</li>
+<li>It does NOT touch the engine, the locks, the notification, mDNS, or
+the handoff provider — the change is confined to the FGS-type
+contract.</li>
+</ol>
+<p><code>connectedDevice</code> (Option C) is the fallback if Play
+review rejects the <code>specialUse</code> justification, but it carries
+the UNCONFIRMED video-justification risk and a looser semantic fit, so
+it is second choice.</p>
+<h2 id="5-prototype-this-branch">5. Prototype (this branch)</h2>
+<p>Three files changed. <strong>No version bump. No
+distribute.</strong></p>
+<h3 id="51-androidmanifestxml">5.1 <code>AndroidManifest.xml</code></h3>
+<ul>
+<li>Replace <code>FOREGROUND_SERVICE_DATA_SYNC</code> permission with
+<code>FOREGROUND_SERVICE_SPECIAL_USE</code>.</li>
+<li>Change <code>android:foregroundServiceType="dataSync"</code> →
+<code>"specialUse"</code>.</li>
+<li>Add the mandatory
+<code>&lt;property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" …&gt;</code>
+child describing the use case (the value is a string resource — the
+free-form Play-review justification string).</li>
+</ul>
+<h3 id="52-apiengineservicekt">5.2 <code>ApiEngineService.kt</code></h3>
+<ul>
+<li>Wrap the <code>onStartCommand</code> <code>startForeground(…)</code>
+in a <code>try/catch (ForegroundServiceStartNotAllowedException)</code>
+so the launch can never FATAL at line 113; on catch, stop self
+gracefully (a <code>recordNonFatal</code> telemetry hook is marked TODO
+since the api-app does not yet wire an <code>AnalyticsTracker</code>
+here — §6.AC follow-up).</li>
+<li>Override <code>Service.onTimeout(startId, fgsType)</code> (guarded
+<code>Build.VERSION.SDK_INT &gt;= 35</code>) to release locks +
+<code>stopForeground</code> + <code>stopSelf</code> within the
+few-second window, eliminating the
+<code>ForegroundServiceDidNotStopInTimeException</code> class.</li>
+<li>These are defensive and type-agnostic: they make the service
+crash-proof on the FGS-budget axis no matter which type ships.</li>
+</ul>
+<h3 id="53-stringsxml">5.3 <code>strings.xml</code></h3>
+<ul>
+<li>Add <code>api_fgs_special_use_justification</code> — the
+operator-editable Play-review justification copy referenced by the
+manifest <code>&lt;property&gt;</code>.</li>
+</ul>
+<h3 id="54-prototype-diff-summary">5.4 Prototype diff summary</h3>
+<pre><code>AndroidManifest.xml
+  - &lt;uses-permission android:name=&quot;android.permission.FOREGROUND_SERVICE_DATA_SYNC&quot; /&gt;
+  + &lt;uses-permission android:name=&quot;android.permission.FOREGROUND_SERVICE_SPECIAL_USE&quot; /&gt;
+  - android:foregroundServiceType=&quot;dataSync&quot; /&gt;
+  + android:foregroundServiceType=&quot;specialUse&quot; &gt;
+  +     &lt;property android:name=&quot;android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE&quot;
+  +         android:value=&quot;@string/api_fgs_special_use_justification&quot; /&gt;
+  + &lt;/service&gt;
+
+ApiEngineService.kt
+  + import android.app.ForegroundServiceStartNotAllowedException
+  ~ onStartCommand: startForeground(...) wrapped in try/catch → graceful stop (no FATAL)
+  + onTimeout(startId, fgsType): release locks + stopForeground + stopSelf (SDK&gt;=35)
+
+strings.xml
+  + api_fgs_special_use_justification</code></pre>
+<h2 id="6-6ae-challenge-plan-how-to-verify-6h-survival">6. §6.AE
+Challenge plan (how to verify &gt;6h survival)</h2>
+<p>The defect is a <em>time-budget</em> crash, so a literal 6h+ soak is
+the gold standard, but the budget can also be <strong>simulated</strong>
+so the gate is runnable inside the §6.AH container/VM emulator path.</p>
+<ol type="1">
+<li><strong>C-FGS-01 — type-is-not-dataSync structural test.</strong>
+Parse the built/merged manifest; assert <code>ApiEngineService</code>'s
+<code>foregroundServiceType == "specialUse"</code> AND the
+<code>PROPERTY_SPECIAL_USE_FGS_SUBTYPE</code> property is present AND
+<code>FOREGROUND_SERVICE_DATA_SYNC</code> is absent. Falsifiability:
+revert the manifest to <code>dataSync</code> → the test FAILS. (Runs on
+JVM; cheapest guard against silent type regression.)</li>
+<li><strong>C-FGS-02 — onStartCommand never FATALs on
+budget-exhaustion.</strong> Instrumented test on the emulator: make
+<code>startForeground</code> throw
+<code>ForegroundServiceStartNotAllowedException</code> (inject via a
+test seam / mock the OS boundary only) and assert the service stops
+gracefully rather than propagating the throw. Falsifiability: remove the
+try/catch → the test crashes the process / FAILS.</li>
+<li><strong>C-FGS-03 — onTimeout graceful stop.</strong> Instrumented
+test: invoke <code>onTimeout(startId, type)</code> and assert locks
+released + <code>stopSelf</code> reached within the window.
+Falsifiability: empty the <code>onTimeout</code> body → test FAILS
+(service still "running").</li>
+<li><strong>C-FGS-04 — &gt;6h survival (soak OR simulation).</strong>
+Either (a) a real &gt;6h device soak with the API reachable throughout
+(operator-run, captured logcat + periodic <code>/health</code> 200s), OR
+(b) a budget-simulation harness that drives the service past a shortened
+budget threshold on the emulator and asserts the API stays reachable.
+The simulation is the §6.AE.7 honest-unblock path on darwin/arm64; the
+real soak is the operator gold-standard before ship.</li>
+</ol>
+<p>All Challenge runs go through
+<code>scripts/run-api-app-challenge-matrix.sh</code> →
+Containers-submodule emulator per §6.AG / §6.AH (no host-direct, no live
+device). On this macOS host the run is honestly BLOCKED by §6.AH-debt
+until the container/VM emulator boots; that block is recorded, not
+bluffed past.</p>
+<h2 id="7-6o-closure-log-draft">7. §6.O closure-log DRAFT</h2>
+<blockquote>
+<p><strong>File (on ship):</strong>
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-14-apiapp-fgs-datasync-budget.md</code></p>
+<ul>
+<li><strong>Crashlytics issues:</strong>
+<code>9ba8502ee0ba0d1fdd03987650b8acf8</code> (FATAL
+<code>ForegroundServiceStartNotAllowedException</code>,
+ApiEngineService.kt:113) + <code>b9baeaede585fc3bc9b515c27cde532c</code>
+(<code>ForegroundServiceDidNotStopInTimeException</code>).</li>
+<li><strong>Stack-trace summary:</strong> <code>dataSync</code> FGS
+exceeded the Android 14+ 6h/24h budget; next
+<code>startForeground(dataSync)</code> threw; over-running instance was
+OS-killed.</li>
+<li><strong>Root cause:</strong> long-lived LAN API server typed
+<code>dataSync</code> (a time-budgeted type); see §1 above.</li>
+<li><strong>Fix commit SHA:</strong>
+<code>&lt;filled on ship&gt;</code>.</li>
+<li><strong>Validation test:</strong> C-FGS-01 (manifest type) +
+C-FGS-02 (no-FATAL) + C-FGS-03 (onTimeout) — paths
+<code>&lt;filled on ship&gt;</code>.</li>
+<li><strong>Challenge Test:</strong> C-FGS-04 (&gt;6h survival
+soak/simulation) — evidence path
+<code>&lt;filled on ship&gt;</code>.</li>
+<li><strong>Verification:</strong> §6.AE matrix run on the
+Containers-submodule emulator; evidence
+<code>&lt;filled on ship&gt;</code>.</li>
+<li><strong>Note:</strong> Defect 1 (google-services.json
+mis-attribution) tracked separately; after BOTH fixes ship, the
+api-app's crashes land on its OWN Firebase app
+(<code>d57b960e…</code>/<code>2932451e…</code>), not the client release
+app.</li>
+</ul>
+</blockquote>
+<h2 id="8-operator-sign-off-required-before-ship">8. OPERATOR SIGN-OFF
+REQUIRED before ship</h2>
+<p>This branch is <strong>design + prototype only</strong>. Before this
+fix ships, the operator MUST:</p>
+<ol type="1">
+<li><strong>Choose the FGS type</strong> — confirm
+<code>specialUse</code> (recommended) vs <code>connectedDevice</code>
+(fallback), accepting the Play-review path (free-form text for
+<code>specialUse</code>; possible video for
+<code>connectedDevice</code>).</li>
+<li><strong>Confirm the Play Console <code>specialUse</code>
+justification copy</strong> (the
+<code>api_fgs_special_use_justification</code> string value + the
+Console declaration) — this is operator-facing policy, not an agent
+decision.</li>
+<li><strong>Author the C-FGS-01..04 tests</strong> + run them through
+the Containers-submodule emulator gate (§6.AE / §6.AG / §6.AH) and
+capture real evidence — currently BLOCKED on this macOS host by
+§6.AH-debt; needs the Linux x86_64 KVM gate-host OR the container/VM TCG
+path.</li>
+<li><strong>Bump api-app
+<code>versionCode</code>/<code>versionName</code></strong> per §6.Y (NOT
+done on this branch).</li>
+<li><strong>Re-gate (§6.Z cold-start + C-FGS suite) + re-distribute the
+api-app</strong> via the two-stage §6.AA flow — required for devices
+already running 0.2.6-10 to receive the fix.</li>
+</ol>
+<p>No rebuild, no re-gate, no re-distribute happens without that
+sign-off. The prototype compiles
+(<code>:api-app:compileDebugKotlin</code> BUILD SUCCESSFUL) — that is
+necessary, NEVER sufficient (§6.Z): it has not been executed against a
+device.</p>
+<h2 id="9-sources">9. Sources</h2>
+<ul>
+<li>developer.android.com — Foreground service timeouts: <a
+href="https://developer.android.com/develop/background-work/services/fgs/timeout">https://developer.android.com/develop/background-work/services/fgs/timeout</a></li>
+<li>developer.android.com — Foreground service types: <a
+href="https://developer.android.com/develop/background-work/services/fgs/service-types">https://developer.android.com/develop/background-work/services/fgs/service-types</a></li>
+<li>developer.android.com — Android 15 behavior changes: <a
+href="https://developer.android.com/about/versions/15/behavior-changes-15">https://developer.android.com/about/versions/15/behavior-changes-15</a></li>
+<li>developer.android.com — Changes to foreground service types for
+Android 15: <a
+href="https://developer.android.com/about/versions/15/changes/foreground-service-types">https://developer.android.com/about/versions/15/changes/foreground-service-types</a></li>
+<li>Play Console Help — foreground service &amp; full-screen intent
+requirements: <a
+href="https://support.google.com/googleplay/android-developer/answer/13392821">https://support.google.com/googleplay/android-developer/answer/13392821</a></li>
+<li>Nordic DFU issue #424 (UNCONFIRMED connectedDevice
+video-justification report): <a
+href="https://github.com/NordicSemiconductor/Android-DFU-Library/issues/424">https://github.com/NordicSemiconductor/Android-DFU-Library/issues/424</a></li>
+<li>Real Firebase data:
+<code>.lava-ci-evidence/crashlytics-resolved/2026-06-14-apiapp-0.2.6-10-field-events-investigation.md</code></li>
+</ul>
+</body>
+</html>

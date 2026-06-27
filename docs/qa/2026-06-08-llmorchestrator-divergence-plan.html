@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-08-llmorchestrator-divergence-plan</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="llmorchestrator-cross-org-mirror-divergence--reconciliation-plan">LLMOrchestrator
+cross-org mirror divergence — reconciliation plan</h1>
+<p><strong>Date:</strong> 2026-06-08 <strong>Scope:</strong>
+<code>submodules/llm_orchestrator</code> gitdir only. READ-ONLY
+investigation. No push / merge / force performed. <strong>Investigator
+note:</strong> All facts below are from actual <code>git</code> output,
+not surmise (§11.4.6).</p>
+<hr />
+<h2 id="1-remote-map">1. Remote map</h2>
+<p><code>git -C submodules/llm_orchestrator remote -v</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Remote</th>
+<th>Fetch URL</th>
+<th>Push URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>origin</code></td>
+<td><code>git@github.com:vasic-digital/LLMOrchestrator.git</code></td>
+<td><code>git@github.com:HelixDevelopment/LLMOrchestrator.git</code></td>
+</tr>
+<tr>
+<td><code>gitlab</code></td>
+<td><code>git@gitlab.com:vasic-digital/LLMOrchestrator.git</code></td>
+<td><code>git@gitlab.com:vasic-digital/LLMOrchestrator.git</code></td>
+</tr>
+<tr>
+<td><code>github</code></td>
+<td><code>git@github.com:HelixDevelopment/LLMOrchestrator.git</code></td>
+<td><code>git@github.com:HelixDevelopment/LLMOrchestrator.git</code></td>
+</tr>
+<tr>
+<td><code>upstream</code></td>
+<td><code>git@github.com:HelixDevelopment/LLMOrchestrator.git</code></td>
+<td><code>git@github.com:HelixDevelopment/LLMOrchestrator.git</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Interpretation:</strong></p>
+<ul>
+<li><strong>§6.W pin targets (what Lava consumes):</strong> the
+vasic-digital pair — <code>origin</code> <em>fetch</em>
+(<code>github.com/vasic-digital</code>) + <code>gitlab</code>
+(<code>gitlab.com/vasic-digital</code>). The local <code>master</code>
+tracks <code>[origin/master]</code>.</li>
+<li><strong>Cross-org HelixDevelopment mirror:</strong>
+<code>github</code> and <code>upstream</code> are BOTH
+<code>github.com/HelixDevelopment/LLMOrchestrator.git</code> (duplicate
+remotes pointing at the same URL).</li>
+<li><strong>MISCONFIGURATION (forensic finding):</strong>
+<code>origin</code> has a <strong>split URL</strong> — fetch =
+<code>vasic-digital</code>, push = <code>HelixDevelopment</code>. This
+is almost certainly the cause of the original session's confusion: a
+<code>git push origin</code> would have pushed to HelixDevelopment (the
+diverged side) while <code>git fetch</code>/tracking reads from
+vasic-digital. This split is itself worth flagging to the operator (see
+§6).</li>
+</ul>
+<p>Local branch state:
+<code>* master a484f7d [origin/master: ahead 1]</code> — clean working
+tree (no uncommitted changes).</p>
+<hr />
+<h2
+id="2-divergence-facts-from-git-rev-list---left-right---count--git-merge-base">2.
+Divergence facts (from <code>git rev-list --left-right --count</code> +
+<code>git merge-base</code>)</h2>
+<table>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Local <code>master</code> (vasic-digital pin)</td>
+<td><code>a484f7dd</code></td>
+</tr>
+<tr>
+<td><code>upstream/master</code> (HelixDevelopment)</td>
+<td><code>80ead875968906bfe71f874d2de51cd7b6c760d7</code></td>
+</tr>
+<tr>
+<td>Commits local has, upstream lacks</td>
+<td><strong>1</strong> (<code>a484f7d</code>)</td>
+</tr>
+<tr>
+<td>Commits upstream has, local lacks</td>
+<td><strong>1</strong> (<code>80ead87</code>)</td>
+</tr>
+<tr>
+<td>Common ancestor (<code>merge-base</code>)</td>
+<td><code>d2a2151</code>
+(<code>cascade: chore(1.1.8-dev-rc1 cascade)…</code>)</td>
+</tr>
+<tr>
+<td>Relationship</td>
+<td><strong>True divergence</strong> — NOT a fast-forward in either
+direction</td>
+</tr>
+<tr>
+<td>Histories</td>
+<td><strong>Related</strong> (shared ancestor exists — NOT unrelated
+histories)</td>
+</tr>
+<tr>
+<td><code>upstream/main</code> (separate branch)</td>
+<td><code>bde3643</code> — not involved in this reconciliation</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Conclusion:</strong> this is a clean 1-vs-1 fork off a shared
+base. Neither side is a superset of the other; each carries one
+independent commit.</p>
+<hr />
+<h2 id="3-what-each-side-contains">3. What each side contains</h2>
+<h3 id="local-a484f7d-vasic-digital-side--the-lava-pin">Local
+<code>a484f7d</code> (vasic-digital side — the Lava pin)</h3>
+<pre><code>chore(deps): add §11.4.31 helix-deps.yaml dependency manifest
+ helix-deps.yaml | 32 ++++++++++++++++++++++++++++++++  (1 file, +32)</code></pre>
+<p>Adds the helix-deps.yaml manifest (the work from this session).
+<code>helix-deps.yaml</code> is <strong>ABSENT</strong> on the
+HelixDevelopment side.</p>
+<h3 id="upstream-80ead87-helixdevelopment-side">Upstream
+<code>80ead87</code> (HelixDevelopment side)</h3>
+<pre><code>chore(go.mod): remove dead llmprovider replace + stray analysis artifact (Wave4 W4E)
+ go.mod                 | 2 --
+ submodule-analysis.txt | 8 --------   (2 files, -10)</code></pre>
+<p>Dated 2026-06-04 (4 days older than the local commit). Removes a
+<strong>dead
+<code>replace digital.vasic.llmprovider =&gt; ../LLMProvider</code></strong>
+directive from <code>go.mod:18</code> and deletes a stray
+<code>submodule-analysis.txt</code>. Commit body asserts
+<code>go build</code>/<code>go vet</code>/<code>go mod verify</code> all
+green.</p>
+<p><strong>Verified on the local (vasic-digital) side, this cleanup is
+still UN-applied:</strong></p>
+<ul>
+<li><code>go.mod:18</code> on local <code>master</code> <strong>still
+contains</strong>
+<code>replace digital.vasic.llmprovider =&gt; ../LLMProvider</code>.</li>
+<li><code>submodule-analysis.txt</code> is <strong>still
+PRESENT</strong> on local <code>master</code>.</li>
+</ul>
+<p>So the HelixDevelopment commit is <strong>genuine, useful,
+not-yet-superseded cleanup work</strong> — not a stale fork. It should
+be preserved, not orphaned.</p>
+<h3 id="verdict">Verdict</h3>
+<p>Neither side is stale or a superset. The two commits are
+<strong>complementary</strong> (disjoint files, both wanted). The
+correct outcome is a UNION of both.</p>
+<hr />
+<h2
+id="4-recommended-reconciliation--option-a-merge-helixdevelopment-into-local-then-push-to-all-three">4.
+Recommended reconciliation — OPTION (a): merge HelixDevelopment into
+local, then push to all three</h2>
+<p><strong>Why (a) and not (b)/(c):</strong></p>
+<ul>
+<li><strong>(b) <code>-s ours</code></strong> would orphan
+<code>80ead87</code>'s real go.mod/cleanup work — wrong, because that
+cleanup is genuine and still un-applied locally. Rejected.</li>
+<li><strong>(c) treat HelixDevelopment as an independent fork</strong> —
+abandons a legitimate cleanup commit and leaves the vasic-digital pin
+carrying a dead <code>replace</code> directive the upstream already
+fixed. Rejected.</li>
+<li><strong>(a) merge</strong> — preserves BOTH commits, is
+<strong>conflict-free</strong> (verified), and is the §6.T.3-compliant
+non-force path. The <code>-s ours</code> 4-mirror reconciliation pattern
+is reserved for "sibling mirror has diverged AND its content is
+superseded"; here the content is NOT superseded.</li>
+</ul>
+<p><strong>Conflict-free confirmation (read-only):</strong>
+<code>git merge-tree --write-tree master upstream/master</code> exited 0
+and produced a clean tree (<code>9fed01f…</code>) with <strong>no
+conflict markers</strong>. The merge touches disjoint files
+(<code>helix-deps.yaml</code> added by us vs
+<code>go.mod</code>/<code>submodule-analysis.txt</code> cleaned by
+them), so it merges cleanly.</p>
+<h3 id="exact-commands-to-run-after-operator-approval--see-5">Exact
+commands (to run AFTER operator approval — see §5)</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> submodules/llm_orchestrator</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 0. Safety: confirm clean tree + current SHAs</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> status <span class="at">--porcelain</span>          <span class="co"># expect empty</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> rev-parse master            <span class="co"># expect a484f7dd…</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> rev-parse upstream/master   <span class="co"># expect 80ead875…</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Merge the HelixDevelopment commit into local master (non-FF, no force)</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> merge <span class="at">--no-ff</span> upstream/master <span class="dt">\</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">-m</span> <span class="st">&quot;merge: reconcile HelixDevelopment cross-org mirror (80ead87 go.mod cleanup) into vasic-digital master&quot;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"># expected result: clean merge tree 9fed01f…, no conflicts</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Verify build still green after the merge (the upstream commit claims green)</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="ex">go</span> build ./... <span class="kw">&amp;&amp;</span> <span class="ex">go</span> vet ./... <span class="kw">&amp;&amp;</span> <span class="ex">go</span> mod verify</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Push the merge to ALL THREE mirror endpoints so they converge on the SAME SHA</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push gitlab   master          <span class="co"># gitlab.com/vasic-digital</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push origin   master          <span class="co"># </span><span class="al">NOTE</span><span class="co">: origin PUSH url = HelixDevelopment (split-URL!) — see §6</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push github   master          <span class="co"># github.com/HelixDevelopment (explicit)</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co"># For the vasic-digital GitHub endpoint, origin&#39;s FETCH url is vasic-digital but its</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co"># PUSH url is HelixDevelopment. To push the vasic-digital GitHub mirror explicitly,</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co"># the operator must either fix origin&#39;s push URL or add a dedicated remote first</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co"># (see §6 — this is an operator decision, not a blind push).</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Confirm convergence (§6.C 2-mirror / cross-org parity)</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> ls-remote gitlab   refs/heads/master</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> ls-remote github   refs/heads/master</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> ls-remote origin   refs/heads/master   <span class="co"># fetch url = vasic-digital github</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co"># all three SHOULD report the same merge SHA after the pushes</span></span></code></pre></div>
+<p><strong>Note on the parent index:</strong> the merge advances the
+submodule HEAD from <code>a484f7dd</code> to the new merge SHA. Per this
+task's constraints I did NOT touch the parent index. If/when the
+operator approves the merge+push, whether to re-pin the Lava parent to
+the merge SHA is a SEPARATE decision (the Q9 always-track-upstream
+waiver covers HelixQA only, not LLMOrchestrator — LLMOrchestrator is a
+frozen-by-default pin, so a parent re-pin is a deliberate operator
+action).</p>
+<hr />
+<h2 id="5-operator-approval-gate-explicit">5. OPERATOR-APPROVAL GATE
+(explicit)</h2>
+<p>The following require explicit operator authorization BEFORE
+execution — none were done in this read-only pass:</p>
+<ol type="1">
+<li><strong>The merge itself
+(<code>git merge --no-ff upstream/master</code>).</strong> It alters
+local <code>master</code> history (advances HEAD to a merge commit).
+Compatible + conflict-free, but still a history-affecting action on a
+branch that feeds the Lava pin.</li>
+<li><strong>Every push
+(<code>git push gitlab/origin/github master</code>).</strong> Per
+§6.T.3, no push without explicit per-operation approval. Authorization
+for one push does not extend to the others.</li>
+<li><strong>The <code>origin</code> split-URL situation.</strong>
+<code>origin</code> fetch=vasic-digital, push=HelixDevelopment. The
+operator must decide how to push the <strong>vasic-digital
+GitHub</strong> mirror — fix <code>origin</code>'s push URL back to
+vasic-digital, or add a dedicated <code>github-vd</code> remote. Pushing
+blindly to <code>origin</code> would land on HelixDevelopment, not
+vasic-digital. This is a configuration decision, not a mechanical
+step.</li>
+<li><strong>Re-pinning the Lava parent</strong> to the merge SHA
+(frozen-by-default pin; deliberate operator action; NOT covered by the
+HelixQA Q9 waiver).</li>
+</ol>
+<p>No <code>-s ours</code> is recommended, so there is no orphan-commit
+scenario to approve. If the operator instead preferred Option (b)/(c)
+(NOT recommended), that WOULD orphan <code>80ead87</code> and would need
+explicit approval to discard that cleanup work.</p>
+<hr />
+<h2 id="6-additional-forensic-flag-for-the-operator">6. Additional
+forensic flag for the operator</h2>
+<p>The <code>origin</code> remote has a <strong>split fetch/push
+URL</strong> (fetch = <code>github.com/vasic-digital</code>, push =
+<code>github.com/HelixDevelopment</code>). Combined with duplicate
+<code>github</code>/<code>upstream</code> remotes both pointing at
+HelixDevelopment, this remote layout is the most likely root cause of
+the original "push to vasic-digital succeeded but HelixDevelopment
+rejected" confusion this session. Recommend the operator normalize the
+remote set (one clear remote per mirror endpoint) as a follow-up so
+future pushes are unambiguous.</p>
+</body>
+</html>
