@@ -142,3 +142,4 @@ tests/check-markdown-export-sync/.fin
 .lava-ci-evidence/device-recordings/
 .lava-ci-evidence/video-analysis/*/raw/
 .lava-ci-evidence/challenge-video/
+Submodules/
