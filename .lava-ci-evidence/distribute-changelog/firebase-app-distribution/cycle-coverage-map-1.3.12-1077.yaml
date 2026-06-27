@@ -1,0 +1,24 @@
+# §6.AK cycle-coverage-map for Lava-Android-1.3.12-1077
+# Each CHANGELOG-claimed user-visible fix MUST have at least one covering
+# device Challenge that was executed+PASSED on the §6.Z gate.
+version: "1.3.12-1077"
+claims:
+  - fix: "Select-All device-proven correct (Issue #9 / LVA-090)"
+    covering_challenges:
+      - "lava.app.challenges.Challenge66SelectAllDoesNotEnableAuthProvidersTest"
+  - fix: "LVA-008 test resilience (C48/C52/C66 carry LenientTeardownRule)"
+    covering_challenges:
+      - "lava.app.challenges.Challenge48ProviderSyncToggleSurvivesAndPersistsTest"
+      - "lava.app.challenges.Challenge52SearchInputProviderChipSelectionTest"
+      - "lava.app.challenges.Challenge66SelectAllDoesNotEnableAuthProvidersTest"
+  - fix: "Full Challenge suite proven on Genymotion"
+    covering_challenges:
+      - "lava.app.challenges.Challenge00CrashSurvivalTest"
+      - "lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest"
+      - "lava.app.challenges.Challenge02AnonymousAccessToggleTest"
+      - "lava.app.challenges.Challenge03RealCredentialsLoginTest"
+      - "lava.app.challenges.Challenge04LoginFailureHandlingTest"
+      - "lava.app.challenges.Challenge05MultipleProviderLoginTest"
+      - "lava.app.challenges.Challenge06ApiSelectionConnectivityTest"
+      - "lava.app.challenges.Challenge07ApiSelectionProvidesProvidersTest"
+      - "lava.app.challenges.Challenge08ApiDiscoveryUiRendersTest"

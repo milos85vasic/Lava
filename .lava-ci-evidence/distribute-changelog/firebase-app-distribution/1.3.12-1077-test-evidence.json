@@ -1,0 +1,14 @@
+{
+  "version": "1.3.12-1077",
+  "channel": "firebase-app-distribution",
+  "commit_sha": "d09b833cd726225f39d82ed3b185797fa964ed18",
+  "timestamp": "2026-06-26T21:21:17Z",
+  "device": "Genymotion Pixel 9 / API 35",
+  "runner": "genymotion",
+  "tests": {
+    "Challenge00CrashSurvivalTest": "PASS",
+    "Challenge66SelectAllDoesNotEnableAuthProvidersTest": "PASS"
+  },
+  "all_pass": true,
+  "evidence": ".lava-ci-evidence/genymotion/1077-device-gate/"
+}
