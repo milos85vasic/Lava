@@ -482,10 +482,10 @@ repo has drifted, the agent acts on the claim.
 
 | Surface | Current state | Pin |
 |---|---|---|
-| Lava parent on master | 2 mirrors (GitHub + GitLab) converged at HEAD `28a8b79b` | §6.AK cycle-coverage gate + post-1076 cycles |
+| Lava parent on master | 2 mirrors (GitHub + GitLab) converged at HEAD `b197a026` | 1077 evidence cycle complete |
 | API (lava-api-go) | 2.3.33 (code 2333) — `internal/version/version.go` | container `lava-api-go-thinker` |
-| Android Firebase | 1.3.12 (1076) distributed 2026-06-25 (debug+release); 1.3.13 (1077) Y-bump applied; `last-version-debug=1077`, `last-version-release=1077` | `lava-vasic-digital` Firebase project |
-| On-device API App | 0.2.11-22 distributed 2026-06-25; `last-version-debug=23` applied | Firebase App Distribution api-app channel |
+| Android Firebase | 1.3.12 (1076) distributed 2026-06-25 (debug+release); `last-version-debug=1077`, `last-version-release=1077` (1077 is a cleanup-only evidence cycle — same feature set as 1076; APK built in `releases/1.3.12-1077/` but distribute §6.P-blocked because pointer==versionCode) | `lava-vasic-digital` Firebase project |
+| On-device API App | 0.2.11-22 distributed 2026-06-25; `last-version-debug=23` (api-app 0.2.11-23 is a parity bump, APK built, same status as client) | Firebase App Distribution api-app channel |
 | 18 own-org submodules | all pushed (16 vasic-digital + HelixQA + vision_engine pinned) | see §3 |
 | constitution submodule | at upstream HEAD (bumped per pin-update cycle) | HelixDevelopment/HelixConstitution |
 | Workable-items tracker | `docs/workable_items.db` tracked; new items LVA-079..091 added for operator video issues | §11.4.93/95/106 |
@@ -494,7 +494,7 @@ repo has drifted, the agent acts on the claim.
 | Vision Engine submodule | pin advanced `85dfd0d1`→`af93b4bc` (install_upstreams.sh per §11.4.36) | `submodules/vision_engine` |
 | OpenDesign transitions | DESIGN SPEC authored (`docs/superpowers/specs/2026-06-26-opendesign-transitions-design.md`) — Wave A blocked on operator decisions 1-6 | NA |
 
-> **CRITICAL — this is NOT the plumbing-only cycle.** The 1072-1076 cycles (June 23-25) shipped real user-facing fixes: search works again (auth-interceptor 401 root cause fixed, engine 18s deadline, back-press-cancels-search, YTS endpoints refreshed), Sync-toggle crash fixed (serialization plugin + R8 keep rules), display/onboarding bugs fixed (chips show friendly names, provider count corrected, Select-All doesn't enable auth-requiring providers). The §6.AK incident (C00-only gate shipped broken flows on 1076) was declared and closed with the mechanical cycle-coverage gate §6.AK. LVA-008 (nav-teardown crash) remains open — upstream androidx-navigation defect, 8 client-side candidates exhausted, upstream minimal-repro authored. **User-facing value shipped.**
+> **CRITICAL — this is NOT the plumbing-only cycle.** The 1072-1076 cycles (June 23-25) shipped real user-facing fixes: search works again (auth-interceptor 401 root cause fixed, engine 18s deadline, back-press-cancels-search, YTS endpoints refreshed), Sync-toggle crash fixed (serialization plugin + R8 keep rules), display/onboarding bugs fixed (chips show friendly names, provider count corrected, Select-All doesn't enable auth-requiring providers). The §6.AK incident (C00-only gate shipped broken flows on 1076) was declared and closed with the mechanical cycle-coverage gate §6.AK. **1077 (2026-06-26) is the post-1076 evidence/verification cycle**: CHANGELOG updated, cycle-coverage-map written, Genymotion device gate (Pixel 9 / API 35) proved C00+C66 PASS — all CHANGELOG claims now have executed+PASSED covering device evidence. LVA-008 (nav-teardown crash) remains open — upstream androidx-navigation defect, 8 client-side candidates exhausted, upstream minimal-repro authored. **User-facing value shipped.**
 
 ---
 
@@ -538,7 +538,7 @@ repo has drifted, the agent acts on the claim.
 
 ### §6.L counter advance
 
-The §6.L Anti-Bluff Functional Reality Mandate counter advanced from 36 to 52 across the cycle (53rd is in-flight per the dispatch that triggered this CONTINUATION.md refresh task). 17-cycle back-to-back restatement is the longest sequence in project history; per §6.L the repetition itself is the constitutional record. Anchor commits: `8c47cd17`, `d159d0fc` (37-41 batched), `66803d4d` (43+44 batched), `aa0db6bd` (45), `a61bd3d8` (46), `ed7a658d` (47), `dcec9eb8` (48), `0f1b19f1` (49), `2882304b` (50+51), `0c87b6ae` (52).
+The §6.L Anti-Bluff Functional Reality Mandate counter advanced from 36 to 52 across the constitution-compliance cycle, then through 53-68 across the June 2026 post-compliance cycles (search-fix, display-fix, device-gate). **69th invocation (2026-06-27):** operator issued "continue all work" at session resume — driving the 1077 evidence commit (b197a026) + Genymotion device gate + this CONTINUATION.md refresh. Each restatement is preserved verbatim in the root CLAUDE.md §6.L wall-of-text. Anchor commits: `8c47cd17`, `d159d0fc` (37-41 batched), `66803d4d` (43+44 batched), `aa0db6bd` (45), `a61bd3d8` (46), `ed7a658d` (47), `dcec9eb8` (48), `0f1b19f1` (49), `2882304b` (50+51), `0c87b6ae` (52), `b197a026` (69).
 
 ### On-device Lava API sub-project (2026-06-02)
 
@@ -657,7 +657,9 @@ All 8 operator questions answered (2026-05-16). Phase 6a + 6b executed in this c
 
 ### 2.3 Release-tagging chain — versions advanced past 1076/22
 
-**Last distribute:** Lava-Android-1.3.12-1076 + Lava-API-App-0.2.11-22 (2026-06-25). Both debug+release distributed via Firebase (two-stage). §6.Y post-distribute bumps applied: client → 1.3.13-1077, api-app → 0.2.11-23. Last Firebase build evidence under `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.12-1076*` + `...api-app/0.2.11-22*`.
+**Last distribute:** Lava-Android-1.3.12-1076 + Lava-API-App-0.2.11-22 (2026-06-25). Both debug+release distributed via Firebase (two-stage). §6.Y post-distribute bumps applied: client → 1.3.12-1077, api-app → 0.2.11-23. Evidence and pointers committed at `b197a026`.
+
+**1077 cleanup cycle (2026-06-26):** 1077 APKs are built (`releases/1.3.12-1077/` — 33.9 MB debug + 6.7 MB release). Genymotion device gate executed on Pixel 9 / API 35: C00+PASS, C66+PASS (two-tap RED→GREEN), api-app C01+PASS. All evidence committed (`.lava-ci-evidence/genymotion/1077-device-gate/` + cycle-coverage-map). **Distribute is §6.P-blocked** because `last-version-debug=1077` equals `versionCode=1077` (the §6.Y bump advanced the pointer to the same code). The 1077 cycle has no new user-facing features — it's a verification-only follow-up to 1076. Operator decision needed on distribute vs hold.
 
 **Cycle-coverage gate (§6.AK) now MECHANICALLY ENFORCED:**
 - `scripts/check-cycle-coverage.sh` — the core gate script (parses CHANGELOG claims, maps to covering device Challenges, rejects uncovered claims)
