@@ -1,4 +1,0 @@
-  * ServiceRecord{6ddb34a u0 digital.vasic.lava.api.dev/lava.api.app.service.ApiEngineService c:digital.vasic.lava.api.dev}
-    intent={act=lava.api.app.action.START cmp=digital.vasic.lava.api.dev/lava.api.app.service.ApiEngineService}
-    infoAllowStartForeground=[callingPackage: digital.vasic.lava.api.dev; callingUid: 12238; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=lava.api.app.action.START cmp=digital.vasic.lava.api.dev/lava.api.app.service.ApiEngineService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; allowWiu:12; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
-    isForeground=true foregroundId=6778 types=0x00000001 foregroundNoti=Notification(channel=lava.a... shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONGOING_EVENT|NO_CLEAR|FOREGROUND_SERVICE color=0x00000000 actions=2 vis=PRIVATE semFlags=0x0 semPriority=0 semMissedCount=0)

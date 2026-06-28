@@ -1,2 +1,0 @@
-"Pick your providers"
-"Select one or more content providers to configure."

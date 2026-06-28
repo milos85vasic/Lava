@@ -1,8 +1,0 @@
-{
-  "timestamp": "2026-06-08T18:24:28.01489Z",
-  "description": "step 1: noop",
-  "ocr_snapshot": "",
-  "verdict": "needs-review",
-  "notes": "The current screen shows the LeakCanary \"0 Distinct Leaks\" view with the Leaks/Heap Dumps/About navigation, a stable terminal screen matching the expected leaks-display result.",
-  "provider_rationale": "The current screen shows the LeakCanary \"0 Distinct Leaks\" view with the Leaks/Heap Dumps/About navigation, a stable terminal screen matching the expected leaks-display result."
-}

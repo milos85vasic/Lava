@@ -1,5 +1,0 @@
-# Genymotion Challenge run — 20260613T183519Z
-device: 127.0.0.1:6555
-module: app  test-class: lava.app.challenges.Challenge00CrashSurvivalTest
-gradle exit: 0
-BUILD SUCCESSFUL in 5m 52s

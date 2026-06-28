@@ -1,1 +1,0 @@
-launcher: android/com.android.internal.app.ResolverActivity

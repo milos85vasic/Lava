@@ -1,7 +1,0 @@
-Starting: Intent { cmp=digital.vasic.lava.client/.MainActivity }
-Status: ok
-LaunchState: COLD
-Activity: digital.vasic.lava.client/.MainActivity
-TotalTime: 1721
-WaitTime: 1733
-Complete

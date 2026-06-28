@@ -1,6 +1,0 @@
-# Genymotion Challenge run — 20260608T172244Z
-device: 127.0.0.1:6555
-module: app  test-class: lava.app.challenges.Challenge11ArchiveOrgAnonymousSearchTest
-gradle exit: 1
-> Task :core:navigation:compileDebugKotlin FAILED
-BUILD FAILED in 26s

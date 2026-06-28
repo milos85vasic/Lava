@@ -1,8 +1,0 @@
-# Genymotion Challenge run — 20260609T160325Z
-device: 127.0.0.1:6555
-module: app  test-class: lava.app.challenges.Challenge00CrashSurvivalTest,lava.app.challenges.Challenge01AppLaunchAndTrackerSelectionTest,lava.app.challenges.Challenge07CrossTrackerFallbackAcceptTest,lava.app.challenges.Challenge08CrossTrackerFallbackDismissTest
-gradle exit: 0
-BUILD SUCCESSFUL in 1m 17s
-runner: containers-submodule
-runtime: genymotion-vm
-gating: core-flow (C00/C01/C07/C08 GREEN); C06/C11 = accepted LVA-008 upstream nav-teardown

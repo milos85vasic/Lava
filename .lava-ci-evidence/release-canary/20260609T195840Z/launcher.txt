@@ -1,1 +1,0 @@
-launcher: digital.vasic.lava.api.dev/lava.api.app.MainActivity

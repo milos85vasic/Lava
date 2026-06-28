@@ -1,1 +1,0 @@
-# LVA-050 — commit 96b7255a; release-variant unit test missing ComponentActivity host (ui-test-manifest debugApi-scoped); added testImplementation ui-test-manifest; :core:designsystem:test green both variants; assertions intact (falsifiability proven)

@@ -1,8 +1,0 @@
-{
-  "timestamp": "2026-06-08T19:07:44.181506Z",
-  "description": "step 1: noop",
-  "ocr_snapshot": "",
-  "verdict": "needs-review",
-  "notes": "The screen shows LeakCanary's main \"0 Distinct Leaks\" view with the Leaks/Heap Dumps/About navigation bar fully loaded, which is a stable expected app result screen.",
-  "provider_rationale": "The screen shows LeakCanary's main \"0 Distinct Leaks\" view with the Leaks/Heap Dumps/About navigation bar fully loaded, which is a stable expected app result screen."
-}

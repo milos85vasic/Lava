@@ -1,1 +1,0 @@
-# LVA-069 — commit e1c983ae; covered SearchResultViewModel SSE raw-JSON parsing (applySseEvent 10 tests incl malformed-no-op hardening) + onRetryClick Error re-dispatch (2 tests); CLEAN no bug; falsifiability-proven.

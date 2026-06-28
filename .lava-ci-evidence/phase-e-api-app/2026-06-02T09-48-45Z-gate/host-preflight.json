@@ -1,8 +1,0 @@
-{
-  "platform": "Darwin",
-  "host_arch": "arm64",
-  "kvm_available_on_host": 0,
-  "hvf_available_on_host": 1,
-  "resolved_accel_backend": "hvf",
-  "gate_eligible": true
-}

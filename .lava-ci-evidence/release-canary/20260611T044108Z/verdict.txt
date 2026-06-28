@@ -1,8 +1,0 @@
-# Release cold-start canary — 20260611T044108Z
-package: digital.vasic.lava.client
-apk: releases/1.3.2/android-release/digital.vasic.lava.client-1.3.2-release.apk
-serial: 127.0.0.1:6555
-pid_after_launch: 4109
-resumed_activity:     topResumedActivity=ActivityRecord{2577247 u0 digital.vasic.lava.client/.MainActivity t117}
-fatal_lines:
-<none>

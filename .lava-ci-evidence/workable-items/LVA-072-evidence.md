@@ -1,1 +1,0 @@
-# LVA-072 — commit 3de3ef4c; §6.AC RecordWarning on the rotatingCert mid-process leaf swap (+remint-failure path); public cert metadata only (§6.H clean); call-site falsifiability proven; api-source.hash written correctly (the prior /dev/null bug fixed); SourceHash contract GREEN.

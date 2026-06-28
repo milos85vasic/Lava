@@ -1,6 +1,0 @@
-Starting: Intent { cmp=digital.vasic.lava.client/.MainActivity }
-Status: timeout
-LaunchState: UNKNOWN (-1)
-Activity: digital.vasic.lava.client/.MainActivity
-WaitTime: 10531
-Complete

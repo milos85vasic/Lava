@@ -1,1 +1,0 @@
-# LVA-071 — commit 5a253a75; SseClient + base-URL builder injected into SearchResultViewModel (Hilt, production-default); §6.R inline https literal hoisted; MockWebServer SSE error→retry test (real VM, falsifiability-proven). search_result green + :app compiles.

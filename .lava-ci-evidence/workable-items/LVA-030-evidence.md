@@ -1,1 +1,0 @@
-# LVA-030 — 6 submodules §6.R/§6.S/§6.X/§6.AD pointer-blocks. Commits in-submodule + pushed; parent pin bump 7c9843c8 (5 converged). All 4 per-submodule gates PASS for all 6. llm_orchestrator github fork → LVA-036 (operator-gated).

@@ -1,1 +1,0 @@
-/Applications/Genymotion.app/Contents/MacOS/gmtool

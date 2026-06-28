@@ -1,6 +1,0 @@
-# Genymotion Challenge run — 20260606T164905Z
-device: 127.0.0.1:6555
-module: app  test-class: lava.app.challenges.Challenge00CrashSurvivalTest
-gradle exit: 1
-> Task :feature:login:kspDebugKotlin FAILED
-BUILD FAILED in 1m 14s

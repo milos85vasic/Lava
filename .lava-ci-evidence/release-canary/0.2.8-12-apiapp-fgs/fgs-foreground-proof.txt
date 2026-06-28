@@ -1,3 +1,0 @@
-    startForegroundCount=1
-    infoAllowStartForeground=[callingPackage: digital.vasic.lava.api; callingUid: 10175; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { act=lava.api.app.action.START cmp=digital.vasic.lava.api/lava.api.app.service.ApiEngineService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]; startForegroundDelayMs:64472
-    isForeground=true foregroundId=6778 types=0x40000000 foregroundNoti=Notification(channel=lava.api.app.server shortcut=null contentView=null vibrate=null sound=null defaults=0 flags=ONGOING_EVENT|FOREGROUND_SERVICE color=0x00000000 actions=2 vis=PRIVATE)

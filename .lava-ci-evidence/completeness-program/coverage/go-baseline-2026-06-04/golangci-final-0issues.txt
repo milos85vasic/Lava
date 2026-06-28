@@ -1,2 +1,0 @@
-[1;36m[golangci][0m running via podman image golangci/golangci-lint:latest (mount /Users/milosvasic/Projects/Lava/.claude/worktrees/agent-a367aa1aa376c49f1 -> /app, wd /app/lava-api-go)
-0 issues.
