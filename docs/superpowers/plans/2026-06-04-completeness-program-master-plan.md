@@ -72,7 +72,7 @@
 ## E. Concurrency & safety posture
 
 - **No critical hazards found.** Kotlin tracker HTTP clients use `Semaphore(4)` + `ConcurrentHashMap` + `@Synchronized` cookie jar + circuit breakers. Go uses `sync.RWMutex`, buffered error channels, `context` + `defer cancel()`, `sync.Once`/`WaitGroup` for GC lifecycle, SQLite WAL + single-writer pool.
-- **Available-but-unused reuse:** `Submodules/Concurrency/pkg/{semaphore,bulkhead,lazyloader,pool,limiter,safe,...}` and `Submodules/RateLimiter/pkg/*` are not wired into core modules (inline impls used instead). Opportunity: consolidate onto submodule primitives (Decoupled Reusable Architecture rule) + add lazy-init/non-blocking where audits find blocking spots.
+- **Available-but-unused reuse:** `submodules/concurrency/pkg/{semaphore,bulkhead,lazyloader,pool,limiter,safe,...}` and `submodules/ratelimiter/pkg/*` are not wired into core modules (inline impls used instead). Opportunity: consolidate onto submodule primitives (Decoupled Reusable Architecture rule) + add lazy-init/non-blocking where audits find blocking spots.
 - **Audit still owed:** systematic leak (listener/observer/NsdManager/BroadcastReceiver lifecycle), deadlock (lock-ordering), and race (shared `var`) sweep with reproducing tests — no such sweep exists today.
 
 ## F. Security / quality scanning gaps
@@ -215,7 +215,7 @@ Cloud-search auth lag (`thinker.local` registration of `android-1.3.0-1057`), C0
 
 ### Task 3.3 — Consolidate onto submodule primitives (Decoupled Reusable Architecture)
 
-- [ ] Where inline circuit-breaker/semaphore/limiter duplicates `Submodules/Concurrency` or `RateLimiter`, migrate to the submodule primitive (or document why the inline version is Lava-domain-specific). Tests stay green throughout.
+- [ ] Where inline circuit-breaker/semaphore/limiter duplicates `submodules/concurrency` or `RateLimiter`, migrate to the submodule primitive (or document why the inline version is Lava-domain-specific). Tests stay green throughout.
 
 **Constitution gates:** §6.T.2 resource limits on test runs; §6.J falsifiability; no-break guarantee.
 

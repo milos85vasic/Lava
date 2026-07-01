@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>check-workable-items.sh</title>
   <style>
@@ -156,8 +156,12 @@
       text-decoration: none;
     }
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -243,6 +247,10 @@ single-source-of-truth) + §11.4.95 (DB tracked-in-git, never
 gitignored). Gate ID: <code>CM-WORKABLE-ITEMS-SYNC</code>.</p>
 <p><strong>Type:</strong> Local CI gate (invoked by
 <code>scripts/verify-all-constitution-rules.sh</code>).</p>
+<p><strong>Last verified:</strong> 2026-07-01 (re-verified against
+<code>scripts/check-workable-items.sh</code> at HEAD — canonical-binary
+build + <code>validate</code>/<code>diff</code>/<code>git-tracked</code>
+steps below match the script's four-step flow).</p>
 <h2 id="what-it-does">What it does</h2>
 <p>Verifies Lava's workable-items tracker is internally consistent,
 using the <strong>canonical</strong> <code>workable-items</code> Go

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>check-cycle-coverage.sh</title>
   <style>
@@ -156,8 +156,12 @@
       text-decoration: none;
     }
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -240,11 +244,12 @@
 <h1
 id="scriptscheck-cycle-coveragesh--user-guide"><code>scripts/check-cycle-coverage.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-06-26 (§6.AK cycle-coverage
-gate, against the script at HEAD) <strong>Inheritance:</strong>
-HelixConstitution §11.4.18 (script documentation mandate) · enforces
-Lava <code>CLAUDE.md</code> §6.AK clause 1 (Cycle-Coverage Device
-Gate)</p>
+<p><strong>Last verified:</strong> 2026-07-01 (re-verified against the
+committed §6.AK implementation at HEAD — flags/exit-codes/file-formats
+below match <code>scripts/check-cycle-coverage.sh</code>; prior:
+2026-06-26 gate landing) <strong>Inheritance:</strong> HelixConstitution
+§11.4.18 (script documentation mandate) · enforces Lava
+<code>CLAUDE.md</code> §6.AK clause 1 (Cycle-Coverage Device Gate)</p>
 <h2 id="overview">Overview</h2>
 <p><code>check-cycle-coverage.sh</code> is the mechanical implementation
 of the <code>CM-CYCLE-COVERAGE-INTERSECTION</code> gate (§6.AK /

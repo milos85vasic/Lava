@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>2026-06-03-docs-chain-add-orchestrator-steps</title>
   <style>
@@ -156,8 +156,12 @@
       text-decoration: none;
     }
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -434,20 +438,20 @@ class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb8-1"><
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">## §6.X — Container-Submodule Emulator Wiring Mandate (inherited 2026-05-13, per §6.F)</span></span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>See root <span class="in">`/CLAUDE.md`</span> §6.X. Every Android emulator instance the project depends on for testing MUST execute its emulator process INSIDE a podman/docker container managed by <span class="in">`Submodules/Containers/`</span>, NOT be host-direct-launched by Containers-submodule code that runs on the host. The Containers submodule&#39;s <span class="in">`pkg/runtime/`</span> (rootless podman/docker auto-detection) brings the container up; <span class="in">`pkg/emulator/`</span> orchestrates the AVD lifecycle inside it. Lava-side <span class="in">`scripts/run-emulator-tests.sh`</span> is thin glue forwarding to the Containers CLI. The container-bound path is the gate — host-direct emulators are permitted for workstation iteration only. §6.X-debt tracks the wiring implementation owed to <span class="in">`Submodules/Containers/`</span>. This submodule MAY add stricter rules but MUST NOT relax.</span></code></pre></div>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>See root <span class="in">`/CLAUDE.md`</span> §6.X. Every Android emulator instance the project depends on for testing MUST execute its emulator process INSIDE a podman/docker container managed by <span class="in">`submodules/containers/`</span>, NOT be host-direct-launched by Containers-submodule code that runs on the host. The Containers submodule&#39;s <span class="in">`pkg/runtime/`</span> (rootless podman/docker auto-detection) brings the container up; <span class="in">`pkg/emulator/`</span> orchestrates the AVD lifecycle inside it. Lava-side <span class="in">`scripts/run-emulator-tests.sh`</span> is thin glue forwarding to the Containers CLI. The container-bound path is the gate — host-direct emulators are permitted for workstation iteration only. §6.X-debt tracks the wiring implementation owed to <span class="in">`submodules/containers/`</span>. This submodule MAY add stricter rules but MUST NOT relax.</span></code></pre></div>
 <p><strong>Patch B —
 <code>submodules/docs_chain/AGENTS.md</code></strong> — add at end:</p>
 <div class="sourceCode" id="cb9"><pre
 class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">## §6.X — Container-Submodule Emulator Wiring Mandate (inherited 2026-05-13, per §6.F)</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>Inherited verbatim from parent Lava <span class="in">`/CLAUDE.md`</span> §6.X. Every Android emulator instance MUST execute INSIDE a podman/docker container managed by <span class="in">`Submodules/Containers/`</span>. Host-direct emulator launches are permitted for workstation iteration only; the constitutional gate run (release tagging, real-device verification) MUST go through the container-bound path. <span class="in">`pkg/runtime/`</span> brings the container up; <span class="in">`pkg/emulator/`</span> orchestrates the AVD lifecycle inside it. §6.X-debt tracks the wiring implementation owed to the Containers submodule. This submodule MAY add stricter rules but MUST NOT relax.</span></code></pre></div>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>Inherited verbatim from parent Lava <span class="in">`/CLAUDE.md`</span> §6.X. Every Android emulator instance MUST execute INSIDE a podman/docker container managed by <span class="in">`submodules/containers/`</span>. Host-direct emulator launches are permitted for workstation iteration only; the constitutional gate run (release tagging, real-device verification) MUST go through the container-bound path. <span class="in">`pkg/runtime/`</span> brings the container up; <span class="in">`pkg/emulator/`</span> orchestrates the AVD lifecycle inside it. §6.X-debt tracks the wiring implementation owed to the Containers submodule. This submodule MAY add stricter rules but MUST NOT relax.</span></code></pre></div>
 <p><strong>Patch C —
 <code>submodules/docs_chain/CONSTITUTION.md</code></strong> — add at
 end:</p>
 <div class="sourceCode" id="cb10"><pre
 class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">## §6.X — Container-Submodule Emulator Wiring Mandate (inherited 2026-05-13, per §6.F)</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>See root <span class="in">`/CLAUDE.md`</span> §6.X. Every Android emulator instance the project depends on for testing MUST execute its emulator process INSIDE a podman/docker container managed by <span class="in">`Submodules/Containers/`</span>, NOT be host-direct-launched by Containers-submodule code that runs on the host. The Containers submodule&#39;s <span class="in">`pkg/runtime/`</span> (rootless podman/docker auto-detection) brings the container up; <span class="in">`pkg/emulator/`</span> orchestrates the AVD lifecycle inside it. Lava-side <span class="in">`scripts/run-emulator-tests.sh`</span> is thin glue forwarding to the Containers CLI. The container-bound path is the gate — host-direct emulators are permitted for workstation iteration only. §6.X-debt tracks the wiring implementation owed to <span class="in">`Submodules/Containers/`</span>. This submodule MAY add stricter rules but MUST NOT relax.</span></code></pre></div>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>See root <span class="in">`/CLAUDE.md`</span> §6.X. Every Android emulator instance the project depends on for testing MUST execute its emulator process INSIDE a podman/docker container managed by <span class="in">`submodules/containers/`</span>, NOT be host-direct-launched by Containers-submodule code that runs on the host. The Containers submodule&#39;s <span class="in">`pkg/runtime/`</span> (rootless podman/docker auto-detection) brings the container up; <span class="in">`pkg/emulator/`</span> orchestrates the AVD lifecycle inside it. Lava-side <span class="in">`scripts/run-emulator-tests.sh`</span> is thin glue forwarding to the Containers CLI. The container-bound path is the gate — host-direct emulators are permitted for workstation iteration only. §6.X-debt tracks the wiring implementation owed to <span class="in">`submodules/containers/`</span>. This submodule MAY add stricter rules but MUST NOT relax.</span></code></pre></div>
 <p><strong>After applying patches upstream in docs_chain:</strong></p>
 <div class="sourceCode" id="cb11"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># In the docs_chain repo:</span></span>

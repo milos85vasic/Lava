@@ -21,9 +21,9 @@
 # Invariant values: pass | gap | n/a | "waiver: <rationale>" | "pass: <rationale>"
 metadata:
   schema_version: 1
-  generated_at: "2026-06-27T06:17:45Z"
+  generated_at: "2026-07-01T21:28:04Z"
   generator: "scripts/generate-coverage-ledger.sh"
-  commit_sha: "dca7cac75baa5dc181bdbb4d065466886c9d5574"
+  commit_sha: "159683919188b0bc5088ae23f3d4ef480afb147f"
   mandate: "HelixConstitution §11.4.25 Full-Automation-Coverage Mandate"
 
 rows:
@@ -101,7 +101,7 @@ rows:
     status: "covered"
     unit_test_count: 1
     integration_test_count: 0
-    challenge_count: 9
+    challenge_count: 10
     challenges:
       - "C47"
       - "C53"
@@ -111,6 +111,7 @@ rows:
       - "C60"
       - "C61"
       - "C62"
+      - "C70"
       - "HEURISTIC"
     sample_tests:
       - "CredentialsViewModelTest.kt"
@@ -237,7 +238,7 @@ rows:
     status: "covered"
     unit_test_count: 8
     integration_test_count: 0
-    challenge_count: 19
+    challenge_count: 20
     challenges:
       - "C20"
       - "C21"
@@ -257,6 +258,7 @@ rows:
       - "C64"
       - "C65"
       - "C66"
+      - "C70"
       - "HEURISTIC"
     sample_tests:
       - "AuthTypeDisplayTest.kt"
@@ -274,7 +276,7 @@ rows:
     status: "covered"
     unit_test_count: 2
     integration_test_count: 0
-    challenge_count: 7
+    challenge_count: 8
     challenges:
       - "C39"
       - "C40"
@@ -282,6 +284,7 @@ rows:
       - "C49"
       - "C50"
       - "C51"
+      - "C70"
       - "HEURISTIC"
     sample_tests:
       - "ProviderConfigViewModelTest.kt"
@@ -349,10 +352,11 @@ rows:
     status: "covered"
     unit_test_count: 2
     integration_test_count: 0
-    challenge_count: 3
+    challenge_count: 4
     challenges:
       - "C52"
       - "C59"
+      - "C70"
       - "HEURISTIC"
     sample_tests:
       - "SearchInputNavigationRoundtripTest.kt"
@@ -369,7 +373,7 @@ rows:
     status: "covered"
     unit_test_count: 8
     integration_test_count: 0
-    challenge_count: 10
+    challenge_count: 11
     challenges:
       - "C7"
       - "C8"
@@ -380,6 +384,7 @@ rows:
       - "C60"
       - "C61"
       - "C62"
+      - "C70"
       - "HEURISTIC"
     sample_tests:
       - "ApplyMultiSearchEventTest.kt"
@@ -397,12 +402,13 @@ rows:
     status: "covered"
     unit_test_count: 3
     integration_test_count: 0
-    challenge_count: 5
+    challenge_count: 6
     challenges:
       - "C5"
       - "C6"
       - "C37"
       - "C40"
+      - "C70"
       - "HEURISTIC"
     sample_tests:
       - "TopicViewModelHttpDownloadTest.kt"
@@ -822,7 +828,7 @@ rows:
   - path: "app"
     kind: "app"
     status: "covered"
-    unit_test_count: 72
+    unit_test_count: 73
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -840,8 +846,8 @@ rows:
   - path: "lava-api-go"
     kind: "api"
     status: "covered"
-    unit_test_count: 219
-    integration_test_count: 1
+    unit_test_count: 221
+    integration_test_count: 2
     challenge_count: 0
     challenges: []
     sample_tests:
@@ -993,7 +999,7 @@ rows:
   - path: "submodules/helixqa"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 754
+    unit_test_count: 391
     integration_test_count: 0
     challenge_count: 0
     challenges: []
