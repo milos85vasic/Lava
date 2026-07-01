@@ -10,6 +10,8 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"digital.vasic.lava.apigo/internal/httpx"
 )
 
 // maxAttempts + retryBackoff bound a small retry on TRANSIENT upstream failures
@@ -40,6 +42,9 @@ func NewClient(base string) *Client {
 		base: base,
 		http: &http.Client{
 			Timeout: 30 * time.Second,
+			// Route egress through the configurable outbound proxy
+			// (LAVA_API_UPSTREAM_PROXY / *_PROXY env) — see internal/httpx.
+			Transport: httpx.NewTransport(),
 		},
 	}
 }

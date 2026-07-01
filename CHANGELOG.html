@@ -91,7 +91,6 @@
       color: #606060;
     }
     code {
-      white-space: pre-wrap;
       font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
       font-size: 85%;
       margin: 0;
@@ -155,6 +154,7 @@
     #TOC a:not(:hover) {
       text-decoration: none;
     }
+    code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
@@ -173,6 +173,46 @@
 </head>
 <body>
 <h1 id="changelog">Changelog</h1>
+<h2
+id="lava-android-1312-1078--2026-06-30-dev-cycle-not-yet-distributed--6y-bump-first">Lava-Android-1.3.12-1078
+— 2026-06-30 (dev cycle, NOT YET DISTRIBUTED — §6.Y bump-first)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.12-1077.</p>
+<p>1078 is the <strong>§6.Y bump-first version code</strong> for the
+autonomous-QA dev cycle. It has <strong>NOT been distributed</strong> —
+this entry is the §6.Y/§6.P stub recording the new releasable identity;
+it will be filled out with the executed §6.Z device evidence (per §6.AK
+cycle-coverage) before any distribute.</p>
+<ul>
+<li><strong>Autonomous-QA harness (no user-facing app change).</strong>
+New <code>scripts/autonomous-qa/</code> orchestrator
+(subsets/emulator/backend libs, <code>run-iteration</code>,
+<code>run-matrix</code>, marker-based anti-bluff verdict), 5 HelixQA
+matrix banks + <code>run-helixqa-provider-qa.sh --matrix</code>, and
+<code>Challenge70AutonomousQaProviderMatrixTest</code> (parameterized
+onboard→search→details→download). Real API-level search→download proven
+(ThePirateBay 1080p→100, Nyaa mp3→75 with magnets); on-device E2E is
+harness-checkpointed (see DEEP-FIX-STATUS / the 2026-06-30 sixth-law
+incident).</li>
+<li><strong>Off-main navigation guard (production NO-OP).</strong>
+<code>core/navigation</code> <code>NavigationController</code> now
+marshals <code>navHostController.navigate(...)</code> /
+<code>navigateUp()</code> onto the main looper, enforcing
+NavHostController's documented main-thread contract. On the production
+happy path this runs inline (no behavior change); it only diverges under
+the Compose UI test harness. Forensic:
+<code>.lava-ci-evidence/sixth-law-incidents/2026-06-30-keystone-offmain-nav-and-lva008.json</code>.</li>
+<li><strong>§6.Y:</strong> versionCode 1077→1078 (bump-first);
+versionName HELD 1.3.12 (QA-harness + test + docs only; the nav guard is
+a proven production no-op).</li>
+</ul>
+<p><strong>Known open:</strong> LVA-008 nav-teardown crash remains an
+upstream androidx-navigation defect (test-harness teardown only).
+On-device search→detail→download clean-proof is gated on
+provider/upstream egress reachability from the QA host (honest finding —
+not a pipeline defect).</p>
+<p><strong>Channel:</strong> firebase-app-distribution (debug
+<code>.client.dev</code> + release <code>.client</code>) — pending §6.Z
+gate + §6.AA two-stage distribute.</p>
 <h2
 id="lava-android-1312-1077--2026-06-26-post-1076-cleanup-c66-device-fix-test-lva-008-resilience-genymotion-full-suite-gate">Lava-Android-1.3.12-1077
 — 2026-06-26 (post-1076 cleanup: C66 device-fix, test LVA-008

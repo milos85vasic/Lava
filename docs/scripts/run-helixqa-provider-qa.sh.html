@@ -91,7 +91,6 @@
       color: #606060;
     }
     code {
-      white-space: pre-wrap;
       font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
       font-size: 85%;
       margin: 0;
@@ -155,6 +154,7 @@
     #TOC a:not(:hover) {
       text-decoration: none;
     }
+    code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
@@ -239,8 +239,14 @@
 <body>
 <h1
 id="scriptsrun-helixqa-provider-qash"><code>scripts/run-helixqa-provider-qa.sh</code></h1>
-<p><strong>Revision:</strong> 1 <strong>Last modified:</strong>
-2026-06-08T00:00:00Z</p>
+<p><strong>Revision:</strong> 2 <strong>Last modified:</strong>
+2026-06-30T00:00:00Z <strong>Inheritance:</strong> HelixConstitution
+§11.4.18 (script documentation mandate) + Lava §6.AD (HelixConstitution
+Inheritance). Constitutional bindings of the script itself: §6.AE
+(per-provider Challenge coverage), §6.AH (device in VM/container — no
+host-direct), §11.4.3 (topology SKIP, never a fake PASS), §11.4.27
+(HelixQA full coverage), §11.4.87/§11.4.98 (autonomous, no manual
+intervention).</p>
 <h2 id="overview">Overview</h2>
 <p>Thin Lava glue that runs <strong>HelixQA</strong> against the Lava
 Android app for a given provider (or all), feeding the matching Lava
@@ -250,70 +256,149 @@ API key needed). It is the per-provider companion to
 <code>scripts/run-genymotion-challenges.sh</code>.</p>
 <h2 id="prerequisites">Prerequisites</h2>
 <ul>
-<li>HelixQA buildable: <code>submodules/helixqa</code> + its 5 own-org
-dep submodules (<code>doc_processor</code>,
-<code>llm_orchestrator</code>, <code>llm_provider</code>,
-<code>llms_verifier</code>, <code>vision_engine</code> — added
-2026-06-08; see <code>docs/qa/helixqa-dependency-submodules.md</code>).
-<code>go build ./cmd/helixqa</code> → <code>v0.2.0</code>.</li>
-<li>Lava banks present:
-<code>lava-api-go/qa/banks/lava-&lt;provider&gt;-journey.yaml</code> (7
-banks, 32 cases).</li>
+<li>HelixQA buildable: <code>submodules/helixqa</code> + its own-org dep
+submodules (see <code>docs/qa/helixqa-dependency-submodules.md</code>,
+added 2026-06-08). <code>go build ./cmd/helixqa</code>.</li>
+<li>Lava banks present under <code>lava-api-go/qa/banks/</code>:
+<ul>
+<li>default mode resolves
+<code>lava-&lt;provider&gt;-journey.yaml</code>;</li>
+<li><code>--matrix</code> resolves
+<code>lava-&lt;provider&gt;-matrix-journey.yaml</code> instead.</li>
+</ul></li>
 <li><code>go</code> (1.24+), <code>adb</code>, and the
 <code>claude</code> CLI on <code>PATH</code>.</li>
-<li><strong>A reachable device</strong> — the Genymotion VM at
-<code>127.0.0.1:6555</code> (boot it first) or a physical device with
-the Lava app (<code>digital.vasic.lava.client.dev</code>)
-installed.</li>
+<li><strong>A reachable device</strong> — the Genymotion VM (default
+<code>127.0.0.1:6555</code>) booted first, or a physical device with the
+Lava app (<code>digital.vasic.lava.client.dev</code>) installed. Per
+§6.AH the device MUST be a VM/container emulator, never a host-direct
+one.</li>
 </ul>
 <h2 id="usage">Usage</h2>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># explicit per-provider bank run (default mode)</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/run-helixqa-provider-qa.sh</span> <span class="at">--provider</span> rutor <span class="at">--serial</span> 127.0.0.1:6555</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># every provider</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/run-helixqa-provider-qa.sh</span> <span class="at">--all</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># doc-driven autonomous QA session instead of explicit banks</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/run-helixqa-provider-qa.sh</span> <span class="at">--provider</span> kinozal <span class="at">--autonomous</span></span></code></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># matrix-journey bank for a provider (the broader matrix variant)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/run-helixqa-provider-qa.sh</span> <span class="at">--provider</span> archiveorg <span class="at">--matrix</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># every provider, sequentially</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/run-helixqa-provider-qa.sh</span> <span class="at">--all</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># doc-driven autonomous QA session instead of explicit banks</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/run-helixqa-provider-qa.sh</span> <span class="at">--provider</span> kinozal <span class="at">--autonomous</span></span></code></pre></div>
+<h2 id="inputs-flags">Inputs (flags)</h2>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--provider &lt;id&gt;</code></td>
+<td>— (required unless <code>--all</code>)</td>
+<td>One of the PROVIDERS set (below).</td>
+</tr>
+<tr>
+<td><code>--all</code></td>
+<td>—</td>
+<td>Run every provider bank sequentially (non-zero exit if any
+fails).</td>
+</tr>
+<tr>
+<td><code>--serial &lt;s&gt;</code></td>
+<td><code>$LAVA_REAL_DEVICE_SERIALS</code> or
+<code>127.0.0.1:6555</code> (the Genymotion VM)</td>
+<td>adb device serial to target.</td>
+</tr>
+<tr>
+<td><code>--autonomous</code></td>
+<td>off (<code>helixqa run --banks</code>)</td>
+<td>Use <code>helixqa autonomous</code> (doc-driven session) instead of
+the explicit per-provider bank.</td>
+</tr>
+<tr>
+<td><code>--matrix</code></td>
+<td>off (<code>journey</code>)</td>
+<td>Resolve banks as <code>lava-&lt;prov&gt;-matrix-journey.yaml</code>
+instead of the default <code>lava-&lt;prov&gt;-journey.yaml</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="providers-set">PROVIDERS set</h3>
+<p><code>rutracker</code>, <code>rutor</code>, <code>iptorrents</code>,
+<code>kinozal</code>, <code>nnmclub</code>, <code>archiveorg</code>,
+<code>gutenberg</code> (the <code>PROVIDERS</code> array in the script;
+<code>--all</code> iterates exactly this list). A provider with no
+matching bank file is <code>SKIP</code>ped (honest, not a failure).</p>
+<h3 id="environment-overrides">Environment overrides</h3>
+<ul>
+<li><code>LAVA_QA_PACKAGE</code> — app package id (default
+<code>digital.vasic.lava.client.dev</code>).</li>
+<li><code>LAVA_REAL_DEVICE_SERIALS</code> — default adb serial when
+<code>--serial</code> is omitted.</li>
+</ul>
 <h2 id="exit-codes-anti-bluff">Exit codes (anti-bluff)</h2>
 <ul>
 <li><code>0</code> — QA run completed.</li>
+<li><code>1</code> — QA run reported failures (one or more banks
+failed).</li>
 <li><code>2</code> — <strong>honest BLOCKED</strong>: no adb device in
 <code>device</code> state (or <code>adb</code> missing). NOT a pass
 (§6.AH/§11.4.3). Boot the Genymotion VM / attach a device, then
 re-run.</li>
 <li><code>3</code> — helixqa build failed (check the dep
 submodules).</li>
-<li><code>1</code> — QA run reported failures.</li>
+<li><code>64</code> — usage error (unknown flag, or neither
+<code>--provider</code> nor <code>--all</code> given).</li>
 </ul>
 <h2 id="internal-behaviour">Internal behaviour</h2>
 <ol type="1">
+<li>Parse flags; require <code>--provider &lt;id&gt;</code> or
+<code>--all</code>.</li>
 <li>Honest device gate first — <code>adb connect &lt;serial&gt;</code> +
 check for a <code>device</code>-state entry; exit 2 if none.</li>
-<li>Build the <code>helixqa</code> binary to a temp path; print its
+<li>Build the <code>helixqa</code> binary to a temp path
+(<code>GOMAXPROCS=2 go build ./cmd/helixqa</code>); print its
 version.</li>
 <li>Confirm the <code>claude</code> bridge is on <code>PATH</code> (warn
-if absent).</li>
-<li>Per provider:
+if absent — autonomous mode then lacks the LLM/Vision bridge).</li>
+<li>Per provider, resolve the bank
+(<code>lava-&lt;prov&gt;-&lt;journey|matrix-journey&gt;.yaml</code>);
+<code>SKIP</code> if absent, else:
 <code>helixqa run --banks &lt;bank&gt; --platform android --device &lt;serial&gt; --package &lt;pkg&gt; --output .lava-ci-evidence/helixqa/&lt;provider&gt;/&lt;run-id&gt;/</code>
 (or
 <code>helixqa autonomous --project &lt;root&gt; --platforms android --env .env --output …</code>
 in <code>--autonomous</code> mode).</li>
 </ol>
+<h2 id="outputs">Outputs</h2>
+<p>Per-run evidence under
+<code>.lava-ci-evidence/helixqa/&lt;provider&gt;/&lt;run-id&gt;/</code>
+(run id is a UTC timestamp suffixed with the provider).</p>
 <h2 id="verified">Verified</h2>
 <ul>
 <li><code>bash -n</code> parse: clean (§11.4.67).</li>
-<li>No-device gate: exits 2 with the BLOCKED message (proven 2026-06-08,
-no VM booted).</li>
+<li>No-device gate: exits 2 with the BLOCKED message when no VM is
+booted (honest BLOCKED, §6.AH/§11.4.3).</li>
 </ul>
 <h2 id="related">Related</h2>
 <ul>
 <li><code>docs/qa/helixqa-wiring-plan.md</code> — bridge-discovery facts
 + verbatim <code>helixqa list</code> proof.</li>
-<li><code>docs/qa/helixqa-dependency-submodules.md</code> — the 5
-own-org deps that make the binary buildable.</li>
+<li><code>docs/qa/helixqa-dependency-submodules.md</code> — the own-org
+deps that make the binary buildable.</li>
 <li><code>scripts/run-genymotion-challenges.sh</code> — the Genymotion
 Compose-Challenge device path.</li>
+<li><code>scripts/autonomous-qa/run-matrix.sh</code> — the
+backend×provider autonomous-QA matrix orchestrator.</li>
 </ul>
-<p><em>Last verified: 2026-06-08.</em></p>
+<p><em>Last verified: 2026-06-30 (revision 2 — documents
+<code>--matrix</code>, the full 7-provider PROVIDERS set incl.
+<code>iptorrents</code>/<code>gutenberg</code>, the
+<code>--serial</code> default, exit code 64, and the per-script
+constitutional bindings).</em></p>
 </body>
 </html>

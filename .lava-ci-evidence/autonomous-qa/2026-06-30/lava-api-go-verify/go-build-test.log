@@ -1,0 +1,230 @@
+BUILD_EXIT=0
+===== COMMIT-TOUCHED PACKAGES TEST RUN =====
+ok  	digital.vasic.lava.apigo/internal/httpx	(cached)
+ok  	digital.vasic.lava.apigo/internal/config	0.002s
+ok  	digital.vasic.lava.apigo/internal/archiveorg	0.008s
+ok  	digital.vasic.lava.apigo/internal/gutenberg	3.017s
+ok  	digital.vasic.lava.apigo/internal/jackett	(cached)
+ok  	digital.vasic.lava.apigo/internal/kinozal	11.136s
+ok  	digital.vasic.lava.apigo/internal/nnmclub	12.362s
+ok  	digital.vasic.lava.apigo/internal/rutracker	16.156s
+ok  	digital.vasic.lava.apigo/internal/router	0.017s
+ok  	digital.vasic.lava.apigo/internal/provider/curated	0.005s
+ok  	digital.vasic.lava.apigo/internal/provider/curated/bitsearch	6.325s
+ok  	digital.vasic.lava.apigo/internal/provider/curated/knaben	6.279s
+ok  	digital.vasic.lava.apigo/internal/provider/curated/nyaa	6.322s
+ok  	digital.vasic.lava.apigo/internal/provider/curated/thepiratebay	0.005s
+ok  	digital.vasic.lava.apigo/internal/provider/curated/tokyotosho	6.279s
+ok  	digital.vasic.lava.apigo/internal/provider/curated/torrentdownloads	6.305s
+ok  	digital.vasic.lava.apigo/internal/provider/curated/torrentscsv	0.004s
+ok  	digital.vasic.lava.apigo/internal/provider/curated/yts	52.226s
+TOUCHED_PKGS_EXIT=0
+===== FRESH VERBOSE RUN: httpx + jackett (-count=1) =====
+=== RUN   TestProxyFunc_ParsesSchemes
+=== RUN   TestProxyFunc_ParsesSchemes/http
+=== RUN   TestProxyFunc_ParsesSchemes/https
+=== RUN   TestProxyFunc_ParsesSchemes/socks5
+--- PASS: TestProxyFunc_ParsesSchemes (0.00s)
+    --- PASS: TestProxyFunc_ParsesSchemes/http (0.00s)
+    --- PASS: TestProxyFunc_ParsesSchemes/https (0.00s)
+    --- PASS: TestProxyFunc_ParsesSchemes/socks5 (0.00s)
+=== RUN   TestProxyFunc_EmptyReturnsFallback
+--- PASS: TestProxyFunc_EmptyReturnsFallback (0.00s)
+=== RUN   TestProxyFunc_RejectsMalformed
+--- PASS: TestProxyFunc_RejectsMalformed (0.00s)
+=== RUN   TestProxyFunc_LoopbackNeverProxied
+--- PASS: TestProxyFunc_LoopbackNeverProxied (0.00s)
+=== RUN   TestConfigureAndNewTransport
+--- PASS: TestConfigureAndNewTransport (0.00s)
+=== RUN   TestConfigure_RejectsMalformed
+--- PASS: TestConfigure_RejectsMalformed (0.00s)
+=== RUN   TestProviderClientsTraverseUpstreamProxyWhenConfigured
+=== RUN   TestProviderClientsTraverseUpstreamProxyWhenConfigured/rutracker
+=== RUN   TestProviderClientsTraverseUpstreamProxyWhenConfigured/kinozal
+=== RUN   TestProviderClientsTraverseUpstreamProxyWhenConfigured/nnmclub
+--- PASS: TestProviderClientsTraverseUpstreamProxyWhenConfigured (0.00s)
+    --- PASS: TestProviderClientsTraverseUpstreamProxyWhenConfigured/rutracker (0.00s)
+    --- PASS: TestProviderClientsTraverseUpstreamProxyWhenConfigured/kinozal (0.00s)
+    --- PASS: TestProviderClientsTraverseUpstreamProxyWhenConfigured/nnmclub (0.00s)
+=== RUN   TestProviderClientsGoDirectWhenUnsetAndNoEnv
+=== RUN   TestProviderClientsGoDirectWhenUnsetAndNoEnv/rutracker
+=== RUN   TestProviderClientsGoDirectWhenUnsetAndNoEnv/kinozal
+=== RUN   TestProviderClientsGoDirectWhenUnsetAndNoEnv/nnmclub
+--- PASS: TestProviderClientsGoDirectWhenUnsetAndNoEnv (0.00s)
+    --- PASS: TestProviderClientsGoDirectWhenUnsetAndNoEnv/rutracker (0.00s)
+    --- PASS: TestProviderClientsGoDirectWhenUnsetAndNoEnv/kinozal (0.00s)
+    --- PASS: TestProviderClientsGoDirectWhenUnsetAndNoEnv/nnmclub (0.00s)
+PASS
+ok  	digital.vasic.lava.apigo/internal/httpx	0.045s
+=== RUN   TestListIndexers_ParsesConfiguredIndexers
+--- PASS: TestListIndexers_ParsesConfiguredIndexers (0.00s)
+=== RUN   TestListIndexers_UnprotectedJackettNeedsNoCookie
+--- PASS: TestListIndexers_UnprotectedJackettNeedsNoCookie (0.00s)
+=== RUN   TestListIndexers_WrongAdminPasswordFails
+--- PASS: TestListIndexers_WrongAdminPasswordFails (0.00s)
+=== RUN   TestListIndexers_NonOKStatusIsError
+--- PASS: TestListIndexers_NonOKStatusIsError (0.04s)
+=== RUN   TestStress_Sustained_ParseSearch
+    stress_chaos_test.go:183: sustained: 200 iterations p50=106.634µs p95=179.023µs p99=358.565µs min=87.342µs max=415.741µs
+    stress_chaos_test.go:186: evidence written: /run/media/milosvasic/DATA4TB/Projects/lava/.lava-ci-evidence/stress-chaos/jackett/stress-latency-jackett.json
+--- PASS: TestStress_Sustained_ParseSearch (0.02s)
+=== RUN   TestStress_Concurrent_Search
+    stress_chaos_test.go:265: concurrent: 16 workers x 25 calls; goroutines baseline=3 after=9
+--- PASS: TestStress_Concurrent_Search (2.04s)
+=== RUN   TestStress_Boundary_FeedSizes
+=== RUN   TestStress_Boundary_FeedSizes/empty
+=== RUN   TestStress_Boundary_FeedSizes/single
+=== RUN   TestStress_Boundary_FeedSizes/large_500
+--- PASS: TestStress_Boundary_FeedSizes (0.00s)
+    --- PASS: TestStress_Boundary_FeedSizes/empty (0.00s)
+    --- PASS: TestStress_Boundary_FeedSizes/single (0.00s)
+    --- PASS: TestStress_Boundary_FeedSizes/large_500 (0.00s)
+=== RUN   TestChaos_Jackett
+    stress_chaos_test.go:488: chaos[malformed_xml] surface=jackett.ParseResults gotError=true panicked=false degraded=typed-error err="jackett: torznab xml decode: XML syntax error on line 1: unexpected EOF"
+    stress_chaos_test.go:488: chaos[invalid_utf8] surface=jackett.ParseResults gotError=true panicked=false degraded=typed-error err="jackett: torznab xml decode: XML syntax error on line 1: invalid UTF-8"
+    stress_chaos_test.go:488: chaos[http_500] surface=jackett.Client.Search gotError=true panicked=false degraded=typed-error err="jackett: search status 500"
+    stress_chaos_test.go:488: chaos[http_503] surface=jackett.Client.Search gotError=true panicked=false degraded=typed-error err="jackett: search status 503"
+    stress_chaos_test.go:488: chaos[timeout] surface=jackett.Client.Search gotError=true panicked=false degraded=typed-error err="jackett: search request: Get \"http://127.0.0.1:37753/api/v2.0/indexers/all/results/torznab/api?apikey=k&q=x&t=search\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)"
+    stress_chaos_test.go:488: chaos[connection_drop] surface=jackett.Client.Search gotError=true panicked=false degraded=typed-error err="unexpected EOF"
+    stress_chaos_test.go:488: chaos[redirect_302_magnet] surface=jackett.Client.Download gotError=false panicked=false degraded=graceful-magnet-capture err=""
+    stress_chaos_test.go:488: chaos[missing_config] surface=jackett.NewClient gotError=true panicked=false degraded=typed-error(ErrMissingConfig) err="jackett: BaseURL and APIKey are required"
+    stress_chaos_test.go:492: evidence written: /run/media/milosvasic/DATA4TB/Projects/lava/.lava-ci-evidence/stress-chaos/jackett/chaos-categorized-jackett.json
+--- PASS: TestChaos_Jackett (0.15s)
+=== RUN   TestParseResults_UnparseableSeedersStaysUnknown
+--- PASS: TestParseResults_UnparseableSeedersStaysUnknown (0.00s)
+=== RUN   TestParseResults_UnparseableSizeFallsBackToEnclosure
+--- PASS: TestParseResults_UnparseableSizeFallsBackToEnclosure (0.00s)
+=== RUN   TestParseResults_NewznabAttrSpelling
+--- PASS: TestParseResults_NewznabAttrSpelling (0.00s)
+=== RUN   TestParseResults_MagnetAttrPreferredOverEnclosure
+--- PASS: TestParseResults_MagnetAttrPreferredOverEnclosure (0.00s)
+=== RUN   TestDownload_EmptyURL
+--- PASS: TestDownload_EmptyURL (0.00s)
+=== RUN   TestDownload_RedirectToNonMagnet
+--- PASS: TestDownload_RedirectToNonMagnet (0.00s)
+=== RUN   TestDownload_Non200Status
+--- PASS: TestDownload_Non200Status (0.00s)
+=== RUN   TestDownload_TransportError
+--- PASS: TestDownload_TransportError (0.00s)
+=== RUN   TestParseResults_TorrentEnclosureItem
+--- PASS: TestParseResults_TorrentEnclosureItem (0.00s)
+=== RUN   TestParseResults_MagnetItem
+--- PASS: TestParseResults_MagnetItem (0.00s)
+=== RUN   TestParseResults_SeedersUnknownVsZero
+--- PASS: TestParseResults_SeedersUnknownVsZero (0.00s)
+=== RUN   TestParseResults_EmptyFeed
+--- PASS: TestParseResults_EmptyFeed (0.00s)
+=== RUN   TestParseResults_MalformedXML
+--- PASS: TestParseResults_MalformedXML (0.00s)
+=== RUN   TestBuildSearchURL
+--- PASS: TestBuildSearchURL (0.00s)
+=== RUN   TestBuildCapsURL
+--- PASS: TestBuildCapsURL (0.00s)
+=== RUN   TestNewClient_MissingConfig
+--- PASS: TestNewClient_MissingConfig (0.00s)
+=== RUN   TestDownload_302ToMagnet
+--- PASS: TestDownload_302ToMagnet (0.00s)
+=== RUN   TestDownload_TorrentFile
+--- PASS: TestDownload_TorrentFile (0.00s)
+=== RUN   TestDownload_MagnetEnclosureShortCircuits
+--- PASS: TestDownload_MagnetEnclosureShortCircuits (0.00s)
+=== RUN   TestSearch_EndToEnd
+--- PASS: TestSearch_EndToEnd (0.00s)
+=== RUN   TestParseResults_TorrentWithMagnetAndInfohash
+--- PASS: TestParseResults_TorrentWithMagnetAndInfohash (0.00s)
+PASS
+ok  	digital.vasic.lava.apigo/internal/jackett	2.272s
+HTTPX_JACKETT_EXIT=0
+===== FULL SUITE: go test ./... (LAVA_E2E_SKIP=1, POSTGRES_TEST_URL unset) =====
+ok  	digital.vasic.lava.apigo/cmd/healthprobe	1.509s
+ok  	digital.vasic.lava.apigo/cmd/lava-api-go	1.828s
+?   	digital.vasic.lava.apigo/cmd/lavaapi-cshared	[no test files]
+ok  	digital.vasic.lava.apigo/internal/archiveorg	(cached)
+ok  	digital.vasic.lava.apigo/internal/auth	0.055s
+ok  	digital.vasic.lava.apigo/internal/cache	0.003s
+ok  	digital.vasic.lava.apigo/internal/config	(cached)
+ok  	digital.vasic.lava.apigo/internal/discovery	8.411s
+ok  	digital.vasic.lava.apigo/internal/firebase	0.001s
+ok  	digital.vasic.lava.apigo/internal/gen/client	0.003s
+ok  	digital.vasic.lava.apigo/internal/gen/server	0.005s
+ok  	digital.vasic.lava.apigo/internal/gutenberg	(cached)
+ok  	digital.vasic.lava.apigo/internal/handlers	0.009s
+ok  	digital.vasic.lava.apigo/internal/handlers/v1	7.158s
+ok  	digital.vasic.lava.apigo/internal/httpx	(cached)
+ok  	digital.vasic.lava.apigo/internal/jackett	(cached)
+ok  	digital.vasic.lava.apigo/internal/kinozal	(cached)
+ok  	digital.vasic.lava.apigo/internal/middleware	0.027s
+?   	digital.vasic.lava.apigo/internal/migrations/sqlite	[no test files]
+ok  	digital.vasic.lava.apigo/internal/mobile	0.039s
+ok  	digital.vasic.lava.apigo/internal/nnmclub	(cached)
+ok  	digital.vasic.lava.apigo/internal/observability	0.310s
+ok  	digital.vasic.lava.apigo/internal/provider	0.001s
+ok  	digital.vasic.lava.apigo/internal/provider/curated	(cached)
+ok  	digital.vasic.lava.apigo/internal/provider/curated/bitsearch	(cached)
+ok  	digital.vasic.lava.apigo/internal/provider/curated/knaben	(cached)
+ok  	digital.vasic.lava.apigo/internal/provider/curated/nyaa	(cached)
+ok  	digital.vasic.lava.apigo/internal/provider/curated/thepiratebay	(cached)
+ok  	digital.vasic.lava.apigo/internal/provider/curated/tokyotosho	(cached)
+ok  	digital.vasic.lava.apigo/internal/provider/curated/torrentdownloads	(cached)
+ok  	digital.vasic.lava.apigo/internal/provider/curated/torrentscsv	(cached)
+ok  	digital.vasic.lava.apigo/internal/provider/curated/yts	(cached)
+ok  	digital.vasic.lava.apigo/internal/provider/flaresolverr	1.009s
+ok  	digital.vasic.lava.apigo/internal/provider/jackettprovider	0.003s
+ok  	digital.vasic.lava.apigo/internal/qa/detector	0.019s
+ok  	digital.vasic.lava.apigo/internal/qa/evidence	0.006s
+ok  	digital.vasic.lava.apigo/internal/qa/testbank	0.003s
+ok  	digital.vasic.lava.apigo/internal/qa/ticket	0.006s
+ok  	digital.vasic.lava.apigo/internal/qa/validator	0.006s
+ok  	digital.vasic.lava.apigo/internal/ratelimit	0.004s
+ok  	digital.vasic.lava.apigo/internal/router	(cached)
+ok  	digital.vasic.lava.apigo/internal/rutracker	(cached)
+ok  	digital.vasic.lava.apigo/internal/server	0.208s
+ok  	digital.vasic.lava.apigo/internal/storage	0.427s
+ok  	digital.vasic.lava.apigo/internal/version	0.001s
+ok  	digital.vasic.lava.apigo/tests/compose	0.003s
+2026/06/30 20:27:25 INFO firebase: no credentials configured — running in no-op mode (per §6.H, this is the dev/CI default)
+2026/06/30 20:27:25 INFO firebase: no credentials configured — running in no-op mode (per §6.H, this is the dev/CI default)
+2026/06/30 20:27:25 WARN non-fatal event error="provider: unknown error" error_class=*errors.errorString feature=provider operation=/v1/:provider/search endpoint=/v1/:provider/search tracker_id=archiveorg request_id=""
+2026/06/30 20:27:25 WARN firebase noop RecordNonFatal err="http 502 on GET /v1/:provider/search" fields="map[event.elapsed:42.038173ms http.method:GET http.path:/v1/:provider/search http.status:502]" reason="no credentials path"
+2026/06/30 20:27:25 WARN non-fatal event error="provider: unknown error" error_class=*errors.errorString endpoint=/v1/:provider/browse/:id tracker_id=archiveorg request_id="" feature=provider operation=/v1/:provider/browse/:id
+2026/06/30 20:27:25 WARN firebase noop RecordNonFatal err="http 502 on GET /v1/:provider/browse/:id" fields="map[event.elapsed:54.495243ms http.method:GET http.path:/v1/:provider/browse/:id http.status:502]" reason="no credentials path"
+2026/06/30 20:27:26 WARN non-fatal event error="provider: unknown error" error_class=*errors.errorString feature=provider operation=/v1/:provider/topic/:id endpoint=/v1/:provider/topic/:id tracker_id=archiveorg request_id=""
+2026/06/30 20:27:26 WARN firebase noop RecordNonFatal err="http 502 on GET /v1/:provider/topic/:id" fields="map[event.elapsed:36.849941ms http.method:GET http.path:/v1/:provider/topic/:id http.status:502]" reason="no credentials path"
+2026/06/30 20:27:27 WARN non-fatal event error="Get \"https://gutendex.example.invalid/books/?search=x\": dial tcp: lookup gutendex.example.invalid on 1.1.1.1:53: no such host" error_class=*net.DNSError feature=provider operation=/v1/:provider/search endpoint=/v1/:provider/search tracker_id=gutenberg request_id=""
+2026/06/30 20:27:27 WARN firebase noop RecordNonFatal err="http 502 on GET /v1/:provider/search" fields="map[event.elapsed:1.114882874s http.method:GET http.path:/v1/:provider/search http.status:502]" reason="no credentials path"
+2026/06/30 20:27:28 WARN non-fatal event error="Get \"https://gutendex.example.invalid/books/?page=1&topic=1\": dial tcp: lookup gutendex.example.invalid on 1.1.1.1:53: no such host" error_class=*net.DNSError feature=provider operation=/v1/:provider/browse/:id endpoint=/v1/:provider/browse/:id tracker_id=gutenberg request_id=""
+2026/06/30 20:27:28 WARN firebase noop RecordNonFatal err="http 502 on GET /v1/:provider/browse/:id" fields="map[event.elapsed:1.115994526s http.method:GET http.path:/v1/:provider/browse/:id http.status:502]" reason="no credentials path"
+2026/06/30 20:27:29 WARN non-fatal event error="Get \"https://gutendex.example.invalid/books/1/\": dial tcp: lookup gutendex.example.invalid on 1.1.1.1:53: no such host" error_class=*net.DNSError feature=provider operation=/v1/:provider/topic/:id endpoint=/v1/:provider/topic/:id tracker_id=gutenberg request_id=""
+2026/06/30 20:27:29 WARN firebase noop RecordNonFatal err="http 502 on GET /v1/:provider/topic/:id" fields="map[event.elapsed:1.116572987s http.method:GET http.path:/v1/:provider/topic/:id http.status:502]" reason="no credentials path"
+2026/06/30 20:27:30 WARN non-fatal event error="Get \"https://rutracker.example.invalid/viewforum.php?f=1\": dial tcp4: lookup rutracker.example.invalid on 1.1.1.1:53: no such host" error_class=*net.DNSError request_id="" feature=provider operation=/v1/:provider/browse/:id endpoint=/v1/:provider/browse/:id tracker_id=rutracker
+2026/06/30 20:27:30 WARN firebase noop RecordNonFatal err="http 502 on GET /v1/:provider/browse/:id" fields="map[event.elapsed:1.113692098s http.method:GET http.path:/v1/:provider/browse/:id http.status:502]" reason="no credentials path"
+2026/06/30 20:27:31 WARN non-fatal event error="Get \"https://rutracker.example.invalid/index.php?map=0\": dial tcp4: lookup rutracker.example.invalid on 1.1.1.1:53: no such host" error_class=*net.DNSError feature=provider operation=/v1/:provider/forum endpoint=/v1/:provider/forum tracker_id=rutracker request_id=""
+2026/06/30 20:27:31 WARN firebase noop RecordNonFatal err="http 502 on GET /v1/:provider/forum" fields="map[event.elapsed:1.116263322s http.method:GET http.path:/v1/:provider/forum http.status:502]" reason="no credentials path"
+2026/06/30 20:27:32 WARN non-fatal event error="Get \"https://rutracker.example.invalid/viewtopic.php?t=1\": dial tcp4: lookup rutracker.example.invalid on 1.1.1.1:53: no such host" error_class=*net.DNSError operation=/v1/:provider/topic/:id endpoint=/v1/:provider/topic/:id tracker_id=rutracker request_id="" feature=provider
+2026/06/30 20:27:32 WARN firebase noop RecordNonFatal err="http 502 on GET /v1/:provider/topic/:id" fields="map[event.elapsed:1.11168616s http.method:GET http.path:/v1/:provider/topic/:id http.status:502]" reason="no credentials path"
+2026/06/30 20:27:33 WARN non-fatal event error="Get \"https://rutracker.example.invalid/viewtopic.php?t=1\": dial tcp4: lookup rutracker.example.invalid on 1.1.1.1:53: no such host" error_class=*net.DNSError feature=provider operation=/v1/:provider/comments/:id endpoint=/v1/:provider/comments/:id tracker_id=rutracker request_id=""
+2026/06/30 20:27:33 WARN firebase noop RecordNonFatal err="http 502 on GET /v1/:provider/comments/:id" fields="map[event.elapsed:1.111346073s http.method:GET http.path:/v1/:provider/comments/:id http.status:502]" reason="no credentials path"
+2026/06/30 20:27:33 INFO firebase: no credentials configured — running in no-op mode (per §6.H, this is the dev/CI default)
+--- FAIL: TestSourceHash_ManifestMatchesLive (0.44s)
+    sourcehash_contract_test.go:89: API↔embed sync manifest STALE:
+          committed=13e10f0afd4cfc936d48b7ce01f5be7dc5b3cd0d7cdc24c84806a6fbd1beb5c5
+          live=df387ca5483b0c205567963bfd1db88b3146e3481676703929af44961590b356
+        the on-device embed would not match the current lava-api-go source; rebuild via build-cshared.sh and commit the refreshed manifest
+FAIL
+FAIL	digital.vasic.lava.apigo/tests/contract	115.022s
+ok  	digital.vasic.lava.apigo/tests/e2e	0.008s
+ok  	digital.vasic.lava.apigo/tests/integration	0.211s
+?   	digital.vasic.lava.apigo/tests/integration/testenv	[no test files]
+ok  	digital.vasic.lava.apigo/tests/load	0.004s
+ok  	digital.vasic.lava.apigo/tests/parity	0.005s
+ok  	digital.vasic.lava.apigo/tests/scripts	0.400s
+FAIL
+FULL_SUITE_EXIT=1
+
+===== VERIFY SUMMARY (2026-06-30) =====
+HEAD=613083d10275b7073ea902e5030da4868eabfa10
+go build ./... => PASS (exit 0)
+commit-touched packages => ALL PASS
+full go test ./... => 49 ok / 1 FAIL / 3 no-test
+FAIL: tests/contract TestSourceHash_ManifestMatchesLive (stale api-source.hash manifest, not refreshed in commit)
+skipped: Postgres(POSTGRES_TEST_URL unset) + e2e(LAVA_E2E_SKIP=1) + realtrackers/stress build tags

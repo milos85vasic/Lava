@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 )
 
@@ -36,6 +34,13 @@ type IndexerInfo struct {
 //
 //	GET <base>/api/v2.0/indexers?configured=true&apikey=<key>
 //
+// This is a Jackett MANAGEMENT endpoint: when the Jackett dashboard is password
+// protected, apikey alone is NOT sufficient — Jackett answers with an HTTP 302
+// redirect to /UI/Login. The request therefore routes through getManagement,
+// which transparently acquires + reuses the dashboard session cookie (see
+// Client.login). Torznab feeds (Search / caps / Download) are unaffected — they
+// authenticate by apikey and never touch the cookie path.
+//
 // Each configured indexer is exposed as its own discoverable provider in the
 // /v1/providers catalogue (operator decision 2026-06-11 §3.2). The apikey is a
 // §6.H server-side secret carried inside Config — never a literal, never shipped
@@ -50,21 +55,9 @@ func (c *Client) ListIndexers(ctx context.Context) ([]IndexerInfo, error) {
 	v.Set("apikey", c.cfg.APIKey)
 	reqURL := c.cfg.BaseURL + indexersPath + "?" + v.Encode()
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
+	body, err := c.getManagement(ctx, reqURL)
 	if err != nil {
-		return nil, err
-	}
-	resp, err := c.http.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("jackett: list indexers request: %w", err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("jackett: list indexers status %d", resp.StatusCode)
-	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("jackett: list indexers: %w", err)
 	}
 
 	var indexers []IndexerInfo

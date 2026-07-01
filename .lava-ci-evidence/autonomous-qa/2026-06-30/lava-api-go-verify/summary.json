@@ -1,0 +1,39 @@
+{
+  "artifact": "lava-api-go",
+  "module": "digital.vasic.lava.apigo",
+  "repo": "/run/media/milosvasic/DATA4TB/Projects/lava",
+  "head_sha": "613083d10275b7073ea902e5030da4868eabfa10",
+  "head_subject": "fix(archiveorg): topic-detail FlexStringSerializer + TopicPageSource seam (LVA-070) + 1078 distribute-prep",
+  "go_version": "go1.26.2-X:nodwarf5 linux/amd64",
+  "run_settings": "GOMAXPROCS=2 nice -n 18; POSTGRES_TEST_URL unset; LAVA_E2E_SKIP=1; build tags realtrackers/stress NOT enabled",
+  "timestamp_utc": "2026-06-30",
+  "build_ok": true,
+  "build_command": "GOMAXPROCS=2 nice -n 18 go build ./...",
+  "build_exit": 0,
+  "packages_tested": 50,
+  "packages_ok": 49,
+  "packages_failed": 1,
+  "packages_no_test_files": 3,
+  "commit_touched_packages_result": "ALL PASS (internal/httpx, internal/config, internal/archiveorg, internal/gutenberg, internal/jackett, internal/kinozal, internal/nnmclub, internal/rutracker, internal/router, internal/provider/curated/*)",
+  "tests_passed": "all tests in 49 packages passed (e.g. internal/httpx: 8 tests incl. proxy.go + provider_routing_integration_test.go all PASS; internal/jackett: 27 tests all PASS)",
+  "tests_failed": 1,
+  "failures": [
+    {
+      "package": "digital.vasic.lava.apigo/tests/contract",
+      "test": "TestSourceHash_ManifestMatchesLive",
+      "verbatim": "--- FAIL: TestSourceHash_ManifestMatchesLive (1.89s)\n    sourcehash_contract_test.go:89: API↔embed sync manifest STALE:\n          committed=13e10f0afd4cfc936d48b7ce01f5be7dc5b3cd0d7cdc24c84806a6fbd1beb5c5\n          live=df387ca5483b0c205567963bfd1db88b3146e3481676703929af44961590b356\n        the on-device embed would not match the current lava-api-go source; rebuild via build-cshared.sh and commit the refreshed manifest",
+      "deterministic": true,
+      "root_cause": "Commit 613083d1 changed lava-api-go Go source (internal/httpx/proxy.go, internal/jackett/client.go, internal/config/config.go, internal/archiveorg/client.go, internal/router/router.go, etc.) but did NOT refresh the embed-sync manifest core/apiengine/src/main/resources/api-source.hash (that file is absent from the commit's changeset). The hash is deterministic (TestSourceHash_StableAndWellFormed PASSED), so the mismatch is genuine source drift, not flakiness or an external dependency.",
+      "not_a_test_environment_issue": true,
+      "remediation": "Run lava-api-go/scripts/build-cshared.sh (or scripts/compute-api-source-hash.sh > core/apiengine/src/main/resources/api-source.hash) and commit the refreshed manifest."
+    }
+  ],
+  "skipped_integration": [
+    "internal/storage/postgres_test.go + internal/cache/integration_test.go: skipped because POSTGRES_TEST_URL not set (require real podman Postgres; honoring 'do not touch podman' constraint)",
+    "tests/e2e/e2e_test.go: skipped via LAVA_E2E_SKIP=1 (would spin up a podman Postgres container; intentionally skipped per constraints)",
+    "Build-tag 'realtrackers' tests (internal/provider/curated/*/live_realtrackers_test.go): NOT compiled/run (require outbound calls to live trackers)",
+    "Build-tag 'stress' tests (tests/stress/*): NOT compiled/run",
+    "13 skip events observed across internal/storage + internal/cache + tests/e2e (Postgres/podman gated)"
+  ],
+  "constraints_honored": "No source files modified; :8443 server NOT started; ./start.sh / thinker-up.sh NOT run; no podman container or emulator/adb touched; CPU kept modest (GOMAXPROCS=2, nice -n 18)."
+}

@@ -1,5 +1,6 @@
 package lava.tracker.archiveorg.feature
 
+import kotlinx.serialization.Serializable
 import lava.tracker.api.feature.DownloadableTracker
 import lava.tracker.api.feature.HttpDownloadResult
 import lava.tracker.api.feature.HttpDownloadableTracker
@@ -39,18 +40,47 @@ class ArchiveOrgDownload @Inject constructor(
     private val baseUrl: String get() = baseUrlOverride ?: DEFAULT_BASE_URL
 
     override suspend fun downloadHttpFile(id: String): HttpDownloadResult {
+        // LVA-070 — the [id] is EITHER the composite "{identifier}/{filename}"
+        // (explicit file) OR the BARE "{identifier}" — which is what a topic
+        // opened from a search result carries (the search result id is the
+        // archive.org identifier, with no file component). Previously a bare
+        // identifier failed a strict `require`, so EVERY archiveorg download
+        // from search threw → the topic screen's download button surfaced a
+        // download Error and never a completed file (the §6.L on-device finding,
+        // 2026-06-30 keystone). When no filename is supplied, resolve a
+        // representative downloadable file from the item metadata.
         val parts = id.split("/", limit = 2)
-        require(parts.size == 2 && parts[0].isNotBlank() && parts[1].isNotBlank()) {
-            "Archive.org download id must be 'identifier/filename', got '$id'"
+        val identifier = parts[0]
+        require(identifier.isNotBlank()) {
+            "Archive.org download id must start with an identifier, got '$id'"
         }
-        val (identifier, filename) = parts
+        val filename = parts.getOrNull(1)?.takeIf { it.isNotBlank() }
+            ?: resolveDownloadFilename(identifier)
         val url = "$baseUrl/download/$identifier/$filename"
         val bytes = http.download(url)
         return HttpDownloadResult(
             bytes = bytes,
             sourceUrl = url,
-            fileName = url.substringAfterLast('/').ifBlank { filename },
+            fileName = filename,
         )
+    }
+
+    /**
+     * Resolves a representative downloadable file for a bare archive.org
+     * identifier by reading `/metadata/{identifier}`. Prefers the auto-generated
+     * `<identifier>_archive.torrent` (small, and the natural artifact for a
+     * torrent client), else the smallest listed file (so a tap never hands the
+     * user a multi-GB media payload). Throws when the item exposes no files.
+     */
+    private suspend fun resolveDownloadFilename(identifier: String): String {
+        val response = http.get("$baseUrl/metadata/$identifier")
+        val body = response.use { it.body?.string() ?: "" }
+        val envelope = http.json.decodeFromString(FilesEnvelopeDto.serializer(), body)
+        require(envelope.files.isNotEmpty()) {
+            "Archive.org item '$identifier' exposes no downloadable files"
+        }
+        envelope.files.firstOrNull { it.name.endsWith(".torrent") }?.let { return it.name }
+        return envelope.files.minByOrNull { it.size?.toLongOrNull() ?: Long.MAX_VALUE }!!.name
     }
 
     override suspend fun downloadTorrentFile(id: String): ByteArray = downloadHttpFile(id).bytes
@@ -61,3 +91,14 @@ class ArchiveOrgDownload @Inject constructor(
         const val DEFAULT_BASE_URL: String = "https://archive.org"
     }
 }
+
+@Serializable
+private data class FilesEnvelopeDto(
+    val files: List<DownloadFileDto> = emptyList(),
+)
+
+@Serializable
+private data class DownloadFileDto(
+    val name: String,
+    val size: String? = null,
+)

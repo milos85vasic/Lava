@@ -1,0 +1,43 @@
+# §6.AK cycle-coverage-map for Lava-Android-1.3.12-1078
+#
+# Each CHANGELOG-claimed user-visible change for 1.3.12-1078 MUST have at least
+# one covering device Challenge that was EXECUTED + PASSED on the §6.Z gate
+# (and therefore appears in the same-SHA $VER-test-evidence.json).
+#
+# HONEST SCOPE (§6.J / §11.4.6): this cycle ships NO user-visible behavior
+# change. Per the CHANGELOG-1078 entry:
+#   - the autonomous-QA harness is test/CI tooling (no app change);
+#   - the off-main NavigationController guard is a PROVEN production NO-OP
+#     (Looper.myLooper()==mainLooper → runs inline on the happy path; the
+#     off-main branch only diverges under the Compose UI test harness — see
+#     core/navigation/.../NavigationController.kt KDoc + the 2026-06-30 incident);
+#   - the versionName is HELD at 1.3.12 (§6.Y.3).
+# The only PRODUCTION-PATH code touch is the nav guard; it is the load-bearing
+# claim below. The egress / on-device-E2E items in the CHANGELOG are documented
+# KNOWN-OPEN findings, NOT claimed fixes (per §6.AK clause 6 they are NOT listed
+# here because the cycle does not claim them as fixed).
+#
+# DEVICE-VERIFICATION STATUS (as of map authoring 2026-06-30):
+#   PENDING — the green QA matrix has NOT yet produced the §6.Z device
+#   test-evidence for 1078. This map is the DRAFT that the matrix run must
+#   satisfy: when Challenge70 (and the supporting nav Challenges) run+PASS on
+#   the gate against the committed 1078 SHA, their FQNs land in
+#   1.3.12-1078-test-evidence.json and this gate flips to PASS. Until then the
+#   §6.AK/§6.Z Phase-1 Gate 7 in firebase-distribute.sh correctly exits 2
+#   (missing/stale evidence) and BLOCKS the distribute.
+version: "1.3.12-1078"
+claims:
+  - fix: "Off-main navigation guard in core/navigation NavigationController (production NO-OP; enforces NavHostController's documented main-thread contract)"
+    covering_challenges:
+      # Challenge70 is the keystone that SURFACED the off-main side-effect nav
+      # path (SearchScreen collectSideEffect -> openSearchInput -> navigate);
+      # it exercises the exact code path the runOnMainThread guard wraps.
+      - "lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest"
+      # Supporting nav Challenges that drive the guarded navigate / navigateUp /
+      # popBackStack call sites (back-navigation + tab switching).
+      - "lava.app.challenges.Challenge24OnboardingBackNavigationTest"
+      - "lava.app.challenges.Challenge55MainScaffoldBottomNavSwitchesTest"
+      - "lava.app.challenges.Challenge46SearchTimeoutInterruptTest"
+  - fix: "Autonomous-QA harness keystone (onboard -> search -> details -> download device journey; test/CI tooling, no app behavior change)"
+    covering_challenges:
+      - "lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest"

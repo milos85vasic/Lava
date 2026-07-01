@@ -53,7 +53,7 @@ class AddCommentUseCaseTest {
         override suspend fun getTopic(id: String): Topic =
             throw UnsupportedOperationException("not used by AddCommentUseCase")
 
-        override suspend fun getTopicPage(id: String, page: Int?): TopicPage =
+        override suspend fun getTopicPage(id: String, page: Int?, providerId: String?): TopicPage =
             throw UnsupportedOperationException("not used by AddCommentUseCase")
 
         override suspend fun getCommentsPage(id: String, page: Int): Page<Post> =

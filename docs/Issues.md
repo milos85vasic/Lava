@@ -10,6 +10,7 @@ Pin 208e2c8 is 53 commits behind origin/main 883ccc1. Highest-impact new clauses
 
 **Status:** Operator-blocked
 **Type:** Bug
+**Operator-Block-Details:** WHAT: RuTracker CI Firebase token rotation WHY: Agent cannot rotate credentials; only the operator can run firebase logout / firebase login:ci UNBLOCK: Operator rotates the Firebase CI token (no token value ever committed, §11.4.10): [A] run "firebase logout" then "firebase login:ci" and write the new token to LAVA_FIREBASE_TOKEN in the gitignored .env (recommended); [B] mint a fresh token via "firebase login:ci --no-localhost" in a clean shell and update LAVA_FIREBASE_TOKEN in .env; [C] rotate via the Firebase console (Project Settings -> Service accounts) and update .env. Unblock signal: a Firebase distribute run authenticates with the new token and the previously-leaked token no longer authenticates. WHO: Operator
 **Severity:** P0
 
 67th-cycle: the LAVA_FIREBASE_TOKEN default-expansion printed the token to the session transcript (NOT committed to git). Operator MUST rotate per §6.H clause 6 (firebase logout; firebase login:ci). **Source:** self-discovered — .lava-ci-evidence/sixth-law-incidents/2026-05-20-firebase-token-echo-leak.json
@@ -27,6 +28,7 @@ Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at activity-des
 
 **Status:** Operator-blocked
 **Type:** Task
+**Operator-Block-Details:** WHAT: github vs gitlab diverged at d2a2151 with unique non-doc go.mod content each; non-FF. No force-push per 6.T.3. Needs operator content-merge decision. WHY: (not enumerated) UNBLOCK: Operator chooses the content-merge resolution (no force-push, §11.4.113 merge-onto-latest-main): [A] keep github go.mod content as canonical, merge gitlab unique commits on top, push the converged SHA to both mirrors; [B] keep gitlab go.mod content as canonical, merge github unique commits on top, push the converged SHA to both mirrors; [C] hand-author the union of both go.mod files, commit the reconciliation, push that common SHA to github + gitlab. Unblock signal: github and gitlab report the same HEAD SHA for llm_orchestrator. WHO: AI
 **Severity:** P2
 
 github/master and gitlab/master diverged at d2a2151 with unique non-doc go.mod content each; LVA-030 commit landed gitlab+working-tree but github refused non-FF. Needs a content-merge decision (operator-gated, NO force-push per §6.T.3).

@@ -59,7 +59,7 @@ class AddRemoteFavoriteUseCaseTest {
             return topicsById[id] ?: error("FakeTopicService has no topic for id=$id")
         }
 
-        override suspend fun getTopicPage(id: String, page: Int?): TopicPage =
+        override suspend fun getTopicPage(id: String, page: Int?, providerId: String?): TopicPage =
             throw UnsupportedOperationException("not used by AddRemoteFavoriteUseCase")
 
         override suspend fun getCommentsPage(id: String, page: Int): Page<Post> =

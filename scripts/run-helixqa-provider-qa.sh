@@ -7,13 +7,15 @@
 #            the `claude` CLI as the LLM/Vision model bridge (BridgedCLIProvider).
 # Usage:     scripts/run-helixqa-provider-qa.sh [--provider <id>|--all]
 #                                               [--serial <adb-serial>]
-#                                               [--autonomous]
-#            --provider <id>   one of: rutracker rutor kinozal nnmclub archiveorg gutenberg
+#                                               [--autonomous] [--matrix]
+#            --provider <id>   one of: rutracker rutor iptorrents kinozal nnmclub archiveorg gutenberg
 #            --all             run every provider bank sequentially
 #            --serial <s>      adb device serial (default: env LAVA_REAL_DEVICE_SERIALS
 #                              or 127.0.0.1:6555 — the Genymotion VM)
 #            --autonomous      use `helixqa autonomous` (doc-driven session) instead
 #                              of `helixqa run --banks` (explicit per-provider bank)
+#            --matrix          resolve banks as lava-<prov>-matrix-journey.yaml instead
+#                              of the default lava-<prov>-journey.yaml
 # Inputs:    submodules/helixqa (the HelixQA Go source), lava-api-go/qa/banks/*.yaml,
 #            the `claude` CLI on PATH (model bridge — no API key needed),
 #            a reachable adb device with the Lava app installed.
@@ -35,9 +37,10 @@ HELIXQA_SRC="$REPO_ROOT/submodules/helixqa"
 BANKS_DIR="$REPO_ROOT/lava-api-go/qa/banks"
 PKG="${LAVA_QA_PACKAGE:-digital.vasic.lava.client.dev}"
 SERIAL="${LAVA_REAL_DEVICE_SERIALS:-127.0.0.1:6555}"
-PROVIDERS=(rutracker rutor kinozal nnmclub archiveorg gutenberg)
+PROVIDERS=(rutracker rutor iptorrents kinozal nnmclub archiveorg gutenberg)
 MODE="run"
 SELECTED=""
+BANK_KIND="journey"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -45,6 +48,7 @@ while [ $# -gt 0 ]; do
     --all)      SELECTED="__all__"; shift ;;
     --serial)   SERIAL="$2"; shift 2 ;;
     --autonomous) MODE="autonomous"; shift ;;
+    --matrix)   BANK_KIND="matrix-journey"; shift ;;
     *) echo "unknown arg: $1" >&2; exit 64 ;;
   esac
 done
@@ -78,7 +82,7 @@ command -v claude >/dev/null 2>&1 \
 
 run_one() {
   prov="$1"
-  bank="$BANKS_DIR/lava-${prov}-journey.yaml"
+  bank="$BANKS_DIR/lava-${prov}-${BANK_KIND}.yaml"
   [ -f "$bank" ] || { echo "SKIP: no bank for $prov ($bank)"; return 0; }
   rid="$(date -u +%Y%m%dT%H%M%SZ 2>/dev/null || echo run)-${prov}"
   out="$REPO_ROOT/.lava-ci-evidence/helixqa/${prov}/${rid}"

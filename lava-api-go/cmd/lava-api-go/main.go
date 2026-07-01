@@ -42,6 +42,7 @@ import (
 	"digital.vasic.lava.apigo/internal/discovery"
 	"digital.vasic.lava.apigo/internal/firebase"
 	"digital.vasic.lava.apigo/internal/gutenberg"
+	"digital.vasic.lava.apigo/internal/httpx"
 	"digital.vasic.lava.apigo/internal/kinozal"
 	"digital.vasic.lava.apigo/internal/nnmclub"
 	"digital.vasic.lava.apigo/internal/observability"
@@ -88,6 +89,15 @@ func run() error {
 	cfg, err := config.Load()
 	if err != nil {
 		return fmt.Errorf("config: %w", err)
+	}
+
+	// Wire the configurable outbound proxy for ALL provider egress BEFORE the
+	// provider clients are constructed (LAVA_API_UPSTREAM_PROXY). Fail-fast on a
+	// malformed value rather than silently falling through to a direct egress
+	// the operator believed was proxied (§6.J). Empty value => httpx falls back
+	// to http.ProxyFromEnvironment (standard *_PROXY env vars).
+	if err := httpx.Configure(cfg.UpstreamProxy); err != nil {
+		return fmt.Errorf("upstream proxy: %w", err)
 	}
 
 	logger := observability.NewLogger(observability.LogConfig{

@@ -1,6 +1,6 @@
 # `scripts/check-cycle-coverage.sh` — User Guide
 
-**Last verified:** 2026-06-26 (§6.AK cycle-coverage gate, against the script at HEAD)
+**Last verified:** 2026-07-01 (re-verified against the committed §6.AK implementation at HEAD — flags/exit-codes/file-formats below match `scripts/check-cycle-coverage.sh`; prior: 2026-06-26 gate landing)
 **Inheritance:** HelixConstitution §11.4.18 (script documentation mandate) · enforces Lava `CLAUDE.md` §6.AK clause 1 (Cycle-Coverage Device Gate)
 
 ## Overview

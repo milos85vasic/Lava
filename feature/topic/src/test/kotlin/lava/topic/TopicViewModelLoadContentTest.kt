@@ -253,7 +253,7 @@ private class LoadContentFakeTopicService(private val topicId: String) : TopicSe
     override suspend fun getTopic(id: String): Topic =
         Torrent(id = id, title = title, author = null, category = null)
 
-    override suspend fun getTopicPage(id: String, page: Int?): TopicPage =
+    override suspend fun getTopicPage(id: String, page: Int?, providerId: String?): TopicPage =
         TopicPage(
             id = id,
             title = title,

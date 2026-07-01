@@ -72,7 +72,7 @@ class GetTopicUseCaseTest {
     private class FakeTopicService(private val pages: Map<String, TopicPage>) : TopicService {
         override suspend fun getTopic(id: String): Topic =
             throw UnsupportedOperationException("not used by GetTopicUseCase")
-        override suspend fun getTopicPage(id: String, page: Int?): TopicPage =
+        override suspend fun getTopicPage(id: String, page: Int?, providerId: String?): TopicPage =
             pages.getValue(id)
         override suspend fun getCommentsPage(id: String, page: Int): Page<Post> =
             throw UnsupportedOperationException("not used by GetTopicUseCase")

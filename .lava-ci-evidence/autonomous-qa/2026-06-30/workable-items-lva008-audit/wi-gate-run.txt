@@ -1,0 +1,3 @@
+===== running the ACTUAL gate: scripts/check-workable-items.sh =====
+scripts/check-workable-items.sh: line 40: constitution/scripts/workable-items/bin/workable-items: cannot execute binary file: Exec format error
+GATE_RC=126

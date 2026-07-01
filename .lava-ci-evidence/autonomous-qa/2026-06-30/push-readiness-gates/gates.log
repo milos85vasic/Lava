@@ -1,0 +1,419 @@
+================================================================
+Push-readiness constitutional gates — 1078 cycle
+HEAD: 613083d10275b7073ea902e5030da4868eabfa10
+HEAD subject: fix(archiveorg): topic-detail FlexStringSerializer + TopicPageSource seam (LVA-070) + 1078 distribute-prep
+Run timestamp (UTC): 2026-06-30T17:25:33Z
+Mode: read-only / hermetic shell gates (NO gradle, NO emulator, NO backend)
+================================================================
+
+----- GATE: scripts/check-constitution.sh -----
+CMD: bash scripts/check-constitution.sh
+  ✓ clause 6.K: submodules/containers/pkg/emulator present + 11 test file(s)
+6.R VIOLATION: hardcoded host:port literals in tracked source:
+lava-api-go/internal/httpx/proxy.go:66:				"(e.g. http://host:8080, https://host:8080, or socks5://host:1080)",
+  → Move to .env (gitignored) or a JSON config file; read via config layer.
+EXIT_CODE: 1
+RESULT: FAIL (exit 1)
+
+----- GATE: scripts/scan-no-hardcoded-ipv4.sh -----
+CMD: bash scripts/scan-no-hardcoded-ipv4.sh
+EXIT_CODE: 0
+RESULT: PASS
+
+----- GATE: scripts/scan-no-hardcoded-hostport.sh -----
+CMD: bash scripts/scan-no-hardcoded-hostport.sh
+6.R VIOLATION: hardcoded host:port literals in tracked source:
+lava-api-go/internal/httpx/proxy.go:66:				"(e.g. http://host:8080, https://host:8080, or socks5://host:1080)",
+  → Move to .env (gitignored) or a JSON config file; read via config layer.
+EXIT_CODE: 1
+RESULT: FAIL (exit 1)
+
+----- GATE: scripts/scan-no-hardcoded-uuid.sh -----
+CMD: bash scripts/scan-no-hardcoded-uuid.sh
+EXIT_CODE: 0
+RESULT: PASS
+
+----- GATE: scripts/check-cycle-coverage.sh (1.3.12-1078) -----
+CMD: bash scripts/check-cycle-coverage.sh --version=1.3.12-1078 --channel=firebase-app-distribution --evidence-dir=.lava-ci-evidence/distribute-changelog/firebase-app-distribution
+FATAL §6.AK.3: evidence not found for 1.3.12-1078
+EXIT_CODE: 2
+RESULT: FAIL (exit 2)
+
+================================================================
+HERMETIC TEST SUITES
+================================================================
+----- HERMETIC TEST: tests/cycle-coverage/test_cycle_coverage.sh -----
+test: CM-CYCLE-COVERAGE falsifiability (§6.AK / spec §5.2)
+  FAIL  [positive_all_covered] exit=2 (expected 0)
+        ---- gate output ----
+        FATAL: unknown --map=/tmp/.private/milosvasic/tmp.EqdHVScx14/map-full.yaml
+  FAIL  [negative_claim_missing_challenge] exit=2 (expected 1)
+        ---- gate output ----
+        FATAL: unknown --map=/tmp/.private/milosvasic/tmp.EqdHVScx14/map-missing.yaml
+  FAIL  [negative_challenge_compiled_not_executed] exit=2 (expected 1)
+        ---- gate output ----
+        FATAL: unknown --map=/tmp/.private/milosvasic/tmp.EqdHVScx14/map-full.yaml
+  FAIL  [negative_stale_evidence] exit=2 (expected 1)
+        ---- gate output ----
+        FATAL: unknown --map=/tmp/.private/milosvasic/tmp.EqdHVScx14/map-full.yaml
+  PASS  [negative_wrong_sha] exit=2 (expected 2)
+  FAIL  [negative_host_direct_runner] exit=2 (expected 1)
+        ---- gate output ----
+        FATAL: unknown --map=/tmp/.private/milosvasic/tmp.EqdHVScx14/map-full.yaml
+  PASS  [negative_missing_evidence_file] exit=2 (expected 2)
+-----------------------------------------------------------
+cases passed: 2   cases failed: 5
+RESULT: FAIL — the gate did not behave per spec §5.2
+EXIT_CODE: 1
+RESULT: FAIL
+
+----- HERMETIC TEST: tests/cycle-coverage/test_wiring_apiapp.sh -----
+test: §6.AK CHECK-10 api-app channel EXTENSION (pre-push push-time gate)
+  FAIL  [apiapp_advance_debug_pass] exit=1 (expected 0) + needle 'Check 10 (api-app) OK'
+        ---- wrapper output ----
+        89abcdef0123456789abcdef0123456789abcdef: §6.AK violation — advances last-version-debug on the api-app channel but the cycle-coverage gate exits 2 (a CHANGELOG claim lacks a covering executed+PASSED device Challenge / evidence missing). Run the missing Challenge(s) or strike the claim before pushing the pointer advance.
+  FAIL  [apiapp_advance_release_pass] exit=1 (expected 0) + needle 'Check 10 (api-app) OK'
+        ---- wrapper output ----
+        89abcdef0123456789abcdef0123456789abcdef: §6.AK violation — advances last-version-release on the api-app channel but the cycle-coverage gate exits 2 (a CHANGELOG claim lacks a covering executed+PASSED device Challenge / evidence missing). Run the missing Challenge(s) or strike the claim before pushing the pointer advance.
+  PASS  [apiapp_advance_debug_fail] exit=1 (expected 1) + matched '§6.AK violation'
+  PASS  [apiapp_advance_release_fail] exit=1 (expected 1) + matched '§6.AK violation'
+  PASS  [apiapp_no_advance] exit=0 (expected 0) + matched 'Check 10 (api-app) OK'
+-----------------------------------------------------------
+cases passed: 3   cases failed: 2
+RESULT: FAIL — the api-app Check 10 extension logic is unsound; do NOT graft as-is
+EXIT_CODE: 1
+RESULT: FAIL
+
+----- HERMETIC TEST: tests/cycle-coverage/test_wiring.sh -----
+test: §6.AK GATE-WIRING contract (firebase-distribute Phase-1 Gate + pre-push Check 10)
+  FAIL  [firebase_coverage_pass] exit=1 (expected 0) + needle '§6.AK gate PASS'
+        ---- wrapper output ----
+            Phase 1 Gate 7 (§6.AK): cycle-coverage — CHANGELOG claims × executed device Challenges
+        FATAL §6.AK.1: map not found /tmp/.private/milosvasic/tmp.vmjJzBDfU1/edir-pass/cycle-coverage-map-9.9.9-9999.yaml
+        FATAL §6.AK: §6.Z evidence or cycle-coverage-map missing/stale/wrong-SHA for 9.9.9-9999.
+  PASS  [firebase_coverage_fail] exit=1 (expected 1) + matched 'FATAL §6.AK'
+  FAIL  [prepush_advance_pass] exit=1 (expected 0) + needle 'Check 10 OK'
+        ---- wrapper output ----
+        0123456789abcdef0123456789abcdef01234567: §6.AK violation — advances last-version-debug but the cycle-coverage gate exits 2 (a CHANGELOG claim lacks a covering executed+PASSED device Challenge / evidence missing). Run the missing Challenge(s) or strike the claim before pushing the pointer advance.
+  PASS  [prepush_advance_fail] exit=1 (expected 1) + matched '§6.AK violation'
+  PASS  [prepush_no_advance] exit=0 (expected 0) + matched 'Check 10 OK'
+-----------------------------------------------------------
+cases passed: 3   cases failed: 2
+RESULT: FAIL — the wiring logic is unsound; do NOT graft as-is
+EXIT_CODE: 1
+RESULT: FAIL
+
+----- HERMETIC TEST: tests/check-constitution/check_constitution_test.sh -----
+FAIL test_live_repo_passes: script failed against live repo
+  ✓ clause 6.K: submodules/containers/pkg/emulator present + 11 test file(s)
+6.R VIOLATION: hardcoded host:port literals in tracked source:
+lava-api-go/internal/httpx/proxy.go:66:				"(e.g. http://host:8080, https://host:8080, or socks5://host:1080)",
+  → Move to .env (gitignored) or a JSON config file; read via config layer.
+EXIT_CODE: 1
+RESULT: FAIL
+
+----- HERMETIC TEST: tests/check-constitution/test_audit_snake_case_references.sh -----
+PASS test_script_executable
+PASS test_runs_cleanly_on_real_tree
+PASS test_reports_all_17_submodules
+PASS test_reports_total_line
+PASS test_format_md
+PASS test_names_only_mode
+PASS test_help_exits_zero
+PASS test_unknown_arg_exits_2
+================================================================
+RE-RUN: push-gating hermetic suites (tests/check-constitution, tests/pre-push)
+  (these two ARE run by scripts/ci.sh in both modes -> gate the push)
+  (tests/cycle-coverage is NOT in ci.sh suite list -> does NOT gate push)
+  Re-run timestamp (UTC): 2026-06-30T17:30:54Z
+================================================================
+----- HERMETIC TEST: tests/check-constitution/check_constitution_test.sh -----
+FAIL test_live_repo_passes: script failed against live repo
+  ✓ clause 6.K: submodules/containers/pkg/emulator present + 11 test file(s)
+6.R VIOLATION: hardcoded host:port literals in tracked source:
+lava-api-go/internal/httpx/proxy.go:66:				"(e.g. http://host:8080, https://host:8080, or socks5://host:1080)",
+  → Move to .env (gitignored) or a JSON config file; read via config layer.
+EXIT_CODE: 1
+RESULT: FAIL
+
+----- HERMETIC TEST: tests/check-constitution/test_audit_snake_case_references.sh -----
+PASS test_unknown_arg_exits_2
+PASS test_deterministic_output
+PASS test_numeric_columns
+FAIL test_blast_radius_ordering_sanity: post-rename CamelCase regression — these names have >2 refs: Concurrency=4 Containers=6
+
+Results: 10 passed, 1 failed
+EXIT_CODE: 1
+RESULT: FAIL
+
+----- HERMETIC TEST: tests/check-constitution/test_canonical_root_and_upstreams.sh -----
+PASS test_missing_root_pointer_rejected
+PASS test_canonical_self_inheritance_rejected
+PASS test_missing_install_upstreams_rejected
+PASS test_advisory_mode_returns_zero
+PASS test_canonical_fenced_code_block_pointer_passes
+all canonical-root + install_upstreams tests passed
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_challenge_coverage.sh -----
+PASS test_uncovered_feature_rejected
+PASS test_covered_via_import_accepted
+PASS test_exempted_via_marker_accepted
+PASS test_advisory_mode_does_not_fail
+all challenge-coverage tests passed
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_clause_6r_inheritance.sh -----
+PASS test_clause_6r_inheritance
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_clause_6r_present_agents.sh -----
+PASS test_clause_6r_present_agents
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_clause_6r_present.sh -----
+PASS test_clause_6r_present
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_commit_docs_exists.sh -----
+PASS test_strikethrough_skipped
+PASS test_backtick_skipped
+PASS test_fuzzy_basename_passes
+PASS test_indented_quoted_output_skipped
+PASS test_real_repo_passes
+All 8 commit-docs-exists gate tests PASSED
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_covenant_114_propagation.sh -----
+FAIL test_removed_anchor_makes_gate_fire: gate did NOT fire as expected
+  rc=1
+  out=  ✓ clause 6.K: submodules/containers/pkg/emulator present + 11 test file(s)
+6.R VIOLATION: hardcoded host:port literals in tracked source:
+lava-api-go/internal/httpx/proxy.go:66:				"(e.g. http://host:8080, https://host:8080, or socks5://host:1080)",
+  → Move to .env (gitignored) or a JSON config file; read via config layer.
+EXIT_CODE: 1
+RESULT: FAIL
+
+----- HERMETIC TEST: tests/check-constitution/test_coverage_ledger.sh -----
+PASS test_missing_ledger_rejected
+PASS test_missing_row_rejected
+PASS test_stale_ledger_rejected
+PASS test_advisory_mode_returns_zero
+PASS test_generator_deterministic
+all coverage-ledger tests passed
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_emulator_runner_tag.sh -----
+PASS test_containers_runner_passes (gate PASSED with containers-submodule runner, exit=0)
+PASS test_equals_form_passes (gate PASSED with runner=containers-submodule, exit=0)
+PASS test_non_emulator_file_passes (no markers → not flagged, exit=0)
+PASS test_advisory_mode_passes (advisory mode → exit=0 despite missing tag)
+PASS test_real_tree_passes (real tree exit=0)
+all emulator-runner-tag tests passed
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_gitignore_coverage.sh -----
+PASS test_real_tree_passes
+PASS test_module_without_gitignore_rejected
+PASS test_clean_fixture_passes
+all gitignore-coverage tests passed
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_helix_deps_manifest.sh -----
+PASS test_missing_parent_manifest_rejected
+PASS test_missing_submodule_manifest_rejected
+PASS test_wrong_schema_version_rejected
+PASS test_advisory_mode_returns_zero
+PASS test_json_variant_accepted
+all helix-deps-manifest tests passed
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_helixqa_wiring.sh -----
+SKIP test_require_toolchain_go_fails_fast_when_go_absent: 'go' present in /bin or /usr/bin; cannot exercise missing-toolchain path on this host
+SKIP test_require_toolchain_none_skips_go_scripts_when_go_absent: 'go' present in /bin or /usr/bin; cannot exercise toolchain-absent SKIP path on this host
+PASS test_evidence_dir_env_var_override
+PASS test_invalid_runner_rejected
+PASS test_invalid_require_toolchain_rejected
+all helixqa-wiring tests passed
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_nested_own_org_submodules.sh -----
+PASS test_clean_fixture_passes
+PASS test_vasic_digital_chain_rejected
+PASS test_helix_dev_gitlab_chain_rejected
+PASS test_advisory_mode_returns_zero
+all nested-own-org-submodule tests passed
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_no_guessing_vocabulary.sh -----
+PASS test_unconfirmed_whitelist_passes
+PASS test_pending_forensics_whitelist_passes
+PASS test_verbatim_quote_exemption_passes
+PASS test_multiple_scan_paths
+PASS test_real_repo_passes
+All 7 no-guessing-vocabulary gate tests PASSED
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_no_hardcoded_hostport.sh -----
+PASS test_kdoc_literal_passes
+PASS test_shell_comment_literal_passes
+PASS test_real_code_literal_caught
+PASS test_real_literal_with_trailing_comment_caught
+PASS test_container_host_alias_exempt
+PASS test_db_file_exempt
+EXIT_CODE: 1
+RESULT: FAIL
+
+----- HERMETIC TEST: tests/check-constitution/test_no_hardcoded_ipv4.sh -----
+PASS test_json_config_exempt
+PASS test_db_file_exempt
+PASS test_emulator_slirp_exempt
+PASS test_slirp_literal_elsewhere_flagged
+PASS test_routable_ip_in_emulator_helper_flagged
+ALL PASS test_no_hardcoded_ipv4
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_no_hardcoded_uuid.sh -----
+PASS test_real_uuid_flagged
+PASS test_nil_uuid_exempt
+PASS test_test_source_uuid_exempt
+PASS test_db_file_exempt
+PASS test_device_evidence_tsv_exempt
+ALL PASS test_no_hardcoded_uuid
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_no_removelast_seqcoll.sh -----
+PASS test_unsafe_accessors_fail
+PASS test_test_sources_exempt
+PASS test_optout_suppresses
+PASS test_comment_only_mention_passes
+PASS test_real_call_with_trailing_comment_fails
+PASS test_no_removelast_seqcoll (all 7 cases)
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_script_docs_sync.sh -----
+PASS test_orphan_doc_rejected
+PASS test_both_orphan_types_rejected
+PASS test_empty_scaffold_passes
+PASS test_missing_directories_skip
+PASS test_real_repo_passes
+All 7 script-docs-sync gate tests PASSED
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_subagent_delegation_audit.sh -----
+PASS test_post_cutoff_with_audit_passes
+PASS test_gate_name_self_reference_not_triggered
+PASS test_worktree_agent_branch_triggers
+PASS test_backtick_trigger_skipped
+PASS test_real_repo_passes
+All 8 subagent-delegation-audit gate tests PASSED
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_verify_all_rules.sh -----
+
+EXIT_CODE: 124
+RESULT: FAIL
+
+================================================================
+RE-RUN: tests/pre-push suite + verify-all-rules(long timeout) + snake_case parent-commit check
+  timestamp (UTC): 2026-06-30T17:35:44Z
+================================================================
+----- HERMETIC TEST: tests/pre-push/check4_test.sh (timeout 110s) -----
+PASS test_no_stamp_rejected
+PASS test_stamp_unrelated_file_rejected
+PASS test_stamp_matches_diff_accepted
+PASS test_non_gate_file_skipped
+all check4 tests passed
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/pre-push/check5_test.sh (timeout 110s) -----
+PASS test_attestation_no_rehearsal_rejected
+PASS test_attestation_with_embedded_rehearsal_accepted
+PASS test_attestation_with_companion_file_accepted
+PASS test_attestation_with_commit_bluffaudit_accepted
+all check5 tests passed
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/pre-push/check6_test.sh (timeout 110s) -----
+PASS test_no_bump_after_distribute_rejected
+PASS test_bump_first_accepted
+PASS test_constitutional_plumbing_only_opt_out_accepted
+PASS test_doc_only_skipped
+all check6 tests passed
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/pre-push/check7_test.sh (timeout 110s) -----
+PASS test_pointer_advance_without_evidence_rejected
+PASS test_pointer_advance_with_evidence_accepted
+PASS test_pointer_touch_without_value_change_skipped
+all check7 tests passed
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/pre-push/check8_test.sh (timeout 110s) -----
+PASS test_new_clause_without_classification_rejected
+PASS test_new_clause_with_classification_accepted
+PASS test_doc_only_skipped
+all check8 tests passed
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/pre-push/check9_test.sh (timeout 110s) -----
+PASS test_script_change_without_doc_update_rejected
+PASS test_script_change_with_doc_update_accepted
+PASS test_script_without_existing_doc_skipped
+all check9 tests passed
+EXIT_CODE: 0
+RESULT: PASS
+
+----- HERMETIC TEST: tests/check-constitution/test_verify_all_rules.sh (timeout 480s) -----
+FAIL test_clean_tree_passes: expected exit 0 on clean tree, got 1
+EXIT_CODE: 1
+RESULT: FAIL
+
+snake_case test on parent ccdd84c1b2267c968b48f95202fba1e4a2d4dde3 -> exit 0 (PASS)
+
+================================================================
+SUMMARY — push-readiness gates for 613083d1
+  generated (UTC): 2026-06-30T17:44:02Z
+================================================================
+MAIN GATES:
+  check-constitution.sh            -> 1 -> FAIL (delegates to hostport scanner; proxy.go:66)
+  scan-no-hardcoded-ipv4.sh        -> 0 -> PASS
+  scan-no-hardcoded-hostport.sh    -> 1 -> FAIL (proxy.go:66 host:8080 example string)
+  scan-no-hardcoded-uuid.sh        -> 0 -> PASS
+  check-cycle-coverage.sh 1.3.12-1078 -> 2 -> FAIL (no 1078 test-evidence; NOT a push gate for this commit)
+
+HERMETIC tests/pre-push: 6/6 PASS (check4..check9)
+HERMETIC tests/check-constitution: 18/23 PASS; FAILs:
+  check_constitution_test.sh         (live-repo) <- proxy.go:66
+  test_no_hardcoded_hostport.sh      (live-tree; 6 fixtures PASS) <- proxy.go:66
+  test_covenant_114_propagation.sh   (entangled: check-constitution short-circuits on proxy.go:66)
+  test_verify_all_rules.sh           (clean-tree assertion; sweep runs check-constitution+hostport) <- proxy.go:66
+  test_audit_snake_case_references.sh (CamelCase Concurrency=4/Containers=6 — PRE-EXISTING on parent ccdd84c1; snake_case debt)
+HERMETIC tests/cycle-coverage: 0/3 PASS — committed check-cycle-coverage.sh rejects --map/--head
+  that its tests AND pre-push hook pass it (§6.AK-debt contract mismatch); NOT in ci.sh suite list.
+
+ROOT CAUSE (commit-introduced): lava-api-go/internal/httpx/proxy.go:66 — §6.R host:port literal in NEW file.
+VERDICT: NOT push-ready. pre-push -> ci.sh --changed-only -> ci.sh:126 check-constitution.sh exits 1 -> push REJECTED.

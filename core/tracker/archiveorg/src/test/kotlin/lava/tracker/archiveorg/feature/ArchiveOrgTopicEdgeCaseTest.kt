@@ -85,4 +85,48 @@ class ArchiveOrgTopicEdgeCaseTest {
         assertEquals(1, result.files.size)
         assertEquals(42L, result.files[0].sizeBytes)
     }
+
+    // LVA-070 regression — archive.org returns title/creator/date/description as
+    // a JSON ARRAY for multi-author / multi-volume / multi-date items. Before
+    // [FlexStringSerializer], a single array-valued field threw
+    // JsonDecodingException for the WHOLE /metadata response, so getTopic()
+    // threw, LavaTrackerSdk.getTopicPage returned null, and the topic-detail
+    // screen rendered its "Something went wrong, please try again" error state.
+    // These tests pin the user-visible outcome: the page decodes and the
+    // multi-value fields are flattened (joined with ", "). They are falsifiable
+    // by reverting the @Serializable(with = FlexStringSerializer::class)
+    // annotations on MetadataDto — getTopic then throws and the asserts never run.
+
+    @Test
+    fun `array-valued metadata fields are flattened instead of failing the whole topic decode`() = runBlocking {
+        val json = """
+            {"metadata":{
+                "title":["The Pickwick Papers","Volume 1"],
+                "creator":["Charles Dickens","John Forster"],
+                "date":["1836","1837"],
+                "description":["First serialised instalment.","Public domain scan."],
+                "mediatype":"texts"
+            }}
+        """.trimIndent()
+        server.enqueue(MockResponse().setBody(json).setResponseCode(200))
+
+        val result = feature().getTopic("pickwick")
+
+        assertEquals("The Pickwick Papers, Volume 1", result.torrent.title)
+        assertEquals("Charles Dickens, John Forster", result.torrent.metadata["creator"])
+        assertEquals("1836, 1837", result.torrent.metadata["date"])
+        assertEquals("First serialised instalment., Public domain scan.", result.description)
+        assertEquals("texts", result.torrent.metadata["mediatype"])
+    }
+
+    @Test
+    fun `single-element array metadata flattens to the bare value`() = runBlocking {
+        val json = """{"metadata":{"title":["Solo Title"],"creator":["Only Author"]}}"""
+        server.enqueue(MockResponse().setBody(json).setResponseCode(200))
+
+        val result = feature().getTopic("solo")
+
+        assertEquals("Solo Title", result.torrent.title)
+        assertEquals("Only Author", result.torrent.metadata["creator"])
+    }
 }

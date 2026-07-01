@@ -1,6 +1,6 @@
 {
   "any_panicked": false,
-  "captured_at": "2026-06-24T08:35:04Z",
+  "captured_at": "2026-06-30T14:50:05Z",
   "outcomes": [
     {
       "category": "malformed_xml",
@@ -43,7 +43,7 @@
       "injected_fault": "upstream sleeps beyond client Timeout",
       "surface": "jackett.Client.Search",
       "got_error": true,
-      "error_text": "jackett: search request: Get \"http://127.0.0.1:56211/api/v2.0/indexers/all/results/torznab/api?apikey=k\u0026q=x\u0026t=search\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
+      "error_text": "jackett: search request: Get \"http://127.0.0.1:33105/api/v2.0/indexers/all/results/torznab/api?apikey=k\u0026q=x\u0026t=search\": context deadline exceeded (Client.Timeout exceeded while awaiting headers)",
       "panicked": false,
       "degraded_as": "typed-error"
     },

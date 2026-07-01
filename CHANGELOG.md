@@ -1,5 +1,19 @@
 # Changelog
 
+## Lava-Android-1.3.12-1078 — 2026-06-30 (dev cycle, NOT YET DISTRIBUTED — §6.Y bump-first)
+
+**Previous published:** Lava-Android-1.3.12-1077.
+
+1078 is the **§6.Y bump-first version code** for the autonomous-QA dev cycle. It has **NOT been distributed** — this entry is the §6.Y/§6.P stub recording the new releasable identity; it will be filled out with the executed §6.Z device evidence (per §6.AK cycle-coverage) before any distribute.
+
+- **Autonomous-QA harness (no user-facing app change).** New `scripts/autonomous-qa/` orchestrator (subsets/emulator/backend libs, `run-iteration`, `run-matrix`, marker-based anti-bluff verdict), 5 HelixQA matrix banks + `run-helixqa-provider-qa.sh --matrix`, and `Challenge70AutonomousQaProviderMatrixTest` (parameterized onboard→search→details→download). Real API-level search→download proven (ThePirateBay 1080p→100, Nyaa mp3→75 with magnets); on-device E2E is harness-checkpointed (see DEEP-FIX-STATUS / the 2026-06-30 sixth-law incident).
+- **Off-main navigation guard (production NO-OP).** `core/navigation` `NavigationController` now marshals `navHostController.navigate(...)` / `navigateUp()` onto the main looper, enforcing NavHostController's documented main-thread contract. On the production happy path this runs inline (no behavior change); it only diverges under the Compose UI test harness. Forensic: `.lava-ci-evidence/sixth-law-incidents/2026-06-30-keystone-offmain-nav-and-lva008.json`.
+- **§6.Y:** versionCode 1077→1078 (bump-first); versionName HELD 1.3.12 (QA-harness + test + docs only; the nav guard is a proven production no-op).
+
+**Known open:** LVA-008 nav-teardown crash remains an upstream androidx-navigation defect (test-harness teardown only). On-device search→detail→download clean-proof is gated on provider/upstream egress reachability from the QA host (honest finding — not a pipeline defect).
+
+**Channel:** firebase-app-distribution (debug `.client.dev` + release `.client`) — pending §6.Z gate + §6.AA two-stage distribute.
+
 ## Lava-Android-1.3.12-1077 — 2026-06-26 (post-1076 cleanup: C66 device-fix, test LVA-008 resilience, Genymotion full-suite gate)
 
 **Previous published:** Lava-Android-1.3.12-1076.

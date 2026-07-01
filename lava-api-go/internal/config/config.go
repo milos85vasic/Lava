@@ -62,6 +62,19 @@ type Config struct {
 	// rutracker upstream
 	RutrackerBaseURL string
 
+	// UpstreamProxy is an optional outbound proxy URL for ALL provider/upstream
+	// HTTP egress (rutracker, kinozal, nnmclub, archiveorg, gutenberg, jackett,
+	// and the curated public-tracker clients). The Lava service runs from a
+	// fixed egress IP; some Russian trackers are blocked at a datacenter egress
+	// (DNS/TLS interception at the network layer). Setting this routes provider
+	// requests through a residential / VPN / SOCKS egress to bypass the block.
+	//
+	// Schemes: http://, https://, socks5:// (net/http dials socks5 natively).
+	// Env: LAVA_API_UPSTREAM_PROXY (§6.R — no hardcoded address). When empty,
+	// internal/httpx falls back to http.ProxyFromEnvironment so the standard
+	// HTTP_PROXY / HTTPS_PROXY / ALL_PROXY / NO_PROXY variables still apply.
+	UpstreamProxy string
+
 	// SearchTimeout bounds the server-side single-provider /v1/{provider}/search
 	// upstream call (LVA-083 H2 / §6.Z). It MUST stay strictly shorter than the
 	// Android client's OkHttp readTimeout (30s) so the response always arrives
@@ -91,6 +104,14 @@ type Config struct {
 	// JackettAPIKey is the Jackett api_key (§6.H secret — server-side only,
 	// never shipped to the device).
 	JackettAPIKey string
+	// JackettAdminPassword is the Jackett dashboard admin password (§6.H secret —
+	// server-side only). Empty by default (an unprotected Jackett needs no
+	// password). When the operator has protected the Jackett dashboard, the
+	// MANAGEMENT API (configured-indexers enumeration, indexer /config) answers
+	// apikey-only requests with an HTTP 302 → /UI/Login; the client uses this
+	// password to establish a dashboard session cookie. Torznab feeds
+	// (results/caps) authenticate by apikey alone and never need this.
+	JackettAdminPassword string
 	// JackettDefaultIndexer is the indexer id used when a request omits the
 	// `indexer` query parameter (defaults to "all" = every configured indexer).
 	JackettDefaultIndexer string
@@ -142,6 +163,11 @@ func Load() (*Config, error) {
 		// where path starts with `/`.
 		RutrackerBaseURL: envDefault("LAVA_API_RUTRACKER_URL", "https://rutracker.org/forum"),
 
+		// Optional outbound proxy for all provider egress (§6.R — env only, no
+		// default address). Empty => http.ProxyFromEnvironment fallback in
+		// internal/httpx. Validated + applied by the caller via httpx.Configure.
+		UpstreamProxy: os.Getenv("LAVA_API_UPSTREAM_PROXY"),
+
 		// SearchTimeout default 18s < client 30s OkHttp readTimeout (LVA-083 H2).
 		SearchTimeout: envDuration("LAVA_API_SEARCH_TIMEOUT", 18*time.Second),
 
@@ -153,6 +179,7 @@ func Load() (*Config, error) {
 		JackettEnabled:        envBool("LAVA_API_JACKETT_ENABLED", false),
 		JackettBaseURL:        os.Getenv("LAVA_API_JACKETT_URL"),
 		JackettAPIKey:         os.Getenv("LAVA_API_JACKETT_APIKEY"),
+		JackettAdminPassword:  os.Getenv("LAVA_API_JACKETT_ADMIN_PASSWORD"),
 		JackettDefaultIndexer: envDefault("LAVA_API_JACKETT_DEFAULT_INDEXER", "all"),
 	}
 

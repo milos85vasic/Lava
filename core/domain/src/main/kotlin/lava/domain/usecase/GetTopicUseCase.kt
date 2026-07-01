@@ -13,7 +13,10 @@ class GetTopicUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(id: String, providerId: String? = null): TopicPage {
         return withContext(dispatchers.default) {
-            topicService.getTopicPage(id).also {
+            // LVA-070 — thread the source provider into the FETCH (not just the
+            // visited record) so an archiveorg/gutenberg topic resolves against
+            // its own provider client instead of the legacy proxy endpoint.
+            topicService.getTopicPage(id, providerId = providerId).also {
                 // LVA-070 — thread the source provider into the visited record so
                 // an archiveorg/gutenberg topic opened from search persists its
                 // provider and later routes to HTTP_DOWNLOAD on the topic screen.

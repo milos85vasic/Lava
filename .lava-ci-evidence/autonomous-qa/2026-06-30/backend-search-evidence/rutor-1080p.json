@@ -1,0 +1,73 @@
+{
+  "capturedAtUTC": "2026-06-29T22:28:27Z",
+  "commitSHA": "899ad47b8ad4092c9eb0aa579418492366a69b05",
+  "backend": "lava-api-go (Go) via ./start.sh, podman compose profile=api-go",
+  "endpoint_base": "https://127.0.0.1:8443",
+  "auth": {
+    "clientAuthHeader": "Lava-Auth",
+    "scheme": "base64(16-byte client UUID); server verifies hex(HMAC-SHA256(uuid, LAVA_AUTH_HMAC_SECRET)) against LAVA_AUTH_ACTIVE_CLIENTS",
+    "headerValueRedacted": true,
+    "note": "A valid Lava-Auth header WAS used (proven: bad header -> HTTP 401; this request -> HTTP 404 from the route handler, i.e. it passed the auth middleware)."
+  },
+  "trackerCredsInEnv": {
+    "RUTOR_USERNAME": "present-in-.env-REDACTED",
+    "RUTOR_PASSWORD": "present-in-.env-REDACTED",
+    "note": "These are NOT consumed by any Go provider — lava-api-go has no rutor provider that reads them."
+  },
+  "query": "1080p",
+  "request": {
+    "method": "GET",
+    "url": "https://127.0.0.1:8443/v1/rutor/search?query=1080p",
+    "headers": [
+      "Lava-Auth: <redacted-valid>"
+    ]
+  },
+  "result": {
+    "httpStatus": 404,
+    "responseBodyVerbatim": "{\"error\":\"unknown_provider\",\"message\":\"provider \\\"rutor\\\" not found\"}",
+    "outcome": "REAL FAILURE — rutor is NOT a registered provider in the running Go backend.",
+    "realDownloadLinkReturned": false
+  },
+  "providerCatalogueLive": {
+    "source": "GET /providers (public)",
+    "ids": [
+      "yts",
+      "torrentscsv",
+      "bitsearch",
+      "knaben",
+      "torrentdownloads",
+      "tokyotosho",
+      "rutracker",
+      "nnmclub",
+      "gutenberg",
+      "thepiratebay",
+      "nyaa",
+      "kinozal",
+      "archiveorg"
+    ],
+    "rutorPresent": false
+  },
+  "controlProof": {
+    "purpose": "Falsifiability — same authed request shape against a REGISTERED provider returns real results+download links, proving the rutor 404 is 'provider not wired', not a broken request/auth.",
+    "thepiratebay": {
+      "provider": "thepiratebay",
+      "httpStatus": 200,
+      "resultCount": 100,
+      "totalPages": 1,
+      "exampleResults": [
+        {
+          "title": "House of the Dragon S03E02 1080p HEVC x265-MeGusta",
+          "downloadResourceType": "magnet",
+          "magnetLink": "magnet:?xt=urn:btih:e7bbfe0b4bf5b326cc64554950077c016fd725d7&dn=House+of+the+Dragon+S03E02+1080p+HEVC+x265-MeGusta&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Fopen.tracker.cl%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce",
+          "infoHash": "e7bbfe0b4bf5b326cc64554950077c016fd725d7"
+        },
+        {
+          "title": "Masters of the Universe (2026) [1080p] [WEBRip]",
+          "downloadResourceType": "magnet",
+          "magnetLink": "magnet:?xt=urn:btih:81c00c06ab6673aad5ea61455d8e6b0d41646d71&dn=Masters+of+the+Universe+%282026%29+%5B1080p%5D+%5BWEBRip%5D&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Fopen.tracker.cl%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce",
+          "infoHash": "81c00c06ab6673aad5ea61455d8e6b0d41646d71"
+        }
+      ]
+    }
+  }
+}

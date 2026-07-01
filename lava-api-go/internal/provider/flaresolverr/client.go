@@ -20,6 +20,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"digital.vasic.lava.apigo/internal/httpx"
 )
 
 // DefaultMaxTimeout is the per-request solve budget handed to FlareSolverr (ms).
@@ -63,7 +65,9 @@ type Client struct {
 func NewClient(baseURL string) *Client {
 	return &Client{
 		baseURL: strings.TrimRight(baseURL, "/"),
-		http:    &http.Client{Timeout: DefaultTimeout},
+		// Transport carries the configurable outbound proxy (loopback-exempt,
+		// so a localhost FlareSolverr sidecar is reached directly) — internal/httpx.
+		http: &http.Client{Timeout: DefaultTimeout, Transport: httpx.NewTransport()},
 	}
 }
 

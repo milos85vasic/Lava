@@ -24,16 +24,52 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 MODULE_DIR="constitution/scripts/workable-items"
-WI_BIN="$MODULE_DIR/bin/workable-items"
 # Paths are overridable for hermetic testing (e.g. to point the §11.4.95
 # DB-tracked assertion at an untracked fixture DB). Defaults are the real tree.
 DB="${LAVA_WORKABLE_ITEMS_DB:-docs/workable_items.db}"
 ISSUES="${LAVA_WORKABLE_ITEMS_ISSUES:-docs/Issues.md}"
 FIXED="${LAVA_WORKABLE_ITEMS_FIXED:-docs/Fixed.md}"
 
-# Build the canonical binary if absent (must cd into the module dir; no root go.mod).
-if [[ ! -x "$WI_BIN" ]]; then
-  ( cd "$MODULE_DIR" && CGO_ENABLED=1 go build -o bin/workable-items ./cmd/workable-items )
+# §11.4.81 cross-platform parity: select a HOST-ARCH-correct workable-items
+# binary. The module commits a macOS arm64 Mach-O (bin/workable-items) AND a
+# Linux x86_64 ELF (bin/workable-items-linux) side by side; BOTH are kept (never
+# deleted) so this gate is runnable on macOS arm64 AND Linux x86_64. A macOS
+# Mach-O is still +x on Linux, so the old `[[ ! -x "$WI_BIN" ]]` guard never
+# fired and the gate died with "Exec format error". We pick the per-OS binary
+# AND prove it actually executes on THIS host (a uname-correct name is necessary,
+# not sufficient), rebuilding from canonical source only when no committed binary
+# runs here.
+BIN_DIR="$MODULE_DIR/bin"
+_os="$(uname -s)"
+_arch="$(uname -m)"
+case "$_os" in
+  Linux)  WI_CANDIDATES=("$BIN_DIR/workable-items-linux" "$BIN_DIR/workable-items-linux-$_arch") ;;
+  Darwin) WI_CANDIDATES=("$BIN_DIR/workable-items" "$BIN_DIR/workable-items-darwin-$_arch") ;;
+  *)      WI_CANDIDATES=("$BIN_DIR/workable-items-$_os-$_arch") ;;
+esac
+
+# A binary "runs here" iff it is executable AND does not fail with an
+# Exec-format error (`--help` exits 0 on the host arch, 126 otherwise).
+_wi_runs() { [[ -x "$1" ]] && "$1" --help >/dev/null 2>&1; }
+
+WI_BIN=""
+for _cand in "${WI_CANDIDATES[@]}"; do
+  if _wi_runs "$_cand"; then WI_BIN="$_cand"; break; fi
+done
+
+# No committed binary runs on this host → rebuild from canonical source into a
+# host-arch-tagged path (leaves the committed macOS + Linux binaries untouched).
+# go-sqlite3 is a cgo driver, so CGO_ENABLED=1 + a C toolchain are required;
+# resource-bounded per §11.4.82 / §12.6 (GOMAXPROCS=2, nice -n 18).
+if [[ -z "$WI_BIN" ]]; then
+  _built_name="workable-items-$(printf '%s' "$_os" | tr '[:upper:]' '[:lower:]')-$_arch"
+  ( cd "$MODULE_DIR" && GOMAXPROCS=2 nice -n 18 \
+      env CGO_ENABLED=1 go build -o "bin/$_built_name" ./cmd/workable-items )
+  if ! _wi_runs "$BIN_DIR/$_built_name"; then
+    echo "CM-WORKABLE-ITEMS-SYNC: no host-runnable workable-items binary for $_os/$_arch and rebuild failed" >&2
+    exit 1
+  fi
+  WI_BIN="$BIN_DIR/$_built_name"
 fi
 
 # 1. Validate DB invariants (closed sets + §11.4.91 floor).

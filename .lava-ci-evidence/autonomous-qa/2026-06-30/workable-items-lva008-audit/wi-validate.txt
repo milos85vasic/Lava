@@ -1,0 +1,5 @@
+===== validate =====
+validate: 2 violation(s):
+  - LVA-036: Operator-blocked unblock_condition has no enumerated unblock CHOICES (§11.4.148 D3): "(not specified)"
+  - LVA-5: Operator-blocked unblock_condition has no enumerated unblock CHOICES (§11.4.148 D3): "Operator runs firebase logout then firebase login:ci and updates LAVA_FIREBASE_TOKEN in gitignored .env"
+VALIDATE_RC=1

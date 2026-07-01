@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest" tests="1" failures="0" errors="0" skipped="0" time="39.425" timestamp="2026-06-30T17:48:00" hostname="localhost">
+  <properties>
+    <property name="device" value="sdk_gphone64_x86_64 - 14" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="autonomousMatrix_onboard_search_topic_download" classname="lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest" time="38.473" />
+</testsuite>

@@ -53,7 +53,7 @@ class ProviderIdThreadingUseCaseTest {
         override suspend fun getTopic(id: String): Topic =
             BaseTopic(id = id, title = "Archive item $id", author = null, category = null)
 
-        override suspend fun getTopicPage(id: String, page: Int?): TopicPage = TopicPage(
+        override suspend fun getTopicPage(id: String, page: Int?, providerId: String?): TopicPage = TopicPage(
             id = id,
             title = "Archive item $id",
             author = null,

@@ -1,0 +1,93 @@
+{
+  "capturedAtUTC": "2026-06-29T22:28:27Z",
+  "commitSHA": "899ad47b8ad4092c9eb0aa579418492366a69b05",
+  "backend": "lava-api-go (Go) via ./start.sh, podman compose profile=api-go",
+  "endpoint_base": "https://127.0.0.1:8443",
+  "auth": {
+    "clientAuthHeader": "Lava-Auth",
+    "scheme": "base64(16-byte client UUID); server verifies hex(HMAC-SHA256(uuid, LAVA_AUTH_HMAC_SECRET)) against LAVA_AUTH_ACTIVE_CLIENTS",
+    "headerValueRedacted": true,
+    "note": "A valid Lava-Auth header WAS used (proven: bad header -> HTTP 401; this request -> HTTP 404 from the route handler, i.e. it passed the auth middleware)."
+  },
+  "trackerCredsInEnv": {
+    "RUTOR_USERNAME": "present-in-.env-REDACTED",
+    "RUTOR_PASSWORD": "present-in-.env-REDACTED",
+    "note": "These are NOT consumed by any Go provider — lava-api-go has no rutor provider that reads them."
+  },
+  "query": "mp3",
+  "request": {
+    "method": "GET",
+    "url": "https://127.0.0.1:8443/v1/rutor/search?query=mp3",
+    "headers": [
+      "Lava-Auth: <redacted-valid>"
+    ]
+  },
+  "result": {
+    "httpStatus": 404,
+    "responseBodyVerbatim": "{\"error\":\"unknown_provider\",\"message\":\"provider \\\"rutor\\\" not found\"}",
+    "outcome": "REAL FAILURE — rutor is NOT a registered provider in the running Go backend.",
+    "realDownloadLinkReturned": false
+  },
+  "providerCatalogueLive": {
+    "source": "GET /providers (public)",
+    "ids": [
+      "yts",
+      "torrentscsv",
+      "bitsearch",
+      "knaben",
+      "torrentdownloads",
+      "tokyotosho",
+      "rutracker",
+      "nnmclub",
+      "gutenberg",
+      "thepiratebay",
+      "nyaa",
+      "kinozal",
+      "archiveorg"
+    ],
+    "rutorPresent": false
+  },
+  "controlProof": {
+    "purpose": "Falsifiability — same authed request shape against a REGISTERED provider returns real results+download links, proving the rutor 404 is 'provider not wired', not a broken request/auth.",
+    "thepiratebay": {
+      "provider": "thepiratebay",
+      "httpStatus": 200,
+      "resultCount": 100,
+      "totalPages": 1,
+      "exampleResults": [
+        {
+          "title": "Various Artists - 00s Hits - 100 Top Songs (2025) Mp3 320kbps [PMEDIA] ⭐️",
+          "downloadResourceType": "magnet",
+          "magnetLink": "magnet:?xt=urn:btih:024312de6717fb0add5fa3139a6ab916da941057&dn=Various+Artists+-+00s+Hits+-+100+Top+Songs+%282025%29+Mp3+320kbps+%5BPMEDIA%5D+%E2%AD%90%EF%B8%8F&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Fopen.tracker.cl%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce",
+          "infoHash": "024312de6717fb0add5fa3139a6ab916da941057"
+        },
+        {
+          "title": "Harry Potter Audio Books 1-7; Read by Stephen Fry [MP3]",
+          "downloadResourceType": "magnet",
+          "magnetLink": "magnet:?xt=urn:btih:66132602c1981e3e77489086f8af35b903d0643c&dn=Harry+Potter+Audio+Books+1-7%3B+Read+by+Stephen+Fry+%5BMP3%5D&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Fopen.tracker.cl%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce",
+          "infoHash": "66132602c1981e3e77489086f8af35b903d0643c"
+        }
+      ]
+    },
+    "nyaa": {
+      "provider": "nyaa",
+      "httpStatus": 200,
+      "resultCount": 75,
+      "totalPages": 1,
+      "exampleResults": [
+        {
+          "title": "Mezzo DSA - DVDRIP - VOSTFR - Xvid MP3 - DragonMax",
+          "downloadResourceType": "magnet",
+          "magnetLink": "magnet:?xt=urn:btih:1e205842b5696779f42f27621d9f5135560a650e&dn=Mezzo+DSA+-+DVDRIP+-+VOSTFR+-+Xvid+MP3+-+DragonMax&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Fopen.tracker.cl%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce",
+          "infoHash": "1e205842b5696779f42f27621d9f5135560a650e"
+        },
+        {
+          "title": "Disney Twisted-Wonderland Original Soundtrack [mp3]",
+          "downloadResourceType": "magnet",
+          "magnetLink": "magnet:?xt=urn:btih:edbc2ce6ae388b0a368b08f83709b4e4823f251f&dn=Disney+Twisted-Wonderland+Original+Soundtrack+%5Bmp3%5D&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Fopen.tracker.cl%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce",
+          "infoHash": "edbc2ce6ae388b0a368b08f83709b4e4823f251f"
+        }
+      ]
+    }
+  }
+}

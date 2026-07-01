@@ -20,6 +20,7 @@ import (
 	"strings"
 	"time"
 
+	"digital.vasic.lava.apigo/internal/httpx"
 	"digital.vasic.lava.apigo/internal/provider"
 )
 
@@ -110,7 +111,7 @@ func NewClientWithMirrors(urls []string) *Client {
 	}
 	return &Client{
 		baseURLs: bases,
-		http:     &http.Client{Timeout: DefaultTimeout},
+		http:     &http.Client{Timeout: DefaultTimeout, Transport: httpx.NewTransport()},
 	}
 }
 

@@ -1,6 +1,8 @@
 package lava.navigation
 
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -29,6 +31,55 @@ interface NestedNavigationController : NavigationController {
     val canPopBackFlow: Flow<Boolean>
 }
 
+/**
+ * Honors [NavHostController]'s documented main-thread contract.
+ *
+ * `navController.navigate(...)` walks the back stack and calls
+ * `LifecycleRegistry.setCurrentState`, which throws
+ * `IllegalStateException: Method setCurrentState must be called on the main
+ * thread` when invoked off the main thread. On the production happy path this
+ * is already satisfied: navigation is driven either from
+ * `collectSideEffect` (collected inside the composition, on
+ * `AndroidUiDispatcher.Main`) or from Compose event handlers (also Main), so
+ * [block] runs inline and this is a no-op. The branch only diverges under the
+ * Compose UI test harness, whose `FrameDeferringContinuationInterceptor` can
+ * resume the `collectSideEffect` continuation off the device main thread —
+ * there the navigation is marshaled onto the main looper instead of crashing.
+ * This enforces a contract; it does not mask a production defect.
+ */
+private inline fun runOnMainThread(crossinline block: () -> Unit) {
+    if (Looper.myLooper() == Looper.getMainLooper()) {
+        block()
+    } else {
+        Handler(Looper.getMainLooper()).post { block() }
+    }
+}
+
+/**
+ * Result-returning sibling of [runOnMainThread]. `popBackStack()` calls
+ * `navHostController.navigateUp()`, which (like `navigate()`) drives
+ * `LifecycleRegistry.setCurrentState` and so MUST run on the main thread — but
+ * unlike `navigate()` its Boolean "was-handled" result is consumed by the caller
+ * (e.g. system-back handling), so a fire-and-forget post will not do. On the main
+ * thread it runs inline (the production happy path — no-op). Off the main thread
+ * (the Compose UI test harness path documented on [runOnMainThread]) it marshals
+ * the block onto the main looper and blocks for the result; no deadlock arises
+ * because the main thread never waits on the calling (background) thread.
+ */
+private inline fun <T> runOnMainThreadResult(crossinline block: () -> T): T {
+    if (Looper.myLooper() == Looper.getMainLooper()) {
+        return block()
+    }
+    val latch = java.util.concurrent.CountDownLatch(1)
+    var result: Result<T>? = null
+    Handler(Looper.getMainLooper()).post {
+        result = runCatching { block() }
+        latch.countDown()
+    }
+    latch.await()
+    return result!!.getOrThrow()
+}
+
 private open class NavigationControllerImpl(
     override val navHostController: NavHostController,
     loggerFactory: LoggerFactory,
@@ -47,7 +98,7 @@ private open class NavigationControllerImpl(
 
     override fun navigate(route: String) {
         logger.d { "navigate: route=$route" }
-        navHostController.navigate(route = route)
+        runOnMainThread { navHostController.navigate(route = route) }
     }
 
     @Suppress("RestrictedApi")
@@ -56,12 +107,12 @@ private open class NavigationControllerImpl(
         val deepLinkRequest = NavDeepLinkRequest.Builder.fromUri(uri).build()
         val deepLinkMatch = navHostController.graph.matchDeepLink(deepLinkRequest)
         if (deepLinkMatch != null) {
-            navHostController.navigate(request = deepLinkRequest)
+            runOnMainThread { navHostController.navigate(request = deepLinkRequest) }
         }
     }
 
     override fun popBackStack(): Boolean {
-        return navHostController.navigateUp().also {
+        return runOnMainThreadResult { navHostController.navigateUp() }.also {
             logger.d { "popBackStack: handled=$it" }
         }
     }
@@ -115,6 +166,12 @@ private class NestedNavigationControllerImpl(
     }
 
     override fun popBackStack(): Boolean {
+        return runOnMainThreadResult {
+            popBackStackOnMain()
+        }.also { logger.d { "popBackStack: handled=$it" } }
+    }
+
+    private fun popBackStackOnMain(): Boolean {
         return when {
             navHostController.navigateUp() -> true
             topLevelBackStack.isNotEmpty() -> {
@@ -141,7 +198,7 @@ private class NestedNavigationControllerImpl(
                     true
                 }
             }
-        }.also { logger.d { "popBackStack: handled=$it" } }
+        }
     }
 
     private fun isGraphRoot() = topLevelRoute == startTopLevelRoute
@@ -152,10 +209,12 @@ private class NestedNavigationControllerImpl(
         retain: Boolean,
     ) {
         logger.d { "navigate: route=$route; addHistory=$addBackStack; retain=$retain" }
-        navHostController.navigate(route = route) {
-            popUpTo(navHostController.graph.id) { saveState = retain }
-            launchSingleTop = true
-            restoreState = retain
+        runOnMainThread {
+            navHostController.navigate(route = route) {
+                popUpTo(navHostController.graph.id) { saveState = retain }
+                launchSingleTop = true
+                restoreState = retain
+            }
         }
         if (addBackStack && topLevelRoute.isNotBlank()) {
             topLevelBackStack.remove(topLevelRoute)

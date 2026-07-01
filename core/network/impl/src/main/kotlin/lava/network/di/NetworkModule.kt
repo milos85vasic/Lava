@@ -11,6 +11,7 @@ import lava.network.api.HttpDownloadSource
 import lava.network.api.ImageLoader
 import lava.network.api.NetworkApi
 import lava.network.api.ProviderCapabilitySource
+import lava.network.api.TopicPageSource
 import lava.network.data.ImageLoaderFactoryImpl
 import lava.network.data.NetworkApiRepository
 import lava.network.data.NetworkApiRepositoryImpl
@@ -20,6 +21,7 @@ import lava.network.impl.ImageLoaderImpl
 import lava.network.impl.LavaAuthBlobProvider
 import lava.network.impl.ProviderCapabilitySourceImpl
 import lava.network.impl.SwitchingNetworkApi
+import lava.network.impl.TopicPageSourceImpl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import java.net.ProxySelector
@@ -50,6 +52,10 @@ internal interface NetworkModule {
     @Binds
     @Singleton
     fun httpDownloadSource(impl: HttpDownloadSourceImpl): HttpDownloadSource
+
+    @Binds
+    @Singleton
+    fun topicPageSource(impl: TopicPageSourceImpl): TopicPageSource
 
     @Binds
     @Singleton

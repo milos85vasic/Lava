@@ -367,6 +367,34 @@ class LavaTrackerSdk @Inject constructor(
     }
 
     /**
+     * LVA-070 — provider-aware topic-page fetch. Resolves the topic from the
+     * client identified by [trackerId] (the provider the user's search result
+     * came from), NOT the deprecated single-active-tracker knob. This is the
+     * topic-detail sibling of [downloadHttpFile] (trackerId, id) and the reason
+     * a topic opened from a multi-provider search renders against the SAME
+     * provider that produced the result.
+     *
+     * Returns null — never throws — when the provider doesn't declare TOPIC
+     * (its `getFeature(TopicTracker)` resolves null), when [trackerId] is not
+     * registered, or when the underlying fetch/parse throws. Null is the honest
+     * "no topic surface / fetch failed" signal the caller falls back on; it is
+     * never a fabricated page.
+     */
+    suspend fun getTopicPage(trackerId: String, id: String, page: Int): TopicPage? {
+        val client = try {
+            clientFor(trackerId)
+        } catch (_: Throwable) {
+            return null
+        }
+        val feature = client.getFeature(TopicTracker::class) ?: return null
+        return try {
+            feature.getTopicPage(id, page)
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
+    /**
      * Fetches a comments page for [topicId] from the active tracker. Returns
      * null when the tracker doesn't support COMMENTS, or when the underlying
      * call throws. The legacy NetworkApi also accepts a page; we propagate it.

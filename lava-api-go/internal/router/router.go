@@ -146,8 +146,9 @@ func Build(deps Deps) *gin.Engine {
 	// never talks to the sidecar directly.
 	if deps.Cfg != nil && deps.Cfg.JackettEnabled {
 		if jc, err := jackett.NewClient(jackett.Config{
-			BaseURL: deps.Cfg.JackettBaseURL,
-			APIKey:  deps.Cfg.JackettAPIKey,
+			BaseURL:       deps.Cfg.JackettBaseURL,
+			APIKey:        deps.Cfg.JackettAPIKey,
+			AdminPassword: deps.Cfg.JackettAdminPassword,
 		}); err == nil {
 			jh := v1handlers.NewJackettHandler(jc, deps.Cfg.JackettDefaultIndexer)
 			engine.GET("/jackett/search", jh.GetSearch)

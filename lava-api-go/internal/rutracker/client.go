@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	"digital.vasic.lava.apigo/internal/httpx"
 	"digital.vasic.recovery/pkg/breaker"
 	"golang.org/x/net/html/charset"
 )
@@ -144,6 +145,10 @@ func NewClient(base string) *Client {
 		KeepAlive: 30 * time.Second,
 	}
 	transport := &http.Transport{
+		// Route upstream egress through the configurable outbound proxy
+		// (LAVA_API_UPSTREAM_PROXY / *_PROXY env) so the operator can bypass a
+		// datacenter egress block on rutracker.org. See internal/httpx.
+		Proxy: httpx.Proxy,
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			// Force IPv4. See SP-3.5 forensic anchor in NewClient KDoc.
 			if network == "tcp" || network == "tcp6" {

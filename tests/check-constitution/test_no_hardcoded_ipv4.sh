@@ -23,6 +23,15 @@
 #   5. POSITIVE: a *.md / *.json config/doc file is exempt (file-ext branch)
 #   6. POSITIVE (LVA-058/062): a tracked .db file is exempt (`\.db$` branch) —
 #      proven falsifiable by removing `\.db$` from the scanner exclusion regex
+#   7. POSITIVE: a 10.0.2.0/24 slirp constant inside an autonomous-qa
+#      *emulator*.sh helper is exempt (Android-emulator platform-fixed slirp
+#      range — host .2 / DNS .3 / guest .15; the narrow path+range branch)
+#   8. NEGATIVE: the SAME slirp-range literal in a NON-autonomous-qa file is
+#      STILL flagged — proves the exemption is path-scoped, not a global
+#      10.0.2.x allowlist
+#   9. NEGATIVE: a routable deployment IP INSIDE an autonomous-qa *emulator*.sh
+#      helper is STILL flagged — proves the exemption is range-scoped to the
+#      slirp /24, not a blanket file whitelist
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -115,6 +124,43 @@ if [[ "$rc" == "0" ]]; then
   echo "PASS test_db_file_exempt"
 else
   echo "FAIL test_db_file_exempt: expected 0 (.db exempt), got $rc" >&2
+  fail=1
+fi
+
+# Test 7: an Android-emulator slirp constant (10.0.2.0/24) inside an
+# autonomous-qa *emulator*.sh helper is exempt via the narrow path+range
+# branch. 10.0.2.2 is the platform-fixed slirp gateway / host-loopback alias —
+# not configurable, cannot drift, the emulator equivalent of 127.0.0.1.
+rc=$(run_fixture scripts/autonomous-qa/lib-emulator.sh \
+  'ping -c1 10.0.2.2 # slirp gateway')
+if [[ "$rc" == "0" ]]; then
+  echo "PASS test_emulator_slirp_exempt"
+else
+  echo "FAIL test_emulator_slirp_exempt: expected 0 (slirp /24 in autonomous-qa emulator helper), got $rc" >&2
+  fail=1
+fi
+
+# Test 8 (falsifiability — path scope): the SAME slirp-range literal in a file
+# OUTSIDE scripts/autonomous-qa/*emulator*.sh is STILL flagged. Proves the
+# exemption did not loosen 10.0.2.x detection globally.
+rc=$(run_fixture core/data/src/main/kotlin/lava/data/Slirp.kt \
+  'const val GW = "10.0.2.99"')
+if [[ "$rc" == "1" ]]; then
+  echo "PASS test_slirp_literal_elsewhere_flagged"
+else
+  echo "FAIL test_slirp_literal_elsewhere_flagged: expected 1 (path-scoped), got $rc" >&2
+  fail=1
+fi
+
+# Test 9 (falsifiability — range scope): a routable deployment IP INSIDE an
+# autonomous-qa *emulator*.sh helper is STILL flagged. Proves the exemption is
+# the slirp /24 only, not a blanket whitelist of the emulator helper file.
+rc=$(run_fixture scripts/autonomous-qa/lib-emulator.sh \
+  'BACKEND="10.10.20.30"')
+if [[ "$rc" == "1" ]]; then
+  echo "PASS test_routable_ip_in_emulator_helper_flagged"
+else
+  echo "FAIL test_routable_ip_in_emulator_helper_flagged: expected 1 (range-scoped), got $rc" >&2
   fail=1
 fi
 

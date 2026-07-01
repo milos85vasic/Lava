@@ -4,6 +4,8 @@
 
 **Type:** Local CI gate (invoked by `scripts/verify-all-constitution-rules.sh`).
 
+**Last verified:** 2026-07-01 (re-verified against `scripts/check-workable-items.sh` at HEAD — canonical-binary build + `validate`/`diff`/`git-tracked` steps below match the script's four-step flow).
+
 ## What it does
 
 Verifies Lava's workable-items tracker is internally consistent, using the **canonical** `workable-items` Go binary shipped in the constitution submodule (`constitution/scripts/workable-items/`), keyed `LVA-N`:

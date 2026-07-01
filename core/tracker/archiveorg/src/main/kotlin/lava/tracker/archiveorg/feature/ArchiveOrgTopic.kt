@@ -77,10 +77,19 @@ private data class MetadataResponseDto(
 
 @Serializable
 private data class MetadataDto(
-    val title: String,
+    // LVA-070 — archive.org returns these as a string OR an array for
+    // multi-author / multi-date items; [FlexStringSerializer] flattens both so
+    // a single array-valued field no longer fails the whole topic decode
+    // (mirrors the Go backend's `flexString`, LVA-020).
+    @Serializable(with = FlexStringSerializer::class)
+    val title: String = "",
+    @Serializable(with = FlexStringSerializer::class)
     val creator: String? = null,
+    @Serializable(with = FlexStringSerializer::class)
     val description: String? = null,
+    @Serializable(with = FlexStringSerializer::class)
     val date: String? = null,
+    @Serializable(with = FlexStringSerializer::class)
     val mediatype: String? = null,
 )
 

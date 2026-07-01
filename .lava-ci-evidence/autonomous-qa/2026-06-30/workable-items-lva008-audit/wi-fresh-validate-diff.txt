@@ -1,0 +1,13 @@
+===== FRESH-BUILD validate =====
+validate: 2 violation(s):
+  - LVA-036: Operator-blocked unblock_condition has no enumerated unblock CHOICES (§11.4.148 D3): "(not specified)"
+  - LVA-5: Operator-blocked unblock_condition has no enumerated unblock CHOICES (§11.4.148 D3): "Operator runs firebase logout then firebase login:ci and updates LAVA_FIREBASE_TOKEN in gitignored .env"
+FRESH_VALIDATE_RC=1
+
+===== FRESH-BUILD diff (gate paths docs/Issues.md docs/Fixed.md) =====
+diff: DB and Markdown are in sync
+FRESH_DIFF_RC=0
+
+===== git status of docs/workable_items.db, docs/Issues.md, docs/Fixed.md =====
+ M docs/workable_items.db
+(empty above = clean working tree for those files)

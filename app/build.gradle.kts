@@ -78,7 +78,18 @@ android {
         // and §6.AA two-stage distributed (debug 216fs8pr1dkbg + release 50dusshe2uru0).
         // versionName HELD — no new user-facing changes yet in the 1077 dev cycle (the video #3
         // deterministic-chip fix shipped in 1076). Auth NOT re-rotated until 1077 actually distributes.
-        versionCode = 1077
+        // 1078 (§6.Y post-distribute bump-first, 2026-06-30): 1.3.12-1077 has been distributed to
+        // BOTH channels (last-version-debug == last-version-release == 1077). Per §6.Y.1 the FIRST
+        // code-touching commit of the new dev cycle MUST bump versionCode before any further change;
+        // this cycle's autonomous-QA work touches code (Challenge70AutonomousQaProviderMatrixTest +
+        // core/navigation NavigationController off-main guard), so versionCode bumps 1077→1078.
+        // versionName HELD at 1.3.12 per §6.Y.3 (rationale): the cycle is QA-harness + test +
+        // docs/forensic only; the sole production-path touch (the off-main navigation guard) is a
+        // PROVEN NO-OP on the happy path (Looper.myLooper()==mainLooper → runs inline; see the
+        // NavigationController KDoc + .lava-ci-evidence/sixth-law-incidents/
+        // 2026-06-30-keystone-offmain-nav-and-lva008.json), so there is no user-visible behavior
+        // change warranting a versionName bump.
+        versionCode = 1078
         versionName = "1.3.12"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/

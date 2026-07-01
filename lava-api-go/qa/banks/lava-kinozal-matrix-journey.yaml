@@ -1,0 +1,198 @@
+# SPDX-FileCopyrightText: 2026 Milos Vasic
+# SPDX-License-Identifier: Apache-2.0
+#
+# HelixQA Test Bank: Lava — Kinozal.tv autonomous-QA MATRIX journey
+# Scenario (the standing autonomous-QA matrix):
+#   onboard -> select Kinozal -> authenticate (FORM_LOGIN) ->
+#   search "1080p" (populated list) -> search "mp3" (populated list) ->
+#   open first result details/topic -> obtain a download resource
+#   (magnet / http / .torrent).
+#
+# Sibling of lava-kinozal-journey.yaml; this MATRIX variant pins the two
+# specific queries ("1080p" video + "mp3" audio) the autonomous matrix runs
+# against every provider (§6.AE comprehensive Challenge coverage).
+#
+# Provider facts (from core/tracker/kinozal/.../KinozalDescriptor.kt):
+#   id=kinozal  displayName="Kinozal.tv"  authType=FORM_LOGIN
+#   capabilities: SEARCH, BROWSE, TOPIC, TORRENT_DOWNLOAD, MAGNET_LINK,
+#                 AUTH_REQUIRED
+#   baseUrls: https://kinozal.tv (primary), https://kinozal.me
+#
+# Credentials per §6.H / §11.4.10: NEVER inline. The authenticating step
+# loads KINOZAL_USERNAME / KINOZAL_PASSWORD from the runtime env at execution.
+#
+# Executor contract (submodules/helixqa pkg/orchestrator/definition_challenge.go):
+#   - platforms: [android] routes each case to executeAndroidVisionSteps.
+#   - LaunchAction (deriveLaunchAction): the FIRST non-skipped `adb_shell:`
+#     step (am start -n .../MainActivity, explicit component for LeakCanary).
+#   - ScreenGoals (deriveScreenGoals): each entry in `required_evidence`,
+#     then `expected_result`. required_evidence is AND — every token MUST
+#     resolve on a real screen, so tokens stay short + reliably visible.
+version: "1.0"
+name: "Lava — Kinozal.tv Matrix Journey (1080p + mp3)"
+description: "Autonomous-QA matrix journey on the Lava Android app for Kinozal: onboard, form-login auth, search 1080p, search mp3, open first result, obtain a magnet/http/.torrent download resource."
+metadata:
+  author: "vasic-digital"
+  app: "Lava"
+  application_id: "digital.vasic.lava.client.dev"
+  provider_id: "kinozal"
+  provider_display_name: "Kinozal.tv"
+  auth_type: "FORM_LOGIN"
+  supports_anonymous: false
+  credentials_env: ["KINOZAL_USERNAME", "KINOZAL_PASSWORD"]
+  matrix_queries: ["1080p", "mp3"]
+
+test_cases:
+  - id: LAVA-KINOZAL-MATRIX-001
+    name: "Onboard and select the Kinozal provider"
+    category: functional
+    priority: critical
+    platforms: [android]
+    dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
+    steps:
+      - name: "Launch Lava and reach onboarding"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
+        expected: "Onboarding Welcome screen is visible without a crash"
+      - name: "Advance to the provider selection step"
+        action: "Tap the primary continue control to reach provider configuration"
+        expected: "Provider list shows Kinozal.tv as a selectable entry"
+      - name: "Select Kinozal"
+        action: "Tap the Kinozal.tv provider entry"
+        expected: "Kinozal is marked selected and its form-login surface is reachable"
+    required_evidence:
+      - "Kinozal"
+      - "provider"
+    tags: [kinozal, onboarding, provider-selection, matrix]
+    documentation_refs:
+      - type: constitution
+        section: "6.G"
+        path: "CLAUDE.md"
+      - type: constitution
+        section: "6.AE"
+        path: "CLAUDE.md"
+    expected_result: "The provider list is on screen and Kinozal.tv is a selectable entry that a user can choose, reaching its form-login surface"
+
+  - id: LAVA-KINOZAL-MATRIX-002
+    name: "Authenticate to Kinozal with form-login credentials"
+    category: functional
+    priority: critical
+    platforms: [android]
+    dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
+    steps:
+      - name: "Launch Lava"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
+        expected: "App reaches onboarding/provider selection"
+      - name: "Open the Kinozal login form"
+        action: "Select Kinozal and open its credential entry surface"
+        expected: "Username and password fields are presented (FORM_LOGIN, no captcha)"
+      - name: "Enter real credentials from the runtime environment"
+        action: "Type KINOZAL_USERNAME and KINOZAL_PASSWORD loaded from env (never hardcoded)"
+        expected: "Fields accept input; no validation error before submit"
+      - name: "Submit and authenticate against the real Kinozal service"
+        action: "Tap submit; wait for the network round-trip"
+        expected: "Authentication succeeds; the loading indicator clears and the search surface becomes reachable (no stuck spinner)"
+    required_evidence:
+      - "Password"
+    tags: [kinozal, auth, form-login, real-service, matrix]
+    documentation_refs:
+      - type: constitution
+        section: "6.G"
+        path: "CLAUDE.md"
+      - type: constitution
+        section: "6.AE"
+        path: "CLAUDE.md"
+    expected_result: "The Kinozal login form with username and password fields is on screen for a user to authenticate against the live service"
+
+  - id: LAVA-KINOZAL-MATRIX-003
+    name: "Search Kinozal for '1080p' and get a populated result list"
+    category: functional
+    priority: high
+    platforms: [android]
+    dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
+    steps:
+      - name: "Launch Lava"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
+        expected: "App reaches its main surface"
+      - name: "Open the search input"
+        action: "Navigate to the search surface and focus the query field"
+        expected: "Search input is editable"
+      - name: "Submit the '1080p' video query"
+        action: "Type the query 1080p and submit the search to the live tracker"
+        expected: "A result list renders with rows carrying title, size and seed/leech counts; '1080p' appears in the query field and across result titles"
+      - name: "Scroll the result list"
+        action: "Swipe up to scroll additional results"
+        expected: "List scrolls smoothly without crash"
+    required_evidence:
+      - "1080p"
+    tags: [kinozal, search, video, matrix]
+    documentation_refs:
+      - type: constitution
+        section: "6.G"
+        path: "CLAUDE.md"
+      - type: constitution
+        section: "6.AE"
+        path: "CLAUDE.md"
+    expected_result: "A populated, scrollable result list for the '1080p' query is visible on screen, with '1080p' shown in the search field and result titles"
+
+  - id: LAVA-KINOZAL-MATRIX-004
+    name: "Search Kinozal for 'mp3' and get a populated result list"
+    category: functional
+    priority: high
+    platforms: [android]
+    dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
+    steps:
+      - name: "Launch Lava"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
+        expected: "App reaches its main surface"
+      - name: "Open the search input"
+        action: "Navigate to the search surface and focus the query field"
+        expected: "Search input is editable"
+      - name: "Submit the 'mp3' audio query"
+        action: "Type the query mp3 and submit the search to the live tracker"
+        expected: "A result list renders with audio-release rows carrying title, size and seed/leech counts; 'mp3' appears in the query field and across result titles"
+      - name: "Scroll the result list"
+        action: "Swipe up to scroll additional results"
+        expected: "List scrolls smoothly without crash"
+    required_evidence:
+      - "mp3"
+    tags: [kinozal, search, audio, matrix]
+    documentation_refs:
+      - type: constitution
+        section: "6.G"
+        path: "CLAUDE.md"
+      - type: constitution
+        section: "6.AE"
+        path: "CLAUDE.md"
+    expected_result: "A populated, scrollable result list for the 'mp3' query is visible on screen, with 'mp3' shown in the search field and result titles"
+
+  - id: LAVA-KINOZAL-MATRIX-005
+    name: "Open the first result and obtain a download resource"
+    category: functional
+    priority: critical
+    platforms: [android]
+    dispatches_to: "monkey -p digital.vasic.lava.client.dev 1"
+    steps:
+      - name: "Launch Lava"
+        action: "adb_shell: am start -n digital.vasic.lava.client.dev/digital.vasic.lava.client.MainActivity"
+        expected: "App reaches its main surface"
+      - name: "Open the first result topic"
+        action: "Run a search (e.g. the 1080p query) and tap the first result row to open its topic/detail screen"
+        expected: "Topic detail renders with title, metadata and download affordances"
+      - name: "Locate the download affordances"
+        action: "Find the .torrent Download control and the Magnet control (Kinozal declares TORRENT_DOWNLOAD + MAGNET_LINK; files served from kinozal.tv)"
+        expected: "Both a torrent-file Download control and a Magnet control are present and enabled"
+      - name: "Obtain the download resource"
+        action: "Trigger the .torrent download (or copy the magnet); capture the resulting resource"
+        expected: "A non-empty .torrent payload (valid bencoded torrent) is produced OR a magnet URI magnet:?xt=urn:btih:<hash> is resolved"
+    required_evidence:
+      - "Download"
+      - "Magnet"
+    tags: [kinozal, download, torrent, magnet, matrix]
+    documentation_refs:
+      - type: constitution
+        section: "6.G"
+        path: "CLAUDE.md"
+      - type: constitution
+        section: "6.AE"
+        path: "CLAUDE.md"
+    expected_result: "The topic detail screen shows working Download and Magnet controls for a Kinozal result, yielding a usable download resource (magnet / http / .torrent)"

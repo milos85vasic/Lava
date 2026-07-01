@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"digital.vasic.lava.apigo/internal/httpx"
 	"digital.vasic.recovery/pkg/breaker"
 	"golang.org/x/net/html/charset"
 )
@@ -115,6 +116,9 @@ func NewClient(base string) *Client {
 		base: base,
 		http: &http.Client{
 			Timeout: 30 * time.Second,
+			// Route egress through the configurable outbound proxy
+			// (LAVA_API_UPSTREAM_PROXY / *_PROXY env) — see internal/httpx.
+			Transport: httpx.NewTransport(),
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				return http.ErrUseLastResponse
 			},

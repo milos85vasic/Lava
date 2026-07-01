@@ -1,0 +1,6 @@
+[
+  {"target":"scripts/scan-no-hardcoded-ipv4.sh (§6.R IPv4 gate)","type":"gate-script","mutation":"violation-branch exit 1 -> exit 0","observed_result":"FAIL test_real_ipv4_flagged: expected 1, got 0","verdict":"genuine","reverted":true},
+  {"target":".githooks/pre-push Check 7 (§6.Z evidence presence)","type":"gate-script","mutation":"if [[ ! -f md && ! -f json ]] -> if false","observed_result":"FAIL test_pointer_advance_without_evidence_rejected: expected §6.Z violation, got exit=0","verdict":"genuine","reverted":true},
+  {"target":"lava-api-go/internal/archiveorg/flexstring.go","type":"go-test","mutation":"array join separator \", \" -> \" \"","observed_result":"FAIL TestSearchResponse_ArrayValuedFields...: got \"Charles Dickens John Forster\" want \"Charles Dickens, John Forster\"","verdict":"genuine","reverted":true},
+  {"target":"lava-api-go/internal/gutenberg/utils.go (pickBestFormatURL)","type":"go-test","mutation":"reversed preferred MIME slice (PDF first)","observed_result":"FAIL TestPickBestFormatURL_PrefersEpubOverPdf: picked .pdf want .epub","verdict":"genuine","reverted":true}
+]

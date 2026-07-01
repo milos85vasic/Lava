@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"digital.vasic.lava.apigo/internal/httpx"
 	"digital.vasic.lava.apigo/internal/provider"
 )
 
@@ -81,7 +82,7 @@ func NewClient(baseURL string) *Client {
 	}
 	return &Client{
 		baseURL: strings.TrimRight(baseURL, "/"),
-		http:    &http.Client{Timeout: DefaultTimeout},
+		http:    &http.Client{Timeout: DefaultTimeout, Transport: httpx.NewTransport()},
 	}
 }
 

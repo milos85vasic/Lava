@@ -21,9 +21,15 @@ class ObserveTopicPagingDataUseCase @Inject constructor(
         id: String,
         actions: Flow<PagingAction>,
         scope: CoroutineScope,
+        providerId: String? = null,
     ): Flow<PagingData<List<Post>>> {
         return PagingDataLoader(
-            fetchData = { page -> topicService.getTopicPage(id, page).commentsPage },
+            // LVA-070 — provider-aware: the comments paging shares the topic
+            // fetch, so it MUST route to the same source provider; otherwise the
+            // refresh hits the legacy proxy `…/topic2/{id}` and throws
+            // (UnknownHost on the QA emulator) → LoadState.Error → the topic
+            // screen's "Something went wrong" error item.
+            fetchData = { page -> topicService.getTopicPage(id, page, providerId).commentsPage },
             transform = { posts -> flowOf(posts) },
             actions = actions.onStart { refresh() },
             scope = scope,

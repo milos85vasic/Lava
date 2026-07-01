@@ -18,6 +18,8 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+
+	"digital.vasic.lava.apigo/internal/httpx"
 )
 
 // Client is a thin HTTP wrapper around archive.org's public JSON endpoints.
@@ -32,6 +34,9 @@ func NewClient(baseURL string) *Client {
 		baseURL: baseURL,
 		client: &http.Client{
 			Timeout: 30 * time.Second,
+			// Route egress through the configurable outbound proxy
+			// (LAVA_API_UPSTREAM_PROXY / *_PROXY env) — see internal/httpx.
+			Transport: httpx.NewTransport(),
 		},
 	}
 }

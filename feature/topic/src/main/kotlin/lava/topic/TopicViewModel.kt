@@ -137,6 +137,10 @@ internal class TopicViewModel @Inject constructor(
             id = id,
             actions = pagingActions,
             scope = viewModelScope,
+            // LVA-070 — route the comments paging to the SAME source provider as
+            // the topic header so an archiveorg/gutenberg topic does not fall to
+            // the legacy proxy endpoint (which renders the error state).
+            providerId = providerId.ifBlank { null },
         ).collectLatest { (data, loadStates, pagination) ->
             reduce {
                 state.copy(

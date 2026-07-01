@@ -1,6 +1,6 @@
 # `scripts/scan-no-hardcoded-ipv4.sh` — User Guide
 
-**Last verified:** 2026-05-15 (1.2.23 closure-cycle, §6.AD-debt task #61 backfill)
+**Last verified:** 2026-07-01 (synced to the §6.R slirp `10.0.2.0/24` emulator-helper exemption added this cycle; prior: 2026-05-15 §6.AD-debt task #61 backfill)
 **Inheritance:** HelixConstitution §11.4.18 (script documentation mandate)
 
 ## Overview
@@ -42,6 +42,18 @@ documentation-only) are filtered AFTER the file-level exemption so a
 code file that legitimately uses 127.0.0.1 or 0.0.0.0 still passes —
 those are not "hardcoded connection addresses" in the §6.R sense
 (they cannot connect to anything but the local host or the wildcard).
+
+Narrow path+range exemption — Android-emulator QEMU user-mode (slirp)
+constants in the 10.0.2.0/24 range inside autonomous-qa emulator helper
+scripts (scripts/autonomous-qa/*emulator*.sh). Within that /24 the helper
+uses host .2 (slirp gateway / host-loopback alias), DNS .3 (the emulator's
+built-in DNS server), and guest .15 (the guest NIC address) — platform-FIXED
+by the Android emulator slirp stack, not configurable, cannot drift. They are
+the emulator equivalent of 127.0.0.1, not a deployment address. The exemption
+is BOTH path-scoped (the autonomous-qa emulator helper) AND range-scoped
+(10.0.2.0/24): a routable IP in those same files, or any 10.0.2.x literal in
+any other tracked file, is still flagged. Line-removal filter, identical in
+mechanism to the reserved-address filter above.
 ```
 
 ## Usage

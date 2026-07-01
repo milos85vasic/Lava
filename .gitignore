@@ -142,4 +142,19 @@ tests/check-markdown-export-sync/.fin
 .lava-ci-evidence/device-recordings/
 .lava-ci-evidence/video-analysis/*/raw/
 .lava-ci-evidence/challenge-video/
+
+# === Autonomous QA harness artifacts (operator directive 2026-06-29) ===
+# Raw recordings (video) + live logs (logcat + API server logs) produced by the
+# autonomous QA matrix MUST NEVER be committed (§6.H + operator directive to
+# git-ignore recorded materials). Only CURATED evidence — summary.md,
+# attestation.json, vision-analysis.md under autonomous-qa/ — is tracked.
+# Globs are belt-and-suspenders for relocations.
+.lava-ci-evidence/autonomous-qa/**/raw/
+.lava-ci-evidence/autonomous-qa/**/api-logs/
+.lava-ci-evidence/**/*.mp4
+.lava-ci-evidence/**/*.webm
+.lava-ci-evidence/**/*.mkv
+.lava-ci-evidence/**/*.logcat.txt
+.lava-ci-evidence/**/api-server-*.log
+
 Submodules/
