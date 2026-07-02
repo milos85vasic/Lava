@@ -43,6 +43,24 @@ internal class AuthServiceImpl @Inject constructor(
 
     override suspend fun getToken(): String = preferencesStorage.getAccount()?.token.orEmpty()
 
+    // LAYER 2 fix (2026-07-02, token-store mismatch): make the multi-tracker SDK
+    // login token visible to getToken(). The SDK path (RuTrackerAuth.login ->
+    // LoginUseCase) obtains the rutracker session cookie but never wrote it to
+    // preferencesStorage — only the legacy login() below did — so getToken()
+    // returned "" and RuTrackerSearch short-circuited Unauthorized before any
+    // tracker.php request. Preserve any existing legacy account fields
+    // (name/password) so refreshToken() still works; when no account exists
+    // (pure SDK path) create a token-only Account. The observation-layer auth
+    // state for the SDK path is handled separately by signalAuthorized(), so we
+    // deliberately do NOT emit an auth-state change here.
+    override suspend fun persistProviderToken(token: String) {
+        if (token.isEmpty()) return
+        val existing = preferencesStorage.getAccount()
+        val account = existing?.copy(token = token)
+            ?: Account(id = "", name = "", password = "", token = token, avatarUrl = null)
+        preferencesStorage.saveAccount(account)
+    }
+
     override suspend fun login(
         username: String,
         password: String,

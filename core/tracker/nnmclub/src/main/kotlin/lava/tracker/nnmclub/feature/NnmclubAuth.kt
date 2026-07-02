@@ -39,7 +39,7 @@ class NnmclubAuth @Inject constructor(
                 "login" to "Вход",
             ),
         )
-        val body = response.use { it.body?.string() ?: "" }
+        val body = response.use { http.bodyString(it) }
         val parsed = parser.parse(body)
         val token = http.cookieValue(PHPBB_COOKIE)
         return parsed.copy(sessionToken = token)

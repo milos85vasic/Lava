@@ -5,6 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
+import lava.logger.api.LoggerFactory
 import lava.network.impl.AuthInterceptor
 import lava.network.impl.LavaAuthBlobProvider
 import lava.network.impl.SigningCertProvider
@@ -39,9 +40,11 @@ internal object AuthInterceptorModule {
     fun provideAuthInterceptor(
         blobProvider: LavaAuthBlobProvider,
         signingCertProvider: SigningCertProvider,
+        loggerFactory: LoggerFactory,
     ): Interceptor = AuthInterceptor(
         blobProvider = blobProvider,
         signingCertHash = AuthInterceptor.SigningCertHash { signingCertProvider.sha256() },
+        loggerFactory = loggerFactory,
     )
 
     /**

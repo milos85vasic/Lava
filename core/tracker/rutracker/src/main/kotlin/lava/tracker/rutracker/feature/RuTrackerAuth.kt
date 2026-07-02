@@ -68,7 +68,19 @@ class RuTrackerAuth @Inject constructor(
                 reason = "${t.javaClass.simpleName}: ${t.message ?: "<no message>"}",
             )
         }
-        return mapper.toLoginResult(dto)
+        val result = mapper.toLoginResult(dto)
+        // LAYER 2 fix (2026-07-02, token-store mismatch): the SDK login path
+        // obtains the rutracker session token (dto.user.token -> sessionToken)
+        // but historically never wrote it to the store TokenProvider.getToken()
+        // reads. RuTrackerSearch reads that same store; an empty token makes
+        // WithTokenVerificationUseCase throw Unauthorized BEFORE any tracker.php
+        // request, so a genuinely-logged-in SDK session could not search.
+        // Bridge the obtained session token into the store so search works.
+        // See docs/issues/fixed/BUGFIXES.md (2026-07-02 — LAYER 2).
+        result.sessionToken
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { tokenProvider.persistProviderToken(it) }
+        return result
     }
 
     override suspend fun logout() {

@@ -119,6 +119,11 @@ internal class CircuitBreaker(
  *
  * Owns a per-tracker OkHttp client with a cookie jar, a [Semaphore] bound to four
  * permits, and a [CircuitBreaker] that trips after 3 failures in a 30-second window.
+ * Response bodies are decoded from windows-1251 to UTF-8 via [bodyString]: nnmclub.to
+ * is a phpBB site that serves windows-1251 HTML and frequently omits the charset from
+ * the HTTP `Content-Type` header (declaring it only in a `<meta>` tag that OkHttp does
+ * not honour), so decoding the raw bytes with an explicit charset is mandatory to
+ * avoid Cyrillic mojibake.
  */
 @Singleton
 class NnmclubHttpClient internal constructor(
@@ -135,6 +140,7 @@ class NnmclubHttpClient internal constructor(
         .build()
 
     private val concurrency = Semaphore(permits = 4)
+    private val nnmCharset = java.nio.charset.Charset.forName("windows-1251")
 
     suspend fun get(url: String): Response = withContext(Dispatchers.IO) {
         breaker.guard {
@@ -194,6 +200,12 @@ class NnmclubHttpClient internal constructor(
 
     fun clearCookies() {
         // Documented limitation — logout requires app restart for SP-3a.
+    }
+
+    /** Decodes the response body using windows-1251 (nnmclub.to's phpBB charset). */
+    fun bodyString(response: Response): String {
+        val bytes = response.body?.bytes() ?: return ""
+        return String(bytes, nnmCharset)
     }
 
     private companion object {

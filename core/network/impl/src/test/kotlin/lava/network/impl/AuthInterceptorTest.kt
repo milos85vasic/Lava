@@ -1,13 +1,17 @@
 package lava.network.impl
 
+import lava.logger.api.Logger
+import lava.logger.api.LoggerFactory
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.security.SecureRandom
@@ -81,30 +85,88 @@ class AuthInterceptorTest {
         assertNull(recorded.getHeader("Lava-Auth"))
     }
 
-    @Test(expected = javax.crypto.AEADBadTagException::class)
-    fun `intercept fails closed when signing cert hash diverges (re-signed APK simulation)`() {
+    /**
+     * REPRODUCE-FIRST fail-open regression (§6.AK / §6.J, 2026-07-02).
+     *
+     * When the running APK's signing cert does not match the cert the auth blob
+     * was generated against — an androidTest build, a re-signed APK, or any
+     * cert/blob drift — the HKDF-derived key is wrong and `AesGcm.decrypt`
+     * THROWS `AEADBadTagException`. Before the fix that exception propagated out
+     * of `intercept()` → OkHttp surfaced it as an `IOException` → EVERY request
+     * on the `@Named("lan")` client failed, INCLUDING the public `/providers`
+     * catalogue fetch that needs no auth (device-observed goapi-onboarding
+     * fallback root cause). A decrypt failure must NOT crash every request.
+     *
+     * The interceptor MUST fail OPEN: proceed WITHOUT the Lava-Auth header.
+     * Public endpoints do not need it; auth-gated endpoints already handle 401.
+     *
+     * §6.J PRIMARY assertion (packet on the wire): the MockWebServer RECEIVED
+     * the request at `/providers` and it carried NO auth header. Not
+     * "an exception did/didn't fire".
+     *
+     * §6.AC/§6.H secondary: the fail-open path records a non-fatal whose text is
+     * the error CLASS ONLY — and NEVER the blob, derived key, nonce, or a header
+     * value (asserted below).
+     *
+     * RED (pre-fix): `execute()` throws `IOException` (wrapping
+     * `AEADBadTagException`) before the server ever receives the request →
+     * `takeRequest()` is never reached, the test fails at `execute()`.
+     * GREEN (post-fix): the server receives `/providers` with no auth header.
+     *
+     * ─── FALSIFIABILITY REHEARSAL (Bluff-Audit stamp) ───────────────────────
+     * Bluff-Audit: AuthInterceptorTest."intercept fails OPEN when signing cert hash diverges (cert-blob drift simulation)"
+     *   Mutation:         In AuthInterceptor.intercept, deleted the `catch (e: Exception)`
+     *                     fail-open branch (leaving try/finally with no catch).
+     *   Observed-Failure: javax.crypto.AEADBadTagException: Tag mismatch
+     *                     (propagated as java.io.IOException out of execute();
+     *                     the server never received the request).
+     *   Reverted:         yes — catch restored, test GREEN.
+     * ─────────────────────────────────────────────────────────────────────────
+     */
+    @Test
+    fun `intercept fails OPEN when signing cert hash diverges (cert-blob drift simulation)`() {
         val uuid = byteArrayOf(
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
             0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
         )
         val (provider, _) = buildKnownProvider(uuid, "X-Test-Auth")
-        // The provider was built with cert-hash filled with 0x42; switch to 0x43.
+        // The provider was built with cert-hash filled with 0x42; switch to 0x43,
+        // so the HKDF-derived key is wrong and AES-GCM decrypt fails.
         val divergedCertHash = AuthInterceptor.SigningCertHash {
             ByteArray(32) { 0x43 }
         }
+        val capturingLogs = CapturingLoggerFactory()
         val client = OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor(provider, divergedCertHash))
+            .addInterceptor(AuthInterceptor(provider, divergedCertHash, capturingLogs))
             .build()
 
         server.enqueue(MockResponse().setResponseCode(200))
-        try {
-            client.newCall(Request.Builder().url(server.url("/")).build()).execute().close()
-        } catch (e: java.io.IOException) {
-            // OkHttp wraps interceptor exceptions in IOException; unwrap to surface AEADBadTagException
-            val cause = e.cause
-            if (cause is javax.crypto.AEADBadTagException) throw cause
-            throw e
-        }
+
+        // MUST NOT throw — fail-open. (Pre-fix this line throws IOException.)
+        client.newCall(Request.Builder().url(server.url("/providers")).build()).execute().close()
+
+        // §6.J PRIMARY: the request reached the server (fail-open let it through)
+        // and carried NO auth header (the malformed one was NOT attached).
+        val recorded = server.takeRequest()
+        assertEquals("/providers", recorded.path)
+        assertNull(
+            "decrypt failure must NOT attach a (malformed) auth header",
+            recorded.getHeader("X-Test-Auth"),
+        )
+        assertNull(recorded.getHeader("Lava-Auth"))
+
+        // §6.AC: a non-fatal was recorded naming the error CLASS.
+        val logLine = capturingLogs.lines.singleOrNull { it.contains("decrypt failed") }
+        assertNotNull("fail-open path must record a §6.AC non-fatal", logLine)
+        assertTrue(
+            "non-fatal must name the error class",
+            logLine!!.contains("AEADBadTagException"),
+        )
+        // §6.H: the non-fatal MUST NOT leak the blob / nonce / pepper / a header value.
+        val blobB64 = Base64.getEncoder().encodeToString(provider.getBlob())
+        val nonceB64 = Base64.getEncoder().encodeToString(provider.getNonce())
+        assertFalse("non-fatal leaked the blob (§6.H)", logLine.contains(blobB64))
+        assertFalse("non-fatal leaked the nonce (§6.H)", logLine.contains(nonceB64))
     }
 
     /**
@@ -141,5 +203,18 @@ class AuthInterceptorTest {
         }
         val signingCertHash = AuthInterceptor.SigningCertHash { certHashFull }
         return provider to signingCertHash
+    }
+
+    /** Captures every logged line so the §6.AC non-fatal recording is provable (not a bluff). */
+    private class CapturingLoggerFactory : LoggerFactory {
+        val lines = mutableListOf<String>()
+
+        override fun get(tag: String): Logger = object : Logger {
+            override fun i(message: () -> String) { lines += message() }
+            override fun d(message: () -> String) { lines += message() }
+            override fun d(t: Throwable?, message: () -> String) { lines += message() }
+            override fun e(message: () -> String) { lines += message() }
+            override fun e(t: Throwable?, message: () -> String) { lines += message() }
+        }
     }
 }

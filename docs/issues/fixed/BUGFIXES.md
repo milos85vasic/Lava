@@ -61,6 +61,111 @@ Format per entry:
 
 ---
 
+## 2026-07-02 — AuthInterceptor decrypt crashed EVERY authenticated request on cert/blob drift (fail-open fix)
+
+**Discovered by:** the goapi-keystone LAYER-1 root-cause (candidate 1) — the public
+`/providers` catalogue fetch failed at runtime, forcing the registry to fall back
+to bundled providers.
+
+**Root cause:** `core/network/impl/.../AuthInterceptor.kt` `intercept()` HKDF-derived
+an AES key from the APK signing-cert sha256 and called `AesGcm.decrypt(blob,…)` inside
+`try { … } finally { … }` with **no catch**. On any signing-cert/blob drift (an
+androidTest build, a re-signed APK), `decrypt` throws `AEADBadTagException` which
+propagated out of `intercept()` → OkHttp wrapped it as `IOException` → EVERY request
+on the `@Named("lan")` client died, including the PUBLIC `/providers` fetch. A crypto
+failure on ONE optional header must not crash all traffic.
+
+**Fix (additive, fail-open):** the auth-attach path (derive+decrypt+build) runs in a
+`try`; `chain.proceed(request)` moved OUTSIDE the try (genuine network errors never
+swallowed / double-proceeded). On failure: record a §6.AC non-fatal via the module's
+`LoggerFactory` (error CLASS only — never blob/key/nonce/header, §6.H) + send the
+request WITHOUT the `Lava-Auth` header (public endpoints don't need it; gated ones
+already handle the 401). `keyBytes.fill(0)`/`uuidBytes?.fill(0)` still run in
+`finally` (core auth-memory hygiene). `AuthInterceptorModule` threads the real
+`LoggerFactory`.
+
+**Test:** `AuthInterceptorTest` — mismatched cert hash → decrypt throws; PRIMARY
+assertion on the wire: server RECEIVES `/providers` with NO auth header (not a crash);
+secondaries: a non-fatal naming `AEADBadTagException` is logged + does not contain the
+blob/nonce. RED (catch removed): the new test FAILS with `AEADBadTagException`; other 2
+stay green. Reverted: yes. **Fix commit:** this commit.
+
+## 2026-07-02 — NNM-Club responses decoded as UTF-8 despite windows-1251 (Cyrillic mojibake)
+
+**Discovered by:** a Prowlarr Cardigann cross-check of the tracker parsers.
+
+**Root cause:** NNM-Club (phpBB, windows-1251) responses were read via OkHttp
+`ResponseBody.string()` which defaults to UTF-8 when the HTTP `Content-Type` omits a
+charset (the live site declares it only in a `<meta>` tag OkHttp ignores) → Cyrillic
+mojibake in search titles + broken Cyrillic login. Sibling **kinozal** already solves
+this with a win-1251 `bodyString()` helper.
+
+**Fix (additive, mirrors kinozal):** `NnmclubHttpClient` gained
+`bodyString(response) = String(response.body?.bytes() ?: return "", windows-1251)`;
+`NnmclubSearch.kt:43` + `NnmclubAuth.kt:42` now use `http.bodyString(it)`.
+
+**Test:** `NnmclubWindows1251DecodeTest` — MockWebServer serves a windows-1251 body
+with Cyrillic title `Дюна: Часть вторая (2024)` (both charset-header-absent — the live
+discriminator — and header-present); asserts the parsed `SearchResult` title equals the
+Cyrillic string byte-for-byte (§6.J). RED (decode reverted to UTF-8): `expected:<[Дюна:
+Часть вторая]…> but was:<[����: ����� ������]…>`. Reverted: yes. **Fix commit:** this
+commit. **Tracked follow-up (§6.AB, same class):** `NnmclubTopic.kt:41`,
+`NnmclubComments.kt:29`, `NnmclubBrowse.kt:34`, `NnmclubClient.kt:43` still use raw
+`it.body?.string()` and will get the same `http.bodyString(it)` swap in a follow-up.
+
+## 2026-07-02 — LAYER 2: bundled RuTrackerClient search short-circuits Unauthorized (token-store mismatch)
+
+**Discovered by:** the goapi-keystone LAYER 1/2 static+device trace
+(`/run/media/milosvasic/DATA4TB/.build-tmp/goapi-keystone-layers-2026-07-02.md`,
+LAYER 2). This is the "bundled-search-failure" layer the goapi CASE-COOKIE entry
+below explicitly deferred as a SEPARATE open investigation — now root-caused and
+fixed. After a genuinely-successful multi-tracker SDK login, the bundled
+`RuTrackerClient.search()` returned "problem reaching the trackers" with **no
+`tracker.php` request on the wire at all**.
+
+**Root cause (token-store mismatch):**
+- `RuTrackerSearch.search()`
+  (`core/tracker/rutracker/.../feature/RuTrackerSearch.kt:31`) reads
+  `token = tokenProvider.getToken()`, then `GetSearchPageUseCase` wraps
+  `api.search()` inside `WithTokenVerificationUseCase`. That guard
+  (`WithTokenVerificationUseCase.kt:12/15`) throws `Unauthorized` when
+  `VerifyTokenUseCase(token)` (`= token.isNotEmpty()`) is false — i.e. the
+  `tracker.php` request is *inside* the guarded block and never runs on an empty
+  token.
+- `tokenProvider` is `AuthServiceImpl` (bound in `core/auth/impl/.../di/AuthModule.kt`).
+  `AuthServiceImpl.getToken()` reads `preferencesStorage.getAccount()?.token.orEmpty()`.
+- The SDK login path `RuTrackerAuth.login → LoginUseCase` obtains the rutracker
+  session cookie but NEVER wrote it to that account/token store — only the legacy
+  single-tracker `AuthServiceImpl.login()` did. So after an SDK-path login,
+  `getAccount()` is null → `getToken()` returns `""` → the guard fires before any
+  request. A genuinely-logged-in (cookie-valid) session was reported Unauthorized.
+
+**Fix (additive, §6.J — persist the real token, do NOT weaken the guard):**
+- `core/auth/api/.../TokenProvider.kt`: new `persistProviderToken(token)` seam
+  (default no-op so the change is additive; production impls MUST override).
+- `core/auth/impl/.../AuthServiceImpl.kt`: overrides `persistProviderToken` to
+  write the session token into `preferencesStorage` (preserving any existing
+  legacy account fields; token-only `Account` when none exists) so `getToken()`
+  returns it. No auth-state emission (the SDK observation layer uses
+  `signalAuthorized`).
+- `core/tracker/rutracker/.../feature/RuTrackerAuth.kt`: after a successful login,
+  bridges `result.sessionToken` into the store via `persistProviderToken(...)`.
+
+**Verification (reproduce-first, Bluff-Audited RED→GREEN):**
+`core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/feature/RuTrackerSearchAfterSdkLoginTest.kt`
+— real `RuTrackerAuth`+`LoginUseCase` (login) and real
+`RuTrackerSearch`+`GetSearchPageUseCase`+`WithTokenVerificationUseCase` (search)
+over a `MockWebServer`, sharing ONE in-memory `TokenProvider` (behaviorally
+equivalent to `AuthServiceImpl`'s token store). PRIMARY assertion on the returned
+`SearchResult` (parsed torrent id/title/seeders); secondary: exactly one
+`tracker.php?nm=` request issued. RED when the `RuTrackerAuth.login` bridge is
+removed (search throws `lava.tracker.rutracker.model.Unauthorized`, 0 tracker.php
+requests).
+
+**Fix commit:** this commit.
+
+---
+
 ## 2026-07-02 — goapi CASE-COOKIE: provider login session never reached the ApiBackedTrackerClient search (Auth-Token dropped)
 
 **Discovered by:** the autonomous-QA rutracker/goapi keystone on a real

@@ -40,7 +40,7 @@ class NnmclubSearch @Inject constructor(
     override suspend fun search(request: SearchRequest, page: Int): SearchResult {
         val url = buildSearchUrl(request.query, page)
         val response = http.get(url)
-        val body = response.use { it.body?.string() ?: "" }
+        val body = response.use { http.bodyString(it) }
         val result = parser.parse(body, pageHint = page)
         result.items.forEach { magnetCache.put(it.torrentId, it.magnetUri) }
         return result
