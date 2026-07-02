@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>apiapp-backend-notes</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="autonomous-qa--on-device-api-app-backend-bring-up--readiness-notes">autonomous-QA
+— on-device :api-app backend bring-up &amp; readiness notes</h1>
+<p>Scope: how
+<code>scripts/autonomous-qa/lib-backend.sh::backend_up_apiapp</code>
+should launch and detect readiness of the on-device Android API backend
+(<code>:api-app</code>, appId <code>digital.vasic.lava.api</code> /
+debug <code>.dev</code>) so the Phase 3 Android-backend matrix
+(<code>qa_backend=apiapp</code>) runs deterministically.</p>
+<p>All facts below are read from source. Anything not provable from code
+is marked <code>UNCONFIRMED:</code>.</p>
+<hr />
+<h2 id="0-the-one-line-correction">0. The one-line correction</h2>
+<p>The current <code>lib-backend.sh</code> TODO says the embed picks a
+<strong>dynamic loopback port</strong> and
+<code>monkey -p … LAUNCHER</code> starts it. <strong>Both are
+wrong:</strong></p>
+<ul>
+<li>The embed binds the <strong>fixed default port 8443</strong> (no
+override in production wiring — see §3). The "dynamic port" idea came
+from <code>OnDeviceApiClient</code> reading the port from the UI, which
+it does only for robustness; the produced value is always 8443.</li>
+<li>A plain <code>monkey … LAUNCHER</code> start launches
+<code>MainActivity</code> with a bare <code>MAIN/LAUNCHER</code> intent.
+<code>MainActivity.handleIntent()</code> only starts the engine when the
+intent carries the <code>START_API</code> extra (§1). So the current
+bring-up <strong>launches the landing screen but never starts the
+server</strong> — the <code>sleep 25</code> then "succeeds" against a
+Stopped engine. This is the latent bluff the TODO warned about.</li>
+</ul>
+<hr />
+<h2 id="1-exact-adb-commands-to-launch-the-server">1. Exact adb commands
+to launch the server</h2>
+<p>Component:
+<code>digital.vasic.lava.api.dev/lava.api.app.MainActivity</code>
+(<code>namespace = lava.api.app</code>; debug
+<code>applicationIdSuffix = .dev</code>; <code>MainActivity</code> is
+<code>android:exported="true"</code> with the LAUNCHER filter —
+<code>am start</code> works from shell).</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">PKG</span><span class="op">=</span>digital.vasic.lava.api.dev</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) Install the debug APK (already done by lib-backend.sh today).</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">-s</span> <span class="st">&quot;</span><span class="va">$serial</span><span class="st">&quot;</span> install <span class="at">-r</span> api-app/build/outputs/apk/debug/<span class="pp">*</span>.apk</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) Grant POST_NOTIFICATIONS BEFORE launch (API 33+). Without it,</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#    MainActivity.requestNotificationPermissionThenStart() pops the runtime</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#    permission dialog and only fires StartRequested in the dialog callback —</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#    so the engine would NOT start unattended. Harmless / errors on &lt;API 33</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#    (permission doesn&#39;t exist) → tolerate failure.</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">-s</span> <span class="st">&quot;</span><span class="va">$serial</span><span class="st">&quot;</span> shell pm grant <span class="st">&quot;</span><span class="va">$PKG</span><span class="st">&quot;</span> android.permission.POST_NOTIFICATIONS <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 3) Launch MainActivity WITH the auto-start extra as a BOOLEAN (--ez).</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#    MainActivity reads it via intent.getBooleanExtra(EXTRA_START_API,false),</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">#    so the extra MUST be a boolean, not a string. This drives</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">#    ApiControlAction.StartRequested → onStart() → controller.start(), which</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">#    binds the TLS listener.</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">-s</span> <span class="st">&quot;</span><span class="va">$serial</span><span class="st">&quot;</span> shell am start <span class="at">-W</span> <span class="dt">\</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">-n</span> <span class="st">&quot;</span><span class="va">$PKG</span><span class="st">/lava.api.app.MainActivity&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">--ez</span> lava.applink.START_API true</span></code></pre></div>
+<p><code>EXTRA_START_API</code> literal value =
+<code>lava.applink.START_API</code> (<code>AppLinkContract</code>).</p>
+<blockquote>
+<p>Cross-app note (<code>UNCONFIRMED:</code> as a bug, but relevant to
+the <code>--ez</code> choice): the client's
+<code>OnboardingViewModel.onLaunchOnDeviceApi()</code> does
+<code>putExtra(EXTRA_START_API, "true")</code> — a
+<strong>String</strong> — while <code>MainActivity</code> reads it with
+<code>getBooleanExtra(...)</code>. A String extra read as a boolean
+returns the default (<code>false</code>). The adb path above sidesteps
+this by passing a real boolean (<code>--ez</code>). Whether the
+client→api-app auto-start actually fires in production is therefore
+<code>UNCONFIRMED:</code> and out of scope for this doc, but the
+orchestrator's <code>--ez</code> launch is correct regardless.</p>
+</blockquote>
+<hr />
+<h2 id="2-deterministic-readiness-signal">2. Deterministic readiness
+signal</h2>
+<p>There is <strong>no dedicated readiness logcat marker and no
+readiness file</strong> beyond the TLS cert. The Go embed logs nothing
+on successful <code>Start</code>; the Kotlin VM / controller log nothing
+on start (only <code>Log.w</code> on <em>failures</em>:
+<code>ApiControlScreen</code>, <code>ApiApplication</code>). So
+<strong>do not poll logcat for "server up".</strong></p>
+<p><strong>Recommended (real served-surface probe — the §6.B-correct
+signal):</strong> tunnel a host port to the device's loopback
+<code>8443</code> and poll <code>GET /health</code>, expecting HTTP 200.
+<code>/health</code> is registered <strong>before</strong> the Lava-Auth
+middleware in <code>internal/router.Build</code> (stated in
+<code>mobile.go</code> and proven empirically by Challenge C02, which
+gets 200 from <code>/health</code> with no key), so the probe needs no
+credential and no cert trust (<code>curl -k</code>).</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">hp</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="ex">adb</span> <span class="at">-s</span> <span class="st">&quot;</span><span class="va">$serial</span><span class="st">&quot;</span> forward tcp:0 tcp:8443<span class="va">)</span><span class="st">&quot;</span>   <span class="co"># allocates a host port → device :8443</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-ksf</span> <span class="st">&quot;https://127.0.0.1:</span><span class="va">${hp}</span><span class="st">/health&quot;</span>        <span class="co"># 200 ⇔ embed bound + serving</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">adb</span> <span class="at">-s</span> <span class="st">&quot;</span><span class="va">$serial</span><span class="st">&quot;</span> forward <span class="at">--remove</span> <span class="st">&quot;tcp:</span><span class="va">${hp}</span><span class="st">&quot;</span></span></code></pre></div>
+<p>This is the exact analogue of <code>backend_up_goapi</code>'s
+<code>curl -ksf $GOAPI_HEALTH</code> loop, and it proves <em>both</em>
+that the listener bound the port <em>and</em> that the HTTP stack serves
+— not merely that the process launched.</p>
+<p><strong>Weaker proxy (fallback only):</strong> the embed persists its
+self-signed leaf at <code>&lt;filesDir&gt;/lava-embed-cert.pem</code> =
+<code>/data/data/digital.vasic.lava.api.dev/files/lava-embed-cert.pem</code>
+during <code>Start</code>, just before <code>net.Listen</code>. On the
+debuggable debug build:
+<code>adb -s "$serial" shell run-as "$PKG" cat files/lava-embed-cert.pem</code>
+non-empty ⇒ <code>Start</code> reached the TLS step. This is weaker than
+<code>/health</code>: it fires before
+<code>net.Listen</code>/<code>Serve</code>, so it cannot distinguish
+"bound + serving" from "about to bind". Prefer the <code>/health</code>
+probe.</p>
+<p>Why <code>adb forward</code> works: the embed binds
+<code>0.0.0.0:8443</code> (wildcard, covers loopback);
+<code>adb forward</code> makes adbd open <code>127.0.0.1:8443</code> on
+the device, which the wildcard listener accepts. The forward is a
+<strong>host-side probe convenience only</strong> — the on-device client
+reaches the embed directly over loopback (§3) and needs no forward.</p>
+<hr />
+<h2 id="3-loopback-port--how-the-client-selects-the-on-device-api">3.
+Loopback port + how the client selects the on-device API</h2>
+<p><strong>Port = 8443, deterministic.</strong> Chain:
+<code>ApiConfig.port</code> default <code>8443</code>
+(<code>core/apiengine/.../ApiEngine.kt</code>) →
+<code>ApiEngineController.DEFAULT_PORT = ApiConfig(sqlitePath="").port</code>
+(8443) → <code>ApiControlModule.provideController(...)</code> passes
+<strong>no</strong> <code>port</code> arg → embed
+<code>mobile.Start</code> uses <code>sc.Port</code> (8443;
+<code>sc.Port==0</code> would fall back to <code>defaultPort=8443</code>
+anyway) → <code>Status().port = 8443</code> →
+<code>ApiControlState.Running.port = 8443</code>.</p>
+<p><strong>Client onboarding "apiapp" path (so Challenge70
+<code>qa_backend=apiapp</code> drives the right UI):</strong></p>
+<ol type="1">
+<li>ApiSelection step → user taps the "On this device" button, whose
+<code>contentDescription</code> is
+<strong><code>api-ondevice-launch</code></strong>
+(<code>ApiSelectionStep.kt</code>). Challenge70's
+<code>selectApiBackend()</code> taps exactly this node for
+<code>apiapp</code>.</li>
+<li><code>OnboardingViewModel.onLaunchOnDeviceApi()</code> →
+<code>SiblingAppLauncher.intentToOpen()</code> + <code>START_API</code>
++ <code>RETURN_TO</code> extras →
+<code>OnboardingSideEffect.LaunchIntent</code> → screen
+<code>startActivity</code>s the api-app. <strong>The button
+label/behaviour depends on the api-app being installed:</strong>
+installed ⇒ "Open Lava API app" + a launch intent; not installed ⇒
+"Install Lava API app" + a Firebase download intent (the WRONG path). So
+<code>backend_up_apiapp</code> <strong>must install the api-app
+first</strong> (it already does), and pre-starting it (§1) makes the key
+handoff immediately available.</li>
+<li>The api-app starts the embed on <code>127.0.0.1:8443</code>. The
+client obtains <code>{access_key, loopback_port}</code> from the
+api-app's <code>ApiKeyProvider</code> ContentProvider
+(<code>content://digital.vasic.lava.api.dev.keyprovider</code>) via
+<code>ApiKeyClient.read()</code> (and/or the
+<code>EXTRA_API_HOST=127.0.0.1</code> / <code>EXTRA_API_PORT</code>
+return extras). <code>loopback_port</code> = the Running port =
+8443.</li>
+<li><code>OnboardingViewModel.onOnDeviceApiReturned(host, port)</code>
+builds
+<code>Endpoint.GoApi(host="127.0.0.1", port=8443, key=access_key)</code>
+and funnels into the normal <code>onSelectApi</code> → probe → persist →
+advance pipeline. (<code>platform</code> is only set as
+<code>android</code> when the endpoint is <em>discovered via mDNS</em>,
+not on the loopback handoff path.)</li>
+</ol>
+<p>For the orchestrator: pre-starting the embed via §1 is
+<strong>idempotent</strong> with a later client-driven
+<code>START_API</code> re-launch —
+<code>ApiEngineController.start()</code> returns early when already
+<code>Running</code>/<code>Starting</code> (atomic compare-and-set
+guard), so no "address already in use" double-bind.</p>
+<hr />
+<h2 id="4-cert--auth-handling-for-the-on-device-api">4. Cert / auth
+handling for the on-device API</h2>
+<p><strong><code>OnDeviceApiClient</code> (the api-app's OWN C02/C03
+instrumentation client):</strong></p>
+<ul>
+<li>Trusts <strong>exactly</strong> the leaf at
+<code>&lt;filesDir&gt;/lava-embed-cert.pem</code> via a custom
+<code>X509TrustManager</code> (no trust-all). It can read that file
+because the test runs <strong>in the same process</strong> as the embed
+(same <code>filesDir</code>).</li>
+<li>Connects to <code>https://127.0.0.1:&lt;port&gt;</code> —
+<code>127.0.0.1</code> is an <strong>IP SAN</strong> baked into the cert
+(<code>generateSelfSigned</code>), so default hostname verification
+stays ON.</li>
+<li>Auth: presents the access key in the
+<strong><code>Lava-Auth</code></strong> header
+(<code>getWithKey(path, authKey, "Lava-Auth")</code>). The embed's
+middleware base64-decodes + HMACs the value; <code>/health</code> needs
+no key, <code>/index</code> (and other <code>/v1/...</code>) return 401
+without it.</li>
+</ul>
+<p><strong>Implication for Challenge70:</strong> Challenge70 drives the
+<strong>client</strong> app, not <code>OnDeviceApiClient</code> — it
+uses the client's own HTTP stack. The same-process cert trick does
+<strong>not</strong> apply cross-process: the client cannot read the
+api-app's private <code>filesDir</code>. Therefore whether Challenge70
+can actually <em>complete a search</em> against the on-device embed
+depends on two things outside <code>OnDeviceApiClient</code>:</p>
+<ul>
+<li>the client being signed with the <strong>same</strong> keystore as
+the api-app (required for the signature-permission
+<code>ApiKeyProvider</code> read to succeed — both use the shared
+<code>keystores/</code> block, so this holds for matched debug builds);
+and</li>
+<li><strong><code>UNCONFIRMED:</code></strong> how the client's network
+layer (under <code>core/network</code>) trusts the embed's self-signed
+leaf for the <code>127.0.0.1:8443</code> TLS handshake. Not read in this
+pass — verify before treating <code>qa_backend=apiapp</code> end-to-end
+search as gating. The <code>/health</code> readiness probe in §2 is
+unaffected (it uses <code>curl -k</code>).</li>
+</ul>
+<hr />
+<h2 id="5-drop-in-backend_up_apiapp-replaces-the-sleep-25-todo">5.
+Drop-in <code>backend_up_apiapp</code> (replaces the
+<code>sleep 25</code> TODO)</h2>
+<p>Do NOT edit <code>lib-backend.sh</code> from this doc; this is the
+replacement body to apply later. It keeps the existing function contract
+(writes the <code>apiapp</code> LOCK on success, returns non-zero on
+failure). <code>8443</code> matches the literal already used for
+<code>GOAPI_HEALTH</code> in the same file (<code>ApiConfig</code>
+default port, §3).</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">backend_up_apiapp()</span> <span class="kw">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="ex">_backend_assert_free</span> <span class="kw">||</span> <span class="cf">return</span> <span class="dv">1</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">local</span> <span class="va">serial</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$1</span><span class="st">&quot;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="bu">local</span> <span class="va">apiapp_port</span><span class="op">=</span>8443   <span class="co"># ApiConfig.port default; production wiring sets no override (§3)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">local</span> <span class="va">apk</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="va">apk</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="fu">find</span> <span class="st">&quot;</span><span class="va">$REPO_ROOT</span><span class="st">/api-app/build/outputs/apk/debug&quot;</span> <span class="at">-name</span> <span class="st">&#39;*.apk&#39;</span> <span class="at">-type</span> f <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">|</span> <span class="fu">head</span> <span class="at">-1</span> <span class="kw">||</span> <span class="fu">true</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">[[</span> <span class="ot">-z</span> <span class="st">&quot;</span><span class="va">$apk</span><span class="st">&quot;</span> <span class="kw">]]</span> <span class="kw">&amp;&amp;</span> <span class="kw">{</span> <span class="bu">echo</span> <span class="st">&quot;[backend] ERROR :api-app debug APK missing — run ./gradlew :api-app:assembleDebug&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span><span class="kw">;</span> <span class="cf">return</span> <span class="dv">1</span><span class="kw">;</span> <span class="kw">}</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;[backend] installing :api-app on </span><span class="va">$serial</span><span class="st">&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;</span><span class="va">$ADB</span><span class="st">&quot;</span> <span class="at">-s</span> <span class="st">&quot;</span><span class="va">$serial</span><span class="st">&quot;</span> install <span class="at">-r</span> <span class="st">&quot;</span><span class="va">$apk</span><span class="st">&quot;</span> <span class="op">&gt;</span>/dev/null</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Grant POST_NOTIFICATIONS BEFORE launch so MainActivity fires StartRequested</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># immediately instead of blocking on the runtime permission dialog (API 33+).</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Harmless / errors on &lt;API 33 → tolerate.</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;</span><span class="va">$ADB</span><span class="st">&quot;</span> <span class="at">-s</span> <span class="st">&quot;</span><span class="va">$serial</span><span class="st">&quot;</span> shell pm grant <span class="st">&quot;</span><span class="va">$APIAPP_PKG</span><span class="st">&quot;</span> android.permission.POST_NOTIFICATIONS <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Launch MainActivity WITH the auto-start extra as a BOOLEAN (--ez): MainActivity</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># reads intent.getBooleanExtra(EXTRA_START_API). A plain LAUNCHER start does NOT</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># start the embed — only START_API drives controller.start() (binds the listener).</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;[backend] launching :api-app MainActivity with START_API=true&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;</span><span class="va">$ADB</span><span class="st">&quot;</span> <span class="at">-s</span> <span class="st">&quot;</span><span class="va">$serial</span><span class="st">&quot;</span> shell am start <span class="at">-W</span> <span class="dt">\</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">-n</span> <span class="st">&quot;</span><span class="va">$APIAPP_PKG</span><span class="st">/lava.api.app.MainActivity&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">--ez</span> lava.applink.START_API true <span class="op">&gt;</span>/dev/null</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Deterministic readiness: tunnel a host port to the device loopback:8443 and</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  <span class="co"># poll /health (pre-auth route) for 200 — the real served-surface signal</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  <span class="co"># (§6.B: process-launched != serving), mirroring backend_up_goapi.</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  <span class="bu">local</span> <span class="va">hp</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  <span class="va">hp</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="st">&quot;</span><span class="va">$ADB</span><span class="st">&quot;</span> <span class="at">-s</span> <span class="st">&quot;</span><span class="va">$serial</span><span class="st">&quot;</span> forward tcp:0 tcp:<span class="st">&quot;</span><span class="va">$apiapp_port</span><span class="st">&quot;</span><span class="va">)</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">||</span> <span class="kw">{</span> <span class="bu">echo</span> <span class="st">&quot;[backend] ERROR adb forward failed&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span><span class="kw">;</span> <span class="cf">return</span> <span class="dv">1</span><span class="kw">;</span> <span class="kw">}</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  <span class="bu">local</span> <span class="va">waited</span><span class="op">=</span>0 <span class="va">ok</span><span class="op">=</span>0</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="kw">((</span> <span class="va">waited</span> <span class="op">&lt;</span> <span class="dv">90</span> <span class="kw">));</span> <span class="cf">do</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="ex">curl</span> <span class="at">-ksf</span> <span class="st">&quot;https://127.0.0.1:</span><span class="va">${hp}</span><span class="st">/health&quot;</span> <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span><span class="kw">;</span> <span class="cf">then</span> <span class="va">ok</span><span class="op">=</span>1<span class="kw">;</span> <span class="cf">break</span><span class="kw">;</span> <span class="cf">fi</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sleep</span> 3<span class="kw">;</span> <span class="va">waited</span><span class="op">=</span><span class="va">$((waited</span><span class="op">+</span><span class="dv">3</span><span class="va">))</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>  <span class="cf">done</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;</span><span class="va">$ADB</span><span class="st">&quot;</span> <span class="at">-s</span> <span class="st">&quot;</span><span class="va">$serial</span><span class="st">&quot;</span> forward <span class="at">--remove</span> <span class="st">&quot;tcp:</span><span class="va">${hp}</span><span class="st">&quot;</span> <span class="op">&gt;</span>/dev/null <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span> <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">((</span> <span class="va">ok</span> <span class="op">==</span> <span class="dv">0</span> <span class="kw">));</span> <span class="cf">then</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;[backend] ERROR apiapp /health never passed after </span><span class="va">${waited}</span><span class="st">s. logcat tail:&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;</span><span class="va">$ADB</span><span class="st">&quot;</span> <span class="at">-s</span> <span class="st">&quot;</span><span class="va">$serial</span><span class="st">&quot;</span> logcat <span class="at">-d</span> <span class="at">-t</span> 200 <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="dt">\</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>      <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-iE</span> <span class="st">&#39;lava|apiengine|AndroidRuntime&#39;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span> <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>  <span class="cf">fi</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;apiapp&quot;</span> <span class="op">&gt;</span> <span class="st">&quot;</span><span class="va">$LOCK</span><span class="st">&quot;</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;[backend] apiapp healthy after </span><span class="va">${waited}</span><span class="st">s (embed serving on device loopback :</span><span class="va">${apiapp_port}</span><span class="st">; client reaches it on-device)&quot;</span> <span class="op">&gt;&amp;</span><span class="dv">2</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span></code></pre></div>
+<p><code>backend_down_apiapp</code> (existing:
+<code>am force-stop</code> + <code>uninstall</code> +
+<code>rm LOCK</code>) needs no change; optionally add
+<code>"$ADB" -s "$serial" forward --remove-all</code> for tidiness.</p>
+</body>
+</html>

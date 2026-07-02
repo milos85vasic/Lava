@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>helixqa-runner-readiness</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<!-- SPDX-FileCopyrightText: 2026 Milos Vasic -->
+
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<h1
+id="helixqa-runner-readiness--can-the-matrix-banks-drive-the-real-app-flow">HelixQA
+Runner Readiness — can the matrix banks DRIVE the real app flow?</h1>
+<p><strong>Question.</strong> Can the HelixQA matrix banks drive the
+real Lava app flow (onboard → search <code>1080p</code> /
+<code>mp3</code> → open details → obtain download link) on a
+containerized emulator via <strong>adb + vision OCR</strong> — i.e.
+<strong>without</strong> <code>createAndroidComposeRule</code>, so
+immune to the upstream LVA-008 Compose-rule teardown defect — as an
+alternative/complementary evidence vehicle to the Compose Challenge?</p>
+<p><strong>One-line verdict.</strong> <strong>VIABLE-WITH-GAPS.</strong>
+The adb + vision-driven, Compose-rule-free <em>capability</em> exists
+and is unit-tested in the pinned HelixQA submodule
+(<code>pkg/visionnav</code> + <code>pkg/navigator</code> +
+<code>pkg/autonomous</code>), but the <strong>integration glue that
+drives a MATRIX BANK through that vision loop is not wired in the pinned
+submodule</strong> — so neither mode the Lava script offers
+(<code>--matrix</code> nor <code>--autonomous</code>) actually executes
+the pinned 1080p/mp3 journey end-to-end today.</p>
+<p>This is an evidence-based finding from reading the pinned submodule
+source. Where a fact could not be proven from code it is marked
+<code>UNCONFIRMED:</code> per §11.4.6 (no-guessing).</p>
+<hr />
+<h2
+id="1-does-helixqa-actively-drive-ui-input-or-only-launch--passively-ocr">1.
+Does HelixQA actively drive UI input, or only launch + passively
+OCR?</h2>
+<p><strong>Both capabilities exist in the codebase, but they live in
+DIFFERENT code paths, and the matrix-bank path that the Lava script
+invokes does NOT reach the active-driving one.</strong></p>
+<h3
+id="1a-the-active-driving-mechanism-exists-and-is-compose-rule-free">1a.
+The active-driving mechanism EXISTS (and is Compose-rule-free)</h3>
+<p>The vision-driven loop genuinely drives input — tap / type / key /
+back / home / swipe — under LLM control, using only adb + screenshots.
+No <code>createAndroidComposeRule</code>, no instrumentation, no
+UIAutomator-dump dependency; the taps are <strong>vision-located
+coordinate taps</strong> the LLM produces from looking at each
+screenshot.</p>
+<ul>
+<li><code>pkg/visionnav/session.go:118</code> — <code>Session.Run</code>
+loop, per step: screenshot → build
+<code>Observation{LastImageBytes}</code> →
+<code>Provider.Decide(obs)</code> →
+<strong><code>Actor.Dispatch(action)</code></strong> →
+<code>Explorer.CaptureFinding</code> → check <code>ScreenGoals</code>
+against the captured OCR snapshot.</li>
+<li><code>pkg/visionnav/llm_provider.go:110</code> —
+<code>LLMProvider.Decide</code> sends the screenshot <strong>bytes + a
+goal-aware prompt</strong> to a vision-capable LLM
+(<code>VisionDecider.Vision</code>) and parses an
+<code>ACTION / RATIONALE / EXPECT</code> reply into a validated
+<code>Decision</code> (a reply with no action/rationale is rejected as a
+bluff — <code>:217</code>, <code>:221</code>).</li>
+<li><code>pkg/visionnav/adb_actor.go:87</code> —
+<code>ADBActor.Dispatch</code> maps the action grammar
+(<code>tap &lt;x&gt; &lt;y&gt;</code>, <code>text &lt;string&gt;</code>,
+<code>key &lt;KEYCODE&gt;</code>, <code>back</code>, <code>home</code>,
+<code>launch</code>, <code>shell</code>) onto a
+<code>DeviceExecutor</code>. <strong>An unknown verb is a hard error,
+never a silent no-op</strong> (<code>:140</code>) — the anti-bluff
+posture that prevents "thought it acted but didn't".</li>
+<li><code>pkg/navigator/executor.go</code> — <code>ADBExecutor</code>
+implements the real device primitives: <code>Tap</code> via
+<code>cmd input tap</code> with legacy <code>input tap</code> fallback
+(<code>:113-127</code>), <code>Type</code> via
+<code>adb shell input text</code> (<code>:135</code>),
+<code>KeyPress</code>/<code>Back</code>/ <code>Home</code> via
+<code>input keyevent</code> (<code>:164-282</code>), <code>Swipe</code>
+via <code>input swipe</code> (<code>:235</code>),
+<code>Screenshot</code> via
+<code>adb -s &lt;serial&gt; exec-out screencap -p</code> with a
+<code>shell screencap</code> fallback (<code>:351-359</code>). All over
+adb — <strong>no Compose rule.</strong></li>
+<li>Anti-bluff verdict gate: <code>session.go:180</code> — a run PASSes
+only when <strong>both</strong> (a) a captured
+<code>Evidence.OCRSnapshot</code> matches a registered
+<code>ScreenGoal</code> <strong>and</strong> (b) the screen demonstrably
+changed between steps (zero-screen-delta ⇒ auto-FAIL, §11.4.52). This is
+exactly the "the action did something the user can see" guarantee.</li>
+</ul>
+<p><strong>Conclusion: the active-driving + vision-OCR + anti-bluff
+mechanism is real and Compose-rule-free → architecturally
+LVA-008-immune.</strong></p>
+<h3
+id="1b-the-matrix-bank-run-path-only-launches--passively-checks--it-does-not-drive">1b.
+The matrix-bank <code>run</code> path only LAUNCHES + passively checks —
+it does NOT drive</h3>
+<p>The Lava <code>--matrix</code> path runs
+<code>helixqa run --banks &lt;matrix&gt; --platform android</code>
+(<code>scripts/run-helixqa-provider-qa.sh:95</code>). That command goes
+through <code>orchestrator.Run</code> →
+<code>runPlatform("android")</code>:</p>
+<ul>
+<li><code>cmd/helixqa/main.go:187,210</code> — <code>run</code>
+constructs <code>orchestrator.New(...)</code> and calls
+<code>orch.Run(ctx)</code>. The orchestrator package is the only run
+engine here.</li>
+<li><code>pkg/orchestrator/orchestrator.go:300-356</code> — per
+definition it calls a <code>definitionChallenge.Execute</code>. For
+android (anything but <code>desktop</code>) that returns an
+<strong>honest SKIP</strong>
+(<code>definition_challenge.go:390-402</code>,
+<code>skippedResult</code> reason: <em>"bank case has no executable
+action for the "android" platform (needs an Android/UI/web topology
+backend)"</em>, <code>:498-501</code>). <strong>It never constructs a
+<code>visionnav.Session</code> and never drives a
+tap/type.</strong></li>
+<li><code>promoteSkippedToPassed</code>
+(<code>orchestrator.go:399</code>, logic
+<code>definition_challenge.go:146-194</code>) CANNOT rescue these cases:
+the matrix cases carry <code>adb_shell:</code> launch steps + tap steps,
+and <code>caseHasUnrunAssertingStep</code> (<code>:204-226</code>)
+returns <code>true</code> for any <code>adb_shell</code> /
+<code>tap</code> / <code>text</code> action → promotion is
+<strong>blocked</strong> → the cases stay <strong>SKIPPED</strong>.</li>
+<li>The validator that does run (<code>orchestrator.go:360-384</code>,
+<code>pkg/detector/android.go</code>) is <strong>passive crash/ANR
+detection</strong> (pidof / logcat / screencap), not input driving.</li>
+<li>The bank's <code>dispatches_to: "monkey -p ... 1"</code> and
+<code>required_evidence</code> tokens are <strong>NOT consumed by
+<code>orchestrator.Run</code> at all</strong> — that metadata is owned
+by <code>pkg/testbank.Dispatcher</code> (<code>dispatch.go</code>),
+which <code>orchestrator.go</code> never imports or calls.</li>
+</ul>
+<p><strong>Net for <code>--matrix</code>: every matrix case reports an
+honest SKIPPED; no onboarding, no search, no details, no download is
+exercised.</strong> (A run with 0 executed challenges is honestly
+reported as not-success — <code>orchestrator.go:222</code>.)</p>
+<h3 id="1c-the-banks-executor-contract-comment-is-aspirational">1c. The
+bank's "Executor contract" comment is ASPIRATIONAL</h3>
+<p>The matrix YAML header
+(<code>lava-rutor-matrix-journey.yaml:29-37</code>) claims:</p>
+<blockquote>
+<p>Executor contract (pkg/orchestrator/definition_challenge.go):
+platforms:[android] routes each case to
+<code>executeAndroidVisionSteps</code>, which builds a
+<code>visionnav.Target{LaunchAction, ScreenGoals}</code> …
+<code>deriveLaunchAction</code> … <code>deriveScreenGoals</code> …</p>
+</blockquote>
+<p><strong>None of <code>executeAndroidVisionSteps</code>,
+<code>deriveLaunchAction</code>, or <code>deriveScreenGoals</code> exist
+anywhere in the pinned submodule</strong> (verified by exact-symbol grep
+— zero matches). <code>visionnav.Session</code> /
+<code>visionnav.NewSession</code> is <strong>never constructed in any
+non-test production file</strong> (verified). The bank was authored
+against a planned wiring that the pinned submodule does not yet
+contain.</p>
+<h3
+id="1d-the---autonomous-mode-does-drive-input--but-is-not-matrix-bank-driven">1d.
+The <code>--autonomous</code> mode DOES drive input — but is NOT
+matrix-bank-driven</h3>
+<p><code>helixqa autonomous</code>
+(<code>scripts/run-helixqa-provider-qa.sh:92</code>) uses a different
+engine that genuinely drives the device:</p>
+<ul>
+<li><code>cmd/helixqa/main.go:704</code> →
+<code>autonomous.NewSessionPipeline</code>, with executors from
+<code>pkg/autonomous/real_executor.go:83</code> →
+<code>navigator.NewADBExecutor(serial, …)</code> (the same
+tap/type/screencap primitives as 1a). It records video
+(<code>FFmpegPath</code> / <code>HELIX_FFMPEG_PATH</code>,
+<code>cfg</code> at <code>main.go:670</code>) and uses LLM vision
+providers.</li>
+<li><strong>BUT it is doc-driven, not bank-driven</strong>:
+<code>cfg.IssuesDir = &lt;project&gt;/docs/issues</code> and
+<code>cfg.BanksDir = &lt;project&gt;/challenges/helixqa-banks</code>
+(<code>main.go:657-662</code>). The Lava matrix banks live at
+<code>lava-api-go/qa/banks/*.yaml</code>, which autonomous mode does
+<strong>not</strong> read, and
+<code>&lt;project&gt;/challenges/helixqa-banks</code> does not exist in
+Lava. So autonomous mode will <strong>not</strong> run the pinned
+1080p/mp3 journey; it would free-explore from docs.</li>
+</ul>
+<h3
+id="1e-the-only-binary-that-consumes-dispatches_to--required_evidence-is-a-script-runner-not-a-ui-driver">1e.
+The only binary that consumes <code>dispatches_to</code> +
+<code>required_evidence</code> is a script-runner, not a UI driver</h3>
+<p><code>cmd/helixqa-bank-session/main.go:147</code> wires
+<code>testbank.Dispatcher</code>. But it (a) is <strong>not</strong> the
+binary the Lava script builds
+(<code>run-helixqa-provider-qa.sh:73</code> builds
+<code>./cmd/helixqa</code>), and (b) interprets
+<code>dispatches_to</code> as a <strong>repo-relative on-device
+<code>test_*.sh</code> it pushes + runs via adb</strong>
+(<code>main.go:134-135,209-233</code>), then enforces a
+content-asserting evidence ledger. That is script-execution +
+evidence-gating — <strong>still not active onboarding/search/tap UI
+driving</strong>, and the matrix bank's
+<code>dispatches_to: "monkey -p ... 1"</code> is not a script path
+anyway.</p>
+<hr />
+<h2
+id="2-exact-command-to-run-a-matrix-bank-against-a-booted-emulator">2.
+Exact command to run a matrix bank against a booted emulator</h2>
+<p>The Lava glue (<code>scripts/run-helixqa-provider-qa.sh</code>)
+targets adb by serial via <code>--device</code>/<code>$SERIAL</code>
+(default <code>127.0.0.1:6555</code> Genymotion, or
+<code>$LAVA_REAL_DEVICE_SERIALS</code>). For a booted emulator at
+<code>127.0.0.1:&lt;port&gt;</code>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Via the Lava glue (preferred — does the adb-connect + device gate + build):</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/run-helixqa-provider-qa.sh</span> <span class="at">--provider</span> rutor <span class="at">--matrix</span> <span class="at">--serial</span> 127.0.0.1:<span class="op">&lt;</span>port<span class="op">&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Equivalent raw helixqa invocation (what the glue runs internally):</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">helixqa</span> run <span class="dt">\</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--banks</span> lava-api-go/qa/banks/lava-rutor-matrix-journey.yaml <span class="dt">\</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--platform</span> android <span class="dt">\</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">--device</span> 127.0.0.1:<span class="op">&lt;</span>port<span class="op">&gt;</span> <span class="dt">\</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">--package</span> digital.vasic.lava.client.dev <span class="dt">\</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">--output</span> .lava-ci-evidence/helixqa/rutor/<span class="op">&lt;</span>run-id<span class="op">&gt;</span></span></code></pre></div>
+<p><code>--all</code> runs every provider bank;
+<code>--autonomous</code> switches to the doc-driven engine (see §1d
+caveat — does not consume the matrix bank).</p>
+<p><strong>Caveat (consequence of §1b):</strong> today this command
+returns <strong>SKIPPED rows</strong> for the matrix cases — it does not
+drive the flow. The command is correct; the runner wiring behind it is
+the gap.</p>
+<hr />
+<h2 id="3-does-it-record-video--perform-vision-ocr-analysis">3. Does it
+record video + perform vision OCR analysis?</h2>
+<ul>
+<li><strong>Video recording:</strong> Yes, the capability exists.
+<code>helixqa run</code> accepts <code>--record</code> (default
+<strong>true</strong>, <code>cmd/helixqa/main.go:131</code>) and the
+codebase has real recorders (<code>pkg/session/recorder.go</code>,
+<code>pkg/capture/linux_capture.go</code>, ffmpeg via
+<code>HELIX_FFMPEG_PATH</code>). In <code>--autonomous</code> mode video
+is wired through <code>cfg.FFmpegPath</code> (<code>main.go:670</code>).
+<strong>However</strong>, in the <code>--matrix</code> <code>run</code>
+path the android cases SKIP without the app being actively driven, so
+any recorded video would capture an undriven screen — not useful journey
+evidence. <code>UNCONFIRMED:</code> whether <code>--record=true</code>
+actually starts a screenrecord in the android <code>run</code> path when
+every case skips (not traced to a start call in
+<code>runPlatform</code>).</li>
+<li><strong>Vision OCR analysis:</strong> Yes, the capability exists.
+The vision loop matches goals against a real Tesseract OCR snapshot
+(<code>pkg/visionnav/explorer.go:135-141</code>
+<code>DefaultExplorer</code> → <code>tesseract.OCR</code>, evidence
+stored via <code>FileSink</code>, <code>evidence.go</code>). The
+§11.4.52 OCR-goal + screen-delta gate is in
+<code>session.go:174-189</code>. Autonomous mode additionally uses LLM
+vision over screenshots directly. <strong>But</strong> — same gap — this
+OCR analysis only happens inside <code>visionnav.Session</code> / the
+autonomous pipeline, neither of which the <code>--matrix</code>
+<code>run</code> path constructs. The <code>run</code> path's only
+screen analysis is passive crash/ANR detection
+(<code>pkg/detector/android.go</code>).</li>
+</ul>
+<hr />
+<h2 id="4-viability-verdict">4. VIABILITY VERDICT</h2>
+<p><strong>VIABLE-WITH-GAPS</strong> as the matrix UI-evidence
+vehicle.</p>
+<p><strong>Why viable (the hard part is already built):</strong> an
+adb-only, vision-driven, Compose-rule-free active-driving loop with an
+anti-bluff goal+screen-delta verdict and Tesseract OCR exists and is
+unit-tested
+(<code>pkg/visionnav/{session,llm_provider,adb_actor,explorer,evidence}.go</code>
++ <code>pkg/navigator/executor.go</code> +
+<code>pkg/autonomous/real_executor.go</code>). Because it is pure adb +
+screenshots + vision LLM, it is <strong>structurally immune to the
+LVA-008 <code>createAndroidComposeRule</code> teardown defect</strong> —
+it never instantiates a Compose rule. The <code>--autonomous</code>
+engine already drives input + records video + uses vision on a device
+addressed by adb serial.</p>
+<p><strong>The specific gaps (what blocks it being the matrix vehicle
+today):</strong></p>
+<ol type="1">
+<li><p><strong>No matrix-bank → vision-loop wiring (primary
+gap).</strong> <code>orchestrator.Run</code> handles android bank cases
+by honest-SKIP; it does not build a <code>visionnav.Target</code> from
+the bank and does not run <code>visionnav.Session</code>. The functions
+the bank comment references (<code>executeAndroidVisionSteps</code>,
+<code>deriveLaunchAction</code>, <code>deriveScreenGoals</code>)
+<strong>do not exist</strong> in the pinned submodule.
+<strong>Fix:</strong> add an android execution path in the orchestrator
+that, for <code>platforms:[android]</code> cases, derives
+<code>LaunchAction</code> from the first <code>adb_shell:</code> step
+and <code>ScreenGoals</code> from <code>required_evidence</code> +
+<code>expected_result</code>, then runs <code>visionnav.Session</code>
+with
+<code>visionnav.NewADBActor(navigator.NewADBExecutor(serial,…))</code></p>
+<ul>
+<li><code>visionnav.NewLLMProvider(&lt;vision backend&gt;, goals, grammar-hint)</code>
++ <code>visionnav.NewDefaultExplorer(tesseract, FileSink)</code>. This
+is HelixQA-side (own-org submodule) work, contributable upstream per the
+Decoupled Reusable Architecture rule.</li>
+</ul></li>
+<li><p><strong>Vision backend must be supplied.</strong> The loop needs
+a <code>VisionDecider</code> (<code>SupportsVision()==true</code>). The
+Lava script offers the <code>claude</code> CLI bridge
+(<code>run-helixqa-provider-qa.sh:79-81</code>);
+<code>UNCONFIRMED:</code> whether the bridged CLI provider advertises
+<code>SupportsVision()==true</code> end-to-end in <code>run</code> mode
+(it is wired for <code>autonomous</code>). Without a vision backend the
+loop cannot decide coordinate taps.</p></li>
+<li><p><strong><code>--autonomous</code> points at the wrong banks/docs
+for Lava.</strong> It reads <code>&lt;project&gt;/docs/issues</code> +
+<code>&lt;project&gt;/challenges/helixqa-banks</code>, not
+<code>lava-api-go/qa/banks/</code>. To use autonomous mode as the matrix
+vehicle, either place the matrix journeys where autonomous looks, or
+(better) close gap #1 so the deterministic <code>run --banks</code> path
+drives them.</p></li>
+<li><p><strong>Credentials / anonymous path.</strong> The login case
+loads <code>RUTOR_USERNAME</code> / <code>RUTOR_PASSWORD</code> from env
+(<code>lava-rutor-matrix-journey.yaml:96</code>); the bank accepts the
+anonymous "continue" path too, so a no-credential run can still satisfy
+the search+download cases — but the vision loop must be able to find and
+tap the anonymous-continue control.</p></li>
+<li><p><strong>Host/topology gate unchanged.</strong> §6.AH requires the
+emulator to run in a container/VM via the Containers submodule; the Lava
+script's device gate is an honest BLOCKED (exit 2) when no adb device is
+in <code>device</code> state
+(<code>run-helixqa-provider-qa.sh:57-68</code>). This is orthogonal to
+the wiring gap but is the runtime precondition.</p></li>
+</ol>
+<p><strong>Bottom line:</strong> HelixQA is the right
+<em>complementary</em> vehicle — an adb+vision, Compose-rule-free path
+that side-steps LVA-008 — and the engine parts exist, but the matrix
+banks cannot drive the flow until gap #1 (the orchestrator's
+android-vision wiring) is implemented in the pinned submodule. Until
+then the <code>--matrix</code> run reports honest SKIPs, and
+<code>--autonomous</code> does not consume the matrix banks.</p>
+</body>
+</html>

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-07-02-redroid-feasibility</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="redroid-feasibility-for-the-lava-6x--6ah-emulator-gate">Redroid
+Feasibility for the Lava §6.X / §6.AH Emulator Gate</h1>
+<ul>
+<li>Date: 2026-07-02</li>
+<li>Host: <code>nezha</code>, kernel <code>6.12.61-6.12-alt1</code>,
+<code>x86_64</code> (ALT Linux)</li>
+<li>Runtime: rootless <code>podman 5.7.1</code> (no docker
+installed)</li>
+<li>Investigator: read-only feasibility subagent (no source edits, no
+gradle, no container mutations)</li>
+<li>Redroid upstream: <a
+href="https://github.com/remote-android/redroid-doc">https://github.com/remote-android/redroid-doc</a></li>
+</ul>
+<h2 id="verdict-tldr">Verdict (TL;DR)</h2>
+<p><strong>NO-GO on this host right now</strong> — but <strong>GO as an
+adoptable §6.X/§6.AH runner on a properly-provisioned Linux gate
+host.</strong></p>
+<p>Single biggest blocker: <strong>this host's kernel has
+<code>CONFIG_ANDROID_BINDER_IPC</code> NOT set and ships zero loadable
+binder/ashmem modules.</strong> Redroid physically cannot start without
+the binder driver. Providing it requires host-level root actions
+(<code>apt install linux-modules-extra-$(uname -r)</code> +
+<code>modprobe binder_linux ashmem_linux</code>) which §6.U forbids
+inside the repo — and it is unconfirmed that this ALT Linux kernel even
+packages those modules.</p>
+<p>The upside worth capturing: Redroid is the <strong>strongest
+§6.X/§6.AH candidate found to date</strong> because it needs <strong>no
+<code>/dev/kvm</code>, no QEMU, no TCG</strong>, and it maps almost 1:1
+onto the existing <code>emulator.Emulator</code> interface. Once binder
+is provisioned once on a Linux gate host, adoption is a small,
+well-bounded Go addition.</p>
+<hr />
+<h2 id="1-host-kernel-prerequisites--absent-hard-blocker">1. Host kernel
+prerequisites — ABSENT (hard blocker)</h2>
+<p>Redroid runs a real Android userspace directly on the host Linux
+kernel, so it requires the Android kernel drivers
+<code>binder_linux</code> (+ <code>binderfs</code>) and
+<code>ashmem_linux</code> (or <code>androidboot.use_memfd</code>) to be
+present and loaded on the <strong>host</strong>. Probes of this
+host:</p>
+<table>
+<thead>
+<tr>
+<th>Probe</th>
+<th>Command</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kernel config</td>
+<td><code>zcat /proc/config.gz | grep -iE 'BINDER|ASHMEM|CONFIG_ANDROID'</code></td>
+<td><strong><code># CONFIG_ANDROID_BINDER_IPC is not set</code></strong>
+— and that is the ONLY match. No <code>BINDERFS</code>, no
+<code>ASHMEM</code>, no <code>CONFIG_ANDROID</code> symbol at all.</td>
+</tr>
+<tr>
+<td>binder device nodes</td>
+<td><code>ls -la /dev/binder* /dev/*binder*</code></td>
+<td>NONE in /dev</td>
+</tr>
+<tr>
+<td>binderfs mount</td>
+<td><code>ls /dev/binderfs</code> +
+<code>mount | grep binder</code></td>
+<td>absent; no binder mounts</td>
+</tr>
+<tr>
+<td>loaded modules</td>
+<td><code>lsmod | grep -iE 'binder|ashmem'</code></td>
+<td>none loaded</td>
+</tr>
+<tr>
+<td>module in sysfs</td>
+<td><code>ls /sys/module/binder_linux</code></td>
+<td>absent</td>
+</tr>
+<tr>
+<td>module files on disk</td>
+<td><code>find /lib/modules/6.12.61-6.12-alt1 -iname '*binder*' -o -iname '*ashmem*'</code></td>
+<td><strong>no binder/ashmem module files found</strong></td>
+</tr>
+<tr>
+<td>modinfo</td>
+<td><code>modinfo binder_linux</code> /
+<code>modinfo ashmem_linux</code></td>
+<td>not found (empty)</td>
+</tr>
+<tr>
+<td>android drivers dir</td>
+<td><code>ls /lib/modules/$(uname -r)/kernel/drivers/android</code></td>
+<td>does not exist</td>
+</tr>
+<tr>
+<td>modprobe present</td>
+<td><code>command -v modprobe</code></td>
+<td><strong>not in PATH</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Conclusion:</strong> binder is not merely unloaded — it is
+<strong>not built into the kernel AND has no loadable module available
+on disk.</strong> <code>binderfs</code> and <code>ashmem</code> depend
+on <code>CONFIG_ANDROID_BINDER_IPC</code>, so they are necessarily
+absent too. This is the decisive blocker.</p>
+<p><strong>What would be needed to unblock (and the §6.U
+conflict):</strong></p>
+<ul>
+<li>Upstream redroid recipe:
+<code>apt install linux-modules-extra-$(uname -r)</code> then
+<code>modprobe binder_linux devices="binder,hwbinder,vndbinder"</code>
+and <code>modprobe ashmem_linux</code>.</li>
+<li>On ALT Linux (not Debian/apt), the equivalent kernel-modules-extra
+package would have to exist and be installed — <strong>UNCONFIRMED that
+ALT ships these modules for <code>6.12.61-6.12-alt1</code>; it must be
+verified against ALT's <code>kernel-modules-*</code> repo.</strong> If
+ALT does not package them, the only path is a custom kernel rebuild with
+<code>CONFIG_ANDROID_BINDER_IPC=y</code>/<code>=m</code> +
+<code>CONFIG_ANDROID_BINDERFS=y</code> + <code>CONFIG_ASHMEM</code> (or
+a memfd-capable redroid image).</li>
+<li>Both installing packages and <code>modprobe</code>-ing modules
+require <strong>root</strong>. Per <strong>§6.U (no sudo/su in any
+tracked artifact)</strong>, a committed Lava/Containers script may NOT
+do this. The module load must be a one-time <strong>host-provisioning
+action performed by the operator outside the repo</strong> (e.g.
+persisted via <code>/etc/modules-load.d/redroid.conf</code> on the gate
+host). Once the modules are loaded and <code>/dev/binderfs</code> is
+mountable, a rootless container consuming an already-present binder
+device does not itself need root — so the §6.U conflict is confined to
+host provisioning, not to the runner code.</li>
+</ul>
+<hr />
+<h2
+id="2-rootless-podman-compatibility--unresolved-needs-a-real-spike-second-blocker">2.
+Rootless podman compatibility — UNRESOLVED, needs a real spike (second
+blocker)</h2>
+<p>Redroid's documented quick-start (quoted verbatim from
+redroid-doc):</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-itd</span> <span class="at">--rm</span> <span class="at">--privileged</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">--pull</span> always <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">-v</span> ~/data:/data <span class="dt">\</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">-p</span> 5555:5555 <span class="dt">\</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    redroid/redroid:12.0.0_64only-latest</span></code></pre></div>
+<ul>
+<li>It uses <strong><code>--privileged</code></strong>. Lava's posture
+is <strong>§6.V rootless podman only + no
+<code>--privileged</code></strong> (see root CLAUDE.md §6.V clause 2:
+"No privileged containers, no <code>--privileged</code> flag").</li>
+<li>The redroid docs contain <strong>no mention of rootless podman and
+no non-privileged recipe</strong> (WebFetch of the README confirmed
+this).</li>
+<li>Community practice (outside the official docs — treat as UNCONFIRMED
+until spiked here) narrows <code>--privileged</code> down to explicit
+device access, e.g. bind-mounting <code>/dev/binder*</code> /
+<code>/dev/ashmem</code> (or a per-container <code>binderfs</code>
+instance) plus an unconfined AppArmor/seccomp profile. Whether that
+fully-narrowed form works under <strong>rootless</strong> podman (where
+the container user maps to an unprivileged subuid — this host has
+<code>milosvasic:100000:65536</code> in /etc/subuid/subgid) is
+<strong>not established</strong> and is exactly the kind of
+device-cgroup + userns interaction that broke KVM access in the existing
+<code>containerized.go</code> (see its <code>--userns=keep-id</code> RC1
+fix).</li>
+</ul>
+<p><strong>Assessment:</strong> a rootless-compatible,
+non-<code>--privileged</code> redroid configuration is
+<em>plausible</em> (binder is a char device; if the host ACL grants the
+invoking user access and the device is passed with
+<code>--device</code>, the model is analogous to the existing
+<code>--device /dev/kvm</code> + <code>--userns=keep-id</code> path).
+But it is <strong>undocumented upstream and unproven here</strong> — it
+requires a real rootless spike <strong>after</strong> binder modules are
+present. Until that spike passes, treat rootless-without-privileged as
+an open risk, not a given.</p>
+<hr />
+<h2 id="3-adb--instrumentation--recording-fit--excellent">3. ADB +
+instrumentation + recording fit — EXCELLENT</h2>
+<ul>
+<li><strong>ADB:</strong> redroid exposes adbd on TCP <code>5555</code>;
+you connect with <code>adb connect localhost:5555</code> (docs verbatim:
+"adb connect localhost:5555", substitute IP for remote). This is exactly
+the connection model <code>Containerized.WaitForBoot</code> already uses
+(<code>adb connect localhost:&lt;port&gt;</code> →
+<code>adb -s localhost:&lt;port&gt; ...</code>).</li>
+<li><strong>Instrumentation:</strong> the existing flow is
+<code>adb install -r &lt;apk&gt;</code> → gradle
+<code>:&lt;module&gt;:connectedDebugAndroidTest</code> with
+<code>ANDROID_SERIAL=localhost:&lt;port&gt;</code>. Redroid is a full
+Android with a normal adbd, so <code>adb install</code> +
+<code>am instrument</code> (which is what connectedDebugAndroidTest
+drives) work unchanged.</li>
+<li><strong>Simplification vs. QEMU/containerized:</strong> redroid
+needs <strong>none</strong> of the containerized path's boot ceremony —
+no AVD system-image fetch, no <code>/dev/kvm</code>, no baked
+adb-keypair <code>authorizeADB()</code> dance, no
+<code>socat 5575→5555</code> bridge, no <code>sys.boot_completed</code>
+KVM-accel timing. adbd is directly reachable on the published port;
+boot-completed polling still applies but is faster.</li>
+<li><strong>Recording:</strong> docs confirm
+<code>scrcpy -s localhost:5555</code> works against redroid;
+<code>scrcpy --record file.mp4</code> therefore satisfies the §11.4.128
+always-on device-recording debt for redroid targets.</li>
+</ul>
+<hr />
+<h2 id="4-current-containers-runner-surface--where-redroid-plugs-in">4.
+Current Containers runner surface + where redroid plugs in</h2>
+<p><strong>The interface a redroid runner implements</strong>
+(<code>submodules/containers/pkg/emulator/types.go:309-334</code>):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Emulator <span class="kw">interface</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    Boot<span class="op">(</span>ctx<span class="op">,</span> avd<span class="op">,</span> coldBoot<span class="op">)</span> <span class="op">(</span>BootResult<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    WaitForBoot<span class="op">(</span>ctx<span class="op">,</span> port<span class="op">,</span> timeout<span class="op">)</span> <span class="op">(</span>time<span class="op">.</span>Duration<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    Install<span class="op">(</span>ctx<span class="op">,</span> port<span class="op">,</span> apkPath<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    RunInstrumentation<span class="op">(</span>ctx<span class="op">,</span> port<span class="op">,</span> testClass<span class="op">,</span> timeout<span class="op">)</span> <span class="op">(</span>output <span class="dt">string</span><span class="op">,</span> passed <span class="dt">bool</span><span class="op">,</span> err <span class="dt">error</span><span class="op">)</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    Teardown<span class="op">(</span>ctx<span class="op">,</span> port<span class="op">)</span> <span class="dt">error</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p><code>MatrixRunner</code>/<code>AndroidMatrixRunner</code>
+orchestrates any <code>Emulator</code> through
+Boot→WaitForBoot→Install→RunInstrumentation→Teardown and writes the
+per-AVD attestation. <strong>Nothing in the matrix runner is
+QEMU/KVM-specific</strong> — it is fully polymorphic over
+<code>Emulator</code>. A <code>RedroidEmulator</code> slots in with zero
+matrix-runner changes.</p>
+<h3 id="concrete-go-changes-new-file-pkgemulatorredroidgo">Concrete Go
+changes (new file <code>pkg/emulator/redroid.go</code>)</h3>
+<p>A <code>RedroidEmulator</code> closely mirrors
+<code>Containerized</code> (<code>containerized.go</code>) but drops the
+KVM/AVD-image/keypair machinery:</p>
+<ul>
+<li><code>type RedroidEmulator struct { runtimeBinary, image string; executor CommandExecutor; containerName string; hostADBPort int; adbBinaryPath, gradleBinary, gradleModule string }</code></li>
+<li><code>NewRedroid(cfg RedroidConfig) (*RedroidEmulator, error)</code>
+— validates <code>RuntimeBinary</code> + <code>Image</code> (reuse the
+ContainerizedConfig fail-loud pattern).</li>
+<li><code>Boot()</code> —
+<code>podman run -d --rm --name lava-redroid-&lt;avd&gt;-&lt;ms&gt; -v &lt;data&gt;:/data -p &lt;hostPort&gt;:5555 [device/userns flags — NOT --privileged] &lt;image&gt;</code>.
+<code>buildRedroidRunArgs()</code> is the unit-testable seam (mirror
+<code>buildContainerRunArgs</code>), with a <strong>falsifiability
+rehearsal proving <code>--privileged</code> is NEVER emitted</strong>
+(anti-bluff guard against silently regressing to the docs'
+quick-start).</li>
+<li><code>WaitForBoot()</code> —
+<code>adb connect localhost:&lt;port&gt;</code> then poll
+<code>getprop sys.boot_completed == 1</code>. No
+<code>authorizeADB()</code> needed.</li>
+<li><code>Install()</code> / <code>RunInstrumentation()</code> /
+<code>Teardown()</code> — reuse the identical implementations from
+<code>containerized.go</code> (they are already runtime-agnostic;
+<code>RunInstrumentation</code> uses the shared
+<code>gradleConnectedTestArgs</code>).</li>
+<li><code>var _ Emulator = (*RedroidEmulator)(nil)</code> compile-time
+check.</li>
+<li>Add a <code>Pre-flight</code> that stat-checks
+<code>/dev/binderfs</code> (or <code>/dev/binder</code>) and
+<strong>fails loud with an honest §6.J error</strong> ("redroid requires
+host binder; CONFIG_ANDROID_BINDER_IPC absent — see research
+2026-07-02") when binder is missing, rather than emitting a container
+that never boots.</li>
+</ul>
+<h3 id="cli-wiring-cmdemulator-matrixmaingo">CLI wiring
+(<code>cmd/emulator-matrix/main.go</code>)</h3>
+<ul>
+<li>Extend <code>--runner</code> help + <code>ResolveRunner</code>
+(<code>pkg/emulator/accel.go</code>) to accept <code>redroid</code> as
+an explicit runner value. On Linux, <code>redroid</code> is
+gate-eligible <strong>iff</strong> host binder is present.</li>
+<li>Reuse the existing <code>--container-image</code> +
+<code>--container-runtime</code> flags (redroid uses
+<code>--container-image redroid/redroid:14.0.0_64only-latest</code>).</li>
+<li>Add a <code>redroid</code> branch to the emulator-construction
+switch (alongside <code>RunnerContainerized</code>) building
+<code>NewRedroid(...)</code>.</li>
+</ul>
+<h3 id="lava-side-glue-scriptsrun-challenge-matrixsh">Lava-side glue
+(<code>scripts/run-challenge-matrix.sh</code>)</h3>
+<ul>
+<li>Add <code>--runner=redroid</code> passthrough (the script already
+forwards <code>--runner</code>; today it hard-forwards
+<code>auto</code>). Add a Linux pre-flight that checks
+<code>[ -e /dev/binderfs ] || [ -e /dev/binder ]</code> and exits 2 with
+an honest "binder absent — provision per research 2026-07-02" message
+(mirrors the existing KVM pre-flight <code>exit 2</code>).</li>
+</ul>
+<h3 id="image-manifest-toolslava-containersvm-imagesjson">Image manifest
+(<code>tools/lava-containers/vm-images.json</code>)</h3>
+<p>Nuance: <code>vm-images.json</code> is a
+<strong><code>pkg/cache.Manifest</code></strong> (fields
+<code>url</code>/<code>sha256</code>/<code>size</code>/<code>format</code>)
+for <strong>downloadable qcow2 / android-system-image blobs</strong>
+fetched + SHA-verified by <code>pkg/cache.Store.Get</code>. Redroid
+images are <strong>OCI images pulled by podman</strong>, not cache blobs
+— they do not fit the existing schema cleanly. Two honest options:</p>
+<ol type="1">
+<li>Add a new <code>"format": "oci-image"</code> entry (e.g.
+<code>id: redroid-android14-x86_64</code>,
+<code>url: docker.io/redroid/redroid:14.0.0_64only-latest</code>, sha
+via image digest) and teach the redroid path to <code>podman pull</code>
+by digest rather than routing through <code>pkg/cache</code> — keeps one
+manifest, honest about the different fetch mechanism.</li>
+<li>Keep redroid image refs in a separate small
+<code>redroid-images.json</code> so the SHA-verified qcow2 cache
+manifest stays pure. Recommended, lower blast radius.</li>
+</ol>
+<hr />
+<h2 id="5-phased-adoption-plan-ifwhen-go">5. Phased adoption plan
+(if/when GO)</h2>
+<p><strong>Blockers to clear, in order:</strong></p>
+<ol type="1">
+<li><strong>[HOST, operator, §6.U-external]</strong> Confirm ALT Linux
+packages <code>binder_linux</code>+<code>ashmem_linux</code> for
+<code>6.12.61-6.12-alt1</code> (or a memfd-capable path); if so,
+operator loads them once on the Linux gate host via
+<code>/etc/modules-load.d/</code> + mounts <code>binderfs</code>. If ALT
+does not package them → custom kernel build with
+<code>CONFIG_ANDROID_BINDER_IPC</code> +
+<code>CONFIG_ANDROID_BINDERFS</code> + <code>CONFIG_ASHMEM</code>.
+<strong>This is the single biggest blocker.</strong></li>
+<li><strong>[SPIKE, rootless]</strong> With binder present, prove a
+<strong>rootless podman + non-<code>--privileged</code></strong> redroid
+boot (narrowed
+<code>--device</code>/<code>--userns=keep-id</code>/security-opt). If it
+needs <code>--privileged</code>, it is
+<strong>§6.V-non-compliant</strong> and adoption stops until a
+non-privileged recipe is found.</li>
+</ol>
+<p><strong>Then, once both pass:</strong></p>
+<ul>
+<li>Phase A — <code>pkg/emulator/redroid.go</code>
+(<code>RedroidEmulator</code> + <code>buildRedroidRunArgs</code> +
+binder pre-flight) with falsifiability-rehearsed unit tests
+(no-<code>--privileged</code> guard; adb-connect/boot-poll seam via the
+fake <code>CommandExecutor</code>). Upstream to Containers first
+(Decoupled Reusable Architecture rule).</li>
+<li>Phase B — <code>cmd/emulator-matrix</code>
+<code>--runner=redroid</code> +
+<code>ResolveRunner</code>/<code>accel.go</code> gate-eligibility
+(Linux+binder). Bump Containers pin in Lava.</li>
+<li>Phase C — Lava glue: <code>scripts/run-challenge-matrix.sh</code>
+<code>--runner=redroid</code> + binder pre-flight; redroid image entry
+(separate <code>redroid-images.json</code> recommended).</li>
+<li>Phase D — one real gate run on the provisioned Linux host producing
+a genuine per-AVD attestation (§6.I/§6.AE), + wire scrcpy
+<code>--record</code> for §11.4.128 recording. Only then does redroid
+become a gate-eligible runner.</li>
+</ul>
+<h2 id="why-this-matters-despite-the-no-go">Why this matters despite the
+NO-GO</h2>
+<p>Redroid is the first candidate that could close <strong>§6.X-debt /
+§6.AH-debt without <code>/dev/kvm</code> and without QEMU/TCG</strong>:
+it runs native Android on the host kernel, fits the existing
+<code>Emulator</code> interface almost verbatim (and is simpler than the
+KVM containerized path — no system-image fetch, no adb-keypair
+authorize, no socat bridge), and supports Android 8.1→16 on amd64+arm64.
+The entire adoption reduces to two provisioning preconditions (host
+binder modules; a proven rootless non-privileged recipe) plus a small,
+bounded Go addition. Recommend confirming ALT's binder-module
+availability and running the rootless spike on the intended Linux gate
+host as the next step.</p>
+</body>
+</html>

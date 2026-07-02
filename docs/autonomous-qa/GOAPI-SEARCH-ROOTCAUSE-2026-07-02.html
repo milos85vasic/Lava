@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>GOAPI-SEARCH-ROOTCAUSE-2026-07-02</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="go-api-rutracker-search--root-cause-analysis-2026-07-02">Go API
+rutracker Search — Root-Cause Analysis (2026-07-02)</h1>
+<p>Isolated (no-emulator) root-cause of the autonomous-QA keystone
+failure: <code>goapi backend × rutracker</code> search shows
+<strong>"problem reaching the trackers" / "Search failed"</strong> after
+on-device onboarding login was fixed.</p>
+<ul>
+<li><strong>Environment:</strong> Linux x86_64, podman 5.7.1, Mullvad
+VPN egress. Go API brought up via
+<code>BUILDAH_FORMAT=docker ./start.sh</code> (profile
+<code>api-go</code>), version <strong>2.3.33 / build 2333</strong>,
+listening <code>:8443</code> (HTTP/3 + HTTP/2), <code>/health</code> →
+<code>{"status":"alive"}</code>.</li>
+<li><strong>Method:</strong> black-box <code>curl</code> against the
+running container + source read of the search route, auth middleware,
+and rutracker client.</li>
+<li><strong>§11.4.6 vocabulary:</strong> claims below are backed by
+captured HTTP responses. Items I could not observe in isolation are
+marked <code>UNCONFIRMED:</code>.</li>
+<li><strong>§6.H:</strong> no credential/key/cookie VALUES are recorded
+here. Scratch files that held a real <code>bb_session</code> were
+deleted after the run (verified 0 residue).</li>
+</ul>
+<hr />
+<h2 id="1-the-search-route--auth-model-source-facts">1. The search route
++ auth model (source facts)</h2>
+<p>The Go API exposes rutracker search on <strong>two</strong> routes,
+both built by <code>internal/router/router.go</code>
+<code>Build()</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Handler</th>
+<th>Registered</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /v1/:provider/search</code> (modern, provider-agnostic —
+the keystone path)</td>
+<td><code>internal/handlers/v1/search.go</code>
+<code>GetSearch</code></td>
+<td><code>v1handlers.Register</code>, per-route
+<code>ProviderMiddleware(reg, CapSearch)</code></td>
+</tr>
+<tr>
+<td><code>GET /search</code> (legacy rutracker-specific)</td>
+<td><code>internal/handlers/search.go</code> <code>GetSearch</code></td>
+<td><code>handlers.Register</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Both routes sit behind TWO independent auth
+gates:</strong></p>
+<h3 id="gate-1--lava-auth-per-instance-client-key-candidate-b">Gate 1 —
+<code>Lava-Auth</code> per-instance client key (candidate b)</h3>
+<p><code>internal/auth/middleware.go</code> <code>NewMiddleware</code>,
+mounted globally at <code>router.go:106</code> BEFORE the v1 group. It
+reads the header named by <code>LAVA_AUTH_FIELD_NAME</code>
+(<code>Lava-Auth</code>), base64-decodes it to a 16-byte UUID blob,
+HMAC-SHA256's it with <code>LAVA_AUTH_HMAC_SECRET</code>, and looks the
+hash up in <code>LAVA_AUTH_ACTIVE_CLIENTS</code> (<code>.env</code>, CSV
+of <code>name:uuid</code>).</p>
+<ul>
+<li>missing header → <strong>401
+<code>{"error":"unauthorized"}</code></strong>
+(middleware.go:57-60)</li>
+<li>malformed / unknown → 401 (+ backoff-ladder increment)</li>
+<li>retired hash → 426.</li>
+</ul>
+<p><code>/health</code>, <code>/ready</code>, <code>/providers</code>
+are mounted BEFORE this middleware and are public.</p>
+<h3
+id="gate-2--rutracker-session-cookie-forwarded-via-auth-token-upstream-auth">Gate
+2 — rutracker session cookie forwarded via <code>Auth-Token</code>
+(upstream auth)</h3>
+<p>The Go API <strong>does NOT log into rutracker on its own for
+search</strong>. It is a pure <strong>cookie pass-through</strong>:</p>
+<ul>
+<li><p>v1 path: <code>parseCredentials(c)</code> →
+<code>auth.ProviderCredentials</code> → <code>ParseAuthToken</code>
+(<code>internal/auth/multiprovider.go</code>) parses
+<code>Auth-Token: rutracker:cookie:bb_session=…</code> (or a legacy bare
+cookie) into
+<code>provider.Credentials{Type:"cookie", CookieValue:…}</code>. The
+rutracker <code>ProviderAdapter.Search</code>
+(<code>internal/rutracker/provider.go:67</code>) calls
+<code>credToCookie(cred)</code> → the cookie string (empty unless
+<code>Type=="cookie"</code>).</p></li>
+<li><p><code>Client.GetSearchPage</code>
+(<code>internal/rutracker/search.go:229-236</code>)
+<strong>short-circuits</strong>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode go"><code class="sourceCode go"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> cookie <span class="op">==</span> <span class="st">&quot;&quot;</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ot">nil</span><span class="op">,</span> ErrUnauthorized   <span class="co">// → provider.ErrUnauthorized → HTTP 401 {}</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div></li>
+<li><p>With a cookie, it does
+<code>GET /forum/tracker.php?nm=&lt;query&gt;&amp;…</code> with
+<code>Cookie: &lt;value&gt;</code> and parses the HTML (windows-1251 →
+UTF-8).</p></li>
+</ul>
+<p><strong>Rutracker credentials the Go API itself uses:</strong>
+<em>none.</em> <code>internal/config/config.go</code> reads only
+<code>LAVA_API_RUTRACKER_URL</code> (default
+<code>https://rutracker.org/forum</code>). There is no
+<code>RUTRACKER_USERNAME</code>/<code>RUTRACKER_PASSWORD</code> read
+anywhere in the Go config — those <code>.env</code> vars are consumed by
+the Android client / tests, not the API. The Go API's
+<code>/v1/rutracker/login</code> endpoint takes the username/password
+<strong>from the client request body</strong>, logs in to rutracker on
+the client's behalf, and hands the <code>bb_session</code> cookie back
+for the client to replay on subsequent search calls.</p>
+<p><strong>Net contract:</strong> <code>search</code> needs BOTH a valid
+<code>Lava-Auth</code> key AND a rutracker session cookie. Missing
+either → <strong>401</strong>. Present-but-invalid cookie → <strong>200
+with empty results</strong>.</p>
+<hr />
+<h2 id="2-reproduction-captured-http-status--body">2. Reproduction
+(captured HTTP status / body)</h2>
+<p>All against <code>https://127.0.0.1:8443</code>.
+<code>Lava-Auth</code> value derived from <code>.env</code>
+<code>LAVA_AUTH_ACTIVE_CLIENTS</code> (client
+<code>android-1.2.7-1027</code>, 16-byte UUID) — value never
+printed.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Request</th>
+<th>Result</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T1</td>
+<td><code>GET /providers</code> (no auth)</td>
+<td><strong>200</strong>; rutracker <code>authType=CAPTCHA_LOGIN</code>,
+caps <code>SEARCH,BROWSE,…</code></td>
+<td>public catalogue OK</td>
+</tr>
+<tr>
+<td>T2</td>
+<td><code>GET /v1/rutracker/search?query=1080p</code> — <strong>no
+<code>Lava-Auth</code></strong></td>
+<td><strong>401 <code>{"error":"unauthorized"}</code></strong></td>
+<td>Gate 1 (candidate <strong>b</strong>)</td>
+</tr>
+<tr>
+<td>—</td>
+<td>host → <code>https://rutracker.org/forum/index.php</code>
+(IPv4)</td>
+<td><strong>200</strong>, 1.07s, ip 172.67.182.196</td>
+<td>rutracker reachable (candidate <strong>c</strong> network
+REFUTED)</td>
+</tr>
+<tr>
+<td>—</td>
+<td>host → <code>/forum/tracker.php?nm=1080p</code> anon (no
+cookie)</td>
+<td><strong>302</strong>, 0 bytes</td>
+<td>rutracker requires a session to search</td>
+</tr>
+<tr>
+<td>T3</td>
+<td>search + <strong>valid <code>Lava-Auth</code></strong>, <strong>no
+<code>Auth-Token</code></strong></td>
+<td><strong>401 <code>{}</code></strong></td>
+<td>Gate 2: <code>ErrUnauthorized</code> (empty cookie)</td>
+</tr>
+<tr>
+<td>T4</td>
+<td>search + valid <code>Lava-Auth</code> + <strong>bogus</strong>
+<code>Auth-Token: rutracker:cookie:bb_session=…fake</code></td>
+<td><strong>200
+<code>{"provider":"rutracker","page":1,"totalPages":1,"results":[]}</code></strong></td>
+<td>scrape runs; invalid session → empty</td>
+</tr>
+<tr>
+<td>T5</td>
+<td>search + valid <code>Lava-Auth</code> + legacy bare bogus
+cookie</td>
+<td><strong>200</strong>, empty results</td>
+<td>legacy bare-cookie path behaves identically</td>
+</tr>
+<tr>
+<td>T6a</td>
+<td><code>POST /v1/rutracker/login</code> + valid <code>Lava-Auth</code>
++ <code>.env</code> creds</td>
+<td><strong>200
+<code>{"success":true,"authToken":"bb_session=…"}</code></strong> (no
+captcha needed)</td>
+<td>Go API logs into rutracker server-side for the client</td>
+</tr>
+<tr>
+<td>T6b</td>
+<td>search + valid <code>Lava-Auth</code> + <strong>REAL
+<code>bb_session</code></strong> (from a live login)</td>
+<td><strong>200; 50 results; page 1/10; first title
+<code>Другая кровь …</code></strong> (Cyrillic decoded)</td>
+<td><strong>full scrape path works end-to-end</strong></td>
+</tr>
+</tbody>
+</table>
+<p>T6b is the load-bearing result: with both headers valid, the Go API
+returns 50 real rutracker torrents. Candidate <strong>(c) "Go API can't
+scrape rutracker"</strong> is <strong>definitively refuted</strong>.</p>
+<hr />
+<h2 id="3-confirmed-root-cause">3. Confirmed root cause</h2>
+<p><strong>The Go API rutracker <code>search</code> endpoint is
+server-side-correct.</strong> It fails ("Search failed" = HTTP
+<strong>401</strong>) only because the request reaching it is missing
+one of its two required auth inputs. This is an <strong>auth /
+header-forwarding</strong> problem on the request INTO the Go API — NOT
+a server-side rutracker scrape failure (T6b = 50 results) and NOT a
+network/endpoint reachability problem (host reaches rutracker;
+<code>/providers</code> reached the API in T1).</p>
+<p>The two 401 producers, with <strong>distinct, diagnostic response
+bodies</strong>:</p>
+<ul>
+<li><strong><code>401 {"error":"unauthorized"}</code></strong> ⇒ the
+<code>Lava-Auth</code> per-instance key is missing/invalid on the
+request (<strong>candidate b</strong>). This is exactly the cold-start
+gap documented in
+<code>core/domain/.../RepopulateProvidersOnStartupUseCase.kt:140-149</code>
+("dynamic <code>ApiBackedTrackerClient</code>s built at cold start have
+no <code>Lava-Auth</code> value → <code>/v1/{provider}/search</code>
+returns 401").</li>
+<li><strong><code>401 {}</code></strong> ⇒ the request carried a valid
+<code>Lava-Auth</code> but <strong>no rutracker session cookie</strong>
+in <code>Auth-Token</code> (the <code>ErrUnauthorized</code>
+short-circuit). This happens if the on-device login stored a session but
+the goapi search flow does not attach it as
+<code>Auth-Token: rutracker:cookie:…</code>.</li>
+</ul>
+<p><code>UNCONFIRMED:</code> which of the two the keystone device
+actually hits — that needs the on-device HTTP capture (Chucker) of the
+failing <code>/v1/rutracker/search</code> response
+<strong>body</strong>. The two bodies above disambiguate it in one look.
+Given the client-side heal code that already exists specifically for the
+<code>Lava-Auth</code> key
+(<code>RepopulateProvidersOnStartupUseCase.restoreActiveEndpointKey</code>
+/ <code>reconcileActiveEndpoint</code>), candidate <strong>(b)</strong>
+is the leading suspect; the cookie-forwarding branch is the secondary
+must-verify.</p>
+<hr />
+<h2 id="4-proposed-fix">4. Proposed fix</h2>
+<h3 id="40-one-command-disambiguation-do-this-first">4.0 One-command
+disambiguation (do this first)</h3>
+<p>On the failing keystone run, capture the
+<code>/v1/rutracker/search</code> <strong>response body</strong>:</p>
+<ul>
+<li>body <code>{"error":"unauthorized"}</code> → go to §4.1 (Lava-Auth
+key).</li>
+<li>body <code>{}</code> → go to §4.2 (rutracker cookie).</li>
+<li>body <code>{"provider":"rutracker",…,"results":[]}</code> (a 200) →
+session invalid/expired; re-login on device (the cookie is stale), not
+an auth-wiring bug.</li>
+</ul>
+<h3 id="41-if-the-key-is-missing-candidate-b--client-side">4.1 If the
+key is missing (candidate b) — client-side</h3>
+<p>The Go API is correct; the fix is ensuring the search request carries
+the key. Verify the cold-start restore path in
+<code>core/domain/src/main/kotlin/lava/domain/usecase/RepopulateProvidersOnStartupUseCase.kt</code>
+actually populates <code>Endpoint.GoApi.key</code> onto the endpoint
+that the search flow resolves via
+<code>NetworkApiRepositoryImpl.endpoint()</code> AND onto the dynamic
+<code>ApiBackedTrackerClient</code>
+(<code>activator.activate(apiBaseUrl, goApi.key)</code>, line 103).
+<code>restoreActiveEndpointKey()</code> (line 164) is a no-op when
+<code>apiKeyProvider.keyFor(host,port)</code> returns null (api-app not
+co-installed / permission denied) — confirm on the keystone device that
+the api-app key ContentProvider actually returns the key.</p>
+<h3 id="42-if-the-cookie-is-not-forwarded--client-side">4.2 If the
+cookie is not forwarded — client-side</h3>
+<p><code>core/network/impl/.../NetworkApiRepositoryImpl.kt:124-135</code>
+<code>getAuthHeader(token)</code> returns
+<code>"Auth-Token" to token</code> for <code>Endpoint.GoApi</code>.
+Confirm the goapi search flow (a) has a non-empty stored rutracker
+session <code>token</code>, and (b) formats it as the Go API expects —
+<code>ParseAuthToken</code> accepts either a legacy bare cookie
+(<code>bb_session=…</code>) OR the typed
+<code>rutracker:cookie:bb_session=…</code> (multiprovider.go:41-50).
+Note the Go login response (<code>/v1/rutracker/login</code>) returns
+the <strong>full Set-Cookie line</strong>
+(<code>bb_session=…; expires=…; Max-Age=…; path=…; domain=…; secure; HttpOnly</code>)
+as <code>authToken</code>. <code>UNCONFIRMED:</code> whether the client
+stores/forwards that entire line vs. just
+<code>bb_session=&lt;value&gt;</code>; forwarding the whole line puts
+cookie <em>attributes</em> into the request <code>Cookie</code> header.
+It worked in T4/T5 with a clean <code>bb_session=…</code>; recommend the
+client store only <code>bb_session=&lt;value&gt;</code> to avoid any
+ambiguity.</p>
+<h3 id="43-optional-go-side-hardening-not-the-root-cause">4.3 Optional
+Go-side hardening (not the root cause)</h3>
+<p><code>internal/handlers/v1/handlers.go:184-185</code> maps
+<code>provider.ErrUnauthorized</code> to <code>401 {}</code>. Emitting a
+discriminating body (e.g. <code>{"error":"login_required"}</code>) would
+let the client (and this QA harness) tell the "no rutracker session" 401
+apart from the "no Lava-Auth key" 401 without reading source.
+File+change: <code>writeProviderError</code>
+<code>ErrUnauthorized</code> branch →
+<code>writeJSON(c, 401, gin.H{"error":"login_required"})</code>. This is
+a diagnostics improvement, not a functional fix.</p>
+<hr />
+<h2 id="5-container-state--cleanup">5. Container state / cleanup</h2>
+<p>Left the Go API <strong>UP</strong> for further keystone work:
+<code>lava-api-go</code> (<code>:8443</code>, healthy) +
+<code>lava-postgres</code> (healthy). Run <code>./stop.sh</code> to tear
+down. No other projects' containers were touched. No source was edited
+(investigation only). Scratch under
+<code>/run/media/milosvasic/DATA4TB/.build-tmp/goapi-search-rca/</code>
+(token-bearing files deleted). <code>.env</code> credentials were used
+only at runtime and never written to any file; the live
+<code>bb_session</code> obtained during T6 will expire naturally.</p>
+</body>
+</html>

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-06-29-autonomous-qa-backend-provider-matrix</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="autonomous-qa--backend--provider-mix-matrix-implementation-plan">Autonomous
+QA — Backend × Provider-Mix Matrix Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development to implement this plan. Build
+work parallelizes across subagents; the emulator/backend RUNTIME loop is
+physically sequential (one emulator, one backend at a time) and runs
+inline. Steps use checkbox (<code>- [ ]</code>) syntax.</p>
+</blockquote>
+<p><strong>Goal:</strong> A fully autonomous QA session that, one
+backend at a time (Go <code>lava-api-go</code>, then Android
+<code>:api-app</code>), runs every provider-mix iteration through a
+fresh Lava install → onboarding → <code>1080p</code>/<code>mp3</code>
+search → open details → obtain a real download resource
+(magnet/http/.torrent), recording video + live logs throughout,
+vision-analyzing the recordings for defects, fixing what breaks, and
+looping until all iterations produce real, bluff-free evidence — then
+distributing new dev+prod Android builds.</p>
+<p><strong>Architecture:</strong> Reuse the existing containerized-KVM
+<code>emulator-matrix</code> runner,
+<code>record-device-session.sh</code>, the C05/C06/C20 Challenges, and
+the HelixQA vision-OCR banks. Add (1) a parameterized
+onboarding+search+download Challenge keyed on
+<code>{backend, provider-subset, query}</code>, (2) a backend-swap
+orchestrator that brings up exactly one backend, runs the subset matrix
+with fresh installs, records, and tears down, (3) per-iteration evidence
+aggregation + vision analysis + a fix loop, (4) a §6.AK cycle-coverage
+map gating the distribute.</p>
+<p><strong>Tech Stack:</strong> Kotlin/Compose + JUnit4 + Orbit
+(client), Go (lava-api-go), podman 5.7.1 + /dev/kvm (containerized
+emulators), ffmpeg + adb screenrecord/logcat (recording), HelixQA YAML
+banks + vision OCR, bash orchestration (Local-Only CI/CD).</p>
+<h2 id="global-constraints">Global Constraints</h2>
+<ul>
+<li><strong>Anti-Bluff (§6.J/§6.L/§6.AK):</strong> every iteration's
+PASS must rest on real user-visible state (rendered result row,
+<code>DownloadState.Completed(uri)</code>, the resolved
+magnet/http/.torrent) captured on a real emulator against a real backend
++ real tracker. C00-only / cold-start-only evidence NEVER green-lights a
+distribute (§6.AK).</li>
+<li><strong>Credentials (§6.H):</strong> the 5 tracker logins live ONLY
+in gitignored <code>.env</code> (already done). NEVER echo to logs,
+screenshots, commits, or <code>${VAR:-...}</code> shell expansions (§6.L
+67th-cycle leak).</li>
+<li><strong>Recordings gitignored:</strong> raw video/logcat/API-logs
+under <code>.lava-ci-evidence/autonomous-qa/**/raw/</code> +
+<code>device-recordings/</code> are git-excluded (done in
+<code>.gitignore</code>); only curated
+<code>summary.md</code>/<code>attestation.json</code>/<code>vision-analysis.md</code>
+are committed.</li>
+<li><strong>One backend at a time:</strong> never run the Go API and the
+on-device <code>:api-app</code> backend concurrently for the same
+iteration.</li>
+<li><strong>Emulators in containers/VMs only (§6.AH/§6.AG):</strong>
+gate runs use <code>emulator-matrix --runner=auto</code> (Linux+/dev/kvm
+→ containerized+KVM). NEVER a host-direct emulator, NEVER a live ADB
+device.</li>
+<li><strong>No sudo/su (§6.U). No hosted CI. No hardcoded
+host:port/UUID/creds (§6.R). No host suspend/poweroff. Mirrors = GitHub
++ GitLab only (§6.W).</strong></li>
+<li><strong>Matrix (operator-chosen):</strong> all 31 non-empty subsets
+of {RuTracker, RuTor, IPTorrents, NNMClub, Kinozal} × 2 backends ×
+{<code>1080p</code>,<code>mp3</code>} = 124 functional iterations on
+<code>CZ_API34_Phone</code>. Full §6.AE multi-AVD matrix only at the
+pre-distribute gate.</li>
+<li><strong>IPTorrents:</strong> Cloudflare-protected →
+Jackett+FlareSolverr sidecar for the Go API; on <code>:api-app</code>
+attempt-and-log-real-failures (operator-chosen; findings, not
+skips).</li>
+<li><strong>Distribute:</strong> auto dev + prod once green AND §6.AK
+gate passes; operator pre-authorized the combined two-stage compression
+(record <code>combined-distribute-authorization</code> in §6.Z
+evidence).</li>
+<li><strong>§6.S:</strong> update <code>docs/CONTINUATION.md</code> in
+the same commit as each phase transition.</li>
+</ul>
+<hr />
+<h2 id="file-structure">File Structure</h2>
+<p><strong>Create:</strong></p>
+<ul>
+<li><code>scripts/autonomous-qa/run-matrix.sh</code> — top orchestrator:
+backend up → subset loop (fresh install + record + run Challenge) →
+backend down → next backend.</li>
+<li><code>scripts/autonomous-qa/lib-backend.sh</code> — bring Go API /
+<code>:api-app</code> up+down, health-probe, expose reachable URL for
+the onboarding cloud-input.</li>
+<li><code>scripts/autonomous-qa/lib-subsets.sh</code> — emit the 31
+non-empty provider subsets + per-subset evidence slug + state-hash.</li>
+<li><code>scripts/autonomous-qa/vision-analyze.sh</code> — run HelixQA
+vision/OCR over each recording, emit <code>vision-analysis.md</code>
+findings.</li>
+<li><code>scripts/autonomous-qa/aggregate-evidence.sh</code> — roll
+per-iteration attestations into a cycle <code>summary.md</code> + §6.AK
+<code>cycle-coverage-map-&lt;ver&gt;.yaml</code> +
+<code>&lt;ver&gt;-test-evidence.json</code>.</li>
+<li><code>app/src/androidTest/kotlin/lava/app/challenges/Challenge70AutonomousQaProviderMatrixTest.kt</code>
+— parameterized onboarding→search→details→download Challenge reading
+<code>{backend, providers, query}</code> from instrumentation args.</li>
+<li><code>lava-api-go/qa/banks/lava-matrix-&lt;backend&gt;-&lt;subset-hash&gt;.yaml</code>
+— generated per-iteration HelixQA vision banks (gitignored generated;
+template tracked).</li>
+<li><code>.lava-ci-evidence/autonomous-qa/</code> — evidence root (raw
+gitignored, curated tracked).</li>
+</ul>
+<p><strong>Modify:</strong></p>
+<ul>
+<li><code>scripts/run-helixqa-provider-qa.sh</code> — accept a backend +
+subset selector (or call the new orchestrator).</li>
+<li><code>app/build.gradle.kts</code> — ensure <code>RUTOR_*</code> +
+<code>NNMCLUB_*</code> BuildConfig fields exist
+(RuTracker/Kinozal/IPTorrents already wired).</li>
+<li><code>docs/CONTINUATION.md</code> — §6.S phase tracking.</li>
+<li><code>CHANGELOG.md</code> + <code>app/build.gradle.kts</code> +
+<code>api-app/build.gradle.kts</code> +
+<code>lava-api-go/internal/version/version.go</code> — §6.Y version
+bumps before distribute.</li>
+</ul>
+<hr />
+<h2
+id="phase-0--de-risk-vertical-slice-prove-the-keystone-before-scaling">Phase
+0 — De-risk vertical slice (PROVE the keystone before scaling)</h2>
+<p>Goal: one fully real, recorded iteration — Go API up → fresh client
+install on a containerized KVM emulator → onboard <strong>RuTracker
+only</strong> (real creds) targeting the Go API via the onboarding
+cloud-input → search <code>1080p</code> → open a result → obtain a
+magnet/.torrent → video + logcat + API logs captured → vision-confirm.
+If any sub-step is blocked (container image missing, TLS/auth handshake
+fails, datacenter IP blocked by the tracker), STOP and surface it
+honestly — do not fabricate a pass.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>0.1 Build lava-api-go +
+bring the Go backend up.</strong>
+<code>cd lava-api-go &amp;&amp; make build</code> (or
+<code>go build ./...</code>);
+<code>docker compose -f docker-compose.yml up -d</code>; poll
+<code>curl -ksf https://127.0.0.1:8443/health</code> until JSON
+liveness. Capture the host-reachable URL the emulator will use
+(<code>https://10.0.2.2:8443</code>). Record API logs to
+<code>.lava-ci-evidence/autonomous-qa/&lt;date&gt;/go/raw/api-server.log</code>.</label></li>
+<li><label><input type="checkbox" /><strong>0.2 Build the client debug
+APK.</strong> <code>./gradlew :app:assembleDebug</code> (App ID
+<code>digital.vasic.lava.client.dev</code>). Confirm
+<code>RUTRACKER_*</code> BuildConfig populated from <code>.env</code>
+(gradle reads project props / <code>.env</code>).</label></li>
+<li><label><input type="checkbox" /><strong>0.3 Boot ONE containerized
+emulator + smoke-prove the path.</strong> Resolve the container image
+from <code>tools/lava-containers/vm-images.json</code>; run
+<code>scripts/run-challenge-matrix.sh --test-class lava.app.challenges.Challenge00CrashSurvivalTest --avds CZ_API34_Phone:34:phone --evidence-dir .lava-ci-evidence/autonomous-qa/&lt;date&gt;/phase0-smoke</code>.
+Expected: <code>real-device-verification.json</code> row
+<code>runner=containers-submodule</code>, <code>test_passed=true</code>.
+This proves container→install→instrument works on THIS host before any
+backend wiring.</label></li>
+<li><label><input type="checkbox" /><strong>0.4 Prove backend
+reachability + TLS + auth from the emulator.</strong> Add a minimal
+instrumented probe (or extend C44 ApiSearchAuth) that, on the booted
+emulator, hits <code>https://10.0.2.2:8443/health</code> and an authed
+route with the <code>Lava-Auth</code> key. Confirm: cert trust path
+works (the client must trust the Go API's self-signed cert — determine
+the mechanism: <code>usesCleartextTraffic</code> is true, but HTTPS
+needs a trust anchor; the cloud-input GoApi flow + <code>key</code>
+field carries the auth UUID). <strong>This is the keystone — if it
+fails, the whole Go-backend half is blocked; record the exact failure
+and adapt (e.g. provision the cert into the emulator, or use the
+on-device api-app backend first).</strong></label></li>
+<li><label><input type="checkbox" /><strong>0.5 Author the parameterized
+Challenge (RuTracker/1080p/GoApi instance).</strong> Create
+<code>Challenge70AutonomousQaProviderMatrixTest.kt</code> reading
+instrumentation args <code>qa_backend</code>, <code>qa_providers</code>
+(CSV), <code>qa_query</code>; it drives onboarding (ApiSelection
+cloud-input = Go API URL → Providers select subset by displayName →
+Configure: form-login providers get <code>.env</code> creds via
+BuildConfig, anonymous-capable get the anon toggle → Summary "Start
+Exploring") → search <code>qa_query</code> → open result row → tap
+"Torrent"/"Magnet" → assert
+<code>DownloadState.Completed</code>/"Download completed" OR captured
+magnet URI. Include the §6.AB FALSIFIABILITY REHEARSAL KDoc block +
+<code>// covers-feature:</code> markers. Pass args via
+<code>-Pandroid.testInstrumentationRunnerArguments.qa_backend=goapi,qa_providers=rutracker,qa_query=1080p</code>
+(the emulator-matrix <code>--test-args</code> path).</label></li>
+<li><label><input type="checkbox" /><strong>0.6 Run the single real
+iteration WITH recording.</strong> Start
+<code>record-device-session.sh</code> for the emulator serial; run
+<code>Challenge70...</code> with args RuTracker/1080p/GoApi against the
+live Go backend + live rutracker.org (real creds). Stop recording.
+Outputs: <code>screen.mp4</code>, <code>logcat.txt</code>,
+<code>api-server.log</code> under the gitignored raw dir.</label></li>
+<li><label><input type="checkbox" /><strong>0.7 Vision-confirm the
+recording.</strong> Run the HelixQA vision/OCR step over
+<code>screen.mp4</code> (or sampled frames) asserting OCR goals:
+provider configured, results visible for <code>1080p</code>,
+topic/details opened, a download affordance + resolved link. Emit
+<code>vision-analysis.md</code>.</label></li>
+<li><label><input type="checkbox" /><strong>0.8 Phase-0 verdict +
+commit.</strong> If 0.1–0.7 all produced REAL evidence: write
+<code>.lava-ci-evidence/autonomous-qa/&lt;date&gt;/phase0-verdict.md</code>
+(curated, tracked) with the magnet/torrent obtained + video/log paths +
+vision findings; commit the harness + verdict (NOT raw media). If
+blocked: write the blocker honestly into the verdict + a
+<code>sixth-law-incidents</code> entry, surface to operator, do NOT
+proceed to Phase 1 with a fabricated pass.</label></li>
+</ul>
+<p><strong>Phase 0 gate:</strong> Do not start Phase 1 until 0.8 records
+a REAL pass (or the operator accepts a documented adaptation).</p>
+<hr />
+<h2 id="phase-1--generalize-the-iteration-into-the-orchestrator">Phase 1
+— Generalize the iteration into the orchestrator</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>1.1</strong>
+<code>lib-subsets.sh</code>: emit all 31 non-empty subsets of the 5
+providers, each with a stable slug + state-hash.</label></li>
+<li><label><input type="checkbox" /><strong>1.2</strong>
+<code>lib-backend.sh</code>: <code>backend_up goapi</code> (compose up +
+health + emit <code>https://10.0.2.2:8443</code>),
+<code>backend_up apiapp</code> (install+launch <code>:api-app</code> on
+the emulator, emit its loopback URL),
+<code>backend_down &lt;which&gt;</code>, mutual-exclusion guard (refuse
+if the other is up).</label></li>
+<li><label><input type="checkbox" /><strong>1.3</strong>
+<code>run-matrix.sh</code>: for backend in (goapi, apiapp):
+<code>backend_up</code> → for subset in 31: fresh install
+(<code>adb uninstall digital.vasic.lava.client.dev || true; adb install -r &lt;apk&gt;</code>)
+→ start recording → run <code>Challenge70</code> with
+<code>qa_backend/qa_providers/qa_query</code> for both
+<code>1080p</code> and <code>mp3</code> → stop recording → collect
+attestation → <code>backend_down</code>. Honor IPTorrents policy
+(Jackett on goapi; attempt+log on apiapp).</label></li>
+<li><label><input type="checkbox" /><strong>1.4</strong>
+<code>aggregate-evidence.sh</code>: roll per-iteration
+<code>real-device-verification.json</code> rows into
+<code>summary.md</code> + per-iteration pass/fail table.</label></li>
+<li><label><input type="checkbox" /><strong>1.5</strong> Falsifiability
+rehearsal for <code>Challenge70</code> (break onboarding provider-select
+OR the download path; confirm RED with a clear message; revert; GREEN).
+Record in the test KDoc + commit body Bluff-Audit stamp.</label></li>
+</ul>
+<h2 id="phase-2--go-api-backend-full-matrix-31--2-queries">Phase 2 — Go
+API backend full matrix (31 × 2 queries)</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>2.1</strong> Bring
+Jackett+FlareSolverr sidecar up for IPTorrents
+(<code>docker-compose.jackett.yml</code>, profiles jackett+cloudflare);
+validate <code>/caps</code>.</label></li>
+<li><label><input type="checkbox" /><strong>2.2</strong> Run
+<code>run-matrix.sh goapi</code> (62 iterations). Record real evidence
+per iteration.</label></li>
+<li><label><input type="checkbox" /><strong>2.3</strong> Triage failures
+→ systematic-debugging → fix root cause → add/strengthen the covering
+Challenge/bank (reproduce-first) → re-run the failed iterations until
+green. Log each fix in <code>docs/issues/fixed/BUGFIXES.md</code>
+(§6.T.4).</label></li>
+<li><label><input type="checkbox" /><strong>2.4</strong> Commit harness
++ curated evidence; push (GitHub+GitLab).</label></li>
+</ul>
+<h2
+id="phase-3--android-api-app-backend-full-matrix-31--2-queries">Phase 3
+— Android <code>:api-app</code> backend full matrix (31 × 2
+queries)</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>3.1</strong> Build
+<code>:api-app</code> debug APK
+(<code>./gradlew :api-app:assembleDebug</code>).</label></li>
+<li><label><input type="checkbox" /><strong>3.2</strong> Run
+<code>run-matrix.sh apiapp</code> (62 iterations); IPTorrents attempts
+logged as real findings.</label></li>
+<li><label><input type="checkbox" /><strong>3.3</strong>
+Triage/fix/reproduce-first/re-run as Phase 2.3. Distinguish genuine
+<code>:api-app</code> limitations (e.g. Cloudflare) from real
+bugs.</label></li>
+<li><label><input type="checkbox" /><strong>3.4</strong> Commit +
+push.</label></li>
+</ul>
+<h2 id="phase-4--vision-analysis--endless-fix-loop">Phase 4 — Vision
+analysis + endless fix loop</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>4.1</strong>
+<code>vision-analyze.sh</code>: HelixQA OCR over every recording; emit
+<code>vision-analysis.md</code> per iteration + a cycle-level rollup of
+defects (white-on-white, stuck spinners, wrong screen, missing download
+affordance — the §6.AB non-crashing classes).</label></li>
+<li><label><input type="checkbox" /><strong>4.2</strong> For each
+vision-found defect: reproduce-first device Challenge (RED on current
+build) → fix → GREEN → BUGFIXES.md entry.</label></li>
+<li><label><input type="checkbox" /><strong>4.3</strong> Loop driver
+(<code>ScheduleWakeup</code>): re-run failed iterations + re-analyze
+until N consecutive clean passes, or operator interrupt. Each loop bumps
+the curated evidence + CONTINUATION.</label></li>
+</ul>
+<h2 id="phase-5--gate--version-bump--distribute-dev--prod">Phase 5 —
+Gate + version bump + distribute (dev + prod)</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>5.1</strong> Run the FULL
+§6.AE multi-AVD matrix on the covering Challenges (API 28/30/34/latest ×
+phone+tablet) → <code>real-device-verification.json</code> with all gate
+rows pass + <code>runner=containers-submodule</code>.</label></li>
+<li><label><input type="checkbox" /><strong>5.2</strong> §6.Y version
+bumps: <code>app/build.gradle.kts</code> (client),
+<code>api-app/build.gradle.kts</code>,
+<code>lava-api-go/internal/version/version.go</code>; CHANGELOG
+entries.</label></li>
+<li><label><input type="checkbox" /><strong>5.3</strong> §6.AK
+cycle-coverage: author <code>cycle-coverage-map-&lt;ver&gt;.yaml</code>
+(every CHANGELOG claim → covering executed Challenge) +
+<code>&lt;ver&gt;-test-evidence.json</code> (same SHA, executed PASS
+rows); <code>check-cycle-coverage.sh --strict</code> exits
+0.</label></li>
+<li><label><input type="checkbox" /><strong>5.4</strong> §6.Z evidence
+file incl. <code>combined-distribute-authorization</code> (operator
+pre-authorized) + cold-start (C00) PASS for each APK.</label></li>
+<li><label><input type="checkbox" /><strong>5.5</strong> Two-stage
+distribute: <code>firebase-distribute.sh --debug-only</code> (client +
+api-app dev) → then prod, per operator's auto-both authorization. Verify
+§6.P monotonic versionCode + CHANGELOG.</label></li>
+<li><label><input type="checkbox" /><strong>5.6</strong> Commit + push
+everything (submodules + main → GitHub + GitLab). Final report to
+operator with distribute IDs + evidence index.</label></li>
+</ul>
+<hr />
+<h2
+id="anti-bluff--constitutional-gate-checklist-run-before-each-commit">Anti-bluff
+/ constitutional gate checklist (run before each commit)</h2>
+<ul>
+<li><code>scripts/check-constitution.sh</code> (forbidden cmds, creds,
+no-hardcode, §6.W mirrors)</li>
+<li><code>scripts/check-challenge-coverage.sh</code> +
+<code>scripts/check-challenge-discrimination.sh</code></li>
+<li><code>./scripts/ci.sh --changed-only</code> (pre-push subset)</li>
+<li>No raw media staged (<code>git status</code> shows only curated
+<code>.md</code>/<code>.json</code> under
+<code>autonomous-qa/</code>)</li>
+</ul>
+<h2 id="execution-mode">Execution mode</h2>
+<p>Subagent-driven for parallel BUILD (Challenge author, bank generator,
+orchestrator scripts, vision tooling, gate wiring) + parallel vision
+ANALYSIS of recordings. The emulator/backend RUNTIME loop runs
+inline/sequentially (one emulator, one backend). Phase 0 runs first,
+inline, as the keystone proof.</p>
+</body>
+</html>

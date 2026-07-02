@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>DEEP-FIX-STATUS</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="autonomous-qa--deep-fix-status--resumption-anchor-2026-06-30">Autonomous-QA
+— deep-fix status &amp; resumption anchor (2026-06-30)</h1>
+<p>Single-blocker checkpoint for the on-device UI-E2E half. Everything
+else is proven or committed.</p>
+<h2 id="proven-real-evidence-backed--committed">PROVEN (real,
+evidence-backed — committed)</h2>
+<ul>
+<li><strong>Core search→download works at the API level</strong>
+(thinker Go backend, real authed queries):
+<ul>
+<li>ThePirateBay <code>1080p</code> → 100 results + magnet; Nyaa
+<code>mp3</code> → 75 + magnet (auth control-proof).
+<code>.lava-ci-evidence/autonomous-qa/2026-06-30/backend-search-evidence/</code>.</li>
+<li><strong>archiveorg <code>1080p</code> → HTTP 200, 50 results, http
+download links</strong> ✅ (the proven keystone query). gutenberg
+<code>mp3</code> → 200, 1 result. (thinker
+<code>~/lava-qa/.lava-ci-evidence/autonomous-qa/2026-06-30/api-matrix-evidence/</code>).</li>
+<li>REAL FINDING: authenticated providers rutracker/nnmclub/kinozal →
+401/502 from thinker (tracker login 502 / datacenter-IP block).
+Anonymous providers work; authenticated 3 do not from thinker's IP.</li>
+</ul></li>
+<li>Containerized-KVM emulator boots (~30s, adb via socat bridge) on
+thinker; Go backend healthy on thinker
+(<code>lava-api-go-thinker</code>, :8443, via <code>thinker-up.sh</code>
+podman-run, NO compose).</li>
+<li>Onboarding→main-app UI flow works LOCALLY (podman 5.7.1).</li>
+<li>Off-main nav crash fixed (core/navigation
+<code>runOnMainThread</code> guard); LVA-008 teardown mitigated
+(marker-based verdict in run-iteration.sh).</li>
+</ul>
+<h2 id="white_check_mark-root-cause-found--fix-proven-2026-06-30">✅
+ROOT CAUSE FOUND + FIX PROVEN (2026-06-30)</h2>
+<p><strong>Root cause:</strong> on thinker the Android guest never
+<em>registers</em> <code>eth0</code> as a framework network at boot (the
+boot-time <code>ndc network interface add</code> fails while
+<code>eth0</code> is still DOWN). The NIC itself is fine. Android uses
+per-network <strong>mark-based routing</strong> (netd), so raw
+<code>ip route</code> edits the main table that Android ignores →
+app/ping see "Network unreachable". <strong>Proven fix (guest-side only
+— NO podman/container/image change):</strong> post-boot, as root via
+<code>su 0</code>:</p>
+<pre><code>ip link set eth0 up
+ip addr add 10.0.2.15/24 dev eth0
+ndc network interface add 100 eth0      # net 100 already exists; just add eth0
+ndc network route add 100 eth0 0.0.0.0/0 10.0.2.2   # run AFTER eth0 up (else &quot;unreachable&quot;)
+ndc network default set 100
+# DNS: ndc resolver setnetdns syntax differs on API 34 (got &quot;Command not recognized&quot;);
+#   not needed for the keystone (guest→backend is adb-reverse LOOPBACK; backend has thinker internet).</code></pre>
+<p><strong>Verified:</strong> after
+<code>ndc network interface add 100 eth0</code> +
+<code>ndc network default set 100</code>, <code>ping 10.0.2.2</code> =
+2/2 0% loss. (<code>ping 8.8.8.8</code> ICMP fails — slirp doesn't
+forward ICMP-to-internet; TCP/UDP NAT works. Irrelevant for the keystone
+which uses loopback to the backend.) <strong>Next:</strong> wire as
+<code>emu_fix_network</code> post-boot hook in
+<code>lib-emulator.sh</code>; run the archiveorg/1080p keystone.</p>
+<h2
+id="nezha-matrix-result-2026-06-30--egress-solved-per-provider-functional-bugs-remain-no-download-ok-yet">NEZHA
+MATRIX RESULT (2026-06-30) — egress SOLVED, per-provider functional bugs
+remain (no DOWNLOAD-OK yet)</h2>
+<p>Ran the matrix ON nezha (emulator egress via VPN) as a DURABLE
+systemd-user-service + linger (the ONLY way it survived — nezha logind
+KillUserProcesses reaped every tmux/nohup/poller attempt;
+<code>loginctl enable-linger</code> + <code>systemd-run --user</code>
+fixed it). Build OK, backend up, emulator booted, matrix ran to
+completion. Verdicts (goapi, --external-backend, 1080p):</p>
+<ul>
+<li><strong>EGRESS PROVEN WORKING</strong>: rutracker logcat shows
+<code>RuTrackerHttp: REQUEST login.php</code> THEN
+<code>index.php</code> (TWO requests = reached rutracker.org + got a
+response), vs thinker's 90s CancellationException on login.php. The
+emulator's traffic now flows through nezha's VPN to the real
+trackers.</li>
+<li><strong>rutracker = SKIP</strong> — <code>CAPTCHA_LOGIN</code>:
+automated login can't solve the captcha → onboarding can't complete.
+Honest, expected, unautomatable for this provider.</li>
+<li><strong>archiveorg = FAIL</strong> — topic-detail renders
+<code>Something went wrong, please try again later</code> (C70-TREE) →
+Step-4 affordance wait times out (30s, Challenge70 line 609). SAME error
+as on thinker ⇒ NOT egress; a real archiveorg TOPIC-DETAIL bug (search
+reaches the topic, the topic fetch/parse fails). Anonymous provider, no
+captcha → the most tractable path to green; root cause (on-device
+archiveorg client topic parse vs archive.org response) needs focused
+debugging.</li>
+<li><strong>nnmclub = SKIP</strong> — <code>FORM_LOGIN</code> onboarding
+"could not complete" (30s); login/connectivity step didn't finish. Needs
+diagnosis (no captcha, so should be automatable once the login step is
+traced).</li>
+<li><strong>NO DOWNLOAD-OK</strong> this run. Egress is solved; the
+remaining blockers are PER-PROVIDER functional issues, not reachability.
+NEXT to green: (a) fix the archiveorg topic-detail bug (anonymous →
+cleanest green); OR (b) try gutenberg (anonymous, different client — may
+not share archiveorg's topic bug, but sparse results); OR (c) diagnose
+nnmclub FORM_LOGIN. rutracker/kinozal are captcha/region-gated and won't
+auto-green.</li>
+</ul>
+<h2
+id="white_check_mark-egress-solved-via-nezha-vpn-2026-06-30--operator-nezhalocal-is-connected-to-vpn-already">✅
+EGRESS SOLVED via nezha VPN (2026-06-30) — operator: "nezha.local is
+connected to vpn already"</h2>
+<p>PROVEN: nezha.local has VPN egress IP <code>31.169.53.44</code> (≠
+thinker <code>176.195.102.116</code>) that REACHES the blocked providers
+— <code>rutracker=200, nnmclub=200, archiveorg=200</code> (kinozal=522
+Cloudflare-flaky, FlareSolverr-solvable). nezha also has
+<code>podman</code> + <code>/dev/kvm</code> +
+<code>AllowTcpForwarding=yes</code>. PROVEN: a SOCKS5 tunnel
+<code>ssh -D 127.0.0.1:1080 nezha.local</code> from thinker works
+IN-SESSION (<code>listening=1</code>, <code>via=31.169.53.44</code>,
+<code>rutracker=200</code> through it). It does NOT survive a transient
+ssh (setsid/nohup/tmux/systemd-run all left listening=0 from a detached
+launch) → run the tunnel as a bg job INSIDE the long-lived session that
+runs the matrix. REMAINING MECHANICAL STEPS to green (Path B):</p>
+<ol type="1">
+<li><code>remote_sync_repo</code> (local→thinker) — carries stream E's
+lava-api-go proxy code + all fixes.</li>
+<li>REBUILD the lava-api-go image on thinker with the synced source (the
+deployed image predates stream E, so its provider clients ignore the
+proxy) + redeploy with
+<code>LAVA_API_UPSTREAM_PROXY=socks5://127.0.0.1:1080</code> in
+<code>~/lava/thinker.local.env</code>. Backend is
+<code>--network host</code> so it reaches <code>127.0.0.1:1080</code>.
+socks5 → Go does remote DNS (resolves trackers via nezha, bypassing
+thinker's blocked DNS).</li>
+<li>In ONE long ssh session: start
+<code>ssh -D 127.0.0.1:1080 -N nezha.local &amp;</code> (bg job) → run
+<code>run-matrix.sh --backend goapi --external-backend</code> for the
+trackers + archiveorg → tunnel stays up for the whole run → real green
+DOWNLOAD-OK. ALT (Path A): run the whole matrix ON nezha (has
+podman+KVM+reachable egress, no proxy/tunnel/rebuild needed) — needs
+Android SDK+gradle on nezha.</li>
+</ol>
+<h3
+id="warning-decisive-finding-2026-06-30--backend-proxy-does-not-help-the-trackers-emulator-egress-is-what-matters">⚠️
+DECISIVE finding (2026-06-30) — backend proxy does NOT help the
+trackers; emulator egress is what matters</h3>
+<p>Wired Path B fully + PROVEN: backend image rebuilt w/ stream-E proxy
+code, <code>LAVA_API_UPSTREAM_PROXY=socks5://127.0.0.1:1080</code>
+confirmed IN the container (via <code>podman inspect</code>;
+<code>podman exec printenv</code> is a false-negative — distroless has
+no shell), nezha SOCKS tunnel up (<code>via=31.169.53.44</code>,
+rutracker=200 through it). YET rutracker still SKIP. Root cause from the
+on-device logcat:
+<code>RuTrackerHttp: REQUEST https://rutracker.org/forum/login.php failed ... CancellationException</code>
+(90s timeout). <strong>The bundled rutracker client logs in DIRECTLY
+from the device — it does NOT route through the lava-api-go
+backend.</strong> So the backend's proxy is irrelevant to it; the login
+egresses via the EMULATOR's network (thinker's blocked IP). Two
+compounding facts:</p>
+<ol type="1">
+<li>Onboarding uses BUNDLED descriptors (the API
+<code>/v1/providers</code> catalogue fetch falls back to bundled — so
+the goapi-backend flow is NOT even exercised for the trackers; that
+itself is a real bug to fix if goapi-routing is intended for all
+providers).</li>
+<li>Bundled tracker clients (<code>RuTrackerHttp</code> etc.) run
+on-device, direct to the tracker. <strong>THE FIX for green = make the
+EMULATOR's egress go through nezha's VPN</strong>, i.e. run the matrix
+ON nezha (podman+KVM+VPN egress reaches rutracker/nnmclub/archiveorg=200
+directly). Path B (backend proxy) only helps the
+API-backed/RemoteTrackerDescriptor flow, which the catalogue-fallback
+isn't using. PATH A execution needs on nezha: repo (rsync), Android SDK
+(adb+gradle) for connectedAndroidTest, the emulator image (pull),
+optional lava-api-go backend. OR: emulator-on-nezha (egress via VPN) +
+adb/gradle driven cross-host from thinker (adb connect nezha:port).
+nezha already has <code>deployment/nezha/nezha.local.env</code> (known
+deploy target).</li>
+</ol>
+<h2
+id="on-device-keystone-progress-2026-06-30-archiveorg1080p-goapi-backend-on-thinker">ON-DEVICE
+KEYSTONE PROGRESS (2026-06-30, archiveorg/1080p, goapi backend on
+thinker)</h2>
+<p>The keystone drove the real stack DEEP; each run surfaced + fixed a
+genuine defect (all recorded: verdict.json + screenrecord frames +
+C70-TREE semantics dump + JUnit):</p>
+<ol type="1">
+<li>✅ <strong>Emulator networking</strong> — root-caused (eth0
+unregistered by netd at boot; raw <code>ip route</code> ignored due to
+Android mark-based routing) → <code>emu_fix_network</code> post-boot
+<code>ndc</code> default-network hook in <code>lib-emulator.sh</code>,
+now a <strong>retry-until-gateway-reachable loop</strong> (was flaky
+single-shot). Gateway 10.0.2.2 pings; ConnectivityService reports active
+network.</li>
+<li>✅ <strong>Onboarding provider-deselection</strong> — picker
+enumerates the FULL bundled descriptor set; the test's
+<code>DESELECT_CANDIDATES</code>/rutracker <code>displayName</code> were
+wrong. Fixed: rutracker
+<code>"Rutracker"</code>→<code>"RuTracker.org"</code>; added
+<code>"RuTor.info"</code> + <code>"IPTorrents"</code>. Onboarding now
+COMPLETES on-device (archiveorg-only → anonymous "Continue" → Summary →
+main app).</li>
+<li>✅ <strong>Off-main nav crash</strong> —
+<code>NestedNavigationControllerImpl.popBackStack</code> (+ base) called
+<code>navHostController.navigateUp()</code> unguarded; the search
+side-effect coroutine runs off-main in the test harness →
+<code>setCurrentState</code> ISE. Fixed with
+<code>runOnMainThreadResult</code> (blocking main-thread marshal)
+wrapping both <code>popBackStack</code>s.</li>
+<li>✅ <strong>Search WORKS on-device</strong> — archiveorg/1080p
+returns its 50 real results (Step-3 <code>Favorite</code>-node wait
+passes); the test clicks the first result.</li>
+<li>⚠️ <strong>CURRENT BLOCKER — topic-DETAIL fetch errors.</strong>
+Opening an archiveorg result's detail shows the error state
+(<code>C70-TREE</code>: Text <code>"Error"</code> /
+<code>"Something went wrong, please try again"</code> /
+<code>Retry</code> button) → Step-4
+<code>waitUntil { present("Torrent")||present("Magnet") }</code> times
+out (30 s). Note archiveorg downloads are <strong>HTTP files</strong>
+(<code>http_identifier</code>), not torrent/magnet — so even on success
+the test's affordance assertion needs an HTTP-download branch. UNDER
+INVESTIGATION: backend archiveorg topic-endpoint bug vs client parse vs
+upstream archive.org metadata flakiness (archiveorg/mp3 was 502
+upstream). Backend per-request logging is minimal (no topic error
+logged).</li>
+</ol>
+<h3
+id="provider-reality-from-thinkers-datacenter-ip-real-finding">Provider
+reality from thinker's datacenter IP (real finding)</h3>
+<ul>
+<li>Authenticated (rutracker/nnmclub/kinozal/iptorrents/rutor): search
+401/502 — login fails / IP-blocked. NOT usable for the full flow from
+thinker.</li>
+<li>archiveorg: search 200 / 50 results ✅, but topic-detail errors
+(item 5 above).</li>
+<li>gutenberg: search 200 but sparse (0–1 results). ⇒ No single provider
+yet yields a clean search→detail→download from thinker; archiveorg is
+closest (only the detail step remains).</li>
+</ul>
+<h3 id="confirmed-intermittent-multi-run-evidence-2026-06-30">CONFIRMED
+INTERMITTENT (multi-run evidence, 2026-06-30)</h3>
+<p>archiveorg/1080p across consecutive keystone runs:
+search-works→topic-detail-"Something went wrong" (30 s) ONE run;
+search-itself-fails "There was a problem reaching the trackers" (60 s
+Step-3) the NEXT run. The app behaves CORRECTLY (surfaces the upstream
+failure as an error state with Retry). This is <strong>upstream
+archive.org reachability flakiness from thinker's datacenter
+IP</strong>, matching the API-level evidence (archiveorg/1080p=200/50 vs
+archiveorg/mp3=502). Also: the onboarding picker shows the BUNDLED
+descriptor set (RuTor.info present) ⇒ the API <code>/v1/providers</code>
+catalogue fetch during onboarding ALSO fails/falls-back intermittently
+(so the reliable curated providers TPB/Nyaa — proven at API level:
+100/75 results+magnets — are NOT onboardable via the bundled-fallback
+picker).</p>
+<h3 id="honest-conclusion-no-bluff">HONEST CONCLUSION (no bluff)</h3>
+<p>The on-device autonomous-QA PIPELINE is PROVEN functional and
+recorded: containerized-KVM emulator boot → guest networking
+(root-caused+fixed) → onboarding completes → search renders real results
+→ correct error-handling. The LIMITING FACTOR for a clean end-to-end
+search→detail→download proof is <strong>provider/upstream reachability
+from thinker's datacenter egress IP</strong> (authenticated=IP-blocked,
+archiveorg=upstream-flaky, gutenberg=sparse, API-catalogue-fetch
+intermittently falls back to bundled). NOT a pipeline defect. A clean
+proof needs a residential/non-datacenter egress OR the IP-block lifted
+OR running where the upstreams are reliably reachable. The 4 fixes this
+session (emulator-net, onboarding deselect ×2, off-main popBackStack)
+are real, durable improvements regardless.</p>
+<h2 id="the-one-blocker-was--now-root-caused-above">THE ONE BLOCKER (was
+— now root-caused above)</h2>
+<p><strong>thinker containerized-emulator has NO guest network</strong>
+(podman 4.9.3, rootless slirp4netns): guest gets a DHCP lease
+(10.0.2.16) but installs no route → <code>ip route</code> empty,
+<code>ping 10.0.2.2</code> unreachable → onboarding's network steps
+stall → Challenge70 SKIPs. Local podman 5.7.1 (pasta) works.</p>
+<h3 id="deep-fix-attempts-so-far">Deep-fix attempts so far</h3>
+<ul>
+<li>42 experiments (subagent, report lost to rate-limit) — all
+container-net-focused — no fix wired.</li>
+<li><code>--network host</code> (direct, this session): emulator did NOT
+become adb-reachable (<code>boot_completed</code> empty) — inconclusive
+on guest route.</li>
+<li><code>--cap-add NET_ADMIN --cap-add NET_RAW --device /dev/net/tun</code>
+(direct): boot=1, <strong>guest <code>ip route</code> EMPTY, ping
+8.8.8.8 "Network is unreachable"</strong>. FAILED.</li>
+<li><code>--network pasta</code> (direct): boot=1, <strong>guest
+<code>ip route</code> EMPTY, "Network is unreachable"</strong>.
+FAILED.</li>
+</ul>
+<h3
+id="critical-finding-2026-06-30--container-net-backend-is-ruled-out">CRITICAL
+FINDING (2026-06-30) — container net backend is RULED OUT</h3>
+<p>Two genuinely different container backends (slirp4netns+caps vs
+pasta) yield the <strong>identical</strong> guest no-route. The Android
+emulator runs its <strong>own</strong> QEMU user-mode NIC
+<em>inside</em> the container; the guest's default route is pushed by
+the emulator's <strong>RIL/modem emulation</strong>, independent of the
+container's network namespace. So the blocker is
+<strong>guest/emulator-internal</strong>, NOT podman's net backend. The
+whole 42-experiment + 3-this-session container-net line is a dead end.
+STOP chasing container net.</p>
+<h3
+id="remaining-candidates-guestemulator-internal--the-right-layer">Remaining
+candidates (guest/emulator-internal — the RIGHT layer)</h3>
+<ol type="1">
+<li><strong>Inspect the guest NIC state</strong> on thinker:
+<code>adb shell ip addr</code> / <code>ip link</code> /
+<code>getprop | grep -E 'net|dns|ril'</code> — is
+<code>radio0</code>/<code>eth0</code> UP with 10.0.2.15? Is the route
+absent or the interface down?</li>
+<li><strong>Compare a WORKING local (podman 5.7.1) emulator's</strong>
+<code>ip addr</code>+<code>ip route</code>+ril props vs thinker's — the
+diff pinpoints the exact guest-side divergence.</li>
+<li><strong>Emulator launch flags</strong> inside the image entrypoint:
+add <code>-netdelay none -netspeed full</code>, or check whether
+thinker's emulator is silently launched with a degraded
+<code>-netdev</code> / <code>-no-network</code> due to a CPU/KVM
+capability the emulator probes.</li>
+<li><strong>KVM/CPU angle</strong>: thinker CPU may lack a feature the
+emulator's virtual NIC path needs; try <code>-accel kvm</code> flag
+variants or a different system image ABI.</li>
+<li>(Lowered priority — net backend ruled out) Provision podman 5.x
+user-local on thinker.</li>
+</ol>
+<h2 id="resumption-fresh-session-full-context">RESUMPTION (fresh
+session, full context)</h2>
+<ol type="1">
+<li>Crack the emulator-net candidate above → wire into
+<code>scripts/autonomous-qa/lib-emulator.sh emu_boot</code> (env-gated
+<code>LAVA_EMU_NETWORK</code>/podman-major detect; no-op on local
+5.7.1).</li>
+<li>Run the PROVEN keystone:
+<code>run-matrix.sh --backend goapi --external-backend --subsets archiveorg --queries 1080p</code>
+on thinker (backend already up). Expect onboard→search(50
+results)→details→download → <code>C70-RESULT DOWNLOAD-OK</code> marker →
+verdict PASS.</li>
+<li>Execute Challenge70's §6.AB falsifiability rehearsal → honest
+Bluff-Audit.</li>
+<li>Scale matrix on thinker (both backends; note authenticated providers
+will 401/502 — honest findings).</li>
+<li>Resolve the gated push: §6.Y versionCode bump,
+<code>docs/scripts/run-helixqa-provider-qa.sh.md</code> (§11.4.18),
+falsifiability block in the 2026-06-30 incident JSON (§6.N.1.3),
+Bluff-Audit for the now-verified Challenge70 — then push (the pre-push
+gate correctly blocked the unverified-test commit; do NOT
+--no-verify).</li>
+<li>§6.AK cycle-coverage gate → §6.AA two-stage dev+prod
+firebase-distribute.</li>
+</ol>
+<h2 id="durable-state">DURABLE STATE</h2>
+<ul>
+<li>Local commit <code>ccdd84c1</code> holds the harness (8 orchestrator
+scripts, 5 HelixQA banks, nav fix, Challenge70, docs, forensic, curated
+evidence). Push is GATED (correctly) — see step 5.</li>
+<li>thinker: Go backend up; api-matrix-evidence + keystone evidence
+under
+<code>~/lava-qa/.lava-ci-evidence/autonomous-qa/2026-06-30/</code>.</li>
+</ul>
+</body>
+</html>

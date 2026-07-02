@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>PORTING-PLAYBOOK</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="autonomous-qa-porting-playbook--lava--boba-base">Autonomous-QA
+Porting Playbook — Lava → Boba-Base</h1>
+<p>Deep research of every solution/approach developed in the Lava
+autonomous-QA effort, structured for porting into
+<strong>Boba-Base</strong>
+(<code>git@github.com:milos85vasic/Boba-Base.git</code>). Each section:
+<strong>Problem → Root cause → Solution → Key files/code → Port
+steps</strong>. Ordered by foundational dependency.</p>
+<p>The end goal these solve: drive a <strong>clean Android install →
+onboard → search → open details → obtain a download
+(magnet/torrent/HTTP)</strong> flow on a <em>containerized</em>
+emulator, against a real backend, reaching real upstream providers —
+recorded, with anti-bluff verdicts — for many provider/backend/query
+combinations.</p>
+<hr />
+<h2 id="0-the-single-most-important-architectural-insight-read-first">0.
+The single most important architectural insight (read first)</h2>
+<p>There are <strong>two distinct egress paths</strong>, and which one a
+provider uses determines where you must inject reachability:</p>
+<ol type="1">
+<li><strong>Backend-routed (RemoteTrackerDescriptor /
+API-backed)</strong> — the app calls <em>your backend</em> (loopback via
+<code>adb reverse</code>); the <strong>backend</strong> makes the
+upstream call. To reach blocked upstreams, proxy the
+<strong>backend</strong> (§3).</li>
+<li><strong>On-device-direct (bundled descriptor)</strong> — the app's
+<em>bundled client</em> (e.g. <code>RuTrackerHttp</code>) hits the
+tracker <strong>directly from the device</strong>. The backend proxy is
+irrelevant here; the <strong>emulator's own egress</strong> must reach
+the upstream (§2 + §4).</li>
+</ol>
+<p>The onboarding picker <strong>falls back to bundled descriptors when
+the API <code>/v1/providers</code> catalogue fetch fails</strong>,
+silently switching the whole flow to on-device-direct. So a "backend"
+test can quietly become a direct test. <strong>Diagnose which path is
+active before debugging reachability.</strong> (Forensic: logcat
+<code>RuTrackerHttp: REQUEST https://rutracker.org/...</code> proves
+on-device-direct.)</p>
+<hr />
+<h2 id="1-containerized-android-emulator-podmandocker-kvm">1.
+Containerized Android emulator (podman/docker, KVM)</h2>
+<p><strong>Problem:</strong> need a reproducible emulator that runs
+<em>inside</em> a container (not host-direct), with <code>adb</code>
+reachable from the host/test runner.</p>
+<p><strong>Solution (the working recipe):</strong></p>
+<ul>
+<li>Image bundles Android SDK + AVD + a baked adb keypair + a
+<strong>socat bridge</strong> (container <code>0.0.0.0:5575</code> →
+<code>127.0.0.1:5555</code> adbd) so adb is reachable without host
+networking.</li>
+<li>Boot:
+<code>podman run -d --rm --userns=keep-id --device /dev/kvm -p 127.0.0.1:&lt;hostADB&gt;:5575 -p 127.0.0.1:&lt;hostConsole&gt;:5554 -e ANDROID_AVD_NAME=default -e ANDROID_COLD_BOOT=true &lt;image&gt;</code></li>
+<li>Host adb: copy the baked key out
+(<code>podman cp &lt;c&gt;:/home/emulator/.android/adbkey</code>),
+<code>export ADB_VENDOR_KEYS=…</code>,
+<code>adb connect 127.0.0.1:&lt;hostADB&gt;</code>.</li>
+<li>Poll readiness: <code>getprop sys.boot_completed == 1</code> AND
+<code>pm path android</code> succeeds.</li>
+</ul>
+<p><strong>Key files:</strong>
+<code>scripts/autonomous-qa/lib-emulator.sh</code>
+(<code>emu_boot</code>/<code>emu_authorize_adb</code>/<code>emu_connect</code>/<code>emu_wait_boot</code>/<code>emu_cleanup_orphans</code>/<code>emu_teardown</code>)
+— thin glue replicating
+<code>submodules/containers/pkg/emulator/containerized.go</code>. Image:
+<code>ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64</code>
+(Containerfile in the Containers submodule).</p>
+<p><strong>CRITICAL — podman version:</strong> <strong>podman 5.7.1
+(pasta)</strong> boots the emulator with <strong>working guest
+networking natively</strong>; <strong>podman 4.9.3
+(slirp4netns)</strong> boots but the <strong>guest has no
+network</strong> (see §2). Prefer ≥5.x on the gate host. The container's
+network backend does NOT fix the <em>guest</em> route (proven by testing
+host/caps+tun/pasta — all identical guest result); the divergence is
+between the podman versions' interaction with the emulator, addressed by
+§2's guest-side fix regardless.</p>
+<p><strong>Port steps:</strong> reuse the Containers submodule's
+emulator package + image; copy <code>lib-emulator.sh</code> verbatim
+(it's generic). On TMPDIR-constrained hosts set
+<code>TMPDIR=$HOME/.podman-build-tmp</code> for image builds (32GB
+<code>/tmp</code> tmpfs filled during build).</p>
+<hr />
+<h2 id="2-containerized-emulator-guest-networking-fix-the-ndc-dance">2.
+Containerized-emulator guest networking fix (the <code>ndc</code>
+dance)</h2>
+<p><strong>Problem:</strong> on some hosts the emulator boots but the
+guest has <strong>no network</strong> — <code>ip route</code> empty,
+<code>ping 10.0.2.2</code> "Network is unreachable", onboarding
+stalls.</p>
+<p><strong>Root cause:</strong> Android never registers
+<code>eth0</code> with its framework at boot (the boot-time
+interface-add fails while eth0 is still DOWN). Android uses
+<strong>per-network mark-based routing</strong> (netd) — so a raw
+<code>ip route</code> on the main table is <strong>ignored</strong> by
+apps. The NIC is fine; the <em>framework</em> doesn't know the network
+exists. (<code>eth0</code> shows <code>state DOWN</code>; forcing it up
+gives carrier+IP but apps still see "unreachable" because netd routing
+isn't configured.)</p>
+<p><strong>Solution (post-boot, as root via <code>su 0</code>),
+retry-until-gateway-pings:</strong></p>
+<pre><code>ip link set eth0 up
+ip addr add 10.0.2.15/24 dev eth0
+ndc network interface add 100 eth0      # net 100 = Android&#39;s default physical net
+ndc network default set 100
+ndc network route add 100 eth0 0.0.0.0/0 10.0.2.2   # run AFTER eth0 up
+setprop net.dns1 10.0.2.3</code></pre>
+<p>Verify <code>ping -c2 10.0.2.2</code> succeeds. Constants are
+<strong>platform-fixed</strong> Android-emulator slirp values:
+<code>10.0.2.2</code>=host/gateway, <code>10.0.2.3</code>=DNS,
+<code>10.0.2.15</code>=guest (the emulator's <code>127.0.0.1</code>
+equivalent). Wrap in an 8-attempt retry loop (boot-timing race) and
+<strong>self-gate</strong>: if <code>ping 10.0.2.2</code> already works
+(healthy podman 5.x guest), no-op.</p>
+<p><strong>Key code:</strong>
+<code>scripts/autonomous-qa/lib-emulator.sh</code> →
+<code>emu_fix_network()</code>. Note: <code>ping 8.8.8.8</code> failing
+is EXPECTED (slirp doesn't NAT ICMP-to-internet) — TCP/UDP work; don't
+use ICMP-to-internet as a health signal.</p>
+<p><strong>Port steps:</strong> copy <code>emu_fix_network</code>; call
+it once after <code>emu_wait_boot</code>. It's a no-op where unneeded,
+so it's safe everywhere.</p>
+<hr />
+<h2
+id="3-backend-configurable-outbound-proxy-for-backend-routed-providers">3.
+Backend configurable outbound proxy (for backend-routed providers)</h2>
+<p><strong>Problem:</strong> the backend's upstream calls to providers
+go out the host's IP; if that IP is blocked you need to route through a
+different egress.</p>
+<p><strong>Solution:</strong> a single env knob
+<code>LAVA_API_UPSTREAM_PROXY</code> (<code>socks5://</code> |
+<code>http://</code> | <code>https://</code>), falling back to standard
+<code>HTTP_PROXY</code>/<code>HTTPS_PROXY</code>/<code>ALL_PROXY</code>/<code>NO_PROXY</code>
+when unset. A shared transport factory sets
+<code>http.Transport.Proxy</code> on <strong>every</strong> provider
+client; <strong>loopback bypass</strong> keeps local sidecars (Jackett
+at 127.0.0.1) direct. Go's <code>net/http</code> dials
+<code>socks5://</code> natively (no <code>x/net/proxy</code> dep) and
+does <strong>remote DNS</strong> for socks5 (critical — the host's DNS
+is often part of the block).</p>
+<p><strong>Key files:</strong>
+<code>lava-api-go/internal/httpx/proxy.go</code>
+(<code>ProxyFunc</code>/<code>Configure</code>/<code>Proxy</code>/<code>NewTransport</code>),
+wired in <code>cmd/lava-api-go/main.go</code>
+(<code>httpx.Configure(cfg.UpstreamProxy)</code> BEFORE provider
+construction) + each <code>internal/&lt;provider&gt;/client.go</code>
+(<code>Proxy: httpx.Proxy</code> /
+<code>Transport: httpx.NewTransport()</code>); config in
+<code>internal/config/config.go</code>; documented in
+<code>.env.example</code>. Tested with a live local proxy + real
+provider clients + falsifiability (mutate <code>Proxy→nil</code> → test
+fails).</p>
+<p><strong>Deployment wiring gotcha:</strong> the deploy script must
+<strong>forward the env into the container</strong> (allow-list). See
+<code>deployment/thinker/thinker-up.sh</code> —
+<code>LAVA_API_UPSTREAM_PROXY</code> (+ proxy fallbacks) added to the
+<code>for var in …</code> <code>-e</code> loop. With
+<code>--network host</code>, the container reaches the host's
+<code>127.0.0.1:&lt;proxyport&gt;</code>.</p>
+<p><strong>Verify env reached the container:</strong> the image is
+<strong>distroless</strong> (no shell/<code>printenv</code>) →
+<code>podman exec … printenv</code> is a
+<strong>false-negative</strong>. Use
+<code>podman inspect &lt;c&gt; --format '{{range .Config.Env}}{{println .}}{{end}}'</code>.</p>
+<p><strong>Port steps:</strong> copy the <code>httpx</code> proxy
+factory pattern into Boba-Base's backend HTTP layer; add the config knob
++ <code>.env.example</code> entry + the deploy-script env-forward.</p>
+<hr />
+<h2
+id="4-providerupstream-egress-via-a-vpn-connected-host-the-nezha-pattern">4.
+Provider/upstream egress via a VPN-connected host (the nezha
+pattern)</h2>
+<p><strong>Problem:</strong> datacenter/cloud host IPs are
+<strong>network-level blocked</strong> for the Russian trackers —
+DNS-resolution failure + TLS-MITM (self-signed cert) +
+connection-refused. This is <strong>ISP/DPI blocking, NOT a Cloudflare
+challenge</strong> → FlareSolverr/Jackett <strong>cannot</strong> bypass
+it. (Diagnose by: <code>curl https://api.ipify.org</code> for the host
+IP;
+<code>curl -o /dev/null -w %{http_code} https://rutracker.org/…</code>
+direct → fails; same via a VPN-host proxy → 200.)</p>
+<p><strong>Solution:</strong> route through a <strong>VPN-connected
+host</strong> (<code>nezha.local</code>, VPN egress IP reaches
+rutracker/nnmclub/archive.org = 200). Two sub-approaches by egress path
+(§0):</p>
+<ul>
+<li><strong>Backend-routed:</strong> a SOCKS5 tunnel +
+<code>LAVA_API_UPSTREAM_PROXY</code> (§3). Tunnel from the backend host
+to the VPN host: <code>ssh -D 127.0.0.1:1080 -N &lt;vpnhost&gt;</code>
+(use <code>--socks5-hostname</code> for remote DNS). The tunnel exits
+via the VPN host's network (its VPN). Set
+<code>LAVA_API_UPSTREAM_PROXY=socks5://127.0.0.1:1080</code>.</li>
+<li><strong>On-device-direct:</strong> the tunnel/backend-proxy does NOT
+help (the emulator egresses, not the backend). <strong>Run the whole
+matrix ON the VPN host</strong> — there the emulator's slirp NAT exits
+through the VPN host's network → VPN → upstream. (Requires
+podman+KVM+Android-SDK+the emulator image on the VPN host.)</li>
+</ul>
+<p><strong>Key facts to port:</strong> the diagnosis script (host-IP +
+per-tracker HTTP code, direct vs via-proxy); the decision rule (which
+egress path → which fix). Constants/coords live in <code>.env</code>
+(gitignored) — never hardcode.</p>
+<hr />
+<h2 id="5-durable-remote-execution-the-operational-unblock">5. Durable
+remote execution (the operational unblock)</h2>
+<p><strong>Problem:</strong> long (~20 min) remote runs kept dying —
+tmux sessions vanished,
+<code>nohup</code>/<code>setsid</code>/<code>disown</code> processes
+died, background SSH pollers were killed.</p>
+<p><strong>Root cause:</strong> the remote host's
+<code>systemd-logind</code> reaps <strong>all</strong> user processes
+when the SSH session ends (default <code>KillUserProcesses</code>
+behavior on that host) — so anything tied to the session dies, even
+detached.</p>
+<p><strong>Solution:</strong> <strong>enable lingering + run as a
+systemd user service:</strong></p>
+<pre><code>export XDG_RUNTIME_DIR=/run/user/$(id -u)
+loginctl enable-linger                      # processes persist past session end
+systemd-run --user --unit=&lt;name&gt; --collect bash /path/to/runner.sh
+systemctl --user is-active &lt;name&gt;           # poll; result persists on disk</code></pre>
+<p>This was the ONLY mechanism that survived (tmux/nohup all failed).
+Poll by checking <code>is-active</code> + the on-disk evidence (don't
+rely on a long-lived SSH poller — those get killed by the local harness
+too; keep pollers short, or check on the next turn).</p>
+<p><strong>Port steps:</strong> any long remote job (matrix, build) →
+wrap in a self-contained runner script, scp it over, launch via
+<code>systemd-run --user</code> with linger. Write a
+<code>MATRIX_COMPLETE</code> sentinel for completion detection.
+<strong>Gotcha:</strong> if the runner pipes a long command through
+<code>tail -N</code>, output buffers until exit — log progress
+separately (per-iteration <code>verdict.json</code>) instead of relying
+on the piped log.</p>
+<hr />
+<h2 id="6-the-autonomous-qa-harness-orchestration">6. The autonomous-QA
+harness (orchestration)</h2>
+<p><strong>Structure (all in
+<code>scripts/autonomous-qa/</code>):</strong></p>
+<ul>
+<li><code>lib-subsets.sh</code> — emits the provider-mix matrix (all
+2ⁿ−1 non-empty subsets of the backed-provider set, as
+<code>csv|slug|statehash</code>).</li>
+<li><code>lib-emulator.sh</code> — containerized emulator lifecycle (§1)
++ <code>emu_fix_network</code> (§2).</li>
+<li><code>lib-backend.sh</code> —
+<code>backend_up_&lt;goapi|apiapp&gt;</code> /
+<code>backend_target_*</code> / <code>backend_down_*</code> with a
+<strong>mutual-exclusion lock</strong> ("never run both backends at
+once"). The on-device backend (<code>apiapp</code>) embeds the Go server
+(<code>:core:apiengine</code>) and is started with
+<code>am start … --ez &lt;START_API_extra&gt; true</code> +
+<code>pm grant POST_NOTIFICATIONS</code> (a plain LAUNCHER launch leaves
+it stopped); readiness = real <code>/health</code> poll over TLS via
+<code>adb forward</code>, not <code>podman ps</code> "Up" (§6.B: "Up" ≠
+healthy).</li>
+<li><code>run-iteration.sh</code> — <strong>fresh install</strong>
+(uninstall+install -r for clean onboarding state) → start recording
+(logcat + chunked <code>screenrecord</code>) →
+<code>./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.&lt;key&gt;=&lt;val&gt;</code>
+→ parse JUnit → marker-based verdict.</li>
+<li><code>run-matrix.sh</code> — backend up → boot ONE kept-alive
+emulator → <code>emu_fix_network</code> → loop subsets×queries →
+teardown. <code>--external-backend</code> skips backend lifecycle (when
+the backend is managed separately).</li>
+<li><code>lib-remote.sh</code> — <code>remote_sync_repo</code> (rsync
+incl. gitignored <code>.env</code>, exclude build/.git/raw/recordings) +
+<code>remote_run "&lt;cmd&gt;"</code> + <code>remote_fetch</code>.
+Targets a host from <code>.env</code>
+(<code>LAVA_API_GO_REMOTE_HOST</code>); override per host.</li>
+<li><code>vision-analyze.sh</code> / <code>aggregate-evidence.sh</code>
+/ <code>lib-jackett.sh</code>.</li>
+</ul>
+<p><strong>Anti-bluff verdict (the load-bearing bit):</strong> the test
+logs <code>C70-RESULT … DOWNLOAD-OK</code> <strong>only</strong> after
+the real on-screen download/magnet affordance is confirmed.
+<code>run-iteration.sh</code> greps logcat+JUnit and applies a decision
+table: PASS only if the marker is present AND the only failure is the
+known teardown crash (LVA-008) AND no other failure signal. Verdicts:
+PASS / SKIP (honest <code>assumeTrue</code> skip when env/provider
+unreachable) / FAIL. <strong>Known bug to fix on port:</strong> the
+summary counter regex <code>grep -oE '[A-Z]+$'</code> never matches the
+trailing-<code>"</code> JSON token → mislabels everything FAIL; use
+<code>grep -oE '"verdict": *"[A-Z]+"' | grep -oE '[A-Z]+' | tail -1</code>.
+Per-iteration <code>verdict.json</code> is authoritative.</p>
+<p><strong>Port steps:</strong> copy the whole
+<code>scripts/autonomous-qa/</code> tree; adjust
+<code>lib-subsets</code> provider set, the instrumentation-arg names,
+and the marker tag to Boba-Base's test.</p>
+<hr />
+<h2 id="7-the-parameterized-compose-ui-challenge-the-device-test">7. The
+parameterized Compose UI Challenge (the device test)</h2>
+<p><strong>Pattern:</strong>
+<code>createAndroidComposeRule&lt;MainActivity&gt;</code> + a single
+<code>@Test</code> that reads instrumentation args
+(<code>qa_backend</code>/<code>qa_providers</code>/<code>qa_query</code>/<code>qa_api_url</code>)
+and drives the <strong>real production path</strong>: onboarding wizard
+→ provider pick → configure/login → search → results → topic → download.
+(<code>app/src/androidTest/kotlin/lava/app/challenges/Challenge70AutonomousQaProviderMatrixTest.kt</code>.)</p>
+<p><strong>Hard-won fixes to port:</strong></p>
+<ul>
+<li><strong>Off-main navigation crash</strong>
+(<code>IllegalStateException: setCurrentState must be called on the main thread</code>):
+the test harness's <code>FrameDeferringContinuationInterceptor</code>
+resumes <code>collectSideEffect</code>/<code>LaunchedEffect</code>
+coroutines <strong>off the main thread</strong>, so
+<code>navController.navigate/navigateUp/popBackStack</code> crash. Fix
+in the nav layer: marshal every nav call to the main looper.
+<code>navigate()</code> (returns Unit) →
+<code>runOnMainThread { … }</code> (fire-and-forget Handler post);
+<code>popBackStack()</code> (returns Boolean) →
+<code>runOnMainThreadResult { … }</code> (CountDownLatch blocking
+marshal, propagates result+exceptions). No-op in production (already on
+main). See
+<code>core/navigation/.../NavigationController.kt</code>.</li>
+<li><strong>Provider deselection</strong>: the picker renders
+<strong>bundled descriptor</strong> displayNames (e.g.
+<code>RuTracker.org</code>, <code>RuTor.info</code>,
+<code>IPTorrents</code>), NOT the API/humanized names — enumerate the
+<em>real</em> rendered names (grep
+<code>core/tracker/*/src/main/**/*Descriptor.kt</code>) and deselect all
+non-requested ones, else a credentialed provider's Configure page blocks
+the wizard.</li>
+<li><strong>All-affordance download handling</strong>: the "Torrent"
+button is the download affordance for <strong>all</strong> non-magnet
+providers <em>including HTTP-file ones</em> (it routes through
+<code>onTorrentFileClick → resolveProviderDownloadKind → downloadHttpFile|downloadTorrentFile</code>,
+both → the same <code>DownloadDialog</code>). Don't invent a "file-row"
+matcher (doesn't exist). Confirm download via
+<code>DownloadDialog</code> text "Download completed"/"Downloading
+file…" (NOT "Download in progress" — that string doesn't exist). Magnet
+→ <code>MagnetDialog</code> "Open".</li>
+<li><strong>Transient-search retry</strong>: on the "Search failed /
+problem reaching the trackers" state, tap "Retry" up to 3× before
+failing loudly (handles upstream flakiness).</li>
+<li><strong>Honest skips</strong>: wrap onboarding in
+<code>try { … } catch (ComposeTimeoutException) { assumeTrue(false, "…honest §6.J skip…") }</code>
+— an unreachable env/provider is a SKIP, never a green.</li>
+</ul>
+<hr />
+<h2
+id="8-jackett--flaresolverr-sidecar-cloudflare-protected-trackers">8.
+Jackett + FlareSolverr sidecar (Cloudflare-protected trackers)</h2>
+<p><strong>Use when:</strong> the block is a <strong>Cloudflare
+challenge</strong> (not an ISP/DPI block — §4). FlareSolverr solves the
+challenge; Jackett aggregates indexers and exposes Torznab.</p>
+<p><strong>Backend integration:</strong>
+<code>LAVA_API_JACKETT_ENABLED/URL/APIKEY/DEFAULT_INDEXER</code>.
+Sidecar via <code>scripts/autonomous-qa/lib-jackett.sh</code> +
+<code>tools/lava-containers/docker-compose.jackett.yml</code> (Jackett
+9117, FlareSolverr 8191).</p>
+<p><strong>§6.J gap to port-fix:</strong> a <strong>fresh Jackett has
+zero indexers</strong> (must be added via its API), and its
+<strong>management API needs a dashboard session cookie</strong> — the
+apikey only authorizes the Torznab
+<code>/results</code>+<code>/caps</code> feeds (management GET/POST →
+302 <code>/UI/Login</code>). The backend's jackett client must do the
+<strong>empty-password cookie login</strong> (POST
+<code>/UI/Dashboard</code>, cookie jar) for
+<code>ListIndexers</code>/config; apikey stays for Torznab. And the
+<strong>test fake must enforce the same 302-without-cookie</strong>
+behavior (behavioral-equivalence / Third Law) or the gap stays hidden.
+See <code>lava-api-go/internal/jackett/</code>.</p>
+<hr />
+<h2 id="9-diagnostic-techniques-reusable">9. Diagnostic techniques
+(reusable)</h2>
+<ul>
+<li><strong><code>C70-TREE</code> semantics dump</strong>: on any
+failure, log
+<code>composeRule.onRoot(useUnmergedTree=true).printToString(maxDepth=100)</code>
+→ recover the exact on-screen state (e.g. an
+<code>[Error] / Something went wrong / Retry</code> topic screen) from
+the recording even after the activity tears down.</li>
+<li><strong>Frame extraction from screenrecord</strong>:
+<code>ffmpeg -ss &lt;t&gt; -i rec.mp4 -frames:v 1 frame.png</code>;
+small PNGs = simple/blank screens (loading/error), large = populated — a
+cheap progress signal.</li>
+<li><strong>distroless env check</strong>: <code>podman inspect</code>
+(not <code>exec printenv</code>).</li>
+<li><strong>buffered <code>tail</code> trap</strong>: a command piped
+through <code>tail -N</code> shows nothing until it exits — read
+per-iteration artifacts for live progress.</li>
+</ul>
+<hr />
+<h2
+id="10-honest-status-of-the-remaining-per-provider-post-egress-blockers">10.
+Honest status of the <em>remaining</em> (per-provider, post-egress)
+blockers</h2>
+<p>After egress is solved, the search→download still depends on
+per-provider realities — port these expectations:</p>
+<ul>
+<li><strong>CAPTCHA_LOGIN providers (rutracker)</strong>: cannot be
+auto-onboarded (captcha). Honest SKIP; needs a
+manual-creds/session-cookie path or a captcha service.</li>
+<li><strong>archiveorg topic-detail bug</strong>: search works, but
+opening a result shows "Something went wrong" consistently (independent
+of egress) — a real topic-fetch/parse bug to fix in the provider
+client.</li>
+<li><strong>FORM_LOGIN providers (nnmclub/kinozal)</strong>: should
+auto-onboard once egress works; trace the login step if onboarding times
+out.</li>
+<li>Anonymous, well-behaved providers (e.g. a working Gutenberg/Archive
+client) are the cleanest first-green target.</li>
+</ul>
+<hr />
+<h2 id="recommended-porting-order-into-boba-base">Recommended porting
+order into Boba-Base</h2>
+<ol type="1">
+<li>§1 containerized emulator + §2 guest-net fix (foundation).</li>
+<li>§5 durable execution (so long runs survive) + §6 harness
+skeleton.</li>
+<li>§7 the parameterized Challenge + the 4 device-test fixes.</li>
+<li>§0/§4 egress decision + §3 backend proxy / VPN-host run.</li>
+<li>§8 Jackett (only if Cloudflare-blocked) + §9 diagnostics + §6
+verdict-counter fix.</li>
+</ol>
+<blockquote>
+<p>To tailor this to Boba-Base's actual structure (module names,
+provider clients, deploy scripts), add the repo to the session and I'll
+map each section to concrete Boba-Base files + generate the diffs.</p>
+</blockquote>
+</body>
+</html>

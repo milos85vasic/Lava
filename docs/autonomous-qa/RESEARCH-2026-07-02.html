@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>RESEARCH-2026-07-02</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="deep-web-research--solutions-for-lavas-standing-challenges-2026-07-02">Deep
+Web Research — Solutions for Lava's Standing Challenges
+(2026-07-02)</h1>
+<blockquote>
+<p>Author: research subagent. Standing operator directive: "Perform
+frequent deep web researches about solutions for all of our challenges,
+new ideas, game-changing approaches, and various opensource codebases
+and services we can incorporate into our System!"</p>
+<p><strong>Anti-bluff note.</strong> Every project/version/date below
+was pulled from a URL that was actually fetched during this session
+(listed in each section's <em>Sources</em>). Where a fact could not be
+confirmed from a primary source it is prefixed <code>UNVERIFIED:</code>.
+Version numbers and dates reflect what the fetched page reported on
+2026-07-02 and should be re-checked before adoption. No claim here is a
+substitute for the §6.J/§6.L requirement that any incorporated tool be
+proven on a real device / real service before it gates anything.</p>
+</blockquote>
+<hr />
+<h2 id="topic-1--live-html-fixture-refresh--anti-cloudflare">Topic 1 —
+Live HTML fixture refresh + anti-Cloudflare</h2>
+<p>Lava's problem: keeping scraper test fixtures (and the live
+<code>:proxy</code> / <code>lava-api-go</code> scrapers) working against
+sites behind Cloudflare — notably rutor.info, which currently returns
+403/501 to plain HTTP clients. The 2026 landscape has shifted: the
+classic FlareSolverr sidecar still works for <em>light</em> JS
+challenges but its CAPTCHA/Turnstile solvers are non-functional, and
+TLS-fingerprint impersonation has become the cheaper first line of
+defense.</p>
+<h3 id="findings">Findings</h3>
+<ul>
+<li><p><strong>FlareSolverr</strong>
+(<code>github.com/FlareSolverr/FlareSolverr</code>,
+<strong>MIT</strong>). Latest release reported as <strong>v3.5.0
+(2026-05-26)</strong>; 14.5k stars, still receiving releases. A
+Dockerized proxy that returns cookies+UA after solving a challenge in a
+real browser. <strong>Critical limitation confirmed on the
+README:</strong> <em>"At this time none of the captcha solvers
+work"</em> — it returns
+<code>Captcha detected but no automatic solver is configured</code> on
+Turnstile / 2026 Managed Challenges. Still viable as a sidecar for sites
+that only throw a light JS challenge (this is a good fit for a container
+in Lava's stack because it speaks a simple JSON HTTP API and is
+language-agnostic). <em>How Lava could use it:</em> run as a
+<code>submodules/containers</code>-managed sidecar; the Go/Kotlin
+scraper POSTs <code>{cmd:"request.get", url:...}</code> to
+<code>:8191/v1</code> and uses the returned cookies for the real fetch.
+Only helps where the tracker uses a light JS challenge, not
+Turnstile.</p></li>
+<li><p><strong>Byparr</strong>
+(<code>github.com/ThePhaseless/Byparr</code>, <strong>GPL-3.0</strong>).
+Latest release <strong>v2.1.0 (2026-02-08)</strong>. A <strong>drop-in
+FlareSolverr replacement</strong>: same <code>:8191/v1</code> JSON API,
+shipped as <code>ghcr.io/thephaseless/byparr:latest</code>. Secondary
+sources say it is Camoufox-backed (hardened Firefox) with a higher
+success rate than FlareSolverr on Turnstile; the repo itself only
+promises <em>"greatly increases the chance"</em> (honest, no guarantee).
+<strong>License caveat:</strong> GPL-3.0 — fine as an unmodified sidecar
+container, but do NOT vendor its source into Lava (which is not GPL).
+<em>How Lava could use it:</em> identical wiring to FlareSolverr but
+with a better Turnstile hit-rate; swap the sidecar image, keep the
+client code. Best current open-source option for a browser-based
+challenge solver.</p></li>
+<li><p><strong>curl_cffi</strong>
+(<code>github.com/lexiforest/curl_cffi</code>, <strong>MIT</strong>).
+Latest <strong>v0.15.1b2 (2026-06-05)</strong>, actively maintained, 37
+preset browser fingerprints (Chrome/Safari/Firefox families), and —
+since v0.15.1 — fingerprints can be updated without upgrading the
+library. It is the Python binding; the <strong>standalone
+<code>github.com/lexiforest/curl-impersonate</code></strong>
+distribution is a patched <code>curl</code> that impersonates browser
+TLS/JA3/HTTP2 (and HTTP/3) fingerprints. This is the <em>cheap</em>
+first line: many Cloudflare 403s are pure TLS-fingerprint blocks that
+never reach a JS challenge, and a fingerprint-correct request just
+succeeds with no browser. <em>How Lava could use it:</em> the
+<code>lava-api-go</code> scraper is Go, not Python — the actionable path
+is the <strong>curl-impersonate binary/shared-lib as a fetch
+backend</strong> (invoke the impersonate <code>curl</code> or link the
+boringssl-patched build) OR a thin Python <code>curl_cffi</code> sidecar
+for the fixture-refresh script. For the JVM app side, the analogous idea
+is documented under "okhttp custom fingerprints" in the curl_cffi docs
+(they show okhttp JA3), i.e. Lava's OkHttp client can be tuned toward a
+browser-like fingerprint. Recommend curl-impersonate as the
+<strong>fixture-refresh fetcher</strong> first, before reaching for a
+browser.</p></li>
+<li><p><strong>Scrapling</strong> (Python framework; secondary-source
+only this session — see caveat). Reported <strong>v0.4.8
+(2026-05)</strong>: one library with three fetchers (TLS-impersonated
+HTTP → Camoufox with an auto-Turnstile solver → full Playwright),
+letting a fixture-refresh script escalate only as far as a given tracker
+needs. UNVERIFIED (repo not fetched): exact license and repo URL —
+verify before use. <em>How Lava could use it:</em> the
+<code>scripts/check-fixture-freshness.sh</code> companion refresher
+could call a small Scrapling script that auto-escalates per
+tracker.</p></li>
+<li><p><strong>cloudscraper</strong>
+(<code>github.com/VeNoMouS/cloudscraper</code>, Python).
+<strong>Mixed/declining signal.</strong> Some sources call the mainline
+fork stale; a <code>cloudscraper25</code> fork is cited as the
+currently-maintained one. Open-source solvers of this class lag
+Cloudflare changes. <em>Recommendation:</em> <strong>do not
+adopt</strong> as a primary — it is the weakest of the options here for
+2026 Cloudflare.</p></li>
+<li><p><strong>undetected-chromedriver / nodriver</strong> and
+<strong>Playwright stealth</strong> — the in-process browser route (no
+separate container). Higher operational weight; only needed when a
+tracker requires full browser interaction. For Lava, a shared
+<strong>Byparr sidecar</strong> is a cleaner fit than embedding a
+browser in the Go/Kotlin process.</p></li>
+</ul>
+<h3 id="recommendation-for-lava">Recommendation for Lava</h3>
+<ol type="1">
+<li><strong>Two-tier fetch strategy for the scrapers and the
+fixture-refresh script.</strong> Tier 1: <strong>curl-impersonate /
+curl_cffi</strong> with a current Chrome fingerprint — cheapest, no
+browser, likely clears rutor.info's TLS-fingerprint 403 outright. Tier 2
+(only if Tier 1 gets a JS/Turnstile challenge): a
+<strong>Byparr</strong> sidecar container (FlareSolverr-API-compatible,
+better Turnstile hit-rate than FlareSolverr, GPL-3.0 used <em>unmodified
+as a container</em> so no license contamination), managed by
+<code>submodules/containers</code> per §6.V/§6.X.</li>
+<li>Keep the tool <strong>out of the app</strong>: this belongs in the
+backend scraper + the fixture-refresh tooling, never shipped in the
+Android APK.</li>
+<li>Anti-bluff: wire a contract test (per §6.A) asserting the
+fixture-refresh fetcher actually returns a 200 + expected tracker markup
+for each tracker, and that a deliberately-wrong fingerprint reproduces
+the 403 — so the refresher can't silently "succeed" on a Cloudflare
+error page (the classic stale-fixture bluff).</li>
+</ol>
+<h3 id="sources">Sources</h3>
+<ul>
+<li><a
+href="https://github.com/FlareSolverr/FlareSolverr">https://github.com/FlareSolverr/FlareSolverr</a></li>
+<li><a
+href="https://github.com/ThePhaseless/Byparr">https://github.com/ThePhaseless/Byparr</a></li>
+<li><a
+href="https://github.com/lexiforest/curl_cffi">https://github.com/lexiforest/curl_cffi</a></li>
+<li><a
+href="https://curl-cffi.readthedocs.io/en/latest/impersonate/customize.html">https://curl-cffi.readthedocs.io/en/latest/impersonate/customize.html</a>
+(okhttp custom fingerprints)</li>
+<li><a
+href="https://github.com/VeNoMouS/cloudscraper">https://github.com/VeNoMouS/cloudscraper</a></li>
+<li><a
+href="https://godberrystudios.com/posts/byparr-scrapling-flaresolverr-cloudflare-bypass-2026/">https://godberrystudios.com/posts/byparr-scrapling-flaresolverr-cloudflare-bypass-2026/</a>
+(secondary: Byparr/Scrapling landscape)</li>
+<li><a
+href="https://www.zenrows.com/blog/byparr">https://www.zenrows.com/blog/byparr</a>
+(secondary: Byparr = Camoufox-backed)</li>
+</ul>
+<hr />
+<h2 id="topic-2--opensource-tracker-parsers--metadata-libraries">Topic 2
+— Opensource tracker parsers / metadata libraries</h2>
+<h3 id="findings-1">Findings</h3>
+<ul>
+<li><p><strong>TorAPI</strong> (<code>github.com/Lifailon/TorAPI</code>,
+<strong>MIT</strong>). <strong>This is the standout find.</strong> An
+unofficial <strong>backend REST API + RSS</strong> for exactly Lava's
+target set: <strong>RuTracker, Kinozal, RuTor, and NoNameClub
+(NNMClub)</strong>. Node.js/Express, latest <strong>v0.5.2
+(2024-10-09)</strong>. Self-hostable via
+<code>lifailon/torapi:latest</code> Docker image / Compose. Search by
+title or ID, category filtering, magnet links, <code>.torrent</code>
+download, plus enriched metadata (IMDb/Kinopoisk links, posters).
+<strong>No tracker auth or token required for search</strong>; proxy
+address/port/user/pass are configurable via env vars. <em>How Lava could
+use it:</em> the four trackers TorAPI covers overlap Lava's provider
+matrix almost exactly. It is a <strong>reference implementation of the
+parsers Lava maintains by hand</strong> — even without adopting it as a
+runtime dependency, its parsing logic (selectors, category maps, RSS
+shapes) is a cross-check to keep Lava's <code>core/tracker/*</code>
+parsers honest and a fast way to see how a 4th/5th tracker is scraped.
+Adoption caveat: it is Node.js (a new runtime in Lava's stack) and last
+tagged 2024-10 — treat as a <strong>parser-reference + optional
+sidecar</strong>, not a frozen dependency, and confirm it still tracks
+current tracker HTML before trusting it.</p></li>
+<li><p><strong>Prowlarr / Jackett Cardigann YAML indexer
+definitions</strong> (<code>github.com/Prowlarr/Indexers</code>, and
+<code>github.com/Jackett/Jackett</code>). Community-maintained
+declarative <strong>YAML (Cardigann) scraper definitions</strong> synced
+Jackett→Prowlarr daily via GitHub Actions. Cardigann supports
+HTML/JSON/XML parsing. A Russian-tracker example set lives at
+<strong><code>github.com/msergein/ru-cardigann-yml</code></strong>
+(RuTracker in Prowlarr Cardigann YAML, with release-name reformatting
+for Radarr/Sonarr). <em>How Lava could use it:</em> the Cardigann YAML
+for a given tracker is a <strong>field-level spec of that tracker's
+search rows and categories</strong> — a maintenance aid and a potential
+model for making Lava's own tracker definitions data-driven rather than
+hand-coded Kotlin (aligns with §6.R no-hardcoding: move
+selectors/category maps into config). License varies per repo — Jackett
+is GPL-2.0, Prowlarr GPL-3.0; use the YAML <em>definitions as
+reference/data</em>, not the GPL engine code, to avoid license
+contamination.</p></li>
+<li><p><strong>qBittorrent search-engine plugins</strong> (community;
+Python). A widely-used plugin set covering <strong>rutracker, rutor,
+nnmclub, kinozal</strong> (secondary source reports ~133 stars, updated
+2025-07). UNVERIFIED (repo not fetched this session): exact canonical
+repo URL + license — verify before relying on it. Same value proposition
+as TorAPI/Cardigann: parser reference for the same four
+trackers.</p></li>
+<li><p><strong>Torrent metadata parsing libraries.</strong></p>
+<ul>
+<li><strong>Go:</strong> <code>github.com/anacrolix/torrent</code> (full
+BitTorrent client) ships reusable sub-packages —
+<strong><code>bencode</code></strong> (Marshal/Unmarshal, json-like API)
+and <strong><code>metainfo</code></strong> (<code>ParseMagnetUri</code>,
+<code>.torrent</code> parse). This is the mature Go choice and fits
+<code>lava-api-go</code> directly. License: check repo (historically
+MPL-2.0 — UNVERIFIED this session, confirm).</li>
+<li><strong>.NET:</strong> <code>github.com/Krusen/BencodeNET</code>
+(bencode + <code>.torrent</code> read/write + magnet generation) — not
+Lava's stack but a clean reference.</li>
+<li><strong>Kotlin/JVM:</strong> no dedicated, actively-maintained
+Kotlin bencode/torrent library surfaced in this session's searches.
+UNVERIFIED: a first-class Kotlin lib may exist — not found. For the JVM
+app, the pragmatic path is a small hand-rolled bencode reader (the
+format is tiny) or a Java bencode lib, since Lava mostly needs
+magnet/<code>.torrent</code> field extraction, not a full client.</li>
+</ul></li>
+</ul>
+<h3 id="recommendation-for-lava-1">Recommendation for Lava</h3>
+<ol type="1">
+<li><strong>Adopt TorAPI as a parser-reference (and optional self-hosted
+sidecar).</strong> It targets Lava's exact four trackers, is MIT, and
+needs no credentials for search — it is the single best external
+cross-check that Lava's RuTracker/RuTor/Kinozal/NNMClub parsers still
+match live HTML. Wire a periodic diff (Lava parser output vs. TorAPI
+output for the same query) into the fixture-freshness tooling to catch
+silent tracker-HTML drift.</li>
+<li><strong>Mine Prowlarr/Jackett Cardigann YAML</strong> for the same
+trackers to (a) validate Lava's category maps and selectors and (b)
+prototype a <strong>data-driven tracker-definition format</strong>
+(§6.R-aligned: selectors in config, not hardcoded).</li>
+<li><strong>Use <code>anacrolix/torrent</code>'s
+<code>bencode</code>+<code>metainfo</code> in
+<code>lava-api-go</code></strong> for any magnet/<code>.torrent</code>
+handling instead of hand-rolling — confirm the license first.</li>
+</ol>
+<h3 id="sources-1">Sources</h3>
+<ul>
+<li><a
+href="https://github.com/Lifailon/TorAPI">https://github.com/Lifailon/TorAPI</a></li>
+<li><a
+href="https://github.com/Lifailon/TorAPI/blob/main/docs.md">https://github.com/Lifailon/TorAPI/blob/main/docs.md</a></li>
+<li><a
+href="https://github.com/Prowlarr/indexers">https://github.com/Prowlarr/indexers</a></li>
+<li><a
+href="https://github.com/msergein/ru-cardigann-yml">https://github.com/msergein/ru-cardigann-yml</a></li>
+<li><a
+href="https://wiki.servarr.com/prowlarr/cardigann-yml-definition">https://wiki.servarr.com/prowlarr/cardigann-yml-definition</a></li>
+<li><a
+href="https://pkg.go.dev/github.com/anacrolix/torrent/bencode">https://pkg.go.dev/github.com/anacrolix/torrent/bencode</a></li>
+<li><a
+href="https://pkg.go.dev/github.com/anacrolix/torrent/metainfo">https://pkg.go.dev/github.com/anacrolix/torrent/metainfo</a></li>
+<li><a
+href="https://github.com/anacrolix/torrent">https://github.com/anacrolix/torrent</a></li>
+<li><a
+href="https://github.com/Krusen/BencodeNET">https://github.com/Krusen/BencodeNET</a></li>
+</ul>
+<hr />
+<h2
+id="topic-3--containerized-android-emulator-farms-for-the-6x-ci-gate">Topic
+3 — Containerized Android emulator farms (for the §6.X CI gate)</h2>
+<p>Lava's §6.X/§6.V/§6.AH mandate: emulators must boot <strong>inside a
+container/VM managed by the Containers submodule</strong>, never
+host-direct. The standing blocker (<code>§6.X-debt</code>,
+<code>§6.AH-debt</code>) is that a Linux container needs
+<code>/dev/kvm</code>, which the darwin/arm64 podman VM does not expose.
+This topic surveys what the field ships so the Containers submodule can
+converge on a proven design.</p>
+<h3 id="findings-2">Findings</h3>
+<ul>
+<li><p><strong>Google
+<code>android-emulator-container-scripts</code></strong>
+(<code>github.com/google/android-emulator-container-scripts</code>,
+<strong>Apache-2.0</strong>). The <strong>official</strong>,
+most-authoritative reference. Publishes prebuilt emulator images at
+<code>us-docker.pkg.dev/android-emulator-268719/images/</code> spanning
+<strong>API 30–37</strong> (google_apis, google_apis_playstore, and
+16KB-page variants). Exposes <strong>adb over forwarded port
+5555</strong>, a <strong>gRPC</strong> control service, and a
+<strong>WebRTC</strong> video bridge + Envoy TLS proxy for browser
+access. <strong>Hard constraints (confirmed on the repo):</strong>
+<em>"The images will not run in docker on mac or windows"</em>,
+<strong>KVM is mandatory</strong> (bare metal, nested virtualization, or
+a cloud instance with nested virt), and the tooling is <strong>still
+experimental</strong> (Python ≥3.10, run in a venv). <em>How Lava could
+use it:</em> this is the <strong>canonical design the Containers
+submodule's <code>Containerized</code> emulator path should
+mirror</strong> — image layout, adb-5555 forwarding, and especially the
+<strong>gRPC + WebRTC remote surface</strong> (which would give Lava
+headless per-AVD control + video capture for §11.4.128 recording). Its
+Linux+KVM-only reality also <strong>confirms Lava's §6.AH-debt is a
+real, industry-wide constraint, not an agent excuse</strong>: the
+accepted answer is a <strong>Linux x86_64 KVM gate host</strong>, not
+host-direct on macOS.</p></li>
+<li><p><strong>budtmo/docker-android</strong>
+(<code>github.com/budtmo/docker-android</code>). The most popular
+community image: Android emulator in Docker with <strong>noVNC</strong>
+(web view), <strong>video recording</strong>, and Appium integration.
+Prebuilt images for <strong>Android 9.0–14.0</strong> (e.g.
+<code>budtmo/docker-android:emulator_13.0</code>). Requires
+<code>--device /dev/kvm</code> on Linux (kernel ≥4.10). UNVERIFIED this
+session: exact license (historically MIT/Apache — confirm on repo).
+<em>How Lava could use it:</em> fastest way to get a <strong>known-good
+containerized-emulator + built-in screen recording + VNC</strong>
+reference to compare against the Containers submodule's implementation;
+its video-recording feature is directly relevant to Lava's §11.4.128
+always-on device-recording debt.</p></li>
+<li><p><strong>Genymotion</strong> (SaaS + <strong>Self-Hosted</strong>;
+<code>genymotion.com</code>). <strong>Commercial/proprietary</strong>,
+not open-source. Runs Android VMs in the cloud or in your private
+cloud/on-prem. Already familiar to Lava (the CLAUDE.md history
+references a Genymotion VM as a gate host). <em>How Lava could use
+it:</em> a <strong>paid fallback gate host</strong> when a Linux+KVM box
+isn't available — but it does <strong>not</strong> satisfy the
+"open-source, self-hostable, Containers-submodule-driven" preference, so
+treat as escape hatch, not strategy.</p></li>
+<li><p><strong>OpenSTF / DeviceFarmer</strong>
+(<code>github.com/DeviceFarmer/stf</code>). <strong>OpenSTF is
+effectively dead</strong> (last release v3.4.1, Android ≤9, project
+abandoned ~2020); <strong>DeviceFarmer</strong> is the
+volunteer-maintained successor. <strong>Important scope point:</strong>
+STF/DeviceFarmer is <strong>remote device <em>access</em>
+(view/tap/type/ install), NOT a test runner</strong> — it does not
+execute Espresso/Appium/Maestro. <em>How Lava could use it:</em> not a
+fit for the automated §6.X gate (no test execution); only relevant if
+Lava ever wants a human-remote-control device lab. <strong>Recommend
+against</strong> for the CI gate.</p></li>
+</ul>
+<h3 id="recommendation-for-lava-2">Recommendation for Lava</h3>
+<ol type="1">
+<li><strong>Model the Containers submodule's <code>Containerized</code>
+emulator path on Google's
+<code>android-emulator-container-scripts</code></strong> (Apache-2.0,
+official): its <strong>image layout + adb-5555 + gRPC control + WebRTC
+video</strong> are exactly the primitives §6.X and §11.4.128 need, and
+its Linux+KVM-only requirement is authoritative confirmation that the
+darwin/arm64 gap is structural.</li>
+<li><strong>Provision a Linux x86_64 host with
+<code>/dev/kvm</code></strong> as the constitutional gate host — this is
+the accepted industry answer and directly closes §6.AH-debt (no
+host-direct fallback needed once a real KVM box exists). Every fetched
+primary source agrees KVM-on-Linux is the path; macOS/Windows containers
+are unsupported for hardware-accelerated emulation.</li>
+<li><strong>Borrow budtmo/docker-android's built-in video
+recording</strong> pattern to satisfy the §11.4.128 always-on
+device-recorder debt, whether or not its image is adopted
+wholesale.</li>
+<li><strong>Do not use OpenSTF/DeviceFarmer for the gate</strong> — it's
+device-access, not a test runner.</li>
+</ol>
+<h3 id="sources-2">Sources</h3>
+<ul>
+<li><a
+href="https://github.com/google/android-emulator-container-scripts">https://github.com/google/android-emulator-container-scripts</a></li>
+<li><a
+href="https://github.com/google/android-emulator-container-scripts/blob/master/REGISTRY.MD">https://github.com/google/android-emulator-container-scripts/blob/master/REGISTRY.MD</a></li>
+<li><a
+href="https://github.com/budtmo/docker-android">https://github.com/budtmo/docker-android</a></li>
+<li><a
+href="https://www.genymotion.com/product-self-hosted/">https://www.genymotion.com/product-self-hosted/</a></li>
+<li><a
+href="https://devicelab.dev/blog/openstf-devicefarmer-alternative">https://devicelab.dev/blog/openstf-devicefarmer-alternative</a></li>
+<li><a
+href="https://dev.to/omnarayan/openstf-is-dead-the-best-alternative-for-mobile-device-labs-in-2025-2j5o">https://dev.to/omnarayan/openstf-is-dead-the-best-alternative-for-mobile-device-labs-in-2025-2j5o</a></li>
+</ul>
+<hr />
+<h2 id="topic-4--autonomous-mobile-ui-qa--vision-analysis">Topic 4 —
+Autonomous mobile UI QA + vision analysis</h2>
+<p>Lava already drives Compose UI Challenge Tests; the operator's
+video-issue workflow (§6.AK: every manual-testing-video issue must gain
+a reproduce-first device Challenge) makes <strong>AI-driven UI
+exploration and screen/video analysis</strong> directly useful for
+turning operator videos into repro tests and for catching visual defects
+the deterministic Challenges miss.</p>
+<h3 id="findings-3">Findings</h3>
+<ul>
+<li><p><strong>Maestro</strong>
+(<code>github.com/mobile-dev-inc/maestro</code>,
+<strong>Apache-2.0</strong>). Latest CLI <strong>2.6.1
+(2026-06-12)</strong>, very active. <strong>YAML flows</strong>
+(<code>launchApp</code>, <code>tapOn</code>,
+<code>assertVisible</code>), self-hosted CLI
+(<code>curl -fsSL https://get.maestro.mobile.dev | bash</code>), drives
+<strong>Android emulators via adb with no app-code changes</strong>,
+built-in flakiness tolerance/smart-waiting. <strong>Ships experimental
+LLM/vision commands directly relevant to Lava:</strong></p>
+<ul>
+<li><strong><code>assertNoDefectsWithAI</code></strong> — screenshots
+the screen and asks an LLM to flag common visual defects (text/UI cut
+off, overlapping, off-center). This is a <strong>smoke test for exactly
+the class of §6.AB/§6.Z bugs Lava keeps shipping</strong> (the
+white-placeholder logo, the cut-off subtitle).</li>
+<li><strong><code>assertWithAI</code></strong> — natural-language visual
+assertion via LLM screenshot upload (good for the "is the brand mark
+actually rendered in Lava red, not white?" check that pixel assertions
+kept missing).</li>
+<li><strong><code>extractTextWithAI</code></strong> — pulls
+dynamic/imagery text (e.g. CAPTCHAs, banners) into
+<code>aiOutput</code>.</li>
+<li>Plus <strong>AI test analysis</strong> reports (HTML+JSON) for a
+whole run. There is also a <strong><code>KMaestro</code> Kotlin
+DSL</strong> (<code>github.com/cnrture/KMaestro</code>) for writing
+Maestro flows type-safely from Kotlin — a natural bridge for Lava's JVM
+stack. <em>How Lava could use it:</em> add a <strong>Maestro flow layer
+alongside the Espresso Challenges</strong> — YAML flows are far faster
+to author from an operator video than Compose test code, and
+<code>assertNoDefectsWithAI</code> / <code>assertWithAI</code> give a
+<strong>vision-based acceptance gate</strong> that catches non-crashing
+visual regressions the deterministic tests miss (the recurring §6.AB
+failure class). Self-hosted, Apache-2.0, adb-based — fits the
+Containers-driven emulator gate.</li>
+</ul></li>
+<li><p><strong>DroidRun</strong> (repo
+<code>github.com/droidrun/droidrun</code> <strong>redirects to
+<code>github.com/droidrun/mobilerun</code></strong>,
+<strong>MIT</strong>). Latest <strong>v0.6.8 (2026-06-22)</strong>, very
+active (~1,267 commits). An <strong>LLM-agnostic mobile agent</strong>
+(OpenAI, Anthropic, Gemini, Ollama, DeepSeek, OpenRouter) that controls
+a device via <strong>adb + a "Portal" companion app</strong>
+(accessibility service), reads the <strong>accessibility tree</strong>
+(fast, not vision-dependent) with optional <strong><code>--vision</code>
+screenshot mode</strong> and <strong><code>--reasoning</code>
+manager-executor planning</strong>. Secondary sources report a
+<strong>91.4% score on Google's AndroidWorld benchmark</strong> and a
+43% success rate across an independent 65-task suite (strongest of those
+tested). <em>How Lava could use it:</em> <strong>exploratory /
+autonomous QA</strong> — point it at the debug APK on the containerized
+emulator with natural-language goals ("onboard a no-auth provider and
+run a search") to surface flows that crash or dead-end, feeding §6.AK
+reproduce-first Challenges. Note it needs an LLM API key and installs a
+companion accessibility app; keep it in the QA harness, never in the
+shipped app.</p></li>
+<li><p><strong>Fastbot2 / Fastbot_Android</strong>
+(<code>github.com/bytedance/Fastbot_Android</code>). <strong>Model-based
+GUI fuzzer</strong> (ByteDance) enhanced with reinforcement learning;
+runs via <strong><code>adb shell</code> with no app
+instrumentation</strong> (works on real Android 5–14 and emulators), ~12
+actions/sec, emits crash/ANR logs (<code>/sdcard/crash-dump.log</code>,
+<code>/sdcard/oom-traces.log</code>) and activity-coverage metrics.
+Published research: deployed in ByteDance CI ~2 years, caught 50.8% of
+developer-fixed crash bugs on Douyin/ Toutiao; outperforms
+Monkey/Ape/Stoat on coverage + fault detection. UNVERIFIED this session:
+exact license + last-release date (the fetch showed 50 commits but no
+dated release — confirm). <em>How Lava could use it:</em> a
+<strong>stability/crash-hunting monkey on steroids</strong> for the §6.Z
+cold-start / crash-survival class — run it in the containerized emulator
+against the debug APK to shake out
+<code>onCreate</code>/Hilt/Compose-init crashes before distribute.
+Complements (does not replace) the deterministic Challenges.</p></li>
+<li><p><strong>DroidBot</strong>
+(<code>github.com/honeynet/droidbot</code>, academic). Lightweight
+<strong>UI-guided input generator</strong>, no instrumentation, builds
+an on-the-fly state-transition model. Older/academic; Fastbot2 is the
+more current model-based option. <em>How Lava could use it:</em> lower
+priority than Fastbot2 for the same crash-hunting job.</p></li>
+<li><p><strong>Appium 2 visual/OCR</strong>
+(<code>github.com/appium/appium</code>, Apache-2.0).
+<strong><code>images-plugin</code></strong> (OpenCV pixel/region image
+comparison + <code>getImagesSimilarity</code>) and a
+<strong>Tesseract-based <code>appium-ocr-plugin</code></strong> (OCR
+endpoint on the current screenshot). Appium has <strong>built-in Android
+screen recording</strong> for failed-test debugging. Note: Appium's
+image comparison is <strong>pixel-based (OpenCV)</strong>, prone to
+false positives on anti-aliasing/color shifts — it is <em>not</em> an
+LLM vision engine (Maestro's <code>assertWithAI</code> is closer to what
+Lava wants for "does this look right"). <em>How Lava could use it:</em>
+if Lava ever needs deterministic pixel/region matching or OCR of a
+rendered screen (e.g. verifying the logo pixels are red), the
+images-plugin + ocr-plugin are the self-hosted, license-clean route;
+otherwise Maestro's AI commands are the lighter answer.</p></li>
+</ul>
+<h3 id="recommendation-for-lava-3">Recommendation for Lava</h3>
+<ol type="1">
+<li><strong>Add Maestro (Apache-2.0) as a second UI-test layer</strong>
+focused on <strong>vision acceptance</strong>:
+<code>assertNoDefectsWithAI</code> + <code>assertWithAI</code> on the
+key onboarding/search/provider screens is a direct, low-effort
+mechanical guard against the recurring §6.AB/§6.Z visual-regression
+class (white logo, cut-off text, gate-bypass). YAML flows are also the
+fastest way to convert an operator §6.AK video into a repro flow. Run it
+on the same Containers-driven emulator gate.</li>
+<li><strong>Add Fastbot2 as a crash-hunting monkey</strong> in the §6.Z
+pre-distribute gate — adb-driven, no instrumentation, emits crash/ANR
+logs; cheap insurance against cold-start crashes that the deterministic
+Challenges don't randomly hit. (Confirm its license first.)</li>
+<li><strong>Evaluate DroidRun (MIT) for autonomous exploratory
+QA</strong> — LLM-agnostic (can use the operator's existing
+Anthropic/Gemini keys, or local Ollama), reads the accessibility tree,
+optional vision. Use it in the QA harness to discover broken flows →
+feed §6.AK reproduce-first Challenges. Keep its companion accessibility
+app out of the shipped APK.</li>
+<li><strong>Keep Appium images-plugin/ocr-plugin in reserve</strong> for
+deterministic pixel/OCR checks where an LLM assertion is overkill or
+non-reproducible.</li>
+<li>Anti-bluff guard for all four: an AI/vision assertion is only a gate
+if it is <strong>falsifiable</strong> (§6.J/§6.AB.3) — before trusting
+<code>assertNoDefectsWithAI</code> or a DroidRun run, prove it goes RED
+on a deliberately-broken build (monochrome logo, cut-off text). An LLM
+that rubber-stamps a broken screen is the exact §6.AK bluff, just at a
+new layer.</li>
+</ol>
+<h3 id="sources-3">Sources</h3>
+<ul>
+<li><a
+href="https://github.com/mobile-dev-inc/maestro">https://github.com/mobile-dev-inc/maestro</a></li>
+<li><a
+href="https://docs.maestro.dev/api-reference/commands/assertnodefectswithai">https://docs.maestro.dev/api-reference/commands/assertnodefectswithai</a></li>
+<li><a
+href="https://docs.maestro.dev/api-reference/commands/assertwithai">https://docs.maestro.dev/api-reference/commands/assertwithai</a></li>
+<li><a
+href="https://docs.maestro.dev/api-reference/commands/extracttextwithai">https://docs.maestro.dev/api-reference/commands/extracttextwithai</a></li>
+<li><a
+href="https://docs.maestro.dev/maestro-flows/workspace-management/ai-test-analysis">https://docs.maestro.dev/maestro-flows/workspace-management/ai-test-analysis</a></li>
+<li><a
+href="https://github.com/cnrture/KMaestro">https://github.com/cnrture/KMaestro</a></li>
+<li><a
+href="https://github.com/droidrun/mobilerun">https://github.com/droidrun/mobilerun</a></li>
+<li><a
+href="https://github.com/bytedance/Fastbot_Android">https://github.com/bytedance/Fastbot_Android</a></li>
+<li><a
+href="https://github.com/appium/appium/blob/master/packages/images-plugin/docs/image-comparison.md">https://github.com/appium/appium/blob/master/packages/images-plugin/docs/image-comparison.md</a></li>
+<li><a
+href="https://github.com/jlipps/appium-ocr-plugin">https://github.com/jlipps/appium-ocr-plugin</a></li>
+</ul>
+<hr />
+<h2 id="cross-cutting-takeaways">Cross-cutting takeaways</h2>
+<ul>
+<li><strong>Cloudflare is now a two-tier problem:</strong>
+TLS-fingerprint impersonation (curl-impersonate) solves the cheap cases;
+a browser sidecar (Byparr &gt; FlareSolverr in 2026) solves
+JS/Turnstile. Adopt both tiers in the backend + fixture-refresh tooling,
+neither in the app.</li>
+<li><strong>TorAPI is the highest-leverage single find</strong> — an
+MIT, self-hostable API covering Lava's exact four trackers, usable as a
+parser cross-check to end silent fixture drift.</li>
+<li><strong>The §6.X/§6.AH emulator gap is industry-confirmed
+structural:</strong> Google's own container scripts are Linux+KVM-only
+and refuse to run on mac/windows. The clean fix is a Linux x86_64 KVM
+gate host; model the Containers submodule on Google's Apache-2.0 scripts
+(adb-5555 + gRPC + WebRTC video).</li>
+<li><strong>Maestro's <code>assertNoDefectsWithAI</code> is a near-exact
+mechanical guard</strong> for the visual-regression class Lava keeps
+shipping (white logo / cut-off text) — Apache-2.0, self-hosted,
+adb-based, and it layers on top of the existing Challenges rather than
+replacing them.</li>
+<li><strong>Every recommendation stays subordinate to
+§6.J/§6.L:</strong> any adopted tool must be proven falsifiable (goes
+RED on a real defect) on the real device gate before it is allowed to
+gate a distribute.</li>
+</ul>
+</body>
+</html>

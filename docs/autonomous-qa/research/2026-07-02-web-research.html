@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-07-02-web-research</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="deep-web-research--2026-07-02">Deep Web Research —
+2026-07-02</h1>
+<p>Standing operator directive: <em>"Perform frequent deep web
+researches about solutions for all of our challenges, new ideas,
+game-changing approaches, and various opensource codebase and services
+we can incorporate into our System."</em></p>
+<p>Every claim below traces to a real URL that was fetched or searched
+during this pass (see the per-topic <strong>Sources</strong> lists). No
+source-code was edited, no Gradle was run, no secrets were read while
+producing this report.</p>
+<hr />
+<h2 id="topic-1--brotli-decompression-on-android-ktor--okhttp">Topic 1 —
+Brotli decompression on Android (Ktor / OkHttp)</h2>
+<h3 id="context-our-bug">Context (our bug)</h3>
+<p>We root-caused a total-provider-breakage: setting a
+<strong>manual</strong> <code>Accept-Encoding: gzip, deflate, br</code>
+header on a Ktor <strong>OkHttp-engine</strong> client made OkHttp
+return <strong>raw compressed bytes</strong>. OkHttp only
+<em>transparently</em> decompresses an encoding it negotiated
+<strong>itself</strong>; the moment the application sets
+<code>Accept-Encoding</code>, OkHttp assumes the caller will handle
+decompression and stops stripping <code>Content-Encoding</code>.
+rutracker.org replies <code>Content-Encoding: br</code>, so we got
+brotli bytes fed into a windows-1251 HTML parser = garbage. Current
+landed fix (commit <code>8bb2317c</code>): drop the manual header so
+OkHttp negotiates + decompresses gzip itself.</p>
+<h3 id="how-okhttp-actually-behaves">How OkHttp actually behaves</h3>
+<ul>
+<li><p>OkHttp's <code>BridgeInterceptor</code> adds
+<code>Accept-Encoding: gzip</code> and transparently decompresses the
+response <strong>only when the app did not set
+<code>Accept-Encoding</code></strong>.</p></li>
+<li><p><code>okhttp-brotli</code>'s <code>BrotliInterceptor</code>
+extends that transparent behaviour to <code>br</code>: it "adds
+<code>Accept-Encoding: br</code> to request and checks (and strips) for
+<code>Content-Encoding: br</code> in responses ... provided
+<code>Accept-Encoding</code> is not set previously." It is response-only
+("not used for sending requests"). Source: okhttp-brotli README +
+<code>BrotliInterceptor</code> API docs.</p>
+<p>=&gt; The same "don't set the header yourself" rule that fixed our
+gzip path is exactly what makes <code>BrotliInterceptor</code> work. Our
+current fix is correct; adding brotli is an
+<strong>enhancement</strong>, not a required fix.</p></li>
+</ul>
+<h3
+id="option-a--okhttp-brotli-brotliinterceptor-recommended-shape-with-a-caveat">Option
+A — <code>okhttp-brotli</code> <code>BrotliInterceptor</code>
+(recommended shape, with a caveat)</h3>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// gradle/libs.versions.toml</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">//   okhttp-brotli = { module = &quot;com.squareup.okhttp3:okhttp-brotli&quot;, version.ref = &quot;okhttp&quot; }</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Latest: 5.4.0 (README, master). Keep version.ref aligned with the okhttp BOM/core</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">// version already in the catalog so brotli and core never diverge.</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Ktor OkHttp engine config:</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>HttpClient<span class="op">(</span>OkHttp<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    engine <span class="op">{</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        addInterceptor<span class="op">(</span>okhttp3<span class="op">.</span>brotli<span class="op">.</span>BrotliInterceptor<span class="op">.</span>INSTANCE<span class="op">)</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li>Do <strong>NOT</strong> also set a manual
+<code>Accept-Encoding</code> anywhere (repeats our bug).</li>
+<li>Ships a bundled pure-JVM brotli <strong>decoder</strong>
+(<code>org.brotli:dec</code>) transitively, so no NDK/native
+<code>.so</code> per-ABI — friendly to a slim APK.</li>
+</ul>
+<h3
+id="-security-finding--cve-2023-3782-brotli-decompression-bomb--has-no-fix">⚠
+Security finding — CVE-2023-3782 (brotli decompression bomb) — HAS NO
+FIX</h3>
+<ul>
+<li><code>okhttp-brotli</code>'s <code>intercept()</code> does
+<strong>not</strong> guard against decompression bombs: "a file weighing
+several KBs can be decompressed into 10GB", crashing the process via
+OOM. Triggerable by a malicious server <strong>or a MitM injecting a
+brotli zip-bomb</strong> into any HTTP response.</li>
+<li>Snyk (checked the <code>okhttp-brotli 4.12.0</code> package page
+directly) states: <strong>"There is no fixed version for
+<code>com.squareup.okhttp3:okhttp-brotli</code>"</strong>, affected
+range <code>[0,)</code> — i.e. <strong>every version including 5.x is
+still vulnerable.</strong> NVD's CPE range is also open-ended
+(<code>version 0, lessThan *</code>).</li>
+<li>Implication for Lava: rutracker/rutor/nnmclub/kinozal are
+third-party origins reached over
+<code>usesCleartextTraffic="true"</code> + they've been behind
+Cloudflare — a hostile middlebox injecting a br bomb is a realistic
+threat model. If we adopt <code>BrotliInterceptor</code> we MUST cap the
+decompressed size ourselves (wrap the interceptor / enforce a max-body
+limit on the response stream) and record a §6.O/§6.T.4 note. Given the
+app already works fine on plain gzip, <strong>brotli is not worth this
+risk unless a provider becomes br-only.</strong></li>
+</ul>
+<h3 id="option-b--ktor-contentencoding-plugin">Option B — Ktor
+<code>ContentEncoding</code> plugin</h3>
+<ul>
+<li>Ktor's <code>ContentEncoding</code> client plugin supports
+<strong>gzip, deflate, identity only</strong> — <strong>brotli is NOT
+supported.</strong> Kotlin Slack + Ktor issue #408 confirm no built-in
+br encoder/decoder; the documented workaround is to implement the
+<code>ContentEncoder</code> interface yourself and register it via
+<code>customEncoder()</code>. Not worth it vs. the engine-level
+interceptor.</li>
+</ul>
+<h3 id="option-c--lower-level-brotli-libs-only-if-we-hand-roll">Option C
+— lower-level brotli libs (only if we hand-roll)</h3>
+<ul>
+<li><code>com.aayushatharva.brotli4j:brotli4j:1.23.0</code> — native JNI
+(C brotli via bundled per-OS/arch <code>.so</code>, JAR ~2MB per
+platform). Fast, but adds native libs / R8-keep surface and APK bloat —
+<strong>overkill for Android</strong>.</li>
+<li><code>org.brotli:dec</code> (Google, pure-Java decoder) — smallest
+footprint, <code>InputStream</code> API only (blocking). This is what
+<code>okhttp-brotli</code> already pulls in transitively.</li>
+<li>(Reference: Methanol HTTP client documents the same brotli
+landscape.)</li>
+</ul>
+<h3 id="recommended-for-lava-topic-1">Recommended for Lava (Topic
+1)</h3>
+<ol type="1">
+<li><strong>Keep the current fix</strong> (no manual
+<code>Accept-Encoding</code>; OkHttp negotiates gzip). It is correct and
+sufficient today — verified against the OkHttp transparent-encoding
+contract.</li>
+<li>Add a small <strong>contract/regression test</strong> (§6.A / Fifth
+Law) that asserts: with a MockWebServer replying
+<code>Content-Encoding: br</code> <strong>and</strong> no app-set
+<code>Accept-Encoding</code>, the client either (a) correctly decodes
+when <code>BrotliInterceptor</code> is installed, or (b) never silently
+returns raw br bytes. This locks the regression that
+<code>8bb2317c</code> fixed.</li>
+<li><strong>Only if</strong> a provider goes br-only: install
+<code>okhttp3.brotli.BrotliInterceptor</code> at the engine level
+<strong>plus a max-decompressed-size guard</strong> (CVE-2023-3782 has
+no upstream fix), and file a §6.O forensic note. Prefer the transitive
+<code>org.brotli:dec</code> decoder; avoid <code>brotli4j</code> native
+libs.</li>
+<li>R8/ProGuard: <code>okhttp-brotli</code> +
+<code>org.brotli:dec</code> are plain JVM; no reflection-keep rules
+needed beyond OkHttp's existing consumer rules. <code>brotli4j</code>
+WOULD need keep rules for JNI + native-lib extraction — another reason
+to avoid it.</li>
+</ol>
+<h3 id="sources-topic-1">Sources (Topic 1)</h3>
+<ul>
+<li><a
+href="https://github.com/square/okhttp/blob/master/okhttp-brotli/README.md">https://github.com/square/okhttp/blob/master/okhttp-brotli/README.md</a></li>
+<li><a
+href="https://square.github.io/okhttp/5.x/okhttp-brotli/okhttp3.brotli/-brotli-interceptor/index.html">https://square.github.io/okhttp/5.x/okhttp-brotli/okhttp3.brotli/-brotli-interceptor/index.html</a></li>
+<li><a
+href="https://github.com/square/okhttp/issues/3706">https://github.com/square/okhttp/issues/3706</a></li>
+<li><a
+href="https://ktor.io/docs/client-content-encoding.html">https://ktor.io/docs/client-content-encoding.html</a></li>
+<li><a
+href="https://github.com/ktorio/ktor/issues/408">https://github.com/ktorio/ktor/issues/408</a></li>
+<li><a
+href="https://security.snyk.io/vuln/SNYK-JAVA-COMSQUAREUPOKHTTP3-5789026">https://security.snyk.io/vuln/SNYK-JAVA-COMSQUAREUPOKHTTP3-5789026</a></li>
+<li><a
+href="https://security.snyk.io/package/maven/com.squareup.okhttp3%3Aokhttp-brotli/4.12.0">https://security.snyk.io/package/maven/com.squareup.okhttp3%3Aokhttp-brotli/4.12.0</a></li>
+<li><a
+href="https://research.jfrog.com/vulnerabilities/okhttp-client-brotli-dos/">https://research.jfrog.com/vulnerabilities/okhttp-client-brotli-dos/</a></li>
+<li><a
+href="https://nvd.nist.gov/vuln/detail/CVE-2023-3782">https://nvd.nist.gov/vuln/detail/CVE-2023-3782</a></li>
+<li><a
+href="https://github.com/hyperxpro/Brotli4j">https://github.com/hyperxpro/Brotli4j</a></li>
+<li><a
+href="https://mvnrepository.com/artifact/com.aayushatharva.brotli4j/brotli4j">https://mvnrepository.com/artifact/com.aayushatharva.brotli4j/brotli4j</a></li>
+<li><a
+href="https://mizosoft.github.io/methanol/brotli/">https://mizosoft.github.io/methanol/brotli/</a></li>
+</ul>
+<hr />
+<h2
+id="topic-2--russian-tracker-anti-bot--session-handling-2025-2026">Topic
+2 — Russian tracker anti-bot &amp; session handling (2025-2026)</h2>
+<h3 id="cloudflare-on-rutrackerorg">Cloudflare on rutracker.org</h3>
+<ul>
+<li>rutracker.org has been behind Cloudflare (confirmed by the
+qBittorrent-RuTracker plugin issue #41: "rutracker implemented
+Cloudflare protection"; broke org/.nl/.net mirrors for credential
+logins). This is the same class of failure our own Cloudflare-mitigation
+work (commit <code>f7d0a62</code>, C03) targeted.</li>
+<li>The <code>cf_clearance</code> cookie is <strong>bound to the exact
+User-Agent + IP</strong> that solved the challenge. Reusing it from a
+different UA or egress IP → immediate block. So our session store must
+pin UA+cookie together and never rotate UA mid-session.</li>
+<li>Practical bypass building blocks used by the scraping ecosystem
+(open source):
+<ul>
+<li><strong>FlareSolverr</strong> — proxy that spins a real (undetected)
+browser, solves the JS challenge, returns <code>cf_clearance</code> + UA
+to reuse. Heavy (full browser) but the de-facto standard;
+Prowlarr/Jackett integrate with it.</li>
+<li><strong>Byparr</strong> — newer, actively-maintained
+FlareSolverr-compatible drop-in.</li>
+<li><strong>cloudscraper</strong> (Python) — lightweight, handles the
+older JS-challenge form; less effective against current
+Turnstile/managed-challenge.</li>
+</ul></li>
+<li>Session-reuse pattern: solve once, persist <code>cf_clearance</code>
++ session cookies + UA, replay for subsequent requests until the cookie
+expires (short-lived, often ~30 min to a few hours), then re-solve. This
+maps onto Lava's existing auth/session storage.</li>
+</ul>
+<h3 id="charset-gotcha-windows-1251">Charset gotcha (windows-1251)</h3>
+<ul>
+<li>rutracker/rutor/kinozal/nnmclub serve <strong>windows-1251</strong>
+(Cyrillic), not UTF-8. Bytes must be decoded as cp1251
+<strong>before</strong> HTML parse — decoding as UTF-8 mangles Cyrillic
+titles. This compounds with Topic 1: br/gzip must be decompressed FIRST,
+then the decompressed bytes decoded as windows-1251. (Our bug fed
+still-compressed bytes into the cp1251 decoder → double garbage.) Worth
+an explicit test asserting a known Cyrillic title round-trips through
+decompress→cp1251→parse.</li>
+</ul>
+<h3 id="open-source-clientsdefinitions-to-learn-from">Open-source
+clients/definitions to learn from</h3>
+<ul>
+<li><strong>Prowlarr <code>Prowlarr/Indexers</code></strong> — Cardigann
+<strong>YAML</strong> definitions for rutracker, rutor, kinozal, nnmclub
+(NoNameClub). These are the canonical, community-maintained descriptions
+of each tracker's login flow, search rows, category maps, and
+(critically) the exact <strong>headers + encoding</strong> each site
+needs. Best single reference for field-level parsing parity.
+<code>Prowlarr/Indexers</code> issue #370 documents Jackett↔︎Prowlarr
+YAML differences; issues #1391 (kinozal invalid-torrent) and #1816
+(nnmclub connect) are live troubleshooting threads.</li>
+<li><strong>Jackett</strong> — the older C# indexer set (some trackers
+still only have C# impls; see Prowlarr issue #29 "parity with Jackett C#
+indexers").</li>
+<li><strong><code>msergein/ru-cardigann-yml</code></strong> — a
+community repo of Russian-tracker Cardigann YAMLs (handy diff target for
+header/charset specifics).</li>
+<li>Sonarr forum thread "Cannot configure Rutor and Rutracker indexers"
+documents the real-world header/login pitfalls users hit.</li>
+</ul>
+<h3 id="recommended-for-lava-topic-2">Recommended for Lava (Topic
+2)</h3>
+<ol type="1">
+<li><strong>Mine the Prowlarr Cardigann YAMLs</strong> for
+rutracker/rutor/kinozal/nnmclub as the source-of-truth for required
+request headers, login form fields, category maps, and charset. Port
+field-by-field into our SDK plugins; add a parity/fixture test per
+tracker (§6.D behavioral coverage).</li>
+<li><strong>Pin UA↔︎cookie together</strong> in the session store; never
+rotate UA while a <code>cf_clearance</code> is live. Treat
+<code>cf_clearance</code> as short-lived; re-solve on 403.</li>
+<li>Add an explicit <strong>decompress-then-cp1251</strong> ordering
+test with a known Cyrillic fixture per provider — directly guards the
+class of bug we just shipped.</li>
+<li>Consider a <strong>FlareSolverr/Byparr sidecar</strong> option
+(containerized via the Containers submodule) for the rutracker
+Cloudflare path in <code>lava-api-go</code>, gated behind config — keeps
+the heavy browser out of the Android client. This is the same shape as
+our existing proxy-scrapes-upstream architecture.</li>
+<li>Keep live-capture fixtures fresh (§6.D) — tracker HTML + Cloudflare
+posture drift.</li>
+</ol>
+<h3 id="sources-topic-2">Sources (Topic 2)</h3>
+<ul>
+<li><a
+href="https://github.com/nbusseneau/qBittorrent-RuTracker-plugin/issues/41">https://github.com/nbusseneau/qBittorrent-RuTracker-plugin/issues/41</a></li>
+<li><a
+href="https://www.zenrows.com/blog/cf-clearance">https://www.zenrows.com/blog/cf-clearance</a></li>
+<li><a
+href="https://scrapfly.io/blog/posts/how-to-bypass-cloudflare-with-flaresolverr">https://scrapfly.io/blog/posts/how-to-bypass-cloudflare-with-flaresolverr</a></li>
+<li><a
+href="https://scrapeops.io/web-scraping-playbook/how-to-bypass-cloudflare/">https://scrapeops.io/web-scraping-playbook/how-to-bypass-cloudflare/</a></li>
+<li><a
+href="https://pypi.org/project/cloudscraper/">https://pypi.org/project/cloudscraper/</a></li>
+<li><a
+href="https://github.com/Prowlarr/Indexers/issues/370">https://github.com/Prowlarr/Indexers/issues/370</a></li>
+<li><a
+href="https://wiki.servarr.com/en/prowlarr/cardigann-yml-definition">https://wiki.servarr.com/en/prowlarr/cardigann-yml-definition</a></li>
+<li><a
+href="https://github.com/msergein/ru-cardigann-yml">https://github.com/msergein/ru-cardigann-yml</a></li>
+<li><a
+href="https://github.com/Prowlarr/Prowlarr/issues/29">https://github.com/Prowlarr/Prowlarr/issues/29</a></li>
+<li><a
+href="https://github.com/Prowlarr/Prowlarr/issues/1391">https://github.com/Prowlarr/Prowlarr/issues/1391</a></li>
+<li><a
+href="https://github.com/Prowlarr/Prowlarr/issues/1816">https://github.com/Prowlarr/Prowlarr/issues/1816</a></li>
+<li><a
+href="https://forums.sonarr.tv/t/cannot-configure-rutor-and-rutracker-indexers/27037">https://forums.sonarr.tv/t/cannot-configure-rutor-and-rutracker-indexers/27037</a></li>
+</ul>
+<hr />
+<h2
+id="topic-3--emulator-in-container--video-recording--llm-vision-autonomous-qa-loop">Topic
+3 — Emulator-in-container + video recording + LLM-vision autonomous-QA
+loop</h2>
+<h3
+id="3a-emulator-in-container-fits-our-containers-submodule--6x6ah">3a.
+Emulator-in-container (fits our Containers submodule + §6.X/§6.AH)</h3>
+<p>Two families, and which one solves our KVM problem:</p>
+<ul>
+<li><strong>Redroid (Remote-Android)</strong> — containerized Android
+that runs the Android userspace <strong>directly on the host Linux
+kernel via binder/ashmem; NEVER touches <code>/dev/kvm</code>.</strong>
+Multi-arch (arm64 + amd64), GPU-optional, ships images <strong>Android
+8.1 → Android 16</strong> (<code>redroid/redroid</code> on Docker Hub,
+<code>..._64only</code> arm64 variants). This is the
+<strong>game-changer for our standing §6.X-debt / §6.AH-debt</strong>:
+our blocker has always been "podman VM has no
+<code>/dev/kvm</code>/HVF". Redroid sidesteps KVM entirely — but note it
+is <strong>not</strong> the Google SDK emulator (it's real Android
+userspace on the host kernel), so it needs a <strong>Linux host kernel
+with binder/ashmem</strong> modules. On macOS it would run inside a
+Linux VM; on a Linux x86_64/arm64 gate-host it runs natively no-KVM.
+This directly enables the "Linux x86_64 gate host" remediation already
+recorded in our incident JSONs, AND an arm64-native path.</li>
+<li><strong>docker-android (HQarroum)</strong> /
+<strong>dockerify-android (Shmayro)</strong> /
+<strong>sickcodes/dock-droid</strong> — these wrap the <strong>QEMU SDK
+emulator</strong> in a container (dock-droid uses full QEMU). They still
+want acceleration for speed and are heavier, but dockerify-android
+advertises x86 <strong>and arm64</strong> with ADB + <strong>scrcpy
+web</strong> access. Good for "real Google emulator system image"
+fidelity when Redroid's non-standard userspace matters.</li>
+<li>Software-mode (TCG, no KVM) SDK emulator is possible but slow —
+matches the §6.AH "slower-but-reproducible beats fast-but-host-direct"
+stance.</li>
+</ul>
+<h3 id="3b-screen-video-recording">3b. Screen video recording</h3>
+<ul>
+<li><strong>scrcpy</strong> — server captures screen with
+<strong>MediaCodec → H.264/AVC</strong>, streams over adb; client
+decodes with <strong>FFmpeg</strong>.
+<code>scrcpy --record file.mp4</code> records without needing a window;
+works against <code>adb connect ip:5555</code> (i.e. a containerized
+emulator). This is the cleanest continuous-recording primitive and pairs
+with §11.4.128 always-on device-recording.</li>
+<li><strong><code>adb screenrecord</code></strong> — built-in, no deps,
+but <strong>max ~3 min per clip</strong> and stops on screen-off; fine
+for short Challenge captures, needs chunking for long runs.</li>
+<li><strong>ffmpeg</strong> — post-process/segment/concat scrcpy output;
+overlay timestamps; extract keyframes as the screenshots we feed to the
+vision model.</li>
+</ul>
+<h3 id="3c-ui-driving--maestro-vs-appium-vs-espresso">3c. UI driving —
+Maestro vs Appium vs Espresso</h3>
+<ul>
+<li><strong>Maestro</strong> (open source, YAML flows): black-box, polls
+for elements up to ~17s, compares screenshots pixel-by-pixel and retries
+if &lt;0.5% of screen changed, waits ~2s for UI to settle after each
+action → <strong>built-in flakiness handling</strong>. ~20-30% faster
+than Appium (hits UIAutomator2 directly, no WebDriver layer), 10x faster
+authoring via hot-reload. Real result: Todoist Android migrated 63 flows
+to Maestro early-2025 → <strong>&gt;99% reliability (was ~50%)</strong>,
+80min → &lt;20min. <strong>Caveat:</strong> terse errors, <strong>no
+automatic screenshots/video on failure</strong> (we'd add scrcpy/ffmpeg
+for that). Best fit for our black-box "drive real UI on the gating
+matrix" (§6.I/§6.AE).</li>
+<li><strong>Appium</strong>: most flexible, richest diagnostics
+(Inspector, logs, screenshots), iOS physical-device support — but
+WebDriver layer → slower + more flaky (doesn't auto-sync to app internal
+state / animation completion).</li>
+<li><strong>Espresso</strong>: our existing
+<code>connectedAndroidTest</code> Challenge harness — white-box,
+fastest, deterministic, but in-process (can't drive across apps / system
+dialogs). Keep Espresso as the constitutional Challenge gate; add
+Maestro for cross-app + exploratory + the vision-loop driver.</li>
+</ul>
+<h3 id="3d-llm-vision-autonomous-qa-the-endless-fix-loop">3d. LLM-vision
+autonomous QA (the "endless fix loop")</h3>
+<ul>
+<li><strong>droidrun / mobilerun</strong> (MIT,
+<code>github.com/droidrun/mobilerun</code>, PyPI <code>droidrun</code>)
+— the strongest ready-made building block. Controls Android (and iOS)
+via a <strong>Portal app installed over ADB</strong> that fuses
+<strong>accessibility tree + screenshots</strong>. Flags:
+<code>--vision</code> (send screenshots to LLM),
+<code>--vision-only</code> (screenshot-only, for apps with no a11y
+tree), <code>--reasoning</code> (manager-executor planning).
+Multi-provider: OpenAI, <strong>Anthropic</strong>, Gemini, Ollama,
+DeepSeek, OpenRouter, OpenAI-compatible. Install:
+<code>uv tool install mobilerun</code> → <code>mobilerun setup</code> →
+<code>mobilerun configure</code> → <code>mobilerun run "..."</code>.
+Raised €2.1M pre-seed (Jul 2025), 3.3k+ stars — actively maintained.
+<strong>This is our fastest path to "natural-language drive +
+vision-detect broken UI".</strong></li>
+<li><strong>Microsoft OmniParser v2</strong>
+(<code>github.com/microsoft/OmniParser</code>, checkpoints on HF
+<code>microsoft/OmniParser-v2.0</code>, Feb 2025) — pure-vision screen
+parser: YOLOv8 icon detector + OCR + description model → structured
+bounding boxes from a raw screenshot, <strong>no a11y tree / HTML
+needed</strong>. SOTA 39.5% on ScreenSpot-Pro. Use it to turn our scrcpy
+keyframes into structured "these are the tappable elements + their
+labels", then let Claude vision reason "the Welcome logo rendered as a
+white box" / "onboarding completed with 0 providers" — exactly the §6.AB
+non-crashing-defect class our tests have historically missed.
+<code>OmniTool</code> shows the full parse→vision-model→act loop.</li>
+<li><strong>ScreenAgent</strong> (IJCAI-24,
+<code>niuzaisheng/ScreenAgent</code>) — reference architecture for the
+plan→act→<strong>reflect</strong> state machine (VNC screenshots in,
+mouse/keyboard out) worth copying for our loop's control flow.</li>
+<li>Research signal: "Leveraging LLM Agents for Automated Video Game
+Testing" (arXiv 2509.22170) — LLM produces a <strong>structured
+diagnosis report</strong> (goal, attempted actions, why-stuck,
+screenshot evidence) that can be filed as a ticket. This is the template
+for auto-generating our §6.O closure logs / LVA workable items from a
+failed vision run.</li>
+</ul>
+<h3 id="recommended-for-lava-topic-3">Recommended for Lava (Topic
+3)</h3>
+<ol type="1">
+<li><strong>Add a Redroid runner path to the Containers
+submodule</strong> as the primary no-KVM emulator on a Linux gate-host
+(closes the practical blocker behind §6.X-debt/§6.AH-debt). Keep the
+QEMU-SDK-emulator path (dockerify-android style) for Google-system-image
+fidelity when needed. Honestly record which runner produced each
+attestation row (§6.I
+<code>runner</code>/<code>runtime</code>/<code>image</code>
+fields).</li>
+<li><strong>Wire scrcpy <code>--record</code> + ffmpeg
+segmentation</strong> as the always-on recorder (§11.4.128): raw clips
+git-ignored + codegraph-excluded under the deterministic
+<code>&lt;root&gt;/YYYY-MM-DD/&lt;state-hash&gt;/&lt;DEVICE&gt;_&lt;SERIAL&gt;/recording_NNN/</code>
+layout; commit only curated evidence. Extract keyframes as the
+vision-model input.</li>
+<li><strong>Pilot droidrun/mobilerun with the Anthropic provider +
+<code>--vision</code></strong> as an exploratory QA agent driving the
+debug APK on the Redroid emulator; have it produce a structured defect
+report per run. Keep Espresso Challenges as the constitutional gate; the
+vision agent is a <strong>bluff-hunter</strong> that finds the
+non-crashing UI defects (white logo, wrong nav, gate-bypass) that green
+tests miss (§6.AB/§6.AK).</li>
+<li><strong>Evaluate OmniParser v2</strong> to structure screenshots
+before the vision call — improves grounding + reduces token cost vs.
+raw-screenshot-only.</li>
+<li><strong>Adopt Maestro</strong> for cross-app + exploratory flows
+(its flakiness handling is a direct answer to our emulator-flakiness
+pain), while noting it needs our scrcpy/ffmpeg layer for failure
+video.</li>
+</ol>
+<h3 id="sources-topic-3">Sources (Topic 3)</h3>
+<ul>
+<li><a
+href="https://github.com/remote-android/redroid-doc">https://github.com/remote-android/redroid-doc</a></li>
+<li><a
+href="https://hub.docker.com/r/redroid/redroid">https://hub.docker.com/r/redroid/redroid</a></li>
+<li><a
+href="https://codersera.com/blog/android-emulator-docker-without-kvm/">https://codersera.com/blog/android-emulator-docker-without-kvm/</a></li>
+<li><a
+href="https://github.com/HQarroum/docker-android">https://github.com/HQarroum/docker-android</a></li>
+<li><a
+href="https://github.com/Shmayro/dockerify-android">https://github.com/Shmayro/dockerify-android</a></li>
+<li><a
+href="https://github.com/sickcodes/dock-droid">https://github.com/sickcodes/dock-droid</a></li>
+<li><a
+href="https://www.blog.brightcoding.dev/2025/10/04/display-and-control-your-android-device-with-scrcpy-a-comprehensive-guide/">https://www.blog.brightcoding.dev/2025/10/04/display-and-control-your-android-device-with-scrcpy-a-comprehensive-guide/</a></li>
+<li><a
+href="https://maestro.dev/a/appium-maestro-the-benchmark">https://maestro.dev/a/appium-maestro-the-benchmark</a></li>
+<li><a
+href="https://devicelab.dev/blog/maestro-vs-appium-2025">https://devicelab.dev/blog/maestro-vs-appium-2025</a></li>
+<li><a
+href="https://github.com/droidrun/mobilerun">https://github.com/droidrun/mobilerun</a></li>
+<li><a
+href="https://github.com/droidrun/mobilerun/blob/main/README.md">https://github.com/droidrun/mobilerun/blob/main/README.md</a></li>
+<li><a
+href="https://pypi.org/project/droidrun/0.2.0/">https://pypi.org/project/droidrun/0.2.0/</a></li>
+<li><a
+href="https://github.com/microsoft/OmniParser">https://github.com/microsoft/OmniParser</a></li>
+<li><a
+href="https://huggingface.co/microsoft/OmniParser-v2.0">https://huggingface.co/microsoft/OmniParser-v2.0</a></li>
+<li><a
+href="https://microsoft.github.io/OmniParser/">https://microsoft.github.io/OmniParser/</a></li>
+<li><a
+href="https://github.com/niuzaisheng/ScreenAgent">https://github.com/niuzaisheng/ScreenAgent</a></li>
+<li><a
+href="https://arxiv.org/html/2509.22170v1">https://arxiv.org/html/2509.22170v1</a></li>
+</ul>
+<hr />
+<h2
+id="topic-4--other-open-source-pieces-for-an-autonomous-mobile-qa-system">Topic
+4 — Other open-source pieces for an autonomous mobile-QA system</h2>
+<h3 id="structured-logcat--crash--anr-analysis">Structured logcat /
+crash / ANR analysis</h3>
+<ul>
+<li><strong>logcat.ai</strong> — natural-language Q&amp;A over
+logcat/bugreport/dmesg/kernel logs; "Deep Research" autonomous agent
+runs 5-10min multi-step investigations, correlates events across
+subsystems, cites sources; "Delta" compares log files across app
+versions to detect regressions and cross-layer root causes. Understands
+30+ bugreport/logcat/kernel formats. (Hosted service, but the
+format-parsing + temporal correlation model is the pattern to mirror in
+<code>lava-api-go/internal/qa</code>.)</li>
+<li><strong><code>lana-20/android-crash-anr-logcat-bugreport</code></strong>
+— open reference for crash-vs-ANR and <code>adb logcat</code> vs
+<code>adb bugreport</code> triage; good grounding for our own structured
+parser.</li>
+</ul>
+<h3
+id="visual-regression--screenshot-diff-find-the-white-logo-class-deterministically">Visual
+regression / screenshot-diff (find the "white logo" class
+deterministically)</h3>
+<ul>
+<li><strong>Lost Pixel</strong> (open source) — flexible config, has
+explicit <strong>flaky-visual-test handling</strong> guidance
+(animations are the #1 cause; disable/accelerate before capture).</li>
+<li><strong>BackstopJS</strong> — screenshot-comparison framework
+(Playwright/Puppeteer backends).</li>
+<li><strong>Argos</strong> — surfaces visual diffs directly in PRs,
+CI-integrated.</li>
+<li><strong>Percy</strong> (open-source tooling) — AI-driven
+dynamic-element handling to cut false positives.</li>
+<li>Android-native pairing: Maestro's built-in pixel-diff polling + our
+Espresso <code>captureToImage</code> screenshots. Combine with a
+<strong>dominant-color / hue assertion</strong> (per §6.AB —
+RGB-variance alone let the white-logo bug pass) rather than a plain
+screenshot-equality diff.</li>
+</ul>
+<h3 id="flakiness-detection">Flakiness detection</h3>
+<ul>
+<li>Maestro's polling/retry model (Topic 3) is the strongest built-in
+mobile flakiness mitigation. For test-history-based flake detection, the
+Semaphore roundup lists the current tooling; the key practice is
+<strong>quarantine + retry-with-history</strong>, not just pixel
+diff.</li>
+</ul>
+<h3 id="recommended-for-lava-topic-4">Recommended for Lava (Topic
+4)</h3>
+<ol type="1">
+<li>Build a small <strong>structured-logcat parser</strong> in
+<code>lava-api-go/internal/qa</code> (or a Containers-side helper)
+modeled on logcat.ai's parse→temporal-correlate→diagnose pipeline; feed
+it the scrcpy-run logcat to auto-classify crash vs ANR vs warning and
+attach to the vision agent's defect report.</li>
+<li>Add <strong>screenshot-diff with a hue/dominant-color
+assertion</strong> (not bare equality) to the Challenge suite for
+brand-mark/rendering-correctness — closes the §6.AB discrimination gap
+that shipped the white-logo defect.</li>
+<li>Use <strong>Lost Pixel or BackstopJS</strong> as the diff engine if
+we want PR-surfaced visual diffs; keep them local-only per the
+Local-Only CI/CD rule.</li>
+<li>Standardize on <strong>disable/accelerate animations before
+capture</strong> across all screenshot + Challenge runs to kill the #1
+flakiness source.</li>
+</ol>
+<h3 id="sources-topic-4">Sources (Topic 4)</h3>
+<ul>
+<li><a href="https://logcat.ai/">https://logcat.ai/</a></li>
+<li><a
+href="https://blog.logcat.ai/2025/10/05/from-app-crashes-to-kernel-panics-introducing-logcat.ai/">https://blog.logcat.ai/2025/10/05/from-app-crashes-to-kernel-panics-introducing-logcat.ai/</a></li>
+<li><a
+href="https://github.com/lana-20/android-crash-anr-logcat-bugreport">https://github.com/lana-20/android-crash-anr-logcat-bugreport</a></li>
+<li><a
+href="https://www.lost-pixel.com/blog/handling-flaky-visual-regression-tests-with-lost-pixel-platform">https://www.lost-pixel.com/blog/handling-flaky-visual-regression-tests-with-lost-pixel-platform</a></li>
+<li><a
+href="https://www.browserstack.com/guide/visual-regression-testing-open-source">https://www.browserstack.com/guide/visual-regression-testing-open-source</a></li>
+<li><a
+href="https://percy.io/blog/open-source-visual-regression-testing-tools">https://percy.io/blog/open-source-visual-regression-testing-tools</a></li>
+<li><a
+href="https://semaphore.io/blog/tools-flaky-tests">https://semaphore.io/blog/tools-flaky-tests</a></li>
+</ul>
+<hr />
+<h2 id="cross-cutting-verdict">Cross-cutting verdict</h2>
+<ul>
+<li><strong>Topic 1:</strong> current fix is correct; add a regression
+test; adopt <code>BrotliInterceptor</code> ONLY if a provider goes
+br-only AND with a decompression-bomb size cap (CVE-2023-3782 has
+<strong>no upstream fix</strong>).</li>
+<li><strong>Topic 2:</strong> Prowlarr Cardigann YAMLs are the
+field-level source-of-truth; pin UA↔︎cf_clearance; test decompress→cp1251
+ordering; consider a FlareSolverr/Byparr sidecar in
+<code>lava-api-go</code>.</li>
+<li><strong>Topic 3:</strong> <strong>Redroid</strong> is the concrete
+way past the KVM blocker; scrcpy+ffmpeg for recording;
+<strong>droidrun/mobilerun (MIT) + Claude vision + OmniParser
+v2</strong> for the autonomous vision loop; Maestro for
+flakiness-resilient driving.</li>
+<li><strong>Topic 4:</strong> structured logcat parser + hue-based
+screenshot-diff + animation-disable close the §6.AB/§6.AK bluff classes
+deterministically.</li>
+</ul>
+</body>
+</html>
