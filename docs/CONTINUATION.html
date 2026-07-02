@@ -328,16 +328,25 @@ independently first: HTTP 200, 24,835,597 bytes,
 <code>Content-Disposition: attachment</code>. gutenberg now FULLY green
 (search→topic→download) alongside rutracker + kinozal. Because it
 reached TERMINAL "Download completed" (not the in-progress fallback),
-QA-harness fix #1 (require terminal completion) is confirmed SAFE to
-apply. Also unblocks archiveorg's download PATH (SEARCH stays separately
-per-destination-egress-blocked). MATRIX EXPANSION 2026-07-02: rutracker
-mp3 keystone ALSO device-green (<code>verdict=PASS</code>,
-<code>"Download completed" ×14</code>, real music <code>.torrent</code>)
-— rutracker now covers BOTH spec queries (1080p + mp3). Device-green
-goapi matrix: rutracker (1080p + mp3), kinozal (1080p), gutenberg
-(sherlock) — search→topic→download proven on real emulators. <strong>(C)
-6 public providers WIRED but not yet device-run</strong> (worktree
-<code>agent-ae03137803ae71457</code>):
+QA-harness fix #1 (require terminal completion) is now LANDED + fully
+on-device rehearsed: green-path re-run <code>verdict=PASS</code>
+(gutenberg "Download completed" ×9 under the stricter gate);
+discrimination PROVEN by a 2s-timeout rehearsal →
+<code>verdict=SKIP</code> ("AssumptionViolated"/"Honest SKIP" — an
+in-progress download is now an honest SKIP, the EXACT false-PASS the
+pre-fix
+<code>require(completed || presentContains("Downloading file"))</code>
+reported as a green PASS). The QA-harness audit's real false-PASS vector
+is closed. Fix #3 (scope onboarding SKIP to network stages) still queued
+(needs its own edit + rehearsal). Also unblocks archiveorg's download
+PATH (SEARCH stays separately per-destination-egress-blocked). MATRIX
+EXPANSION 2026-07-02: rutracker mp3 keystone ALSO device-green
+(<code>verdict=PASS</code>, <code>"Download completed" ×14</code>, real
+music <code>.torrent</code>) — rutracker now covers BOTH spec queries
+(1080p + mp3). Device-green goapi matrix: rutracker (1080p + mp3),
+kinozal (1080p), gutenberg (sherlock) — search→topic→download proven on
+real emulators. <strong>(C) 6 public providers WIRED but not yet
+device-run</strong> (worktree <code>agent-ae03137803ae71457</code>):
 thepiratebay/torrentscsv/knaben/bitsearch/nyaa/tokyotosho added to
 Challenge70 <code>ProviderSpec.forId</code> (authNone) +
 <code>lib-subsets.sh QA_PROVIDERS</code> (compileDebugAndroidTestKotlin

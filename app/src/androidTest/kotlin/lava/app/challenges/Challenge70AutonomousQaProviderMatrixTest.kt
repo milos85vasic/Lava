@@ -616,22 +616,36 @@ class Challenge70AutonomousQaProviderMatrixTest {
             //   Error           → error_title (NOT accepted: a download failure is
             //                     a loud failure, never DOWNLOAD-OK).
             composeRule.onNodeWithText("Torrent").performClick()
-            // Prefer the terminal "Download completed". A persistent in-progress
-            // dialog on a slow upstream is an acceptable affordance fallback; the
-            // error dialog (neither string present) is a loud failure.
+            // §6.AB anti-bluff (QA-harness audit fix #1, 2026-07-02): DOWNLOAD-OK
+            // requires the TERMINAL "Download completed". A download that renders
+            // "Downloading file…" then HANGS >60s (never completing, never erroring)
+            // is NOT a pass — the user never receives the file — so it is an honest
+            // SKIP, never a green PASS. No dialog / an error dialog is a loud FAIL.
+            // Confirmed safe 2026-07-02: rutracker (x14), kinozal, gutenberg (a real
+            // 24.8MB epub) all reach "Download completed" within the window.
             val completed = try {
                 composeRule.waitUntil(timeoutMillis = 60_000) { present("Download completed") }
                 true
             } catch (_: ComposeTimeoutException) {
                 false
             }
-            require(completed || presentContains("Downloading file")) {
-                "Tapping \"Torrent\" must surface the DownloadDialog — " +
-                    "\"Download completed\" or, on a slow upstream, the " +
-                    "\"Downloading file…\" in-progress dialog. Neither appeared (a " +
-                    "download Error dialog or no dialog is a loud failure). HTTP-file " +
-                    "providers (archiveorg/gutenberg) reach this via the same button " +
-                    "→ downloadHttpFile()."
+            if (!completed) {
+                // No terminal completion: distinguish an honest slow-upstream SKIP
+                // (the in-progress dialog IS present) from a loud FAIL (no dialog or
+                // an error dialog — the user got nothing).
+                require(presentContains("Downloading file")) {
+                    "Tapping \"Torrent\" surfaced NEITHER \"Download completed\" nor " +
+                        "the \"Downloading file…\" in-progress dialog — a download Error " +
+                        "dialog or no dialog is a loud failure (never DOWNLOAD-OK). " +
+                        "HTTP-file providers (archiveorg/gutenberg) reach this via " +
+                        "downloadHttpFile()."
+                }
+                assumeTrue(
+                    "Download rendered \"Downloading file…\" but did not reach terminal " +
+                        "\"Download completed\" within 60s (slow upstream). Honest SKIP " +
+                        "(NOT PASS) — the user did not receive the file.",
+                    false,
+                )
             }
         } else {
             // Magnet-only topic — tap Magnet → MagnetDialog with an "Open" action
@@ -643,9 +657,10 @@ class Challenge70AutonomousQaProviderMatrixTest {
             }
         }
         // Success marker (anti-bluff): emitted ONLY after a real user-visible
-        // download affordance is confirmed on screen — the DownloadDialog
-        // ("Downloading file…" in-progress OR "Download completed") for the
-        // Torrent/HTTP-file path, OR the MagnetDialog "Open" action for the
+        // download OUTCOME is confirmed on screen — the DownloadDialog reaching
+        // the TERMINAL "Download completed" (fix #1: a hung in-progress dialog is
+        // an honest SKIP above, never DOWNLOAD-OK) for the Torrent/HTTP-file path,
+        // OR the MagnetDialog "Open" action for the
         // magnet path. This line is unreachable unless one of the require()s
         // above passed, so the marker cannot be emitted without a real affordance
         // on screen. The orchestrator greps this to distinguish a REAL flow
