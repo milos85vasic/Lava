@@ -297,8 +297,24 @@ Challenge70 <code>ProviderSpec.forId</code> (authNone) +
 BUILD SUCCESSFUL); KEY: bitsearch renders <strong>"Bitsearch"</strong>
 (humanized, not "BitSearch"). NOTE: torrentscsv+nyaa are among the
 IPv4-only egress-blocked set (A) → they need the VPN fix before their
-keystones can pass. <strong>NEXT (when rate limits clear):</strong> (1)
-operator applies the VPN split-tunnel for the goapi → re-run
+keystones can pass. TRIAGE 2026-07-02 (running goapi, direct
+search-endpoint curl): of ALL public providers ONLY gutenberg returns
+rows (32);
+archiveorg/nyaa/torrentscsv/bitsearch/yts/thepiratebay/knaben/tokyotosho
+ALL return 0 through the container's VPN egress — so NO additional
+public provider is device-runnable until the per-destination egress
+lands (running their keystones now would FAIL at the search step, not go
+green — NOT run, per §6.J). The excluded-proxy unblock IS viable
+(LAVA_API_UPSTREAM_PROXY is GLOBAL — curated providers construct
+<code>&amp;http.Client{Transport: httpx.NewTransport()}</code> which
+honors it) for torrentscsv/bitsearch/yts/archiveorg (NOT nyaa —
+DPI-blocked on direct per the parser audit), BUT it also routes the
+Russian trackers direct → breaks rutracker/kinozal while active, so it
+is a PUBLIC-ONLY-RUN toggle (operator/infra decision), not a standing
+config. The 6 providers remain worktree-only
+(<code>agent-ae03137803ae71457</code>); main <code>QA_PROVIDERS</code>
+is still the original 5. <strong>NEXT (when rate limits clear):</strong>
+(1) operator applies the VPN split-tunnel for the goapi → re-run
 archiveorg/nyaa/torrentscsv keystones; (2) complete the gutenberg-topic
 parser fix + re-run; (3) apply the mapError §6.AC hardening; (4) run the
 6 wired providers' keystones (reachable ones:
