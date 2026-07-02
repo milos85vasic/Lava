@@ -1,14 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<testsuite name="lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest" tests="1" failures="1" errors="0" skipped="0" time="48.149" timestamp="2026-07-02T07:07:02" hostname="localhost">
+<testsuite name="lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest" tests="1" failures="0" errors="0" skipped="0" time="96.102" timestamp="2026-07-02T20:48:57" hostname="localhost">
   <properties>
     <property name="device" value="sdk_gphone64_x86_64 - 14" />
     <property name="flavor" value="" />
     <property name="project" value=":app" />
   </properties>
-  <testcase name="autonomousMatrix_onboard_search_topic_download" classname="lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest" time="45.934">
-    <failure>java.lang.IllegalArgumentException: Search returned no results after 3 attempts — the search-error placeholder ("Search failed" / "problem reaching the trackers") persisted across retries. A real user cannot search rutracker from this environment.
-at lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest.searchTopicDownload(Challenge70AutonomousQaProviderMatrixTest.kt:579)
-at lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest.autonomousMatrix_onboard_search_topic_download(Challenge70AutonomousQaProviderMatrixTest.kt:354)
-</failure>
-  </testcase>
+  <testcase name="autonomousMatrix_onboard_search_topic_download" classname="lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest" time="94.329" />
 </testsuite>
