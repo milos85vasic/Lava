@@ -189,6 +189,43 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🟢🔬 2026-07-02 (generalization batch, pushed
+<code>687232fc</code>) — fixes C2/D/E PROVEN to generalize beyond
+rutracker; remaining failures are now PROVIDER-SPECIFIC, not
+systemic.</strong> Batch <code>rutor;kinozal;nnmclub × 1080p</code> on
+the goapi backend = <strong>PASS 0 / SKIP 2 / FAIL 1</strong>, each a
+distinct actionable next-layer (rutracker keystone stays GREEN +
+pushed). <strong>KEY WIN — kinozal generalizes:</strong> device logcat
+<code>login(kinozal) result=LoginResult(state=Authenticated, sessionToken=uid=…;pass=…)</code>
+→ <code>Finish</code> → search — kinozal (FORM_LOGIN, win-1251, a
+completely different provider) logged in + onboarded + searched with
+ZERO kinozal-specific work, because C2 (AUTH_REQUIRED derivation) + D
+(IO dispatcher) + E (LoginResultDto wire) were architectural fixes.
+<strong>Per-provider next-layers (evidence
+<code>.lava-ci-evidence/autonomous-qa/2026-07-02/goapi/{rutor,kinozal,nnmclub}-1080p/</code>):</strong>
+<strong>(rutor SKIP)</strong> rutor is NOT in the goapi
+<code>/providers</code> catalogue (the 13-provider catalogue =
+archiveorg,thepiratebay,yts,bitsearch,nyaa,tokyotosho,rutracker,nnmclub,kinozal,gutenberg,torrentscsv,knaben,torrentdownloads
+— no rutor) AND Challenge70 <code>ProviderSpec.forId</code> has no rutor
+case (assumption "qa_providers resolved to no known providers (expected
+rutracker,nnmclub,kinozal,archiveorg,gutenberg)") → rutor×goapi is
+NOT-APPLICABLE: either add rutor to the goapi provider registry OR
+exclude rutor from goapi subsets in <code>lib-subsets.sh</code>.
+<strong>(kinozal FAIL)</strong> login+onboarding+search ALL ran; the
+FINAL assertion failed — the results list was empty
+(<code>SearchResultViewModel: Perform ListBottomReached</code> fires
+immediately = empty list), consistent with the documented kinozal
+Cloudflare-522 flakiness / win-1251 search-parse; NEXT: with the goapi
+up, <code>curl /v1/kinozal/search?q=1080p</code>
+(Auth-Token=<code>kinozal:cookie:uid=…;pass=…</code>) to classify
+(kinozal.tv 5xx/Cloudflare vs empty-parse vs win-1251 mojibake).
+<strong>(nnmclub SKIP)</strong> goapi <code>/v1/nnmclub/login</code>
+returned <code>ApiHttpException: HTTP 401</code> — a real
+goapi→nnmclub.com login failure (NOT a client bug); NEXT: with the goapi
+up, <code>curl /v1/nnmclub/login</code> with the real creds to classify
+(Gate-1 Lava-Auth key vs nnmclub credential-reject vs Cloudflare vs
+win-1251-login-encoding). All three are the continuing loop's next
+iterations. ───── (current)</p>
 <p><strong>🟢🎉 2026-07-02 (SUCCESS) — goapi × rutracker keystone is
 GENUINELY GREEN on a real containerized-KVM emulator:
 <code>verdict=PASS</code>, <code>marker_download_ok=true</code>,
