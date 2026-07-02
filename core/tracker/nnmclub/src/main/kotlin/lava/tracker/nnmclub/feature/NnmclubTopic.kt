@@ -38,7 +38,7 @@ class NnmclubTopic @Inject constructor(
 
     override suspend fun getTopic(id: String): TopicDetail {
         val url = "$baseUrl/forum/viewtopic.php?t=$id"
-        val html = http.get(url).use { it.body?.string() ?: "" }
+        val html = http.get(url).use { http.bodyString(it) }
         val detail = parser.parse(html, topicIdHint = id)
         magnetCache.put(id, detail.torrent.magnetUri)
         return detail

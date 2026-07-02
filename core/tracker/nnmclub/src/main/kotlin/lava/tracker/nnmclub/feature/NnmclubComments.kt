@@ -26,7 +26,7 @@ class NnmclubComments @Inject constructor(
 
     override suspend fun getComments(topicId: String, page: Int): CommentsPage {
         val url = "$baseUrl/forum/viewtopic.php?t=$topicId"
-        val html = http.get(url).use { it.body?.string() ?: "" }
+        val html = http.get(url).use { http.bodyString(it) }
         val doc = Jsoup.parse(html)
 
         val items = doc.select("table.forumline tr").mapNotNull { row ->

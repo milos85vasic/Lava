@@ -40,7 +40,7 @@ class NnmclubClient @Inject constructor(
 
     override suspend fun healthCheck(): Boolean = try {
         http.get("https://nnmclub.to/forum/index.php").use { response ->
-            response.isSuccessful && (response.body?.string().orEmpty()).contains(
+            response.isSuccessful && http.bodyString(response).contains(
                 descriptor.expectedHealthMarker,
                 ignoreCase = true,
             )

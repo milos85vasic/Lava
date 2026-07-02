@@ -31,7 +31,7 @@ class NnmclubBrowse @Inject constructor(
     override suspend fun browse(category: String?, page: Int): BrowseResult {
         val url = buildBrowseUrl(category, page)
         val response = http.get(url)
-        val body = response.use { it.body?.string() ?: "" }
+        val body = response.use { http.bodyString(it) }
         return parser.parse(body, pageHint = page)
     }
 
