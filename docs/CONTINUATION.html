@@ -189,6 +189,44 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🟢🎯 2026-07-02 (culmination) — goapi path PROVEN TO ENGAGE
+on device (verdict FAIL→SKIP, ZERO bundled fallback); root cause was
+<code>apiSelectionEnabled=false</code> in Challenge70, NOT
+providerIds.</strong> CORRECTION to the prior banner:
+<code>providerIds</code> was <code>[rutracker]</code> all along (the
+<code>ListBottomReached</code> was a Streaming-spinner no-op, misread).
+The TRUE root cause (a92db298 subagent, quoted file:line):
+<code>TestOnboardingHiltModule</code> binds
+<code>apiSelectionEnabled</code> from <code>ApiSelectionTestFlag</code>
+(default FALSE); Challenge70 never set it true → the ApiSelection
+onboarding step was SKIPPED → the Go API endpoint was never configured →
+catalogue never fetched → dynamic client never registered → search fell
+to the bundled direct client
+(<code>tracker.php?nm=…&amp;start=-50</code>, the
+<code>50*(page-1)</code> 1-indexed builder vs page=0). <strong>FIXES
+(this cycle):</strong> (1) Challenge70 now sets
+<code>ApiSelectionTestFlag.enabled=true</code> via an ordered
+<code>@get:Rule(order=2)</code> BEFORE the compose rule (mirrors
+C39/C40/C63); (2) <code>RuTrackerInnerApiImpl</code> <code>start</code>
+computations gain <code>.coerceAtLeast(0)</code> (defensive — a negative
+tracker.php offset is never valid); (3) nnmclub 4-site win-1251
+follow-up (<code>0b0885ac</code>). <strong>DEVICE-PROVEN this
+cycle:</strong> <code>OnboardingViewModel: Perform AddCloudApi</code> →
+<code>ApiSelection: probe OK for GoApi(host=127.0.0.1,port=8443,key=&lt;qa_key-injected&gt;) — advance to Providers</code>,
+and <strong>0 bundled <code>tracker.php</code> search reqs</strong> (was
+6). So qa_key + AuthInterceptor-fail-open + ApiSelection ALL engage —
+the goapi auth chain works end to end through the keyed probe.
+<strong>REMAINING LAYER for SUCCESS (verdict is an HONEST §6.J
+assumeTrue SKIP, NOT a bluff — the Challenge refuses to claim a green it
+didn't earn):</strong> after "advance to Providers" the onboarding
+stalled (no app activity for 39s) and the 30s
+<code>waitUntil("All set!")</code> fired → the
+Providers→Configure→login→Summary step didn't complete on the
+newly-enabled goapi flow. NEXT: root-cause the onboarding
+login/completion stall (does Challenge70 drive the Configure creds step
+under apiSelectionEnabled=true? does the goapi
+<code>/v1/rutracker/login</code> complete?) → SUCCESS. Keystone NOT
+green; distribute BLOCKED (§6.J/§6.AK). ───── (current)</p>
 <p><strong>🟢🔧 2026-07-02 (latest) — 3 MORE fixes CONVERGED (LAYER 2 +
 AuthInterceptor + nnmclub); qa_key DEVICE-VALIDATED; goapi keystone
 advanced to the NEXT layer (providerIds-null → legacy paging

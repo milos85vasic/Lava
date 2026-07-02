@@ -99,7 +99,7 @@ class RuTrackerInnerApiImpl(private val httpClient: HttpClient) : RuTrackerInner
         parameter("o", sortType?.value)
         parameter("s", sortOrder?.value)
         parameter("tm", period?.value)
-        parameter("start", page?.let { (50 * (page - 1)).toString() })
+        parameter("start", page?.let { (50 * (page - 1)).coerceAtLeast(0).toString() })
     }.bodyAsText()
 
     override suspend fun forum() = httpClient.get(Index) {
@@ -108,7 +108,7 @@ class RuTrackerInnerApiImpl(private val httpClient: HttpClient) : RuTrackerInner
 
     override suspend fun category(id: String, page: Int?) = httpClient.get(Forum) {
         parameter("f", id)
-        parameter("start", page?.let { (50 * (page - 1)).toString() })
+        parameter("start", page?.let { (50 * (page - 1)).coerceAtLeast(0).toString() })
     }.bodyAsText()
 
     override suspend fun topic(
@@ -155,7 +155,7 @@ class RuTrackerInnerApiImpl(private val httpClient: HttpClient) : RuTrackerInner
 
     override suspend fun favorites(token: String, page: Int?) = httpClient.get(Bookmarks) {
         header(CookieHeader, token)
-        parameter("start", page?.let { (50 * (page - 1)).toString() })
+        parameter("start", page?.let { (50 * (page - 1)).coerceAtLeast(0).toString() })
     }.bodyAsText()
 
     override suspend fun addFavorite(
@@ -190,7 +190,7 @@ class RuTrackerInnerApiImpl(private val httpClient: HttpClient) : RuTrackerInner
     override suspend fun futureDownloads(token: String, page: Int?) = httpClient.get(Search) {
         header(CookieHeader, token)
         parameter("future_dls", null)
-        parameter("start", page?.let { (50 * (page - 1)).toString() })
+        parameter("start", page?.let { (50 * (page - 1)).coerceAtLeast(0).toString() })
     }.bodyAsText()
 
     override suspend fun addFutureDownload(

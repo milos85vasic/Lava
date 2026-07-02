@@ -291,7 +291,20 @@ class Challenge70AutonomousQaProviderMatrixTest {
     @get:Rule(order = 1)
     val resetPrefs = ResetOnboardingPrefsRule()
 
+    // The ApiSelection onboarding step (where the goapi backend endpoint is
+    // configured + its catalogue fetched → dynamic ApiBackedTrackerClient
+    // registered) is gated on apiSelectionEnabled, which TestOnboardingHiltModule
+    // binds from ApiSelectionTestFlag (default FALSE). Without this the wizard
+    // SKIPS ApiSelection → the Go API is never contacted → search falls back to
+    // the bundled direct client (device-proven 2026-07-02). Set it BEFORE the
+    // compose rule launches MainActivity (order 2 < 3), mirroring C39/C40/C63.
     @get:Rule(order = 2)
+    val enableApiSelection = object : org.junit.rules.ExternalResource() {
+        override fun before() { lava.app.di.ApiSelectionTestFlag.enabled = true }
+        override fun after() { lava.app.di.ApiSelectionTestFlag.enabled = false }
+    }
+
+    @get:Rule(order = 3)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     // ── Instrumentation args (defaults make the test runnable standalone) ──
