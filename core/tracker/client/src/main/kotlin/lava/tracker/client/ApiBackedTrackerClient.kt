@@ -1,5 +1,8 @@
 package lava.tracker.client
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -106,6 +109,15 @@ class ApiBackedTrackerClient(
     // auth providers — in both cases NOTHING is attached (additive, §6.J).
     private val sessionToken: String? = null,
     private val json: Json = DEFAULT_JSON,
+    // Fix D (2026-07-02 goapi keystone, device-proven): the blocking OkHttp
+    // `.execute()` calls in the HTTP helpers below MUST run off the caller's thread.
+    // sdk.login() is invoked from OnboardingViewModel's viewModelScope
+    // (Dispatchers.Main.immediate), so an un-dispatched blocking call threw
+    // android.os.NetworkOnMainThreadException and the goapi-catalogue login (+
+    // search/browse/topic/download) crashed for real users. Inject an IO dispatcher
+    // (default Dispatchers.IO; overridable in tests).
+    // Device evidence: .lava-ci-evidence/autonomous-qa/2026-07-02/goapi/.
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : TrackerClient {
 
     /**
@@ -261,9 +273,11 @@ class ApiBackedTrackerClient(
     }
 
     override suspend fun healthCheck(): Boolean = try {
-        httpClient.newCall(Request.Builder().url(baseUrl("health").toString()).get().withAuth().build())
-            .execute()
-            .use { it.isSuccessful }
+        withContext(ioDispatcher) {
+            httpClient.newCall(Request.Builder().url(baseUrl("health").toString()).get().withAuth().build())
+                .execute()
+                .use { it.isSuccessful }
+        }
     } catch (_: Throwable) {
         false
     }
@@ -278,7 +292,7 @@ class ApiBackedTrackerClient(
     private fun baseUrl(op: String) =
         (apiBaseUrl.trimEnd('/') + "/v1/" + descriptor.trackerId + "/" + op).toHttpUrl()
 
-    private fun getString(url: String): String =
+    private suspend fun getString(url: String): String = withContext(ioDispatcher) {
         httpClient.newCall(Request.Builder().url(url).get().withAuth().build()).execute().use { resp ->
             if (!resp.isSuccessful) {
                 val snippet = resp.body?.string()?.let { redactAndTruncate(it) }
@@ -292,8 +306,9 @@ class ApiBackedTrackerClient(
             }
             resp.body?.string() ?: error("API request returned empty body for $url")
         }
+    }
 
-    private fun getBytes(url: String): ByteArray =
+    private suspend fun getBytes(url: String): ByteArray = withContext(ioDispatcher) {
         httpClient.newCall(Request.Builder().url(url).get().withAuth().build()).execute().use { resp ->
             if (!resp.isSuccessful) {
                 val snippet = resp.body?.string()?.let { redactAndTruncate(it) }
@@ -307,14 +322,15 @@ class ApiBackedTrackerClient(
             }
             resp.body?.bytes() ?: error("API request returned empty body for $url")
         }
+    }
 
-    private fun postJson(url: String, payload: String): String {
+    private suspend fun postJson(url: String, payload: String): String = withContext(ioDispatcher) {
         val request = Request.Builder()
             .url(url)
             .post(payload.toRequestBody(JSON_MEDIA_TYPE))
             .withAuth()
             .build()
-        return httpClient.newCall(request).execute().use { resp ->
+        httpClient.newCall(request).execute().use { resp ->
             if (!resp.isSuccessful) {
                 val snippet = resp.body?.string()?.let { redactAndTruncate(it) }
                 throw ApiHttpException(
@@ -466,12 +482,25 @@ internal data class LoginRequestDto(
 
 @Serializable
 internal data class LoginResultDto(
-    val state: String,
-    val sessionToken: String? = null,
+    // Fix E (2026-07-02 goapi keystone, device-proven): mirror the ACTUAL
+    // lava-api-go wire struct `provider.LoginResult`
+    // (internal/provider/provider.go:218 — {success, authToken, expiresAt}), NOT a
+    // {state, sessionToken} shape the server never sends. The prior DTO required a
+    // `state` field, so decoding the real 200 login response threw
+    // kotlinx.serialization.MissingFieldException and a genuinely-successful login
+    // surfaced to the user as "Connection test failed" — no session cookie was
+    // stored, so every subsequent /v1/{id}/search stayed anonymous / 401'd. (The
+    // OpenAPI /login schema still names the stale AuthResponseDto {type,user}
+    // union — a separate contract-drift to reconcile; tracked in
+    // docs/CONTINUATION.md.) Device evidence:
+    // .lava-ci-evidence/autonomous-qa/2026-07-02/goapi/.
+    val success: Boolean = false,
+    val authToken: String? = null,
+    val expiresAt: String? = null,
 ) {
     fun toDomain() = LoginResult(
-        state = parseState(state),
-        sessionToken = sessionToken,
+        state = if (success) AuthState.Authenticated else AuthState.Unauthenticated,
+        sessionToken = authToken,
     )
 }
 

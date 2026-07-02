@@ -243,6 +243,76 @@
 <body>
 <h1 id="lava--bug-fix-audit-trail">Lava — Bug Fix Audit Trail</h1>
 <blockquote>
+<p><strong>Revision §11.4.44 (2026-07-02, goapi keystone
+GREEN):</strong> the goapi × rutracker autonomous-QA keystone
+(<code>Challenge70AutonomousQaProviderMatrixTest</code>) went from an
+honest §6.J SKIP to a device-verified <code>verdict=PASS</code> (real
+rutracker login + search + download, recorded to
+<code>qa_rec_0.mp4</code>;
+<code>.lava-ci-evidence/autonomous-qa/2026-07-02/goapi/rutracker-1080p/</code>).
+Five reproduce-first + Bluff-Audited fixes — three are REAL PRODUCTION
+BUGS a goapi-catalogue user would hit, all invisible to the prior green
+suite:</p>
+<ul>
+<li><strong>Fix B</strong> —
+<code>lava-api-go/internal/rutracker/provider.go:48</code>
+<code>DisplayName()</code> <code>"RuTracker"</code> →
+<code>"RuTracker.org"</code>. Root cause: the name equalled the id
+case-insensitively, so the Android catalogue humanizer
+(<code>core/data/.../ProviderCatalogRepository.friendlyDisplayName</code>)
+rendered the off-brand <code>"Rutracker"</code>, diverging from the
+bundled <code>"RuTracker.org"</code> and breaking Challenge70's provider
+pick. Verification:
+<code>provider_mapping_test.go TestProviderAdapter_Metadata</code>
+(mutation →
+<code>DisplayName = "RuTracker", want RuTracker.org</code>).</li>
+<li><strong>Fix C2</strong> —
+<code>core/data/.../ProviderCatalogRepository.toRemoteDescriptor</code>
+now derives <code>AUTH_REQUIRED</code> when
+<code>authType != NONE</code>
+(<code>withAuthRequiredWhenAuthTyped</code>). Root cause: the goapi
+catalogue declares <code>authType:CAPTCHA_LOGIN</code> but omits an
+<code>AUTH_REQUIRED</code> capability, so
+<code>ApiBackedTrackerClient.getFeature&lt;AuthenticatableTracker&gt;()</code>
+(gated on it) returned null → <code>sdk.login</code> short-circuited to
+null → no session cookie (§6.E capability honesty). Verification:
+<code>ProviderDisplayNameTest</code> (mutation →
+<code>AssertionError at ProviderDisplayNameTest.kt:133</code>).</li>
+<li><strong>Fix D</strong> —
+<code>core/tracker/client/.../ApiBackedTrackerClient</code> blocking
+OkHttp <code>.execute()</code> (getString/getBytes/postJson/healthCheck)
+now runs on an injected <code>Dispatchers.IO</code>. Root cause:
+<code>sdk.login</code> runs on <code>viewModelScope</code> (Main) → the
+un-dispatched blocking call threw
+<code>android.os.NetworkOnMainThreadException</code> on every goapi
+login/search/download. Falsifiability: device keystone
+<code>NetworkOnMainThreadException</code> before, real 2.5s network
+login after.</li>
+<li><strong>Fix E</strong> — client <code>LoginResultDto</code> now
+mirrors the real
+<code>provider.LoginResult {success, authToken, expiresAt}</code> wire.
+Root cause: the prior <code>{state, sessionToken}</code> DTO required a
+<code>state</code> field the server never sends →
+<code>kotlinx.serialization.MissingFieldException</code> → a
+genuinely-successful login surfaced as "Connection test failed", no
+cookie stored. Verification:
+<code>ApiBackedTrackerClientLoginContractTest</code> (new real-stack,
+mutation → <code>MissingFieldException at ...kt:98</code>) +
+<code>ApiBackedTrackerClientTest</code> (corrected a bluff mock that
+used the fake <code>{state,…}</code> body — it passed green while the
+real login was broken). Contract note: the OpenAPI <code>/login</code>
+<code>AuthResponseDto {type,user}</code> schema is stale vs BOTH server
+and client — a tracked follow-up (reconcile openapi + server + client
+onto one shape).</li>
+<li><strong>Problem B (test-harness, not a product bug)</strong> —
+<code>Challenge70</code> deselects the full provider list via
+<code>SelectAllProvidersTestTag</code> then re-selects requested
+providers via <code>performScrollTo</code>. Root cause: all 13 catalogue
+providers are selected by default; the prior
+exact/case-sensitive/no-scroll name-list deselect cleared only 5,
+stranding the wizard on a non-requested Configure page → "All set!"
+never rendered → SKIP.</li>
+</ul>
 <p><strong>Revision §11.4.44 (2026-06-24, updated again):</strong>
 appended three Crashlytics-triage fixes from 2026-06-24 session — ALL
 THREE FIXES LANDED in the working tree (the earlier "P1 OWED" note was a

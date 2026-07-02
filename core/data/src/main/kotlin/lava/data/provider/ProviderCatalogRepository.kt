@@ -166,13 +166,38 @@ internal fun ProviderDescriptorDto.toRemoteDescriptor(
         // so chips/subtitles never show a raw lowercased id. A genuine
         // server-supplied friendly name (different from id, non-blank) is kept.
         displayName = friendlyDisplayName(id, displayName),
-        capabilities = capabilities,
+        capabilities = capabilities.withAuthRequiredWhenAuthTyped(authType),
         authType = authType,
         baseUrls = baseUrls,
         encoding = encoding,
         supportsAnonymous = supportsAnonymous,
         warn = warn,
     )
+
+/**
+ * §6.E Capability-Honesty bridge (2026-07-02 goapi keystone, device-proven).
+ *
+ * The goapi catalogue expresses "this provider needs a login" via the `authType`
+ * field (FORM_LOGIN / CAPTCHA_LOGIN / …) and does NOT emit an `AUTH_REQUIRED`
+ * capability. But the client's [lava.tracker.client.ApiBackedTrackerClient] gates
+ * `getFeature<AuthenticatableTracker>()` on [TrackerCapability.AUTH_REQUIRED].
+ * Without deriving it, `sdk.login()` short-circuited to `null` for every
+ * API-backed provider (rutracker/nnmclub/kinozal) — no session cookie was ever
+ * obtained, so the onboarding treated the provider as no-auth and every
+ * `/v1/{id}/search` 401'd. Device evidence:
+ * `.lava-ci-evidence/autonomous-qa/2026-07-02/goapi/`.
+ *
+ * Mirror [lava.onboarding.OnboardingViewModel]'s own auth decision (it calls
+ * `login()` iff `authType != NONE`): expose the login feature iff the provider
+ * declares a non-NONE auth type. `AUTH_REQUIRED` is added as a raw string so the
+ * tolerant, case-insensitive [RemoteTrackerDescriptor.parseCapability] maps it to
+ * the enum value alongside the other catalogue capabilities.
+ */
+private fun List<String>.withAuthRequiredWhenAuthTyped(authType: String): List<String> {
+    val isNone = authType.isBlank() || authType.trim().equals("NONE", ignoreCase = true)
+    val alreadyPresent = any { it.trim().equals("AUTH_REQUIRED", ignoreCase = true) }
+    return if (isNone || alreadyPresent) this else this + "AUTH_REQUIRED"
+}
 
 /**
  * Issue #4 (2026-06-25 video sweep): produce a user-facing provider name.

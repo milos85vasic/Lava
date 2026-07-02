@@ -189,6 +189,57 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🟢🎉 2026-07-02 (SUCCESS) — goapi × rutracker keystone is
+GENUINELY GREEN on a real containerized-KVM emulator:
+<code>verdict=PASS</code>, <code>marker_download_ok=true</code>,
+video-recorded (<code>qa_rec_0.mp4</code>). Real rutracker login
+(<code>bb_session</code> cookie) → real search "1080p"
+(<code>Torrent id=6876600 "Adventure Time: Side Quests"</code>) →
+download link. ZERO bluff.</strong> The prior "onboarding-completion
+stall" was the tip of a FIVE-layer stack of real defects, each surfaced
+only after the previous was fixed — the device keystone was a genuine
+bug-discovery engine (three of the five are REAL PRODUCTION BUGS a
+goapi-catalogue user would hit, all invisible to the prior green suite).
+Fixes (all reproduce-first + Bluff-Audited): <strong>(B)</strong>
+<code>lava-api-go</code> rutracker <code>DisplayName()</code>
+<code>"RuTracker"</code>→<code>"RuTracker.org"</code> — the name
+equalled the id case-insensitively so
+<code>ProviderCatalogRepository.friendlyDisplayName</code> humanized it
+to off-brand <code>"Rutracker"</code>, diverging from the bundled name +
+breaking the onboarding pick; <strong>(C2)</strong>
+<code>ProviderCatalogRepository.toRemoteDescriptor</code> now DERIVES
+<code>AUTH_REQUIRED</code> from <code>authType != NONE</code> (§6.E
+honesty — the catalogue declares <code>authType:CAPTCHA_LOGIN</code> but
+omitted the capability, so
+<code>ApiBackedTrackerClient.getFeature&lt;Authenticatable&gt;()</code>
+was null → <code>sdk.login</code> short-circuited to null → no cookie);
+<strong>(D)</strong> <code>ApiBackedTrackerClient</code>'s blocking
+OkHttp <code>.execute()</code> helpers
+(getString/getBytes/postJson/healthCheck) now run on an injected
+<code>Dispatchers.IO</code> — <code>sdk.login</code> runs on
+<code>viewModelScope</code>/Main so the un-dispatched blocking call
+threw <code>NetworkOnMainThreadException</code> (a REAL crash on every
+goapi login/search/download); <strong>(E)</strong> client
+<code>LoginResultDto</code> now mirrors the REAL wire
+<code>provider.LoginResult {success, authToken, expiresAt}</code> — the
+prior <code>{state, sessionToken}</code> required a <code>state</code>
+field the server never sends → <code>MissingFieldException</code> → a
+successful login surfaced as "Connection test failed", no cookie stored
+(the OpenAPI <code>/login</code>
+<code>AuthResponseDto {type,user}</code> schema is ALSO stale — a
+separate contract-drift to reconcile, NOT blocking); plus a test-harness
+fix — Challenge70 deselects the whole list via
+<code>SelectAllProvidersTestTag</code> then re-selects requested via
+<code>performScrollTo</code> (robust to catalogue casing + off-screen
+rows; the prior name-list deselect left 8 of 13 default-selected
+providers selected → wizard stranded on a non-requested Configure).
+Device evidence:
+<code>.lava-ci-evidence/autonomous-qa/2026-07-02/goapi/rutracker-1080p/</code>
+(raw video/logcat/png gitignored per operator directive; curated
+<code>verdict.json</code>+<code>junit.xml</code> committed).
+<strong>NEXT:</strong> extend the keystone to rutor/kinozal/nnmclub +
+mixed subsets, then the on-device <code>:api-app</code> backend (Phase
+3), then §6.AK-gated dev+prod Firebase distribute. ───── (current)</p>
 <p><strong>🟢🎯 2026-07-02 (culmination) — goapi path PROVEN TO ENGAGE
 on device (verdict FAIL→SKIP, ZERO bundled fallback); root cause was
 <code>apiSelectionEnabled=false</code> in Challenge70, NOT
@@ -1532,9 +1583,10 @@ PostConverters clamp, ProbeMirrorUseCase reproducing Crashlytics
 39469d3b). Evidence:
 <code>.lava-ci-evidence/bluff-hunt/2026-06-23-cycle6-{session-telemetry,android-core}.json</code>.
 The session's telemetry tests are PROVEN genuine.</p>
-<p><strong>Last updated:</strong> 2026-07-02 (rutracker brotli client
-fix — see top banner; prior 2026-06-30 context follows) (**🤖 AUTONOMOUS
-QA HARNESS (Phase 0) — self-driving QA built under
+<p><strong>Last updated:</strong> 2026-07-02 (goapi × rutracker keystone
+GREEN — verdict=PASS, device-recorded, 5-fix stack B/C2/D/E +
+Challenge70 deselect; see top banner; prior 2026-06-30 context follows)
+(**🤖 AUTONOMOUS QA HARNESS (Phase 0) — self-driving QA built under
 <code>scripts/autonomous-qa/</code>; emulator image boots
 containerized-KVM in ~30s; Go backend serves <code>/health</code>;
 onboarding proven end-to-end (RuTor anon → main app, keystone run #1

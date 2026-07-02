@@ -116,6 +116,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToString
 import androidx.test.filters.SdkSuppress
@@ -125,6 +126,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.BuildConfig
 import digital.vasic.lava.client.MainActivity
 import lava.app.ResetOnboardingPrefsRule
+import lava.onboarding.steps.SelectAllProvidersTestTag
 import org.junit.After
 import org.junit.Assume.assumeTrue
 import org.junit.Rule
@@ -228,58 +230,6 @@ private data class ProviderSpec(
         }
     }
 }
-
-/**
- * All provider displayNames that may appear pre-selected in the onboarding
- * picker (every verified+apiSupported descriptor is selected by default — see
- * OnboardingViewModel.loadProviders). The test deselects the ones NOT requested
- * so only qa_providers remain selected, exactly mirroring C02/C03's deselect
- * pattern.
- *
- * In the production flow the picker is populated from the chosen API's
- * GET /v1/providers catalogue (ALL providers selected by default), so this list
- * MUST cover every API-vended provider — including the 8 API-backed-but-NOT-
- * client-native curated providers — otherwise a non-matrix provider stays
- * selected and strands the per-provider Configure loop. Names are the RENDERED
- * strings (`friendlyDisplayName(id, serverName)`): a server name equal (case-
- * insensitively) to the id is humanized (yts→"Yts", bitsearch→"Bitsearch",
- * rutracker's "RuTracker"→"Rutracker"); a genuine friendly name is kept.
- * Deselecting a name absent from the rendered list is swallowed (try/catch), so
- * listing all 13 is safe in the bundled-fallback path too.
- */
-private val DESELECT_CANDIDATES: List<String> = listOf(
-    // Matrix providers ({client-onboardable} ∩ {API-backed}).
-    // rutracker renders as the BUNDLED descriptor name "RuTracker.org" (verified
-    // via the 2026-06-30 keystone recording — the picker uses the bundled
-    // displayName, NOT the humanized API id). Both forms listed so the deselect
-    // works on either render path; absent names are swallowed by the try/catch.
-    "RuTracker.org",
-    "Rutracker",
-    "NNM-Club",
-    "Kinozal.tv",
-    "Internet Archive",
-    "Project Gutenberg",
-    // Bundled client-native providers OUTSIDE the matrix set. The onboarding
-    // picker enumerates the FULL bundled descriptor set (every *Descriptor.kt
-    // under core/tracker/*/src/main), all pre-selected — verified 2026-06-30 when
-    // "RuTor.info" then would-be "IPTorrents" appeared and stranded the Configure
-    // loop on a credentialed page. MUST be deselected so only the requested
-    // matrix provider survives. (rutor is native-but-not-API-backed; iptorrents
-    // is Jackett-only — neither is in the matrix, but both render in the picker.)
-    "RuTor.info",
-    "IPTorrents",
-    // API-backed but NOT client-native (curated server-side providers) — listed
-    // so they are deselected when not requested and never strand the Configure
-    // loop. Rendered via friendlyDisplayName from their live /providers ids.
-    "Yts",
-    "Torrents-CSV",
-    "Bitsearch",
-    "Knaben",
-    "Torrentdownloads",
-    "Tokyo Toshokan",
-    "The Pirate Bay",
-    "Nyaa",
-)
 
 @SdkSuppress(maxSdkVersion = 35) // Forward-compat skip on API 36+ until Compose BOM update fixes the AndroidPrefetchScheduler-needs-Looper crash on API 36. See .lava-ci-evidence/sixth-law-incidents/2026-05-05-pixel9a-espresso-api36-incompatibility.json
 @HiltAndroidTest
@@ -426,13 +376,24 @@ class Challenge70AutonomousQaProviderMatrixTest {
         // (already-selected-by-default) providers remain. Then Next.
         composeRule.waitUntil(timeoutMillis = 15_000) { present("Pick your providers") }
         val requested = providerSpecs.map { it.displayName }.toSet()
-        DESELECT_CANDIDATES.filterNot { it in requested }.forEach { name ->
-            try {
-                composeRule.onNodeWithText(name).performClick()
-            } catch (_: AssertionError) {
-                // Provider not in the rendered list (e.g. verified=false) — skip.
-            }
+        // Deselect the ENTIRE rendered list in ONE VM action — robust to the
+        // goapi catalogue's display-name casing AND to rows scrolled off-screen in
+        // the plain Column(verticalScroll) picker (13 providers overflow a 1080p
+        // viewport; the prior name-list deselect only cleared the 5 on-screen
+        // exact-case rows, leaving 7 unhandled leftovers that stranded the per-
+        // provider Configure loop -> "All set!" never rendered -> honest SKIP).
+        // On entry every provider is selected, so the Select-all control reads
+        // "Deselect all" and clears the whole list (OnboardingViewModel
+        // .onToggleAllProviders deselect branch). Device evidence + root cause:
+        // .lava-ci-evidence/autonomous-qa/2026-07-02/goapi/.
+        composeRule.onNodeWithTag(SelectAllProvidersTestTag).performClick()
+        composeRule.waitForIdle()
+        // Re-select ONLY the requested providers, scrolling each into view first so
+        // the tap lands even when its row is below the fold.
+        requested.forEach { name ->
+            composeRule.onNodeWithText(name).performScrollTo().performClick()
         }
+        composeRule.waitForIdle()
         composeRule.onNodeWithText("Next").performClick()
 
         // Step 4: Configure each selected provider, in the wizard's order.

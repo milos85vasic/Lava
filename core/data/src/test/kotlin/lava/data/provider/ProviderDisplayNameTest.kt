@@ -1,6 +1,7 @@
 package lava.data.provider
 
 import lava.network.dto.ProviderDescriptorDto
+import lava.tracker.api.TrackerCapability
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -104,5 +105,51 @@ class ProviderDisplayNameTest {
             encoding = "UTF-8",
         )
         assertEquals("Yts", dto.toRemoteDescriptor().displayName)
+    }
+
+    // §6.E Capability-Honesty (2026-07-02 goapi keystone, device-proven). The goapi
+    // catalogue declares auth via `authType` (CAPTCHA_LOGIN/FORM_LOGIN) but omits an
+    // AUTH_REQUIRED capability; without deriving it, ApiBackedTrackerClient.
+    // getFeature<AuthenticatableTracker>() (gated on TrackerCapability.AUTH_REQUIRED)
+    // returned null and sdk.login() short-circuited to null → no session cookie →
+    // every /v1/{id}/search 401'd. Primary assertion: a login-typed provider's
+    // produced descriptor EXPOSES the login capability.
+    //
+    // FALSIFIABILITY: in ProviderCatalogRepository.withAuthRequiredWhenAuthTyped,
+    // return `this` unconditionally (drop the derivation). Observed: this test
+    // FAILS — the capability set stays [SEARCH, BROWSE] with no AUTH_REQUIRED.
+    // Reverted.
+    @Test
+    fun `login-typed provider derives AUTH_REQUIRED capability`() {
+        val dto = ProviderDescriptorDto(
+            id = "rutracker",
+            displayName = "RuTracker.org",
+            kind = "native",
+            authType = "CAPTCHA_LOGIN",
+            encoding = "windows-1251",
+            capabilities = listOf("SEARCH", "BROWSE"), // server omits AUTH_REQUIRED
+        )
+        val caps = dto.toRemoteDescriptor().capabilities
+        assertEquals(true, caps.contains(TrackerCapability.AUTH_REQUIRED))
+        // original capabilities are preserved alongside the derived one
+        assertEquals(true, caps.contains(TrackerCapability.SEARCH))
+    }
+
+    // FALSIFIABILITY: make withAuthRequiredWhenAuthTyped add AUTH_REQUIRED for the
+    // NONE case too. Observed: this test FAILS — a NONE provider MUST NOT be handed
+    // a login feature (it would drive the onboarding cred path + render a spurious
+    // login form for an anonymous provider). Reverted.
+    @Test
+    fun `NONE authType provider does not derive AUTH_REQUIRED`() {
+        val dto = ProviderDescriptorDto(
+            id = "archiveorg",
+            displayName = "Internet Archive",
+            kind = "native",
+            authType = "NONE",
+            encoding = "UTF-8",
+            capabilities = listOf("SEARCH"),
+        )
+        val caps = dto.toRemoteDescriptor().capabilities
+        assertEquals(false, caps.contains(TrackerCapability.AUTH_REQUIRED))
     }
 }

@@ -36,7 +36,16 @@ func NewProviderAdapter(client *Client) *ProviderAdapter {
 func (a *ProviderAdapter) ID() string { return "rutracker" }
 
 // DisplayName returns the human-readable name.
-func (a *ProviderAdapter) DisplayName() string { return "RuTracker" }
+//
+// MUST differ from the id ("rutracker") case-insensitively. The Android
+// catalogue humanizer (core/data ProviderCatalogRepository.friendlyDisplayName)
+// only PRESERVES a server display name when it differs from the id; a name
+// equal to the id case-insensitively (the prior "RuTracker") falls through to
+// id-humanization and renders the off-brand "Rutracker", which then diverges
+// from the bundled descriptor's "RuTracker.org" — breaking the goapi onboarding
+// picker (Challenge70) and confusing real users. Emitting the full brand
+// "RuTracker.org" keeps the goapi and bundled onboarding paths consistent.
+func (a *ProviderAdapter) DisplayName() string { return "RuTracker.org" }
 
 // Capabilities returns the full capability set for rutracker.
 func (a *ProviderAdapter) Capabilities() []provider.ProviderCapability {

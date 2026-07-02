@@ -255,8 +255,14 @@ class ApiBackedTrackerClientTest {
             supportsAnonymous = false,
         )
         server.enqueue(
+            // REAL lava-api-go login wire (provider.LoginResult):
+            // {success, authToken, expiresAt}. Fix E (2026-07-02 goapi keystone):
+            // the prior {state, sessionToken} body was a bluff — the server NEVER
+            // sends that shape, so this test passed green while the real device
+            // login threw MissingFieldException. Now mirrors the true contract; the
+            // Authenticated + session-cookie assertions below are unchanged.
             MockResponse().setBody(
-                """{"state":"Authenticated","sessionToken":"sess-abc"}""",
+                """{"success":true,"authToken":"sess-abc","expiresAt":"2026-07-03T00:00:00Z"}""",
             ).setHeader("Content-Type", "application/json"),
         )
 

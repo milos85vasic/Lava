@@ -1,5 +1,43 @@
 # Lava — Bug Fix Audit Trail
 
+> **Revision §11.4.44 (2026-07-02, goapi keystone GREEN):** the goapi × rutracker autonomous-QA
+> keystone (`Challenge70AutonomousQaProviderMatrixTest`) went from an honest §6.J SKIP to a
+> device-verified `verdict=PASS` (real rutracker login + search + download, recorded to
+> `qa_rec_0.mp4`; `.lava-ci-evidence/autonomous-qa/2026-07-02/goapi/rutracker-1080p/`). Five
+> reproduce-first + Bluff-Audited fixes — three are REAL PRODUCTION BUGS a goapi-catalogue user
+> would hit, all invisible to the prior green suite:
+> - **Fix B** — `lava-api-go/internal/rutracker/provider.go:48` `DisplayName()` `"RuTracker"` →
+>   `"RuTracker.org"`. Root cause: the name equalled the id case-insensitively, so the Android
+>   catalogue humanizer (`core/data/.../ProviderCatalogRepository.friendlyDisplayName`) rendered the
+>   off-brand `"Rutracker"`, diverging from the bundled `"RuTracker.org"` and breaking Challenge70's
+>   provider pick. Verification: `provider_mapping_test.go TestProviderAdapter_Metadata` (mutation →
+>   `DisplayName = "RuTracker", want RuTracker.org`).
+> - **Fix C2** — `core/data/.../ProviderCatalogRepository.toRemoteDescriptor` now derives
+>   `AUTH_REQUIRED` when `authType != NONE` (`withAuthRequiredWhenAuthTyped`). Root cause: the goapi
+>   catalogue declares `authType:CAPTCHA_LOGIN` but omits an `AUTH_REQUIRED` capability, so
+>   `ApiBackedTrackerClient.getFeature<AuthenticatableTracker>()` (gated on it) returned null →
+>   `sdk.login` short-circuited to null → no session cookie (§6.E capability honesty). Verification:
+>   `ProviderDisplayNameTest` (mutation → `AssertionError at ProviderDisplayNameTest.kt:133`).
+> - **Fix D** — `core/tracker/client/.../ApiBackedTrackerClient` blocking OkHttp `.execute()`
+>   (getString/getBytes/postJson/healthCheck) now runs on an injected `Dispatchers.IO`. Root cause:
+>   `sdk.login` runs on `viewModelScope` (Main) → the un-dispatched blocking call threw
+>   `android.os.NetworkOnMainThreadException` on every goapi login/search/download. Falsifiability:
+>   device keystone `NetworkOnMainThreadException` before, real 2.5s network login after.
+> - **Fix E** — client `LoginResultDto` now mirrors the real `provider.LoginResult
+>   {success, authToken, expiresAt}` wire. Root cause: the prior `{state, sessionToken}` DTO required
+>   a `state` field the server never sends → `kotlinx.serialization.MissingFieldException` → a
+>   genuinely-successful login surfaced as "Connection test failed", no cookie stored. Verification:
+>   `ApiBackedTrackerClientLoginContractTest` (new real-stack, mutation → `MissingFieldException at
+>   ...kt:98`) + `ApiBackedTrackerClientTest` (corrected a bluff mock that used the fake `{state,…}`
+>   body — it passed green while the real login was broken). Contract note: the OpenAPI `/login`
+>   `AuthResponseDto {type,user}` schema is stale vs BOTH server and client — a tracked follow-up
+>   (reconcile openapi + server + client onto one shape).
+> - **Problem B (test-harness, not a product bug)** — `Challenge70` deselects the full provider list
+>   via `SelectAllProvidersTestTag` then re-selects requested providers via `performScrollTo`. Root
+>   cause: all 13 catalogue providers are selected by default; the prior exact/case-sensitive/no-scroll
+>   name-list deselect cleared only 5, stranding the wizard on a non-requested Configure page →
+>   "All set!" never rendered → SKIP.
+>
 > **Revision §11.4.44 (2026-06-24, updated again):** appended three Crashlytics-triage fixes from
 > 2026-06-24 session — ALL THREE FIXES LANDED in the working tree (the earlier "P1 OWED" note was a
 > stale-`git diff` race artifact, corrected here): P0 CredentialsKeyHolder locked FATAL

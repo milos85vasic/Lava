@@ -492,8 +492,8 @@ func TestProviderAdapter_Metadata(t *testing.T) {
 	if a.ID() != "rutracker" {
 		t.Errorf("ID = %q, want rutracker", a.ID())
 	}
-	if a.DisplayName() != "RuTracker" {
-		t.Errorf("DisplayName = %q, want RuTracker", a.DisplayName())
+	if a.DisplayName() != "RuTracker.org" {
+		t.Errorf("DisplayName = %q, want RuTracker.org", a.DisplayName())
 	}
 	if a.AuthType() != provider.AuthCaptchaLogin {
 		t.Errorf("AuthType = %q, want CAPTCHA_LOGIN", a.AuthType())
