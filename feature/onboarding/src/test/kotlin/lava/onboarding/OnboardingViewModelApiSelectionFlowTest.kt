@@ -28,6 +28,7 @@ import lava.tracker.api.TrackerDescriptor
 import lava.tracker.api.model.AuthState
 import lava.tracker.api.model.LoginResult
 import lava.tracker.client.LavaTrackerSdk
+import lava.tracker.client.ProviderSessionTokenHolder
 import lava.tracker.registry.DefaultTrackerRegistry
 import lava.tracker.testing.FakeTrackerClient
 import org.junit.Assert.assertEquals
@@ -102,6 +103,8 @@ class OnboardingViewModelApiSelectionFlowTest {
 
     @Before
     fun setup() {
+        // Global singleton holder — clear so a prior test's token cannot leak in.
+        ProviderSessionTokenHolder.reset()
         registry = DefaultTrackerRegistry()
         clonedProviderDao = FakeClonedProviderDao()
 
@@ -153,7 +156,7 @@ class OnboardingViewModelApiSelectionFlowTest {
      * credentialed-provider shape the onboarding TestAndContinue credential
      * branch exercises.
      */
-    private fun registerFormLoginTracker(loginState: AuthState) {
+    private fun registerFormLoginTracker(loginState: AuthState, sessionToken: String? = null) {
         val descriptor = object : TrackerDescriptor {
             override val trackerId: String = "form-login-tracker"
             override val displayName: String = "Form Login Tracker"
@@ -166,7 +169,7 @@ class OnboardingViewModelApiSelectionFlowTest {
             override val apiSupported = true
         }
         val client = FakeTrackerClient(descriptor).apply {
-            loginProvider = { LoginResult(loginState) }
+            loginProvider = { LoginResult(loginState, sessionToken = sessionToken) }
         }
         formLoginClient = client
         registry.register(
@@ -546,6 +549,66 @@ class OnboardingViewModelApiSelectionFlowTest {
             assertFalse(
                 "a credentialed (non-anonymous) login MUST persist useAnonymous=false; was ${persisted?.useAnonymous}",
                 persisted?.useAnonymous == true,
+            )
+        }
+
+    // ── G7b: TestAndContinue FORM_LOGIN persists the PROVIDER session token ──────
+    //
+    // Regression for the 2026-07-02 CASE-COOKIE goapi defect: onboarding logged in
+    // (produced a bb_session) but never wrote it to ProviderSessionTokenHolder, so
+    // the dynamic ApiBackedTrackerClient searched with sessionToken=null →
+    // withAuth() omitted `Auth-Token` → the Go API 401'd every
+    // /v1/{provider}/search ("problem reaching the trackers"). Physical device
+    // evidence (RED before the fix): the containerized-KVM Challenge70 keystone at
+    // .lava-ci-evidence/autonomous-qa/2026-07-02/goapi/rutracker-1080p/. That
+    // real-device run is the load-bearing §6.AK reproduce-first proof; this is the
+    // fast unit gate that keeps the regression from silently returning.
+    //
+    // FALSIFIABILITY: remove `ProviderSessionTokenHolder.set(currentId,
+    // loginResult.sessionToken)` from OnboardingViewModel's Authenticated
+    // else-branch. Observed: this test FAILS — "onboarding login MUST persist the
+    // provider session token ... expected:<bb_session=onboarding-session-xyz>
+    // but was:<null>". Reverted: yes.
+    @Test
+    fun `test and continue with valid credentials persists the provider session token`() =
+        runTest(dispatcherRule.testDispatcher) {
+            val expectedToken = "bb_session=onboarding-session-xyz"
+            registerFormLoginTracker(
+                loginState = AuthState.Authenticated,
+                sessionToken = expectedToken,
+            )
+            rebuildSdk()
+            val viewModel = createViewModel(reachable = true)
+            viewModel.test(this) {
+                runOnCreate()
+                expectInitialState()
+                awaitState()
+
+                viewModel.perform(OnboardingAction.NextStep) // → ApiSelection
+                awaitStateWhere { it.step == OnboardingStep.ApiSelection }
+                viewModel.perform(OnboardingAction.SelectApi(goApi()))
+                awaitStateWhere { it.step == OnboardingStep.Providers }
+                viewModel.perform(OnboardingAction.NextStep) // → Configure
+                awaitStateWhere { it.step == OnboardingStep.Configure }
+
+                viewModel.perform(OnboardingAction.UsernameChanged("alice"))
+                awaitStateWhere { it.configs["form-login-tracker"]?.username == "alice" }
+                viewModel.perform(OnboardingAction.PasswordChanged("s3cret"))
+                awaitStateWhere { it.configs["form-login-tracker"]?.password == "s3cret" }
+
+                viewModel.perform(OnboardingAction.TestAndContinue)
+                awaitStateWhere { it.step == OnboardingStep.Summary }
+                cancelAndIgnoreRemainingItems()
+            }
+
+            // PRIMARY anti-bluff assertion: the provider login-session token the
+            // onboarding login produced MUST be in the holder, so the dynamic
+            // ApiBackedTrackerClient threads it as `Auth-Token` on /v1 search.
+            assertEquals(
+                "onboarding login MUST persist the provider session token into " +
+                    "ProviderSessionTokenHolder (else goapi /v1/{provider}/search 401s — CASE-COOKIE)",
+                expectedToken,
+                ProviderSessionTokenHolder.tokenFor("form-login-tracker"),
             )
         }
 

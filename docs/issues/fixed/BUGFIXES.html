@@ -315,6 +315,79 @@ class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb1-1"><
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>**Forensic anchor:** (optional) what surfaced the bug</span></code></pre></div>
 <hr />
 <h2
+id="2026-07-02--goapi-case-cookie-provider-login-session-never-reached-the-apibackedtrackerclient-search-auth-token-dropped">2026-07-02
+— goapi CASE-COOKIE: provider login session never reached the
+ApiBackedTrackerClient search (Auth-Token dropped)</h2>
+<p><strong>Discovered by:</strong> the autonomous-QA rutracker/goapi
+keystone on a real containerized-KVM emulator — search failed with
+"problem reaching the trackers" even though onboarding + rutracker login
+succeeded (bb_session obtained).</p>
+<p><strong>Root cause (two additive gaps in the
+<code>ApiBackedTrackerClient</code> session-token path):</strong></p>
+<ul>
+<li><strong>A — onboarding never stored the session token.</strong>
+<code>ProviderSessionTokenHolder</code> was written ONLY by
+<code>ProviderLoginViewModel</code> (settings re-login); the ONBOARDING
+login path (<code>OnboardingViewModel</code>, the Authenticated branch)
+never called <code>ProviderSessionTokenHolder.set(...)</code>. So the
+per-provider <code>bb_session</code> captured during onboarding was
+dropped.</li>
+<li><strong>B — the token was read only at client BUILD time.</strong>
+<code>ApiBackedTrackerClient .withAuth()</code> attached
+<code>Auth-Token</code> from the constructor-captured
+<code>sessionToken</code>, which the factory reads when the dynamic
+client is BUILT. Onboarding builds that client at the ApiSelection step
+— BEFORE the provider login stores the token — so even after fix A the
+built client still had <code>sessionToken=null</code> and
+<code>withAuth()</code> omitted <code>Auth-Token</code> → the Go API
+401s <code>/v1/{provider}/search</code>.</li>
+</ul>
+<p><strong>Fix (additive, §6.J):</strong></p>
+<ul>
+<li>A: <code>feature/onboarding/.../OnboardingViewModel.kt</code>
+Authenticated branch now calls
+<code>ProviderSessionTokenHolder.set(currentId, loginResult.sessionToken)</code>
+(mirrors <code>ProviderLoginViewModel.kt:388</code>).</li>
+<li>B: <code>core/tracker/client/.../ApiBackedTrackerClient.kt</code>
+<code>withAuth()</code> now reads
+<code>ProviderSessionTokenHolder.tokenFor(descriptor.trackerId)</code>
+LIVE at request time (fallback to the constructor param) — so a token
+stored after build is threaded, AND the in-memory-holder cold-restart
+gap is closed.</li>
+</ul>
+<p><strong>Verification (reproduce-first, both Bluff-Audited
+RED→GREEN):</strong></p>
+<ul>
+<li>A:
+<code>OnboardingViewModelApiSelectionFlowTest.test and continue with valid credentials persists the provider session token</code>
+— asserts the holder gets the token; RED when the <code>.set(...)</code>
+line is removed.</li>
+<li>B:
+<code>ProviderSessionTokenEndToEndWiringTest .sessionStoredAfterClientBuild_isStillThreaded_liveAtRequestTime</code>
+— builds the client with the holder empty, stores the token AFTER,
+asserts the search request carries
+<code>Auth-Token: rutracker:cookie:…</code>; RED when
+<code>withAuth</code> reverts to build-time-only.</li>
+</ul>
+<p><strong>Fix commit:</strong> this commit.</p>
+<p><strong>HONEST SCOPE NOTE (§6.J / §6.AK — the keystone is NOT yet
+green):</strong> device re-runs proved A+B are necessary but NOT
+sufficient for the <code>--backend goapi</code> keystone, because in
+that harness the external Go API endpoint is added KEYLESS (no
+<code>Lava-Auth</code>), so <code>GET /v1/providers</code> 401s → the
+registry falls back to bundled providers → rutracker search resolves to
+the BUNDLED direct <code>RuTrackerClient</code>, which never routes
+through the Go API (so the A+B path is not exercised there) and itself
+fails. A+B are the correct, verified fix for the
+<code>ApiBackedTrackerClient</code> session-token propagation (exercised
+by the on-device api-app backend + a keyed goapi); the
+keyless-endpoint→bundled-fallback + bundled-search-failure layers are a
+SEPARATE open investigation (evidence:
+<code>.lava-ci-evidence/autonomous-qa/2026-07-02/goapi/</code> +
+<code>docs/autonomous-qa/GOAPI-KEYSTONE-DEEP-DIAGNOSIS-2026-07-02.md</code>).
+This is documented as open, NOT claimed as fixed.</p>
+<hr />
+<h2
 id="2026-07-02--rutracker-provider-totally-broken-client-requested-brotli-but-never-decoded-the-response-body">2026-07-02
 — rutracker provider totally broken: client requested brotli but never
 decoded the response body</h2>

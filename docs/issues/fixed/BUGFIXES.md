@@ -61,6 +61,62 @@ Format per entry:
 
 ---
 
+## 2026-07-02 — goapi CASE-COOKIE: provider login session never reached the ApiBackedTrackerClient search (Auth-Token dropped)
+
+**Discovered by:** the autonomous-QA rutracker/goapi keystone on a real
+containerized-KVM emulator — search failed with "problem reaching the trackers"
+even though onboarding + rutracker login succeeded (bb_session obtained).
+
+**Root cause (two additive gaps in the `ApiBackedTrackerClient` session-token path):**
+- **A — onboarding never stored the session token.** `ProviderSessionTokenHolder`
+  was written ONLY by `ProviderLoginViewModel` (settings re-login); the
+  ONBOARDING login path (`OnboardingViewModel`, the Authenticated branch) never
+  called `ProviderSessionTokenHolder.set(...)`. So the per-provider `bb_session`
+  captured during onboarding was dropped.
+- **B — the token was read only at client BUILD time.** `ApiBackedTrackerClient
+  .withAuth()` attached `Auth-Token` from the constructor-captured `sessionToken`,
+  which the factory reads when the dynamic client is BUILT. Onboarding builds that
+  client at the ApiSelection step — BEFORE the provider login stores the token — so
+  even after fix A the built client still had `sessionToken=null` and `withAuth()`
+  omitted `Auth-Token` → the Go API 401s `/v1/{provider}/search`.
+
+**Fix (additive, §6.J):**
+- A: `feature/onboarding/.../OnboardingViewModel.kt` Authenticated branch now calls
+  `ProviderSessionTokenHolder.set(currentId, loginResult.sessionToken)` (mirrors
+  `ProviderLoginViewModel.kt:388`).
+- B: `core/tracker/client/.../ApiBackedTrackerClient.kt` `withAuth()` now reads
+  `ProviderSessionTokenHolder.tokenFor(descriptor.trackerId)` LIVE at request time
+  (fallback to the constructor param) — so a token stored after build is threaded,
+  AND the in-memory-holder cold-restart gap is closed.
+
+**Verification (reproduce-first, both Bluff-Audited RED→GREEN):**
+- A: `OnboardingViewModelApiSelectionFlowTest.test and continue with valid
+  credentials persists the provider session token` — asserts the holder gets the
+  token; RED when the `.set(...)` line is removed.
+- B: `ProviderSessionTokenEndToEndWiringTest
+  .sessionStoredAfterClientBuild_isStillThreaded_liveAtRequestTime` — builds the
+  client with the holder empty, stores the token AFTER, asserts the search request
+  carries `Auth-Token: rutracker:cookie:…`; RED when `withAuth` reverts to
+  build-time-only.
+
+**Fix commit:** this commit.
+
+**HONEST SCOPE NOTE (§6.J / §6.AK — the keystone is NOT yet green):** device
+re-runs proved A+B are necessary but NOT sufficient for the `--backend goapi`
+keystone, because in that harness the external Go API endpoint is added KEYLESS
+(no `Lava-Auth`), so `GET /v1/providers` 401s → the registry falls back to bundled
+providers → rutracker search resolves to the BUNDLED direct `RuTrackerClient`,
+which never routes through the Go API (so the A+B path is not exercised there) and
+itself fails. A+B are the correct, verified fix for the `ApiBackedTrackerClient`
+session-token propagation (exercised by the on-device api-app backend + a keyed
+goapi); the keyless-endpoint→bundled-fallback + bundled-search-failure layers are a
+SEPARATE open investigation (evidence:
+`.lava-ci-evidence/autonomous-qa/2026-07-02/goapi/` +
+`docs/autonomous-qa/GOAPI-KEYSTONE-DEEP-DIAGNOSIS-2026-07-02.md`). This is
+documented as open, NOT claimed as fixed.
+
+---
+
 ## 2026-07-02 — rutracker provider totally broken: client requested brotli but never decoded the response body
 
 **Discovered by:** the autonomous-QA keystone (`run-matrix --backend goapi --subsets

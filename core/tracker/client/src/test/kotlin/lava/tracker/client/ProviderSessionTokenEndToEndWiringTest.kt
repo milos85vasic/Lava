@@ -182,6 +182,58 @@ class ProviderSessionTokenEndToEndWiringTest {
     }
 
     /**
+     * CASE-COOKIE regression (2026-07-02): a session token stored AFTER the client
+     * was already built MUST still reach the wire, because [withAuth] reads
+     * [ProviderSessionTokenHolder] LIVE at request time. This is the exact
+     * onboarding order the device keystone exposed: the ApiSelection step builds
+     * the dynamic ApiBackedTrackerClient FIRST (holder empty → sessionToken=null),
+     * then the Providers-step login stores the token. A build-time-only read left
+     * the search anonymous → the Go API 401'd → "problem reaching the trackers".
+     * Device evidence: .lava-ci-evidence/autonomous-qa/2026-07-02/goapi/.
+     *
+     * FALSIFIABILITY: revert [withAuth] to the build-time-only
+     * `sessionToken?.let { ... }` (drop the live `ProviderSessionTokenHolder
+     * .tokenFor(...)` read). Observed: this test FAILS — the built-before-login
+     * client sends NO Auth-Token, the dispatcher 401s, and search() throws instead
+     * of returning the row. Reverted: yes.
+     */
+    @Test
+    fun sessionStoredAfterClientBuild_isStillThreaded_liveAtRequestTime() = runTest {
+        val key = "endpoint-key-7"
+        val session = "bb_session=0-47500467-late"
+        server.dispatcher = sessionGatedDispatcher(expectedKey = key)
+
+        // 1. Endpoint key present, but NO session yet — the client is about to be
+        //    built anonymous (the onboarding ApiSelection-before-login order).
+        ApiBaseUrlHolder.set(server.url("/").toString().trimEnd('/'), key)
+
+        // 2. Build the dynamic client while the holder is EMPTY (sessionToken=null).
+        val registry = productionShapedRegistry(authFieldName)
+        registry.populateFrom(listOf(searchDescriptor("rutracker", AuthType.CAPTCHA_LOGIN)))
+        val searchable = registry.get("rutracker", lava.sdk.api.MapPluginConfig())
+            .getFeature(SearchableTracker::class)!!
+
+        // 3. LOGIN happens AFTER the client was built — token lands in the holder.
+        ProviderSessionTokenHolder.set("rutracker", session)
+
+        // 4. User taps search — withAuth() reads the holder LIVE, so the token IS
+        //    threaded even though the client was constructed before it existed.
+        val result = searchable.search(SearchRequest(query = "prince"), page = 0)
+        val recorded = server.takeRequest()
+
+        // PRIMARY 1 — the byte on the wire carries the late-stored session.
+        assertEquals(
+            "a session stored AFTER client build MUST be threaded onto Auth-Token " +
+                "(withAuth reads the holder LIVE at request time — CASE-COOKIE fix)",
+            "rutracker:cookie:$session",
+            recorded.getHeader(authTokenHeader),
+        )
+        // PRIMARY 2 — user-visible outcome: real rows, NOT the 401 error.
+        assertEquals(1, result.items.size)
+        assertEquals("Prince - Purple Rain", result.items.single().title)
+    }
+
+    /**
      * The permanent falsifiability discriminator AND the in-test reproduction of
      * the PRE-P0-1 PRODUCTION BUG: an auth-required provider with NO stored login
      * session produces an ANONYMOUS request (no `Auth-Token`), the upstream

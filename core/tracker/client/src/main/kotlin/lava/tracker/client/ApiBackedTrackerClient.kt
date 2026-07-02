@@ -125,13 +125,24 @@ class ApiBackedTrackerClient(
      */
     private fun Request.Builder.withAuth(): Request.Builder {
         if (authKey != null) header(authFieldName, authKey)
-        sessionToken?.let { token ->
+        // Read the provider login session LIVE from the holder at REQUEST time —
+        // NOT only the constructor-captured [sessionToken]. The dynamic client is
+        // frequently built BEFORE the user logs in: onboarding builds it at the
+        // ApiSelection step, then the provider login (Providers step) stores the
+        // token AFTER. A build-time-only read misses that token, `withAuth()`
+        // omits `Auth-Token`, and every /v1/{provider}/search 401s — CASE-COOKIE,
+        // device-proven 2026-07-02 (.lava-ci-evidence/autonomous-qa/2026-07-02/
+        // goapi/rutracker-1080p/). Live-reading also closes the cold-restart gap
+        // (the in-memory holder is repopulated by a fresh login, no client rebuild
+        // needed). Falls back to the constructor param for tests / no-holder use.
+        val token = ProviderSessionTokenHolder.tokenFor(descriptor.trackerId) ?: sessionToken
+        token?.let {
             // §6.R note: AUTH_TOKEN_HEADER + the `:cookie:` credential-type are
             // SERVER WIRE-PROTOCOL CONSTANTS (the `auth` package's fixed header
             // name + ParseAuthToken's fixed grammar), exempt exactly like the
             // `/v1/{id}/{op}` API CONTRACT ROUTE strings above — not connection
             // addresses/ports/credentials. The credential VALUE is config/runtime.
-            header(AUTH_TOKEN_HEADER, "${descriptor.trackerId}:cookie:$token")
+            header(AUTH_TOKEN_HEADER, "${descriptor.trackerId}:cookie:$it")
         }
         return this
     }

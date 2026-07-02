@@ -26,6 +26,7 @@ import lava.tracker.api.TrackerDescriptor
 import lava.tracker.api.model.AuthState
 import lava.tracker.api.model.LoginRequest
 import lava.tracker.client.LavaTrackerSdk
+import lava.tracker.client.ProviderSessionTokenHolder
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
@@ -690,6 +691,15 @@ class OnboardingViewModel @Inject constructor(
                         }
                         return@launch
                     } else {
+                        // CASE-COOKIE fix (2026-07-02): persist the PROVIDER login
+                        // session token from the onboarding login path — mirroring
+                        // ProviderLoginViewModel's post-login write. Without it the
+                        // dynamic ApiBackedTrackerClient is built with
+                        // sessionToken=null, withAuth() omits the `Auth-Token`
+                        // header, and the Go API 401s every /v1/{provider}/search
+                        // ("problem reaching the trackers"). Root cause + device
+                        // evidence: .lava-ci-evidence/autonomous-qa/2026-07-02/goapi/.
+                        ProviderSessionTokenHolder.set(currentId, loginResult.sessionToken)
                         credentialManager.setPassword(currentId, config.username, config.password)
                     }
                 }
