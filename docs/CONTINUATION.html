@@ -274,12 +274,22 @@ tests PASS</strong> (real capability gate via
 <code>Content-Disposition</code> filename + 501-discrimination guard) +
 full v1 suite green (no regressions); client contract test <strong>BUILD
 SUCCESSFUL</strong>. gutenberg.org reachable through the VPN (HTTP 200,
-24.8MB epub, 17.8s — NOT egress-blocked, unlike archiveorg). The
-device-green gutenberg keystone (§6.AK reproduce-first) is the
-load-bearing NEXT step. Unblocks BOTH gutenberg (reachable end-to-end)
-AND archiveorg (download PATH fixed; archiveorg SEARCH stays separately
-blocked by the per-destination VPN egress noted above). <strong>(C) 6
-public providers WIRED but not yet device-run</strong> (worktree
+24.8MB epub, 17.8s — NOT egress-blocked, unlike archiveorg).
+DEVICE-GREEN CONFIRMED 2026-07-02: keystone <code>verdict=PASS</code>
+(tests=1 fail=0 skip=0), <code>marker_download_ok=true</code>,
+<code>"Download completed" ×3</code> — the REAL 24.8MB gutenberg epub
+downloaded on the containerized emulator (API 34, x86_64) to terminal
+completion, video-recorded. §6.AK RED-then-GREEN SATISFIED (was
+device-FAIL <code>marker_download_ok:false</code> download-dead-end →
+now device-PASS). goapi <code>/http-download/1342</code> verified
+independently first: HTTP 200, 24,835,597 bytes,
+<code>Content-Disposition: attachment</code>. gutenberg now FULLY green
+(search→topic→download) alongside rutracker + kinozal. Because it
+reached TERMINAL "Download completed" (not the in-progress fallback),
+QA-harness fix #1 (require terminal completion) is confirmed SAFE to
+apply. Also unblocks archiveorg's download PATH (SEARCH stays separately
+per-destination-egress-blocked). <strong>(C) 6 public providers WIRED
+but not yet device-run</strong> (worktree
 <code>agent-ae03137803ae71457</code>):
 thepiratebay/torrentscsv/knaben/bitsearch/nyaa/tokyotosho added to
 Challenge70 <code>ProviderSpec.forId</code> (authNone) +

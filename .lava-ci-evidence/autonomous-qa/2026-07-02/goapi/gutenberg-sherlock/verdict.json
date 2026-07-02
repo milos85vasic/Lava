@@ -1,0 +1,15 @@
+{
+  "backend": "goapi",
+  "providers": "gutenberg",
+  "query": "sherlock",
+  "serial": "127.0.0.1:45779",
+  "gradle_rc": 0,
+  "tests": 1, "failures": 0, "errors": 0, "skipped": 0,
+  "marker_download_ok": true,
+  "teardown_known_lva008": false,
+  "other_failure_signal": false,
+  "verdict": "PASS",
+  "note": "clean",
+  "junit_xml": "/run/media/milosvasic/DATA4TB/Projects/lava/app/build/outputs/androidTest-results/connected/debug/TEST-sdk_gphone64_x86_64 - 14-_app-.xml",
+  "raw_dir": "/run/media/milosvasic/DATA4TB/Projects/lava/.lava-ci-evidence/autonomous-qa/2026-07-02/goapi/gutenberg-sherlock/raw"
+}
