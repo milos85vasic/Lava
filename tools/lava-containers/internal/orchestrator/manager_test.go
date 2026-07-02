@@ -55,6 +55,41 @@ func TestManagerConstantsAreNonLegacy(t *testing.T) {
 	}
 }
 
+// TestBuildImageArgsHaveNoProxyStep is the regression guard for the
+// `-cmd=build` bluff: post-Ktor-:proxy-removal (2026-05-06, api-go-2.0.16)
+// the build path MUST be `compose --profile api-go build` and MUST NOT
+// invoke the deleted `:proxy:buildFatJar` / fat-JAR step. The stale-binary
+// trap in start.sh let a pre-removal CLI binary keep running that dead step;
+// this test fails loudly if the compose args ever regress.
+//
+// Falsifiability rehearsal (Bluff-Audit):
+//
+//	Mutation: return {"-f", composeFile, "--profile", "api-go", "build",
+//	          ":proxy:buildFatJar"} from buildImageArgs.
+//	Observed: this test fails with
+//	          "BuildImage args ... still reference the removed Ktor :proxy build step ("proxy")".
+//	Reverted: yes.
+func TestBuildImageArgsHaveNoProxyStep(t *testing.T) {
+	m := &Manager{ProjectDir: "/lava"}
+	args := m.buildImageArgs("/lava/docker-compose.yml")
+	joined := strings.ToLower(strings.Join(args, " "))
+
+	for _, forbidden := range []string{"proxy", "buildfatjar", "fatjar", "fat jar", ".jar"} {
+		if strings.Contains(joined, forbidden) {
+			t.Fatalf("BuildImage args %q still reference the removed Ktor :proxy build step (%q); post-2026-05-06 the build is `compose --profile api-go build`. See api-go-2.0.16 changelog.", strings.Join(args, " "), forbidden)
+		}
+	}
+
+	// Positive assertions on the surviving surface: the api-go profile and
+	// the compose `build` subcommand.
+	if !strings.Contains(joined, "--profile api-go") {
+		t.Fatalf("BuildImage args %q must target the api-go compose profile", strings.Join(args, " "))
+	}
+	if len(args) == 0 || args[len(args)-1] != "build" {
+		t.Fatalf("BuildImage args %q must end in the compose `build` subcommand", strings.Join(args, " "))
+	}
+}
+
 func findComposeFile(t *testing.T) string {
 	t.Helper()
 	dir, err := os.Getwd()

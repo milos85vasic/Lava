@@ -67,12 +67,26 @@ EOF
     esac
 done
 
+# Rebuild the CLI when the compiled binary is MISSING or STALE (any Go
+# source newer than the binary). The previous `[ ! -f ]`-only guard was a
+# build-once-never-refresh trap: once a binary existed it was NEVER rebuilt,
+# so source fixes never reached the deployed CLI. Forensic anchor: the
+# 2026-05-06 removal of the `:proxy:buildFatJar` step from `-cmd=build`
+# (release api-go-2.0.16) shipped in source, but a pre-removal binary left on
+# disk kept running the deleted proxy step — `-cmd=build` failed with
+# "project 'proxy' not found in root project 'Lava'". Staleness detection
+# closes that trap while preserving the "no Go toolchain needed once built
+# and unchanged" property (go build runs only when a .go file is newer).
+NEEDS_BUILD=false
 if [ ! -f "$CONTAINERS_BIN" ]; then
-    echo "[lava-containers] Building Lava containers CLI..."
+    NEEDS_BUILD=true
+elif [ -n "$(find "$SCRIPT_DIR/tools/lava-containers" -name '*.go' -newer "$CONTAINERS_BIN" -print -quit)" ]; then
+    NEEDS_BUILD=true
+fi
+if $NEEDS_BUILD; then
+    echo "[lava-containers] Building Lava containers CLI (missing or stale)..."
     mkdir -p "$SCRIPT_DIR/tools/lava-containers/bin"
-    cd "$SCRIPT_DIR/tools/lava-containers"
-    go build -o "$CONTAINERS_BIN" ./cmd/lava-containers
-    cd "$SCRIPT_DIR"
+    (cd "$SCRIPT_DIR/tools/lava-containers" && go build -o "$CONTAINERS_BIN" ./cmd/lava-containers)
 fi
 
 # Provision TLS material for lava-api-go's HTTPS/HTTP3 listener if absent.

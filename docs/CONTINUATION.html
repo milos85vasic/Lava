@@ -189,6 +189,70 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🟢🔧🔬 2026-07-02 (parallel-subagent round — kinozal SEARCH
+bluff FIXED + device-proven; 6 workable items driven to evidence-backed
+resolution).</strong> Up to 5 parallel subagents on all workable items
+(operator "more agents, increase efficiency"). All results
+real-evidence-backed, no bluff:</p>
+<ul>
+<li><strong>kinozal SEARCH — FIXED (device-proven).</strong> Root cause
+= a §6.D/§6.J BLUFF: <code>lava-api-go/internal/kinozal/search.go</code>
+used FICTIONAL selectors
+(<code>table.tumblers</code>/<code>a.namer</code>/Latin <code>GB</code>)
+that never match real kinozal.tv
+(<code>table.t_peer</code>/<code>td.nam a</code>/Cyrillic
+<code>ГБ</code>), and the test fixture was SYNTHETIC (reverse-engineered
+from the broken parser) → green while every user got 0 rows. Fixed: real
+selectors + a REAL anonymously-captured win-1251 fixture +
+reproduce-first tests (RED <code>Results len=0</code> → GREEN
+<code>50 rows</code>). goapi rebuilt:
+<code>curl /v1/kinozal/search?q=1080p</code> → 50 REAL rows (was 0);
+device: real result <code>id=2145735 "Аферисты / 2007 … (1080p)"</code>
+RENDERED + CLICKED. <strong>NEXT LAYER (in flight):</strong> the kinozal
+TOPIC parser is ALSO stale — clicking a result →
+<code>TopicPageDto MissingFieldException: [id,title,author,category,torrentData] missing</code>
+(rutracker topic works → it's the goapi kinozal topic parser, same bluff
+class). Subagent fixing reproduce-first → re-run to full green.</li>
+<li><strong>rutor — CLOSED (false alarm).</strong> Bundled-client-only
+(no <code>lava-api-go/internal/rutor/</code>); correctly excluded from
+<code>--subsets all</code>; the SKIP came from a MANUAL
+<code>rutor;…</code> invocation on the unvalidated CSV branch.
+<code>run-matrix.sh</code> hardened to filter manual subsets against
+<code>QA_PROVIDERS</code> (unit-verified: rutor/iptorrents dropped,
+kinozal,nnmclub kept). Porting rutor to Go is separate multi-day
+work.</li>
+<li><strong><code>-cmd=build</code> — CLOSED (real cause
+found).</strong> Go source was already clean (<code>170045a0</code>,
+2026-05-06); the REAL bug is <code>start.sh:70</code>'s stale-binary
+guard (rebuilt only when ABSENT → a pre-fix stale
+<code>bin/lava-containers</code> kept running the deleted
+<code>:proxy:buildFatJar</code>). Fixed: rebuild on any newer
+<code>.go</code>; testable <code>buildImageArgs</code> +
+<code>TestBuildImageArgsHaveNoProxyStep</code>; go build/vet/test PASS +
+falsifiability proven.</li>
+<li><strong>nnmclub — root-caused HONEST (external block, NOT a code
+bug).</strong> <code>/v1/nnmclub/login</code>→HTTP 401 <code>{}</code>
+because nnmclub.com gates login with Cloudflare
+<strong>Turnstile</strong> (captured <code>cf-turnstile</code> +
+"неверный код подтверждения"). Plain-HTTP login cannot pass it.
+FlareSolverr wiring (sidecar + route login + §6.E gating) IN FLIGHT.
+nnmclub NOT claimed working.</li>
+<li><strong>goapi parser bluff-audit — kinozal was the ONLY parser
+bluff.</strong> All 11 others' selectors match live upstream. Secondary:
+<strong>torrentdownloads BLOCKED</strong> (dead upstream
+<code>rss.xml</code>→522; drop/mirror); yts+archiveorg
+synthetic-but-structurally-correct (optional §6.D recapture, not
+bluffs).</li>
+<li><strong>api-app (Phase 3) readiness mapped.</strong> Embed registers
+the identical set (<code>mobile.go</code> parity), so kinozal+rutracker
+fixes flow in on next <code>:api-app:assembleDebug</code>. #1 apiapp
+blocker = guest-WAN egress (embed inside emulator QEMU slirp — probe
+guest→tracker before a Phase-3 run). APK source-stale (rebuild after
+landing fixes). Kinozal search fix + rutor + <code>-cmd=build</code>
+committed here (embed <code>.so</code> rebuilt +
+<code>api-source.hash</code> refreshed); kinozal-topic + FlareSolverr
+land next. rutracker keystone stays GREEN + pushed. ───── (current)</li>
+</ul>
 <p><strong>🟢🔬 2026-07-02 (generalization batch, pushed
 <code>687232fc</code>) — fixes C2/D/E PROVEN to generalize beyond
 rutracker; remaining failures are now PROVIDER-SPECIFIC, not

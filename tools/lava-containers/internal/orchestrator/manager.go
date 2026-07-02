@@ -69,6 +69,17 @@ func DetectLANIP() string {
 	return "127.0.0.1"
 }
 
+// buildImageArgs returns the `compose` arguments for rebuilding the
+// lava-api-go image. Extracted from BuildImage so the regression test in
+// manager_test.go can assert the command targets the api-go profile and
+// carries NO legacy `:proxy:buildFatJar` / fat-JAR build step. That step was
+// removed 2026-05-06 with the Ktor `:proxy` module (release api-go-2.0.16);
+// the stale-binary trap in start.sh (a build-if-missing-only guard) let the
+// removed step resurface whenever an old CLI binary survived on disk.
+func (m *Manager) buildImageArgs(composeFile string) []string {
+	return []string{"-f", composeFile, "--profile", "api-go", "build"}
+}
+
 // BuildImage rebuilds the lava-api-go image via `compose --profile api-go
 // build`. The image is defined by docker-compose.yml's lava-api-go service
 // (build context: ., dockerfile: lava-api-go/docker/Dockerfile, target:
@@ -76,7 +87,7 @@ func DetectLANIP() string {
 func (m *Manager) BuildImage() error {
 	fmt.Println("[lava-containers] Building lava-api-go image via compose...")
 	composeFile := filepath.Join(m.ProjectDir, m.Runtime.ComposeFile())
-	cmd := m.Runtime.ComposeRun("-f", composeFile, "--profile", "api-go", "build")
+	cmd := m.Runtime.ComposeRun(m.buildImageArgs(composeFile)...)
 	cmd.Dir = m.ProjectDir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

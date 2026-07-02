@@ -9,7 +9,10 @@
 # Usage:
 #   run-matrix.sh --backend goapi|apiapp [--queries 1080p,mp3] [--subsets all]
 #   # Keystone (Phase 0): --backend goapi --subsets rutracker --queries 1080p
-#   # --subsets accepts "all" OR ';'-separated csv groups, e.g. "rutracker;rutor,kinozal"
+#   # --subsets accepts "all" OR ';'-separated csv groups, e.g. "rutracker;kinozal,nnmclub"
+#   # Only API-backed ids (QA_PROVIDERS in lib-subsets.sh) are honored; rutor
+#   # (bundled-only) + iptorrents (Jackett-only) are dropped with a warning —
+#   # neither API backend vends them via GET /v1/providers.
 #
 # Plan: docs/superpowers/plans/2026-06-29-autonomous-qa-backend-provider-matrix.md
 # ---------------------------------------------------------------------------
@@ -43,12 +46,37 @@ declare -a SUBSET_LINES
 if [[ "$SUBSETS" == "all" ]]; then
   mapfile -t SUBSET_LINES < <(qa_emit_subsets)
 else
+  # Validate manual subsets against the API-backed set (QA_PROVIDERS, sourced from
+  # lib-subsets.sh). Ids not vended by GET /v1/providers — rutor (native bundled-
+  # only) and iptorrents (Jackett-only) — are unreachable via either API backend,
+  # so drop them here with a clear message instead of letting Challenge70
+  # AssumptionViolatedException-SKIP opaquely inside the emulator.
   IFS=';' read -ra groups <<< "$SUBSETS"
   for g in "${groups[@]}"; do
-    slug="$(printf '%s' "$g" | tr ',' '-')"
-    hash="$(printf '%s' "$g" | sha1sum | cut -c1-8)"
-    SUBSET_LINES+=("$g|$slug|$hash")
+    IFS=',' read -ra ids <<< "$g"
+    keep=()
+    for id in "${ids[@]}"; do
+      id="$(printf '%s' "$id" | tr -d '[:space:]')"
+      [[ -z "$id" ]] && continue
+      if printf '%s\n' "${QA_PROVIDERS[@]}" | grep -qx "$id"; then
+        keep+=("$id")
+      else
+        echo "[matrix] WARN dropping '$id' from subset '$g' — not API-backed (absent from GET /v1/providers); test it via the bundled/direct backend, not $BACKEND." >&2
+      fi
+    done
+    if [[ ${#keep[@]} -eq 0 ]]; then
+      echo "[matrix] SKIP subset '$g' — no API-backed providers remain after filtering." >&2
+      continue
+    fi
+    csv="$(IFS=,; printf '%s' "${keep[*]}")"
+    slug="$(printf '%s' "$csv" | tr ',' '-')"
+    hash="$(printf '%s' "$csv" | sha1sum | cut -c1-8)"
+    SUBSET_LINES+=("$csv|$slug|$hash")
   done
+  if [[ ${#SUBSET_LINES[@]} -eq 0 ]]; then
+    echo "[matrix] ERROR no API-backed subsets to run after filtering '$SUBSETS'." >&2
+    exit 2
+  fi
 fi
 IFS=',' read -ra QUERY_LIST <<< "$QUERIES"
 

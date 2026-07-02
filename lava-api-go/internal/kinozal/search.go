@@ -22,12 +22,10 @@ func ParseSearchPage(html []byte) (*provider.SearchResult, error) {
 	}
 
 	items := make([]provider.SearchItem, 0)
-	doc.Find("table.tumblers tr").Each(func(_ int, row *goquery.Selection) {
-		// Skip header rows.
-		if row.Find("th").Length() > 0 {
-			return
-		}
-		titleAnchor := row.Find("a.namer").First()
+	doc.Find("table.t_peer tr").Each(func(_ int, row *goquery.Selection) {
+		// Title cell is td.nam > a. The header row (tr.mn) carries td.z / td.zl
+		// cells but NO td.nam anchor, so title=="" there and the row is skipped.
+		titleAnchor := row.Find("td.nam a").First()
 		title := strings.TrimSpace(titleAnchor.Text())
 		if title == "" {
 			return
@@ -38,20 +36,25 @@ func ParseSearchPage(html []byte) (*provider.SearchResult, error) {
 			return
 		}
 
-		var size string
-		var seeders, leechers int
-		row.Find("span.sider").Each(func(_ int, s *goquery.Selection) {
-			text := strings.TrimSpace(s.Text())
-			switch {
-			case strings.Contains(text, "GB") || strings.Contains(text, "MB") || strings.Contains(text, "KB") || text == "B":
-				size = text
-			case strings.HasPrefix(text, "S:"):
-				seeders = parseIntAfterColon(text)
-			case strings.HasPrefix(text, "L:"):
-				leechers = parseIntAfterColon(text)
+		// Size lives in a td.s cell whose text carries a Cyrillic unit
+		// (ГБ/МБ/КБ/ТБ). Other td.s cells in the same row hold the comment
+		// count and the upload date, so pick the first one that is a size.
+		size := ""
+		row.Find("td.s").EachWithBreak(func(_ int, s *goquery.Selection) bool {
+			if t := strings.TrimSpace(s.Text()); isSizeText(t) {
+				size = t
+				return false
 			}
+			return true
 		})
 
+		// Seeders (Сидов) and leechers (Пиров) are bare integers in dedicated
+		// cells.
+		seeders := atoiTrim(row.Find("td.sl_s").First().Text())
+		leechers := atoiTrim(row.Find("td.sl_p").First().Text())
+
+		// The search/browse listing carries no magnet link (the magnet lives on
+		// the topic detail page); leave it empty when absent.
 		magnetLink, _ := row.Find("a[href^=magnet:]").Attr("href")
 
 		items = append(items, provider.SearchItem{
@@ -106,18 +109,34 @@ func extractIDFromHref(href string) string {
 	return u.Query().Get("id")
 }
 
-func parseIntAfterColon(s string) int {
-	parts := strings.SplitN(s, ":", 2)
-	if len(parts) != 2 {
-		return 0
+// isSizeText reports whether t is a kinozal size cell, e.g. "1.71 ГБ".
+// kinozal serves Cyrillic size units (ГБ/МБ/КБ/ТБ), not the Latin GB/MB/KB the
+// original parser matched — that Latin-unit mismatch was why every real search
+// parsed zero size and (via the same synthetic-fixture drift) zero rows.
+func isSizeText(t string) bool {
+	for _, u := range []string{"ГБ", "МБ", "КБ", "ТБ"} {
+		if strings.Contains(t, u) {
+			return true
+		}
 	}
-	v, _ := strconv.Atoi(strings.TrimSpace(parts[1]))
-	return v
+	return false
+}
+
+// atoiTrim parses the leading integer of a trimmed cell, returning 0 on any
+// non-numeric content (a malformed seeders/leechers cell degrades to 0 rather
+// than corrupting the whole page parse).
+func atoiTrim(s string) int {
+	n, _ := strconv.Atoi(strings.TrimSpace(s))
+	return n
 }
 
 func parsePagination(doc *goquery.Document) int {
 	maxPage := 0
-	doc.Find("a[href]").Each(func(_ int, s *goquery.Selection) {
+	// Real kinozal pagination links live inside div.paginator and are RELATIVE,
+	// e.g. href="?s=1080p&g=0&page=99" — url.Parse gives an empty Path for those,
+	// so the old u.Path=="/browse.php" absolute-path guard never matched and
+	// TotalPages was stuck at 1 even across 100-page result sets.
+	doc.Find("div.paginator a[href]").Each(func(_ int, s *goquery.Selection) {
 		href, _ := s.Attr("href")
 		u, err := url.Parse(href)
 		if err != nil {
@@ -126,11 +145,9 @@ func parsePagination(doc *goquery.Document) int {
 			// scanning. The maxPage value reflects whatever links DID parse.
 			return
 		}
-		if u.Path == "/browse.php" {
-			if p := u.Query().Get("page"); p != "" {
-				if n, err := strconv.Atoi(p); err == nil && n > maxPage {
-					maxPage = n
-				}
+		if p := u.Query().Get("page"); p != "" {
+			if n, err := strconv.Atoi(p); err == nil && n > maxPage {
+				maxPage = n
 			}
 		}
 	})

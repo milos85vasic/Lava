@@ -32,6 +32,10 @@ func TestAdapter_Search_EndToEnd(t *testing.T) {
 		if r.URL.Query().Get("s") != "matrix" {
 			t.Errorf("query s = %q, want matrix", r.URL.Query().Get("s"))
 		}
+		// Serve the REAL captured kinozal page with its real charset header so
+		// the client's readBodyDecoded transcodes windows-1251 exactly as it
+		// does against the live site.
+		w.Header().Set("Content-Type", "text/html; charset=windows-1251")
 		w.Write(loadTestData("search/search_results.html"))
 	})
 
@@ -42,11 +46,21 @@ func TestAdapter_Search_EndToEnd(t *testing.T) {
 	if res.Provider != "kinozal" {
 		t.Errorf("Provider = %q, want kinozal", res.Provider)
 	}
-	if len(res.Results) != 1 {
-		t.Fatalf("Results len = %d, want 1", len(res.Results))
+	// A real kinozal results page returns a full page of rows (~50); the prior
+	// synthetic fixture had exactly 1, which hid the parser-selector drift.
+	if len(res.Results) < 20 {
+		t.Fatalf("Results len = %d, want >= 20 (real kinozal page)", len(res.Results))
 	}
-	if res.Results[0].Title != "Test Movie 2024" || res.Results[0].Seeders != 12 {
-		t.Errorf("Results[0] = %+v, want title='Test Movie 2024' seeders=12", res.Results[0])
+	first := res.Results[0]
+	if first.Title == "" || first.ID == "" {
+		t.Errorf("Results[0] = %+v, want a non-empty title + id", first)
+	}
+	totalSeeders := 0
+	for _, item := range res.Results {
+		totalSeeders += item.Seeders
+	}
+	if totalSeeders == 0 {
+		t.Errorf("no row parsed Seeders > 0 — td.sl_s selector broke on the real page")
 	}
 }
 
@@ -57,6 +71,7 @@ func TestAdapter_Browse_EndToEnd(t *testing.T) {
 		if r.URL.Query().Get("c") != "1002" {
 			t.Errorf("category c = %q, want 1002", r.URL.Query().Get("c"))
 		}
+		w.Header().Set("Content-Type", "text/html; charset=windows-1251")
 		w.Write(loadTestData("search/search_results.html"))
 	})
 
@@ -64,8 +79,13 @@ func TestAdapter_Browse_EndToEnd(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Browse: %v", err)
 	}
-	if len(res.Items) != 1 || res.Items[0].ID != "12345" {
-		t.Errorf("Items = %+v, want one item id=12345", res.Items)
+	// Browse reuses ParseSearchPage, so the real page yields a full page of
+	// items; the first carries a real details.php?id= torrent id.
+	if len(res.Items) < 20 {
+		t.Fatalf("Items len = %d, want >= 20 (real kinozal browse page)", len(res.Items))
+	}
+	if res.Items[0].ID == "" || res.Items[0].Title == "" {
+		t.Errorf("Items[0] = %+v, want a non-empty id + title", res.Items[0])
 	}
 }
 
@@ -287,7 +307,12 @@ func TestCredToCookie(t *testing.T) {
 // empty result set with TotalPages defaulting to 1 (the user sees "no
 // results", and paging does not break).
 func TestParseSearchPage_NoResults(t *testing.T) {
-	res, err := ParseSearchPage([]byte(`<html><body><table class="tumblers"><tr><th>Header</th></tr></table></body></html>`))
+	// A real kinozal results table whose only row is the header row (tr.mn with
+	// td.z / td.zl cells and NO td.nam anchor) must yield zero result rows.
+	res, err := ParseSearchPage([]byte(`<html><body><table class="t_peer w100p">` +
+		`<tr class="mn"><td class="z">Комм.</td><td class="z">Размер</td>` +
+		`<td class="z">Сидов</td><td class="z">Пиров</td><td class="zl">Раздает</td></tr>` +
+		`</table></body></html>`))
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -302,9 +327,12 @@ func TestParseSearchPage_NoResults(t *testing.T) {
 // TestParseSearchPage_RowMissingIDSkipped verifies a result row whose anchor
 // has no id query param is skipped (not rendered as a broken row).
 func TestParseSearchPage_RowMissingIDSkipped(t *testing.T) {
-	html := `<html><body><table class="tumblers">
-	  <tr><td><a class="namer" href="/details.php">No ID Here</a></td></tr>
-	  <tr><td><a class="namer" href="/details.php?id=42">Valid</a></td></tr>
+	// Real kinozal row shape: table.t_peer > tr > td.nam > a[href=/details.php?id=N].
+	// A row whose anchor carries no id query param must be skipped, not rendered
+	// as a broken row that would open the wrong topic on tap.
+	html := `<html><body><table class="t_peer w100p">
+	  <tr class="bg"><td class="nam"><a href="/details.php" class="r0">No ID Here</a></td><td class="sl_s">3</td></tr>
+	  <tr class="bg"><td class="nam"><a href="/details.php?id=42" class="r0">Valid</a></td><td class="sl_s">7</td></tr>
 	</table></body></html>`
 	res, err := ParseSearchPage([]byte(html))
 	if err != nil {

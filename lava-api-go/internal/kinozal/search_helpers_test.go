@@ -2,18 +2,18 @@ package kinozal
 
 import "testing"
 
-// extractIDFromHref and parseIntAfterColon are the two pure parsing
-// helpers that turn raw scraped HTML fragments into user-visible search
-// data: extractIDFromHref produces the torrent ID a user taps to open a
-// topic (search.go:36), and parseIntAfterColon produces the seeders /
-// leechers counts shown on every result row (search.go:49,51).
+// extractIDFromHref is the pure parsing helper that turns a raw scraped
+// result-row anchor href into the torrent ID a user taps to open a topic
+// (search.go). A silent bug in it is invisible to the happy-path fixture test
+// because the fixture only feeds well-formed hrefs; this test drives the real
+// production helper with the edge inputs the fixture never exercises and
+// asserts on the exact returned ID string — no fakes, no "didn't panic".
 //
-// A silent bug in either is invisible to the happy-path fixture test
-// (ParseSearchPage @ 96%) because the fixture only feeds well-formed
-// hrefs and well-formed "Сидов: N" strings. These tests drive the real
-// production helpers with the edge inputs the fixtures never exercise and
-// assert on the exact returned value (the ID string / the int count) —
-// no fakes, no "didn't panic".
+// (The former parseIntAfterColon helper + its test were removed when the parser
+// was corrected to the real kinozal structure: seeders/leechers now come from
+// bare-integer td.sl_s / td.sl_p cells via atoiTrim, not from "S:/L:" prefixed
+// span text, so the colon-splitting helper is no longer part of any real code
+// path.)
 
 func TestExtractIDFromHref(t *testing.T) {
 	cases := []struct {
@@ -42,30 +42,57 @@ func TestExtractIDFromHref(t *testing.T) {
 	}
 }
 
-func TestParseIntAfterColon(t *testing.T) {
+// TestIsSizeText / TestAtoiTrim cover the two helpers that replaced
+// parseIntAfterColon when the parser was corrected to the real kinozal
+// structure. isSizeText decides which td.s cell in a row is the size (the one
+// carrying a Cyrillic unit); atoiTrim turns a bare seeders/leechers cell into
+// an int. Both are on the real user-visible parse path (search.go).
+func TestIsSizeText(t *testing.T) {
+	cases := []struct {
+		name string
+		in   string
+		want bool
+	}{
+		{"gigabytes cyrillic", "1.71 ГБ", true},
+		{"megabytes cyrillic", "700 МБ", true},
+		{"kilobytes cyrillic", "512 КБ", true},
+		{"terabytes cyrillic", "1.2 ТБ", true},
+		// FALSIFIABILITY: the comment-count cell "0" and the date cell must NOT
+		// be mistaken for a size. If isSizeText matched them, the row's Size
+		// would render as "0" or a date string to the user.
+		{"comment count is not a size", "0", false},
+		{"upload date is not a size", "сегодня в 18:20", false},
+		// FALSIFIABILITY: the OLD parser matched Latin units. A real kinozal
+		// size never carries them, so matching "GB" would be the exact bug that
+		// made every real search parse an empty size.
+		{"latin GB is not a kinozal size", "1.71 GB", false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := isSizeText(tc.in); got != tc.want {
+				t.Fatalf("isSizeText(%q) = %v, want %v", tc.in, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestAtoiTrim(t *testing.T) {
 	cases := []struct {
 		name string
 		in   string
 		want int
 	}{
-		{"russian seeders label", "Сидов: 42", 42},
-		{"leading/trailing space around number", "Личеров:   7  ", 7},
-		// FALSIFIABILITY: no colon -> 0 (the len(parts)!=2 guard, the
-		// uncovered branch). If the guard were dropped, SplitN returns a
-		// 1-element slice and parts[1] would panic with index-out-of-range,
-		// crashing the whole search-result parse for a malformed row.
-		{"no colon yields zero", "Сидов 42", 0},
-		{"empty string yields zero", "", 0},
-		// FALSIFIABILITY: non-numeric after the colon -> Atoi error is
-		// swallowed -> 0, so one bad row degrades to zero seeders rather
-		// than corrupting the whole page.
-		{"non-numeric after colon yields zero", "Сидов: many", 0},
-		{"colon but empty value yields zero", "Сидов:", 0},
+		{"bare seeders cell", "42", 42},
+		{"padded cell", "  7  ", 7},
+		// FALSIFIABILITY: a malformed cell degrades to 0 rather than panicking
+		// and killing the whole page parse.
+		{"non-numeric yields zero", "many", 0},
+		{"empty yields zero", "", 0},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			if got := parseIntAfterColon(tc.in); got != tc.want {
-				t.Fatalf("parseIntAfterColon(%q) = %d, want %d", tc.in, got, tc.want)
+			if got := atoiTrim(tc.in); got != tc.want {
+				t.Fatalf("atoiTrim(%q) = %d, want %d", tc.in, got, tc.want)
 			}
 		})
 	}
