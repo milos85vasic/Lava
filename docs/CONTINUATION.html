@@ -189,6 +189,78 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🔧🌐 2026-07-02 (public-provider phase — archiveorg 0-rows
+ROOT-CAUSED to VPN egress (NOT code); gutenberg SEARCH green + TOPIC
+layer open; 6 providers wired).</strong> After kinozal went fully green
+(banner below, pushed <code>99baa334</code>), the public-provider
+keystones surfaced two DISTINCT issues, both diagnosed with captured
+evidence (no bluff): <strong>(A) archiveorg/nyaa/torrentscsv return 0
+rows = ENVIRONMENT/EGRESS, NOT a parser bug — OPERATOR ACTION
+NEEDED.</strong> PROVEN: the EXACT goapi archiveorg request replicated
+from the host returns HTTP 200 numFound=15582 (parser/query/URL correct;
+the recaptured fixture is real). The containerized goapi's outbound TCP
+to IPv4-only upstreams STALLS over a Mullvad WireGuard VPN that
+force-routes its egress (<code>ss</code>: ESTAB with Send-Q backed up,
+ClientHello never ACKed → TLS never completes → HTTP 502 → rendered "0
+rows"). Per-host: goapi OK for gutenberg (gutendex dual-stack → Go uses
+IPv6) but 0 for archiveorg/nyaa/torrentscsv (IPv4-only).
+rutracker+kinozal happened to be reachable → their keystones passed. FIX
+(REFINED 2026-07-02 — a GLOBAL bypass is UNSAFE): a host process reaches
+archive.org BOTH direct AND through the VPN (<code>curl</code> → HTTP
+200); only the CONTAINERIZED goapi stalls on IPv4-only hosts
+(rootless-podman fwmark/cgroup differs from the host's VPN
+include-rule). <code>mullvad split-tunnel add &lt;goapi-pid&gt;</code>
+did NOT take effect (a podman-managed cgroup can't be reclassified after
+launch). <code>mullvad-exclude curl archive.org</code> → HTTP 200
+numFound=15599 (premise confirmed). BUT a GLOBAL egress bypass
+(mullvad-exclude the whole goapi, or a global
+<code>LAVA_API_UPSTREAM_PROXY</code>) would route the Russian trackers
+DIRECT too — and rutracker/kinozal work ONLY through the VPN exit-IP, so
+a global bypass would BREAK the banked-green providers. The CORRECT fix
+is PER-DESTINATION: the goapi already has provider-aware routing
+(<code>internal/httpx/provider_routing_integration_test.go</code> —
+Russian trackers traverse the proxy, others direct); wire the public
+IPv4-only providers (archiveorg/nyaa/torrentscsv) to an EXCLUDED egress
+(a small <code>mullvad-exclude</code>d local proxy pointed at ONLY those
+hosts) while the Russian trackers keep the VPN path. NOT a parser patch,
+NOT a global bypass — a per-destination routing/infra change (operator
+decision; <code>socat</code> is available, no HTTP-proxy binary is).
+Secondary §6.AC gap: <code>archiveorg/provider.go mapError()</code>
+(also nnmclub/kinozal/rutracker adapters) DISCARDS the real dial/TLS
+error → always <code>ErrUnknown</code> → the egress stall MASQUERADED as
+a parser bug; harden with
+<code>fmt.Errorf("%w: %v", ErrUnknown, err)</code> +
+<code>RecordNonFatal</code>. Full evidence:
+<code>.build-tmp/archiveorg-search-0rows-2026-07-02.md</code>.
+<strong>(B) gutenberg SEARCH + TOPIC + download-URL are ALL correct
+server-side</strong> (REFINED 2026-07-02) — the goapi returns a real
+direct ebook URL (<code>GET /v1/gutenberg/topic/1342</code> →
+<code>downloadUrl: https://www.gutenberg.org/ebooks/1342.epub3.images</code>).
+The keystone <code>marker_download_ok:false</code> is an ON-DEVICE
+affordance-not-reached, NOT a goapi parser bug: Challenge70 DOES handle
+the HTTP-file path (<code>downloadHttpFile</code> + the "Torrent" button
+is documented as "the affordance for EVERY downloadable topic INCLUDING
+the HTTP-file"), so on-device the gutenberg topic screen either didn't
+present that affordance or the test didn't reach it. Pin it with a
+screenshot-level device re-run (rendering vs timing) — a
+client/test-side investigation, NOT a server fix. (The rate-limited
+subagent's worktree <code>agent-abf93a7c1f3967c77</code> is
+stale/partial — supersede it.) <strong>(C) 6 public providers WIRED but
+not yet device-run</strong> (worktree
+<code>agent-ae03137803ae71457</code>):
+thepiratebay/torrentscsv/knaben/bitsearch/nyaa/tokyotosho added to
+Challenge70 <code>ProviderSpec.forId</code> (authNone) +
+<code>lib-subsets.sh QA_PROVIDERS</code> (compileDebugAndroidTestKotlin
+BUILD SUCCESSFUL); KEY: bitsearch renders <strong>"Bitsearch"</strong>
+(humanized, not "BitSearch"). NOTE: torrentscsv+nyaa are among the
+IPv4-only egress-blocked set (A) → they need the VPN fix before their
+keystones can pass. <strong>NEXT (when rate limits clear):</strong> (1)
+operator applies the VPN split-tunnel for the goapi → re-run
+archiveorg/nyaa/torrentscsv keystones; (2) complete the gutenberg-topic
+parser fix + re-run; (3) apply the mapError §6.AC hardening; (4) run the
+6 wired providers' keystones (reachable ones:
+thepiratebay/knaben/bitsearch/tokyotosho). rutracker + kinozal remain
+FULLY green + pushed. ───── (current)</p>
 <p><strong>🟢🎉 2026-07-02 (kinozal FULLY GREEN — verdict=PASS
 end-to-end; round-3 parallel-subagent sweep landed).</strong> The
 kinozal goapi keystone now passes the COMPLETE flow on device: search →
