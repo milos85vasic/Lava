@@ -54,7 +54,7 @@ class RuTorAuthTest {
 
     @Test
     fun `successful login surfaces Authenticated and the userid cookie as sessionToken`() = runBlocking {
-        val successHtml = loader.load("login", "success-target-home-2026-04-30.html")
+        val successHtml = loader.load("login", "success-target-home-2026-07-02.html")
         server.enqueue(
             MockResponse()
                 .setBody(successHtml)
@@ -108,7 +108,7 @@ class RuTorAuthTest {
         )
 
         // Step 2: drive a successful login so the cookie jar captures userid.
-        val successHtml = loader.load("login", "success-target-home-2026-04-30.html")
+        val successHtml = loader.load("login", "success-target-home-2026-07-02.html")
         server.enqueue(
             MockResponse()
                 .setBody(successHtml)

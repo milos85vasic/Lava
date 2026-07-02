@@ -52,7 +52,7 @@ class RuTorSearchTest {
 
     @Test
     fun `search hits the canonical rutor URL shape and surfaces parsed results`() = runBlocking {
-        val html = loader.load("search", "search-normal-2026-04-30.html")
+        val html = loader.load("search", "search-normal-2026-07-02.html")
         server.enqueue(MockResponse().setBody(html).setResponseCode(200))
         val baseUrl = server.url("/").toString().trimEnd('/')
         val feature = RuTorSearch(RuTorHttpClient(), parser, RuTorMagnetCache(), baseUrl)
@@ -80,7 +80,7 @@ class RuTorSearchTest {
 
     @Test
     fun `cyrillic query is percent-encoded as UTF-8 with %20 for spaces`() = runBlocking {
-        val html = loader.load("search", "search-cyrillic-2026-04-30.html")
+        val html = loader.load("search", "search-cyrillic-2026-07-02.html")
         server.enqueue(MockResponse().setBody(html).setResponseCode(200))
         val baseUrl = server.url("/").toString().trimEnd('/')
         val feature = RuTorSearch(RuTorHttpClient(), parser, RuTorMagnetCache(), baseUrl)
@@ -99,7 +99,7 @@ class RuTorSearchTest {
 
     @Test
     fun `empty result page returns an empty SearchResult, not an exception`() = runBlocking {
-        val html = loader.load("search", "search-empty-2026-04-30.html")
+        val html = loader.load("search", "search-empty-2026-07-02.html")
         server.enqueue(MockResponse().setBody(html).setResponseCode(200))
         val baseUrl = server.url("/").toString().trimEnd('/')
         val feature = RuTorSearch(RuTorHttpClient(), parser, RuTorMagnetCache(), baseUrl)

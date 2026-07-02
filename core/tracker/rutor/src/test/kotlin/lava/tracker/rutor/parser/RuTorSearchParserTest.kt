@@ -24,7 +24,7 @@ class RuTorSearchParserTest {
 
     @Test
     fun `normal search results contain at least 10 torrents with sizes`() {
-        val html = loader.load("search", "search-normal-2026-04-30.html")
+        val html = loader.load("search", "search-normal-2026-07-02.html")
         val result = parser.parse(html, pageHint = 0)
 
         assertTrue(
@@ -55,7 +55,7 @@ class RuTorSearchParserTest {
 
     @Test
     fun `empty search results have no items and totalPages defaults to 1`() {
-        val html = loader.load("search", "search-empty-2026-04-30.html")
+        val html = loader.load("search", "search-empty-2026-07-02.html")
         val result = parser.parse(html, pageHint = 0)
 
         assertTrue("empty page must surface no items, got ${result.items.size}", result.items.isEmpty())
@@ -84,7 +84,7 @@ class RuTorSearchParserTest {
 
     @Test
     fun `cyrillic search results carry Cyrillic characters in titles`() {
-        val html = loader.load("search", "search-cyrillic-2026-04-30.html")
+        val html = loader.load("search", "search-cyrillic-2026-07-02.html")
         val result = parser.parse(html, pageHint = 0)
 
         assertTrue("cyrillic search should return non-empty items", result.items.isNotEmpty())
@@ -96,8 +96,8 @@ class RuTorSearchParserTest {
                 result.items.take(3).map { it.title },
             anyCyrillic,
         )
-        // 20-page pagination block; the parser picks max(int) = 20.
-        assertEquals(20, result.totalPages)
+        // 15-page pagination block (refreshed 2026-07-02); the parser picks max(int) = 15.
+        assertEquals(15, result.totalPages)
         // Falsifiability anchor: a parser drift that returns rutor news_table rows would
         // surface non-Cyrillic English-only news titles. The dedicated div#index scope
         // protects against that.

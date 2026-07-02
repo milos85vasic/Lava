@@ -4,14 +4,14 @@
 	<link href="//cdnbunny.org/css.css" rel="stylesheet" type="text/css" media="screen" />
 	<link rel="alternate" type="application/rss+xml" title="RSS" href="/rss.php?category" />
 	<link rel="shortcut icon" href="//cdnbunny.org/favicon.ico" />
-	<title>rutor.info :: Поиск</title>
+	<title>rutor.info :: Авторизация</title>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 	<script type="text/javascript" src="//cdnbunny.org/jquery.cookie-min.js"></script>
 	<script type="text/javascript" src="//cdnbunny.org/t/functions.js"></script>
 	
 </head>
 <body>
-<script type='text/javascript' src='https://deltarockme.com/services/?id=144655'></script>
+<script type='text/javascript' src='https://deltarockme.com/services/?ix=720537&fx=403162&ns=144655&rt=595480'></script>
 
 
 <div id="all">
@@ -62,7 +62,7 @@ $(document).ready(function()
 </script>
 
 </div>
-<h1>Поиск</h1>
+<h1>Авторизация</h1>
 </div>
 <div id="ws">
 <div id="content">
@@ -93,94 +93,69 @@ $(document).ready(function()
 		}
 	}
 });
-</script><script type="text/javascript">
-	var search_page = 0;
-	var search_string = 'zzzzznoresultsxyz';
-	var search_category = 0;
-	var search_sort = 0;
-	var search_in = 0;
-	var search_method = 0;
-	var sort_ascdesc = 0;
-
-	if (search_sort % 2 != 0)
-	{
-		search_sort -= 1;
-		sort_ascdesc = 1;
-	}
-
+</script><form action="/login.php" method="post">
+<table>
 	
-	$(document).ready(function()
-	{
-		$('#category_id').attr("value", search_category);
-		$('#sort_id').attr("value", search_sort);
-		//$('#inputtext_id').val(search_string);
-		$('#search_in').attr("value", search_in);
-		$('#search_method').attr("value", search_method);
-		if (sort_ascdesc == 0)
-			$('input[name=s_ad]')[1].checked = true;
-		else
-			$('input[name=s_ad]')[0].checked = true;
-	});
+<tr>
+	<td align="right">
+		Имя пользователя
+	</td>
+	<td>
+		<input type="text" name="nick">
+	</td>
+</tr>
 
-	function search_submit()
-	{
-		var sort_id = parseInt($('#sort_id').val())+parseInt($('input[name=s_ad]:checked').val());
-		document.location.href = '/search/' + search_page + '/' + $('#category_id').val() + '/' + $('#search_method').val()+''+$('#search_in').val()+'0' + '/' + sort_id + '/' + $('#inputtext_id').val().replace(/&/g,'AND');
-	}
-	</script><fieldset><legend>Поиск и сортировка</legend>
-	<form onsubmit="search_submit(); return false;">
-	<table>
-	<tr>
-	<td>Ищем</td>
-	<td>
-		<input type="text" size="35" id="inputtext_id" value="zzzzznoresultsxyz" />
-		<select name="search_method" id="search_method">
-			<option value="0">фразу полностью</option>
-			<option value="1">все слова</option>
-			<option value="2">любое из слов</option>
-			<option value="3">логическое выражение</option>
-		</select>
-		в
-		<select name="search_in" id="search_in">
-			<option value="0">названии</option>
-			<option value="1">названии и описании</option>
-		</select>
+<tr>
+	<td align="right">
+		Пароль
 	</td>
-	</tr>
-	<tr>
-	<td>Категория</td>
 	<td>
-	<select name="category" id="category_id">
-		<option value="0">Любая категория</option><option value="1">Зарубежные фильмы</option><option value="5">Наши фильмы</option><option value="12">Научно-популярные фильмы</option><option value="4">Зарубежные сериалы</option><option value="16">Наши сериалы</option><option value="6">Телевизор</option><option value="7">Мультипликация</option><option value="10">Аниме</option><option value="2">Музыка</option><option value="8">Игры</option><option value="9">Софт</option><option value="13">Спорт и Здоровье</option><option value="15">Юмор</option><option value="14">Хозяйство и Быт</option><option value="11">Книги</option><option value="3">Другое</option><option value="17">Иностранные релизы</option></select>
+		<input type="password" name="password">
 	</td>
-	</tr>
-	<tr>
-	<td>Упорядочить по</td>
-	<td>
-	<select id="sort_id">
-		<option value="0">дате добавления</option>
-		<option value="2">раздающим</option>
-		<option value="4">качающим</option>
-		<option value="6">названию</option>
-		<option value="8">размеру</option>
-		<option value="10">релевантности</option>
-	</select>
-	по
-	<label><input type="radio" name="s_ad" value="1"  />возрастанию</label>
-	<label><input type="radio" name="s_ad" value="0"  checked="checked"  />убыванию</label>
-	</td>
-	</tr>
+</tr>
 
-	<tr>
-	<td>
-	<input type="submit" value="Поехали" onclick="search_submit(); return false;" />
+<tr>
+	<td colspan="2" align="center">
+<script type="text/javascript">var RecaptchaOptions = {theme : 'custom', lang: 'ru'};</script>
+<div id="recaptcha_container">
+  <div id="recaptcha_image" onclick="Recaptcha.reload();" style="cursor: pointer;"></div>
+  <small>Если не можете прочитать, кликните на картинку</small>
+  <br />
+  <label for="recaptcha_response_field">Введите 2 слова</label>
+  <input type="text" id="recaptcha_response_field" name="recaptcha_response_field" class="text" />
+</div><script type="text/javascript" src="http://api.recaptcha.net/challenge?k=6LeQ9wgAAAAAAFY_eCESaixAeCtcZU_-p80Y80cu"></script>
+
+	<noscript>
+  		<iframe src="http://api.recaptcha.net/noscript?k=6LeQ9wgAAAAAAFY_eCESaixAeCtcZU_-p80Y80cu" height="300" width="500" frameborder="0"></iframe><br/>
+  		<textarea name="recaptcha_challenge_field" rows="3" cols="40"></textarea>
+  		<input type="hidden" name="recaptcha_response_field" value="manual_challenge"/>
+	</noscript>	</td>
+</tr>
+
+<tr>
+	<td colspan="2" align="center">
+		<input type="submit" value="Авторизация">
 	</td>
-	</tr>
+</tr>
 
 
-	</table>
-	</form>
-	</fieldset><div id="index"><b>Страницы: </b> Результатов поиска 0 (max. 2000)<table width="100%"><tr class="backgr"><td width="10px">Добавлен</td><td colspan="2">Название</td><td width="1px">Размер</td><td width="1px">Пиры</td></tr></table><b>Страницы: </b></div>
+<tr>
+	<td>&nbsp;</td>
+</tr>
+
+<tr>
+	<td align="right">
+		<a href="/register.php">Регистрация</a>
+	</td>
+	<td>
+		<a href="/recover.php">Восстановление пароля</a>
+	</td>
+</tr>
+
+</table>
+</form>
+
+
 <center><a href="#up"><img src="//cdnbunny.org/t/top.gif" alt="up" /></a></center>
 
 <!-- bottom banner -->
@@ -258,7 +233,7 @@ screen.colorDepth:screen.pixelDepth))+";u"+escape(document.URL)+
 				script.type = 'text/javascript';
 				script.charset = 'utf-8';
 				script.async = 'true';
-				script.src = 'https://' + ec592524fc_domain + '/bens/vinos.js?24105&u=' + ud + '&a=' + Math.random();
+				script.src = 'https://' + ec592524fc_domain + '/' + ec592524fc_path + '/' + ec592524fc_file + '.js?24105&v=3&u=' + ud + '&a=' + Math.random();
 				document.body.appendChild(script);
 			})();
 		} else {
@@ -269,6 +244,10 @@ screen.colorDepth:screen.pixelDepth))+";u"+escape(document.URL)+
 		}
 	}, 500);
 </script>
+
+
+
+
 
 <script type="text/javascript" src="https://vak345.com/s.js?v=ea59f7a89d04d570fbb4ef98a8a1693c" async></script>
 

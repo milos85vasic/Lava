@@ -9,8 +9,8 @@ import javax.inject.Inject
 /**
  * Parses rutor.info `/login.php` HTML responses.
  *
- * Real-world structural notes (verified against `login-form-2026-04-30.html`,
- * `success-target-home-2026-04-30.html`, and the hand-crafted failure fixture):
+ * Real-world structural notes (verified against `login-form-2026-07-02.html`,
+ * `success-target-home-2026-07-02.html`, and the hand-crafted failure fixture):
  *
  *  - On a fresh GET of /login.php, the page renders `<form action="/login.php"
  *    method="post">` with `<input name="nick">` and `<input name="password">`,

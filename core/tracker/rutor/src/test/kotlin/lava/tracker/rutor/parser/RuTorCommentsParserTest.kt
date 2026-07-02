@@ -20,7 +20,7 @@ class RuTorCommentsParserTest {
 
     @Test
     fun `topic page without inline comments returns an empty CommentsPage`() {
-        val html = loader.load("topic", "topic-normal-2026-04-30.html")
+        val html = loader.load("topic", "topic-normal-2026-07-02.html")
         val page = parser.parse(html)
 
         // Topic pages on rutor never embed comment bodies — comments are served
@@ -35,14 +35,14 @@ class RuTorCommentsParserTest {
 
     @Test
     fun `pageHint round-trips into CommentsPage_currentPage`() {
-        val html = loader.load("topic", "topic-with-files-2026-04-30.html")
+        val html = loader.load("topic", "topic-with-files-2026-07-02.html")
         val page = parser.parse(html, pageHint = 7)
         assertEquals(7, page.currentPage)
     }
 
     @Test
     fun `topic-with-long-description page also yields zero comments`() {
-        val html = loader.load("topic", "topic-with-long-description-2026-04-30.html")
+        val html = loader.load("topic", "topic-with-long-description-2026-07-02.html")
         val page = parser.parse(html)
         assertTrue("long-description topic must yield zero comments", page.items.isEmpty())
     }

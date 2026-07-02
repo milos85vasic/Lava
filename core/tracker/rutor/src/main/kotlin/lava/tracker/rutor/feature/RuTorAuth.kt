@@ -12,7 +12,7 @@ import javax.inject.Inject
  * RuTor implementation of [AuthenticatableTracker] (SP-3a Task 3.38, Section I).
  *
  * URL contract: `<baseUrl>/login.php` (POST). Verified by inspecting the
- * `<form action="...">` attribute in `login-form-2026-04-30.html` — the form
+ * `<form action="...">` attribute in `login-form-2026-07-02.html` — the form
  * action attribute is literally "/login.php". Form fields mirror the input
  * names rutor's template uses: `nick` and `password`.
  *

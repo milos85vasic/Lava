@@ -6,7 +6,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Drives [RuTorBrowseParser] against the three `browse-*-2026-04-30.html` fixtures.
+ * Drives [RuTorBrowseParser] against the three `browse-*` fixtures (normal + deep-pagination
+ * refreshed 2026-07-02; empty is a marked synthetic dated 2026-04-30).
  *
  * Sixth Law clause 2 (falsifiability): assertions are on user-visible mapped state
  * (item titles, sizeBytes, magnet hash, totalPages). A parser that produces empty
@@ -19,7 +20,7 @@ class RuTorBrowseParserTest {
 
     @Test
     fun `normal browse page returns 10+ items with sizes and pagination`() {
-        val html = loader.load("browse", "browse-normal-2026-04-30.html")
+        val html = loader.load("browse", "browse-normal-2026-07-02.html")
         val result = parser.parse(html, pageHint = 0)
 
         assertTrue(
@@ -38,8 +39,8 @@ class RuTorBrowseParserTest {
             "all rows must produce a 40-char infoHash; offenders=${badHash.size}",
             badHash.isEmpty(),
         )
-        // Pagination references /browse/6815/0/0/0 → 6816 total pages (0-indexed).
-        assertEquals(6816, result.totalPages)
+        // Pagination references /browse/6883/0/0/0 → 6884 total pages (0-indexed).
+        assertEquals(6884, result.totalPages)
         // currentPage hint round-trips.
         assertEquals(0, result.currentPage)
     }
@@ -57,11 +58,11 @@ class RuTorBrowseParserTest {
 
     @Test
     fun `deep-pagination page 50 reports correct currentPage and totalPages`() {
-        val html = loader.load("browse", "browse-deep-pagination-2026-04-30.html")
+        val html = loader.load("browse", "browse-deep-pagination-2026-07-02.html")
         val result = parser.parse(html, pageHint = 50)
 
-        // totalPages = 6815 + 1 = 6816.
-        assertEquals(6816, result.totalPages)
+        // totalPages = 6883 + 1 = 6884.
+        assertEquals(6884, result.totalPages)
         assertEquals(50, result.currentPage)
         assertTrue(
             "deep-pagination page should still surface result rows; got ${result.items.size}",

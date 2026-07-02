@@ -40,7 +40,7 @@ class RuTorBrowseTest {
 
     @Test
     fun `browse with null category hits the all-categories slot`() = runBlocking {
-        val html = loader.load("browse", "browse-normal-2026-04-30.html")
+        val html = loader.load("browse", "browse-normal-2026-07-02.html")
         server.enqueue(MockResponse().setBody(html).setResponseCode(200))
         val baseUrl = server.url("/").toString().trimEnd('/')
         val feature = RuTorBrowse(RuTorHttpClient(), parser, baseUrl)
@@ -55,7 +55,7 @@ class RuTorBrowseTest {
 
     @Test
     fun `browse with explicit category id places it in the category slot`() = runBlocking {
-        val html = loader.load("browse", "browse-normal-2026-04-30.html")
+        val html = loader.load("browse", "browse-normal-2026-07-02.html")
         server.enqueue(MockResponse().setBody(html).setResponseCode(200))
         val baseUrl = server.url("/").toString().trimEnd('/')
         val feature = RuTorBrowse(RuTorHttpClient(), parser, baseUrl)
