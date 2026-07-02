@@ -189,6 +189,53 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🟢🔧 2026-07-02 (latest) — 3 MORE fixes CONVERGED (LAYER 2 +
+AuthInterceptor + nnmclub); qa_key DEVICE-VALIDATED; goapi keystone
+advanced to the NEXT layer (providerIds-null → legacy paging
+<code>start=-50</code>).</strong> Commit <code>e2301562</code> (BOTH
+mirrors) landed 3 reproduce-first Bluff-Audited fixes: <strong>LAYER
+2</strong> — the SDK login path now persists the provider session token
+(<code>TokenProvider.persistProviderToken</code> default-no-op seam +
+<code>AuthServiceImpl</code> override + <code>RuTrackerAuth.login</code>
+bridge) so the bundled search's
+<code>WithTokenVerificationUseCase</code> token-gate passes;
+<strong>AuthInterceptor fail-open</strong> — the decrypt had NO catch →
+an <code>AEADBadTagException</code> on cert/blob drift crashed EVERY
+<code>@Named("lan")</code> request incl. the public
+<code>/providers</code> fetch; now records a §6.AC non-fatal + proceeds
+header-less; <strong>nnmclub windows-1251</strong> — Cyrillic mojibake
+fix mirroring kinozal (<code>NnmclubHttpClient.bodyString</code>; 4 more
+sites tracked as follow-up). qa_key plumbing committed LOCAL
+<code>d375d562</code> (debug-only <code>QaKeyInjection</code> seam +
+<code>MainActivity</code> reader + Challenge70 arm/disarm +
+<code>run-iteration.sh</code> derives the key from <code>.env</code> at
+runtime, §6.H-safe; EDIT E unneeded — the AuthInterceptor fix already
+covers candidate 1). <strong>qa_key DEVICE-PROVEN VALID:</strong> curl
+<code>/v1/rutracker/search</code> with the derived key returns
+<code>401 {}</code> (Gate-2 cookie-missing), NOT
+<code>401 {"error":"unauthorized"}</code> (Gate-1) → it authenticates to
+the running Go API. <strong>DEVICE PROGRESS:</strong> the LAYER 2 fix
+now lets the bundled search issue REAL <code>tracker.php</code> requests
+to rutracker.org (previously ZERO — the token gate blocked every one).
+<strong>NEXT LAYER (OPEN — physical evidence
+<code>.lava-ci-evidence/autonomous-qa/2026-07-02/goapi/rutracker-1080p/raw/logcat.txt</code>):</strong>
+the keystone search took the LEGACY paging path
+(<code>SearchResultViewModel</code>
+<code>ListBottomReached</code>→<code>observePagingData</code>, i.e.
+<code>filter.providerIds == null</code>) and issued
+<code>tracker.php?nm=1080p&amp;…&amp;start=-50</code> — a NEGATIVE
+paging offset → empty results. So (a) <code>providerIds</code> is null →
+search does NOT route through the goapi
+<code>streamMultiSearch</code>→<code>/v1/rutracker/search</code> path
+(qa_key/A+B not exercised there), and (b) the legacy paging computes a
+bad <code>start=-50</code>. <strong>NEXT:</strong> root-cause why
+<code>SearchInputViewModel.resolveProviderIdsForSubmit</code> returns
+null (rutracker's
+<code>ProviderConfig.searchEnabled</code>/<code>isEnabled</code> after
+onboarding?) so search routes through the goapi path; fix the
+<code>start=-50</code> legacy-paging offset; re-run the keystone.
+Keystone NOT green; NOT claimed green; 1.3.12-1078 distribute BLOCKED
+(§6.J/§6.AK). ───── (current)</p>
 <p><strong>🟢🔧 2026-07-02 (later) — goapi CASE-COOKIE session-token fix
 LANDED (A+B, reproduce-first Bluff-Audited); goapi keystone deeper
 layers ROOT-CAUSED + OPEN.</strong> After the brotli fix advanced the

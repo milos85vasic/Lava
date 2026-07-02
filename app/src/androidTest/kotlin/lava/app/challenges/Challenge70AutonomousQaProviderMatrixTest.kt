@@ -125,6 +125,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.BuildConfig
 import digital.vasic.lava.client.MainActivity
 import lava.app.ResetOnboardingPrefsRule
+import org.junit.After
 import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
@@ -300,6 +301,11 @@ class Challenge70AutonomousQaProviderMatrixTest {
     private val qaBackend by lazy { arg("qa_backend", "goapi") }
     private val qaApiUrl by lazy { arg("qa_api_url", "https://10.0.2.2:8443") }
     private val qaQuery by lazy { arg("qa_query", "1080p") }
+
+    // §6.AK: the standalone Go API's derived Lava-Auth key (base64 of the raw UUID
+    // from LAVA_AUTH_ACTIVE_CLIENTS). Empty default → keyless (legacy behavior /
+    // apiapp+direct modes read the key on-device). §6.H: never logged.
+    private val qaKey by lazy { arg("qa_key", "") }
     private val providerSpecs by lazy {
         arg("qa_providers", "rutracker")
             .split(",")
@@ -308,9 +314,23 @@ class Challenge70AutonomousQaProviderMatrixTest {
             .mapNotNull { ProviderSpec.forId(it) }
     }
 
+    @After
+    fun clearQaKeyOverride() {
+        digital.vasic.lava.client.QaKeyInjection.override = null
+    }
+
     @Test
     fun autonomousMatrix_onboard_search_topic_download() {
         hiltRule.inject()
+
+        // §6.AK: goapi keystone against a standalone lava-api-go has no on-device
+        // key ContentProvider; feed the derived key to the REAL keying path
+        // (MainActivity.buildApiKeyReader → withLocalApiKeyIfMissing). §6.H: never
+        // logged. Read at invoke time by the apiKeyReader lambda, so arming here —
+        // before the ApiSelection probe — is sufficient.
+        if (qaBackend == "goapi" && qaKey.isNotEmpty()) {
+            digital.vasic.lava.client.QaKeyInjection.override = qaKey
+        }
 
         // Sanity: the qa_providers value resolved to at least one known provider.
         assumeTrue(

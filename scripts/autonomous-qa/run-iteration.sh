@@ -72,6 +72,22 @@ stop_recording() {
 }
 trap stop_recording EXIT
 
+# §6.AK: for the goapi backend the client must authenticate /v1 with the Go API's
+# configured Lava-Auth key. Derive it from the SAME root .env the compose stack
+# feeds the container (LAVA_AUTH_ACTIVE_CLIENTS: name:uuid). Needs the UUID only —
+# NOT the HMAC secret (server base64-decodes then HMACs; client just sends base64).
+# §6.H: never echo qa_key / the uuid; the derived key is credential-equivalent.
+QA_KEY=""
+if [[ "$BACKEND" == "goapi" ]]; then
+  acl="$(grep -E '^LAVA_AUTH_ACTIVE_CLIENTS=' "$REPO_ROOT/.env" 2>/dev/null | head -1 | cut -d= -f2-)"
+  acl="${acl%\"}"; acl="${acl#\"}"        # strip optional surrounding quotes
+  entry="${acl%%,*}"; uuid="${entry#*:}"  # first name:uuid → uuid
+  if [[ -n "$uuid" && "$uuid" != "$entry" ]]; then
+    QA_KEY="$(printf '%s' "${uuid//-/}" | xxd -r -p | base64 | tr -d '\n')"
+  fi
+  [[ -z "$QA_KEY" ]] && echo "[iter] NOTICE goapi backend but no LAVA_AUTH_ACTIVE_CLIENTS entry in .env — /v1 will 401; running keyless" >&2
+fi
+
 # 3) Run the parameterized Challenge (instrumentation args, one -P per key).
 GRADLE_LOG="$RAW/gradle-connected.log"
 set +e
@@ -82,6 +98,7 @@ set +e
     -Pandroid.testInstrumentationRunnerArguments.qa_providers="$PROVIDERS" \
     -Pandroid.testInstrumentationRunnerArguments.qa_query="$QUERY" \
     -Pandroid.testInstrumentationRunnerArguments.qa_api_url="${API_URL:-https://127.0.0.1:8443}" \
+    -Pandroid.testInstrumentationRunnerArguments.qa_key="$QA_KEY" \
     ) > "$GRADLE_LOG" 2>&1
 GRADLE_RC=$?
 set -e

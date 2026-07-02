@@ -228,7 +228,12 @@ open class MainActivity : ComponentActivity() {
         val suffix = if (BuildConfig.DEBUG) ".dev.keyprovider" else ".keyprovider"
         val authority = BuildConfig.API_RELEASE_PACKAGE + suffix
         val client = ApiKeyClient(this, authority, analytics)
-        return { client.read()?.key }
+        // §6.AK: a debug-only autonomous-QA override takes precedence so a keystone
+        // run against a standalone lava-api-go (no on-device api-app ContentProvider
+        // to read) still exercises the REAL withLocalApiKeyIfMissing keying path.
+        // QaKeyInjection.override is compile-time-null in the release sourceset, so
+        // release builds are byte-for-byte unchanged (the `?:` always falls through).
+        return { QaKeyInjection.override ?: client.read()?.key }
     }
 
     @Composable
