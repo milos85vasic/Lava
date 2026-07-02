@@ -1,5 +1,25 @@
 # Lava — Bug Fix Audit Trail
 
+> **Revision §11.4.44 (2026-07-03, §6.AC archiveorg mapError hardening — egress-stall-masquerade class CLOSED):**
+> the 2026-07-02 diagnostic trap is fixed reproduce-first. Root cause:
+> `lava-api-go/internal/archiveorg/provider.go mapError()` collapsed EVERY error to a bare
+> `provider.ErrUnknown`, discarding the real cause. When the containerized goapi's outbound TCP to
+> IPv4-only `archive.org` stalled over the Mullvad VPN (a dial/TLS timeout), `writeProviderError`'s
+> §6.AC default branch recorded a `RecordNonFatal` whose `error_message` was the useless generic
+> `"provider: unknown error"` — so the egress stall MASQUERADED as an archiveorg parser bug and cost
+> real diagnostic time. Fix: `mapError` returns `fmt.Errorf("%w: %v", provider.ErrUnknown, err)` —
+> `errors.Is(_, provider.ErrUnknown)` stays true (HTTP status 502 + the recorded non-fatal are
+> UNCHANGED, wire body stays `{}`) while the underlying dial/TLS detail SURVIVES for remote triage.
+> archiveorg was the ONLY discard-everything adapter — nnmclub/kinozal/rutracker already preserve the
+> cause via `default: return err`, so they were left untouched. Verification (reproduce-first §6.T.1):
+> `internal/archiveorg/provider_test.go TestMapError_PreservesUnderlyingCause` — RED
+> `mapError discarded the underlying cause: got "provider: unknown error", want it to contain
+> "i/o timeout"` before the fix, GREEN after (full archiveorg pkg 15/15 + `TestMapError_NilPassthrough`
+> guard); v1 handler error-mapping + non-fatal-telemetry tests green (no status/wire regression);
+> `go vet` clean. Observability-only change — the banked device-green goapi matrix (rutracker 1080p+mp3,
+> kinozal 1080p, gutenberg sherlock) is unaffected. Public-provider keystones remain gated on the
+> per-destination excluded-proxy egress decision (operator-present required).
+
 > **Revision §11.4.44 (2026-07-02, goapi keystone GREEN):** the goapi × rutracker autonomous-QA
 > keystone (`Challenge70AutonomousQaProviderMatrixTest`) went from an honest §6.J SKIP to a
 > device-verified `verdict=PASS` (real rutracker login + search + download, recorded to

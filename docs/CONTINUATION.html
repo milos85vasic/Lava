@@ -189,6 +189,48 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🔧📡 2026-07-03 (§6.AC archiveorg mapError hardening —
+egress-stall-masquerade class CLOSED; matrix banked, public providers
+still gated).</strong> The one genuinely-reachable non-gated item from
+the 2026-07-02 handoff is done reproduce-first. Root cause of the
+2026-07-02 diagnostic trap:
+<code>lava-api-go/internal/archiveorg/provider.go mapError()</code>
+collapsed EVERY error to a bare <code>provider.ErrUnknown</code>,
+discarding the real cause — so when the containerized goapi's outbound
+TCP to IPv4-only <code>archive.org</code> stalled over the Mullvad VPN
+(a dial/TLS timeout), <code>writeProviderError</code>'s §6.AC default
+branch recorded a <code>RecordNonFatal</code> whose
+<code>error_message</code> was the useless generic
+<code>"provider: unknown error"</code>, and the egress stall MASQUERADED
+as an archiveorg parser bug. FIX (<code>mapError</code> →
+<code>fmt.Errorf("%w: %v", provider.ErrUnknown, err)</code>):
+<code>errors.Is(_, provider.ErrUnknown)</code> stays true so the HTTP
+status (502) + the recorded non-fatal + the <code>{}</code> wire body
+are ALL unchanged, while the real dial/TLS detail now SURVIVES for
+remote triage. archiveorg was the ONLY discard-everything adapter
+(nnmclub/kinozal/rutracker already preserve via
+<code>default: return err</code> — the prior banner's "also
+nnmclub/kinozal/rutracker" was imprecise; they were NOT touched).
+Reproduce-first proven:
+<code>internal/archiveorg/provider_test.go TestMapError_PreservesUnderlyingCause</code>
+RED
+<code>mapError discarded the underlying cause: got "provider: unknown error", want it to contain "i/o timeout"</code>
+→ GREEN (archiveorg pkg 15/15 +
+<code>TestMapError_NilPassthrough</code>; v1 handler error-mapping +
+non-fatal-telemetry green = no status/wire regression;
+<code>go vet</code> clean; <code>go build ./...</code> OK).
+Observability-only — banked device-green goapi matrix UNCHANGED:
+rutracker (1080p+mp3), kinozal (1080p), gutenberg (sherlock).
+<strong>STILL GATED (operator-present required, unchanged from
+handoff):</strong> (1) public IPv4-only providers
+(archiveorg/nyaa/torrentscsv/bitsearch/yts/…) need the per-destination
+excluded-proxy egress toggle — a GLOBAL bypass breaks rutracker/kinozal
+(VPN-exit-IP-only) so it is a public-ONLY-run infra decision; (2)
+QA-harness fixes #1/#3 need an on-device falsifiability rehearsal
+(emulator in container/VM per §6.AH); (3) api-app Phase 3 = guest-WAN
+egress blocker. NEXT when operator returns: pick the excluded-proxy
+toggle → I run the public-provider keystones; otherwise the device-green
+matrix stands as banked, real, recorded proof. ───── (current)</p>
 <p><strong>🔧🌐 2026-07-02 (public-provider phase — archiveorg 0-rows
 ROOT-CAUSED to VPN egress (NOT code); gutenberg SEARCH green + TOPIC
 layer open; 6 providers wired).</strong> After kinozal went fully green
@@ -1859,10 +1901,13 @@ PostConverters clamp, ProbeMirrorUseCase reproducing Crashlytics
 39469d3b). Evidence:
 <code>.lava-ci-evidence/bluff-hunt/2026-06-23-cycle6-{session-telemetry,android-core}.json</code>.
 The session's telemetry tests are PROVEN genuine.</p>
-<p><strong>Last updated:</strong> 2026-07-02 (goapi × rutracker keystone
+<p><strong>Last updated:</strong> 2026-07-03 (§6.AC archiveorg mapError
+hardening — egress-stall-masquerade class CLOSED, reproduce-first
+RED→GREEN, banked device-green matrix UNCHANGED, public providers still
+gated; see top banner. Prior 2026-07-02: goapi × rutracker keystone
 GREEN — verdict=PASS, device-recorded, 5-fix stack B/C2/D/E +
-Challenge70 deselect; see top banner; prior 2026-06-30 context follows)
-(**🤖 AUTONOMOUS QA HARNESS (Phase 0) — self-driving QA built under
+Challenge70 deselect; prior 2026-06-30 context follows) (**🤖 AUTONOMOUS
+QA HARNESS (Phase 0) — self-driving QA built under
 <code>scripts/autonomous-qa/</code>; emulator image boots
 containerized-KVM in ~30s; Go backend serves <code>/health</code>;
 onboarding proven end-to-end (RuTor anon → main app, keystone run #1

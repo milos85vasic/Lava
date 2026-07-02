@@ -243,6 +243,40 @@
 <body>
 <h1 id="lava--bug-fix-audit-trail">Lava — Bug Fix Audit Trail</h1>
 <blockquote>
+<p><strong>Revision §11.4.44 (2026-07-03, §6.AC archiveorg mapError
+hardening — egress-stall-masquerade class CLOSED):</strong> the
+2026-07-02 diagnostic trap is fixed reproduce-first. Root cause:
+<code>lava-api-go/internal/archiveorg/provider.go mapError()</code>
+collapsed EVERY error to a bare <code>provider.ErrUnknown</code>,
+discarding the real cause. When the containerized goapi's outbound TCP
+to IPv4-only <code>archive.org</code> stalled over the Mullvad VPN (a
+dial/TLS timeout), <code>writeProviderError</code>'s §6.AC default
+branch recorded a <code>RecordNonFatal</code> whose
+<code>error_message</code> was the useless generic
+<code>"provider: unknown error"</code> — so the egress stall MASQUERADED
+as an archiveorg parser bug and cost real diagnostic time. Fix:
+<code>mapError</code> returns
+<code>fmt.Errorf("%w: %v", provider.ErrUnknown, err)</code> —
+<code>errors.Is(_, provider.ErrUnknown)</code> stays true (HTTP status
+502 + the recorded non-fatal are UNCHANGED, wire body stays
+<code>{}</code>) while the underlying dial/TLS detail SURVIVES for
+remote triage. archiveorg was the ONLY discard-everything adapter —
+nnmclub/kinozal/rutracker already preserve the cause via
+<code>default: return err</code>, so they were left untouched.
+Verification (reproduce-first §6.T.1):
+<code>internal/archiveorg/provider_test.go TestMapError_PreservesUnderlyingCause</code>
+— RED
+<code>mapError discarded the underlying cause: got "provider: unknown error", want it to contain "i/o timeout"</code>
+before the fix, GREEN after (full archiveorg pkg 15/15 +
+<code>TestMapError_NilPassthrough</code> guard); v1 handler
+error-mapping + non-fatal-telemetry tests green (no status/wire
+regression); <code>go vet</code> clean. Observability-only change — the
+banked device-green goapi matrix (rutracker 1080p+mp3, kinozal 1080p,
+gutenberg sherlock) is unaffected. Public-provider keystones remain
+gated on the per-destination excluded-proxy egress decision
+(operator-present required).</p>
+</blockquote>
+<blockquote>
 <p><strong>Revision §11.4.44 (2026-07-02, goapi keystone
 GREEN):</strong> the goapi × rutracker autonomous-QA keystone
 (<code>Challenge70AutonomousQaProviderMatrixTest</code>) went from an

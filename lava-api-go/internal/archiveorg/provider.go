@@ -234,11 +234,18 @@ func (a *ProviderAdapter) HealthCheck(ctx context.Context) (*provider.HealthStat
 }
 
 // mapError translates archive.org-specific errors to provider-agnostic ones.
+//
+// §6.AC: archive.org errors classify as provider.ErrUnknown (→ 502 +
+// non-fatal telemetry in writeProviderError) but the underlying cause MUST be
+// preserved — a dial/TLS egress stall (the 2026-07-02 IPv4-only-over-VPN
+// failure) that collapsed to a bare sentinel here masqueraded as a parser bug
+// and cost diagnostic time. Wrapping keeps errors.Is(_, ErrUnknown) true (so
+// the status mapping is unchanged) while the operator dashboard sees the real
+// dial/TLS detail. Explicit HTTP-status-derived sentinels could be added here
+// later.
 func mapError(err error) error {
 	if err == nil {
 		return nil
 	}
-	// For now, all archive.org errors map to ErrUnknown except explicit
-	// HTTP-status-derived errors that could be added later.
-	return provider.ErrUnknown
+	return fmt.Errorf("%w: %v", provider.ErrUnknown, err)
 }

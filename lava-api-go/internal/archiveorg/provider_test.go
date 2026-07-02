@@ -2,8 +2,10 @@ package archiveorg
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"digital.vasic.lava.apigo/internal/provider"
@@ -272,5 +274,53 @@ func TestProviderAdapter_HealthCheck_Unhealthy(t *testing.T) {
 	}
 	if status.Healthy {
 		t.Error("expected Healthy=false for 500")
+	}
+}
+
+// TestMapError_PreservesUnderlyingCause is the §6.AC hardening regression
+// test. Forensic anchor (2026-07-02): the containerized goapi's outbound TCP
+// to IPv4-only upstreams STALLED over the Mullvad VPN — a dial/TLS error —
+// but archiveorg's mapError() collapsed EVERY error to a bare
+// provider.ErrUnknown, discarding the real cause. writeProviderError's
+// default branch then recorded a §6.AC non-fatal whose error_message was the
+// useless generic "provider: unknown error", so the egress stall
+// MASQUERADED as a parser bug and cost real diagnostic time. mapError MUST
+// (a) still classify as provider.ErrUnknown (so the HTTP status stays 502 and
+// the non-fatal is recorded) AND (b) preserve the underlying cause so the
+// operator dashboard sees the actual dial/TLS detail.
+//
+// PRIMARY assertion is on the preserved error text — the bytes the §6.AC
+// telemetry pipeline records for remote triage.
+//
+// FALSIFIABILITY REHEARSAL (Sixth Law clause 2, §6.J clause 2):
+//
+//	Mutation: revert mapError to `return provider.ErrUnknown`.
+//	Observed: TestMapError_PreservesUnderlyingCause FAILS:
+//	  "mapError discarded the underlying cause: got \"provider: unknown
+//	  error\", want it to contain \"i/o timeout\"".
+//	Reverted: yes.
+func TestMapError_PreservesUnderlyingCause(t *testing.T) {
+	// The archive.org IPv4-only-over-VPN failure surfaces as a dial timeout.
+	underlying := errors.New("dial tcp 207.241.224.2:443: i/o timeout")
+	got := mapError(underlying)
+	if got == nil {
+		t.Fatal("mapError(non-nil) returned nil")
+	}
+	// (a) Classification preserved: routes to writeProviderError's 502 +
+	// §6.AC non-fatal branch (provider.ErrUnknown is not a mapped sentinel).
+	if !errors.Is(got, provider.ErrUnknown) {
+		t.Errorf("mapError result no longer wraps provider.ErrUnknown: %v", got)
+	}
+	// (b) §6.AC: the underlying dial cause MUST survive for remote triage.
+	if !strings.Contains(got.Error(), "i/o timeout") {
+		t.Errorf("mapError discarded the underlying cause: got %q, want it to contain %q", got.Error(), "i/o timeout")
+	}
+}
+
+// TestMapError_NilPassthrough guards the happy path: a nil error MUST stay
+// nil (a non-nil wrap here would fabricate a failure on every success).
+func TestMapError_NilPassthrough(t *testing.T) {
+	if got := mapError(nil); got != nil {
+		t.Errorf("mapError(nil)=%v want nil", got)
 	}
 }
