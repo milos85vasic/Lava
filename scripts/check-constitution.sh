@@ -224,17 +224,21 @@ declare -a propagation_targets=(
   "CLAUDE.md" "AGENTS.md"
   "lava-api-go/CLAUDE.md" "lava-api-go/AGENTS.md" "lava-api-go/CONSTITUTION.md"
 )
-for sm in Auth Cache Challenges Concurrency Config Containers Database \
-          Discovery HTTP3 Mdns Middleware Observability RateLimiter \
-          Recovery Security Tracker-SDK; do
-  propagation_targets+=("submodules/$sm/CLAUDE.md")
+# Post-snake_case-migration (§11.4.29) the submodule dirs are lowercase; a glob
+# is migration-proof. The prior CamelCase literals (the pre-migration Auth /
+# Tracker-SDK / … dir names) stopped resolving after the rename, so the
+# `[[ ! -f ]]` guard below silently skipped
+# EVERY submodule — turning blocks 9/9b/9d/9e into no-ops for submodules and
+# hiding real propagation drift. Fixed 2026-07-02 (falsifiability: the hermetic
+# test_missing_6n_from_submodule_fails now exercises the submodule path).
+for sub in submodules/*/CLAUDE.md; do
+  [[ -f "$sub" ]] && propagation_targets+=("$sub")
 done
 for f in "${propagation_targets[@]}"; do
   if [[ ! -f "$f" ]]; then continue; fi
-  count=$(grep -c "6\.N" "$f")
-  if [[ "$count" -lt 1 ]]; then
-    echo "§6.N propagation REGRESSED: $f has 0 references (expected ≥ 1)" >&2
-    echo "  → Re-propagate per Group A's pattern (see commit 130b655)." >&2
+  if ! doc_inherits_clause "$f" "6.N"; then
+    echo "§6.N propagation REGRESSED: $f has neither a literal 6.N reference nor the §6.AD '## INHERITED FROM constitution/' pointer-block" >&2
+    echo "  → Re-propagate per Group A's pattern (see commit 130b655) OR add the inheritance pointer-block." >&2
     exit 1
   fi
 done
@@ -246,10 +250,9 @@ done
 # ----------------------------------------------------------------
 for f in "${propagation_targets[@]}"; do
   if [[ ! -f "$f" ]]; then continue; fi
-  count=$(grep -c "6\.O" "$f")
-  if [[ "$count" -lt 1 ]]; then
-    echo "§6.O propagation REGRESSED: $f has 0 references (expected ≥ 1)" >&2
-    echo "  → Re-propagate per the §6.O Crashlytics-Resolved Issue Coverage Mandate pattern." >&2
+  if ! doc_inherits_clause "$f" "6.O"; then
+    echo "§6.O propagation REGRESSED: $f has neither a literal 6.O reference nor the §6.AD '## INHERITED FROM constitution/' pointer-block" >&2
+    echo "  → Re-propagate per the §6.O Crashlytics-Resolved Issue Coverage Mandate pattern OR add the inheritance pointer-block." >&2
     exit 1
   fi
 done
@@ -261,10 +264,9 @@ done
 # ----------------------------------------------------------------
 for f in "${propagation_targets[@]}"; do
   if [[ ! -f "$f" ]]; then continue; fi
-  count=$(grep -c "6\.P" "$f")
-  if [[ "$count" -lt 1 ]]; then
-    echo "§6.P propagation REGRESSED: $f has 0 references (expected ≥ 1)" >&2
-    echo "  → Re-propagate per the §6.P Distribution Versioning + Changelog Mandate pattern." >&2
+  if ! doc_inherits_clause "$f" "6.P"; then
+    echo "§6.P propagation REGRESSED: $f has neither a literal 6.P reference nor the §6.AD '## INHERITED FROM constitution/' pointer-block" >&2
+    echo "  → Re-propagate per the §6.P Distribution Versioning + Changelog Mandate pattern OR add the inheritance pointer-block." >&2
     exit 1
   fi
 done
@@ -276,10 +278,9 @@ done
 # ----------------------------------------------------------------
 for f in "${propagation_targets[@]}"; do
   if [[ ! -f "$f" ]]; then continue; fi
-  count=$(grep -c "6\.Q" "$f")
-  if [[ "$count" -lt 1 ]]; then
-    echo "§6.Q propagation REGRESSED: $f has 0 references (expected ≥ 1)" >&2
-    echo "  → Re-propagate per the §6.Q Compose Layout Antipattern Guard pattern." >&2
+  if ! doc_inherits_clause "$f" "6.Q"; then
+    echo "§6.Q propagation REGRESSED: $f has neither a literal 6.Q reference nor the §6.AD '## INHERITED FROM constitution/' pointer-block" >&2
+    echo "  → Re-propagate per the §6.Q Compose Layout Antipattern Guard pattern OR add the inheritance pointer-block." >&2
     exit 1
   fi
 done

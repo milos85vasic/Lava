@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>check-constitution.sh</title>
   <style>
@@ -156,8 +156,12 @@
       text-decoration: none;
     }
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -175,9 +179,10 @@
 <h1
 id="scriptscheck-constitutionsh--user-guide"><code>scripts/check-constitution.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-05-15 (1.2.23 closure-cycle,
-§6.AD-debt task #61 backfill) <strong>Inheritance:</strong>
-HelixConstitution §11.4.18 (script documentation mandate)</p>
+<p><strong>Last verified:</strong> 2026-07-02 (§6.N/O/P/Q
+propagation-check snake_case-glob + pointer-block fix)
+<strong>Inheritance:</strong> HelixConstitution §11.4.18 (script
+documentation mandate)</p>
 <h2 id="overview">Overview</h2>
 <p>Stub doc generated from the script's in-source header comment. See
 <code>scripts/check-constitution.sh</code> for canonical behavior. This
@@ -274,5 +279,53 @@ it transitively invokes via
 <code>scripts/verify-all-constitution-rules.sh</code>. The waiver-state
 synchronization across the three docs is maintained per §11.4.18
 (script-doc sync).</p>
+<h2
+id="2026-07-02-update--6nopq-propagation-check-fix-snake_case-glob--pointer-block-acceptance">2026-07-02
+update — §6.N/O/P/Q propagation-check fix (snake_case glob +
+pointer-block acceptance)</h2>
+<p><strong>Regression found:</strong> the §6.N / §6.O / §6.P / §6.Q
+propagation blocks (9 / 9b / 9d / 9e) built their
+<code>propagation_targets</code> list from the <strong>pre-migration
+CamelCase</strong> submodule directory names (<code>Auth</code>,
+<code>Cache</code>, <code>Tracker-SDK</code>, … — the literal
+<code>submodules/&lt;CamelCase&gt;/CLAUDE.md</code> path form). After
+the §11.4.29 snake_case migration renamed every submodule dir to
+lowercase (<code>submodules/auth/</code>,
+<code>submodules/tracker_sdk/</code>, …), those old paths stopped
+resolving, so the per-target
+<code>[[ ! -f "$f" ]] &amp;&amp; continue</code> guard <strong>silently
+skipped every submodule</strong> — turning all four propagation gates
+into no-ops for submodules. The drift went unnoticed because the
+parallel §6.AD pointer-block mechanism was doing the actual inheritance.
+Surfaced by the hermetic
+<code>tests/check-constitution/check_constitution_test.sh::test_missing_6n_from_submodule_fails</code>,
+which was failing (the checker passed a fixture with §6.N stripped from
+<code>submodules/auth/CLAUDE.md</code>).</p>
+<p><strong>Fix (two parts, no submodule backfill):</strong></p>
+<ol type="1">
+<li><code>propagation_targets</code> now enumerates submodule docs via a
+migration-proof <code>submodules/*/CLAUDE.md</code> glob instead of the
+CamelCase literal list.</li>
+<li>Blocks 9 / 9b / 9d / 9e now use the existing
+<code>doc_inherits_clause "$f" "6.N"</code> helper (literal clause
+<strong>OR</strong> the <code>## INHERITED FROM constitution/</code>
+§6.AD pointer-block) — the <em>same</em> mechanism the §6.R / §6.S /
+§6.X propagation gates already accept. This is provably
+<strong>not</strong> a weakening: block <code>6.AD(4)</code>
+independently HARD-enforces the pointer-block's presence in every
+submodule doc, so accepting it here adds no pass-path that isn't already
+guaranteed and gated.</li>
+</ol>
+<p><strong>Why not backfill legacy per-clause sections into 16
+submodules:</strong> every submodule already carries the §6.AD
+pointer-block (the canonical post-2026-05-14 inheritance mechanism),
+which transitively inherits §6.N/O/P/Q. The explicit
+<code>## Clause 6.N</code> sections that only http3/mdns/tracker_sdk
+carry are pre-§6.AD "Group A" legacy; duplicating them into every
+submodule would be redundant churn, not real coverage.</p>
+<p>The companion test was updated to strip BOTH the literal §6.N and the
+pointer-block from <code>submodules/auth/CLAUDE.md</code>, so it
+faithfully exercises the block-9 rejection path (a submodule with NO
+§6.N inheritance mechanism).</p>
 </body>
 </html>

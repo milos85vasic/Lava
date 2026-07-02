@@ -70,10 +70,18 @@ test_missing_6n_from_submodule_fails() {
   fixture=$(make_fixture)
   cd "$fixture"
   if [[ -f submodules/auth/CLAUDE.md ]]; then
-    # Strip all 6.N references from Auth's CLAUDE.md
+    # A submodule inherits §6.N via EITHER a literal 6.N reference OR the §6.AD
+    # '## INHERITED FROM constitution/' pointer-block (doc_inherits_clause, the
+    # same mechanism §6.R/§6.S/§6.X propagation already accepts). Strip BOTH so
+    # the submodule has NO §6.N inheritance mechanism at all — the block-9
+    # propagation gate MUST then reject. (Pre-2026-07-02 this test stripped only
+    # the literal and passed vacuously because the checker's stale CamelCase
+    # submodule list skipped every submodule; the glob fix + this both-mechanism
+    # strip make it exercise the real submodule path.)
     sed_inplace '/6\.N/d' submodules/auth/CLAUDE.md
+    sed_inplace '/INHERITED FROM constitution/d' submodules/auth/CLAUDE.md
     if "$fixture/scripts/check-constitution.sh" >/dev/null 2>&1; then
-      echo "FAIL test_missing_6n_from_submodule_fails: script passed despite Auth missing §6.N"
+      echo "FAIL test_missing_6n_from_submodule_fails: script passed despite Auth missing §6.N (no literal + no pointer-block)"
       exit 1
     else
       echo "PASS test_missing_6n_from_submodule_fails"
