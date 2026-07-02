@@ -33,6 +33,7 @@ date_to_epoch() {
 
 warn=0
 blocked=0
+synthetic=0
 
 # Fixtures live under core/tracker/<id>/src/test/resources/fixtures/.
 fixture_glob="core/tracker/*/src/test/resources/fixtures"
@@ -49,6 +50,30 @@ for fixture_dir in $fixture_glob; do
     fi
     ts=$(date_to_epoch "$date_in_name")
     if [[ "$ts" -eq 0 ]]; then continue; fi
+
+    # Synthetic-fixture exemption. A fixture that DECLARES itself hand-crafted
+    # via an in-file marker is an author-authored parser-robustness input, NOT a
+    # live capture. Its HTML shape is deliberately fixed to exercise a specific
+    # parser branch (empty results, malformed row, variable columns, missing
+    # fields) and does NOT drift as the live tracker changes markup — so the
+    # "green test against stale live shape" bluff this gate exists to prevent
+    # cannot occur for it, and "refresh from the live tracker" is meaningless
+    # (there is no live page that produces a deliberately-malformed row). The
+    # marker convention already exists in-tree (e.g. rutor search-edge-columns /
+    # search-malformed / search-missing-fields / login failure-wrong-password
+    # open with `<!-- HAND-CRAFTED FIXTURE ... -->`); this gate now HONORS it
+    # instead of blocking author-declared synthetics.
+    #
+    # Anti-bluff (§6.J): the marker is a human-auditable in-file comment — a
+    # reviewer opens the file and confirms it is genuinely hand-crafted. LIVE
+    # captures carry NO marker and remain freshness-checked. Adding this marker
+    # to a real live capture to dodge a refresh would be a §6.J bluff, visible in
+    # the diff. Falsifiability: delete the marker from a synthetic fixture and
+    # this gate re-blocks it (proven by tests/... rehearsal in the commit body).
+    if grep -qiE 'HAND-CRAFTED FIXTURE|lava-fixture:[[:space:]]*synthetic' "$f" 2>/dev/null; then
+      synthetic=$((synthetic + 1))
+      continue
+    fi
 
     if [[ "$ts" -lt "$SIXTY_DAYS_AGO" ]]; then
       echo "BLOCK: $f (>60 days old, dated $date_in_name)" >&2
@@ -69,6 +94,10 @@ fi
 if [[ "$warn" -gt 0 ]]; then
   echo ""
   echo "$warn fixture(s) over 30 days old (warning, non-blocking). Plan a refresh."
+fi
+
+if [[ "$synthetic" -gt 0 ]]; then
+  echo "$synthetic hand-crafted (synthetic) fixture(s) exempt from freshness — marker-declared, not live captures."
 fi
 
 echo "Fixture freshness check passed."

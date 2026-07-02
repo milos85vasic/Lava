@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>check-fixture-freshness.sh</title>
   <style>
@@ -156,8 +156,12 @@
       text-decoration: none;
     }
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -175,9 +179,9 @@
 <h1
 id="scriptscheck-fixture-freshnesssh--user-guide"><code>scripts/check-fixture-freshness.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-05-15 (1.2.23 closure-cycle,
-§6.AD-debt task #61 backfill) <strong>Inheritance:</strong>
-HelixConstitution §11.4.18 (script documentation mandate)</p>
+<p><strong>Last verified:</strong> 2026-07-02 (synthetic-fixture marker
+exemption added) <strong>Inheritance:</strong> HelixConstitution
+§11.4.18 (script documentation mandate)</p>
 <h2 id="overview">Overview</h2>
 <p>Stub doc generated from the script's in-source header comment. See
 <code>scripts/check-fixture-freshness.sh</code> for canonical behavior.
@@ -197,6 +201,35 @@ Sixth Law clause 1 (&quot;same surfaces the user touches&quot;) implies that
 parsers must be tested against HTML that resembles what the user
 actually sees today. Trackers change their HTML structure; an old
 fixture is a green-test-against-stale-shape bluff.</code></pre>
+<h2 id="synthetic-fixture-exemption-added-2026-07-02">Synthetic-fixture
+exemption (added 2026-07-02)</h2>
+<p>The freshness rule targets <strong>live-capture</strong> fixtures —
+HTML saved from the real tracker, whose shape drifts as the tracker
+changes markup (the "green test against a stale live shape" bluff). It
+does <strong>not</strong> apply to <strong>synthetic</strong> fixtures:
+author-authored parser-robustness inputs (empty result set, malformed
+row, variable-column layout, missing fields, minimal representative
+rows) whose shape is deliberately fixed to exercise one parser branch.
+"Refresh from the live tracker" is meaningless for those — there is no
+live page that emits a deliberately-malformed row.</p>
+<p>A fixture is exempt from the freshness check iff it carries an
+in-file marker matching <code>HAND-CRAFTED FIXTURE</code> or
+<code>lava-fixture: synthetic</code> (case-insensitive). The convention
+already existed in-tree (e.g. rutor <code>search-edge-columns</code>,
+<code>search-malformed</code>, <code>search-missing-fields</code>,
+<code>login/failure-wrong-password</code> open with
+<code>&lt;!-- HAND-CRAFTED FIXTURE … --&gt;</code>); the gate now
+<strong>honors</strong> it rather than blocking author-declared
+synthetics. The tiny kinozal/nnmclub unit fixtures were given the same
+marker (their live verification runs via the <code>-PrealTrackers</code>
+<code>*RealNetworkDownloadTest</code> crown-jewel runs).</p>
+<p><strong>Anti-bluff (§6.J):</strong> the marker is a human-auditable
+in-file comment — a reviewer opens the file and confirms it is genuinely
+hand-crafted. Live captures carry <strong>no</strong> marker and stay
+freshness-checked. Adding the marker to a real live capture to dodge a
+refresh would be a §6.J bluff, plainly visible in the diff.
+Falsifiability: delete the marker from a synthetic fixture and the gate
+re-blocks it.</p>
 <h2 id="usage">Usage</h2>
 <p>See the script's in-source comment block (above) for canonical usage
 examples.</p>
