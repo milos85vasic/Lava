@@ -71,10 +71,16 @@ export PATH="$FAKE_BIN_DIR:$PATH"
 # --- Fake git (sha + branch queries) -----------------------------------------
 cat > "$FAKE_BIN_DIR/git" <<'GITEOF'
 #!/usr/bin/env bash
+# Leading `*` glob so the fake answers regardless of a `-C <dir>` prefix.
+# check-cycle-coverage.sh (§6.AK Gate 7, added after this test was first
+# written) resolves HEAD via `git -C "$REPO_ROOT" rev-parse HEAD` — the
+# `-C <dir>` form. Without the glob it fell through to real git on the
+# non-git fake repo → empty → HEAD=unknown, which mismatched the evidence
+# commit_sha (deadbeef) and made Gate 7 exit 2 before app-routing ran.
 case "$*" in
-    "rev-parse --short HEAD") echo "deadbeef" ;;
-    "rev-parse HEAD")         echo "deadbeef" ;;
-    "rev-parse --abbrev-ref HEAD") echo "master" ;;
+    *"rev-parse --short HEAD")      echo "deadbeef" ;;
+    *"rev-parse HEAD")             echo "deadbeef" ;;
+    *"rev-parse --abbrev-ref HEAD") echo "master" ;;
     *) command git "$@" ;;
 esac
 GITEOF
