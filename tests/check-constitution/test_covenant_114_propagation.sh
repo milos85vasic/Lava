@@ -78,9 +78,16 @@ test_clauses_present() {
 test_removed_anchor_makes_gate_fire() {
     local backup
     backup=$(mktemp)
-    cp "$CLAUDE_MD" "$backup"
-    # Guarantee restoration even if the test aborts/errors.
-    trap 'cp "$backup" "$CLAUDE_MD"; rm -f "$backup"' RETURN
+    # cp -p preserves CLAUDE.md's ORIGINAL mtime on both the backup and the
+    # restore, so this test leaves the file exactly as it found it. A plain cp
+    # restore would stamp CLAUDE.md's mtime to "now", making it newer than its
+    # generated .html/.pdf siblings — and a LATER hermetic test that re-runs the
+    # verify-all sweep (test_verify_all_rules.sh, 'v' > 'c' in run order) would
+    # then fail the markdown-export-sync gate on a spurious staleness. A hermetic
+    # test MUST leave shared state (mtime included) untouched.
+    cp -p "$CLAUDE_MD" "$backup"
+    # Guarantee restoration even if the test aborts/errors (preserve mtime too).
+    trap 'cp -p "$backup" "$CLAUDE_MD"; rm -f "$backup"' RETURN
 
     # Mutate: delete EVERY occurrence of the 11.4.134 literal token so no
     # form of the anchor survives. 134 is chosen because it appears exactly

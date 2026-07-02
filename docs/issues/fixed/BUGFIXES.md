@@ -61,6 +61,49 @@ Format per entry:
 
 ---
 
+## 2026-07-02 — hermetic test bumped real CLAUDE.md mtime → spurious markdown-export-sync failures blocking every push
+
+**Root cause:** `tests/check-constitution/test_covenant_114_propagation.sh` (the
+CM-COVENANT-114 falsifiability test) mutates the **real** repo-root `CLAUDE.md`
+(deletes the `11.4.134` anchor), runs the gate, then restores the original via a
+`trap` using a **plain `cp`**. Plain `cp` stamps the destination mtime to "now",
+so after this test ran, `CLAUDE.md` was newer than its generated `CLAUDE.html` /
+`CLAUDE.pdf` siblings. A LATER hermetic test in the same `scripts/ci.sh` run —
+`test_verify_all_rules.sh::test_clean_tree_passes` (runs after it; `v` > `c`) —
+re-invokes the full verify-all sweep, whose `markdown-export-sync` (§11.4.65)
+gate then reported the CLAUDE exports STALE and exited 1. Net effect:
+`ci.sh --changed-only` — and therefore **every `git push`** — failed at the
+hermetic phase, with a *different-looking* gate failing depending on run order
+(markdown-export in the direct sweep, or the hermetic phase via the re-run
+sweep). All one root cause: a non-hermetic test perturbing shared mtime state
+that feeds a later mtime-based gate.
+
+**Affected files:** `tests/check-constitution/test_covenant_114_propagation.sh`
+(backup + `trap` restore, ~lines 80-90).
+
+**Fix:** use `cp -p` for BOTH the backup and the `trap` restore so the test
+preserves `CLAUDE.md`'s ORIGINAL mtime and leaves shared repo state exactly as
+found. A hermetic test MUST NOT perturb repo state — mtime included.
+
+**Verification test/challenge:** reproduce-first — regenerated CLAUDE exports
+(md < exports), ran the covenant test, confirmed `CLAUDE.md` mtime **UNCHANGED**
+before/after (it was bumped before the fix), then ran the previously-failing
+`test_verify_all_rules.sh` and full `scripts/ci.sh --changed-only` → **EXIT 0,
+"All --changed-only gates passed"** (hermetic phase now runs through
+`tests/vm-distro`). Peer tests `test_canonical_root_and_upstreams.sh` +
+`tests/pre-push/check8_test.sh` verified SAFE (they write CLAUDE.md only inside
+`mktemp -d` fixtures, never the real repo).
+
+**Fix commit:** (this commit)
+**Forensic anchor:** surfaced while pushing the 2026-07-02 rutor fixture-refresh
++ gate-fix commits; the pre-push hook rejected 4× with seemingly-different gate
+failures that all traced to this single mtime-perturbation bug.
+
+`Classification:` project-specific (Lava hermetic-test hygiene; the underlying
+"hermetic tests must not perturb shared state" principle is universal).
+
+---
+
 ## 2026-06-25 — display/onboarding video-sweep batch (issues #4 / #6 / #7 / #8 / #9)
 
 Five display/onboarding defects from the operator's 2026-06-25 issue video.

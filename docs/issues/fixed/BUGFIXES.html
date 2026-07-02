@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>BUGFIXES</title>
   <style>
@@ -156,8 +156,12 @@
       text-decoration: none;
     }
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -309,6 +313,62 @@ class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb1-1"><
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>**Verification test/challenge:** path or commit ref</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>**Fix commit:** SHA</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>**Forensic anchor:** (optional) what surfaced the bug</span></code></pre></div>
+<hr />
+<h2
+id="2026-07-02--hermetic-test-bumped-real-claudemd-mtime--spurious-markdown-export-sync-failures-blocking-every-push">2026-07-02
+— hermetic test bumped real CLAUDE.md mtime → spurious
+markdown-export-sync failures blocking every push</h2>
+<p><strong>Root cause:</strong>
+<code>tests/check-constitution/test_covenant_114_propagation.sh</code>
+(the CM-COVENANT-114 falsifiability test) mutates the
+<strong>real</strong> repo-root <code>CLAUDE.md</code> (deletes the
+<code>11.4.134</code> anchor), runs the gate, then restores the original
+via a <code>trap</code> using a <strong>plain <code>cp</code></strong>.
+Plain <code>cp</code> stamps the destination mtime to "now", so after
+this test ran, <code>CLAUDE.md</code> was newer than its generated
+<code>CLAUDE.html</code> / <code>CLAUDE.pdf</code> siblings. A LATER
+hermetic test in the same <code>scripts/ci.sh</code> run —
+<code>test_verify_all_rules.sh::test_clean_tree_passes</code> (runs
+after it; <code>v</code> &gt; <code>c</code>) — re-invokes the full
+verify-all sweep, whose <code>markdown-export-sync</code> (§11.4.65)
+gate then reported the CLAUDE exports STALE and exited 1. Net effect:
+<code>ci.sh --changed-only</code> — and therefore <strong>every
+<code>git push</code></strong> — failed at the hermetic phase, with a
+<em>different-looking</em> gate failing depending on run order
+(markdown-export in the direct sweep, or the hermetic phase via the
+re-run sweep). All one root cause: a non-hermetic test perturbing shared
+mtime state that feeds a later mtime-based gate.</p>
+<p><strong>Affected files:</strong>
+<code>tests/check-constitution/test_covenant_114_propagation.sh</code>
+(backup + <code>trap</code> restore, ~lines 80-90).</p>
+<p><strong>Fix:</strong> use <code>cp -p</code> for BOTH the backup and
+the <code>trap</code> restore so the test preserves
+<code>CLAUDE.md</code>'s ORIGINAL mtime and leaves shared repo state
+exactly as found. A hermetic test MUST NOT perturb repo state — mtime
+included.</p>
+<p><strong>Verification test/challenge:</strong> reproduce-first —
+regenerated CLAUDE exports (md &lt; exports), ran the covenant test,
+confirmed <code>CLAUDE.md</code> mtime <strong>UNCHANGED</strong>
+before/after (it was bumped before the fix), then ran the
+previously-failing <code>test_verify_all_rules.sh</code> and full
+<code>scripts/ci.sh --changed-only</code> → <strong>EXIT 0, "All
+--changed-only gates passed"</strong> (hermetic phase now runs through
+<code>tests/vm-distro</code>). Peer tests
+<code>test_canonical_root_and_upstreams.sh</code> +
+<code>tests/pre-push/check8_test.sh</code> verified SAFE (they write
+CLAUDE.md only inside <code>mktemp -d</code> fixtures, never the real
+repo).</p>
+<p><strong>Fix commit:</strong> (this commit) <strong>Forensic
+anchor:</strong> surfaced while pushing the 2026-07-02 rutor
+fixture-refresh</p>
+<ul>
+<li>gate-fix commits; the pre-push hook rejected 4× with
+seemingly-different gate failures that all traced to this single
+mtime-perturbation bug.</li>
+</ul>
+<p><code>Classification:</code> project-specific (Lava hermetic-test
+hygiene; the underlying "hermetic tests must not perturb shared state"
+principle is universal).</p>
 <hr />
 <h2
 id="2026-06-25--displayonboarding-video-sweep-batch-issues-4--6--7--8--9">2026-06-25
