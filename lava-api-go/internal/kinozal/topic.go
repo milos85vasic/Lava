@@ -24,12 +24,34 @@ func ParseTopicPage(html []byte) (*provider.TopicResult, error) {
 		title = strings.TrimSpace(doc.Find("title").First().Text())
 	}
 
+	// kinozal details pages carry NO magnet link (the torrent is fetched via
+	// download.php); these generic selectors stay only for synthetic / non-kinozal
+	// pages and resolve to empty on a real kinozal page.
 	magnetLink, _ := doc.Find("a.magnet").Attr("href")
 	if magnetLink == "" {
 		magnetLink, _ = doc.Find("a[href^=magnet:]").Attr("href")
 	}
 
-	description := strings.TrimSpace(doc.Find("div.content").First().Text())
+	// Description: a real kinozal /details.php page renders the item metadata
+	// (Оригинальное название / О фильме / Размер …) inside `div.bx1` blocks. The
+	// historical `div.content` selector matched the ENTIRE content column (menu +
+	// comments + everything), so the description was an unreadable blob; on many
+	// layouts `div.content` is absent entirely and the description came back empty.
+	// Prefer the focused bx1 blocks; fall back to div.content for synthetic /
+	// non-kinozal pages so the generic path still works.
+	var descParts []string
+	doc.Find("div.bx1").Each(func(_ int, s *goquery.Selection) {
+		if t := strings.TrimSpace(s.Text()); t != "" {
+			descParts = append(descParts, t)
+		}
+	})
+	description := strings.Join(descParts, "\n\n")
+	if description == "" {
+		description = strings.TrimSpace(doc.Find("div.content").First().Text())
+	}
+
+	// Poster: kinozal shows the cover image as `img.p200`.
+	posterURL, _ := doc.Find("img.p200").Attr("src")
 
 	id := ""
 	doc.Find("a[href*=\"details.php?id=\"]").Each(func(_ int, s *goquery.Selection) {
@@ -48,12 +70,24 @@ func ParseTopicPage(html []byte) (*provider.TopicResult, error) {
 		id = u.Query().Get("id")
 	})
 
+	// Download affordance: the actual /download.php anchor on a kinozal details
+	// page is gated behind login, so an anonymous scrape sees no download link.
+	// Derive the canonical download route from the topic id — the SAME route
+	// ProviderAdapter.DownloadFile issues (/download.php?id=<id>). Without this the
+	// topic detail renders with no working download button for the user.
+	downloadURL := ""
+	if id != "" {
+		downloadURL = "/download.php?id=" + id
+	}
+
 	return &provider.TopicResult{
 		Provider:    "kinozal",
 		ID:          id,
 		Title:       title,
 		Description: description,
+		PosterURL:   posterURL,
 		MagnetLink:  magnetLink,
+		DownloadURL: downloadURL,
 	}, nil
 }
 
@@ -71,6 +105,13 @@ func (c *Client) GetTopic(ctx context.Context, id string, cookie string) (*provi
 	if err != nil {
 		return nil, err
 	}
+	// The request id is authoritative — prefer it over the anchor-parsed id so the
+	// id + derived download route are always keyed on the topic the caller asked
+	// for (ParseTopicPage derives DownloadURL from the parsed anchor id, which is
+	// empty on layouts without a self-referential details.php link).
 	result.ID = id
+	if id != "" {
+		result.DownloadURL = "/download.php?id=" + id
+	}
 	return result, nil
 }

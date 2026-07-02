@@ -21,9 +21,11 @@ import (
 	"digital.vasic.lava.apigo/internal/provider/curated/nyaa"
 	"digital.vasic.lava.apigo/internal/provider/curated/thepiratebay"
 	"digital.vasic.lava.apigo/internal/provider/curated/tokyotosho"
-	"digital.vasic.lava.apigo/internal/provider/curated/torrentdownloads"
 	"digital.vasic.lava.apigo/internal/provider/curated/torrentscsv"
 	"digital.vasic.lava.apigo/internal/provider/curated/yts"
+	// NOTE: torrentdownloads is intentionally NOT imported/registered — its
+	// upstream is DEAD (see RegisterAll below). Kept as an unregistered package
+	// so it can be re-enabled if the upstream returns.
 )
 
 // RegisterAll registers every curated provider into r. Adding a curated
@@ -35,6 +37,13 @@ func RegisterAll(r *provider.ProviderRegistry) {
 	r.Register(bitsearch.New())
 	r.Register(knaben.New())
 	r.Register(nyaa.New())
-	r.Register(torrentdownloads.New())
+	// torrentdownloads UNREGISTERED 2026-07-02 — DEAD UPSTREAM. Re-probe of
+	// https://www.torrentdownloads.pro/rss.xml returned HTTP 522 (Cloudflare
+	// "origin down") x3 and the root host timed out (origin unreachable), so
+	// every real user search via this provider returned 0 results — a silent
+	// broken provider in the catalogue. Removing the registration hides it from
+	// GET /v1/providers. The internal/provider/curated/torrentdownloads package
+	// is retained (not deleted): re-add `r.Register(torrentdownloads.New())`
+	// (and its import above) once the upstream returns and re-probes healthy.
 	r.Register(tokyotosho.New())
 }

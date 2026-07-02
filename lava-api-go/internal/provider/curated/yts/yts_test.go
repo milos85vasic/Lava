@@ -13,24 +13,28 @@ import (
 	"digital.vasic.lava.apigo/internal/provider"
 )
 
-// Anti-Bluff (§6.J): the SUT is the REAL YTS Client hitting a REAL
-// httptest.Server socket serving a captured YTS response. The primary
-// assertions are on the PARSED, user-visible SearchItem fields a real provider
-// list renders (title, info_hash, magnet, size, seeders) — not on call counts.
+// Anti-Bluff (§6.J) + §6.D fixture honesty: the SUT is the REAL YTS Client
+// hitting a REAL httptest.Server socket serving a REAL captured YTS response.
+// The fixture testdata/yts_inception.json is a verbatim capture of the live
+// YTS list_movies.json API (query_term=inception, limit=50) taken 2026-07-02
+// from the production failover mirror set (yts.bz → yts.gg), NOT a fabricated
+// document. The primary assertions are on the PARSED, user-visible SearchItem
+// fields a real provider list renders (title, info_hash, magnet, size) — not on
+// call counts. The real capture returns 1 movie (Inception (2010), id 1606)
+// with 3 real torrents (720p/1080p/2160p), so the flattening + magnet-build +
+// hash-lowercasing paths are exercised against real upstream data.
 //
 // FALSIFIABILITY REHEARSAL (§6.J clause 2) — recorded in the Bluff-Audit stamp:
-//   Mutation: in client.go, map Seeders from tor.Peers (wrong YTS field).
+//   Mutation: in client.go searchOne, map SizeBytes from tor.Seeds (wrong YTS
+//             JSON field) instead of tor.SizeBytes.
 //   Observed: TestSearch_ParsesYTSFixture →
-//             "yts_test.go:93: seeders = 5, want 142".
-//   Mutation: drop the len(hash)!=40 / !isHex(hash) skip in Search.
-//   Observed: a non-40-hex hash would leak through as a fake torrent
-//             (TestSearch_FlattensAndFiltersHashes → non-40-hex info_hash leaked).
-//   Reverted: yes (the Seeders mutation was actually performed against this
-//             test, observed the failure above, then reverted).
+//             "yts_test.go: sizeBytes = 0, want 1148903752".
+//   Reverted: yes (the mutation was actually performed against this test,
+//             observed the failure above, then reverted via git checkout).
 
 func serveFixture(t *testing.T) *httptest.Server {
 	t.Helper()
-	body, err := os.ReadFile(filepath.Join("testdata", "yts_ubuntu.json"))
+	body, err := os.ReadFile(filepath.Join("testdata", "yts_inception.json"))
 	if err != nil {
 		t.Fatalf("read fixture: %v", err)
 	}
@@ -54,28 +58,29 @@ func TestSearch_ParsesYTSFixture(t *testing.T) {
 	srv := serveFixture(t)
 	c := NewClient(srv.URL)
 
-	res, err := c.Search(context.Background(), "ubuntu", 0)
+	res, err := c.Search(context.Background(), "inception", 0)
 	if err != nil {
 		t.Fatalf("Search: %v", err)
 	}
 	if res.Provider != providerID {
 		t.Errorf("provider = %q, want %q", res.Provider, providerID)
 	}
-	// FLATTENING: 1 movie with 2 torrents → 2 SearchItems.
-	if len(res.Results) != 2 {
-		t.Fatalf("got %d results, want 2 (one per torrent — flattening)", len(res.Results))
+	// FLATTENING: the real capture is 1 movie (Inception (2010)) with 3
+	// torrents (720p, 1080p, 2160p) → 3 SearchItems, in torrents-array order.
+	if len(res.Results) != 3 {
+		t.Fatalf("got %d results, want 3 (one per real torrent — flattening)", len(res.Results))
 	}
 
 	first := res.Results[0]
-	// Title includes the quality tag.
-	if first.Title != "Ubuntu (2019) [1080p]" {
-		t.Errorf("title = %q, want %q", first.Title, "Ubuntu (2019) [1080p]")
+	// Title = real title_long + " [" + quality + "]". First real torrent is 720p.
+	if first.Title != "Inception (2010) [720p]" {
+		t.Errorf("title = %q, want %q", first.Title, "Inception (2010) [720p]")
 	}
-	if !strings.Contains(first.Title, "1080p") {
+	if !strings.Contains(first.Title, "720p") {
 		t.Errorf("first title missing quality: %q", first.Title)
 	}
-	// Uppercase upstream hash must be lowercased.
-	const wantHash = "34930674ef3bb9317fb5f263cca830c52a1e5da8"
+	// The real upstream hash is UPPERCASE and MUST be lowercased by the parser.
+	const wantHash = "ce9156eb497762f8b7577b71c0647a4b0c3423e1"
 	if first.InfoHash != wantHash {
 		t.Errorf("infoHash = %q, want %q", first.InfoHash, wantHash)
 	}
@@ -86,30 +91,63 @@ func TestSearch_ParsesYTSFixture(t *testing.T) {
 	if !strings.Contains(first.MagnetLink, "tr=") || !strings.Contains(first.MagnetLink, "dn=") {
 		t.Errorf("magnet missing tr/dn: %q", first.MagnetLink)
 	}
-	if first.SizeBytes != 1557135360 {
-		t.Errorf("sizeBytes = %d, want 1557135360", first.SizeBytes)
+	// Real size_bytes for the 720p bluray torrent.
+	if first.SizeBytes != 1148903752 {
+		t.Errorf("sizeBytes = %d, want 1148903752", first.SizeBytes)
 	}
-	if first.Seeders != 142 {
-		t.Errorf("seeders = %d, want 142", first.Seeders)
-	}
-	if first.Leechers != 5 {
-		t.Errorf("leechers = %d, want 5", first.Leechers)
-	}
-	if first.Date == "" {
-		t.Errorf("date should be parsed from date_uploaded_unix>0, got empty")
+	// Real date_uploaded_unix (1446333277) → exact RFC3339 in UTC.
+	if first.Date != "2015-10-31T23:14:37Z" {
+		t.Errorf("date = %q, want %q (parsed from date_uploaded_unix=1446333277)", first.Date, "2015-10-31T23:14:37Z")
 	}
 
-	// Second row is the 720p quality from the SAME movie (proves flattening),
-	// with a lowercase hash already lowercased + date_uploaded_unix=0 → empty date.
+	// Second row is the 1080p quality from the SAME movie (proves flattening),
+	// with its own real hash (also uppercase upstream → lowercased) + size.
 	second := res.Results[1]
-	if second.Title != "Ubuntu (2019) [720p]" {
-		t.Errorf("second title = %q, want %q", second.Title, "Ubuntu (2019) [720p]")
+	if second.Title != "Inception (2010) [1080p]" {
+		t.Errorf("second title = %q, want %q", second.Title, "Inception (2010) [1080p]")
 	}
-	if second.InfoHash != "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678" {
+	if second.InfoHash != "224bf45881252643dfc2e71abc7b2660a21c68c4" {
 		t.Errorf("second infoHash = %q", second.InfoHash)
 	}
-	if second.Date != "" {
-		t.Errorf("row with date_uploaded_unix=0 must yield empty date, got %q", second.Date)
+	if second.SizeBytes != 1986422374 {
+		t.Errorf("second sizeBytes = %d, want 1986422374", second.SizeBytes)
+	}
+
+	// Third row is the 2160p quality — proves all torrents flatten through.
+	third := res.Results[2]
+	if third.Title != "Inception (2010) [2160p]" {
+		t.Errorf("third title = %q, want %q", third.Title, "Inception (2010) [2160p]")
+	}
+	if third.InfoHash != "43e3691dc6f4172841e32b25b349e2b7a980b9c5" {
+		t.Errorf("third infoHash = %q", third.InfoHash)
+	}
+	if third.SizeBytes != 7129645711 {
+		t.Errorf("third sizeBytes = %d, want 7129645711", third.SizeBytes)
+	}
+	if third.Date != "2022-02-28T11:35:02Z" {
+		t.Errorf("third date = %q, want %q (parsed from date_uploaded_unix=1646048102)", third.Date, "2022-02-28T11:35:02Z")
+	}
+}
+
+// TestUnixToDate_ZeroYieldsEmpty preserves the date-parsing branch coverage that
+// the real all-positive-timestamp inception fixture no longer exercises: YTS
+// occasionally sends date_uploaded_unix=0, which MUST map to an empty Date
+// (never a bogus 1970 epoch string a user would see). Direct unit test of the
+// production unixToDate helper — no synthetic search fixture involved.
+//
+// FALSIFIABILITY REHEARSAL (§6.J clause 2):
+//   Mutation: in client.go unixToDate, drop the `if sec <= 0 { return "" }`
+//             guard so 0 formats as "1970-01-01T00:00:00Z".
+//   Observed: TestUnixToDate_ZeroYieldsEmpty →
+//             `unixToDate(0) = "1970-01-01T00:00:00Z", want ""`.
+//   Reverted: yes.
+func TestUnixToDate_ZeroYieldsEmpty(t *testing.T) {
+	if got := unixToDate(0); got != "" {
+		t.Errorf("unixToDate(0) = %q, want \"\" (YTS 0-timestamp must not render as epoch)", got)
+	}
+	// Positive timestamp round-trips to exact RFC3339 UTC.
+	if got := unixToDate(1446333277); got != "2015-10-31T23:14:37Z" {
+		t.Errorf("unixToDate(1446333277) = %q, want %q", got, "2015-10-31T23:14:37Z")
 	}
 }
 
@@ -191,7 +229,7 @@ func TestSearch_FailsOverToHealthyMirror(t *testing.T) {
 	}))
 	t.Cleanup(dead.Close)
 
-	body, err := os.ReadFile(filepath.Join("testdata", "yts_ubuntu.json"))
+	body, err := os.ReadFile(filepath.Join("testdata", "yts_inception.json"))
 	if err != nil {
 		t.Fatalf("read fixture: %v", err)
 	}
@@ -206,15 +244,15 @@ func TestSearch_FailsOverToHealthyMirror(t *testing.T) {
 	t.Cleanup(healthy.Close)
 
 	c := NewClientWithMirrors([]string{dead.URL, healthy.URL})
-	res, err := c.Search(context.Background(), "ubuntu", 0)
+	res, err := c.Search(context.Background(), "inception", 0)
 	if err != nil {
 		t.Fatalf("Search across [dead, healthy] mirrors should fail over, got error: %v", err)
 	}
-	// Results came from the SECOND (healthy) mirror's fixture.
-	if len(res.Results) != 2 {
-		t.Fatalf("got %d results, want 2 (parsed from the healthy fallback mirror)", len(res.Results))
+	// Results came from the SECOND (healthy) mirror's REAL fixture: 3 torrents.
+	if len(res.Results) != 3 {
+		t.Fatalf("got %d results, want 3 (parsed from the healthy fallback mirror)", len(res.Results))
 	}
-	const wantHash = "34930674ef3bb9317fb5f263cca830c52a1e5da8"
+	const wantHash = "ce9156eb497762f8b7577b71c0647a4b0c3423e1"
 	if res.Results[0].InfoHash != wantHash {
 		t.Errorf("first infoHash = %q, want %q (from the healthy mirror)", res.Results[0].InfoHash, wantHash)
 	}

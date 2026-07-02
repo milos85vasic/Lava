@@ -86,6 +86,12 @@ func Register(group *gin.RouterGroup, deps *Deps, reg *provider.ProviderRegistry
 
 	topic := NewTopicHandler(deps)
 	group.GET("/topic/:id", chain(provider.CapTopic, topic.GetTopic)...)
+	// The Android client's getTopicPage requests /topic/:id/page and decodes into
+	// the tolerant TopicDetailDto; serve the same TopicResult shape as /topic/:id
+	// (Provider.GetTopic already takes the page index). Without this route the
+	// page request 404'd → SDK page-source returned null → legacy rutracker-only
+	// /topic2/{id} fallback → MissingFieldException for non-rutracker providers.
+	group.GET("/topic/:id/page", chain(provider.CapTopic, topic.GetTopicPage)...)
 
 	torrent := NewTorrentHandler(deps)
 	group.GET("/torrent/:id", chain(provider.CapTorrentDownload, torrent.GetTorrent)...)

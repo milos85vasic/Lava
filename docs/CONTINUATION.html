@@ -189,6 +189,45 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🟢🎉 2026-07-02 (kinozal FULLY GREEN — verdict=PASS
+end-to-end; round-3 parallel-subagent sweep landed).</strong> The
+kinozal goapi keystone now passes the COMPLETE flow on device: search →
+open details → download. Evidence:
+<code>topic/:id/page -&gt; HTTP 200</code>,
+<code>[iter] verdict=PASS (fail=0 skip=0)</code>. THREE kinozal layers,
+all §6.D/§6.J bluffs or gaps, all reproduce-first + device-verified: (1)
+SEARCH parser (fictional
+<code>table.tumblers</code>/<code>a.namer</code>/Latin GB + synthetic
+fixture — fixed round-2, 50 real rows); (2) TOPIC parser (synthetic
+fixture, fictional <code>a.magnet</code>/<code>div.content</code> —
+fixed: real
+<code>div.bx1</code>/<code>img.p200</code>/<code>download.php?id=</code>
++ real anonymous win-1251 fixture, RED <code>DownloadURL=""</code> →
+GREEN); (3) missing goapi route
+<code>GET /v1/{provider}/topic/:id/page</code> — the client's
+getTopicPage 404'd → fell back to the legacy rutracker-only
+<code>/topic2/{id}</code> → strict <code>TopicPageDto</code> decode
+threw for non-rutracker providers (rutracker passed only because its
+fallback IS rutracker); added the route serving the tolerant
+<code>TopicDetailDto</code> shape (RED 404 → GREEN 200, live-verified).
+<strong>Round-3 parallel-subagent items (all real-evidence, no
+bluff):</strong> torrentdownloads DROPPED from the goapi catalogue
+(re-probed DEAD 522×3 — dead upstream; unregistered + negative-guard
+tests); yts + archiveorg synthetic fixtures REPLACED with real
+sha256-verified captured API responses (§6.D honesty, 3 falsifiability
+rehearsals); nnmclub topic-description selector fixed
+(<code>#pagecontent</code>→first <code>div.postbody</code>; the audit's
+<code>#contentdiv</code> was the hidden spoiler — real fixture, RED
+empty→GREEN) — nnmclub LOGIN remains Turnstile-blocked (FlareSolverr
+wired but structurally can't solve in-form Turnstile → needs a paid
+token solver; honest, not faked); topic/download parser audit found NO
+other kinozal-class bluff. Committed here (embed <code>.so</code>
+rebuilt + <code>api-source.hash</code> refreshed). <strong>goapi
+provider status: rutracker + kinozal FULLY green;
+archiveorg/gutenberg/thepiratebay/torrentscsv/knaben/bitsearch/nyaa/tokyotosho
+parsers OK (device runs next); torrentdownloads dropped; nnmclub login
+Turnstile-blocked; rutor/iptorrents not-goapi-served.</strong> ─────
+(current)</p>
 <p><strong>🟢🔧🔬 2026-07-02 (parallel-subagent round — kinozal SEARCH
 bluff FIXED + device-proven; 6 workable items driven to evidence-backed
 resolution).</strong> Up to 5 parallel subagents on all workable items

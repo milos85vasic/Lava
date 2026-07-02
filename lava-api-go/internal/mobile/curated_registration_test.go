@@ -56,14 +56,21 @@ func TestEmbedPath_RegistersCuratedProviders(t *testing.T) {
 	if _, err := registry.Get("nyaa"); err != nil {
 		t.Errorf("embed path did not register curated provider nyaa: %v", err)
 	}
-	if _, err := registry.Get("torrentdownloads"); err != nil {
-		t.Errorf("embed path did not register curated provider torrentdownloads: %v", err)
+
+	// torrentdownloads MUST NOT be registered on the embed path either — its
+	// upstream is DEAD (rss.xml → HTTP 522 x3 + origin timeout, re-probed
+	// 2026-07-02), so it was UNREGISTERED in curated.go RegisterAll. On-device
+	// the same registration site is used, so the dead provider must not reach
+	// the mobile catalogue. Reproduce-first guard: re-registering it in
+	// RegisterAll makes registry.Get succeed and fails this assertion.
+	if _, err := registry.Get("torrentdownloads"); err == nil {
+		t.Error("embed path registered torrentdownloads but its upstream is DEAD (522) — it must NOT appear in the on-device catalogue")
 	}
 
 	// The on-device catalogue is now strictly larger than the 5 bundled natives
 	// (rutracker, nnmclub, kinozal, archiveorg, gutenberg) — the curated set is
-	// additive. This is the "more than the natives" assertion in concrete form.
-	if got := len(registry.All()); got < 12 {
-		t.Errorf("embed registry has %d providers, want >= 12 (5 natives + 7 curated)", got)
+	// additive. 6 curated remain after torrentdownloads was dropped (was 7).
+	if got := len(registry.All()); got < 11 {
+		t.Errorf("embed registry has %d providers, want >= 11 (5 natives + 6 curated)", got)
 	}
 }

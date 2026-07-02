@@ -174,7 +174,10 @@ func TestProvidersHandler_IncludesRealCuratedProvidersEndToEnd(t *testing.T) {
 
 	// Every curated public-tracker provider MUST appear in the body with honest
 	// SEARCH + MAGNET_LINK caps, anonymous + AuthNone, compiled-in (native).
-	for _, id := range []string{"thepiratebay", "yts", "torrentscsv", "bitsearch", "knaben", "nyaa", "torrentdownloads"} {
+	// NOTE: torrentdownloads is intentionally absent — UNREGISTERED 2026-07-02
+	// (DEAD UPSTREAM: rss.xml → HTTP 522 x3 + origin timeout). The negative
+	// assertion after this loop pins that it is NOT served in the catalogue body.
+	for _, id := range []string{"thepiratebay", "yts", "torrentscsv", "bitsearch", "knaben", "nyaa"} {
 		got, ok := byID[id]
 		if !ok {
 			t.Fatalf("GET /providers body is missing curated provider %q (registry→handler→body drift)", id)
@@ -200,6 +203,15 @@ func TestProvidersHandler_IncludesRealCuratedProvidersEndToEnd(t *testing.T) {
 		if !hasSearch || !hasMagnet {
 			t.Errorf("%q capabilities = %v, want SEARCH+MAGNET_LINK in the body", id, got.caps)
 		}
+	}
+
+	// torrentdownloads MUST NOT appear in the served catalogue — its upstream is
+	// DEAD (rss.xml → HTTP 522 x3 + origin timeout, re-probed 2026-07-02). A dead
+	// provider in GET /providers means every real user who selects it gets 0
+	// results. Reproduce-first guard: re-registering it in curated.go RegisterAll
+	// makes it appear in the body and fails this assertion.
+	if _, ok := byID["torrentdownloads"]; ok {
+		t.Error("GET /providers body includes torrentdownloads but its upstream is DEAD (522) — it must NOT be served to users")
 	}
 
 	// The catalogue body is strictly larger than the bundled natives — the
@@ -265,19 +277,21 @@ func TestProvidersHandler_ServesAdapterDisplayName(t *testing.T) {
 		displayByID[p.ID] = p.DisplayName
 	}
 
-	// The exact two chips from the operator's video, plus the rest of the
-	// curated set so the whole catalogue is pinned to human names. The wanted
+	// The exact chip from the operator's video (yts → "YTS"), plus the rest of
+	// the curated set so the whole catalogue is pinned to human names. The wanted
 	// values are the adapters' own DisplayName() returns (see
 	// internal/provider/curated/<id>/provider.go).
+	// NOTE: torrentdownloads is intentionally NOT listed — UNREGISTERED
+	// 2026-07-02 (DEAD UPSTREAM: rss.xml → HTTP 522 x3 + origin timeout); it has
+	// no served catalogue entry, so there is no displayName to pin.
 	want := map[string]string{
-		"yts":              "YTS",
-		"torrentdownloads": "TorrentDownloads",
-		"thepiratebay":     "The Pirate Bay",
-		"torrentscsv":      "Torrents-CSV",
-		"bitsearch":        "BitSearch",
-		"knaben":           "Knaben",
-		"nyaa":             "Nyaa",
-		"tokyotosho":       "Tokyo Toshokan",
+		"yts":          "YTS",
+		"thepiratebay": "The Pirate Bay",
+		"torrentscsv":  "Torrents-CSV",
+		"bitsearch":    "BitSearch",
+		"knaben":       "Knaben",
+		"nyaa":         "Nyaa",
+		"tokyotosho":   "Tokyo Toshokan",
 	}
 
 	for id, wantName := range want {

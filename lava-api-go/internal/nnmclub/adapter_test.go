@@ -77,7 +77,7 @@ func TestAdapter_GetForumTree_EndToEnd(t *testing.T) {
 // ParseTopicPage, asserting the magnet link the user taps to download.
 func TestAdapter_GetTopic_EndToEnd(t *testing.T) {
 	a := newAdapter(t, func(w http.ResponseWriter, r *http.Request) {
-		w.Write(readTestData(t, "topic/topic_normal.html"))
+		w.Write(readTestData(t, "topic/topic_real.html"))
 	})
 
 	res, err := a.GetTopic(context.Background(), "1001", 1, provider.Credentials{})

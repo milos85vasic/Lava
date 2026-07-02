@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"digital.vasic.lava.apigo/internal/provider"
@@ -61,9 +62,10 @@ func TestProviderAdapter_Browse(t *testing.T) {
 }
 
 func TestProviderAdapter_GetTopic(t *testing.T) {
-	fixture := loadFixture(t, "topic", "topic_normal.html")
+	fixture := loadFixture(t, "topic", "topic_real.html")
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		// Serve win-1251 like the real nnmclub.to so the full decode pipeline runs.
+		w.Header().Set("Content-Type", "text/html; charset=windows-1251")
 		_, _ = w.Write(fixture)
 	}))
 	defer srv.Close()
@@ -73,8 +75,11 @@ func TestProviderAdapter_GetTopic(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetTopic error: %v", err)
 	}
-	if result.Title != "Ubuntu 24.04 LTS" {
-		t.Errorf("Title: got %q, want \"Ubuntu 24.04 LTS\"", result.Title)
+	if !strings.Contains(result.Title, "Учебная группа") {
+		t.Errorf("Title: got %q, want it to contain \"Учебная группа\"", result.Title)
+	}
+	if strings.TrimSpace(result.Description) == "" {
+		t.Error("Description: expected the real non-empty opening-post body, got EMPTY")
 	}
 }
 
