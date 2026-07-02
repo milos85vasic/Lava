@@ -182,7 +182,13 @@ fi
 note=""
 if [[ "$GRADLE_RC" -eq 0 && "$failures" -eq 0 && "$errors" -eq 0 ]]; then
   # Clean JUnit run. (Preserve the existing all-skipped -> SKIP behavior.)
-  if [[ "$skipped" -gt 0 && "$tests" -eq "$skipped" ]]; then
+  if [[ "$tests" -eq 0 ]]; then
+    # gradle_rc=0 but ZERO tests executed = the Challenge never ran (bad -Ptest
+    # filter, empty suite, wrong module). A no-op run asserts NOTHING, so it is
+    # NOT a pass. §6.J: BUILD SUCCESSFUL is necessary, never sufficient — a green
+    # with 0 executed tests is a bluff by construction.
+    verdict="FAIL"; note="no tests executed (gradle_rc=0 but tests=0 — Challenge did not run)"
+  elif [[ "$skipped" -gt 0 && "$tests" -eq "$skipped" ]]; then
     verdict="SKIP"; note="all tests skipped"
   else
     verdict="PASS"; note="clean"

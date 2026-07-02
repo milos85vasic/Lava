@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -61,5 +62,19 @@ func (h *TorrentHandler) GetDownload(c *gin.Context) {
 		writeProviderError(c, err)
 		return
 	}
-	c.Data(http.StatusOK, result.ContentType, result.Body)
+	// Serve the raw bytes with the provider-supplied content type (falling back
+	// to a generic binary type when the provider left it blank — e.g. archiveorg
+	// fills Filename only) plus a Content-Disposition so the client can name the
+	// saved artifact. HTTP-file providers (gutenberg, archiveorg) reach this
+	// handler via the CapHTTPDownload-gated /http-download/:id route; torrent
+	// providers reach it via /download/:id — both deliver Provider.DownloadFile
+	// output, so the header applies uniformly.
+	contentType := result.ContentType
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	if result.Filename != "" {
+		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%q", result.Filename))
+	}
+	c.Data(http.StatusOK, contentType, result.Body)
 }

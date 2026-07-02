@@ -1,0 +1,69 @@
+{
+  "date": "2026-07-02",
+  "trigger": "operator anti-bluff-mandate invocation (autonomous-QA loop, \"no bluff of any kind\") — §6.N.1.1 first-in-window full 5+2 hunt",
+  "method": "§6.N mutation-rehearsal: for each target, mutate the PRODUCTION parser (not the test), run the test, confirm RED on the exact user-visible field, git-checkout revert, confirm GREEN. Executed by a worktree subagent with submodules initialised to their recorded pins (no pin changed).",
+  "test_targets": [
+    {
+      "test": "internal/kinozal/search_test.go :: TestParseSearchPage",
+      "mutated_production_file": "internal/kinozal/search.go",
+      "mutation": "row selector doc.Find(\"table.t_peer tr\") -> doc.Find(\"table.nope tr\")",
+      "observed_red": "search_test.go:84: Results len = 0, want >= 20 (a real kinozal results page)",
+      "reverted": true,
+      "post_revert": "--- PASS: TestParseSearchPage / ok",
+      "verdict": "GENUINE"
+    },
+    {
+      "test": "internal/kinozal/topic_test.go :: TestParseTopicPage",
+      "mutated_production_file": "internal/kinozal/topic.go",
+      "mutation": "download-link derivation \"/download.php?id=\" + id -> \"/nope?id=\" + id",
+      "observed_red": "topic_test.go:58: DownloadURL = \"/nope?id=2145735\", want /download.php?id=2145735",
+      "reverted": true,
+      "post_revert": "--- PASS: TestParseTopicPage / ok",
+      "verdict": "GENUINE"
+    },
+    {
+      "test": "internal/provider/curated/yts/yts_test.go :: TestSearch_ParsesYTSFixture",
+      "mutated_production_file": "internal/provider/curated/yts/client.go",
+      "mutation": "size mapping SizeBytes: tor.SizeBytes -> SizeBytes: int64(tor.Seeds)",
+      "observed_red": "yts_test.go:96: sizeBytes = 0, want 1148903752 (and :113 want 1986422374, :125 want 7129645711)",
+      "reverted": true,
+      "post_revert": "--- PASS: TestSearch_ParsesYTSFixture / ok",
+      "verdict": "GENUINE"
+    },
+    {
+      "test": "internal/nnmclub/topic_test.go :: TestParseTopicPage_HappyPath",
+      "mutated_production_file": "internal/nnmclub/topic.go",
+      "mutation": "description selector doc.Find(\"div.postbody\") -> doc.Find(\"div.nope\")",
+      "observed_red": "topic_test.go:62: Description: expected the real opening-post body, got EMPTY (selector missed the description container)",
+      "reverted": true,
+      "post_revert": "--- PASS: TestParseTopicPage_HappyPath / ok",
+      "verdict": "GENUINE"
+    },
+    {
+      "test": "internal/rutracker/search_test.go :: TestParseSearchPage_HappyPath",
+      "mutated_production_file": "internal/rutracker/search.go",
+      "mutation": "size selector row.Find(\".tor-size\") -> row.Find(\".tor-nope\")",
+      "observed_red": "search_test.go:96: torrents[0].Size: got \"0 B\", want \"1.5 GB\" (formatSize 1610612736)",
+      "reverted": true,
+      "post_revert": "--- PASS: TestParseSearchPage_HappyPath / ok",
+      "verdict": "GENUINE"
+    }
+  ],
+  "production_code_coverage_5b": [
+    {
+      "file": "scripts/autonomous-qa/run-iteration.sh (verdict decision-table)",
+      "method": "QA-harness falsifiability audit (read + trace)",
+      "finding": "GAP — clean-PASS branch lacked a tests>0 guard: gradle_rc=0 + tests=0 would report PASS asserting nothing",
+      "fix_applied": "added `if [[ \"$tests\" -eq 0 ]]; then verdict=FAIL` guard; §6.J BUILD-SUCCESSFUL-with-0-tests is a bluff",
+      "verdict": "GAP-FIXED"
+    },
+    {
+      "file": "app/src/androidTest/.../Challenge70AutonomousQaProviderMatrixTest.kt (download assertion :628 + onboarding SKIP :318-329)",
+      "method": "QA-harness falsifiability audit (read + trace)",
+      "findings": "GAP #1 — Torrent require accepts in-progress 'Downloading file' → a hung download could report PASS (fix: require terminal 'Download completed'); GAP #2 — any onboarding ComposeTimeoutException → blanket SKIP masks a pure-UI onboarding regression (fix: scope SKIP to network-stage waits). Both queued for the gutenberg device-re-run cycle (need device to rehearse); confirmed safe: green rutracker/kinozal keystones both reach terminal 'Download completed' (15x/11x)",
+      "verdict": "GAP-QUEUED"
+    }
+  ],
+  "result": "5/5 test targets GENUINE, 0 bluffs. Every mutation produced a RED failure on the exact user-visible field (row count / download URL / size bytes / description / size string) and reverted GREEN. 2 gate-shaping production files audited: 1 real false-PASS gap FIXED (run-iteration tests>0), 2 further gaps queued with device rehearsal.",
+  "no_guessing_compliance": "All verdicts are backed by captured `go test` output; no forbidden vocabulary."
+}

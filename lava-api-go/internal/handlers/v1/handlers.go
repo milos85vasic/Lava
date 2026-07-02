@@ -96,6 +96,18 @@ func Register(group *gin.RouterGroup, deps *Deps, reg *provider.ProviderRegistry
 	torrent := NewTorrentHandler(deps)
 	group.GET("/torrent/:id", chain(provider.CapTorrentDownload, torrent.GetTorrent)...)
 	group.GET("/download/:id", chain(provider.CapTorrentDownload, torrent.GetDownload)...)
+	// HTTP-file providers (gutenberg, archiveorg) declare HTTP_DOWNLOAD, not
+	// TORRENT_DOWNLOAD, yet their topic screens surface a download button whose
+	// artifact (epub / media file) is served over plain HTTP by the SAME generic
+	// Provider.DownloadFile handler. Without an HTTP_DOWNLOAD-gated route their
+	// download dead-ends: the only download routes above gate on CapTorrentDownload,
+	// so the capability chain 501s HTTP-file providers before the handler runs.
+	// This route is the capability-honest (§6.E) home for that flow — same
+	// handler, HTTP_DOWNLOAD gate. It uses a catch-all *id (not :id) because an
+	// HTTP-file id may be composite: archiveorg addresses a file as
+	// "identifier/filename", which a single-segment :id cannot capture. The
+	// handler trims the catch-all's leading slash back to the provider-facing id.
+	group.GET("/http-download/*id", chain(provider.CapHTTPDownload, torrent.GetDownload)...)
 
 	comments := NewCommentsHandler(deps)
 	group.GET("/comments/:id", chain(provider.CapComments, comments.GetComments)...)

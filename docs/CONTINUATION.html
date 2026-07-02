@@ -225,10 +225,19 @@ IPv4-only providers (archiveorg/nyaa/torrentscsv) to an EXCLUDED egress
 hosts) while the Russian trackers keep the VPN path. NOT a parser patch,
 NOT a global bypass — a per-destination routing/infra change (operator
 decision; <code>socat</code> is available, no HTTP-proxy binary is).
-Secondary §6.AC gap: <code>archiveorg/provider.go mapError()</code>
-(also nnmclub/kinozal/rutracker adapters) DISCARDS the real dial/TLS
-error → always <code>ErrUnknown</code> → the egress stall MASQUERADED as
-a parser bug; harden with
+PARSER AUDIT 2026-07-02 (subagent, evidence
+<code>.build-tmp/public-provider-parser-audit-2026-07-02.md</code>): all
+4 public parsers — nyaa/torrentscsv/bitsearch/yts — CONFIRMED REAL (real
+fixtures + real selectors; live rows 75/25/20/3; yts fixture is a
+byte-exact live capture); kinozal was the ONLY parser bluff. The egress
+is NON-UNIFORM: nyaa.si NEEDS the VPN (direct TLS handshake is
+DPI-blocked; works 200 through the VPN) while archiveorg NEEDS a bypass
+(IPv4 stalls through the VPN) — so a single GLOBAL policy CANNOT satisfy
+both, and per-destination routing is MANDATORY, not optional. Secondary
+§6.AC gap: <code>archiveorg/provider.go mapError()</code> (also
+nnmclub/kinozal/rutracker adapters) DISCARDS the real dial/TLS error →
+always <code>ErrUnknown</code> → the egress stall MASQUERADED as a
+parser bug; harden with
 <code>fmt.Errorf("%w: %v", ErrUnknown, err)</code> +
 <code>RecordNonFatal</code>. Full evidence:
 <code>.build-tmp/archiveorg-search-0rows-2026-07-02.md</code>.
@@ -236,17 +245,41 @@ a parser bug; harden with
 server-side</strong> (REFINED 2026-07-02) — the goapi returns a real
 direct ebook URL (<code>GET /v1/gutenberg/topic/1342</code> →
 <code>downloadUrl: https://www.gutenberg.org/ebooks/1342.epub3.images</code>).
-The keystone <code>marker_download_ok:false</code> is an ON-DEVICE
-affordance-not-reached, NOT a goapi parser bug: Challenge70 DOES handle
-the HTTP-file path (<code>downloadHttpFile</code> + the "Torrent" button
-is documented as "the affordance for EVERY downloadable topic INCLUDING
-the HTTP-file"), so on-device the gutenberg topic screen either didn't
-present that affordance or the test didn't reach it. Pin it with a
-screenshot-level device re-run (rendering vs timing) — a
-client/test-side investigation, NOT a server fix. (The rate-limited
-subagent's worktree <code>agent-abf93a7c1f3967c77</code> is
-stale/partial — supersede it.) <strong>(C) 6 public providers WIRED but
-not yet device-run</strong> (worktree
+ROOT-CAUSED 2026-07-02 (definitive):
+<code>marker_download_ok:false</code> is the HTTP-file DOWNLOAD
+dead-ending — Challenge70:628 taps "Torrent" (topic renders it) but NO
+DownloadDialog is shown. TWO gaps: (1) CLIENT
+<code>ApiBackedTrackerClient.kt:268</code> returns
+<code>HttpDownloadableTracker::class -&gt; null</code> ("does not yet
+surface these feature families") so <code>sdk.downloadHttpFile</code> →
+getFeature → null → no dialog; (2) goapi
+<code>handlers/v1/handlers.go:97-98</code> gates BOTH download routes
+(<code>/torrent/:id</code>, <code>/download/:id</code>) on
+<code>CapTorrentDownload</code> ONLY, which HTTP-file providers
+(gutenberg/archiveorg) lack — the generic handler +
+<code>gutenberg/download.go DownloadBook()</code> already work, only the
+ROUTE GATE excludes them. FIX LANDED 2026-07-02 +
+unit/contract-VERIFIED: client
+<code>httpDownloadable(HttpDownloadableTracker)</code>
+(<code>ApiBackedTrackerClient.kt:225</code> + getFeature wiring
+<code>:286-287</code>) requests the NEW
+<code>CapHTTPDownload</code>-gated goapi route
+<code>GET /http-download/*id</code>
+(<code>handlers/v1/handlers.go:110</code>, reusing
+<code>torrent.GetDownload</code> → <code>provider.DownloadFile</code> →
+<code>gutenberg.DownloadBook</code>; <code>*id</code> wildcard because
+archiveorg ids contain <code>/</code>). goapi <strong>3/3 HTTP-download
+tests PASS</strong> (real capability gate via
+<code>setupRegistryRouter</code> + served bytes +
+<code>Content-Disposition</code> filename + 501-discrimination guard) +
+full v1 suite green (no regressions); client contract test <strong>BUILD
+SUCCESSFUL</strong>. gutenberg.org reachable through the VPN (HTTP 200,
+24.8MB epub, 17.8s — NOT egress-blocked, unlike archiveorg). The
+device-green gutenberg keystone (§6.AK reproduce-first) is the
+load-bearing NEXT step. Unblocks BOTH gutenberg (reachable end-to-end)
+AND archiveorg (download PATH fixed; archiveorg SEARCH stays separately
+blocked by the per-destination VPN egress noted above). <strong>(C) 6
+public providers WIRED but not yet device-run</strong> (worktree
 <code>agent-ae03137803ae71457</code>):
 thepiratebay/torrentscsv/knaben/bitsearch/nyaa/tokyotosho added to
 Challenge70 <code>ProviderSpec.forId</code> (authNone) +

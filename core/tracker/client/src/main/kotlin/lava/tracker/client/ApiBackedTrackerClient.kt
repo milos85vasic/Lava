@@ -15,6 +15,7 @@ import lava.tracker.api.feature.BrowsableTracker
 import lava.tracker.api.feature.CommentsTracker
 import lava.tracker.api.feature.DownloadableTracker
 import lava.tracker.api.feature.FavoritesTracker
+import lava.tracker.api.feature.HttpDownloadResult
 import lava.tracker.api.feature.HttpDownloadableTracker
 import lava.tracker.api.feature.SearchableTracker
 import lava.tracker.api.feature.TopicTracker
@@ -221,6 +222,26 @@ class ApiBackedTrackerClient(
         override fun getMagnetLink(id: String): String? = null
     }
 
+    private val httpDownloadable = object : HttpDownloadableTracker {
+        // HTTP-file providers (Project Gutenberg, Internet Archive) declare
+        // HTTP_DOWNLOAD, not TORRENT_DOWNLOAD; their topic screen's download
+        // button routes here. Hits the goapi HTTP_DOWNLOAD-gated route
+        // /v1/{id}/http-download/{id} (wired API-side alongside /download/{id}),
+        // reads BOTH the artifact bytes AND the server-supplied filename from the
+        // Content-Disposition header so the saved file is named correctly.
+        override suspend fun downloadHttpFile(id: String): HttpDownloadResult {
+            val url = baseUrl("http-download/$id").toString()
+            val response = getFile(url)
+            val fileName = filenameFromContentDisposition(response.contentDisposition)
+                ?: url.substringAfterLast('/').substringBefore('?').ifBlank { id }
+            return HttpDownloadResult(
+                bytes = response.bytes,
+                sourceUrl = url,
+                fileName = fileName,
+            )
+        }
+    }
+
     private val authenticatable = object : AuthenticatableTracker {
         override suspend fun login(req: LoginRequest): LoginResult {
             val payload = json.encodeToString(
@@ -262,10 +283,11 @@ class ApiBackedTrackerClient(
                 if (TrackerCapability.TORRENT_DOWNLOAD in caps) downloadable as T else null
             AuthenticatableTracker::class ->
                 if (TrackerCapability.AUTH_REQUIRED in caps) authenticatable as T else null
+            HttpDownloadableTracker::class ->
+                if (TrackerCapability.HTTP_DOWNLOAD in caps) httpDownloadable as T else null
             // The API-backed client does not yet surface these feature families
             // over /v1/{id}/{op}; declaring them here as explicit nulls keeps
             // capability honesty unambiguous (no accidental non-null fall-through).
-            HttpDownloadableTracker::class -> null
             CommentsTracker::class -> null
             FavoritesTracker::class -> null
             else -> null
@@ -324,6 +346,33 @@ class ApiBackedTrackerClient(
         }
     }
 
+    /**
+     * Fetches an HTTP file, returning BOTH the raw bytes AND the response's
+     * `Content-Disposition` header so the caller can recover the server-supplied
+     * filename. Distinct from [getBytes] (which discards headers) because
+     * [HttpDownloadableTracker.downloadHttpFile] must name the saved artifact.
+     * Throws [ApiHttpException] on a non-2xx response and errors on an empty body
+     * (a successful return therefore guarantees a non-empty artifact, per the
+     * [HttpDownloadableTracker] contract). All network runs on [ioDispatcher].
+     */
+    private suspend fun getFile(url: String): HttpFileResponse = withContext(ioDispatcher) {
+        httpClient.newCall(Request.Builder().url(url).get().withAuth().build()).execute().use { resp ->
+            if (!resp.isSuccessful) {
+                val snippet = resp.body?.string()?.let { redactAndTruncate(it) }
+                throw ApiHttpException(
+                    statusCode = resp.code,
+                    requestUrl = stripQueryForTelemetry(url),
+                    httpMethod = "GET",
+                    responseSnippet = snippet,
+                    message = "API request failed: HTTP ${resp.code} for $url",
+                )
+            }
+            val disposition = resp.header(CONTENT_DISPOSITION_HEADER)
+            val bytes = resp.body?.bytes() ?: error("API request returned empty body for $url")
+            HttpFileResponse(bytes = bytes, contentDisposition = disposition)
+        }
+    }
+
     private suspend fun postJson(url: String, payload: String): String = withContext(ioDispatcher) {
         val request = Request.Builder()
             .url(url)
@@ -378,11 +427,37 @@ class ApiBackedTrackerClient(
             .replace(Regex("(?i)(token|key|cookie|auth|bearer|password|secret)([=:\\s]+)\\S+"), "$1$2[REDACTED]")
     }
 
+    /**
+     * Extracts the filename from a `Content-Disposition` header value, handling
+     * both the quoted form the goapi download handler emits
+     * (`attachment; filename="pg1342.epub3.images"`) and a bare unquoted token
+     * (`filename=pg1342.epub`). Returns `null` when the header is absent or
+     * carries no usable filename, so the caller can fall back to the URL's last
+     * path segment. §6.R: no literals — the filename is read live from the wire.
+     */
+    private fun filenameFromContentDisposition(header: String?): String? {
+        if (header.isNullOrBlank()) return null
+        Regex("""filename\s*=\s*"([^"]+)"""", RegexOption.IGNORE_CASE).find(header)?.let {
+            return it.groupValues[1].trim().ifBlank { null }
+        }
+        Regex("""filename\s*=\s*([^;]+)""", RegexOption.IGNORE_CASE).find(header)?.let {
+            return it.groupValues[1].trim().trim('"').ifBlank { null }
+        }
+        return null
+    }
+
+    /** Bytes + the raw `Content-Disposition` header from an HTTP-file fetch. */
+    private class HttpFileResponse(val bytes: ByteArray, val contentDisposition: String?)
+
     companion object {
         // Server wire-protocol header carrying the provider login session
         // (`auth.HeaderName` in lava-api-go/internal/auth/passthrough.go). A
         // fixed protocol constant — §6.R-exempt like the /v1 route paths.
         private const val AUTH_TOKEN_HEADER = "Auth-Token"
+
+        // Standard HTTP response header carrying the download filename. A fixed
+        // protocol constant (RFC 6266) — §6.R-exempt like the /v1 route paths.
+        private const val CONTENT_DISPOSITION_HEADER = "Content-Disposition"
         private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
         private val DEFAULT_JSON = Json {
             ignoreUnknownKeys = true
