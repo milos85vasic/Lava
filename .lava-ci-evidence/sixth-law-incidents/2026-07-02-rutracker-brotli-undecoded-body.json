@@ -1,0 +1,34 @@
+{
+  "incident": "rutracker provider fully broken: client requests brotli (br) but OkHttp returns raw undecoded bytes, so every HTML-body parse fails while login (header-only) still succeeds",
+  "date": "2026-07-02",
+  "classification": "production code defect (client HTTP decompression) — §6.J anti-bluff (real total breakage, no test caught it)",
+  "discovered_by": "autonomous-QA keystone run-matrix --backend goapi --subsets rutracker --queries 1080p (verdict SKIP) — logcat showed GetCurrentProfileUseCase.parseUserId: 'rutracker logged-in user-id not found'",
+  "user_visible_impact": "A user with valid rutracker credentials cannot onboard/search/browse rutracker at all. Onboarding login returns ServiceUnavailable; Challenge70 honestly SKIPs. The whole rutracker provider is unusable.",
+  "root_cause": {
+    "confirmed": "RuTrackerHttpClientFactory (clone path) and TrackerClientModule.provideRuTrackerHttpClient (on-device Hilt path) both set a MANUAL defaultRequest header `Accept-Encoding: gzip, deflate, br`. The Ktor OkHttp engine only transparently decompresses a Content-Encoding it negotiated ITSELF; when the app sets Accept-Encoding manually, OkHttp hands back the RAW compressed body. rutracker responds with `Content-Encoding: br` (brotli), which the client never decodes. RuTrackerInnerApiImpl.mainPage()/search()/browse()/topic() call bodyAsText() on those raw brotli bytes -> garbage -> Jsoup selectors match nothing -> parseUserId throws 'logged-in user-id not found'. login() survives ONLY because it extracts the session token from the Set-Cookie HEADER, not the body — masking the defect as a transient 'ServiceUnavailable'.",
+    "physical_evidence": [
+      "curl replicating the app EXACTLY (manual `Accept-Encoding: gzip, deflate, br`, no client-side decode): Response `Content-Encoding: br`; raw body first bytes `5b8c9831233dabbd` (NOT HTML); raw-as-text contains '#logged-in-username' = False",
+      "same bytes brotli-decoded: 'Выход' present, login-form absent, `#logged-in-username` carries `u=<id>` = True (page IS a valid logged-in page)",
+      "control: `Accept-Encoding: gzip` (OkHttp transparent path) -> Content-Encoding gzip -> decoded logged-in page with u = True; identity path -> clean HTML with u = True",
+      "cookie ground truth: login sets bb_session + bb_ssl (no bb_data/bb_login); replaying bb_session alone yields the logged-in page — so the cookie/token handling was NOT the bug"
+    ],
+    "eliminated": [
+      "charset/encoding of the login POST (UTF-8 vs cp1251) — both authenticate; login is fine",
+      "stale parseUserId selectors — selector #logged-in-username + queryParamOrNull('u') works on the REAL logged-in page once it is decoded",
+      "missing `redirect` form field — login authenticates without it",
+      "wrong/expired credentials — no 'неверный пароль', no captcha; login succeeds",
+      "mainPage single-cookie replay — bb_session (clean OR full Set-Cookie string) both yield the logged-in page"
+    ]
+  },
+  "fix": {
+    "change": "Remove the manual `Accept-Encoding: gzip, deflate, br` header from BOTH rutracker client-construction paths (TrackerClientModule.provideRuTrackerHttpClient + RuTrackerHttpClientFactory.create). OkHttp then adds its own `Accept-Encoding: gzip` and transparently decompresses the response body.",
+    "files": [
+      "core/tracker/client/src/main/kotlin/lava/tracker/client/di/TrackerClientModule.kt",
+      "core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerHttpClientFactory.kt"
+    ],
+    "why_this_fix": "Minimal, proven (control test above), no new dependency. A gzip-only Accept-Encoding is a valid, common value rutracker serves without issue; a broken `br` request that cannot be decoded is strictly worse than a working `gzip`.",
+    "scope_note": "Only rutracker set a manual Accept-Encoding. rutor/kinozal/nnmclub do not, so they already benefit from OkHttp's transparent gzip and are unaffected."
+  },
+  "regression_test": "core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/impl/RuTrackerBodyDecompressionRegressionTest.kt — MockWebServer serves a gzip-encoded logged-in index; the REAL RuTrackerHttpClientFactory client + RuTrackerInnerApiImpl.mainPage() must return DECODED HTML containing the logged-in marker. Falsifiable: with the manual Accept-Encoding restored the client returns raw bytes and the assertion fails.",
+  "anti_bluff_note": "Reproduced with physical evidence BEFORE fixing (§6.T.1). No guessing vocabulary used; every candidate cause was tested and either CONFIRMED or ELIMINATED with captured output (§11.4.6)."
+}

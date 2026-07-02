@@ -96,7 +96,15 @@ object TrackerClientModule {
             url("https://rutracker.org/forum/")
             header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
             header("Accept-Language", "en-US,en;q=0.5")
-            header("Accept-Encoding", "gzip, deflate, br")
+            // NO manual Accept-Encoding. rutracker serves `br` (brotli) when we
+            // advertise it, but the OkHttp engine only transparently decompresses
+            // an encoding IT negotiated — a manually-set Accept-Encoding makes
+            // OkHttp hand back the RAW brotli bytes, so `bodyAsText()` returns
+            // garbage and every HTML parse (mainPage/search/browse/topic) fails
+            // silently while login (header-only, Set-Cookie) appears to succeed.
+            // Root cause + physical evidence: .lava-ci-evidence/sixth-law-incidents/
+            // 2026-07-02-rutracker-brotli-undecoded-body.json. Letting OkHttp add
+            // its own `Accept-Encoding: gzip` restores transparent decompression.
         }
         install(ContentNegotiation) {
             json(Json { ignoreUnknownKeys = true })

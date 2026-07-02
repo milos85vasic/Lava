@@ -55,7 +55,13 @@ object RuTrackerHttpClientFactory {
             url(baseUrl)
             header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
             header("Accept-Language", "en-US,en;q=0.5")
-            header("Accept-Encoding", "gzip, deflate, br")
+            // NO manual Accept-Encoding — see TrackerClientModule.provideRuTrackerHttpClient
+            // for the full rationale: rutracker serves `br` (brotli); OkHttp only
+            // transparently decompresses an encoding it negotiated itself, so a manual
+            // Accept-Encoding leaves bodyAsText() holding raw brotli bytes and every
+            // HTML parse fails. Omitting it lets OkHttp add `Accept-Encoding: gzip`
+            // and decompress transparently. Evidence: .lava-ci-evidence/
+            // sixth-law-incidents/2026-07-02-rutracker-brotli-undecoded-body.json.
         }
         install(ContentNegotiation) {
             json(Json { ignoreUnknownKeys = true })

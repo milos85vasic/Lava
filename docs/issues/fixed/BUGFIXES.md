@@ -61,6 +61,49 @@ Format per entry:
 
 ---
 
+## 2026-07-02 — rutracker provider totally broken: client requested brotli but never decoded the response body
+
+**Discovered by:** the autonomous-QA keystone (`run-matrix --backend goapi --subsets
+rutracker --queries 1080p`) — verdict SKIP; logcat showed
+`GetCurrentProfileUseCase.parseUserId: rutracker logged-in user-id not found` →
+onboarding login returned `ServiceUnavailable` and the flow could not proceed.
+
+**Root cause (CONFIRMED with physical evidence):** both rutracker HttpClient paths —
+`TrackerClientModule.provideRuTrackerHttpClient` (on-device Hilt path) and
+`RuTrackerHttpClientFactory.create` (clone path) — set a **manual**
+`defaultRequest { header("Accept-Encoding", "gzip, deflate, br") }`. Ktor's OkHttp
+engine only transparently decompresses a Content-Encoding it negotiated **itself**;
+a manually-set Accept-Encoding makes OkHttp hand back the **raw** compressed bytes.
+rutracker replies `Content-Encoding: br` (brotli), so `RuTrackerInnerApiImpl.mainPage()`
+(and `search`/`browse`/`topic`) called `bodyAsText()` on undecoded brotli → garbage →
+every Jsoup selector matched nothing → `parseUserId` threw. `login()` survived only
+because it reads the session token from the `Set-Cookie` **header**, not the body,
+so the total breakage masqueraded as a transient `ServiceUnavailable`.
+
+**Physical evidence:** curl replicating the app exactly (manual `Accept-Encoding:
+gzip, deflate, br`, no client decode) → `Content-Encoding: br`, raw body first bytes
+`5b8c9831…` (not HTML), `#logged-in-username` absent; brotli-decoded → valid logged-in
+page with `#logged-in-username` carrying `u=<id>`. Control: OkHttp's transparent
+`gzip` and identity both decode to the logged-in page. Eliminated (each tested):
+login charset (UTF-8 vs cp1251 — both authenticate), cookie/token handling
+(bb_session alone yields the logged-in page), stale selectors (work once decoded),
+missing `redirect` form field, wrong credentials. Full forensic:
+`.lava-ci-evidence/sixth-law-incidents/2026-07-02-rutracker-brotli-undecoded-body.json`.
+
+**Affected files / fix:** removed the manual `Accept-Encoding` header from both
+`core/tracker/client/src/main/kotlin/lava/tracker/client/di/TrackerClientModule.kt`
+and `core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerHttpClientFactory.kt`,
+so OkHttp adds its own `Accept-Encoding: gzip` and decompresses transparently. Only
+rutracker set a manual header; rutor/kinozal/nnmclub were already transparent.
+
+**Verification test:** `core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/impl/RuTrackerBodyDecompressionRegressionTest.kt`
+— MockWebServer serves a gzip-encoded logged-in index; the real client +
+`RuTrackerInnerApiImpl.mainPage()` must return DECODED HTML containing the logged-in
+marker. Reproduce-first (§6.T.1): with the manual `Accept-Encoding` restored the test
+FAILS (raw bytes, marker absent); removed, it PASSES. Rehearsal run captured.
+
+---
+
 ## 2026-07-02 — hermetic test bumped real CLAUDE.md mtime → spurious markdown-export-sync failures blocking every push
 
 **Root cause:** `tests/check-constitution/test_covenant_114_propagation.sh` (the

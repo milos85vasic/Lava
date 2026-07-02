@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>DECOMPRESSION-AUDIT-2026-07-02</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="response-decompression--body-decode-audit--2026-07-02">Response-Decompression
+/ Body-Decode Audit — 2026-07-02</h1>
+<p>Scope: determine whether the OTHER trackers (rutor, kinozal, nnmclub)
+and the <code>lava-api-go</code> scraper share the same class of defect
+that took rutracker down — a client that advertises an encoding it
+cannot decode (specifically brotli), causing <code>bodyAsText()</code> /
+body reads to return raw compressed bytes and every HTML parse to fail
+silently.</p>
+<p>Trigger incident (already root-caused + fixed):
+<code>.lava-ci-evidence/sixth-law-incidents/2026-07-02-rutracker-brotli-undecoded-body.json</code>.</p>
+<p>Vocabulary per §11.4.6: statements are facts backed by captured
+evidence unless explicitly marked <code>UNCONFIRMED:</code> /
+<code>UNKNOWN:</code>.</p>
+<hr />
+<h2 id="0-the-defect-class-restated">0. The defect class, restated</h2>
+<p>Two independent mechanisms exist, one per stack:</p>
+<ul>
+<li><strong>Kotlin / OkHttp (Ktor OkHttp engine OR raw OkHttp).</strong>
+OkHttp only transparently decompresses a <code>Content-Encoding</code>
+it negotiated ITSELF. When a caller sets <code>Accept-Encoding</code>
+manually, OkHttp disables its transparent decompression and hands back
+the RAW bytes. OkHttp's automatic path only ever advertises
+<code>gzip</code> and only decodes <code>gzip</code>. It does NOT decode
+<code>br</code> (brotli).</li>
+<li><strong>Go <code>net/http</code>.</strong> The
+<code>Transport</code> auto-adds <code>Accept-Encoding: gzip</code> and
+transparently decompresses gzip ONLY IF (a) the caller did not set
+<code>Accept-Encoding</code> manually AND (b)
+<code>Transport.DisableCompression == false</code>. Go's stdlib does NOT
+decode <code>br</code> at all.</li>
+</ul>
+<p>So the defect appears when a client advertises <code>br</code> (or
+any non-gzip encoding it cannot decode) AND the server honours it. The
+fix is to NOT advertise <code>br</code> (let OkHttp/Go negotiate gzip
+transparently), unless a real brotli decoder is wired first.</p>
+<hr />
+<h2 id="1-host-side-probes-physical-evidence">1. Host-side probes
+(physical evidence)</h2>
+<p>Egress: Mullvad WireGuard (server <code>no-osl-wg-103</code>, IP
+<code>141.98.253.210</code>) — confirmed via
+<code>am.i.mullvad.net/connected</code> before probing.</p>
+<p>Method: one GET per host, guest/public page, body discarded to
+<code>/dev/null</code>, only response headers captured. Two runs per
+host:</p>
+<ul>
+<li><strong>bug pattern</strong> — replicating the app's ORIGINAL
+rutracker header set: <code>Accept-Encoding: gzip, deflate, br</code>,
+no client-side decode (<code>--compressed</code> NOT used).</li>
+<li><strong>control</strong> — <code>Accept-Encoding: gzip</code> only,
+i.e. exactly what OkHttp's automatic path sends.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Host (base URL)</th>
+<th><code>Accept-Encoding: gzip, deflate, br</code> →
+<code>Content-Encoding</code></th>
+<th><code>Accept-Encoding: gzip</code> (OkHttp path) →
+<code>Content-Encoding</code></th>
+<th>Server</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rutracker.org <code>/forum/index.php</code> (control tracker)</td>
+<td><strong><code>br</code></strong></td>
+<td><code>gzip</code></td>
+<td>cloudflare</td>
+</tr>
+<tr>
+<td>rutor.info <code>/</code></td>
+<td><code>gzip</code></td>
+<td><code>gzip</code></td>
+<td>nginx/1.22.1</td>
+</tr>
+<tr>
+<td>kinozal.tv <code>/</code></td>
+<td><strong><code>br</code></strong></td>
+<td><code>gzip</code></td>
+<td>cloudflare</td>
+</tr>
+<tr>
+<td>nnmclub.to <code>/</code></td>
+<td><strong><code>br</code></strong></td>
+<td><code>gzip</code></td>
+<td>cloudflare</td>
+</tr>
+</tbody>
+</table>
+<p>All eight requests returned HTTP 200 (no Cloudflare challenge from
+the Mullvad exit at probe time). Facts:</p>
+<ul>
+<li>rutracker.org, kinozal.tv, nnmclub.to (all Cloudflare) <strong>serve
+brotli when the client advertises <code>br</code></strong>. This is what
+broke rutracker.</li>
+<li>All four hosts, including the three Cloudflare ones, <strong>fall
+back to <code>gzip</code> when only <code>gzip</code> is
+advertised</strong> — the OkHttp/Go transparent path. This proves the
+fix (do not advertise <code>br</code>) works against the real
+hosts.</li>
+<li>rutor.info (nginx) chose <code>gzip</code> even when <code>br</code>
+was offered, so rutor would not have been broken even by the
+manual-header pattern; but see §2 — rutor's client never advertises
+<code>br</code> anyway.</li>
+</ul>
+<hr />
+<h2 id="2-per-tracker-client-config-findings-kotlin-coretracker">2.
+Per-tracker client-config findings (Kotlin,
+<code>core/tracker/*</code>)</h2>
+<h3
+id="rutracker--was-the-bug-now-fixed-both-construction-paths">rutracker
+— WAS the bug, NOW FIXED (both construction paths)</h3>
+<ul>
+<li>Uses <strong>Ktor OkHttp engine</strong>
+(<code>HttpClient(OkHttp)</code>), the only tracker that does.</li>
+<li><code>core/tracker/client/src/main/kotlin/lava/tracker/client/di/TrackerClientModule.kt</code>
+(<code>provideRuTrackerHttpClient</code>, on-device Hilt path) and
+<code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerHttpClientFactory.kt</code>
+(<code>create</code>, cloned-provider path) both
+<strong>previously</strong> set
+<code>header("Accept-Encoding", "gzip, deflate, br")</code> in
+<code>defaultRequest</code>.</li>
+<li>Current state: the manual header is REMOVED from both paths; each
+carries an explanatory comment + evidence pointer. OkHttp now adds its
+own <code>Accept-Encoding: gzip</code> and decompresses transparently.
+Probe control above confirms rutracker.org returns <code>gzip</code> on
+that path.</li>
+<li>Regression test present:
+<code>core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/impl/RuTrackerBodyDecompressionRegressionTest.kt</code>.</li>
+<li><strong>Action: none beyond shipping the fixed build.</strong></li>
+</ul>
+<h3 id="rutor--not-affected">rutor — NOT affected</h3>
+<ul>
+<li><code>core/tracker/rutor/src/main/kotlin/lava/tracker/rutor/http/RuTorHttpClient.kt</code>:
+raw <code>okhttp3.OkHttpClient</code> (NOT Ktor). Requests set only
+<code>User-Agent</code>. No <code>defaultRequest</code>, no
+<code>Accept-Encoding</code>, no brotli anywhere.</li>
+<li>OkHttp therefore advertises only <code>gzip</code> and decodes it
+transparently. Probe: rutor.info returns <code>gzip</code>.</li>
+<li><strong>Action: none.</strong></li>
+</ul>
+<h3 id="kinozal--not-affected-but-latent-trap--see-5">kinozal — NOT
+affected (but latent trap — see §5)</h3>
+<ul>
+<li><code>core/tracker/kinozal/src/main/kotlin/lava/tracker/kinozal/http/KinozalHttpClient.kt</code>:
+raw <code>okhttp3.OkHttpClient</code>. Requests set only
+<code>User-Agent</code>. No <code>Accept-Encoding</code>. Bodies decoded
+windows-1251 → UTF-8 via <code>bodyString()</code> on
+<code>response.body?.bytes()</code> (OkHttp has already gunzipped the
+bytes by then).</li>
+<li>Client advertises only <code>gzip</code>; probe control shows
+kinozal.tv returns <code>gzip</code> on that path. The bug-pattern probe
+shows kinozal.tv WOULD serve <code>br</code> if <code>br</code> were
+advertised — but the client never advertises it.</li>
+<li><strong>Action: none functionally. See §5 for a hardening note (the
+server is brotli-capable, so re-introducing a manual <code>br</code>
+header here would reproduce the exact rutracker bug — worse, silently,
+because kinozal decodes cp1251 so the garbage would look like a charset
+problem).</strong></li>
+</ul>
+<h3 id="nnmclub--not-affected-same-latent-trap-as-kinozal">nnmclub — NOT
+affected (same latent trap as kinozal)</h3>
+<ul>
+<li><code>core/tracker/nnmclub/src/main/kotlin/lava/tracker/nnmclub/http/NnmclubHttpClient.kt</code>:
+raw <code>okhttp3.OkHttpClient</code>. Requests set only
+<code>User-Agent</code>. No <code>Accept-Encoding</code>.</li>
+<li>Client advertises only <code>gzip</code>; probe control shows
+nnmclub.to returns <code>gzip</code>. Bug-pattern probe shows nnmclub.to
+serves <code>br</code> when <code>br</code> is advertised.</li>
+<li><strong>Action: none functionally. See §5.</strong></li>
+</ul>
+<h3
+id="adjacent-app--lava-api-go--ktor-proxy-channel--not-affected">(adjacent)
+app → lava-api-go / Ktor-proxy channel — NOT affected</h3>
+<ul>
+<li><code>core/network/impl/.../NetworkApiRepositoryImpl.kt</code>
+<code>proxyApi()</code> builds <code>HttpClient(OkHttp)</code> with
+<code>engine { preconfigured = client }</code> and NO manual
+<code>Accept-Encoding</code>. So the GoApi/proxy client advertises only
+<code>gzip</code>.</li>
+<li>This matters because <code>lava-api-go</code> has a RESPONSE-side
+brotli middleware (<code>internal/server/brotli.go</code>) that
+brotli-compresses its own responses ONLY when the client sends
+<code>Accept-Encoding: br</code>, and mDNS advertises
+<code>compression: br,gzip</code>
+(<code>internal/discovery/mdns.go</code>). Since the Android GoApi
+client never sends <code>br</code>, <code>lava-api-go</code> never
+brotli-compresses for it, and the app↔︎goapi channel is safe.</li>
+<li><strong>Action: none.</strong> <code>UNCONFIRMED:</code> whether any
+non-Lava consumer (a browser, <code>curl --compressed</code>, a future
+client) sends <code>Accept-Encoding: br</code> to
+<code>lava-api-go</code> and cannot decode it — browsers and curl decode
+brotli natively, so this is low-risk, but it is not exercised by an
+Anti-Bluff test today.</li>
+</ul>
+<hr />
+<h2 id="3-go-api-scraper-findings-lava-api-go">3. Go API scraper
+findings (<code>lava-api-go</code>)</h2>
+<h3 id="rutracker-outbound-client--not-affected">rutracker outbound
+client — NOT affected</h3>
+<ul>
+<li><code>internal/rutracker/client.go</code>: the outbound requests set
+only <code>Cookie</code> and <code>Content-Type</code> headers (lines
+272/320/366/368/413/460/462). <strong>No <code>Accept-Encoding</code> is
+set.</strong></li>
+<li>The custom <code>http.Transport</code> (built in
+<code>NewClient</code>, ~line 147) pins IPv4 and wires the proxy but
+does <strong>NOT</strong> set <code>DisableCompression</code>, so it
+defaults to <code>false</code>.</li>
+<li>Therefore Go auto-adds <code>Accept-Encoding: gzip</code> and
+transparently decompresses gzip. It never advertises <code>br</code>, so
+rutracker returns gzip/identity (proven by the §1 control probe). No
+brotli reaches the parser.</li>
+<li><strong>Action: none.</strong></li>
+</ul>
+<h3
+id="curated-providers-bitsearch-thepiratebay-yts-flaresolverr--not-affected">curated
+providers (bitsearch, thepiratebay, yts, flaresolverr) — NOT
+affected</h3>
+<ul>
+<li>All build
+<code>&amp;http.Client{... Transport: httpx.NewTransport()}</code>.</li>
+<li><code>internal/httpx/proxy.go</code> <code>NewTransport()</code> =
+<code>http.DefaultTransport.Clone()</code> with <code>Proxy</code> set
+only. <code>DisableCompression</code> stays <code>false</code>; no
+<code>Accept-Encoding</code> is set on any request.</li>
+<li>Same transparent-gzip guarantee as above. No brotli advertised.</li>
+<li><strong>Action: none.</strong></li>
+</ul>
+<h3
+id="internalserverbrotligo--response-side-correct-by-construction"><code>internal/server/brotli.go</code>
+— response side, correct-by-construction</h3>
+<ul>
+<li>This is lava-api-go COMPRESSING its OWN responses (server→client),
+gated on the client sending <code>Accept-Encoding: br</code> and on the
+<code>BrotliResponseEnabled</code> config flag. It is NOT an
+outbound-scrape decode path and is not the defect class.</li>
+<li><code>internal/config/config.go</code> also exposes
+<code>BrotliRequestDecodeEnabled</code> (default <code>false</code>) —
+request-body brotli DECODE is off by default. Not a scraper
+concern.</li>
+<li><strong>Action: none.</strong></li>
+</ul>
+<hr />
+<h2 id="4-verdict-matrix">4. Verdict matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Stack</th>
+<th>Advertises <code>br</code>?</th>
+<th>Can decode <code>br</code>?</th>
+<th>Server serves <code>br</code> (probe)?</th>
+<th>Affected?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rutracker (Hilt + factory)</td>
+<td>Ktor/OkHttp</td>
+<td><del>yes</del> → <strong>no (fixed)</strong></td>
+<td>no</td>
+<td>yes</td>
+<td><strong>was → fixed</strong></td>
+</tr>
+<tr>
+<td>rutor</td>
+<td>raw OkHttp</td>
+<td>no</td>
+<td>no</td>
+<td>no (nginx picks gzip)</td>
+<td>no</td>
+</tr>
+<tr>
+<td>kinozal</td>
+<td>raw OkHttp</td>
+<td>no</td>
+<td>no</td>
+<td>yes (if asked)</td>
+<td>no</td>
+</tr>
+<tr>
+<td>nnmclub</td>
+<td>raw OkHttp</td>
+<td>no</td>
+<td>no</td>
+<td>yes (if asked)</td>
+<td>no</td>
+</tr>
+<tr>
+<td>app→goapi/proxy</td>
+<td>Ktor/OkHttp</td>
+<td>no</td>
+<td>no</td>
+<td>n/a (own service)</td>
+<td>no</td>
+</tr>
+<tr>
+<td>lava-api-go rutracker client</td>
+<td>Go net/http</td>
+<td>no</td>
+<td>no (stdlib)</td>
+<td>n/a</td>
+<td>no</td>
+</tr>
+<tr>
+<td>lava-api-go curated clients</td>
+<td>Go net/http</td>
+<td>no</td>
+<td>no (stdlib)</td>
+<td>n/a</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-prioritized-action-list">5. Prioritized action list</h2>
+<ol type="1">
+<li><strong>rutracker — ALREADY FIXED (P0, done).</strong> Both
+client-construction paths have the manual <code>Accept-Encoding</code>
+removed and a regression test. Only remaining step is
+shipping/redistributing the fixed build. No code change owed.</li>
+<li><strong>No functional fix needed for rutor / kinozal / nnmclub / Go
+API — PROVEN safe</strong> by source audit (no manual
+<code>Accept-Encoding</code>, Go <code>DisableCompression</code> unset)
++ the §1 gzip control probes.</li>
+<li><strong>Hardening (P2, latent-trap prevention).</strong> kinozal.tv
+and nnmclub.to are Cloudflare hosts that DO serve brotli when
+<code>br</code> is advertised (physical proof in §1). If anyone ever
+adds a manual <code>Accept-Encoding</code> containing <code>br</code> to
+<code>KinozalHttpClient</code> / <code>NnmclubHttpClient</code> (or any
+raw-OkHttp tracker), they reproduce the exact rutracker bug — and for
+kinozal the raw brotli bytes would be mis-decoded as cp1251 garbage,
+masquerading as a charset bug. Recommend: (a) a short comment in each
+raw-OkHttp client stating "do NOT set Accept-Encoding manually — OkHttp
+negotiates gzip transparently; a manual <code>br</code> would hand back
+undecoded brotli", mirroring the rutracker fix comment; and/or (b) a
+lightweight constitution/lint guard that flags a manual
+<code>Accept-Encoding</code> containing <code>br</code> in any tracker
+HTTP client that lacks a brotli decoder.</li>
+<li><strong>Prerequisite for any future brotli use (P3).</strong>
+Nothing in the app or Go API requires brotli today. If perf work later
+wants to advertise <code>br</code>, a real brotli decoder MUST be wired
+FIRST (client: an okhttp brotli interceptor / Brotli4j; Go:
+<code>andybalholm/brotli</code>), before the header is added — never the
+other way round.</li>
+</ol>
+<hr />
+<h2 id="6-evidence-provenance--anti-bluff-notes">6. Evidence provenance
+/ Anti-Bluff notes</h2>
+<ul>
+<li>All probes ran host-side over Mullvad against PUBLIC guest pages;
+response bodies were discarded (<code>-o /dev/null</code>), only headers
+captured to <code>/run/media/milosvasic/DATA4TB/.build-tmp</code>
+(outside the repo), then deleted.</li>
+<li>No credentials were used or printed; no authenticated HTML was saved
+anywhere.</li>
+<li>No source file was edited by this audit; nothing was
+<code>git add</code>ed/committed.</li>
+<li>Findings for rutor/kinozal/nnmclub/Go are backed by both source
+inspection AND the live <code>gzip</code>-control probes; the "servers
+are brotli-capable" claim is backed by the bug-pattern probes. Only the
+two <code>UNCONFIRMED:</code> items in §2/§3 (non-Lava consumers of
+lava-api-go's brotli response middleware) are not exercised by a test
+and are marked as such per §11.4.6.</li>
+</ul>
+</body>
+</html>

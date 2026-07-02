@@ -315,6 +315,62 @@ class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb1-1"><
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>**Forensic anchor:** (optional) what surfaced the bug</span></code></pre></div>
 <hr />
 <h2
+id="2026-07-02--rutracker-provider-totally-broken-client-requested-brotli-but-never-decoded-the-response-body">2026-07-02
+— rutracker provider totally broken: client requested brotli but never
+decoded the response body</h2>
+<p><strong>Discovered by:</strong> the autonomous-QA keystone
+(<code>run-matrix --backend goapi --subsets rutracker --queries 1080p</code>)
+— verdict SKIP; logcat showed
+<code>GetCurrentProfileUseCase.parseUserId: rutracker logged-in user-id not found</code>
+→ onboarding login returned <code>ServiceUnavailable</code> and the flow
+could not proceed.</p>
+<p><strong>Root cause (CONFIRMED with physical evidence):</strong> both
+rutracker HttpClient paths —
+<code>TrackerClientModule.provideRuTrackerHttpClient</code> (on-device
+Hilt path) and <code>RuTrackerHttpClientFactory.create</code> (clone
+path) — set a <strong>manual</strong>
+<code>defaultRequest { header("Accept-Encoding", "gzip, deflate, br") }</code>.
+Ktor's OkHttp engine only transparently decompresses a Content-Encoding
+it negotiated <strong>itself</strong>; a manually-set Accept-Encoding
+makes OkHttp hand back the <strong>raw</strong> compressed bytes.
+rutracker replies <code>Content-Encoding: br</code> (brotli), so
+<code>RuTrackerInnerApiImpl.mainPage()</code> (and
+<code>search</code>/<code>browse</code>/<code>topic</code>) called
+<code>bodyAsText()</code> on undecoded brotli → garbage → every Jsoup
+selector matched nothing → <code>parseUserId</code> threw.
+<code>login()</code> survived only because it reads the session token
+from the <code>Set-Cookie</code> <strong>header</strong>, not the body,
+so the total breakage masqueraded as a transient
+<code>ServiceUnavailable</code>.</p>
+<p><strong>Physical evidence:</strong> curl replicating the app exactly
+(manual <code>Accept-Encoding: gzip, deflate, br</code>, no client
+decode) → <code>Content-Encoding: br</code>, raw body first bytes
+<code>5b8c9831…</code> (not HTML), <code>#logged-in-username</code>
+absent; brotli-decoded → valid logged-in page with
+<code>#logged-in-username</code> carrying <code>u=&lt;id&gt;</code>.
+Control: OkHttp's transparent <code>gzip</code> and identity both decode
+to the logged-in page. Eliminated (each tested): login charset (UTF-8 vs
+cp1251 — both authenticate), cookie/token handling (bb_session alone
+yields the logged-in page), stale selectors (work once decoded), missing
+<code>redirect</code> form field, wrong credentials. Full forensic:
+<code>.lava-ci-evidence/sixth-law-incidents/2026-07-02-rutracker-brotli-undecoded-body.json</code>.</p>
+<p><strong>Affected files / fix:</strong> removed the manual
+<code>Accept-Encoding</code> header from both
+<code>core/tracker/client/src/main/kotlin/lava/tracker/client/di/TrackerClientModule.kt</code>
+and
+<code>core/tracker/rutracker/src/main/kotlin/lava/tracker/rutracker/RuTrackerHttpClientFactory.kt</code>,
+so OkHttp adds its own <code>Accept-Encoding: gzip</code> and
+decompresses transparently. Only rutracker set a manual header;
+rutor/kinozal/nnmclub were already transparent.</p>
+<p><strong>Verification test:</strong>
+<code>core/tracker/rutracker/src/test/kotlin/lava/tracker/rutracker/impl/RuTrackerBodyDecompressionRegressionTest.kt</code>
+— MockWebServer serves a gzip-encoded logged-in index; the real client +
+<code>RuTrackerInnerApiImpl.mainPage()</code> must return DECODED HTML
+containing the logged-in marker. Reproduce-first (§6.T.1): with the
+manual <code>Accept-Encoding</code> restored the test FAILS (raw bytes,
+marker absent); removed, it PASSES. Rehearsal run captured.</p>
+<hr />
+<h2
 id="2026-07-02--hermetic-test-bumped-real-claudemd-mtime--spurious-markdown-export-sync-failures-blocking-every-push">2026-07-02
 — hermetic test bumped real CLAUDE.md mtime → spurious
 markdown-export-sync failures blocking every push</h2>

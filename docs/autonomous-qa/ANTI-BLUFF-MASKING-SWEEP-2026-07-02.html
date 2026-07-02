@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>ANTI-BLUFF-MASKING-SWEEP-2026-07-02</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="anti-bluff-masking-sweep--client-codebase-core-feature">Anti-Bluff
+Masking Sweep — Client Codebase (core/, feature/)</h1>
+<p><strong>Date:</strong> 2026-07-02 <strong>Scope:</strong>
+<code>core/**</code> + <code>feature/**</code> (Android client).
+READ-ONLY audit — no source edited. <strong>Motivating
+incident:</strong> the RuTracker brotli-undecoded-body bug
+(<code>.lava-ci-evidence/sixth-law-incidents/2026-07-02-rutracker-brotli-undecoded-body.json</code>)
+— a total failure (every HTML parse got raw brotli bytes) was invisible
+because the broken paths degraded to "no results" / "service
+unavailable" instead of surfacing an error, and login (header-only)
+appeared to succeed. <strong>Vocabulary:</strong> per §11.4.6 —
+statements are facts backed by cited <code>file:line</code> evidence;
+inferences that were not executed are marked
+<code>UNCONFIRMED:</code>.</p>
+<hr />
+<h2 id="bug-class-definition">Bug class definition</h2>
+<p>A <strong>masking bug</strong> here = a real, total failure (stale
+selector, undecoded body, upstream-shape change, parser regression, hard
+down) that the code converts into a benign-looking outcome — an empty
+list ("no results"), a <code>null</code>, a <code>false</code>, or a
+<em>transient</em>-flavoured error state ("Service unavailable, try
+again later") — so that: (a) no test fails, and (b) the user cannot tell
+"broken" from "legitimately empty / temporarily down".</p>
+<hr />
+<h2 id="ranked-findings">Ranked findings</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Sev</th>
+<th>File:line</th>
+<th>Masking pattern</th>
+<th>User-visible failure it hides</th>
+<th>Suggested fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F1</td>
+<td><strong>P0</strong></td>
+<td><code>core/tracker/rutracker/.../impl/RuTrackerNetworkApi.kt:51-91</code>
++ <code>.../feature/RuTrackerAuth.kt:60-70</code></td>
+<td><code>catch (t: Throwable) → AuthResponseDto.ServiceUnavailable(reason=…)</code>
+maps <strong>every</strong> login exception (incl. <code>NoData</code>,
+stale-selector <code>error(...)</code>, undecoded-body parse failure) to
+the <em>transient</em> ServiceUnavailable state</td>
+<td>Permanent login breakage (parser/selector rot, undecoded body,
+upstream redesign) renders to the user as "Service unavailable. Please
+try again later." forever — indistinguishable from a real Cloudflare
+5xx. This is the exact class of the brotli incident.</td>
+<td>Split the catch: classify <code>NoData</code> / parse-shape failures
+as a distinct
+<strong><code>ParserBroken</code>/<code>Unexpected</code></strong> state
+("login is broken, not down") vs genuine transport
+<code>IOException</code>/5xx → ServiceUnavailable. Emit
+<code>recordNonFatal</code> (§6.AC) on the parser-broken branch so it is
+visible in Crashlytics even though the UI is graceful.</td>
+</tr>
+<tr>
+<td>F2</td>
+<td><strong>P0</strong></td>
+<td><code>core/tracker/rutracker/.../domain/GetSearchPageUseCase.kt:56</code>;
+<code>core/tracker/kinozal/.../parser/KinozalSearchParser.kt:31-33</code>;
+<code>core/tracker/nnmclub/.../parser/NnmclubSearchParser.kt:33-35</code>;
+<code>core/tracker/rutor/.../parser/RuTorSearchParser.kt:52-57</code></td>
+<td>Search parsers do
+<code>doc.select(&lt;row-selector&gt;).map{}</code> /
+<code>.mapNotNull{}</code> and return whatever survives. A
+<strong>total</strong> structural mismatch (stale selector, bot-block
+page, login-redirect page, undecoded/garbage body) yields
+<strong><code>emptyList()</code></strong>, never an error.</td>
+<td>Broken/blocked/undecoded search → SDK emits
+<code>MultiSearchEvent.ProviderResults(id, emptyList())</code>
+(<code>LavaTrackerSdk.kt:886-896</code>), NOT
+<code>ProviderFailure</code> → UI shows <strong>"No results
+found"</strong> (Empty), not Error+Retry. A dead provider looks
+identical to an empty query. Generalises the brotli bug to all 4 HTML
+trackers + future rutracker markup drift.</td>
+<td>Have each parser detect <strong>absence of the results container
+itself</strong> (e.g. <code>selectFirst("table.tumblers")==null</code>,
+<code>selectFirst("div#index")==null</code>, no <code>.hl-tr</code>
+table wrapper) and throw a typed <code>UnrecognizedPageException</code>
+→ routes to <code>ProviderFailure</code>. "Container present + 0 rows" =
+legit empty; "container absent" = broken.</td>
+</tr>
+<tr>
+<td>F3</td>
+<td><strong>P1</strong></td>
+<td><code>app/src/androidTest/.../Challenge02AuthenticatedSearchOnRuTrackerTest.kt:170-177</code>
+and <code>:185-195</code></td>
+<td>In-body <code>assumeTrue(…, false)</code> inside the success-wait
+and its <code>catch (ComposeTimeoutException)</code> — a login/search
+that never renders "All set!" OR "Service unavailable" within 90s is
+turned into <strong>SKIP</strong>, not FAIL.</td>
+<td>A fully-broken RuTracker login+search (the brotli scenario) makes
+C02 report SKIPPED — which most runners count as green. Same
+green-on-skip class as Challenge70. The one Challenge that would catch
+F1/F2 for rutracker cannot fail on the failure it exists to detect.</td>
+<td>Distinguish "creds/reachability genuinely absent" (legit
+<code>assumeTrue</code> at the <em>top</em>, before the action) from
+"action executed and produced neither expected outcome" (must be
+<strong><code>fail()</code></strong>). A timeout after the login POST is
+a real defect signal, not an assumption violation.</td>
+</tr>
+<tr>
+<td>F4</td>
+<td><strong>P1</strong></td>
+<td><code>core/tracker/rutracker/</code> (whole module)</td>
+<td><strong>Zero HTML fixtures</strong> exist for rutracker
+(<code>find core/tracker/rutracker -path '*fixtures*' -name '*.html'</code>
+→ 0). rutor/kinozal/nnmclub ship fixtures; rutracker does not.</td>
+<td>The highest-traffic tracker — the one that just broke — has no
+fixture-based selector-drift signal at all.
+<code>scripts/check-fixture-freshness.sh</code> has nothing to flag for
+rutracker; selector rot in search/topic/download/profile parsers is
+undetectable until a user hits it.</td>
+<td>Capture real rutracker search/topic/download/login/profile fixtures
+under
+<code>core/tracker/rutracker/src/test/resources/fixtures/rutracker/&lt;scope&gt;/&lt;name&gt;-&lt;date&gt;.html</code>
+and add parser tests that assert a <strong>non-empty</strong> parse
+(F2's container-present assertion) against them.</td>
+</tr>
+<tr>
+<td>F5</td>
+<td><strong>P1</strong></td>
+<td><code>core/tracker/kinozal/.../http/KinozalHttpClient.kt:203</code></td>
+<td><code>bodyString()</code> →
+<code>response.body?.bytes() ?: return ""</code> returns empty string on
+a null body.</td>
+<td>Empty HTML → KinozalSearchParser returns <code>emptyList()</code> →
+"No results". A null/failed body on a 2xx (or a windows-1251 decode
+edge) is silently rendered as an empty search rather than an error.
+Compounds F2 for Kinozal specifically.</td>
+<td>Throw on null body for a response that was <code>isSuccessful</code>
+(a successful response with no body is an anomaly, not an empty result
+set).</td>
+</tr>
+<tr>
+<td>F6</td>
+<td><strong>P2</strong></td>
+<td><code>core/tracker/client/.../LavaTrackerSdk.kt:276-283</code>
+(<code>getTopic</code>), <code>:300-307</code>
+(<code>downloadTorrent</code>), <code>:324-336</code> +
+<code>:343-350</code> (<code>downloadHttpFile</code>)</td>
+<td><code>catch (_: Throwable) → null</code> — topic detail / torrent
+download / http download swallow every exception to
+<code>null</code>.</td>
+<td>User taps a result → topic fails to load (stale topic selectors,
+undecoded body) → returns <code>null</code> → UI shows
+"unavailable"/blank with no error or retry. User taps Download →
+<code>null</code> → nothing happens, no explanation. A broken download
+path is indistinguishable from "no download for this item".</td>
+<td>These convenience wrappers already document "callers needing a
+reason should use the per-feature interface directly." Route the
+download/topic UI actions through the feature interface (or a
+<code>Result</code>-returning variant) so a thrown failure reaches the
+user as Error+Retry, and add <code>recordNonFatal</code>.</td>
+</tr>
+<tr>
+<td>F7</td>
+<td><strong>P2</strong></td>
+<td><code>core/tracker/rutor/.../feature/RuTorTopic.kt:73-90</code></td>
+<td><code>fetchFilesOrEmpty</code>
+<code>catch (_: Throwable) → emptyList()</code>. Documented as graceful
+degradation for the <strong>secondary</strong> file-list fragment
+only.</td>
+<td>A parser regression on the <code>.files</code> fragment silently
+drops the entire file list on <strong>every</strong> topic — the topic
+still renders, so no test/user sees a hard failure, but the "Files (N)"
+panel is permanently empty. Acceptable-by-design today, but zero
+telemetry means silent drift.</td>
+<td>Keep the graceful degrade but emit <code>recordWarning</code>
+(§6.AC) when the fragment fetch succeeds (2xx, non-blank) yet parses to
+0 files — that distinguishes "no files" from "parser broke".</td>
+</tr>
+<tr>
+<td>F8</td>
+<td><strong>P2</strong></td>
+<td><code>core/tracker/kinozal</code> +
+<code>core/tracker/nnmclub</code> fixtures</td>
+<td>Newest kinozal/nnmclub fixtures are <code>…-2026-05-02.html</code>
+(filename-encoded capture date) — ~2 months old vs rutor's
+<code>…-2026-07-02.html</code>.</td>
+<td>Selector calibration for Kinozal/NNM is 2 months stale; combined
+with F2 (empty-on-mismatch), drift here surfaces as silent "no results",
+not a red test.</td>
+<td>Re-capture kinozal/nnmclub fixtures and re-run parser tests; make
+the F2 container-present assertion part of those tests so drift fails
+loudly.</td>
+</tr>
+<tr>
+<td>F9</td>
+<td><strong>P3</strong></td>
+<td><code>app/src/androidTest/.../Challenge00…:160</code>,
+<code>Challenge02…:118</code>, <code>Challenge03…:100</code>,
+<code>Challenge12…:77</code>, <code>Challenge20…:83</code>,
+<code>Challenge23…:94</code></td>
+<td><code>try { onNodeWithText(name).performClick() } catch (_: AssertionError) {}</code>
+in per-provider selection helpers.</td>
+<td>If used around a <strong>primary</strong> interaction, a
+missing/renamed node is swallowed and the test proceeds on a false
+premise. <code>UNCONFIRMED:</code> whether any of these wrap a
+load-bearing step vs optional dialog-dismiss (each occurrence reads as
+an optional provider-chip click).</td>
+<td>Audit each site; where the click is required for the flow, remove
+the catch or assert the node exists first. Keep only for genuinely
+optional pre-steps.</td>
+</tr>
+<tr>
+<td>F10</td>
+<td><strong>P3 (not-a-bug, recorded)</strong></td>
+<td><code>KinozalClient.kt:40-49</code>,
+<code>ArchiveOrgClient.kt:47-53</code>,
+<code>RuTrackerAuth.kt:85-89</code>, all tracker
+<code>healthCheck()</code></td>
+<td><code>catch (_: Throwable) → false</code>.</td>
+<td>None — a liveness/auth-alive probe returning <code>false</code> on
+error is correct boolean semantics, not masking. Listed for completeness
+so a future sweep does not re-flag it.</td>
+<td>No change.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="item-by-item-against-the-tasks-four-asks">Item-by-item against
+the task's four asks</h2>
+<h3
+id="1-bodyastext--body-after-a-manual-content-encoding-header--beyond-the-2-fixed-rutracker-paths">1.
+<code>bodyAsText()</code> / <code>.body</code> after a manual
+content-encoding header — beyond the 2 fixed rutracker paths</h3>
+<p><strong>FACT: no other instances exist.</strong> A repo-wide scan
+(<code>grep -rn "Accept-Encoding\|acceptEncoding\|Content-Encoding"</code>
+over <code>core/ feature/ --include=*.kt</code>) matches
+<strong>only</strong> the two rutracker files, and both now correctly
+<strong>omit</strong> the header:</p>
+<ul>
+<li><code>core/tracker/client/.../di/TrackerClientModule.kt:94-108</code>
+— comment + no header (fixed).</li>
+<li><code>core/tracker/rutracker/.../RuTrackerHttpClientFactory.kt:56-64</code>
+— comment + no header (fixed, clone path).</li>
+</ul>
+<p>All other HTTP clients are raw OkHttp (<code>RuTorHttpClient</code>,
+<code>NnmclubHttpClient</code>, <code>KinozalHttpClient</code>,
+<code>ArchiveOrgHttpClient</code>, <code>GutenbergHttpClient</code>,
+IPTorrents) or Ktor-on-OkHttp (<code>NetworkApiRepositoryImpl</code>
+lava-api-go client). <strong>None set a manual
+<code>Accept-Encoding</code></strong>, so OkHttp adds its own
+<code>Accept-Encoding: gzip</code> and transparently decompresses — the
+brotli failure mode cannot occur there.
+<code>GutenbergHttpClient.kt:38</code> sets only
+<code>Accept: application/json</code>. (The <code>"br"</code> and
+<code>node.tag().name == "br"</code> hits are the HTML
+<code>&lt;br&gt;</code> tag in <code>ParsePostUseCase.kt:109</code>,
+unrelated to brotli.)</p>
+<h3
+id="2-catchruncatchinggetornull-emptylist-return-that-maps-a-real-failure-to-a-generic-benign-result">2.
+catch/<code>runCatching</code>/<code>getOrNull</code>/<code>?: emptyList()</code>/<code>?: return</code>
+that maps a real failure to a generic benign result</h3>
+<p>Ranked above. The load-bearing ones are <strong>F1</strong> (login
+Throwable→ServiceUnavailable = the described class, verbatim),
+<strong>F2</strong> (search parse-mismatch→emptyList, systemic across 4
+trackers), <strong>F6</strong> (SDK topic/download→null). The
+lava-api-go client path is <strong>clean</strong> —
+<code>ApiBackedTrackerClient.getString/getBytes/postJson</code>
+(<code>:270-319</code>) throw <code>ApiHttpException</code> with the
+real status code on any non-2xx, and <code>ProbeMirrorUseCase</code>
+(<code>core/domain/.../ProbeMirrorUseCase.kt:17-53</code>) returns a
+<strong>distinguishable</strong> <code>Unhealthy(status)</code> vs
+<code>Unreachable(reason)</code> — neither masks.
+<code>ProviderCatalogRepository.fetchProviders</code>
+(<code>core/data/.../ProviderCatalogRepository.kt:100-122</code>)
+returns <code>Result&lt;&gt;</code> with the failure reason — not
+masking.</p>
+<h3
+id="3-stale-html-selectors--parsers-that-throw-vs-return-empty-on-mismatch">3.
+Stale HTML selectors — parsers that throw vs return-empty on
+mismatch</h3>
+<ul>
+<li><strong>Throws (good, surfaces the problem):</strong>
+<code>GetCurrentProfileUseCase.parseUserId</code> (<code>:30</code>)
+<code>error("… selectors stale")</code>; <code>LoginUseCase</code>
+(<code>:40,43</code>) throws <code>Unknown</code>/<code>NoData</code>.
+<strong>BUT</strong> every one of these throws is caught by F1's login
+catch and flattened to ServiceUnavailable, so the honest throw is
+re-masked downstream.</li>
+<li><strong>Returns empty (masks, = F2):</strong> all four HTML
+<strong>search</strong> parsers (rutracker/kinozal/nnmclub/rutor) return
+<code>emptyList()</code> when the row/container selector matches
+nothing. None assert the results container is present.</li>
+<li><strong>Partial-throw hazard:</strong>
+<code>GetSearchPageUseCase.parseSearchPage:67</code> does
+<code>element.select(".tor-size").attr("data-ts_text").toLong()</code> —
+if <code>.hl-tr</code> matches but the size cell selector is stale,
+<code>"".toLong()</code> throws <code>NumberFormatException</code>
+(surfaced). Only the <strong>total</strong> no-<code>.hl-tr</code> case
+is silently empty. So rutracker search fails <em>loud</em> on partial
+drift, <em>silent</em> on total drift.</li>
+<li><strong>Fixture freshness:</strong> rutracker = <strong>0
+fixtures</strong> (F4). kinozal/nnmclub = 2026-05-02 (F8, ~2mo). rutor =
+2026-07-02 (fresh).</li>
+</ul>
+<h3
+id="4-challengetests-that-pass-or-skip-while-the-feature-is-broken--beyond-challenge70">4.
+Challenge/tests that PASS or SKIP while the feature is broken — beyond
+Challenge70</h3>
+<ul>
+<li><strong>F3 — Challenge02AuthenticatedSearchOnRuTrackerTest</strong>
+is the primary green-on-skip: <code>assumeTrue(false)</code> on the
+ComposeTimeout / ServiceUnavailable branches converts a totally-broken
+rutracker login+search into SKIP.</li>
+<li><code>UNCONFIRMED:</code> Challenge09 (Kinozal) <code>:70,74</code>
+and Challenge10 (NNM) <code>:58,62</code> use <code>assumeTrue</code>
+for missing credentials — this is the <em>legitimate</em> top-of-test
+skip pattern, but they should be re-read to confirm they do not also
+<code>assumeTrue</code> on a post-action failure the way C02 does.</li>
+<li>F9 — swallowed <code>AssertionError</code> in provider-selection
+helper clicks (green-on-swallow if any wraps a primary step).</li>
+</ul>
+<hr />
+<h2 id="top-3-for-the-caller">Top-3 (for the caller)</h2>
+<ol type="1">
+<li><strong>F1 (P0)</strong> — <code>RuTrackerNetworkApi.kt:51-91</code>
++ <code>RuTrackerAuth.kt:60-70</code>: login maps <strong>every</strong>
+Throwable (including stale-selector <code>error()</code> and
+undecoded-body <code>NoData</code>) to the <em>transient</em>
+<code>ServiceUnavailable</code>, so a permanently-broken login shows
+"Service unavailable, try again later" forever. This is the described
+bug class verbatim; the honest throws in
+<code>LoginUseCase</code>/<code>GetCurrentProfileUseCase</code> are
+re-masked here. Fix: classify parser-broken vs transport-down,
+<code>recordNonFatal</code> the former.</li>
+<li><strong>F2 (P0)</strong> — the four HTML search parsers
+(<code>GetSearchPageUseCase.kt:56</code>,
+<code>KinozalSearchParser.kt:31</code>,
+<code>NnmclubSearchParser.kt:33</code>,
+<code>RuTorSearchParser.kt:52</code>) return <code>emptyList()</code> on
+any structural mismatch; <code>LavaTrackerSdk.kt:886-896</code> then
+emits <code>ProviderResults(empty)</code> (not
+<code>ProviderFailure</code>), so a dead/blocked/undecoded provider
+renders as "No results found". Fix: throw
+<code>UnrecognizedPageException</code> when the results
+<strong>container</strong> is absent.</li>
+<li><strong>F3 (P1)</strong> —
+<code>Challenge02AuthenticatedSearchOnRuTrackerTest.kt:170,185</code>:
+in-body <code>assumeTrue(false)</code> on timeout/ServiceUnavailable
+turns a totally-broken RuTracker flow into SKIP (counts green) — the one
+Challenge that could catch F1/F2 for rutracker cannot fail on the
+failure it exists to detect. Fix: <code>fail()</code> when the action
+executed but produced neither expected outcome.</li>
+</ol>
+<p><strong>Cross-cutting root cause:</strong> the client treats "empty
+result set" and "null" and "ServiceUnavailable" as terminal
+<em>success-shaped</em> states with no separation between "legitimately
+empty / temporarily down" and "structurally broken". The durable fix is
+a <strong>typed <code>UnrecognizedPage</code>/<code>ParserBroken</code>
+signal</strong> at every scrape boundary, routed to
+<code>ProviderFailure</code>/Error+Retry and <code>recordNonFatal</code>
+(§6.AC), so total breakage is always loud — in the UI and in Crashlytics
+— instead of degrading to "nothing found".</p>
+</body>
+</html>

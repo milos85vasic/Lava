@@ -189,6 +189,37 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🟢🔧 2026-07-02 — rutracker client brotli-decompression bug
+FOUND + FIXED (device-verified); autonomous-QA loop advancing.</strong>
+The autonomous-QA keystone (goapi × rutracker) surfaced a TOTAL
+rutracker breakage: both client HttpClient paths set a manual
+<code>Accept-Encoding: gzip, deflate, br</code>, but Ktor/OkHttp only
+transparently decompresses an encoding it negotiated itself — so
+<code>bodyAsText()</code> held RAW brotli bytes and every HTML parse
+failed while login (Set-Cookie header) appeared to succeed. FIX: removed
+the manual header from
+<code>TrackerClientModule.provideRuTrackerHttpClient</code> +
+<code>RuTrackerHttpClientFactory.create</code> (OkHttp now adds
+<code>Accept-Encoding: gzip</code> + decompresses).
+<strong>Device-verified:</strong> on the rebuilt debug APK, rutracker
+onboarding login went from broken (<code>parseUserId</code> throw →
+SKIP) to <code>AuthState$Authenticated</code> with a real
+<code>bb_session</code> (FAIL now at the NEXT layer, not a skip).
+Regression test <code>RuTrackerBodyDecompressionRegressionTest</code>
+(reproduce-first, RED-with-header/GREEN-without). Evidence:
+<code>.lava-ci-evidence/sixth-law-incidents/2026-07-02-rutracker-brotli-undecoded-body.json</code>;
+BUGFIXES.md updated (§6.T.4). Decompression audit
+(docs/autonomous-qa/DECOMPRESSION-AUDIT-2026-07-02.md): rutracker was
+the ONLY affected tracker; rutor/kinozal/nnmclub + lava-api-go are NOT
+affected. Also remediated a podman <code>aardvark-dns</code>
+zombie-netns outage that blocked the QA matrix
+(<code>.lava-ci-evidence/sixth-law-incidents/2026-07-02-podman-aardvark-dns-zombie-netns-blocked-qa-matrix.json</code>).
+<strong>NEXT BLOCKER:</strong> the QA matrix now FAILs at SEARCH —
+client→goapi search returns "problem reaching the trackers" (a distinct
+bug from the brotli fix; goapi decompression is clean per the audit —
+root-cause the goapi rutracker search path next). The 1.3.12-1078
+distribute stays BLOCKED until the matrix is green end-to-end
+(search→download). ───── (current)</p>
 <p><strong>🟢🚦 1.3.12-1078 DISTRIBUTE-PREPARED (Phase 5), NOT
 DISTRIBUTED — autonomous-QA matrix relaunching on nezha
 (2026-06-30).</strong> versionCode 1078 / versionName 1.3.12 (§6.Y
@@ -1386,8 +1417,9 @@ PostConverters clamp, ProbeMirrorUseCase reproducing Crashlytics
 39469d3b). Evidence:
 <code>.lava-ci-evidence/bluff-hunt/2026-06-23-cycle6-{session-telemetry,android-core}.json</code>.
 The session's telemetry tests are PROVEN genuine.</p>
-<p><strong>Last updated:</strong> 2026-06-30 (**🤖 AUTONOMOUS QA HARNESS
-(Phase 0) — self-driving QA built under
+<p><strong>Last updated:</strong> 2026-07-02 (rutracker brotli client
+fix — see top banner; prior 2026-06-30 context follows) (**🤖 AUTONOMOUS
+QA HARNESS (Phase 0) — self-driving QA built under
 <code>scripts/autonomous-qa/</code>; emulator image boots
 containerized-KVM in ~30s; Go backend serves <code>/health</code>;
 onboarding proven end-to-end (RuTor anon → main app, keystone run #1

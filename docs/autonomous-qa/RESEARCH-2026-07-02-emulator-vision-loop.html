@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>RESEARCH-2026-07-02-emulator-vision-loop</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="autonomous-qa-research-containerized-emulators-video-evidence-vision-verification-tracker-extraction">Autonomous-QA
+Research: Containerized Emulators, Video Evidence, Vision Verification,
+Tracker Extraction</h1>
+<p>Generated: 2026-07-02 (research subagent)</p>
+<p><strong>Executive summary.</strong> For Lava's autonomous-QA loop on
+a Linux x86_64 host with <code>/dev/kvm</code> and rootless podman
+5.7.1, the strongest KVM-accelerated container path is the Android SDK
+emulator packaged via Google's
+<code>android-emulator-container-scripts</code> (Apache-2.0,
+<code>--device /dev/kvm</code>, gRPC + adb-over-TCP), with
+<code>budtmo/docker-android</code> (MIT, noVNC + video) as a
+batteries-included alternative and <code>redroid</code> (Apache-2.0) as
+the no-KVM fallback for constrained runners; Google's official
+<code>Cuttlefish</code> (<code>cvd</code>) is the highest-fidelity
+self-hostable "device farm" primitive (KVM + <code>vhost_vsock</code>,
+on-prem Docker + Cloud Orchestrator). For evidence capture,
+<code>scrcpy</code> (Apache-2.0) beats <code>adb screenrecord</code>
+because it has no 3-minute cap (the cap is a hardcoded
+<code>kMaxTimeLimitSec = 180</code> in the AOSP
+<code>screenrecord</code> binary; Maestro patches it via Radare2 binary
+rewriting), and <code>ffmpeg</code> segment muxer + the
+<code>hash</code>/<code>framehash</code> muxers give tamper-evident
+chunk+SHA-256 evidence. For AI verification, <code>Midscene.js</code>
+(MIT, drives Android over ADB, runs self-hostable VLMs UI-TARS/Qwen) and
+ByteDance <code>UI-TARS</code> (Apache-2.0, 2B/7B/72B) let a vision
+model assert user-visible outcomes from frames. For legal
+authorized-testing extraction of <code>.torrent</code>/magnet links from
+RuTracker/RuTor/NNM-Club/Kinozal behind Cloudflare + DDoS-Guard,
+<code>TorAPI</code> (MIT, Node.js, already targets exactly these four
+trackers), <code>curl_cffi</code> (MIT, JA3/JA4/HTTP2/HTTP3
+impersonation), and challenge-solver proxies <code>Byparr</code>
+(Camoufox) / <code>FlareSolverr</code> (deprecated) are the concrete OSS
+building blocks.</p>
+<hr />
+<h2
+id="1-containerized-android-emulators-with-kvm-under-rootless-podman">1.
+Containerized Android emulators with KVM under rootless podman</h2>
+<p>Baseline facts about the host target: Cuttlefish and the SDK emulator
+both require the host to expose KVM; Cuttlefish additionally needs the
+<code>vhost_vsock</code> and <code>vhost_net</code> kernel modules for
+guest I/O and networking (<a
+href="https://source.android.com/docs/devices/cuttlefish/get-started">source.android.com/docs/devices/cuttlefish/get-started</a>).
+The standard container passthrough for the SDK emulator is
+<code>docker run --device /dev/kvm ...</code> (<a
+href="https://github.com/google/android-emulator-container-scripts">github.com/google/android-emulator-container-scripts</a>).</p>
+<p><strong>Rootless podman <code>/dev/kvm</code> caveat
+(verified):</strong> rootless podman can silently fail to mount
+<code>/dev/kvm</code> when it is accessed through group membership; the
+documented workaround is to bind-mount the node with
+<code>-v /dev/kvm</code> instead of <code>--device /dev/kvm</code> (<a
+href="https://github.com/containers/podman/issues/16701">containers/podman#16701</a>),
+corroborated by the Red Hat rootless-KVM/QEMU guidance (<a
+href="https://developers.redhat.com/articles/2024/12/18/rootless-virtual-machines-kvm-and-qemu">developers.redhat.com/articles/2024/12/18/rootless-virtual-machines-kvm-and-qemu</a>).
+ACTION for Lava's Containers submodule: the
+<code>containerized.go</code> path that hard-requires
+<code>--device /dev/kvm</code> should carry a rootless-podman fallback
+to <code>-v /dev/kvm:/dev/kvm</code> plus a group-add for the
+<code>kvm</code> gid.</p>
+<p><strong>Headless GPU (verified):</strong> the SDK emulator's
+headless-safe configuration is
+<code>-no-window -gpu swiftshader_indirect</code> (SwiftShader =
+software GL, no host GPU dependency);
+<code>-no-accel -gpu swiftshader</code> is the fully-software fallback
+when KVM is unavailable (<a
+href="https://codersera.com/blog/android-emulator-docker-without-kvm/">codersera.com/blog/android-emulator-docker-without-kvm</a>).
+Host-GPU passthrough into a container is not reliable across drivers;
+<code>swiftshader_indirect</code> is the reproducible choice for a gate.
+Keep CPU acceleration (KVM) and GPU rendering (SwiftShader) as separate
+concerns — KVM accelerates the guest CPU, SwiftShader handles GL without
+the host GPU.</p>
+<p><strong>adb-over-TCP wiring (verified):</strong> the container
+publishes 5555 (adb) and (for the Google scripts) 8554/8555 (gRPC); the
+host connects with <code>adb connect localhost:5555</code> (<a
+href="https://github.com/google/android-emulator-container-scripts">github.com/google/android-emulator-container-scripts</a>).
+Google's images also expose a gRPC service to talk to the running
+emulator inside the container.</p>
+<p><strong>Snapshot pitfall (matches Lava §6.I clause 6):</strong>
+cold-boot is mandatory for gate runs; snapshot reuse is a known
+false-green source. This is an operational discipline, not an image
+feature — Lava already encodes it constitutionally.</p>
+<p>Concrete OSS projects (all fit Lava because they produce a real
+ADB-reachable Android over TCP that <code>connectedAndroidTest</code>
+and Midscene can drive):</p>
+<table>
+<thead>
+<tr>
+<th>Project</th>
+<th>Repo</th>
+<th>License</th>
+<th>Recency</th>
+<th>KVM</th>
+<th>Notes / why it fits Lava</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>android-emulator-container-scripts</td>
+<td><a
+href="https://github.com/google/android-emulator-container-scripts">https://github.com/google/android-emulator-container-scripts</a></td>
+<td>Apache-2.0</td>
+<td>368 commits; last-commit date UNVERIFIED from listing</td>
+<td>Yes <code>--device /dev/kvm</code></td>
+<td>Official Google; builds images from emulator+system-image ZIPs via
+<code>emu-docker create</code>; gRPC + adb 5555. Best fidelity-to-CI
+path. GPU HW accel documented for NVIDIA only. (<a
+href="https://github.com/google/android-emulator-container-scripts">repo</a>)</td>
+</tr>
+<tr>
+<td>budtmo/docker-android</td>
+<td><a
+href="https://github.com/budtmo/docker-android">https://github.com/budtmo/docker-android</a></td>
+<td>MIT</td>
+<td>v3.5.2-p0 (2026-06-24), 112 releases, 15.5k stars</td>
+<td>Yes <code>--device /dev/kvm</code></td>
+<td>noVNC (<code>WEB_VNC=true</code>), API 28/29/30/32/33/34,
+<code>adb connect</code> from outside. Video recording + headless are
+moving to a "Pro" sponsor tier per the current README (UNVERIFIED
+whether OSS video remains in-tree). (<a
+href="https://github.com/budtmo/docker-android">repo</a>)</td>
+</tr>
+<tr>
+<td>HQarroum/docker-android</td>
+<td><a
+href="https://github.com/HQarroum/docker-android">https://github.com/HQarroum/docker-android</a></td>
+<td>UNVERIFIED (check LICENSE)</td>
+<td>UNVERIFIED</td>
+<td>Yes</td>
+<td>Size-optimized, emulator+adb port-forwarded on container NIC,
+headless for CI farms. (<a
+href="https://github.com/HQarroum/docker-android">repo</a>)</td>
+</tr>
+<tr>
+<td>redroid (remote-android)</td>
+<td><a
+href="https://github.com/remote-android/redroid-doc">https://github.com/remote-android/redroid-doc</a></td>
+<td>Apache-2.0 (kernel modules GPLv2)</td>
+<td>96 commits; last-commit date UNVERIFIED</td>
+<td><strong>No</strong> — uses host kernel binder/ashmem, never
+<code>/dev/kvm</code></td>
+<td>Android 8.1–16, `redroid_gpu_mode=auto</td>
+</tr>
+<tr>
+<td>thedrhax/android-avd, bazted/docker-android-avd</td>
+<td><a
+href="https://github.com/thedrhax-dockerfiles/android-avd">https://github.com/thedrhax-dockerfiles/android-avd</a>
+, <a
+href="https://github.com/bazted/docker-android-avd">https://github.com/bazted/docker-android-avd</a></td>
+<td>UNVERIFIED</td>
+<td>UNVERIFIED</td>
+<td>Yes</td>
+<td>Minimal headless x86 AVD for instrumentation tests, adb 5554/5555.
+(<a
+href="https://github.com/thedrhax-dockerfiles/android-avd">repo</a>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2
+id="2-real-time-full-video-recording-that-survives-restarts-and-long-3-min-sessions">2.
+Real-time full video recording that survives restarts and long (&gt;3
+min) sessions</h2>
+<p><strong>Root cause of the 3-minute limit (verified):</strong>
+Android's <code>adb shell screenrecord</code> caps at 180s via a
+hardcoded constant
+<code>static const uint32_t kMaxTimeLimitSec = 180;</code> in the AOSP
+<code>screenrecord</code> binary (<a
+href="https://maestro.dev/fixing-androids-3-minute-screen-recording-limitation-4839abc74aee">maestro.dev/fixing-androids-3-minute-screen-recording-limitation</a>).
+Two production-grade escapes:</p>
+<ol type="1">
+<li><strong>Binary rewrite (Maestro's approach, verified):</strong>
+locate the little-endian <code>b4000000</code> (=180) in the compiled
+<code>screenrecord</code>, overwrite with a larger limit (e.g. 3600)
+using Radare2 (<code>wx</code>), and push the patched binary onto the
+device pool. Produces one uninterrupted file, no stitch seams, works
+across Android versions (<a
+href="https://maestro.dev/fixing-androids-3-minute-screen-recording-limitation-4839abc74aee">maestro.dev</a>).</li>
+<li><strong>scrcpy (verified, recommended for Lava):</strong>
+<code>scrcpy</code> has no 3-minute cap and records to
+<code>.mp4</code>/<code>.mkv</code> via <code>--record-format</code> (<a
+href="https://manpages.debian.org/testing/scrcpy/scrcpy.1.en.html">manpages.debian.org/testing/scrcpy/scrcpy.1.en.html</a>).
+It reads the device H.264/H.265 stream over ADB and muxes host-side, so
+recording is decoupled from the app process and survives app restarts
+within one session. scrcpy's own author notes it does not suffer the
+screenrecord time limit (<a
+href="https://github.com/Genymobile/scrcpy/issues/1315">github.com/Genymobile/scrcpy/issues/1315</a>).
+Repo: <a
+href="https://github.com/Genymobile/scrcpy">https://github.com/Genymobile/scrcpy</a>
+(Apache-2.0). scrcpy can record headless (no mirror window) — suitable
+for a container.</li>
+</ol>
+<p><strong>Chunk-and-stitch alternative (verified tradeoff):</strong>
+looping <code>screenrecord</code> to emit successive mp4 files and
+stitching with ffmpeg introduces a skip at each seam (<a
+href="https://medium.com/@leland_40592/fixing-androids-3-minute-screen-recording-limitation-4839abc74aee">medium.com/@leland_40592/...</a>).
+Prefer scrcpy or the binary rewrite over this for gate evidence.</p>
+<p><strong>Recording backends compared:</strong></p>
+<ul>
+<li><code>adb screenrecord</code>: on-device, 180s cap, H.264, dies when
+the app/session resets. Necessary-but-limited.</li>
+<li><code>scrcpy</code>: host-side capture over ADB, no cap,
+<code>.mp4</code>/<code>.mkv</code>, headless-capable, Apache-2.0. Best
+default.</li>
+<li><code>ffmpeg x11grab</code>: captures a host X display — only
+relevant if the emulator renders to a host X server (noVNC/Xvfb path in
+<code>budtmo/docker-android</code>); couples the recording to the
+display server rather than the device.</li>
+<li>Emulator gRPC/console recording: Google's container scripts expose a
+gRPC service to the running emulator (<a
+href="https://github.com/google/android-emulator-container-scripts">github.com/google/android-emulator-container-scripts</a>);
+the emulator also supports console-driven recording. Exact long-session
+behavior UNVERIFIED.</li>
+<li><code>hansalemaos/adbnativeblitz</code>: wraps
+<code>screenrecord</code> with reduced per-frame subprocess overhead for
+faster continuous capture, MIT-ish (verify) (<a
+href="https://github.com/hansalemaos/adbnativeblitz">github.com/hansalemaos/adbnativeblitz</a>).
+Niche.</li>
+</ul>
+<p><strong>Tamper-evident chunking + hashing (verified
+primitives):</strong> FFmpeg's <code>segment</code> muxer splits a
+stream into sequential files (<a
+href="https://ffmpeg.org/ffmpeg-formats.html">ffmpeg.org/ffmpeg-formats.html</a>);
+FFmpeg's <code>hash</code> and <code>framehash</code> muxers compute
+cryptographic digests (MD5/SHA-256/etc.) over stream/frame data (<a
+href="https://manpages.debian.org/stretch/ffmpeg/ffmpeg-formats.1.en.html">manpages.debian.org/stretch/ffmpeg/ffmpeg-formats.1.en.html</a>).
+Recommended Lava recipe (matches §11.4.128 raw-layout + curated-evidence
+discipline): record with scrcpy → segment into N-second chunks with the
+<code>segment</code> muxer → <code>sha256sum</code> each chunk → write a
+manifest where <code>chunk[i].prev_hash = sha256(chunk[i-1])</code> (a
+hash chain), so any single-chunk tampering breaks the chain. FFmpeg has
+no built-in chain-of-custody chaining; the chain is a thin shell wrapper
+the Containers submodule owns. UNVERIFIED: any single OSS tool that does
+the full record+segment+chain in one step (build it as Lava glue).</p>
+<hr />
+<h2
+id="3-ai-vision-analysis-of-test-recordings-to-verify-user-visible-outcomes">3.
+AI vision-analysis of test recordings to verify user-visible
+outcomes</h2>
+<p>Two families exist: (a) pixel/perceptual diff tools (BackstopJS,
+Argos, Aye Spy, Playwright visual comparisons) that catch regressions vs
+a golden baseline, and (b) VLM-as-oracle tools that answer
+natural-language assertions ("search results rendered", "download link
+visible") from a screenshot/frame — the latter matches Lava's §6.AB
+"rendering correctness not just presence" requirement and needs no
+golden baseline.</p>
+<p><strong>VLM-as-oracle (recommended for Lava's semantic
+assertions):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Repo</th>
+<th>License</th>
+<th>Recency</th>
+<th>Why it fits Lava</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Midscene.js</td>
+<td><a
+href="https://github.com/web-infra-dev/midscene">https://github.com/web-infra-dev/midscene</a></td>
+<td>MIT</td>
+<td>authored 2025, active</td>
+<td>Drives <strong>Android over ADB</strong>; screenshot-only, no
+selectors; <code>aiAssert("search results are visible")</code>
+natural-language oracle; supports <strong>self-hostable</strong> VLMs
+(UI-TARS, Qwen3.x, GLM-4.6V) so no cloud dependency and no §6.H
+credential leak to a SaaS. Directly usable as the vision-assertion step
+over recorded frames or live device. (<a
+href="https://github.com/web-infra-dev/midscene">repo</a>, <a
+href="https://midscenejs.com/introduction">midscenejs.com/introduction</a>)</td>
+</tr>
+<tr>
+<td>UI-TARS (models)</td>
+<td><a
+href="https://github.com/bytedance/UI-TARS">https://github.com/bytedance/UI-TARS</a></td>
+<td>Apache-2.0</td>
+<td>UI-TARS-1.5 / 2 in 2025, ~27–32k stars</td>
+<td>Open-weights vision-language GUI model, sizes <strong>2B / 7B /
+72B</strong>, trained for screen understanding + action prediction.
+Self-host the 2B/7B on the gate host for offline frame verification. (<a
+href="https://github.com/bytedance/UI-TARS">repo</a>)</td>
+</tr>
+<tr>
+<td>UI-TARS-desktop / Agent-TARS</td>
+<td><a
+href="https://github.com/bytedance/UI-TARS-desktop">https://github.com/bytedance/UI-TARS-desktop</a></td>
+<td>Apache-2.0</td>
+<td>active 2025–2026</td>
+<td>Agent stack + CLI wrapping the models; reference for the
+sample→assert loop. (<a
+href="https://github.com/bytedance/UI-TARS-desktop">repo</a>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Perceptual/diff baseline (complementary regression
+signal):</strong> BackstopJS, Argos, Aye Spy are OSS (<a
+href="https://percy.io/blog/open-source-visual-regression-testing-tools">percy.io/blog/open-source-visual-regression-testing-tools</a>,
+<a
+href="https://www.browserstack.com/guide/visual-regression-testing-open-source">browserstack.com/guide/visual-regression-testing-open-source</a>).
+They are web-oriented; for Android use them on captured screenshots. The
+2026 industry trend is "Vision AI catches what pixel-diff misses"
+(semantic noise filtering, ignoring dynamic banners/animations) (<a
+href="https://dev.to/drizzdev/mobile-visual-regression-testing-in-2026-why-vision-ai-catches-what-script-based-tools-miss-2bfm">dev.to/drizzdev/mobile-visual-regression-testing-in-2026-...</a>).</p>
+<p><strong>Frame-sampling + assertion loop (how teams structure
+it):</strong> the standard structure is: (1) record with scrcpy; (2)
+sample keyframes at scene changes or fixed cadence (ffmpeg
+<code>select='gt(scene,0.3)'</code> or <code>fps=1</code>); (3) feed
+each sampled frame + a natural-language assertion to the VLM; (4)
+require a structured JSON verdict
+(<code>{pass: bool, evidence: "...", confidence}</code>); (5) treat the
+VLM verdict as a secondary CI signal that must agree with the
+Espresso/Compose assertion — divergence flags a bluff. This mirrors
+Lava's §6.AK "gate-coverage must intersect cycle-claims": the VLM
+verifies the same user-visible outcome the Challenge claims. UNVERIFIED:
+a single turnkey OSS "video→assertion CI gate" for Android; assemble
+from Midscene + ffmpeg sampling.</p>
+<hr />
+<h2
+id="4-legal-authorized-testing-extraction-of-torrentmagnet-from-rutrackerrutornnm-clubkinozal-behind-cloudflare">4.
+Legal authorized-testing extraction of .torrent/magnet from
+RuTracker/RuTor/NNM-Club/Kinozal behind Cloudflare</h2>
+<p><strong>Protection reality (verified):</strong> RuTracker.org and
+NNM-Club use Cloudflare (<a
+href="http://forum.old-dos.ru/viewtopic.php?f=16&amp;t=2024">forum.old-dos.ru
+viewtopic t=2024</a>, <a
+href="https://lightrun.com/answers/nbusseneau-qbittorrent-rutracker-plugin-plugin-not-working-on-rutrackerorg-and-rutrackernl-due-to-cloudflare-protection">lightrun.com/answers/...rutracker...cloudflare</a>);
+DDoS-Guard is a separate Russian anti-DDoS layer also present in this
+ecosystem; Kinozal is proxy-sensitive and returns 403 with its DDoS
+protection when the egress looks wrong (<a
+href="https://github.com/Lifailon/TorAPI">github.com/Lifailon/TorAPI</a>).
+RuTracker also requires an authenticated session (login cookie) for
+<code>.torrent</code> download — the challenge is Cloudflare cookie +
+auth cookie, not just Cloudflare.</p>
+<p><strong>Direct-match OSS (highest value):</strong></p>
+<ul>
+<li><strong>TorAPI</strong> — <a
+href="https://github.com/Lifailon/TorAPI">https://github.com/Lifailon/TorAPI</a>
+— MIT, Node.js/Express, last release 0.5.2 (2024-10-09). Unofficial API
++ RSS for <strong>exactly RuTracker (3 mirrors), Kinozal (3), RuTor (2),
+NoNameClub (1)</strong>; returns <strong>both <code>.torrent</code>
+files and magnet links/hashes</strong>; search by title/ID, category
+filter; deploys via Docker/NPM/Vercel. Why it fits Lava: it is a ready
+reference implementation for the same four trackers Lava targets, usable
+as an oracle to cross-check Lava's own parser output. Its Cloudflare
+handling is UNVERIFIED from the README (no stated headless-browser/proxy
+mechanism). (<a href="https://github.com/Lifailon/TorAPI">repo</a>)</li>
+<li><strong>imDMG/qBt_SE</strong> and
+<strong>nbusseneau/qBittorrent-RuTracker-plugin</strong> — qBittorrent
+search plugins for these trackers; the RuTracker plugin's open issue #41
+documents the Cloudflare-block failure mode and community fixes (<a
+href="https://github.com/imDMG/qBt_SE">github.com/imDMG/qBt_SE</a>, <a
+href="https://github.com/nbusseneau/qBittorrent-RuTracker-plugin/issues/41">github.com/nbusseneau/qBittorrent-RuTracker-plugin/issues/41</a>).</li>
+</ul>
+<p><strong>TLS-fingerprint HTTP clients (defeat JA3/JA4 blocks without a
+browser):</strong></p>
+<ul>
+<li><strong>curl_cffi</strong> — <a
+href="https://github.com/lexiforest/curl_cffi">https://github.com/lexiforest/curl_cffi</a>
+— MIT, v0.15.1b2 (2026-06), 6k+ stars, 534 commits. Impersonates
+Chrome/Firefox/Safari <strong>JA3/TLS + HTTP2</strong>, custom
+<code>ja3=/akamai=/extra_fp=</code>, <strong>HTTP/3 + UDP
+socks5</strong> since v0.15.0, asyncio + per-request proxy rotation,
+<code>curl-cffi update</code> to refresh fingerprints without upgrading.
+Why it fits Lava: lightweight, no browser, correct TLS fingerprint +
+proper browser headers is the legal-authorized-testing baseline; pair
+with an authenticated session cookie for RuTracker. (<a
+href="https://github.com/lexiforest/curl_cffi">repo</a>)</li>
+<li>Underlying: <strong>curl-impersonate</strong> (the fork curl_cffi
+binds). Utls (Go) is the equivalent for Go clients — relevant if wiring
+into <code>lava-api-go</code> (<a
+href="https://scrapfly.io/blog/posts/curl-impersonate-scrape-chrome-firefox-tls-http2-fingerprint">scrapfly.io/blog/posts/curl-impersonate-scrape-chrome-firefox-tls-http2-fingerprint</a>).</li>
+</ul>
+<p><strong>Browser-based challenge solvers (for full JS/Turnstile
+challenges):</strong></p>
+<ul>
+<li><strong>FlareSolverr</strong> — <a
+href="https://github.com/FlareSolverr/FlareSolverr">https://github.com/FlareSolverr/FlareSolverr</a>
+— latest v3.4.6 (2025-11-29). Selenium + undetected-chromedriver proxy
+that solves the challenge and returns solution cookies; built-in
+integration in Prowlarr/Jackett (<a
+href="https://trash-guides.info/Prowlarr/prowlarr-setup-flaresolverr/">trash-guides.info/Prowlarr/prowlarr-setup-flaresolverr</a>).
+<strong>Caveat (verified):</strong> upstream signals deprecation /
+reduced maintenance and it does not solve CAPTCHAs; it clears light JS
+challenges but breaks on Cloudflare Turnstile / 2026 Managed Challenges
+(<a
+href="https://godberrystudios.com/posts/byparr-scrapling-flaresolverr-cloudflare-bypass-2026/">godberrystudios.com/posts/byparr-scrapling-flaresolverr-cloudflare-bypass-2026</a>).</li>
+<li><strong>Byparr</strong> — <a
+href="https://github.com/ThePhaseless/Byparr">https://github.com/ThePhaseless/Byparr</a>
+— <strong>drop-in FlareSolverr replacement</strong> (same API + port),
+v2.x uses <strong>Camoufox</strong> (Firefox-based anti-detect, C++
+fingerprint patches), v2.1.0 (2026-02) added Python 3.14 + per-request
+<code>X-Proxy-*</code> overrides, weekly-ish release cadence. License
+UNVERIFIED (check repo). Why it fits Lava: swap one base URL vs
+FlareSolverr; better against modern Cloudflare. (<a
+href="https://github.com/ThePhaseless/Byparr">repo</a>)</li>
+<li><strong>Byparr-nodriver</strong> (<a
+href="https://github.com/hatemosphere/Byparr-nodriver">https://github.com/hatemosphere/Byparr-nodriver</a>,
+seleniumbase/nodriver + FastAPI), <strong>trawl</strong> (<a
+href="https://github.com/germondai/trawl">https://github.com/germondai/trawl</a>,
+self-hosted, targets Turnstile/reCAPTCHA/hCaptcha/GeeTest),
+<strong>Solvearr</strong> (<a
+href="https://github.com/nabil-ak/Solvearr">https://github.com/nabil-ak/Solvearr</a>,
+lightweight no-browser, *arr-compatible) are alternatives (<a
+href="https://godberrystudios.com/posts/byparr-scrapling-flaresolverr-cloudflare-bypass-2026/">search
+results</a>).</li>
+</ul>
+<p><strong>Egress (legal note):</strong> residential/VPN egress reduces
+DDoS-Guard/Kinozal 403s (Kinozal is proxy-sensitive per TorAPI docs).
+For Lava this is authorized testing of the operator's own accounts; keep
+credentials in <code>.env</code> per §6.H and never in the scraper
+source per §6.R. Tradeoff table:</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Tool</th>
+<th>Defeats</th>
+<th>Cost</th>
+<th>Fidelity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TLS/JA3 only</td>
+<td>curl_cffi / curl-impersonate / utls</td>
+<td>JA3/JA4/HTTP2 fingerprint blocks</td>
+<td>low (no browser)</td>
+<td>high for header/TLS, none for JS challenges</td>
+</tr>
+<tr>
+<td>Full JS challenge</td>
+<td>Byparr (Camoufox) / FlareSolverr</td>
+<td>Cloudflare IUAM/JS, returns cookies</td>
+<td>medium (headless browser RAM)</td>
+<td>high, Turnstile UNVERIFIED</td>
+</tr>
+<tr>
+<td>Ready API</td>
+<td>TorAPI</td>
+<td>all-of-the-above for these 4 trackers, if it works</td>
+<td>medium</td>
+<td>direct-match oracle for Lava</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-game-changing--novel-approaches-worth-flagging">5.
+Game-changing / novel approaches worth flagging</h2>
+<ul>
+<li><strong>Google Cuttlefish (<code>cvd</code>) — self-hostable "AWS
+Device Farm equivalent" (verified).</strong> Configurable virtual
+Android device, runs locally (x86 + ARM64) or in cloud; official on-prem
+path is the <strong>Cuttlefish Docker image + Cloud Orchestrator web
+service</strong>; couples with Kubernetes for elastic fleets (<a
+href="https://source.android.com/docs/devices/cuttlefish/on-premises">source.android.com/docs/devices/cuttlefish/on-premises</a>,
+<a
+href="https://realz.medium.com/running-android-on-kubernetes-be73b940833f">realz.medium.com/running-android-on-kubernetes</a>).
+Repos: <a
+href="https://github.com/google/android-cuttlefish">https://github.com/google/android-cuttlefish</a>
+(Apache-2.0), community <a
+href="https://github.com/thatoddmailbox/cuttlefish-docker">https://github.com/thatoddmailbox/cuttlefish-docker</a>.
+Needs KVM + <code>vhost_vsock</code>/<code>vhost_net</code>. This is the
+highest-fidelity self-hosted device-farm primitive and a strong
+candidate to back Lava's §6.AE matrix at scale (multiple API levels as
+k8s pods). It is still KVM-in-a-container (not fully isolated) (<a
+href="https://source.android.com/docs/devices/cuttlefish/on-premises">source.android.com/docs/devices/cuttlefish/on-premises</a>).</li>
+<li><strong>redroid microVM-free path (verified).</strong> Real Android
+userspace on the host kernel (binder/ashmem), no QEMU, no
+<code>/dev/kvm</code> — the fastest headless option on runners lacking
+nested virt (<a
+href="https://github.com/remote-android/redroid-doc">github.com/remote-android/redroid-doc</a>).
+Novel for cost, but device-parity with the SDK AVD is UNVERIFIED for
+gate fidelity.</li>
+<li><strong>DeviceFarmer / STF (verified, caveated).</strong> OSS
+continuation of OpenSTF: browser control of real device fleets, REST API
+for CI, booking/partitioning; v3.7.7 (2025-07-23);
+<strong>volunteer-maintained, slow progress</strong> (<a
+href="https://github.com/DeviceFarmer/stf">github.com/DeviceFarmer/stf</a>,
+<a
+href="https://medium.com/@jerimiahham/building-device-farms-with-stf-a-9-year-journey-and-gift-to-the-community-1050a530bd58">medium.com/@jerimiahham/building-device-farms-with-stf</a>).
+Fits Lava if physical devices are added later; heavier than needed for
+emulator-only gates.</li>
+<li><strong>Genymotion Device Image / PaaS (verified, non-OSS).</strong>
+Android AMIs on AWS/GCP/Alibaba/Azure, per-minute-per-device pricing,
+plus on-prem; ARM64 images up to Android 15 (<a
+href="https://www.genymotion.com/product-device-image/">genymotion.com/product-device-image</a>,
+<a
+href="https://aws.amazon.com/marketplace/pp/prodview-wwjcsmbxgbboy">aws.amazon.com/marketplace
+... Genymotion PaaS Android 15</a>). Not OSS and cloud-cost-bearing —
+conflicts with Lava's Local-Only CI/CD and §6.W posture; flag as a
+fallback only.</li>
+<li><strong>Maestro for Compose (verified, Apache-2.0).</strong>
+Black-box UI automation that reads Compose semantics automatically and
+prioritizes text/semantics over <code>testTag</code>;
+<code>testTagsAsResourceId = true</code> exposes tags;
+<code>maestro hierarchy</code> dumps targets (<a
+href="https://docs.maestro.dev/platform-support/android-jetpack-compose">docs.maestro.dev/platform-support/android-jetpack-compose</a>).
+Novel vs Espresso: no instrumentation coupling, YAML flows, resilient to
+refactors — a lighter complement (not replacement) to Lava's Compose
+Challenge Tests, and the source of the screenrecord binary-rewrite
+technique in §2.</li>
+<li><strong>Midscene + self-hosted VLM as an appium alternative
+(verified).</strong> Natural-language, selector-free Android automation
+over ADB with local UI-TARS/Qwen — no Appium server, no brittle locators
+(<a
+href="https://github.com/web-infra-dev/midscene">github.com/web-infra-dev/midscene</a>).
+This is the "vision agent drives the app AND verifies it" convergence of
+§3 and §5.</li>
+<li><strong>UNVERIFIED to flag, not adopt:</strong> gVisor does not run
+Android guests (it is a syscall sandbox for Linux containers), so it is
+not an emulator path; QEMU-full-system Android microVMs beyond
+Cuttlefish/AVF have no mature OSS project found in this pass — mark as
+UNKNOWN.</li>
+</ul>
+<hr />
+<h2
+id="top-5-to-trial-next-prioritized-with-lava-stack-integration-notes">Top
+5 to trial next (prioritized, with Lava-stack integration notes)</h2>
+<ol type="1">
+<li><strong>Google <code>android-emulator-container-scripts</code> under
+rootless podman + KVM (Containers submodule).</strong> Highest-fidelity,
+matches Lava's SDK-AVD gate today. Integration: build images with
+<code>emu-docker create</code> for API 28/30/34/latest; in
+<code>pkg/emulator/containerized.go</code> add the rootless-podman
+fallback <code>-v /dev/kvm:/dev/kvm</code> +
+<code>--group-add keep-groups</code> (per <a
+href="https://github.com/containers/podman/issues/16701">podman#16701</a>);
+launch with <code>-no-window -gpu swiftshader_indirect</code>;
+<code>adb connect</code> on published 5555; run
+<code>connectedDebugAndroidTest</code>. Closes the §6.X/§6.AH "emulator
+inside a container" requirement on the Linux x86_64 gate host.</li>
+<li><strong>scrcpy as the evidence recorder + ffmpeg segment/hash
+chunking (Containers submodule glue).</strong> Replaces
+<code>adb screenrecord</code> to remove the 180s cap and survive app
+restarts. Integration: run
+<code>scrcpy --no-window --record-format=mkv</code> against the
+container's adb; pipe/segment into N-second chunks with ffmpeg
+<code>segment</code> muxer; <code>sha256sum</code> each chunk into a
+hash-chained manifest under the §11.4.128 raw layout
+<code>&lt;root&gt;/YYYY-MM-DD/&lt;state-hash&gt;/&lt;DEVICE&gt;_&lt;SERIAL&gt;/recording_NNN/</code>.
+Satisfies §11.4.128 always-on recording + tamper-evident evidence.</li>
+<li><strong>Midscene.js + self-hosted UI-TARS-7B as the vision oracle
+(new <code>:api-app</code> / CI step).</strong> Feeds sampled frames
+from #2 to a local VLM and asserts user-visible outcomes ("search
+results rendered", "download link visible") as a secondary CI signal
+that must agree with the Compose Challenge — directly enforcing §6.AK
+coverage-intersection and §6.AB rendering-correctness. Integration: run
+UI-TARS-7B on the gate host (Apache-2.0, offline, no §6.H leak);
+Midscene drives via the same adb-over-TCP as #1; emit
+<code>{pass,evidence,confidence}</code> JSON into the evidence dir.</li>
+<li><strong>TorAPI + curl_cffi as the tracker-extraction oracle and
+hardened client (lava-api-go / test bench).</strong> TorAPI (MIT, same
+four trackers) becomes a cross-check oracle for Lava's own
+<code>.torrent</code>/magnet parsers; curl_cffi (or Go <code>utls</code>
+for <code>lava-api-go</code>) supplies correct JA3/JA4/HTTP2 + browser
+headers for authorized-account testing. Integration: stand up TorAPI in
+podman on the LAN; add a parity test comparing Lava's extracted
+magnet/hash for a known topic against TorAPI's; put credentials in
+<code>.env</code> per §6.H. Add Byparr (Camoufox) behind it only when a
+full JS challenge blocks the TLS-only path.</li>
+<li><strong>Cuttlefish on-prem (Docker image + Cloud Orchestrator) for
+the scaled §6.AE matrix.</strong> When the single-AVD path is proven,
+move to Cuttlefish for elastic multi-API/multi-form-factor fleets as
+k8s/podman pods, still KVM-accelerated and fully self-hosted (no cloud
+spend, satisfies Local-Only CI/CD). Integration: pin
+<code>google/android-cuttlefish</code> images, drive via the Cloud
+Orchestrator REST API from Lava-side glue, keep cold-boot-only per §6.I
+clause 6.</li>
+</ol>
+<p><strong>Sources (primary):</strong> <a
+href="https://github.com/google/android-emulator-container-scripts">google/android-emulator-container-scripts</a>
+· <a
+href="https://github.com/budtmo/docker-android">budtmo/docker-android</a>
+· <a
+href="https://github.com/remote-android/redroid-doc">remote-android/redroid-doc</a>
+· <a
+href="https://github.com/containers/podman/issues/16701">podman#16701</a>
+· <a
+href="https://developers.redhat.com/articles/2024/12/18/rootless-virtual-machines-kvm-and-qemu">Red
+Hat rootless KVM/QEMU</a> · <a
+href="https://codersera.com/blog/android-emulator-docker-without-kvm/">emulator-without-kvm/swiftshader</a>
+· <a
+href="https://maestro.dev/fixing-androids-3-minute-screen-recording-limitation-4839abc74aee">Maestro
+screenrecord fix</a> · <a
+href="https://github.com/Genymobile/scrcpy">Genymobile/scrcpy</a> · <a
+href="https://manpages.debian.org/testing/scrcpy/scrcpy.1.en.html">scrcpy
+manpage</a> · <a
+href="https://ffmpeg.org/ffmpeg-formats.html">ffmpeg-formats
+hash/segment</a> · <a
+href="https://github.com/web-infra-dev/midscene">web-infra-dev/midscene</a>
+· <a href="https://github.com/bytedance/UI-TARS">bytedance/UI-TARS</a> ·
+<a
+href="https://percy.io/blog/open-source-visual-regression-testing-tools">percy
+open-source VRT</a> · <a
+href="https://github.com/Lifailon/TorAPI">Lifailon/TorAPI</a> · <a
+href="https://github.com/lexiforest/curl_cffi">lexiforest/curl_cffi</a>
+· <a
+href="https://github.com/FlareSolverr/FlareSolverr">FlareSolverr</a> ·
+<a href="https://github.com/ThePhaseless/Byparr">ThePhaseless/Byparr</a>
+· <a
+href="https://godberrystudios.com/posts/byparr-scrapling-flaresolverr-cloudflare-bypass-2026/">Byparr
+vs FlareSolverr 2026</a> · <a
+href="https://trash-guides.info/Prowlarr/prowlarr-setup-flaresolverr/">TRaSH
+FlareSolverr+Prowlarr</a> · <a
+href="https://source.android.com/docs/devices/cuttlefish/get-started">Cuttlefish
+get-started</a> · <a
+href="https://source.android.com/docs/devices/cuttlefish/on-premises">Cuttlefish
+on-premises</a> · <a
+href="https://github.com/google/android-cuttlefish">google/android-cuttlefish</a>
+· <a href="https://github.com/DeviceFarmer/stf">DeviceFarmer/stf</a> ·
+<a href="https://www.genymotion.com/product-device-image/">Genymotion
+Device Image</a> · <a
+href="https://docs.maestro.dev/platform-support/android-jetpack-compose">Maestro
+Compose docs</a></p>
+</body>
+</html>

@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>VISIONENGINE-INTEGRATION-2026-07-02</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="visionengine--autonomous-qa-vision-analysis-integration-assessment">VisionEngine
+⇄ autonomous-QA vision-analysis integration assessment</h1>
+<ul>
+<li>Date: 2026-07-02</li>
+<li>Scope: read-only assessment + integration plan. No source was
+edited, no submodule was init/deinit'd, nothing committed.</li>
+<li>Subject submodule: <code>submodules/vision_engine</code>
+(<code>.gitmodules</code> →
+<code>git@github.com:vasic-digital/VisionEngine.git</code>, Go module
+<code>digital.vasic.visionengine</code>).</li>
+<li>Consumer under study:
+<code>scripts/autonomous-qa/vision-analyze.sh</code> + its caller chain
+(<code>scripts/autonomous-qa/run-iteration.sh</code>).</li>
+<li>Vocabulary note (§11.4.6): every capability below is stated as FACT
+from the actual files read. Items not present in the docs/source are
+marked <code>UNCONFIRMED:</code>.</li>
+</ul>
+<hr />
+<h2 id="1-capability-summary--what-visionengine-does">1. Capability
+summary — what VisionEngine DOES</h2>
+<p>VisionEngine is a Go computer-vision + LLM-vision toolkit for UI
+analysis and navigation-graph construction (README.md:1-30). Four
+cooperating layers:</p>
+<ul>
+<li><strong><code>pkg/analyzer</code></strong> — <code>Analyzer</code> +
+<code>VideoProcessor</code> interfaces; value types
+(<code>UIElement</code>, <code>ScreenAnalysis</code>,
+<code>ScreenDiff</code>, <code>Rect</code>, <code>Size</code>,
+<code>TextRegion</code>, <code>VisualIssue</code>,
+<code>ScreenIdentity</code>, <code>Action</code>,
+<code>KeyFrame</code>); <code>StubAnalyzer</code> reference impl.
+<code>AnalyzeScreen(nil)</code> returns the sentinel
+<code>analyzer.ErrEmptyScreenshot</code> (README.md:88-90).</li>
+<li><strong><code>pkg/graph</code></strong> —
+<code>NavigationGraph</code> (directed screen-transition graph, BFS
+<code>PathTo</code>, <code>Coverage()</code>,
+<code>UnvisitedScreens()</code>) with DOT/JSON/Mermaid exporters
+(README.md:64-75, ARCHITECTURE.md:71-94). This is the layer
+"most-imported by HelixQA".</li>
+<li><strong><code>pkg/llmvision</code></strong> —
+<code>VisionProvider</code> interface + 8 adapters (OpenAI GPT-4o,
+Anthropic Claude, Gemini, Qwen-VL, Kimi/Moonshot, StepFun, Astica,
+Ollama) + <code>FallbackChain</code> composer (README.md:21-24,
+ARCHITECTURE.md:19-45). Core method:
+<code>provider.AnalyzeImage(ctx, imageBytes, prompt) (string, error)</code>
+(USER_GUIDE.md:58).</li>
+<li><strong><code>pkg/opencv</code></strong> — mechanical CV (element
+detection, SSIM comparison, color analysis, feature/ORB, video).
+Build-tag gated: <strong>default build ships stubs; real GoCV bindings
+only under <code>-tags vision</code></strong> (README.md:28-30,
+factory.go:4 <code>//go:build !vision</code>). All
+<code>gocv.io/x/gocv</code> imports are
+<code>//go:build vision</code>-tagged (verified across
+<code>pkg/opencv/*_vision.go</code>).</li>
+<li>Support layers: <code>pkg/config</code> (env loader),
+<code>pkg/i18n</code> (Translator seam), <code>pkg/remote</code>
+(<code>VisionPool</code> / SSH deploy of Ollama + llama.cpp RPC
+workers).</li>
+</ul>
+<p>The intended pipeline (ARCHITECTURE.md:55-69) is two-layer: Layer 1 =
+GoCV mechanical (element detection / SSIM / color); Layer 2 = LLM vision
+(screen identification / UI comprehension / issue detection),
+combined.</p>
+<hr />
+<h2 id="2-interface--io--how-a-consumer-drives-it">2. Interface / IO —
+how a consumer drives it</h2>
+<p>There are <strong>two consumption modes</strong>, both real (no cloud
+dashboard, no hosted service):</p>
+<h3
+id="2a-cli-bridge--cmdvisiondescribe-the-relevant-one-for-the-qa-loop">2.a
+CLI bridge — <code>cmd/visiondescribe</code> (the relevant one for the
+QA loop)</h3>
+<p><code>cmd/visiondescribe/main.go</code> is a "thin, project-agnostic
+CLI bridge that turns a PNG screenshot into a structured … UI
+description by calling a REAL vision-capable LLM" (main.go:4-30). This
+is the single command entrypoint (<code>find cmd</code> → only
+<code>cmd/visiondescribe/main.go</code>).</p>
+<ul>
+<li><strong>Input:</strong> <code>-image &lt;path.png&gt;</code> (a
+single PNG screenshot), optional <code>-focus "&lt;hint&gt;"</code>
+appended to the prompt, <code>-provider</code> flag present in the usage
+banner, and <code>-probe</code> (report configured providers and
+exit).</li>
+<li><strong>Output:</strong> a single JSON envelope on stdout
+(main.go:68-93). Fields include <code>ok</code>, <code>provider</code>,
+<code>model</code>, <code>image_bytes</code>, <code>latency_ms</code>,
+<code>raw_text_len</code>, <code>parsed_ok</code>,
+<code>raw_text</code>, <code>error</code>, <code>operator_block</code>,
+and a typed <code>result</code> object:
+<ul>
+<li><code>app_label</code>, <code>app_pkg_guess</code>,
+<code>screen_context</code> (one of
+<code>launcher, app_home, content_list, player, settings, dialog, sign_in, error, loading, unknown</code>),
+<code>visible_title</code>, <code>attributes[]</code> (short visible
+facts, e.g. "progress bar 35%"), <code>playback_state</code>
+(<code>playing/paused/buffering/stopped/not_applicable</code>),
+<code>overlays[]</code> (dialog/toast/ad/paywall/ANR/sign-in/geo-block
+text), <code>full_description</code> (main.go:50-93).</li>
+</ul></li>
+<li><strong>Exit codes</strong> (main.go:28-29, 106-170): <code>0</code>
+= described; <code>2</code> = bad input / model error / empty (0-byte)
+image; <code>3</code> = no vision provider configured (OPERATOR-BLOCKED
+— emits a structured envelope, never a canned description);
+<code>4</code> = vision call failed (provider unreachable).</li>
+<li><strong>Anti-bluff provenance</strong> (main.go:17-21): each success
+emits resolved provider name, model id, image byte count, wall-clock
+latency, and raw-text length — fields a stub cannot forge because they
+come from the live HTTP round-trip. Empty/FLAG_SECURE screenshots are
+caught explicitly (main.go:120-123).</li>
+</ul>
+<p>FACT — provider selection in the shipped CLI is
+<strong>cloud-only</strong>: <code>buildProvider()</code>
+(main.go:176-250) wires only anthropic &gt; openai &gt; gemini &gt;
+openrouter, in that priority. <strong>Ollama is NOT wired into
+<code>cmd/visiondescribe</code></strong>
+(<code>grep -c ollama cmd/visiondescribe/main.go</code> = 0), even
+though <code>pkg/llmvision/ollama.go</code> exists as a library adapter.
+This is load-bearing for the offline question (§3).</p>
+<h3 id="2b-go-library">2.b Go library</h3>
+<p>For a custom driver: <code>config.LoadFromEnv()</code> →
+<code>llmvision.NewGeminiProvider(...)</code>/<code>NewOllamaProvider(...)</code>/<code>NewFallbackProvider(...)</code>
+→ <code>provider.AnalyzeImage(ctx, bytes, prompt)</code>
+(USER_GUIDE.md:51-70). The <code>pkg/opencv</code> mechanical layer and
+<code>pkg/graph</code> are library-only (no CLI exposes them).
+<code>pkg/remote.VisionSlot.Lock()/Unlock()</code> serializes vision
+calls per device (USER_GUIDE.md:98-114) — directly relevant to the QA
+matrix runner's per-device contention (§11.4.119).</p>
+<p>There is <strong>no HTTP server mode</strong> and <strong>no prebuilt
+binary</strong> shipped — the consumer builds from source
+(<code>go build ./cmd/visiondescribe/</code>).</p>
+<hr />
+<h2 id="3-runtime-needs--offline-posture-6h--11410">3. Runtime needs
+&amp; offline posture (§6.H / §11.4.10)</h2>
+<p><strong>Build:</strong></p>
+<ul>
+<li><code>cmd/visiondescribe</code> builds <strong>without OpenCV /
+without cgo</strong> — it imports only <code>pkg/config</code> +
+<code>pkg/llmvision</code> (which imports only <code>pkg/i18n</code>);
+no <code>gocv</code> in that path (verified: every gocv import is
+<code>//go:build vision</code>). So
+<code>go build ./cmd/visiondescribe/</code> is pure-Go.</li>
+<li>Toolchain: <code>go.mod</code> declares <code>go 1.25.3</code>.
+<strong>GAP:</strong> <code>Dockerfile.vision</code> bases on
+<code>golang:1.24-bookworm</code> (Dockerfile.vision:5) — 1.24 &lt;
+1.25.3. <code>Dockerfile.vision</code> is the OpenCV image
+(<code>go build -tags vision ./...</code>); building the pure-Go
+<code>visiondescribe</code> there would also hit the version floor. A
+1.25.3+ toolchain (host or a corrected container per §11.4.76 Containers
+submodule) is required.</li>
+<li>The full <code>-tags vision</code> OpenCV path needs
+<code>build-essential cmake pkg-config libopencv-dev libopencv-contrib-dev</code>
+(Dockerfile.vision:8-14) + cgo.</li>
+</ul>
+<p><strong>Can it run offline / does data leave the host?</strong> —
+nuanced, three cases:</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Offline?</th>
+<th>Data leaves host?</th>
+<th>CLI today?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>visiondescribe</code> →
+anthropic/openai/gemini/openrouter</td>
+<td>NO (cloud)</td>
+<td>YES — screenshot bytes POSTed to a cloud vision API</td>
+<td>YES (shipped)</td>
+</tr>
+<tr>
+<td><code>pkg/llmvision</code> Ollama adapter (local/LAN model, e.g.
+<code>minicpm-v:8b</code> at <code>HELIX_OLLAMA_URL</code>)</td>
+<td>YES if Ollama runs on localhost/LAN</td>
+<td>NO (stays on host/LAN)</td>
+<td>NO — library only; <strong>not wired into
+<code>visiondescribe</code></strong></td>
+</tr>
+<tr>
+<td><code>pkg/opencv</code> mechanical (SSIM/element/color)
+<code>-tags vision</code></td>
+<td>YES (fully local)</td>
+<td>NO</td>
+<td>NO — library only, no CLI</td>
+</tr>
+</tbody>
+</table>
+<p>Conclusion: the <strong>shipped CLI's real-provider path is
+cloud</strong> — using it as-is sends recorded QA frames to a
+third-party vision API, a §6.H / §11.4.10 data-egress consideration. A
+fully-offline VisionEngine oracle is achievable but requires either (a)
+a small code extension wiring the existing Ollama adapter into
+<code>buildProvider()</code> (upstream, per §11.4.74
+extend-don't-reimplement), or (b) a custom Go main over
+<code>pkg/opencv</code> mechanical CV. Both are additive work, not
+shipped today.</p>
+<p><strong>Config env vars</strong> (pkg/config.go, .env.example):
+<code>HELIX_VISION_PROVIDER</code> (<code>auto</code>/named),
+<code>ANTHROPIC_API_KEY</code>, <code>OPENAI_API_KEY</code>,
+<code>GOOGLE_API_KEY</code>/<code>GEMINI_API_KEY</code>,
+<code>OPENROUTER_API_KEY</code>, <code>HELIX_OLLAMA_URL</code> +
+<code>HELIX_OLLAMA_MODEL</code>, per-provider model overrides,
+<code>HELIX_VISION_TIMEOUT</code>,
+<code>HELIX_VISION_MAX_IMAGE_SIZE</code>,
+<code>HELIX_VISION_SSIM_THRESHOLD</code>,
+<code>HELIX_VISION_OPENCV_ENABLED</code>. Keys load via env only (no
+hardcoding — aligns with §6.R).</p>
+<hr />
+<h2 id="4-current-vision-analysis-flow-what-exists-today">4. Current
+vision-analysis flow (what exists today)</h2>
+<p><code>scripts/autonomous-qa/vision-analyze.sh</code> (a
+self-contained bash script) is the current vision layer. It is
+<strong>local, deterministic, offline, and zero-cost</strong> — it does
+NOT use VisionEngine.</p>
+<ul>
+<li><strong>Inputs</strong> (per iteration
+<code>&lt;iter&gt;/raw/</code>, produced by
+<code>run-iteration.sh</code>): chunked <code>screenrecord</code> mp4s
+(<code>rec_*.mp4</code> / <code>qa_rec_*.mp4</code>),
+<code>logcat.txt</code>, <code>gradle-connected.log</code>, plus a
+best-effort <code>final-screen.png</code> still (<code>screencap</code>,
+run-iteration.sh:95), and optional <code>verdict.json</code>
+cross-ref.</li>
+<li><strong>Analyses:</strong> ffmpeg <code>signalstats</code> for
+blank/white/black/monochrome frame detection; ffmpeg
+<code>freezedetect</code> for stuck/frozen spans; tesseract OCR (ONLY if
+present) to confirm expected affordance tokens
+(<code>download,magnet,torrent,seed,size</code> default) and to catch
+stuck-loading; logcat grep for
+<code>FATAL EXCEPTION</code>/<code>E AndroidRuntime</code>/<code>ANR in</code>.</li>
+<li><strong>Outputs:</strong> a curated <code>vision-analysis.md</code>
+per iteration + a cycle rollup table; exit codes <code>0=CLEAN</code>,
+<code>1=DEFECTS-FOUND</code>,
+<code>2=CANNOT-ANALYZE/INCOMPLETE/TOOL-MISSING</code>.</li>
+<li><strong>Anti-bluff posture (already strong):</strong> never prints
+CLEAN for analysis it didn't perform — ffmpeg missing → exit 2; no
+recordings → exit 2; unreadable → INCOMPLETE (never CLEAN); tesseract
+absent → OCR checks SKIPPED and said so, no fabricated screen-content
+claims.</li>
+</ul>
+<p>FACT — <code>vision-analyze.sh</code> has <strong>no current caller
+inside <code>scripts/</code></strong>
+(<code>grep -rn vision-analyze scripts/</code> finds only the file
+itself). It is presently a standalone/manually-invoked tool. The
+user-visible-outcome signal that IS wired into the loop is a
+<strong>logcat marker</strong>: <code>run-iteration.sh:113-136</code>
+treats <code>C70-RESULT … DOWNLOAD-OK</code> (logged by Challenge70 only
+after the on-screen download/magnet affordance is confirmed) as the hard
+evidence the real download flow was reached, and uses it in the
+anti-bluff PASS-via-marker decision table (run-iteration.sh:164-206).
+<code>DOWNLOAD-OK</code> is thus the existing "results-rendered +
+download-affordance-visible" contract; today it is asserted by the
+Compose test in-process, not by pixel analysis of the recording.</p>
+<h3 id="the-gap-visionengine-can-close">The gap VisionEngine can
+close</h3>
+<p>The current DOWNLOAD-OK signal is an <strong>in-process
+assertion</strong> (the test says it saw the affordance). The recorded
+frames are analyzed only by the deterministic ffmpeg/OCR floor. There is
+no <strong>independent semantic reading of the actual pixels</strong>
+confirming "search results are rendered" / "a download/magnet affordance
+is visible" / "no blocking overlay". That independent oracle is exactly
+what <code>visiondescribe</code> produces
+(<code>screen_context=content_list</code>, <code>attributes</code>
+contains download/magnet, <code>overlays=[]</code>,
+<code>playback_state</code>).</p>
+<hr />
+<h2
+id="5-proposed-integration--additive-second-oracle-not-a-replacement">5.
+Proposed integration — additive second oracle, not a replacement</h2>
+<p>Keep <code>vision-analyze.sh</code>'s deterministic ffmpeg/OCR floor
+as the always-on, offline, zero-cost baseline (it already satisfies
+§11.4.107-style freeze/frame-advance + OCR). <strong>ADD</strong> an
+optional VisionEngine semantic layer that reads the same recorded frames
+and emits a structured, machine-readable, user-visible-outcome verdict
+that composes with the §6.AK cycle-coverage gate as a second,
+independent DOWNLOAD-OK / results-rendered proof.</p>
+<h3 id="5a-wiring-steps-concrete">5.a Wiring steps (concrete)</h3>
+<ol type="1">
+<li><p><strong>Build the CLI once, cached</strong> (per §11.4.82
+persistent caches; do not rebuild per iteration):</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span> <span class="bu">cd</span> submodules/vision_engine <span class="kw">&amp;&amp;</span> <span class="ex">go</span> build <span class="at">-o</span> <span class="st">&quot;</span><span class="va">$CACHE</span><span class="st">/visiondescribe&quot;</span> ./cmd/visiondescribe/ <span class="kw">)</span></span></code></pre></div>
+<p>Guard on Go ≥ 1.25.3; if absent, run the build inside a
+Containers-submodule Go image (§11.4.76) with a corrected base (see §6
+gap on Dockerfile.vision:5).</p></li>
+<li><p><strong>Add a bounded VisionEngine block to
+<code>vision-analyze.sh</code></strong> (new, opt-in via
+<code>--vision-engine &lt;bin&gt;</code> +
+<code>--vision-focus "&lt;hint&gt;"</code>, default OFF so the offline
+floor never regresses). Per analyzed recording, select representative
+frames already extracted at
+<code>&lt;iter&gt;/raw/.vision-frames/&lt;base&gt;/f_*.png</code> (reuse
+the 1fps PNGs the script already produces — no new extraction) plus
+<code>raw/final-screen.png</code>. Run:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span><span class="va">$VE_BIN</span><span class="st">&quot;</span> <span class="at">-image</span> <span class="st">&quot;</span><span class="va">$frame</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-focus</span> <span class="st">&quot;Are search results rendered with a visible download or magnet affordance? Report any blocking overlay.&quot;</span> <span class="dt">\</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">&gt;</span> <span class="st">&quot;</span><span class="va">$fdir</span><span class="st">/ve_</span><span class="va">$(</span><span class="fu">basename</span> <span class="st">&quot;</span><span class="va">$frame</span><span class="st">&quot;</span><span class="va">)</span><span class="st">.json&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null<span class="kw">;</span> <span class="va">rc</span><span class="op">=</span><span class="va">$?</span></span></code></pre></div></li>
+<li><p><strong>Interpret the envelope into a verdict signal</strong> (jq
+or the existing awk/grep style):</p>
+<ul>
+<li><code>rc==0 &amp;&amp; result.screen_context ∈ {content_list, player, app_home}</code>
+AND (<code>download</code>/<code>magnet</code>/<code>torrent</code>
+token present in <code>result.attributes</code> OR
+<code>result.visible_title</code>) AND
+<code>result.overlays == []</code> → <code>VE-DOWNLOAD-OK</code>
+(semantic confirmation).</li>
+<li><code>rc==0 &amp;&amp; overlays non-empty (paywall/sign_in/error/ANR/geo)</code>
+→ <code>VE-OVERLAY-BLOCKING</code> defect (a §6.AB non-crashing defect
+class the ffmpeg floor cannot name).</li>
+<li><code>rc==0 &amp;&amp; screen_context ∈ {loading, error}</code> with
+no affordance → <code>VE-WRONG-SCREEN</code> / <code>VE-STUCK</code>
+defect.</li>
+<li><code>rc==3</code> (OPERATOR-BLOCKED, no key) → record
+<code>VE-SKIPPED: no vision provider configured</code> — <strong>treated
+as SKIP, never CLEAN/PASS</strong> (matches the script's existing
+tesseract-absent posture and §11.4.69 no-fail-open-skip).</li>
+<li><code>rc∈{2,4}</code> → <code>VE-INCOMPLETE</code> (unreachable/bad
+image), never CLEAN.</li>
+</ul></li>
+<li><p><strong>Emit into the curated
+<code>vision-analysis.md</code></strong> as a distinct "VisionEngine
+semantic oracle" section, and add the verdict token to the same
+defects/verdict machinery the script already has. The script's tri-state
+(<code>CLEAN/DEFECTS-FOUND/INCOMPLETE</code>) is unchanged; VisionEngine
+can only ADD defects or an independent confirmation — it can never
+downgrade a deterministic defect to CLEAN.</p></li>
+<li><p><strong>Compose with §6.AK</strong>
+(<code>scripts/check-cycle-coverage.sh</code> + the
+<code>cycle-coverage-map-&lt;ver&gt;.yaml</code> under
+<code>.lava-ci-evidence/distribute-changelog/…</code>): for a CHANGELOG
+claim like "search results / download works", the covering Challenge's
+device evidence can now carry TWO independent user-visible proofs — the
+in-process <code>C70-RESULT DOWNLOAD-OK</code> logcat marker AND the
+VisionEngine <code>VE-DOWNLOAD-OK</code> semantic verdict on the
+recorded pixels. Record the VisionEngine verdict path in the
+per-iteration evidence so the coverage-intersection gate can cite
+pixel-level confirmation, not only the in-process assertion.</p></li>
+</ol>
+<h3 id="5b-where-it-slots-in-the-caller-chain">5.b Where it slots in the
+caller chain</h3>
+<p><code>vision-analyze.sh</code> is currently uncalled from
+<code>scripts/</code>. Recommended: invoke it from the iteration path
+(after <code>run-iteration.sh</code> writes <code>raw/</code>) or from
+the cycle rollup, with the VisionEngine block enabled only when a vision
+provider (or local Ollama) is configured. The device
+serial/<code>VisionSlot</code> serialization (§11.4.119 /
+USER_GUIDE.md:98-114) matters if the matrix runs providers concurrently
+— serialize vision calls per device.</p>
+<h3 id="5c-dependencies-to-add">5.c Dependencies to add</h3>
+<ul>
+<li>Go ≥ 1.25.3 toolchain (host or Containers-submodule image).</li>
+<li>A vision provider credential in the credential
+single-source-of-truth (<code>ANTHROPIC_API_KEY</code> |
+<code>OPENAI_API_KEY</code> | <code>GOOGLE_API_KEY</code> |
+<code>OPENROUTER_API_KEY</code>) OR — for offline — a local Ollama
+endpoint plus the CLI extension in §6.</li>
+<li><code>jq</code> recommended for envelope parsing (optional; grep/awk
+works).</li>
+<li>No new git remote (the submodule is already declared in
+<code>.gitmodules</code>).</li>
+</ul>
+<hr />
+<h2 id="6-risks--gaps-1146--stated-as-fact-or-marked-unconfirmed">6.
+Risks &amp; gaps (§11.4.6 — stated as fact or marked unconfirmed)</h2>
+<ol type="1">
+<li><strong>Cloud egress (§6.H / §11.4.10).</strong> The shipped
+<code>visiondescribe</code> real path is cloud-only
+(<code>buildProvider</code> main.go:176-250 wires
+anthropic/openai/gemini/openrouter; <code>grep -c ollama</code> = 0).
+Using it sends recorded QA frames off-host. For a truly-offline oracle,
+extend <code>buildProvider()</code> upstream to wire the existing
+<code>pkg/llmvision/ollama.go</code> adapter (§11.4.74), or build a
+custom main over the <code>pkg/opencv</code> mechanical layer.
+<strong>This is the biggest integration gap.</strong></li>
+<li><strong>Non-determinism (§11.4.50).</strong> LLM output varies
+run-to-run; a semantic verdict cannot be the sole gate. Mitigation: keep
+the deterministic ffmpeg/OCR floor authoritative; use VisionEngine as a
+corroborating oracle and require conservative screen_context+overlay
+checks, not free-text.</li>
+<li><strong>Toolchain version gap.</strong>
+<code>Dockerfile.vision:5</code> (<code>golang:1.24-bookworm</code>) is
+below <code>go.mod</code>'s <code>go 1.25.3</code> (go.mod:3) — the
+shipped Docker recipe would fail to build. A corrected Go image is
+needed for containerized builds (§11.4.76).</li>
+<li><strong>No prebuilt binary / no server mode.</strong> Consumer must
+compile <code>cmd/visiondescribe</code> from source; there is no daemon
+to keep warm. Cache the built binary (§11.4.82).</li>
+<li><strong>OpenCV mechanical layer is library-only.</strong>
+<code>pkg/opencv</code> (SSIM/element/color — the offline mechanical
+Layer 1) has no CLI and needs <code>-tags vision</code> + OpenCV + cgo.
+Exposing it would be additive upstream work.</li>
+<li><strong>OPERATOR-BLOCKED must map to SKIP, never PASS.</strong>
+<code>visiondescribe</code> exit 3 (no key) is honest; the integration
+MUST record it as SKIP-with-reason and NOT let a missing provider
+silently produce a CLEAN verdict (§11.4.69 no-fail-open-skip; mirrors
+the script's tesseract-absent handling).</li>
+<li><strong>Submodule availability.</strong> <code>.gitmodules</code>
+declares <code>submodules/vision_engine</code> (path appears in the
+parent index; UNCONFIRMED whether the gitlink is fully committed vs
+staged — parent <code>git status</code> showed it flagged as an
+addition). The integration presumes the submodule is initialized/checked
+out before the build; guard for absence.</li>
+<li><strong><code>pkg/graph</code> opportunity (not required).</strong>
+<code>NavigationGraph</code> +
+<code>Coverage()</code>/<code>UnvisitedScreens()</code> could later map
+QA exploration coverage, but it is orthogonal to the DOWNLOAD-OK signal
+and out of scope for this integration.</li>
+<li><strong>Export mandate (§11.4.65).</strong> This <code>.md</code> is
+owed synchronized <code>.html</code>/<code>.pdf</code> siblings under
+the Lava export discipline; not generated here (read-only assessment).
+Owed as a follow-up.</li>
+</ol>
+</body>
+</html>
