@@ -1,0 +1,33 @@
+# §6.AK cycle-coverage-map for Lava-API-App-0.2.11-24
+#
+# Each CHANGELOG-claimed user-visible change for 0.2.11-24 MUST have at least
+# one covering device Challenge that was EXECUTED + PASSED on the §6.Z gate
+# (and therefore is recorded in the same-SHA $VER-test-evidence.json).
+#
+# HONEST SCOPE (§6.J / §11.4.6): this cycle ships NO user-visible UI behavior
+# change (the api-app is a diagnostics-only app; versionName HELD at 0.2.11 per
+# §6.Y.3). The only PRODUCTION-PATH change is the EMBEDDED ENGINE: lava-api-go
+# proxy.go gains upstream-proxy support → api-source.hash recomputed to
+# eed490bc…; the cshared liblavaapi.so is rebuilt against it and re-linked into
+# the app. The load-bearing claim is therefore that the app LAUNCHES with the
+# rebuilt engine — proven by the cold-start gate. No flow/search/UI Challenge is
+# claimed because the cycle does not change any flow/search/UI behavior (per
+# §6.AK clause 6 unverified items are NOT listed here).
+#
+# DEVICE-VERIFICATION STATUS (as of map authoring 2026-06-30):
+#   PENDING — the §6.Z device test-evidence for 0.2.11-24 is produced by the
+#   cold-start run on the gate (Genymotion / containerized-KVM emulator). This
+#   map is the DRAFT that run must satisfy: when Challenge01ApiAppColdStartTest
+#   runs+PASSES on the gate against the committed 0.2.11-24 SHA, its FQN lands in
+#   0.2.11-24-test-evidence.json and this gate flips to PASS. Until then the
+#   §6.AK/§6.Z Phase-1 Gate 7 in firebase-distribute.sh correctly exits 2
+#   (missing/stale evidence) and BLOCKS the distribute.
+version: "0.2.11-24"
+claims:
+  - fix: "Embedded-engine update: lava-api-go proxy.go upstream-proxy support (api-source.hash → eed490bc…; cshared liblavaapi.so rebuilt + re-linked). Cold-start proves the app launches with the rebuilt engine."
+    covering_challenges:
+      # The cold-start gate is the ONLY Challenge executed+PASSED for this
+      # engine-embed cycle: it boots the app on a real device, loads the rebuilt
+      # liblavaapi.so, and asserts zero FATAL on the launch path — the exact
+      # surface the engine rebuild touches.
+      - "lava.api.app.challenges.Challenge01ApiAppColdStartTest"

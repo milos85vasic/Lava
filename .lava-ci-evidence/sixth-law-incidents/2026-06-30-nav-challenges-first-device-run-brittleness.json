@@ -1,0 +1,62 @@
+{
+  "date": "2026-06-30",
+  "title": "First-ever device execution of three authored-but-never-run nav Challenges (C24, C46, C55) surfaced 3 DISTINCT TEST-HARNESS brittleness defects — NONE is a product defect, NONE is LVA-008, NONE is a 1.3.12-1078 regression",
+  "class": "Sixth-Law / §6.J test-harness-vs-product distinction. All three findings are artifacts of running Compose UI Challenges for the FIRST TIME against a real emulator — cold-boot keyguard, exactly-1 node-matcher brittleness, and a missing API-provider precondition. Each was a latent test-side gap that only a genuine device run could surface; each fix is test-harness-side and does NOT alter any product code path.",
+  "classification": "first-device-execution-test-brittleness",
+  "is_product_defect": false,
+  "is_lva008": false,
+  "is_1078_regression": false,
+  "discovered_by": "First containerized-KVM emulator run on the nezha gate-host of three Challenges previously authored on a macOS host that could not boot the container emulator (§6.AH-debt). Their KDocs explicitly state 'NOT yet EXECUTED against an emulator' / 'device-exec PENDING'. Driver: scripts/autonomous-qa/run-nav-challenges.sh.",
+  "challenges_under_test": [
+    "lava.app.challenges.Challenge24OnboardingBackNavigationTest (C24)",
+    "lava.app.challenges.Challenge46SearchTimeoutInterruptTest (C46)",
+    "lava.app.challenges.Challenge55MainScaffoldBottomNavSwitchesTest (C55)"
+  ],
+  "exclusion_proof": {
+    "not_lva008": "PROVEN — 0 LVA-008 teardown signatures observed in these runs (no \"State must be at least 'CREATED' to be moved to 'DESTROYED'\" and no \"Unable to destroy activity\"). The three defects are pre-instrumentation/in-test-body brittleness, not MainActivity onDestroy NavBackStackEntry teardown.",
+    "not_1078_regression": "PROVEN-by-scope — 1.3.12-1078 changes are confined to archiveorg topic/download plus a NO-OP navigation guard; 1078 does not touch onboarding-back navigation, search-timeout handling, or bottom-nav UI. The three Challenges under test exercise exactly those untouched surfaces, so a 1078 regression is excluded by code scope.",
+    "not_product_defect": "PROVEN — every root cause is in the test harness or the device-run preconditions (keyguard, node matcher, absent API provider, wrong content-desc anchors); no product navigation, search, or scaffold code was changed to make any Challenge pass."
+  },
+  "ah_debt_cross_reference": {
+    "debt": "§6.AH-debt — the container/VM emulator path does not boot on the macOS authoring host (containerized.go hard-requires /dev/kvm, absent in the podman applehv VM; no HVF passthrough).",
+    "consequence": "C24, C46, and C55 were AUTHORED + SOURCE-COMPILED on macOS but their KDocs honestly recorded 'NOT yet EXECUTED against an emulator' / 'device-exec PENDING'. This cycle is their first genuine device execution, on the nezha containerized-KVM gate-host — which is precisely why three first-run brittleness defects surfaced at once. This is the §6.Z / §6.AK lesson in miniature: source-compile is necessary, never sufficient; only a real device run proves a Challenge."
+  },
+  "findings": [
+    {
+      "id": "c24",
+      "challenge": "Challenge24OnboardingBackNavigationTest",
+      "case": "backFromProviders",
+      "name": "Cold-boot keyguard blocks instrumentation attach on the first sub-case",
+      "is_product_defect": false,
+      "exception": "UNCONFIRMED: framework-reported diagnosis (verbatim exception, forensic anchor quote) — java.lang.IllegalStateException: No compose hierarchies found in the app. Possibly an issue with Compose instrumentation.",
+      "root_cause": "On a freshly cold-booted containerized emulator the lockscreen KEYGUARD was still up when the first C24 sub-case (backFromProviders) attached, so no Activity window / Compose hierarchy was present and Compose instrumentation found no hierarchies. The other two C24 sub-cases passed — they ran after the device had been woken — confirming the failure is a cold-boot keyguard race, not a navigation defect.",
+      "fix": "Test-harness/runner-side: dismiss the keyguard and issue KEYCODE_WAKEUP before instrumentation in scripts/autonomous-qa/run-nav-challenges.sh (wake + unlock the device prior to launching the instrumented test).",
+      "status": "RESOLVED — C24 now PASS after the wake-and-dismiss-keyguard preamble was added to run-nav-challenges.sh."
+    },
+    {
+      "id": "c55",
+      "challenge": "Challenge55MainScaffoldBottomNavSwitchesTest",
+      "case": "bottomNavTabTap",
+      "name": "Exactly-1 node matcher brittleness — onNodeWithText(\"Search\") matched 2 nodes",
+      "is_product_defect": false,
+      "exception": "androidx.compose.ui.test assertion failure: onNodeWithText(\"Search\").assertExists() expected exactly 1 node but found 2.",
+      "root_cause": "The bottom-nav 'Search' tab is the start tab, so on launch the Search SCREEN content renders the text 'Search' AND the bottom-nav 'Search' tab label also renders 'Search'. onNodeWithText(\"Search\") therefore matched 2 nodes, and assertExists()'s implicit exactly-1 contract failed. This is matcher brittleness in the test body, not a product defect — both 'Search' strings are correct and expected on screen.",
+      "fix": "Test-side: assert each tab label is present with count >= 1 via onAllNodesWithText(label)...assertCountEquals/onFirst (presence-not-uniqueness), instead of onNodeWithText(label).assertExists() which demands exactly one match.",
+      "status": "RESOLVED — C55 now PASS after the matcher was relaxed to a >=1 presence assertion per tab label."
+    },
+    {
+      "id": "c46",
+      "challenge": "Challenge46SearchTimeoutInterruptTest",
+      "name": "Search never reached the MockWebServer because no API-backed provider was configured — legacy single-tracker paging branch returned instantly, so the 25s withTimeout never fired",
+      "is_product_defect": false,
+      "summary": "The test set ApiBaseUrlHolder to a MockWebServer URL but configured NO API-backed provider. With no API provider, the search took the LEGACY single-tracker paging branch, which returned an instant empty result and never issued a request to the MockWebServer — so withTimeout never elapsed and the user-visible 'Search failed' timeout state was never produced.",
+      "device_logcat_signature": "On the un-fixed run the device logcat showed the search going SubmitClick -> ListBottomReached (the legacy paging path) with no MockWebServer hit and no 25s timeout — i.e. the Challenge's intended timeout path was never exercised.",
+      "root_cause": "Missing test precondition: an ApiBaseUrlHolder pointing at the MockWebServer is necessary but not sufficient; the search routing also requires an API-backed provider to be present so the request actually flows through the API client to the MockWebServer.",
+      "fix": "Test-side, honest precondition wiring: seed a dynamic RemoteTrackerDescriptor + ProviderConfig so the search genuinely flows MainActivity -> Nav -> SearchResultViewModel -> withTimeout -> streamMultiSearch -> ApiBackedTrackerClient -> MockWebServer (the path that can actually time out). Plus corrected 2 wrong content-description anchors in the test body: \"Navigate up\" -> \"Back\", and the history-dependent \"Search history\" -> the search action button (the prior anchor depended on prior search history existing, which is non-deterministic on a fresh device).",
+      "status": "IN PROGRESS — C46 device-validation is running this session; UNCONFIRMED: the post-fix GREEN device run is not yet captured at the time of writing this record. The fix is present in the test source; the device confirmation is pending."
+    }
+  ],
+  "evidence_path": ".lava-ci-evidence/autonomous-qa/2026-06-30/nav-challenges/",
+  "no_guessing": "§11.4.6: C24 and C55 statuses are stated as facts (RESOLVED — now PASS) per the device runs that produced the passing results. C46 is explicitly marked IN PROGRESS / UNCONFIRMED for its post-fix GREEN device run because that confirmation has not yet landed this session. The not-LVA-008 / not-1078 / not-product-defect exclusions are stated as PROVEN per the 0-teardown-signature observation and the 1078 code-scope analysis. Nothing is surmised.",
+  "lesson": "Three Challenges authored on a host that could not boot an emulator (§6.AH-debt) carried 'device-exec PENDING' KDocs in good faith; their first real device execution immediately surfaced 3 distinct test-harness brittleness defects (cold-boot keyguard, exactly-1 matcher, missing API-provider precondition). This is direct evidence for the §6.Z / §6.AK posture: a Challenge that only source-compiled is not a Challenge that ran, and only execution against a real device proves it. All three fixes are test-harness-side; the product navigation/search/scaffold code was not implicated."
+}

@@ -1,8 +1,8 @@
 {
   "backend": "goapi",
-  "providers": "gutenberg",
-  "query": "sherlock",
-  "serial": "127.0.0.1:48685",
+  "providers": "kinozal",
+  "query": "1080p",
+  "serial": "127.0.0.1:56417",
   "gradle_rc": 0,
   "tests": 1, "failures": 0, "errors": 0, "skipped": 0,
   "marker_download_ok": true,
@@ -11,5 +11,5 @@
   "verdict": "PASS",
   "note": "clean",
   "junit_xml": "/run/media/milosvasic/DATA4TB/Projects/lava/app/build/outputs/androidTest-results/connected/debug/TEST-sdk_gphone64_x86_64 - 14-_app-.xml",
-  "raw_dir": "/run/media/milosvasic/DATA4TB/Projects/lava/.lava-ci-evidence/autonomous-qa/2026-07-03/goapi/gutenberg-sherlock/raw"
+  "raw_dir": "/run/media/milosvasic/DATA4TB/Projects/lava/.lava-ci-evidence/autonomous-qa/2026-07-02/goapi/kinozal-1080p/raw"
 }
