@@ -337,10 +337,28 @@ in-progress download is now an honest SKIP, the EXACT false-PASS the
 pre-fix
 <code>require(completed || presentContains("Downloading file"))</code>
 reported as a green PASS). The QA-harness audit's real false-PASS vector
-is closed. Fix #3 (scope onboarding SKIP to network stages) still queued
-(needs its own edit + rehearsal). Also unblocks archiveorg's download
-PATH (SEARCH stays separately per-destination-egress-blocked). MATRIX
-EXPANSION 2026-07-02: rutracker mp3 keystone ALSO device-green
+is closed. Fix #3 (scope onboarding SKIP to NETWORK stages) is now
+LANDED + on-device rehearsed: a sentinel
+<code>OnboardingNetworkUnavailable</code> is thrown ONLY by the two
+network onboarding stages (ApiSelection connectivity probe + provider
+login/configure), the outer catch is narrowed to it (those stay honest
+SKIPs), and a pure-UI stage timeout throws a raw ComposeTimeoutException
+that PROPAGATES as a loud FAIL. Discrimination PROVEN: mutating the
+Welcome (UI) wait → <code>verdict=FAIL</code> (raw ComposeTimeout
+propagated; sentinel=0, SKIP=0; other_failure_signal=false) — pre-fix
+that same timeout was masked as SKIP. Green onboarding path unbroken:
+the rutracker + gutenberg green-path runs both traversed EVERY
+onboarding stage incl. the login/probe network stages (16 login events)
+and reached the download step; the sentinel was never thrown (fix #3
+doesn't spuriously skip a working login). NOTE: those full keystones
+FAILed DOWNSTREAM on transient network slowness this session
+(gutenberg.org 29s epub fetch + a rutracker search-timeout), NOT on
+onboarding — a full end-to-end PASS re-confirm is environment-pending
+(network flakiness late in a 9h session), unrelated to fix #3. Both
+QA-harness false-PASS/masked-FAIL vectors (#1 + #3) are now closed; only
+#2 was mechanical. Also unblocks archiveorg's download PATH (SEARCH
+stays separately per-destination-egress-blocked). MATRIX EXPANSION
+2026-07-02: rutracker mp3 keystone ALSO device-green
 (<code>verdict=PASS</code>, <code>"Download completed" ×14</code>, real
 music <code>.torrent</code>) — rutracker now covers BOTH spec queries
 (1080p + mp3). Device-green goapi matrix: rutracker (1080p + mp3),

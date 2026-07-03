@@ -317,12 +317,19 @@ class Challenge70AutonomousQaProviderMatrixTest {
         // load-bearing one and stays loud. ──
         try {
             runOnboardingToMainApp()
-        } catch (timeout: ComposeTimeoutException) {
+        } catch (unavailable: OnboardingNetworkUnavailable) {
+            // §6.AB anti-bluff (QA-harness audit fix #3, 2026-07-02): ONLY a NETWORK
+            // stage (backend connectivity probe / provider login) timing out is an
+            // honest environment SKIP. A pure-UI onboarding regression (Welcome,
+            // provider pick, Summary, main-app) throws a raw ComposeTimeoutException
+            // that is NOT caught here → it propagates as a loud FAIL, never masked as
+            // a SKIP. (Pre-fix, ANY onboarding timeout was an un-discriminated SKIP,
+            // which hid real UI regressions behind an environment-unavailable skip.)
             assumeTrue(
-                "Onboarding could not complete in this environment (backend/provider/" +
-                    "real-network unavailable: ${timeout.message}). §6.J-tracked honest " +
-                    "skip — NOT a product regression; the success path is verified where " +
-                    "the qa_backend + selected provider are reachable.",
+                "Onboarding could not complete: NETWORK stage unavailable " +
+                    "(${unavailable.stage}: backend/provider/real-network unreachable). " +
+                    "§6.J-tracked honest skip — NOT a product regression. A pure-UI " +
+                    "onboarding regression is a loud FAIL, never a skip.",
                 false,
             )
             return // unreachable after assumeTrue(false), satisfies the compiler
@@ -352,6 +359,18 @@ class Challenge70AutonomousQaProviderMatrixTest {
     // Onboarding
     // ──────────────────────────────────────────────────────────────────────
 
+    /**
+     * fix #3 (QA-harness audit, 2026-07-02): thrown when a NETWORK onboarding stage
+     * (the backend connectivity probe or a provider login) times out — the outer
+     * handler converts THIS to an honest SKIP. A pure-UI onboarding stage timeout
+     * throws a raw ComposeTimeoutException instead, which is NOT caught here → it
+     * propagates as a loud FAIL, so a real UI regression is never masked as a skip.
+     */
+    private class OnboardingNetworkUnavailable(
+        val stage: String,
+        cause: ComposeTimeoutException,
+    ) : Exception("onboarding network stage unavailable: $stage", cause)
+
     private fun runOnboardingToMainApp() {
         // Step 1: Welcome → Get Started. (No assertion on the provider-count copy:
         // in the ApiSelection flow Welcome renders count-free, so only the title +
@@ -367,9 +386,14 @@ class Challenge70AutonomousQaProviderMatrixTest {
         }
         if (present("Choose your API")) {
             selectApiBackend()
-            // A successful probe advances ApiSelection → Providers. Real backend /
-            // cross-app dependency: a timeout here propagates to the honest skip.
-            composeRule.waitUntil(timeoutMillis = 60_000) { present("Pick your providers") }
+            // NETWORK stage (fix #3): a successful connectivity probe advances
+            // ApiSelection → Providers. A timeout here is a real backend/cross-app
+            // dependency being unreachable → honest SKIP, not a UI FAIL.
+            try {
+                composeRule.waitUntil(timeoutMillis = 60_000) { present("Pick your providers") }
+            } catch (t: ComposeTimeoutException) {
+                throw OnboardingNetworkUnavailable("ApiSelection connectivity probe", t)
+            }
         }
 
         // Step 3: Providers — deselect everything NOT requested; the requested
@@ -459,11 +483,16 @@ class Challenge70AutonomousQaProviderMatrixTest {
             val shown = providerSpecs.firstOrNull { present("Configure ${it.displayName}") }
                 ?: return // no further Configure page (or already advancing)
             configureProvider(shown)
-            // Leave this page: Summary appears OR this Configure page is gone.
-            // A credentialed-login failure keeps us on the page → this wait times
-            // out → ComposeTimeoutException → honest skip upstream.
-            composeRule.waitUntil(timeoutMillis = 90_000) {
-                present("All set!") || !present("Configure ${shown.displayName}")
+            // NETWORK stage (fix #3): leaving the Configure page requires the
+            // provider login/connect to complete. A credentialed-login failure keeps
+            // us on the page → this wait times out → honest SKIP (backend/credential
+            // unreachable), not a UI FAIL.
+            try {
+                composeRule.waitUntil(timeoutMillis = 90_000) {
+                    present("All set!") || !present("Configure ${shown.displayName}")
+                }
+            } catch (t: ComposeTimeoutException) {
+                throw OnboardingNetworkUnavailable("provider configure/login: ${shown.displayName}", t)
             }
         }
     }
