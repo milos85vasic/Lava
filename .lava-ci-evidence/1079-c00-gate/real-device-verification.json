@@ -1,0 +1,98 @@
+{
+  "all_passed": true,
+  "finished_at": "2026-07-03T17:02:30+03:00",
+  "gating": true,
+  "rows": [
+    {
+      "avd": "CZ_API28_Phone",
+      "api_level": 28,
+      "form_factor": "phone",
+      "boot_seconds": 12.651776691,
+      "test_class": "lava.app.challenges.Challenge00CrashSurvivalTest",
+      "test_passed": true,
+      "test_seconds": 55.194173125,
+      "gradle_log_path": "CZ_API28_Phone/gradle.log",
+      "diag": {
+        "target": "Android 9.0 (\"Pie\") Tag/ABI: google_apis/x86_64",
+        "sdk": 28,
+        "device": "Android SDK built for x86_64",
+        "adb_devices_state": "localhost:5555         device product:sdk_gphone_x86_64 model:Android_SDK_built_for_x86_64 device:generic_x86_64 transport_id:2"
+      },
+      "failure_summaries": [],
+      "concurrent": 1
+    },
+    {
+      "avd": "CZ_API30_Phone",
+      "api_level": 30,
+      "form_factor": "phone",
+      "boot_seconds": 20.625089349,
+      "test_class": "lava.app.challenges.Challenge00CrashSurvivalTest",
+      "test_passed": true,
+      "test_seconds": 42.07806776,
+      "gradle_log_path": "CZ_API30_Phone/gradle.log",
+      "diag": {
+        "target": "Android 11.0 (\"R\") Tag/ABI: google_apis/x86_64",
+        "sdk": 30,
+        "device": "sdk_gphone_x86_64",
+        "adb_devices_state": "localhost:5555         device product:sdk_gphone_x86_64 model:sdk_gphone_x86_64 device:generic_x86_64_arm64 transport_id:2"
+      },
+      "failure_summaries": [],
+      "concurrent": 1
+    },
+    {
+      "avd": "CZ_API34_Phone",
+      "api_level": 34,
+      "form_factor": "phone",
+      "boot_seconds": 18.020972258,
+      "test_class": "lava.app.challenges.Challenge00CrashSurvivalTest",
+      "test_passed": true,
+      "test_seconds": 62.299601771,
+      "gradle_log_path": "CZ_API34_Phone/gradle.log",
+      "diag": {
+        "target": "Android 14.0 (\"UpsideDownCake\") Tag/ABI: google_apis/x86_64",
+        "sdk": 34,
+        "device": "sdk_gphone64_x86_64",
+        "adb_devices_state": "localhost:5555         device product:sdk_gphone64_x86_64 model:sdk_gphone64_x86_64 device:emu64xa transport_id:2"
+      },
+      "failure_summaries": [],
+      "concurrent": 1
+    },
+    {
+      "avd": "CZ_API34_Tablet",
+      "api_level": 34,
+      "form_factor": "tablet",
+      "boot_seconds": 18.104146163,
+      "test_class": "lava.app.challenges.Challenge00CrashSurvivalTest",
+      "test_passed": true,
+      "test_seconds": 61.283163419,
+      "gradle_log_path": "CZ_API34_Tablet/gradle.log",
+      "diag": {
+        "target": "Android 14.0 (\"UpsideDownCake\") Tag/ABI: google_apis/x86_64",
+        "sdk": 34,
+        "device": "sdk_gphone64_x86_64",
+        "adb_devices_state": "localhost:5555         device product:sdk_gphone64_x86_64 model:sdk_gphone64_x86_64 device:emu64xa transport_id:2"
+      },
+      "failure_summaries": [],
+      "concurrent": 1
+    },
+    {
+      "avd": "CZ_API35_Phone",
+      "api_level": 35,
+      "form_factor": "phone",
+      "boot_seconds": 26.952987299,
+      "test_class": "lava.app.challenges.Challenge00CrashSurvivalTest",
+      "test_passed": true,
+      "test_seconds": 55.865063936,
+      "gradle_log_path": "CZ_API35_Phone/gradle.log",
+      "diag": {
+        "target": "Android 15.0 (\"VanillaIceCream\") Tag/ABI: google_apis/x86_64",
+        "sdk": 35,
+        "device": "sdk_gphone64_x86_64",
+        "adb_devices_state": "localhost:5555         device product:sdk_gphone64_x86_64 model:sdk_gphone64_x86_64 device:emu64xa transport_id:2"
+      },
+      "failure_summaries": [],
+      "concurrent": 1
+    }
+  ],
+  "started_at": "2026-07-03T16:55:22+03:00"
+}

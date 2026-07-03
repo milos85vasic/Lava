@@ -1,0 +1,64 @@
+{
+  "channel": "firebase-app-distribution",
+  "version_name": "1.3.13",
+  "version_code": 1079,
+  "commit_sha": "unknown",
+  "distribute": {
+    "note": "The distribute-advancing commit cannot embed its own git SHA (§6.AK Check 10 self-reference), so commit_sha uses the gate's lenient 'unknown' path. The artifact is pinned MORE strictly here: the exact shipped APK bytes (sha256) + the app-code commit the Gate-7 distribute strictly matched at distribute time.",
+    "artifact_code_sha": "e9a1d9f4a1b5e2c974fddab15599ac4fecba4490",
+    "distributed_apk_sha256_prefix": "d538e591f126eee9",
+    "firebase_debug_release_id": "0rtq7tapl4ia0",
+    "app_id": "digital.vasic.lava.client.dev"
+  },
+  "timestamp": "2026-07-03T14:32:45Z",
+  "authored_utc": "2026-07-03T14:32:45Z",
+  "combined_distribute_authorization": "n/a — §6.AA two-stage: this evidence backs Stage 1 (debug-only). Stage 2 (release) appended after operator device verification.",
+  "covering_challenges": {
+    "Challenge00CrashSurvivalTest": "PASS",
+    "Challenge70AutonomousQaProviderMatrixTest": "PASS"
+  },
+  "cold_start_gate": {
+    "runner": "containers-submodule",
+    "runtime": "podman",
+    "container_image": "lava-android-emulator matrix (api28/api30/api34/api35 x86_64)",
+    "gate_host": "Linux x86_64, KVM",
+    "test_class": "lava.app.challenges.Challenge00CrashSurvivalTest",
+    "all_passed": true,
+    "gating": true,
+    "rows": [
+      { "avd": "CZ_API28_Phone", "api_level": 28, "form_factor": "phone", "boot_seconds": 12.65, "test_passed": true, "test_seconds": 55.19, "concurrent": 1 },
+      { "avd": "CZ_API30_Phone", "api_level": 30, "form_factor": "phone", "boot_seconds": 20.63, "test_passed": true, "test_seconds": 42.08, "concurrent": 1 },
+      { "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone", "test_passed": true, "concurrent": 1 },
+      { "avd": "CZ_API34_Tablet", "api_level": 34, "form_factor": "tablet", "test_passed": true, "concurrent": 1 },
+      { "avd": "CZ_API35_Phone", "api_level": 35, "form_factor": "phone", "test_passed": true, "concurrent": 1 }
+    ],
+    "finished_at": "2026-07-03T17:02:30+03:00",
+    "attestation_path": ".lava-ci-evidence/1079-c00-gate/real-device-verification.json"
+  },
+  "covering_challenge_gate": {
+    "test_class": "lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest",
+    "subset": "kinozal",
+    "query": "1080p",
+    "runner": "containers-submodule",
+    "runtime": "podman",
+    "container_image": "ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64",
+    "verdict": "PASS",
+    "tests": 1,
+    "failures": 0,
+    "skipped": 0,
+    "marker_download_ok": true,
+    "note": "clean — onboard -> login(kinozal) -> search(1080p) -> open topic -> tap Torrent -> Download completed. The discriminating test for the fix: proves the provider-aware /v1/kinozal/download route + the in-app trusted OkHttp fetch for a non-rutracker provider (a kinozal .torrent FAILs on the pre-fix rutracker-only root /download).",
+    "verdict_path": ".lava-ci-evidence/autonomous-qa/2026-07-03/goapi/kinozal-1080p/verdict.json"
+  },
+  "jvm_validation": {
+    "core_feature_tests": "654 tests, 0 failures (core:domain 192, core:network:impl 138, core:downloads 22, core:tracker:client 260, feature:topic 16, feature:login 26)",
+    "app_compile": "BUILD SUCCESSFUL — :app:compileDebugKotlin + :app:compileDebugAndroidTestKotlin against DownloadTorrentUseCase(trackerId,id,title)"
+  },
+  "pepper_rotation": {
+    "gate": "§6.H Phase-1 Gate 4 — fresh LAVA_AUTH_OBFUSCATION_PEPPER per release",
+    "prior_sha_reused_by": "acaf138c... (1.2.16-1036, 2026-05-12)",
+    "rotated": true,
+    "reverified_on_rotated_build": "Challenge70 kinozal .torrent keystone RE-RUN on the pepper-rotated build → verdict=PASS (auth + download unaffected; the pepper is client-side obfuscation, behavior-neutral). C00 is pepper-independent (cold-start does not invoke the AuthInterceptor) so its 5-AVD matrix result carries to the rotated build."
+  },
+  "notes": "§6.Z + §6.AK evidence for the 1.3.13-1079 .torrent download fix. The C00 cold-start canary ran the full §6.I matrix (5 AVDs: API 28/30/34/35, phone + tablet) all PASS, gating=true. The Challenge70 kinozal .torrent keystone ran verdict=PASS. Both against the commit_sha above, on the containerized emulator (runner=containers-submodule, runtime=podman). Per §6.H Gate 4 the auth pepper was rotated to a fresh value for 1079 and the keystone was re-run on the rotated build (still PASS) — the distributed artifact is the verified one."
+}

@@ -1,0 +1,26 @@
+{
+  "date": "2026-07-03",
+  "title": "QA-harness bluff: run-matrix reported verdict=PASS (PASS=1) for an iteration where the client APK was missing and NO test ran — it read a STALE prior-run verdict.json.",
+  "class": "§6.J/§6.L anti-bluff — green verdict with no test executed (the exact 'tests pass, feature unverified' failure the mandate exists to catch), in the QA gate tooling",
+  "status": "ROOT-CAUSED + FIXED + falsifiability-rehearsed. Discovered during the 1.3.13-1079 §6.AA Stage-1 distribute while re-verifying the auth-rotated build.",
+  "how_discovered": "After rotating the auth pepper (§6.H Gate 4) + client (Gate 5) in .env, a clean rebuild (:app:clean + rm generated codegen + rm app-debug.apk) left NO app-debug.apk. The next keystone run reported '[iter] ERROR client APK missing' AND '[matrix] done PASS=1' with verdict.json verdict=PASS — an impossible combination (no APK installed => no test). That exposed the bluff.",
+  "root_cause": {
+    "run_iteration": "scripts/autonomous-qa/run-iteration.sh required a PRE-BUILT app-debug.apk (line 37: `[[ -f $APK ]] || { echo ERROR; exit 2; }`) and, on missing-APK, exited 2 WITHOUT writing a verdict.json — leaving whatever stale verdict.json a prior iteration had written in the evidence dir.",
+    "run_matrix": "scripts/autonomous-qa/run-matrix.sh read the verdict from `$evid/verdict.json` (line 147) and IGNORED run-iteration's exit code (line 144) — so a stale prior-run PASS was counted PASS=1 for a no-test iteration."
+  },
+  "impact": {
+    "product": "NONE on the shipped feature — the #10 .torrent download fix is independently proven by hard logcat evidence ('Download completed' x13-15, C70-RESULT DOWNLOAD-OK) across multiple runs; that evidence does not depend on the buggy PASS logic.",
+    "verification_integrity": "The auth-rotation (pepper+client) re-verifications performed BEFORE this discovery reused the STALE pre-rotation APK (gradle did not rebuild the APK on a .env-only change), so they did NOT actually verify the rotated build. Remediated: a force clean-rebuild (rm codegen -> assembleDebug) produced a fresh rotated APK (sha256 d538e591...) and the keystone was RE-RUN against it with a FRESH verdict (new serial 53187) + hard logcat evidence (Download completed x13). Only that verified APK (d538e591) was staged + distributed."
+  },
+  "fix": {
+    "run_iteration": "On missing-APK, WRITE a FAIL verdict.json to the evidence dir before exit 2 (verdict=FAIL, note='client APK missing ... NO test executed'), so the matrix caller can never read a prior PASS.",
+    "run_matrix": "rm -f the stale verdict.json before EACH iteration; capture run-iteration's exit code; treat a missing verdict.json as FAIL; and (defense-in-depth) never count a non-zero-exit iteration as PASS."
+  },
+  "falsifiability_rehearsal": {
+    "scenario": "app-debug.apk moved away (missing) + a stale {\"verdict\":\"PASS\"} pre-seeded in the evidence dir.",
+    "pre_fix_behavior_prevented": "run-matrix reads the stale verdict.json -> counts PASS=1 for an iteration where no APK was installed and no test ran.",
+    "post_fix_observed": "run-iteration overwrote the evidence verdict.json to {\"verdict\":\"FAIL\"}; the stale PASS is gone. (run-iteration itself exits 2; the matrix additionally rm's the stale verdict + fails-closed on a missing verdict / non-zero exit.)",
+    "reverted": "n/a — the fix is permanent; the rehearsal moved the verified APK away and restored it (sha256 d538e591 unchanged)."
+  },
+  "forbidden_pattern_added": "Acceptance gate whose chief signal is a stale/decoupled verdict artifact: a multi-iteration test runner MUST clear its per-iteration verdict artifact before each run AND MUST treat a missing verdict / non-zero runner exit as FAIL — never inherit a prior iteration's PASS. (Companion to the §7-clause-4 'BUILD SUCCESSFUL as the chief assertion' pattern.)"
+}

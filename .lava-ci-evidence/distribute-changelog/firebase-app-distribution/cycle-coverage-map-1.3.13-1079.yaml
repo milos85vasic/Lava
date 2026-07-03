@@ -1,0 +1,34 @@
+# §6.AK cycle-coverage-map for Lava-Android-1.3.13-1079
+#
+# Each CHANGELOG-claimed user-visible change for 1.3.13-1079 MUST have at least
+# one covering device Challenge that was EXECUTED + PASSED on the §6.Z gate
+# (and therefore is recorded in the same-SHA 1.3.13-1079-test-evidence.json).
+#
+# HONEST SCOPE (§6.J / §11.4.6): this cycle ships ONE user-visible fix — the
+# .torrent download now works for ALL providers over the LAN goapi. Two chained
+# defects were fixed: (1) the OS DownloadManager rejected the self-signed goapi
+# cert (system trust store) so the .torrent never completed; (2) the in-app
+# reroute then hit the goapi ROOT /download, which is rutracker-only, so kinozal
+# (any non-rutracker) fetched from rutracker.org -> error page -> FAIL. The fix
+# routes the in-app trusted OkHttp fetch through the provider-aware
+# /v1/{provider}/download route.
+#
+# The covering Challenge is Challenge70 run against the KINOZAL subset — a
+# non-rutracker .torrent provider — which drives the exact user path the fix
+# touches: onboard -> login(kinozal) -> search(1080p) -> open topic -> tap
+# Torrent -> "Download completed". It is the discriminating test: before the fix
+# a kinozal .torrent download FAILs (root /download is rutracker-only); after,
+# it completes. It ran + PASSED on the §6.Z gate against the committed SHA.
+version: "1.3.13-1079"
+claims:
+  - fix: ".torrent download now works for ALL providers over the LAN goapi (provider-aware /v1/{provider}/download + in-app trusted OkHttp fetch; was rutracker-only root /download + system-DownloadManager cert-blocked)"
+    covering_challenges:
+      # The kinozal (non-rutracker) .torrent keystone: onboard -> login -> search
+      # -> topic -> tap Torrent -> download completes. Proves BOTH the
+      # provider-aware route AND the in-app trusted fetch for a non-rutracker
+      # provider (the exact defect class the fix closes).
+      - "lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest"
+      # §6.Z.4 cold-start crash-survival canary — the fresh-install cold launch
+      # the fix ships in (the fix is a download-path change, not a launch-path
+      # change, so cold-start risk is unchanged; the canary confirms it).
+      - "lava.app.challenges.Challenge00CrashSurvivalTest"

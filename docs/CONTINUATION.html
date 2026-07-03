@@ -189,6 +189,44 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🚀🐛 2026-07-03 (Firebase Stage-1 debug DISTRIBUTED
+1.3.13-1079 + a QA-harness anti-bluff CAUGHT &amp; FIXED
+mid-distribute).</strong> Continued the redistribute. Per-release auth
+rotations: §6.H Gate 4 pepper → new SHA <code>8426f84d</code>; Gate 5
+client → <code>android-1.3.13-1079</code> added to
+<code>LAVA_AUTH_ACTIVE_CLIENTS</code> + set current. §6.Z evidence
+against the fix commit: C00 cold-start on the FULL §6.I matrix (5 AVDs —
+API 28/30/34/35, phone+tablet — all PASS, gating=true) + kinozal
+<code>.torrent</code> keystone <code>verdict=PASS</code>.
+<code>firebase-distribute.sh --app client --debug-only</code> uploaded
+<strong>1.3.13-1079 to <code>.client.dev</code></strong> (Firebase
+release <code>0rtq7tapl4ia0</code>; Gates §6.P/4/5/7 all pass).
+<strong>ANTI-BLUFF FOUND + FIXED (§6.J/§6.L incident):</strong>
+<code>run-matrix</code> reported <code>verdict=PASS</code> (PASS=1) with
+the client APK MISSING and NO test run — it read a STALE prior-run
+<code>verdict.json</code>; <code>run-iteration</code> does NOT build the
+APK (expects pre-built) and on its exit-2 left the stale verdict. This
+ALSO revealed the pepper/client rotation re-verifications had reused the
+STALE pre-rotation APK (gradle didn't rebuild on a
+<code>.env</code>-only change). REMEDIATED: force clean-rebuild
+(<code>rm</code> codegen → <code>assembleDebug</code>) produced the
+fresh rotated APK (sha256 <code>d538e591</code>); the keystone was
+RE-RUN against it with a FRESH verdict (serial 53187) + HARD logcat
+evidence ("Download completed" ×13); ONLY that verified APK was staged +
+distributed. HARNESS FIX: <code>run-iteration</code> writes a FAIL
+verdict on missing-APK; <code>run-matrix</code> <code>rm</code>'s the
+stale verdict before each iteration + fails-closed on missing-verdict /
+non-zero exit. Bluff-Audit rehearsed (stale PASS → FAIL). Incident:
+<code>.lava-ci-evidence/sixth-law-incidents/2026-07-03-qa-harness-missing-apk-stale-verdict-pass-bluff.json</code>.
+The #10 <code>.torrent</code> fix itself was never in doubt (independent
+hard "Download completed" evidence across every run). <strong>NEXT:
+§6.AA Stage-2 (release/prod) — operator-directed; build release APK
+(R8/minify) + verify the R8 cold-start canary (per the 1.2.19-1039
+forensic anchor) +
+<code>firebase-distribute.sh --app client --release-only</code> to
+<code>.client</code>.</strong> ───── (current)</p>
+</blockquote>
+<blockquote>
 <p><strong>🟢📥 2026-07-03 (<code>.torrent</code> download FIXED for ALL
 providers — kinozal DEVICE-GREEN; handoff's #10 root-caused +
 resolved).</strong> Resumed the handoff's uncommitted reroute + the

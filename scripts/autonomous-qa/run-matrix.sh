@@ -140,15 +140,28 @@ for line in "${SUBSET_LINES[@]}"; do
   for q in "${QUERY_LIST[@]}"; do
     evid="$RUN_ROOT/${slug}-${q}"
     mkdir -p "$evid"
+    # §6.J anti-bluff: clear any stale verdict so a prior-iteration PASS can
+    # never be misread when run-iteration dies before writing its own verdict
+    # (sixth-law-incidents 2026-07-03 missing-APK/stale-verdict PASS bluff).
+    rm -f "$evid/verdict.json"
     set +e
     "$QA_DIR/run-iteration.sh" --backend "$BACKEND" --providers "$csv" --query "$q" \
       --serial "$SERIAL" --api-url "$API_URL" --evidence-dir "$evid"
+    iter_rc=$?
     set -e
-    v="$(qa_parse_field "$evid/verdict.json" verdict || echo FAIL)"
-    t="$(qa_parse_field "$evid/verdict.json" tests || echo 0)"
-    f="$(qa_parse_field "$evid/verdict.json" failures || echo 0)"
-    e="$(qa_parse_field "$evid/verdict.json" errors || echo 0)"
-    s="$(qa_parse_field "$evid/verdict.json" skipped || echo 0)"
+    if [[ ! -f "$evid/verdict.json" ]]; then
+      # run-iteration died before writing any verdict — a setup error is a FAIL,
+      # never a pass (NO test executed).
+      v="FAIL"; t=0; f=0; e=1; s=0
+    else
+      v="$(qa_parse_field "$evid/verdict.json" verdict || echo FAIL)"
+      t="$(qa_parse_field "$evid/verdict.json" tests || echo 0)"
+      f="$(qa_parse_field "$evid/verdict.json" failures || echo 0)"
+      e="$(qa_parse_field "$evid/verdict.json" errors || echo 0)"
+      s="$(qa_parse_field "$evid/verdict.json" skipped || echo 0)"
+      # §6.J defense-in-depth: a non-zero iteration exit can NEVER be counted PASS.
+      [[ "$iter_rc" -ne 0 && "$(qa_classify "$v")" == "PASS" ]] && v="FAIL"
+    fi
     echo "| $csv | $q | $v | $t | $f | $e | $s |" >> "$SUMMARY"
     case "$(qa_classify "$v")" in PASS) pass=$((pass+1));; SKIP) skip=$((skip+1));; *) fail=$((fail+1));; esac
   done

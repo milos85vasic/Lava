@@ -34,7 +34,16 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 [[ -z "$BACKEND" || -z "$PROVIDERS" || -z "$QUERY" || -z "$SERIAL" || -z "$EVID" ]] && { usage; exit 2; }
-[[ -f "$APK" ]] || { echo "[iter] ERROR client APK missing: $APK" >&2; exit 2; }
+if [[ ! -f "$APK" ]]; then
+  echo "[iter] ERROR client APK missing: $APK" >&2
+  # §6.J anti-bluff: a missing APK means NO test ran. Overwrite any stale
+  # verdict.json with a FAIL so the matrix caller can NEVER read a prior-run PASS
+  # (the missing-APK/stale-verdict PASS bluff — sixth-law-incidents 2026-07-03).
+  mkdir -p "$EVID"
+  printf '{"backend":"%s","providers":"%s","query":"%s","serial":"%s","gradle_rc":-1,"tests":0,"failures":0,"errors":1,"skipped":0,"marker_download_ok":false,"teardown_known_lva008":false,"other_failure_signal":true,"verdict":"FAIL","note":"client APK missing at %s — build the debug APK before the iteration; NO test executed","junit_xml":"","raw_dir":"%s/raw"}\n' \
+    "$BACKEND" "$PROVIDERS" "$QUERY" "$SERIAL" "$APK" "$EVID" > "$EVID/verdict.json"
+  exit 2
+fi
 
 RAW="$EVID/raw"
 mkdir -p "$RAW"
