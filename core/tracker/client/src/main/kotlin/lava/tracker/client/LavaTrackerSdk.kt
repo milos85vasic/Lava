@@ -336,6 +336,42 @@ class LavaTrackerSdk @Inject constructor(
     }
 
     /**
+     * 2026-07-03 reroute — downloads the raw `.torrent` bytes identified by [id]
+     * from the provider [trackerId], IN-APP over the provider's real client (which
+     * trusts the goapi cert exactly as search/topic do). This is the `.torrent`
+     * twin of [downloadHttpFile]: it resolves the client by explicit [trackerId]
+     * (blank ⇒ the active tracker, preserving the legacy single-tracker deep-link /
+     * favorites path) so the download reaches the SAME provider whose topic the
+     * user is viewing — NOT the endpoint's rutracker-only root `/download/:id`.
+     *
+     * For a goapi-catalogue provider (Kinozal, NNMClub, RuTor, …) the resolved
+     * [ApiBackedTrackerClient] fetches `/v1/{trackerId}/download/{id}` carrying BOTH
+     * auth gates — the `Lava-Auth` client key AND the provider login session as
+     * `Auth-Token: {trackerId}:cookie:{session}` — exactly how its search/topic and
+     * the gutenberg HTTP download already authenticate. This is the byte-fetch the
+     * `.torrent` download-stall incident (kinozal fetched from rutracker.org) fixes.
+     *
+     * Returns null — never throws — when the provider does NOT declare
+     * `TORRENT_DOWNLOAD` (its `getFeature(DownloadableTracker)` resolves null),
+     * when the provider is unknown, or when the underlying fetch fails. Null is an
+     * honest "no `.torrent` surface / fetch failed" signal (§6.E), never fabricated
+     * bytes. §6.H: no credential is logged here.
+     */
+    suspend fun downloadTorrentFile(trackerId: String, id: String): ByteArray? {
+        val client = try {
+            if (trackerId.isBlank()) getActiveClient() else clientFor(trackerId)
+        } catch (_: Throwable) {
+            return null
+        }
+        val feature = client.getFeature(DownloadableTracker::class) ?: return null
+        return try {
+            feature.downloadTorrentFile(id)
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
+    /**
      * Convenience overload of [downloadHttpFile] resolving against the active
      * tracker. Retained for parity with [downloadTorrent]'s active-tracker
      * shape; new callers SHOULD pass an explicit `trackerId`.

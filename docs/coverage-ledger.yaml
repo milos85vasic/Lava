@@ -21,9 +21,9 @@
 # Invariant values: pass | gap | n/a | "waiver: <rationale>" | "pass: <rationale>"
 metadata:
   schema_version: 1
-  generated_at: "2026-07-02T19:38:37Z"
+  generated_at: "2026-07-03T13:11:29Z"
   generator: "scripts/generate-coverage-ledger.sh"
-  commit_sha: "c63471ab34e4555363bbbe6accf8dea81b74db2c"
+  commit_sha: "4874304a022dccf223257ed6c0db7bb7d79a60fb"
   mandate: "HelixConstitution §11.4.25 Full-Automation-Coverage Mandate"
 
 rows:
@@ -630,14 +630,14 @@ rows:
   - path: "core/downloads"
     kind: "core"
     status: "partial"
-    unit_test_count: 4
+    unit_test_count: 5
     integration_test_count: 0
     challenge_count: 0
     challenges: []
     sample_tests:
       - "DownloadServiceCancellationTest.kt"
       - "DownloadServiceImplHttpEmptyBytesTest.kt"
-      - "DownloadUriCacheConcurrencyTest.kt"
+      - "DownloadServiceImplTorrentBytesTest.kt"
     invariants:
       anti_bluff: "gap"
       working_capability: "gap"
@@ -779,7 +779,7 @@ rows:
   - path: "core/tracker"
     kind: "core"
     status: "covered"
-    unit_test_count: 151
+    unit_test_count: 153
     integration_test_count: 2
     challenge_count: 0
     challenges: []

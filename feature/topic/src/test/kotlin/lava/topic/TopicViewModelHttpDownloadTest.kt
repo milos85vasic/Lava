@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import lava.auth.api.TokenProvider
 import lava.common.analytics.AnalyticsTracker
 import lava.data.api.repository.FavoritesRepository
 import lava.data.api.repository.VisitedRepository
@@ -38,6 +37,7 @@ import lava.network.api.HttpArtifact
 import lava.network.api.HttpDownloadSource
 import lava.network.api.ProviderCapabilitySource
 import lava.network.api.ProviderDownloadKind
+import lava.network.api.TorrentDownloadSource
 import lava.testing.TestDispatchers
 import lava.testing.logger.TestLoggerFactory
 import lava.testing.rule.MainDispatcherRule
@@ -68,6 +68,10 @@ import org.orbitmvi.orbit.test.test
  *  - [HttpTestDownloadSource] — the network seam the SDK sits behind. Returns a
  *    real [HttpArtifact] (bytes + filename) for the configured provider, exactly
  *    as `HttpDownloadSourceImpl` would after a real HTTP fetch.
+ *  - [TorrentTestDownloadSource] — the `.torrent` twin of the above, mirroring
+ *    `TorrentDownloadSourceImpl` (→ `LavaTrackerSdk.downloadTorrentFile`). Returns
+ *    the raw `.torrent` bytes for the matching provider id and records the id it
+ *    was queried with, so the test asserts the byte-fetch is PROVIDER-AWARE.
  *  - [HttpTestProviderCapabilitySource] — maps a provider id to its download kind,
  *    mirroring `ProviderCapabilitySourceImpl`'s read of the SDK descriptor
  *    capabilities (HTTP_DOWNLOAD-and-not-TORRENT ⇒ HTTP; TORRENT ⇒ TORRENT).
@@ -79,13 +83,21 @@ import org.orbitmvi.orbit.test.test
  * URI the screen renders AND the bytes/filename that reach the disk writer.
  *
  * ## Falsifiability rehearsal (§6.T.1 / §6.J clause 2)
- * Recorded in the commit body Bluff-Audit stamp. Two mutations were performed
- * before the fix and observed to fail:
+ * Recorded in the commit body Bluff-Audit stamp. Mutations performed before the
+ * fix and observed to fail:
  *   1. `ProviderCapabilitySourceImpl.downloadKind` forced to always return
  *      `TORRENT` → the archiveorg test routes to the `.torrent` path; the disk
  *      writer never receives the HTTP bytes; the HTTP assertion FAILS.
  *   2. `TopicViewModel.onTorrentFileClick` HTTP branch wired to
  *      `downloadTorrentFile(...)` → same failure shape.
+ *   3. `TopicViewModel.downloadTorrentFile` passing a hardcoded `""` instead of
+ *      `providerId` (the non-provider-aware shipped bug). RUN 2026-07-03:
+ *      `torrent topic uses the provider-aware torrent path` FAILED with
+ *      `app.cash.turbine.TurbineAssertionError: No value produced in 3s` — the
+ *      provider-aware source returns null for the empty (wrong) provider id, so
+ *      the `.torrent` download never reaches DownloadState.Completed (it errors),
+ *      and `awaitDownloadCompletedDrainingOthers()` never observes the completion
+ *      the user needs. Reverted; suite re-run GREEN.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class TopicViewModelHttpDownloadTest {
@@ -110,6 +122,7 @@ class TopicViewModelHttpDownloadTest {
         providerIdArg: String?,
         capabilities: Map<String, ProviderDownloadKind>,
         httpSource: HttpDownloadSource,
+        torrentSource: TorrentDownloadSource,
         downloadService: DownloadService,
     ): TopicViewModel {
         val dispatchers: Dispatchers = TestDispatchers(dispatcherRule.testDispatcher)
@@ -136,9 +149,8 @@ class TopicViewModelHttpDownloadTest {
             ),
             addCommentUseCase = AddCommentUseCase(topicService, dispatchers),
             downloadTorrentUseCase = DownloadTorrentUseCase(
-                networkApiRepository = HttpTestNetworkApiRepository(),
+                torrentDownloadSource = torrentSource,
                 downloadService = downloadService,
-                tokenProvider = HttpTestTokenProvider(),
                 dispatchers = dispatchers,
             ),
             downloadHttpFileUseCase = DownloadHttpFileUseCase(httpSource, downloadService, dispatchers),
@@ -175,10 +187,15 @@ class TopicViewModelHttpDownloadTest {
                 ),
             )
             val disk = RecordingDownloadService(savedUri = "content://downloads/mobydick.epub")
+            val torrentSource = TorrentTestDownloadSource(
+                trackerId = rutrackerProviderId, // would serve bytes, but must not be queried
+                bytes = "d4:infoe".toByteArray(),
+            )
             val vm = viewModel(
                 providerIdArg = archiveProviderId,
                 capabilities = mapOf(archiveProviderId to ProviderDownloadKind.HTTP),
                 httpSource = httpSource,
+                torrentSource = torrentSource,
                 downloadService = disk,
             )
 
@@ -200,22 +217,37 @@ class TopicViewModelHttpDownloadTest {
             assertEquals("mobydick.epub", written.fileName)
             // The `.torrent` path MUST NOT have run for an HTTP_DOWNLOAD provider.
             assertNull("a `.torrent` request MUST NOT be issued for an HTTP provider", disk.torrentRequest)
+            assertFalse(
+                "the `.torrent` source MUST NOT be queried for an HTTP provider",
+                torrentSource.wasQueried,
+            )
         }
 
-    // CHALLENGE — no-regression: a rutracker (TORRENT_DOWNLOAD) topic STILL takes
-    // the `.torrent` path; the HTTP-file path is not touched.
+    // CHALLENGE — no-regression + provider-aware: a TORRENT_DOWNLOAD topic STILL
+    // takes the `.torrent` path AND the byte-fetch is provider-aware — the source
+    // is queried with the SOURCE provider id (so a non-rutracker torrent provider
+    // reaches ITS provider, not the endpoint's rutracker-only root route), and the
+    // exact fetched bytes reach the disk writer. The HTTP-file path is not touched.
     @Test
-    fun `rutracker TORRENT topic still uses the torrent path`() =
+    fun `torrent topic uses the provider-aware torrent path`() =
         runTest(dispatcherRule.testDispatcher) {
+            val torrentProviderId = "kinozal" // deliberately NOT rutracker: proves provider-awareness
+            val torrentBytes =
+                "d8:announce16:http://x/announce4:infod4:name8:file.iso12:piece lengthi262144eee".toByteArray()
             val httpSource = HttpTestDownloadSource(
-                trackerId = archiveProviderId, // deliberately NOT rutracker — proves the HTTP path is untaken
+                trackerId = archiveProviderId, // deliberately NOT the torrent provider — proves the HTTP path is untaken
                 artifact = HttpArtifact("x".toByteArray(), "https://x", "x"),
+            )
+            val torrentSource = TorrentTestDownloadSource(
+                trackerId = torrentProviderId,
+                bytes = torrentBytes,
             )
             val disk = RecordingDownloadService(savedUri = "content://downloads/file.torrent")
             val vm = viewModel(
-                providerIdArg = rutrackerProviderId,
-                capabilities = mapOf(rutrackerProviderId to ProviderDownloadKind.TORRENT),
+                providerIdArg = torrentProviderId,
+                capabilities = mapOf(torrentProviderId to ProviderDownloadKind.TORRENT),
                 httpSource = httpSource,
+                torrentSource = torrentSource,
                 downloadService = disk,
             )
 
@@ -227,12 +259,24 @@ class TopicViewModelHttpDownloadTest {
                 cancelAndIgnoreRemainingItems()
             }
 
-            // The `.torrent` writer ran with the right title.
+            // The provider-aware fetch used the SOURCE provider id (not root/rutracker).
+            assertEquals(
+                "the `.torrent` byte-fetch MUST be provider-aware (query the source provider)",
+                torrentProviderId,
+                torrentSource.seenTrackerId,
+            )
+            assertEquals(topicId, torrentSource.seenId)
+            // The `.torrent` writer ran with the right title AND the exact fetched bytes.
             val torrent = requireNotNull(disk.torrentRequest) {
-                "the rutracker path MUST issue a `.torrent` download request"
+                "the torrent path MUST issue a `.torrent` download request"
             }
             assertEquals(topicId, torrent.id)
             assertEquals("Some Linux ISO", torrent.title)
+            assertArrayEquals(
+                "bytes handed to the disk writer must equal the provider-fetched bytes",
+                torrentBytes,
+                torrent.bytes,
+            )
             // The HTTP-file writer + the HTTP source MUST NOT have run.
             assertNull("the HTTP-file path MUST NOT run for a TORRENT provider", disk.httpRequest)
             assertFalse("the HTTP source MUST NOT be queried for a TORRENT provider", httpSource.wasQueried)
@@ -302,16 +346,31 @@ private class RecordingDownloadService(private val savedUri: String) : DownloadS
     }
 }
 
-private class HttpTestNetworkApiRepository : lava.network.data.NetworkApiRepository {
-    override suspend fun getApi(): lava.network.api.NetworkApi = error("unused in this test")
-    override suspend fun getCaptchaUrl(url: String): String = url
-    override suspend fun getDownloadUri(id: String): String = "https://rutracker.org/forum/dl.php?t=$id"
-    override suspend fun getAuthHeader(token: String): Pair<String, String> = "Cookie" to "bb_session=$token"
-}
+/**
+ * Provider-aware `.torrent` byte source fake mirroring `TorrentDownloadSourceImpl`
+ * (→ `LavaTrackerSdk.downloadTorrentFile`): returns the raw `.torrent` bytes ONLY
+ * for the matching tracker id (Capability Honesty), null otherwise — never a
+ * fabricated artifact. Records the id it was queried with so the test can assert
+ * the fetch was PROVIDER-AWARE (reached the source provider, not the endpoint's
+ * rutracker-only root route — the 2026-07-03 download-stall bug).
+ */
+private class TorrentTestDownloadSource(
+    private val trackerId: String,
+    private val bytes: ByteArray,
+) : TorrentDownloadSource {
+    var wasQueried: Boolean = false
+        private set
+    var seenTrackerId: String? = null
+        private set
+    var seenId: String? = null
+        private set
 
-private class HttpTestTokenProvider : TokenProvider {
-    override suspend fun getToken(): String = "test-token"
-    override suspend fun refreshToken(): Boolean = true
+    override suspend fun downloadTorrentFile(trackerId: String, id: String): ByteArray? {
+        wasQueried = true
+        seenTrackerId = trackerId
+        seenId = id
+        return if (trackerId == this.trackerId) bytes else null
+    }
 }
 
 /** In-memory [TopicService] sufficient for VM onCreate (load topic + paging). */

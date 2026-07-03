@@ -178,6 +178,47 @@
 <body>
 <h1 id="changelog">Changelog</h1>
 <h2
+id="lava-android-1313-1079--2026-07-03-lan-proxy-torrent-download-fix--device-green">Lava-Android-1.3.13-1079
+— 2026-07-03 (LAN-proxy <code>.torrent</code> download fix —
+device-GREEN)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.12-1077.
+(Supersedes the undistributed §6.Y dev-stub 1.3.12-1078.)</p>
+<ul>
+<li><strong><code>.torrent</code> download now works for ALL providers
+over the LAN goapi (user-facing fix).</strong> Two chained defects
+fixed:
+<ol type="1">
+<li><strong>Cert / DownloadManager reroute.</strong> The
+<code>.torrent</code> download went through the OS
+<code>DownloadManager</code>, which fetched over the SYSTEM trust store
+and rejected the self-signed goapi cert, so the download never completed
+for the user. Now <code>DownloadTorrentUseCase</code> fetches the bytes
+IN-APP over the app's trusted OkHttp client (the same trusted path
+search/topic/gutenberg use), bencode-validates them, and writes to
+public Downloads.</li>
+<li><strong>Provider-aware routing (#10).</strong> The in-app fetch was
+routed through the goapi's rutracker-ONLY root
+<code>/download/:id</code> (<code>cmd/lava-api-go/main.go:140</code>
+scraper = <code>rutracker.NewClient</code>), so rutracker
+<code>.torrent</code>s worked but kinozal (and any non-rutracker)
+fetched from rutracker.org → error page → FAIL. Now routed through the
+provider-aware <code>/v1/{provider}/download/:id</code> (SDK path, both
+auth gates), mirroring the device-green gutenberg HTTP-file
+download.</li>
+</ol></li>
+<li><strong>§6.Y:</strong> versionCode 1078→1079; versionName
+1.3.12→1.3.13 (user-facing download fix).</li>
+</ul>
+<p><strong>Device evidence (§6.AK):</strong> kinozal 1080p
+<code>.torrent</code> keystone <code>verdict=PASS</code> ("Download
+completed" ×15, DOWNLOAD-OK); gutenberg HTTP-file
+<code>verdict=PASS</code>; rutracker 1080p+mp3 <code>verdict=PASS</code>
+— search→topic→download proven on the containerized emulator (API 34,
+goapi backend).</p>
+<p><strong>Channel:</strong> firebase-app-distribution — pending the
+§6.Z pre-distribute gate + §6.AA two-stage + operator-provided Firebase
+creds.</p>
+<h2
 id="lava-android-1312-1078--2026-06-30-dev-cycle-not-yet-distributed--6y-bump-first">Lava-Android-1.3.12-1078
 — 2026-06-30 (dev cycle, NOT YET DISTRIBUTED — §6.Y bump-first)</h2>
 <p><strong>Previous published:</strong> Lava-Android-1.3.12-1077.</p>

@@ -1,5 +1,18 @@
 # Changelog
 
+## Lava-Android-1.3.13-1079 — 2026-07-03 (LAN-proxy `.torrent` download fix — device-GREEN)
+
+**Previous published:** Lava-Android-1.3.12-1077. (Supersedes the undistributed §6.Y dev-stub 1.3.12-1078.)
+
+- **`.torrent` download now works for ALL providers over the LAN goapi (user-facing fix).** Two chained defects fixed:
+  1. **Cert / DownloadManager reroute.** The `.torrent` download went through the OS `DownloadManager`, which fetched over the SYSTEM trust store and rejected the self-signed goapi cert, so the download never completed for the user. Now `DownloadTorrentUseCase` fetches the bytes IN-APP over the app's trusted OkHttp client (the same trusted path search/topic/gutenberg use), bencode-validates them, and writes to public Downloads.
+  2. **Provider-aware routing (#10).** The in-app fetch was routed through the goapi's rutracker-ONLY root `/download/:id` (`cmd/lava-api-go/main.go:140` scraper = `rutracker.NewClient`), so rutracker `.torrent`s worked but kinozal (and any non-rutracker) fetched from rutracker.org → error page → FAIL. Now routed through the provider-aware `/v1/{provider}/download/:id` (SDK path, both auth gates), mirroring the device-green gutenberg HTTP-file download.
+- **§6.Y:** versionCode 1078→1079; versionName 1.3.12→1.3.13 (user-facing download fix).
+
+**Device evidence (§6.AK):** kinozal 1080p `.torrent` keystone `verdict=PASS` ("Download completed" ×15, DOWNLOAD-OK); gutenberg HTTP-file `verdict=PASS`; rutracker 1080p+mp3 `verdict=PASS` — search→topic→download proven on the containerized emulator (API 34, goapi backend).
+
+**Channel:** firebase-app-distribution — pending the §6.Z pre-distribute gate + §6.AA two-stage + operator-provided Firebase creds.
+
 ## Lava-Android-1.3.12-1078 — 2026-06-30 (dev cycle, NOT YET DISTRIBUTED — §6.Y bump-first)
 
 **Previous published:** Lava-Android-1.3.12-1077.

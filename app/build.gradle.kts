@@ -89,8 +89,8 @@ android {
         // NavigationController KDoc + .lava-ci-evidence/sixth-law-incidents/
         // 2026-06-30-keystone-offmain-nav-and-lva008.json), so there is no user-visible behavior
         // change warranting a versionName bump.
-        versionCode = 1078
-        versionName = "1.3.12"
+        versionCode = 1079
+        versionName = "1.3.13"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/
         // become runnable on a connected device. The custom runner installs

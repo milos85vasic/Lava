@@ -189,6 +189,53 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🟢📥 2026-07-03 (<code>.torrent</code> download FIXED for ALL
+providers — kinozal DEVICE-GREEN; handoff's #10 root-caused +
+resolved).</strong> Resumed the handoff's uncommitted reroute + the
+still-broken #10. ROOT-CAUSED #10 definitively (an advance over the
+handoff's "goapi session-forwarding failing"): the reroute fetched the
+<code>.torrent</code> bytes in-app via
+<code>ProxyNetworkApi.download</code> → the goapi ROOT
+<code>/download/:id</code>, which is <strong>rutracker-ONLY</strong>
+(<code>cmd/lava-api-go/main.go:140</code> scraper =
+<code>rutracker.NewClient</code>;
+<code>internal/handlers/torrent.go GetDownload</code> →
+<code>h.scraper.GetTorrentFile</code> → rutracker.org). So rutracker
+<code>.torrent</code>s worked but kinozal fetched from rutracker.org
+with a kinozal id/cookie → HTML error page → bencode-guard 502 → FAIL.
+FIX (subagent a0736b7e, approach A = SDK provider-aware path mirroring
+the device-green gutenberg HTTP-file download): new
+<code>TorrentDownloadSource</code> seam →
+<code>sdk.downloadTorrentFile(trackerId, id)</code> →
+<code>ApiBackedTrackerClient.downloadable</code> →
+<code>/v1/{trackerId}/download/:id</code> (both auth gates, per-provider
+session); <code>DownloadTorrentUseCase(trackerId, id, title)</code>;
+<code>TopicViewModel</code> threads <code>providerId</code>; the
+superseded root-route byte-fetch reverted; the reroute's
+bencode-validate + public-Downloads write preserved. Approach B (thread
+trackerId into ProxyNetworkApi/root) was rejected: it sends the
+single-tracker <code>tokenProvider</code> token (rutracker session),
+wrong-formatted for kinozal. <strong>654 core+feature JVM tests GREEN +
+3 Bluff-Audit stamps.</strong> <strong>DEVICE-GREEN (§6.AK):</strong>
+kinozal 1080p <code>.torrent</code> keystone <code>verdict=PASS</code>
+("Download completed" ×15, C70-RESULT DOWNLOAD-OK) on the containerized
+emulator (API 34) — answering the handoff's open question: the client's
+kinozal onboarding-login session IS valid for the download. §6.H CLEAN
+(no token logging anywhere in the login-touching client — the handoff's
+#9 is moot). §6.Y bump 1.3.12-1078 → 1.3.13-1079 (user-facing download
+fix). Device-green goapi matrix: rutracker
+(1080p+mp3+<code>.torrent</code>), kinozal
+(1080p+<code>.torrent</code>), gutenberg (sherlock HTTP-file).
+<strong>STILL GATED (unchanged):</strong> public IPv4-only providers
+need the per-destination excluded-proxy egress toggle (operator infra
+decision — a global bypass breaks rutracker/kinozal); the Firebase
+redistribute needs operator-provided real creds
+(<code>google-services.json</code>, <code>LAVA_FIREBASE_TOKEN</code>) +
+the §6.Z pre-distribute gate + §6.AA two-stage — distributing with
+placeholder creds or a broken download is the exact §6.Z bluff the
+mandate forbids. ───── (current)</p>
+</blockquote>
+<blockquote>
 <p><strong>🔧📡 2026-07-03 (§6.AC archiveorg mapError hardening —
 egress-stall-masquerade class CLOSED; matrix banked, public providers
 still gated).</strong> The one genuinely-reachable non-gated item from

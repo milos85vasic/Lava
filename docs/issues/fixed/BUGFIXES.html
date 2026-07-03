@@ -4138,5 +4138,60 @@ worktree per §6.H), so the device gate runs on the provisioned
 gate-host. The JVM RED→GREEN above is the unit-level proof.</p>
 <p><strong>Fix commit:</strong> on the agent worktree branch (authored
 in the same commit as the fix per §6.T.4).</p>
+<hr />
+<h2
+id="2026-07-03--torrent-download-broken-for-non-rutracker-providers-kinozal-got-an-html-error-page-not-the-file">2026-07-03
+— <code>.torrent</code> download broken for non-rutracker providers
+(kinozal got an HTML error page, not the file)</h2>
+<p><strong>Root cause (two chained defects):</strong></p>
+<ol type="1">
+<li><strong>Cert / DownloadManager.</strong>
+<code>DownloadTorrentUseCase</code> built a URI for the OS
+<code>DownloadManager</code>, which fetched the goapi
+<code>/download</code> URL over the SYSTEM trust store and rejected the
+self-signed goapi cert → the download never completed for the user
+(CertPathValidatorException on device).</li>
+<li><strong>Provider-aware routing (#10).</strong> The reroute (defect
+1's fix) fetched the bytes in-app via
+<code>networkApiRepository.download</code> →
+<code>ProxyNetworkApi.download</code> → the goapi ROOT
+<code>/download/:id</code>, which is <strong>rutracker-only</strong>
+(<code>cmd/lava-api-go/main.go:140</code> wires
+<code>scraper = rutracker.NewClient</code>;
+<code>internal/handlers/torrent.go GetDownload</code> calls
+<code>h.scraper.GetTorrentFile</code> → rutracker.org). rutracker
+<code>.torrent</code>s worked, but kinozal (any non-rutracker) fetched
+from rutracker.org with a kinozal id/cookie → rutracker HTML error page
+→ the bencode guard 502'd → DownloadState.Error → FAIL.</li>
+</ol>
+<p><strong>Affected files:</strong>
+<code>core/domain/.../DownloadTorrentUseCase.kt</code>,
+<code>core/downloads/.../DownloadServiceImpl.kt</code>,
+<code>core/downloads/api/DownloadRequest.kt</code>,
+<code>core/tracker/client/.../LavaTrackerSdk.kt</code>,
+<code>core/network/api/TorrentDownloadSource.kt</code> (new),
+<code>core/network/impl/.../TorrentDownloadSourceImpl.kt</code> (new),
+<code>core/network/impl/di/NetworkModule.kt</code>,
+<code>feature/topic/.../TopicViewModel.kt</code>.</p>
+<p><strong>Fix:</strong> (1) fetch the <code>.torrent</code> bytes
+IN-APP over the app's trusted OkHttp client (bencode-validate → write to
+public Downloads), removing the DownloadManager cert path. (2) route the
+in-app fetch through the provider-aware
+<code>/v1/{provider}/download/:id</code> SDK path (new
+<code>TorrentDownloadSource</code> mirroring
+<code>HttpDownloadSource</code>;
+<code>DownloadTorrentUseCase(trackerId, id, title)</code>;
+<code>TopicViewModel</code> threads <code>providerId</code>), so each
+provider's <code>.torrent</code> is fetched from ITS tracker with ITS
+session (both auth gates) — mirroring the device-green gutenberg
+HTTP-file download.</p>
+<p><strong>Verification:</strong> core+feature JVM 654 tests GREEN;
+kinozal 1080p <code>.torrent</code> keystone DEVICE-GREEN
+(<code>verdict=PASS</code>, "Download completed" ×15, C70-RESULT
+DOWNLOAD-OK) on the containerized emulator (API 34, goapi backend).
+Incident:
+<code>.lava-ci-evidence/sixth-law-incidents/2026-07-03-rutracker-kinozal-torrent-download-stall.json</code>.</p>
+<p><strong>Fix commit:</strong> this commit
+(Lava-Android-1.3.13-1079).</p>
 </body>
 </html>

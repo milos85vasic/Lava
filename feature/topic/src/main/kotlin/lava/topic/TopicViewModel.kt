@@ -253,7 +253,12 @@ internal class TopicViewModel @Inject constructor(
             )
             postSideEffect(TopicSideEffect.ShowDownloadProgress)
             reduce { state.copy(downloadState = DownloadState.Started) }
-            val uri = downloadTorrentUseCase(id, title)
+            // LVA-052 / 2026-07-03 reroute — pass the SOURCE provider so the
+            // `.torrent` byte-fetch is provider-aware (reaches Kinozal/RuTor/… via
+            // /v1/{provider}/download, not the endpoint's rutracker-only root
+            // /download). Blank providerId ⇒ the SDK falls back to the active
+            // tracker, preserving the legacy deep-link / favorites path.
+            val uri = downloadTorrentUseCase(providerId, id, title)
             if (uri != null) {
                 intent { reduce { state.copy(downloadState = DownloadState.Completed(uri)) } }
             } else {
