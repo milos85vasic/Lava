@@ -1,0 +1,10 @@
+{
+  "variant": "release",
+  "package": "digital.vasic.lava.client",
+  "apk_sha256": "1b12e21b5af642d62e4e10a0b3bfdf687be76a200a17b9135fdf6442b9302d28",
+  "fatal_count": 0,
+  "pid": "4036",
+  "top_activity": "digital.vasic.lava.client/.MainActivity",
+  "verdict": "PASS",
+  "note": "R8 cold-start canary: fresh install -> pm clear -> cold launch -> (no FATAL EXCEPTION) AND (process alive) AND (app activity is TOP). Covers the 1.2.19-1039 release-only R8 crash class."
+}

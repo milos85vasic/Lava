@@ -60,5 +60,13 @@
     "rotated": true,
     "reverified_on_rotated_build": "Challenge70 kinozal .torrent keystone RE-RUN on the pepper-rotated build → verdict=PASS (auth + download unaffected; the pepper is client-side obfuscation, behavior-neutral). C00 is pepper-independent (cold-start does not invoke the AuthInterceptor) so its 5-AVD matrix result carries to the rotated build."
   },
+  "release_stage": {
+    "gate": "§6.AA Stage 2 — release/prod (.client). §6.Z.4 R8 cold-start canary — the release variant has no testBuildType=release, so the instrumentation keystone cannot run on the R8-minified APK; the canary is the release-variant cold-start equivalent.",
+    "canary": "scripts/autonomous-qa/release-coldstart-canary.sh",
+    "release_apk_sha256": "1b12e21b5af642d62e4e10a0b3bfdf687be76a200a17b9135fdf6442b9302d28",
+    "verdict": "PASS",
+    "evidence_path": ".lava-ci-evidence/1079-release-coldstart/verdict.json",
+    "detail": "R8-minified release APK: fresh install -> pm clear -> cold launch on the containerized emulator (API 34) -> fatal_count=0, process alive (pid 4036), top activity digital.vasic.lava.client/.MainActivity. Covers the 1.2.19-1039 release-only R8 crash class (a cold-start crash would set fatal>0 AND kill the process). Firebase release 7rj8e4om1beh8 (.client); the Stage-1 debug release was 0rtq7tapl4ia0 (.client.dev)."
+  },
   "notes": "§6.Z + §6.AK evidence for the 1.3.13-1079 .torrent download fix. The C00 cold-start canary ran the full §6.I matrix (5 AVDs: API 28/30/34/35, phone + tablet) all PASS, gating=true. The Challenge70 kinozal .torrent keystone ran verdict=PASS. Both against the commit_sha above, on the containerized emulator (runner=containers-submodule, runtime=podman). Per §6.H Gate 4 the auth pepper was rotated to a fresh value for 1079 and the keystone was re-run on the rotated build (still PASS) — the distributed artifact is the verified one."
 }

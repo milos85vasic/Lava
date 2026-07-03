@@ -219,12 +219,25 @@ stale verdict before each iteration + fails-closed on missing-verdict /
 non-zero exit. Bluff-Audit rehearsed (stale PASS → FAIL). Incident:
 <code>.lava-ci-evidence/sixth-law-incidents/2026-07-03-qa-harness-missing-apk-stale-verdict-pass-bluff.json</code>.
 The #10 <code>.torrent</code> fix itself was never in doubt (independent
-hard "Download completed" evidence across every run). <strong>NEXT:
-§6.AA Stage-2 (release/prod) — operator-directed; build release APK
-(R8/minify) + verify the R8 cold-start canary (per the 1.2.19-1039
-forensic anchor) +
-<code>firebase-distribute.sh --app client --release-only</code> to
-<code>.client</code>.</strong> ───── (current)</p>
+hard "Download completed" evidence across every run). <strong>§6.AA
+Stage-2 (release/prod) DONE:</strong> release APK (R8/minify, sha256
+<code>1b12e21b</code>) built + the R8 cold-start canary PASS (fatal=0,
+process alive pid 4036,
+<code>digital.vasic.lava.client/.MainActivity</code> on top — via the
+NEW <code>scripts/autonomous-qa/release-coldstart-canary.sh</code>,
+since there is no <code>testBuildType=release</code> so the keystone
+can't run on the minified APK) +
+<code>firebase-distribute.sh --app client --release-only</code> uploaded
+to prod <code>.client</code> (Firebase release
+<code>7rj8e4om1beh8</code>). <strong>BOTH prod flavors now on Firebase:
+debug <code>.client.dev</code> (<code>0rtq7tapl4ia0</code>) +
+release/prod <code>.client</code> (<code>7rj8e4om1beh8</code>).</strong>
+api-app is already at its released version (0.2.11-23, debug+release
+both distributed); the <code>.torrent</code> fix is client-side so the
+api-app needs no new release. <strong>OPERATOR: install the Firebase
+builds on-device and confirm — §6.AA clause 2 / §6.Z clause 5: the human
+real-device observation is the final release signal.</strong> ─────
+(current)</p>
 </blockquote>
 <blockquote>
 <p><strong>🟢📥 2026-07-03 (<code>.torrent</code> download FIXED for ALL
