@@ -119,7 +119,7 @@ class DynamicRegistryRealClientTest {
         val result = searchable.search(SearchRequest(query = "bunny"), page = 0)
 
         val recorded = server.takeRequest()
-        assertEquals("/v1/jackett-1337x/search?query=bunny&page=0", recorded.path)
+        assertEquals("/v1/jackett-1337x/search?query=bunny&page=0&sort=date&order=descending", recorded.path)
         assertEquals(1, result.items.size)
         assertEquals("Big Buck Bunny", result.items.single().title)
         assertEquals("jackett-1337x", result.items.single().trackerId)

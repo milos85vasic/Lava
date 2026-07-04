@@ -1,5 +1,8 @@
 package lava.tracker.client
 
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
 import kotlinx.coroutines.runBlocking
 import lava.sdk.api.MapPluginConfig
 import lava.sdk.api.PluginConfig
@@ -68,12 +71,16 @@ class LavaTrackerSdkHttpDownloadRealStackTest {
 
     @Before
     fun setUp() {
+        mockkStatic(android.util.Log::class)
+        every { android.util.Log.w(any<String>(), any<String>()) } returns 0
+        every { android.util.Log.w(any<String>(), any<String>(), any<Throwable>()) } returns 0
         server = MockWebServer().also { it.start() }
     }
 
     @After
     fun tearDown() {
         server.shutdown()
+        unmockkAll()
     }
 
     /**

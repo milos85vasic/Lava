@@ -156,7 +156,7 @@ class ApiAuthKeyEndToEndWiringTest {
             key,
             recorded.getHeader(authFieldName),
         )
-        assertEquals("/v1/jackett-1337x/search?query=sintel&page=0", recorded.path)
+        assertEquals("/v1/jackett-1337x/search?query=sintel&page=0&sort=date&order=descending", recorded.path)
 
         // PRIMARY 2 — the user-visible outcome: a real result, NOT the 401 error.
         assertEquals(1, result.items.size)
