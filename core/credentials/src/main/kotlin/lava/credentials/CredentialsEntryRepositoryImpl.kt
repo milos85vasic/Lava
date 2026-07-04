@@ -14,6 +14,7 @@ import lava.database.dao.CredentialsEntryDao
 import lava.database.entity.CredentialsEntryEntity
 import lava.sync.SyncOutbox
 import lava.sync.SyncOutboxKind
+import java.security.GeneralSecurityException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -51,18 +52,25 @@ class CredentialsEntryRepositoryImpl @Inject constructor(
      * collector (ProviderConfigViewModel, CredentialsManagerViewModel) degrades
      * gracefully to "no credentials" rather than crashing.
      *
-     * Genuine decryption failures (wrong key, corrupted ciphertext —
-     * [javax.crypto.AEADBadTagException]) are NOT silenced here; they are
-     * distinct [java.security.GeneralSecurityException] subclasses that do NOT
-     * match the [isLockedKeyHolderError] predicate and therefore propagate
-     * normally through the flow so the non-fatal channel still captures them.
+     * Fix for Crashlytics FATAL 4e11da491ed4854f8d6390e53a09d91f (1.3.12):
+     * A single row whose ciphertext cannot be decrypted (wrong key OR corrupted
+     * bytes — [javax.crypto.AEADBadTagException], a
+     * [java.security.GeneralSecurityException] subclass, or the too-short-payload
+     * [IllegalArgumentException] from [CredentialsCrypto.decrypt]'s `require`)
+     * previously propagated out of the [map] operator. The 1.3.10 comment above
+     * ASSUMED a ViewModel coroutine-scope handler would turn that into a
+     * non-fatal, but Crashlytics recorded it as a real FATAL app crash on device.
+     * A corrupt/undecryptable row is now SKIPPED per-row (see [decodeOrNull]) and
+     * recorded as a §6.AC non-fatal — so one bad row can neither crash the app
+     * nor hide every OTHER valid credential. This achieves the 1.3.10 author's
+     * STATED intent (non-fatal telemetry) without the FATAL side effect.
      */
     override fun observe(): Flow<List<CredentialsEntry>> =
         dao.observeAll().map { rows ->
             // Try to obtain the key once for this emission; if the holder is
             // locked, short-circuit to empty list without calling decode at all.
             runCatching { keyProvider() }.fold(
-                onSuccess = { _ -> rows.map(::decode) },
+                onSuccess = { _ -> rows.mapNotNull(::decodeOrNull) },
                 onFailure = { t ->
                     if (isLockedKeyHolderError(t)) {
                         // §6.AC: record a non-fatal warning so the operator can
@@ -90,7 +98,7 @@ class CredentialsEntryRepositoryImpl @Inject constructor(
 
     override suspend fun list(): List<CredentialsEntry> = observe().first()
 
-    override suspend fun get(id: String): CredentialsEntry? = dao.get(id)?.let(::decode)
+    override suspend fun get(id: String): CredentialsEntry? = dao.get(id)?.let(::decodeOrNull)
 
     override suspend fun upsert(entry: CredentialsEntry) {
         val payload = json.encodeToString(entry.secret.toWire())
@@ -141,6 +149,50 @@ class CredentialsEntryRepositoryImpl @Inject constructor(
             updatedAtUtc = entity.updatedAt,
         )
     }
+
+    /**
+     * Fix for Crashlytics FATAL 4e11da491ed4854f8d6390e53a09d91f (1.3.12):
+     * decode a single row, but return `null` (skip the row) when its ciphertext
+     * cannot be decrypted rather than letting the exception crash the app.
+     *
+     * Caught deliberately narrowly:
+     *  - [GeneralSecurityException] — the AES-GCM auth-tag failure
+     *    ([javax.crypto.AEADBadTagException]) and its siblings (wrong key /
+     *    corrupted/tampered ciphertext).
+     *  - [IllegalArgumentException] — the too-short-payload `require` in
+     *    [CredentialsCrypto.decrypt] (a truncated/garbage blob).
+     *
+     * Everything else (locked-holder [IllegalStateException], a programmer
+     * error such as the "unknown secret kind" [IllegalStateException] in
+     * [WireSecret.toDomain], serialization errors) is NOT caught here and
+     * continues to propagate, exactly as before — we do not want to silently
+     * swallow non-corruption bugs (§6.J). The skipped row is recorded as a
+     * §6.AC non-fatal so the operator can observe on-device corruption without
+     * it being an actionable crash. No secret material is included (§6.H) — only
+     * the row id, operation, and error class.
+     */
+    private fun decodeOrNull(entity: CredentialsEntryEntity): CredentialsEntry? =
+        try {
+            decode(entity)
+        } catch (e: GeneralSecurityException) {
+            analytics?.recordNonFatal(e, undecryptableRowContext(entity, e))
+            null
+        } catch (e: IllegalArgumentException) {
+            analytics?.recordNonFatal(e, undecryptableRowContext(entity, e))
+            null
+        }
+
+    /**
+     * §6.AC non-fatal context for an undecryptable credential row. No secret
+     * material (§6.H) — only the row id, operation, and error class.
+     */
+    private fun undecryptableRowContext(entity: CredentialsEntryEntity, e: Throwable): Map<String, String> =
+        mapOf(
+            AnalyticsTracker.Params.MODULE to "core:credentials",
+            AnalyticsTracker.Params.OPERATION to "decode",
+            AnalyticsTracker.Params.ERROR_CLASS to e.javaClass.simpleName,
+            "credential_id" to entity.id,
+        )
 
     @Serializable
     private data class WireSecret(

@@ -146,4 +146,61 @@ class CredentialsEntryRepositoryImplTest {
             result.isEmpty(),
         )
     }
+
+    /**
+     * Regression test for Crashlytics FATAL 4e11da491ed4854f8d6390e53a09d91f
+     * (firstSeen/lastSeen 1.3.12, OPEN).
+     *
+     * A credential row whose ciphertext cannot be decrypted (wrong key OR
+     * corrupted bytes) makes [CredentialsEntryRepositoryImpl.decode] throw
+     * [javax.crypto.AEADBadTagException] (a
+     * [java.security.GeneralSecurityException] subclass) inside the
+     * [kotlinx.coroutines.flow.Flow.map] operator.  The 1.3.10 fix DELIBERATELY
+     * let that exception propagate, ASSUMING a ViewModel coroutine-scope handler
+     * would turn it into a non-fatal — but Crashlytics recorded it as **FATAL**
+     * (a real app crash) on a real device.  A single corrupt/undecryptable row
+     * MUST NOT crash the app, and MUST NOT hide every OTHER (valid) credential.
+     *
+     * Correct behaviour: [observe] SKIPS the undecryptable row (recording a
+     * §6.AC non-fatal for operator triage) and still returns the valid rows.
+     *
+     * FALSIFIABILITY REHEARSAL (§6.L / Seventh Law clause 1): revert the
+     * per-row resilient decode (`rows.mapNotNull(::decodeOrNull)`) back to the
+     * throwing `rows.map(::decode)` and this test fails because
+     * [kotlinx.coroutines.flow.Flow.first] re-throws:
+     *   "javax.crypto.AEADBadTagException: ... BAD_DECRYPT"
+     * After the fix the corrupt row is skipped and `observe` returns [valid-1].
+     */
+    @Test
+    fun `observe skips a corrupt-ciphertext row and still returns the valid rows — no crash`() = runBlocking {
+        val dao = FakeDao()
+        val repo = CredentialsEntryRepositoryImpl(dao, { key })
+        repo.upsert(
+            CredentialsEntry("valid-1", "Valid", CredentialSecret.ApiKey("good-key"), 1, 2),
+        )
+        repo.upsert(
+            CredentialsEntry("corrupt-1", "Corrupt", CredentialSecret.ApiKey("bad"), 1, 2),
+        )
+        // Tamper the stored ciphertext of the "corrupt-1" row so its AES-GCM
+        // auth tag no longer verifies — exactly the on-device corruption that
+        // produces AEADBadTagException at decrypt time.
+        dao.flow.value = dao.flow.value.map { e ->
+            if (e.id == "corrupt-1") {
+                val tampered = e.ciphertext.copyOf()
+                val last = tampered.size - 1
+                tampered[last] = (tampered[last].toInt() xor 0x01).toByte()
+                e.copy(ciphertext = tampered)
+            } else {
+                e
+            }
+        }
+
+        // Collecting observe() MUST NOT throw; it MUST drop the corrupt row and
+        // still surface the valid one.
+        val read = repo.observe().first()
+
+        assertEquals("corrupt row must be skipped, valid row must survive", 1, read.size)
+        assertEquals("valid-1", read[0].id)
+        assertEquals(CredentialSecret.ApiKey("good-key"), read[0].secret)
+    }
 }

@@ -189,6 +189,47 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🛡️🐛 2026-07-04 (Crashlytics FATAL #2 FIXED reproduce-first —
+credentials decrypt AEADBadTagException no longer crashes the app;
+live-Crashlytics review of the distributed build).</strong> Reviewed
+Firebase Crashlytics for the live client release
+(<code>lava-vasic-digital</code>, app <code>…456475e2…</code>, 2-week
+window) — 3 OPEN FATAL/ANR issues. Triaged all 3 with real evidence:
+<strong>(#3 <code>eaa80c14…</code>
+<code>ProviderConfigViewModel$WireToggle</code> SerializationException,
+1.3.11)</strong> = ALREADY FIXED (regression test
+<code>ProviderConfigWireSerializationTest.kt</code> +
+<code>build.gradle.kts:8</code> comment reference; lastSeen 1.3.11 =
+stopped) → console close-mark owed, no code change. <strong>(#1
+<code>c7c8ccc…</code> nested-scroll IllegalStateException, §6.Q anchor,
+lastSeen 1.3.12)</strong> = still OPEN, needs the crash-stack screen to
+locate the residual violation (sample event not retrievable via API this
+session) — PENDING_FORENSICS. <strong>(#2 <code>4e11da49…</code>
+<code>CredentialsCrypto.decrypt</code> AEADBadTagException BAD_DECRYPT,
+FATAL, 1.3.12)</strong> = GENUINELY OPEN in current code → <strong>FIXED
+reproduce-first</strong>:
+<code>CredentialsEntryRepositoryImpl.observe()</code>/<code>get()</code>
+deliberately let <code>AEADBadTagException</code> propagate (a 1.3.10
+comment ASSUMED it'd become a non-fatal; Crashlytics proved it FATAL).
+Now <code>decodeOrNull(entity)</code> catches narrowly
+(<code>GeneralSecurityException</code> + the too-short-payload
+<code>IllegalArgumentException</code>), records a §6.AC non-fatal (no
+secret material, §6.H), and SKIPS the corrupt row — one bad credential
+row can no longer crash the app nor hide the valid ones; non-corruption
+bugs still propagate. RED→GREEN: new test
+<code>observe skips a corrupt-ciphertext row…</code> RED
+<code>AEADBadTagException at :175</code> → GREEN (6/6). §6.AC scanner 0
+violations. Closure log
+<code>.lava-ci-evidence/crashlytics-resolved/2026-07-04-credentials-decrypt-aeadbadtag-fatal.md</code>.
+§6.O Challenge (device end-to-end) OWED, §6.AH-blocked. Also this
+session: root-caused + fixed the push rejection (§11.4.65
+<code>CM-UNIVERSAL-MARKDOWN-EXPORT-SYNC</code> — the 1080-cycle doc
+edits lacked regenerated <code>.html/.pdf</code> siblings; regenerated
+CHANGELOG/CONTINUATION/BUGFIXES exports). Subagent fleet HARD-BLOCKED
+(provider session limit resets 4:10pm Europe/Moscow) — 3 parallel
+worktree agents (Go download-route bug sweep, Kotlin nav-literal dedup,
+Go search-param honoring) all died on quota; their targets remain
+workable when quota resets. ───── (current)</p>
 <p><strong>🚀 2026-07-04 (Lava-Android-1.3.14-1080 cycle — search flow
 Bug 1+2 FIXED, goapi archiveorg download 502 FIXED, §6.C converged,
 ci.sh --changed-only GREEN; distro blocked on §6.Z device
@@ -2061,13 +2102,18 @@ PostConverters clamp, ProbeMirrorUseCase reproducing Crashlytics
 39469d3b). Evidence:
 <code>.lava-ci-evidence/bluff-hunt/2026-06-23-cycle6-{session-telemetry,android-core}.json</code>.
 The session's telemetry tests are PROVEN genuine.</p>
-<p><strong>Last updated:</strong> 2026-07-03 (§6.AC archiveorg mapError
-hardening — egress-stall-masquerade class CLOSED, reproduce-first
-RED→GREEN, banked device-green matrix UNCHANGED, public providers still
-gated; see top banner. Prior 2026-07-02: goapi × rutracker keystone
-GREEN — verdict=PASS, device-recorded, 5-fix stack B/C2/D/E +
-Challenge70 deselect; prior 2026-06-30 context follows) (**🤖 AUTONOMOUS
-QA HARNESS (Phase 0) — self-driving QA built under
+<p><strong>Last updated:</strong> 2026-07-04 (Crashlytics FATAL #2
+credentials-decrypt AEADBadTagException FIXED reproduce-first +
+live-Crashlytics triage of all 3 open FATALs + 1080-cycle
+doc/CHANGELOG/§11.4.6/export-sync work — see top banners. Subagent fleet
+quota-blocked until 4:10pm Europe/Moscow.)</p>
+<p><strong>Last updated (prior):</strong> 2026-07-03 (§6.AC archiveorg
+mapError hardening — egress-stall-masquerade class CLOSED,
+reproduce-first RED→GREEN, banked device-green matrix UNCHANGED, public
+providers still gated; see top banner. Prior 2026-07-02: goapi ×
+rutracker keystone GREEN — verdict=PASS, device-recorded, 5-fix stack
+B/C2/D/E + Challenge70 deselect; prior 2026-06-30 context follows) (**🤖
+AUTONOMOUS QA HARNESS (Phase 0) — self-driving QA built under
 <code>scripts/autonomous-qa/</code>; emulator image boots
 containerized-KVM in ~30s; Go backend serves <code>/health</code>;
 onboarding proven end-to-end (RuTor anon → main app, keystone run #1
