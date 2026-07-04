@@ -178,6 +178,53 @@
 <body>
 <h1 id="changelog">Changelog</h1>
 <h2
+id="lava-android-1314-1080--2026-07-04-search-filters-now-honored-end-to-end--archiveorg-download-502-fix--not-yet-distributed">Lava-Android-1.3.14-1080
+— 2026-07-04 (search filters now honored end-to-end + archiveorg
+download 502 fix — NOT YET DISTRIBUTED)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.13-1079.</p>
+<ul>
+<li><strong>Search sort / order / period filters now reach the wire
+(user-facing fix, Bug 1 + Bug 2).</strong> In the multi-provider
+streaming search path,
+<code>SearchResultViewModel.observeStreamMultiSearch</code> hard-coded
+<code>SearchRequest(sort=DATE, sortOrder=DESCENDING)</code> and dropped
+<code>filter.sort</code>, <code>filter.order</code>,
+<code>filter.period</code>; separately,
+<code>ApiBackedTrackerClient.search</code> never appended
+<code>sort</code>/<code>order</code>/<code>period</code> to the
+<code>GET /v1/{provider}/search</code> URL. Both are now propagated from
+the <code>Filter</code> (from <code>SavedStateHandle</code>) through
+<code>SearchRequest</code> and onto the wire, so changing sort to Seeds
+/ order to Ascending / period to Today actually changes the results.
+Commit <code>441e321e</code>.</li>
+<li><strong>archiveorg <code>.torrent</code>/file download 502 fixed
+(server-side).</strong> The Go API's <code>GET /http-download/*id</code>
+Gin catch-all captured the wildcard <code>*id</code> with a leading
+<code>/</code>; <code>TrimPrefix</code> now strips it so the upstream
+file id resolves instead of 502-ing. Commit <code>05d14d4a</code>.
+(archiveorg itself remains egress-gated on VPN-egress hosts per the
+per-destination-routing operator-infra item — this fix removes the
+route-level 502 so the provider works once egress is reachable.)</li>
+<li><strong>§6.Y:</strong> versionCode 1079→1080; versionName
+1.3.13→1.3.14 (user-facing search-filter fix).</li>
+</ul>
+<p><strong>Coverage status (§6.AK / §6.Z — HONEST):</strong> the
+filter-propagation fix is covered by executed JVM unit tests
+(<code>SearchResultViewModel</code> filter→<code>SearchRequest</code>
+propagation + <code>ApiBackedTrackerClient</code> sort/order/period wire
+tests, both falsifiability-rehearsed); the archiveorg fix by Go contract
++ unit regression tests. <strong>NO device Challenge has yet been
+EXECUTED against the 1080 artifact</strong> — the §6.AK cycle-coverage
+gate + §6.Z pre-distribute device evidence are NOT satisfied. Per
+§6.AK/§6.Z this version MUST NOT be distributed until a device Challenge
+that drives the "change sort → verify results" journey runs
+RED-then-GREEN on the §6.I matrix. Device gate currently §6.AH-blocked
+on the dev host (no in-container KVM); nezha Linux gate-host or operator
+device required.</p>
+<p><strong>Channel:</strong> firebase-app-distribution — BLOCKED on the
+§6.AK covering-Challenge execution + §6.Z gate + §6.AA two-stage +
+operator-provided Firebase creds.</p>
+<h2
 id="lava-android-1313-1079--2026-07-03-lan-proxy-torrent-download-fix--device-green">Lava-Android-1.3.13-1079
 — 2026-07-03 (LAN-proxy <code>.torrent</code> download fix —
 device-GREEN)</h2>

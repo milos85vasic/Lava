@@ -189,6 +189,42 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🚀 2026-07-04 (Lava-Android-1.3.14-1080 cycle — search flow
+Bug 1+2 FIXED, goapi archiveorg download 502 FIXED, §6.C converged,
+ci.sh --changed-only GREEN; distro blocked on §6.Z device
+gate).</strong> Continued from compaction; 6 commits on master at HEAD
+<code>00cb2188</code>. <strong>Committed (all pushed to both mirrors,
+§6.C converged):</strong> (1) <code>820790e9</code> version bump
+1079→1080 (§6.Y post-distribute). (2) <code>05d14d4a</code> goapi
+TrimPrefix leading slash for Gin catch-all <code>*id</code> — archiveorg
+<code>/http-download</code> 502 root cause FIXED + regression tests
+(contract + Go unit). (3) <code>441e321e</code> search sort/order/period
+propagation from SavedStateHandle into SearchRequest — Bug 1 + Bug 2
+FIXED. (4) <code>fc7ca6a5</code> 2026-07-04 autonomous-QA cycle evidence
+committed (search-flow + credentials-crash traces, 12 providers tested
+on goapi nezha gate-host). (5) <code>1a6ef204</code> tracker client path
+assertions + Log mock updated for buildUrl() changes (§6.Y-1080). (6)
+<code>00cb2188</code> chore(deps): advance 5 own-org (auth, containers,
+database, observability, security) + constitution submodule pins.
+<strong>ci.sh --changed-only GREEN</strong> (BUILD SUCCESSFUL, 339
+tasks, all gates PASS). <strong>§6.Z test-evidence file NOT yet created
+for 1080</strong> (blocked: QA device gate — all provider keystones
+SKIP/FAIL on containerized emulator, root cause pending diagnosis).
+<strong>§6.AA two-stage Firebase distribute BLOCKED</strong> by §6.Z
+evidence + operator credentials (google-services.json,
+LAVA_FIREBASE_TOKEN). vision_engine submodule adopted (GitLab remote
+pending). Two subagents still running in background: LVA-083 (search
+zero-results P0 deep dive — reading ProviderLoginViewModel,
+PreferencesStorage, ApiKeyClient), LVA-081 (coverage-ledger.yaml
+regeneration + ci.sh worktree verification). <strong>CONTINUING BLOCKERS
+(unchanged from 1079 cycle):</strong> device gate can't produce real
+per-AVD attestations; distribute blocked until evidence file exists +
+operator provides Firebase creds. <strong>NEXT:</strong> finish
+CONTINUATION.md → check subagent outputs → commit coverage-ledger.yaml →
+address LVA-083/LVA-081 findings → retry device gate. ─────
+(current)</p>
+</blockquote>
+<blockquote>
 <p><strong>🚀🐛 2026-07-03 (Firebase Stage-1 debug DISTRIBUTED
 1.3.13-1079 + a QA-harness anti-bluff CAUGHT &amp; FIXED
 mid-distribute).</strong> Continued the redistribute. Per-release auth
@@ -236,8 +272,7 @@ api-app is already at its released version (0.2.11-23, debug+release
 both distributed); the <code>.torrent</code> fix is client-side so the
 api-app needs no new release. <strong>OPERATOR: install the Firebase
 builds on-device and confirm — §6.AA clause 2 / §6.Z clause 5: the human
-real-device observation is the final release signal.</strong> ─────
-(current)</p>
+real-device observation is the final release signal.</strong></p>
 </blockquote>
 <blockquote>
 <p><strong>🟢📥 2026-07-03 (<code>.torrent</code> download FIXED for ALL
