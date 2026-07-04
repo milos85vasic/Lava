@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest" tests="1" failures="1" errors="0" skipped="0" time="88.618" timestamp="2026-07-03T23:21:39" hostname="localhost">
+  <properties>
+    <property name="device" value="sdk_gphone64_x86_64 - 14" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="autonomousMatrix_onboard_search_topic_download" classname="lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest" time="87.496">
+    <failure>java.lang.IllegalArgumentException: Tapping "Torrent" surfaced NEITHER "Download completed" nor the "Downloading file…" in-progress dialog — a download Error dialog or no dialog is a loud failure (never DOWNLOAD-OK). HTTP-file providers (archiveorg/gutenberg) reach this via downloadHttpFile().
+at lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest.searchTopicDownload(Challenge70AutonomousQaProviderMatrixTest.kt:665)
+at lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest.autonomousMatrix_onboard_search_topic_download(Challenge70AutonomousQaProviderMatrixTest.kt:344)
+</failure>
+  </testcase>
+</testsuite>

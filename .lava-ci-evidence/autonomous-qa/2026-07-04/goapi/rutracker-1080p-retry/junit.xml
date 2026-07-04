@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite tests="0" failures="0" errors="0" skipped="0" time="0.539" timestamp="2026-07-03T22:03:23" hostname="localhost">
+  <properties>
+    <property name="device" value="sdk_gphone64_x86_64 - 14" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <system-err>Test run failed to complete. Unable to find instrumentation info for: ComponentInfo{digital.vasic.lava.client.dev.test/lava.app.LavaHiltTestRunner}. onError: commandError=true message=INSTRUMENTATION_FAILED: digital.vasic.lava.client.dev.test/lava.app.LavaHiltTestRunner
+</system-err>
+</testsuite>
