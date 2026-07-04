@@ -189,10 +189,52 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>✅📱 2026-07-04 (DEVICE GATE UNBLOCKED — the multi-session
+"device gate broken" was an AVD-NAME MISMATCH; C00 now PASSES with real
+evidence).</strong> A parallel subagent diagnosed the emulator "boot
+hang" with hard captured evidence: it is NOT a hang. The
+<code>api34-x86_64</code> image bakes exactly ONE AVD named
+<strong><code>default</code></strong>; the runner passed
+<strong><code>CZ_API34_Phone</code></strong> (from <code>--avds</code>
+AND the default §6.AE.2 <code>BASE_AVDS</code>) → the entrypoint
+pre-check <code>exit(1)</code>s in ~4s ("AVD not found") → the
+container's <code>--rm</code> erases the log → <code>WaitForBoot</code>
+(NO container-liveness check) polls the dead forwarded port to its
+deadline, misreporting the 4s exit as a 5m/12m "boot timeout"
+(<code>boot_seconds 301/721</code> = the WaitForBoot deadline, not a
+real boot). GPU (swiftshader_indirect, correct) + KVM (ENGAGED —
+<code>kvm-vm</code>+4 <code>kvm-vcpu</code> inodes captured) both RULED
+OUT. <strong>FIX (verified end-to-end):
+<code>scripts/run-challenge-matrix.sh … --avds "default:34:phone"</code></strong>
+→ the emulator cold-boots under KVM in <strong>44.5s</strong> and
+<strong>C00 PASSES</strong>:
+<code>.lava-ci-evidence/2026-07-04T15-03-29Z-challenge-matrix/real-device-verification.json</code>
+=
+<code>all_passed:true, gating:true, avd:default, api:34, boot:44.5s, test_passed:true</code>
+against the fresh 1.3.14-1080 debug APK. <strong>The §6.Z device gate
+now produces real evidence on this host</strong> — the blocker that
+stopped EVERY prior session is solved. DURABLE FIXES OWED (incident
+<code>…2026-07-04-device-gate-emulator-boot-hang.json</code> resolution
+block): (1) align <code>run-challenge-matrix.sh</code> default
+<code>BASE_AVDS</code> to the image's baked AVD name (a plain gate run
+still hits the mismatch — gate-shaping, needs §6.N.1.2 rehearsal); (2)
+<code>containers</code> <code>pkg/emulator/containerized.go</code>
+<code>WaitForBoot</code> needs a container-liveness check +
+<code>podman logs</code> before <code>--rm</code> reaps; (3) full §6.AE
+matrix (API 28/30/latest) needs those images + baked AVD names (only
+api34/<code>default</code> local). <strong>DISTRIBUTE PATH now
+open</strong> (well-scoped): write a covering device Challenge for the
+search-filter fix (runnable now), strike the egress-blocked archiveorg
+claim (§6.AK.6), assemble §6.Z evidence + §6.AK cycle-coverage-map, then
+§6.AA two-stage both apps both flavors. Also this cycle: 3 parallel
+subagents (emulator diagnosis DONE; Go download+search-param sweep +
+Kotlin nav-literal dedup landed in worktrees, pending main-stream
+verify+merge). ───── (current)</p>
 <p><strong>🚧📱 2026-07-04 (operator rebuild+distribute directive —
 device gate BLOCKED by emulator boot-hang on this host; honest §6.Z
-refusal, NOT a bluff-distribute).</strong> Operator: "Once EVERYTHING is
-done, retested fully, validated and verified, rebuild everything and
+refusal, NOT a bluff-distribute — SUPERSEDED by the ✅ banner above once
+the AVD-name root cause was found).</strong> Operator: "Once EVERYTHING
+is done, retested fully, validated and verified, rebuild everything and
 distribute … both apps, both flavors dev and prod." KEY POSITIVE: unlike
 prior macOS sessions, THIS Linux host HAS <code>/dev/kvm</code> (rw),
 podman 5.7.1, the emulator image

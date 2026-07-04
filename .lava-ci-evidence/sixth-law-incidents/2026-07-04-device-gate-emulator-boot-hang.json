@@ -2,7 +2,23 @@
   "incident": "2026-07-04-device-gate-emulator-boot-hang",
   "date": "2026-07-04",
   "class": "device-gate-infrastructure-blocker",
-  "severity": "blocks-distribute",
+  "severity": "RESOLVED — was blocks-distribute; root cause found + fix verified (C00 real-device PASS)",
+  "resolution": {
+    "confirmed_root_cause": "AVD-name mismatch (class d), NOT a boot hang. The api34-x86_64 image bakes exactly ONE AVD named 'default'; the runner passed 'CZ_API34_Phone' (from --avds AND the default BASE_AVDS matrix) → the entrypoint pre-check exits(1) in ~4s ('AVD not found') → the container's --rm auto-removes it, erasing the log → WaitForBoot (which has NO container-liveness check) polls the now-dead forwarded port until its own deadline, misreporting the 4s exit as a 5m/12m 'boot timeout' (boot_seconds 301/721 = the WaitForBoot deadline, not a real boot). GPU (swiftshader_indirect — correct) and KVM/TCG (KVM IS engaged: kvm-vm + 4 kvm-vcpu inodes captured) were both RULED OUT by captured evidence. Diagnosed by subagent a76093bd with hard evidence.",
+    "fix": "Invoke with the AVD name the image actually bakes: scripts/run-challenge-matrix.sh --test-class <T> --avds 'default:34:phone'. Proven end-to-end.",
+    "verification_C00_PASS": {
+      "evidence": ".lava-ci-evidence/2026-07-04T15-03-29Z-challenge-matrix/real-device-verification.json",
+      "all_passed": true, "gating": true, "avd": "default", "api_level": 34,
+      "boot_seconds": 44.5, "test_passed": true,
+      "test_class": "lava.app.challenges.Challenge00CrashSurvivalTest",
+      "note": "Cold-boot under KVM in 44.5s; C00 crash-survival PASS against the fresh 1.3.14-1080 debug APK. The §6.Z device gate is now producing real evidence on this host."
+    },
+    "durable_fixes_owed": [
+      "run-challenge-matrix.sh: the default §6.AE.2 BASE_AVDS names (CZ_API*_Phone) do not match the api34 image's baked AVD 'default' → a plain gate run hits the SAME mismatch. Align the single-image path's AVD name to the baked name, OR make the image→AVD-name mapping explicit in tools/lava-containers/vm-images.json. (Gate-shaping script — §6.N.1.2 Bluff-Audit rehearsal required.)",
+      "submodules/containers pkg/emulator/containerized.go WaitForBoot: add a container-liveness check (podman inspect .State.Running / exit code) + surface `podman logs` before --rm reaps the container, so a 4s exit(1) is not disguised as a multi-minute boot timeout. (Containers submodule change + pin bump.)",
+      "Full §6.AE matrix (API 28/30/latest × phone/tablet) still needs those emulator images + baked AVD names — only api34-x86_64 (AVD 'default') is local."
+    ]
+  },
   "summary": "On this Linux/KVM host the containerized Android emulator (ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64) starts but the Android guest never reaches sys.boot_completed=1 — the §6.Z device gate cannot produce evidence here, so the operator-requested 1.3.14-1080 distribute is BLOCKED (distributing without device evidence would be the §6.Z/1.2.19-1039 bluff).",
   "trigger": "Operator directive 2026-07-04: 'Once EVERYTHING is done, retested fully, validated and verified, rebuild everything and distribute fully fixed versions of both apps, both flavors dev and prod using Firebase distribution.'",
   "host_facts_confirmed": {
