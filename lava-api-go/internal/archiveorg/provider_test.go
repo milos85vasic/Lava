@@ -197,16 +197,76 @@ func TestProviderAdapter_DownloadFile(t *testing.T) {
 	}
 }
 
-func TestProviderAdapter_DownloadFile_InvalidID(t *testing.T) {
+func TestProviderAdapter_DownloadFile_BareIDResolvesMetadata(t *testing.T) {
+	wantBody := []byte("download content")
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/metadata/item-1":
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"metadata":{"title":"Item"},"files":[{"name":"item-1_archive.torrent","size":"1024"}]}`))
+		case "/download/item-1/item-1_archive.torrent":
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(wantBody)
+		default:
+			t.Errorf("unexpected path=%q", r.URL.Path)
+		}
+	}))
+	defer srv.Close()
+
+	a := newTestAdapter(srv)
+	result, err := a.DownloadFile(context.Background(), "item-1", provider.Credentials{})
+	if err != nil {
+		t.Fatalf("DownloadFile: %v", err)
+	}
+	if result.Filename != "item-1_archive.torrent" {
+		t.Errorf("Filename=%q want item-1_archive.torrent", result.Filename)
+	}
+	if string(result.Body) != string(wantBody) {
+		t.Errorf("Body mismatch")
+	}
+}
+
+func TestProviderAdapter_DownloadFile_BareIDFallsBackToSmallestFile(t *testing.T) {
+	wantBody := []byte("small file")
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/metadata/item-1":
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"metadata":{"title":"Item"},"files":[{"name":"big.mp4","size":"9999999"},{"name":"small.txt","size":"42"}]}`))
+		case "/download/item-1/small.txt":
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(wantBody)
+		default:
+			t.Errorf("unexpected path=%q", r.URL.Path)
+		}
+	}))
+	defer srv.Close()
+
+	a := newTestAdapter(srv)
+	result, err := a.DownloadFile(context.Background(), "item-1", provider.Credentials{})
+	if err != nil {
+		t.Fatalf("DownloadFile: %v", err)
+	}
+	if result.Filename != "small.txt" {
+		t.Errorf("Filename=%q want small.txt", result.Filename)
+	}
+}
+
+func TestProviderAdapter_DownloadFile_EmptyID(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer srv.Close()
 
 	a := newTestAdapter(srv)
-	_, err := a.DownloadFile(context.Background(), "noseparator", provider.Credentials{})
+	_, err := a.DownloadFile(context.Background(), "", provider.Credentials{})
 	if err == nil {
-		t.Fatal("expected error for invalid id, got nil")
+		t.Fatal("expected error for empty id, got nil")
+	}
+	if !errors.Is(err, provider.ErrUnknown) {
+		t.Errorf("expected provider.ErrUnknown for empty id, got %v", err)
 	}
 }
 

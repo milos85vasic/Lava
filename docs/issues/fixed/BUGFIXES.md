@@ -1,5 +1,23 @@
 # Lava — Bug Fix Audit Trail
 
+> **Revision (2026-07-04, goapi archiveorg /http-download 502 → root-cause fix):**
+> `/v1/archiveorg/http-download/{id}` returned HTTP 502 with body `{}` for a valid bare identifier.
+> Root cause: the route uses a Gin wildcard path parameter (`*id`), so `c.Param("id")` returned
+> `"/vidmate_201910_201910"` with a leading slash. `archiveorg.ProviderAdapter.resolveDownloadTarget`
+> split on `/`, saw an empty first component, and returned `provider.ErrUnknown`, which
+> `writeProviderError` mapped to 502. The same bug would have hit composite `identifier/filename` ids.
+> Affected files: `lava-api-go/internal/handlers/v1/torrent.go` (`GetDownload` and `GetTorrent`
+> id extraction), `lava-api-go/internal/handlers/v1/http_download_test.go`.
+> Fix: `id := strings.TrimPrefix(c.Param("id"), "/")` in both handlers, plus regression test
+> `TestHTTPDownload_TrimsLeadingSlashFromWildcardID` covering bare and composite ids.
+> Verification (reproduce-first §6.T.1): before the fix the real endpoint returned `502 {}`;
+> after the fix it returns `200` with the 2045-byte `.torrent` file. Falsifiability rehearsal:
+> mutation `strings.TrimPrefix(c.Param("id"), "")` (no-op trim) makes the new test RED with
+> `download id received by provider was "/vidmate_201910_201910", want "vidmate_201910_201910"`,
+> then reverted and GREEN. Package tests: `go test ./internal/handlers/v1/ ./internal/archiveorg/` PASS.
+> Container rebuilt (`podman-compose --profile api-go build --no-cache lava-api-go`) and verified
+> on `https://127.0.0.1:8443`.
+
 > **Revision §11.4.44 (2026-07-03, §6.AC archiveorg mapError hardening — egress-stall-masquerade class CLOSED):**
 > the 2026-07-02 diagnostic trap is fixed reproduce-first. Root cause:
 > `lava-api-go/internal/archiveorg/provider.go mapError()` collapsed EVERY error to a bare

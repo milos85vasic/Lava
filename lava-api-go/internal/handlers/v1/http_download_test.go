@@ -97,7 +97,58 @@ func TestHTTPDownload_ServesFileForHTTPDownloadProvider(t *testing.T) {
 	}
 }
 
-// TestHTTPDownload_FallsBackToOctetStreamWhenContentTypeBlank covers archiveorg,
+// TestHTTPDownload_TrimsLeadingSlashFromWildcardID is the regression guard for
+// the 502 observed on archiveorg /http-download/{id} when the route wildcard
+// returned the id with a leading slash. The handler MUST strip the slash before
+// passing the id to Provider.DownloadFile, otherwise providers that reject an
+// empty identifier component (archiveorg's resolveDownloadTarget) return
+// provider.ErrUnknown → 502 Bad Gateway.
+//
+// FALSIFIABILITY / REPRODUCE-FIRST (§6.T.1 / §6.J clause 2) — actually run:
+//
+//	Mutation: change GetDownload to pass c.Param("id") verbatim (id = "/vidmate_201910_201910").
+//	Observed: RED — "download id received by provider was %q, want %q" for the
+//	          leading-slash id; equivalently the real archiveorg adapter returns
+//	          "download id must be 'identifier' or 'identifier/filename'" → 502.
+//	Reverted: yes — the TrimPrefix fix is the production code under test.
+func TestHTTPDownload_TrimsLeadingSlashFromWildcardID(t *testing.T) {
+	body := []byte("torrent-file-bytes")
+	fp := &httpFileProvider{}
+	fp.fakeProvider.id = "archiveorg"
+	fp.fakeProvider.downloadResult = &provider.FileDownload{
+		Provider: "archiveorg",
+		ID:       "vidmate_201910_201910",
+		Filename: "vidmate_201910_201910_archive.torrent",
+		Body:     body,
+	}
+	router := setupRegistryRouter(fp)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest(http.MethodGet, "/v1/archiveorg/http-download/vidmate_201910_201910", nil)
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	if got := fp.fakeProvider.downloadID; got != "vidmate_201910_201910" {
+		t.Fatalf("download id received by provider was %q, want %q", got, "vidmate_201910_201910")
+	}
+
+	// Composite ids (identifier/filename) must also keep their internal slash
+	// after the leading slash is removed.
+	fp.fakeProvider.downloadID = ""
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest(http.MethodGet, "/v1/archiveorg/http-download/mobydick/mobydick.epub", nil)
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200 for composite id, got %d: %s", w.Code, w.Body.String())
+	}
+	if got := fp.fakeProvider.downloadID; got != "mobydick/mobydick.epub" {
+		t.Fatalf("composite download id received by provider was %q, want %q", got, "mobydick/mobydick.epub")
+	}
+}
+
 // whose DownloadFile fills Filename but leaves ContentType blank. The handler
 // MUST still serve the bytes under a valid binary type + the filename header
 // (a blank Content-Type would make the client mis-handle the artifact).

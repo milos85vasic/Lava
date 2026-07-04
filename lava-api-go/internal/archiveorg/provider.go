@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -141,16 +142,18 @@ func (a *ProviderAdapter) GetTorrent(_ context.Context, _ string, _ provider.Cre
 	return nil, provider.ErrUnsupported
 }
 
-// DownloadFile delegates to Client.Download. The id parameter is expected
-// to be in the form "{identifier}/{filename}" so the caller can specify
-// which file inside the item to retrieve.
+// DownloadFile delegates to Client.Download. The id parameter may be either the
+// composite "{identifier}/{filename}" (explicit file) or the bare
+// "{identifier}" (search-result id). A bare identifier resolves a
+// representative file from the item metadata: prefer the auto-generated
+// "{identifier}_archive.torrent", otherwise the smallest listed file. This
+// mirrors the Android ArchiveOrgDownload.downloadHttpFile behaviour
+// (LVA-070 / 2026-06-30 keystone fix).
 func (a *ProviderAdapter) DownloadFile(ctx context.Context, id string, _ provider.Credentials) (*provider.FileDownload, error) {
-	// Parse "identifier/filename" composite id.
-	parts := strings.SplitN(id, "/", 2)
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return nil, fmt.Errorf("archiveorg: download id must be 'identifier/filename', got %q", id)
+	identifier, filename, err := a.resolveDownloadTarget(ctx, id)
+	if err != nil {
+		return nil, mapError(err)
 	}
-	identifier, filename := parts[0], parts[1]
 	fd, err := a.client.Download(ctx, identifier, filename)
 	if err != nil {
 		return nil, mapError(err)
@@ -161,6 +164,47 @@ func (a *ProviderAdapter) DownloadFile(ctx context.Context, id string, _ provide
 		Filename: fd.Filename,
 		Body:     fd.Body,
 	}, nil
+}
+
+// resolveDownloadTarget normalises an archive.org download id into
+// (identifier, filename). Composite ids pass through; bare ids are enriched
+// from /metadata/{identifier}.
+func (a *ProviderAdapter) resolveDownloadTarget(ctx context.Context, id string) (identifier, filename string, err error) {
+	parts := strings.SplitN(id, "/", 2)
+	identifier = parts[0]
+	if identifier == "" {
+		return "", "", fmt.Errorf("archiveorg: download id must be 'identifier' or 'identifier/filename', got %q", id)
+	}
+	if len(parts) == 2 && parts[1] != "" {
+		return identifier, parts[1], nil
+	}
+
+	// Bare identifier — resolve a representative file from metadata.
+	topic, err := a.client.Topic(ctx, identifier)
+	if err != nil {
+		return "", "", fmt.Errorf("archiveorg: resolve metadata for %q: %w", identifier, err)
+	}
+	if len(topic.Files) == 0 {
+		return "", "", fmt.Errorf("archiveorg: item %q exposes no downloadable files", identifier)
+	}
+	for _, f := range topic.Files {
+		if strings.HasSuffix(f.Name, ".torrent") {
+			return identifier, f.Name, nil
+		}
+	}
+	 smallestIdx := 0
+	smallestSize := int64(-1)
+	for i, f := range topic.Files {
+		sz, _ := strconv.ParseInt(f.Size, 10, 64)
+		if sz < 0 {
+			sz = 0
+		}
+		if smallestSize < 0 || sz < smallestSize {
+			smallestSize = sz
+			smallestIdx = i
+		}
+	}
+	return identifier, topic.Files[smallestIdx].Name, nil
 }
 
 // ─── Extended capabilities ───

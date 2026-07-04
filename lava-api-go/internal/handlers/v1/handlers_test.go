@@ -31,6 +31,7 @@ type fakeProvider struct {
 	topicResult    *provider.TopicResult
 	torrentResult  *provider.TorrentResult
 	downloadResult *provider.FileDownload
+	downloadID     string
 }
 
 func (f *fakeProvider) ID() string { return f.id }
@@ -68,6 +69,7 @@ func (f *fakeProvider) GetTorrent(ctx context.Context, id string, cred provider.
 	return f.torrentResult, nil
 }
 func (f *fakeProvider) DownloadFile(ctx context.Context, id string, cred provider.Credentials) (*provider.FileDownload, error) {
+	f.downloadID = id
 	return f.downloadResult, nil
 }
 func (f *fakeProvider) GetComments(ctx context.Context, id string, page int, cred provider.Credentials) (*provider.CommentsResult, error) {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -29,7 +30,7 @@ func (h *TorrentHandler) GetTorrent(c *gin.Context) {
 	realm := auth.HashFromContext(c)
 	p := currentProvider(c)
 	creds := parseCredentials(c)
-	id := c.Param("id")
+	id := strings.TrimPrefix(c.Param("id"), "/")
 
 	key := cacheKey(c, http.MethodGet, torrentRouteTemplate, map[string]string{"id": id}, c.Request.URL.Query(), realm)
 
@@ -55,7 +56,7 @@ func (h *TorrentHandler) GetTorrent(c *gin.Context) {
 func (h *TorrentHandler) GetDownload(c *gin.Context) {
 	p := currentProvider(c)
 	creds := parseCredentials(c)
-	id := c.Param("id")
+	id := strings.TrimPrefix(c.Param("id"), "/")
 
 	result, err := p.DownloadFile(c.Request.Context(), id, creds)
 	if err != nil {
