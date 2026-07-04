@@ -189,6 +189,47 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🚧📱 2026-07-04 (operator rebuild+distribute directive —
+device gate BLOCKED by emulator boot-hang on this host; honest §6.Z
+refusal, NOT a bluff-distribute).</strong> Operator: "Once EVERYTHING is
+done, retested fully, validated and verified, rebuild everything and
+distribute … both apps, both flavors dev and prod." KEY POSITIVE: unlike
+prior macOS sessions, THIS Linux host HAS <code>/dev/kvm</code> (rw),
+podman 5.7.1, the emulator image
+<code>ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64</code>
+(local), both <code>google-services.json</code>,
+<code>LAVA_FIREBASE_TOKEN</code>, firebase CLI 15.16.0 —
+<code>host-preflight.json</code> = "Gate-host eligible … accel=kvm". So
+the §6.AH KVM-absence blocker does NOT apply here. Client
+debug+androidTest REBUILT fresh at HEAD <code>6cc27c16</code> (includes
+the credentials #2 fix). BUT the §6.Z C00 cold-start gate FAILED TWICE
+(containerized runner resolved to KVM correctly, emulator container
+started, but the Android guest never reached
+<code>sys.boot_completed</code>): attempt 1 = 5m timeout
+(<code>boot_seconds 301</code>), attempt 2 = 12m timeout
+(<code>boot_seconds 721</code>) → CONFIRMED a boot HANG (not
+slow-but-progressing). This matches the prior "QA device gate broken —
+keystones SKIP/FAIL on containerized emulator". The runner behaved
+CORRECTLY (FAIL + RC=1 + "tag.sh MUST refuse"). <strong>DISTRIBUTE IS
+DEVICE-GATE-BLOCKED</strong> — per §6.Z/§6.AK/§6.L a distribute without
+device evidence is the exact 1.2.19-1039 bluff, so it is REFUSED (the
+§6.L-correct response, as in the 23rd/67th cycles). PENDING_FORENSICS
+(candidate causes, incident
+<code>.lava-ci-evidence/sixth-law-incidents/2026-07-04-device-gate-emulator-boot-hang.json</code>):
+(a) emulator GPU mode in the headless container (launch flags live in
+the image entrypoint, not <code>containerized.go</code>), (b) KVM not
+actually engaged inside the rootless-podman namespace despite
+<code>--device /dev/kvm</code> (TCG fallback → &gt;12m boot), (c)
+image/kernel-6.12 incompatibility. Remediation: focused
+Containers-submodule boot diagnosis (manual boot + adb logcat + verify
+qemu <code>-accel kvm</code> inside the container) OR run the gate on a
+known-good host (prior cycles booted on "thinker"/"nezha"). ALSO owed
+for a §6.AK-honest 1080 distribute: a covering device Challenge for the
+search-filter fix (NONE exists — C59/C60/C70 cover chips, not
+sort/order/period), striking the egress-blocked archiveorg claim, and
+the other API images for the full §6.AE matrix (only api34 local).
+1080's fixes are committed+pushed+unit-verified, NOT device-gated. ─────
+(current)</p>
 <p><strong>🛡️🐛 2026-07-04 (Crashlytics FATAL #2 FIXED reproduce-first —
 credentials decrypt AEADBadTagException no longer crashes the app;
 live-Crashlytics review of the distributed build).</strong> Reviewed
