@@ -243,6 +243,37 @@
 <body>
 <h1 id="lava--bug-fix-audit-trail">Lava — Bug Fix Audit Trail</h1>
 <blockquote>
+<p><strong>Revision (2026-07-04, goapi archiveorg /http-download 502 →
+root-cause fix):</strong> <code>/v1/archiveorg/http-download/{id}</code>
+returned HTTP 502 with body <code>{}</code> for a valid bare identifier.
+Root cause: the route uses a Gin wildcard path parameter
+(<code>*id</code>), so <code>c.Param("id")</code> returned
+<code>"/vidmate_201910_201910"</code> with a leading slash.
+<code>archiveorg.ProviderAdapter.resolveDownloadTarget</code> split on
+<code>/</code>, saw an empty first component, and returned
+<code>provider.ErrUnknown</code>, which <code>writeProviderError</code>
+mapped to 502. The same bug would have hit composite
+<code>identifier/filename</code> ids. Affected files:
+<code>lava-api-go/internal/handlers/v1/torrent.go</code>
+(<code>GetDownload</code> and <code>GetTorrent</code> id extraction),
+<code>lava-api-go/internal/handlers/v1/http_download_test.go</code>.
+Fix: <code>id := strings.TrimPrefix(c.Param("id"), "/")</code> in both
+handlers, plus regression test
+<code>TestHTTPDownload_TrimsLeadingSlashFromWildcardID</code> covering
+bare and composite ids. Verification (reproduce-first §6.T.1): before
+the fix the real endpoint returned <code>502 {}</code>; after the fix it
+returns <code>200</code> with the 2045-byte <code>.torrent</code> file.
+Falsifiability rehearsal: mutation
+<code>strings.TrimPrefix(c.Param("id"), "")</code> (no-op trim) makes
+the new test RED with
+<code>download id received by provider was "/vidmate_201910_201910", want "vidmate_201910_201910"</code>,
+then reverted and GREEN. Package tests:
+<code>go test ./internal/handlers/v1/ ./internal/archiveorg/</code>
+PASS. Container rebuilt
+(<code>podman-compose --profile api-go build --no-cache lava-api-go</code>)
+and verified on <code>https://127.0.0.1:8443</code>.</p>
+</blockquote>
+<blockquote>
 <p><strong>Revision §11.4.44 (2026-07-03, §6.AC archiveorg mapError
 hardening — egress-stall-masquerade class CLOSED):</strong> the
 2026-07-02 diagnostic trap is fixed reproduce-first. Root cause:

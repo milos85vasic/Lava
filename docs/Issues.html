@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.10" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>Issues</title>
   <style>
@@ -156,8 +156,12 @@
       text-decoration: none;
     }
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     /* The extra [class] is a hack that increases specificity enough to
        override a similar rule in reveal.js */
@@ -188,6 +192,17 @@ operator-gated; decision owed on §6.AD.3 Path B vs SQLite DB.
 id="lva-5--rotate-firebase-ci-token-printed-to-session-transcript">LVA-5
 — Rotate Firebase CI token (printed to session transcript)</h2>
 <p><strong>Status:</strong> Operator-blocked <strong>Type:</strong> Bug
+<strong>Operator-Block-Details:</strong> WHAT: RuTracker CI Firebase
+token rotation WHY: Agent cannot rotate credentials; only the operator
+can run firebase logout / firebase login:ci UNBLOCK: Operator rotates
+the Firebase CI token (no token value ever committed, §11.4.10): [A] run
+"firebase logout" then "firebase login:ci" and write the new token to
+LAVA_FIREBASE_TOKEN in the gitignored .env (recommended); [B] mint a
+fresh token via "firebase login:ci --no-localhost" in a clean shell and
+update LAVA_FIREBASE_TOKEN in .env; [C] rotate via the Firebase console
+(Project Settings -&gt; Service accounts) and update .env. Unblock
+signal: a Firebase distribute run authenticates with the new token and
+the previously-leaked token no longer authenticates. WHO: Operator
 <strong>Severity:</strong> P0</p>
 <p>67th-cycle: the LAVA_FIREBASE_TOKEN default-expansion printed the
 token to the session transcript (NOT committed to git). Operator MUST
@@ -217,6 +232,17 @@ id="lva-036--llm_orchestrator-githubgitlab-pre-existing-mirror-fork-non-ff-block
 — llm_orchestrator github↔︎gitlab pre-existing mirror fork (non-FF)
 blocks §6.W convergence</h2>
 <p><strong>Status:</strong> Operator-blocked <strong>Type:</strong> Task
+<strong>Operator-Block-Details:</strong> WHAT: github vs gitlab diverged
+at d2a2151 with unique non-doc go.mod content each; non-FF. No
+force-push per 6.T.3. Needs operator content-merge decision. WHY: (not
+enumerated) UNBLOCK: Operator chooses the content-merge resolution (no
+force-push, §11.4.113 merge-onto-latest-main): [A] keep github go.mod
+content as canonical, merge gitlab unique commits on top, push the
+converged SHA to both mirrors; [B] keep gitlab go.mod content as
+canonical, merge github unique commits on top, push the converged SHA to
+both mirrors; [C] hand-author the union of both go.mod files, commit the
+reconciliation, push that common SHA to github + gitlab. Unblock signal:
+github and gitlab report the same HEAD SHA for llm_orchestrator. WHO: AI
 <strong>Severity:</strong> P2</p>
 <p>github/master and gitlab/master diverged at d2a2151 with unique
 non-doc go.mod content each; LVA-030 commit landed gitlab+working-tree
