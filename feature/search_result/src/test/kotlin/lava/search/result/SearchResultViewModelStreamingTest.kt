@@ -34,6 +34,9 @@ import lava.tracker.api.TrackerFeature
 import lava.tracker.api.feature.SearchableTracker
 import lava.tracker.api.model.SearchRequest
 import lava.tracker.api.model.SearchResult
+import lava.tracker.api.model.SortField
+import lava.tracker.api.model.SortOrder
+import lava.tracker.api.model.TimePeriod
 import lava.tracker.api.model.TorrentItem
 import lava.tracker.client.ApiHttpException
 import lava.tracker.client.LavaTrackerSdk
@@ -125,6 +128,44 @@ class SearchResultViewModelStreamingTest {
         }
     }
 
+    /**
+     * Capturing tracker client whose `search()` records the [SearchRequest] and
+     * [page] so a test can assert what the ViewModel sent to the SDK.
+     *
+     * This is the Bug 1 discrimination test's key difference from
+     * [FixedResultClient]: FixedResultClient throws away the request, so asserting
+     * the VM propagated the user's sort/order/period choice is impossible.
+     * CapturingClient enables the primary assertion — "the SearchRequest the
+     * ViewModel constructed carries the non-default filter params the user selected".
+     *
+     * Anti-Bluff (§6.J): this is NOT a mock of the SUT (the SUT is the real
+     * ViewModel + real LavaTrackerSdk + real DefaultTrackerRegistry). CapturingClient
+     * only replaces the outermost network boundary, exactly as MockWebServer does
+     * in ApiBackedTrackerClientTest. The VM + SDK + registry are all real production
+     * code.
+     */
+    private class CapturingClient(
+        override val descriptor: TrackerDescriptor,
+    ) : TrackerClient {
+        var lastRequest: SearchRequest? = null
+        var lastPage: Int? = null
+
+        override suspend fun healthCheck(): Boolean = true
+        override fun close() {}
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : TrackerFeature> getFeature(featureClass: KClass<T>): T? = when (featureClass) {
+            SearchableTracker::class -> object : SearchableTracker {
+                override suspend fun search(request: SearchRequest, page: Int): SearchResult {
+                    lastRequest = request
+                    lastPage = page
+                    return SearchResult(items = emptyList(), totalPages = 1, currentPage = page)
+                }
+            } as T
+            else -> null
+        }
+    }
+
     private fun factoryFor(client: TrackerClient): TrackerClientFactory = object : TrackerClientFactory {
         override val descriptor: TrackerDescriptor = client.descriptor
         override fun create(config: PluginConfig): TrackerClient = client
@@ -137,6 +178,9 @@ class SearchResultViewModelStreamingTest {
     // into; SavedStateHandle.filter deserializes it back (comma-joined).
     private val providerIdsKey = "pids"
     private val queryKey = "nm"
+    private val sortKey = "o"
+    private val orderKey = "s"
+    private val periodKey = "tm"
 
     // --- named real fakes for the legacy paging-graph (NOT exercised by
     //     the streaming path; their counters prove that fact). ----------
@@ -242,17 +286,22 @@ class SearchResultViewModelStreamingTest {
         providerIds: List<String>,
         clients: List<TrackerClient>,
         analytics: AnalyticsTracker = RecordingAnalytics(),
+        sortParam: String? = null,
+        orderParam: String? = null,
+        periodParam: String? = null,
     ): SearchResultViewModel {
         pagingFake = FakeObserveSearchPagingDataUseCase()
         addHistoryFake = FakeAddSearchHistoryUseCase()
         val registry = DefaultTrackerRegistry()
         clients.forEach { registry.register(factoryFor(it)) }
-        val savedState = SavedStateHandle(
-            mapOf(
-                queryKey to "ubuntu",
-                providerIdsKey to providerIds.joinToString(","),
-            ),
+        val entries = mutableMapOf<String, Any?>(
+            queryKey to "ubuntu",
+            providerIdsKey to providerIds.joinToString(","),
         )
+        sortParam?.let { entries[sortKey] = it }
+        orderParam?.let { entries[orderKey] = it }
+        periodParam?.let { entries[periodKey] = it }
+        val savedState = SavedStateHandle(entries)
         return SearchResultViewModel(
             savedStateHandle = savedState,
             loggerFactory = TestLoggerFactory(),
@@ -414,5 +463,69 @@ class SearchResultViewModelStreamingTest {
                 "a fully-failed stream must render Error (Retry affordance), was $finalContent",
                 finalContent is SearchResultContent.Error,
             )
+        }
+
+    // CHALLENGE — Bug 1 regression: filter sort/order/period MUST propagate
+    // through the ViewModel into the SDK's SearchRequest. Before the fix, the
+    // URL builder always sent SortField.DATE / SortOrder.DESCENDING regardless
+    // of the user's selection, making sort/order toggles and period filters
+    // silently inoperative.
+    //
+    // Primary assertion: the SearchRequest the real ViewModel constructs (via
+    // SavedStateHandle.filter → observeStreamMultiSearch → mapping extensions)
+    // carries the non-default sort/order/period the SavedStateHandle stores.
+    // This is the user-visible state at the SDK contract boundary.
+    //
+    // FALSIFIABILITY (§6.J / Sixth Law clause 2):
+    //  - Remove the `sort = filter.sort.toSortField()` assignment in
+    //    observeStreamMultiSearch → CapturingClient.lastRequest!!.sort is
+    //    SortField.DATE (the default), not SortField.TITLE → test fails:
+    //    "expected:<TITLE> but was:<DATE>".
+    //  - Revert the mutation → test passes.
+    //  - Same protocol for `sortOrder = filter.order.toSortOrder()` and
+    //    `period = filter.period.toTimePeriod()` individually.
+    @Test
+    fun streaming_search_propagatesSortOrderPeriod_fromSavedState_toSdkRequest() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val capturing = CapturingClient(descriptor("p1"))
+            val vm = createViewModel(
+                providerIds = listOf("p1"),
+                clients = listOf(capturing),
+                // SavedStateHandle.filter deserializes the nav-param codes:
+                // SortKey "o" → Sort.TITLE (code "2")
+                // OrderKey "s" → Order.ASCENDING (code "1")
+                // PeriodKey "tm" → Period.LAST_WEEK (code "7")
+                sortParam = "2",
+                orderParam = "1",
+                periodParam = "7",
+            )
+
+            vm.test(this) {
+                runOnCreate()
+                cancelAndIgnoreRemainingItems()
+            }
+
+            val request = capturing.lastRequest
+                ?: error("CapturingClient.search was never called — streaming path did not execute")
+
+            // §6.J primary — every non-default filter field the user selected
+            // through the UI MUST match in the SDK contract.
+            assertEquals(
+                "Sort.TITLE from nav params must propagate to SearchRequest.sort",
+                SortField.TITLE,
+                request.sort,
+            )
+            assertEquals(
+                "Order.ASCENDING from nav params must propagate to SearchRequest.sortOrder",
+                SortOrder.ASCENDING,
+                request.sortOrder,
+            )
+            assertEquals(
+                "Period.LAST_WEEK from nav params must propagate to SearchRequest.period",
+                TimePeriod.LAST_WEEK,
+                request.period,
+            )
+            // The default fields must still pass through unchanged.
+            assertEquals("ubuntu", request.query)
         }
 }

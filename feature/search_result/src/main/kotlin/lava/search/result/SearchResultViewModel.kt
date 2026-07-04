@@ -37,6 +37,7 @@ import lava.models.topic.Torrent
 import lava.tracker.api.model.SearchRequest
 import lava.tracker.api.model.SortField
 import lava.tracker.api.model.SortOrder
+import lava.tracker.api.model.TimePeriod
 import lava.tracker.client.ApiHttpException
 import lava.tracker.client.LavaTrackerSdk
 import lava.tracker.client.MultiSearchEvent
@@ -164,8 +165,11 @@ internal class SearchResultViewModel @Inject constructor(
 
         val request = SearchRequest(
             query = filter.query.orEmpty(),
-            sort = SortField.DATE,
-            sortOrder = SortOrder.DESCENDING,
+            categories = filter.categories?.map { it.id }.orEmpty(),
+            sort = filter.sort.toSortField(),
+            sortOrder = filter.order.toSortOrder(),
+            author = filter.author?.name,
+            period = filter.period.toTimePeriod(),
         )
 
         try {
@@ -711,4 +715,29 @@ internal fun applyMultiSearchEvent(
         )
         is MultiSearchEvent.AllProvidersDone -> state
     }
+}
+
+// ---- domain-to-API model mapping helpers ---------------------------------
+
+private fun Sort.toSortField(): SortField = when (this) {
+    Sort.DATE -> SortField.DATE
+    Sort.TITLE -> SortField.TITLE
+    Sort.DOWNLOADED -> SortField.DATE // approximated — counts not in API model
+    Sort.SEEDS -> SortField.SEEDERS
+    Sort.LEECHES -> SortField.LEECHERS
+    Sort.SIZE -> SortField.SIZE
+}
+
+private fun Order.toSortOrder(): SortOrder = when (this) {
+    Order.ASCENDING -> SortOrder.ASCENDING
+    Order.DESCENDING -> SortOrder.DESCENDING
+}
+
+private fun Period.toTimePeriod(): TimePeriod? = when (this) {
+    Period.ALL_TIME -> TimePeriod.ALL_TIME
+    Period.TODAY -> null // not in API model; let provider decide
+    Period.LAST_THREE_DAYS -> null
+    Period.LAST_WEEK -> TimePeriod.LAST_WEEK
+    Period.LAST_TWO_WEEKS -> null
+    Period.LAST_MONTH -> TimePeriod.LAST_MONTH
 }

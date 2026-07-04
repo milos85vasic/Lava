@@ -11,6 +11,9 @@ import lava.tracker.api.feature.SearchableTracker
 import lava.tracker.api.model.AuthState
 import lava.tracker.api.model.LoginRequest
 import lava.tracker.api.model.SearchRequest
+import lava.tracker.api.model.SortField
+import lava.tracker.api.model.SortOrder
+import lava.tracker.api.model.TimePeriod
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
@@ -136,7 +139,14 @@ class ApiBackedTrackerClientTest {
         // Primary assertion #1 — the exact wire path the client issued.
         val recorded = server.takeRequest()
         assertEquals("GET", recorded.method)
-        assertEquals("/v1/rutracker/search?query=ubuntu&page=0", recorded.path)
+        // The fix now always propagates sort=date (SortField.DATE default) and
+        // order=descending (SortOrder.DESCENDING default) even when the caller
+        // does not set them explicitly. period is omitted because the caller's
+        // SearchRequest has period=null, so the ?.let {} path does not fire.
+        assertEquals(
+            "/v1/rutracker/search?query=ubuntu&page=0&sort=date&order=descending",
+            recorded.path,
+        )
 
         // Primary assertion #2 — the parsed domain result a user would see.
         assertEquals(3, result.totalPages)
@@ -150,6 +160,51 @@ class ApiBackedTrackerClientTest {
         assertEquals(42, item.seeders)
         assertEquals("magnet:?xt=urn:btih:ABCDEF", item.magnetUri)
         assertEquals("https://rutracker.org/dl/12345.torrent", item.downloadUrl)
+    }
+
+    @Test
+    fun search_propagatesSortOrderPeriodParamsToWire() = runTest {
+        // Regression for Bug 2 — the URL builder must propagate sort/order/period
+        // query parameters to the Go API. Before the fix, these params were absent
+        // from the wire URL, causing the server to default to DATE/DESCENDING/ALL_TIME.
+        //
+        // Primary assertion: the exact wire path the client issues carries the
+        // non-default sort/order/period the user selected (§6.J — user-visible at
+        // the HTTP boundary).
+        server.enqueue(
+            MockResponse().setBody(
+                """
+                {"provider":"rutracker","page":0,"totalPages":1,"results":[]}
+                """.trimIndent(),
+            ).setHeader("Content-Type", "application/json"),
+        )
+
+        val searchable = newClient(searchDownloadDescriptor())
+            .getFeature(SearchableTracker::class)!!
+        searchable.search(
+            SearchRequest(
+                query = "ubuntu",
+                sort = SortField.TITLE,
+                sortOrder = SortOrder.ASCENDING,
+                period = TimePeriod.LAST_WEEK,
+            ),
+            page = 0,
+        )
+
+        val recorded = server.takeRequest()
+        assertEquals("GET", recorded.method)
+        // The wire path MUST carry all three filter params the user selected.
+        // The order of query parameters is an implementation detail of
+        // HttpUrl.Builder; we assert each param is present rather than the
+        // full sorted string, because Go's net/url parses query params
+        // independently of order and the test should not break on an
+        // irrelevant ordering change.
+        val path = recorded.path!!
+        assertTrue("sort=title missing from $path", path.contains("sort=title"))
+        assertTrue("order=ascending missing from $path", path.contains("order=ascending"))
+        assertTrue("period=last_week missing from $path", path.contains("period=last_week"))
+        assertTrue("page=0 missing from $path", path.contains("page=0"))
+        assertTrue("query=ubuntu missing from $path", path.contains("query=ubuntu"))
     }
 
     private fun newClientWithKey(descriptor: RemoteTrackerDescriptor, key: String) =

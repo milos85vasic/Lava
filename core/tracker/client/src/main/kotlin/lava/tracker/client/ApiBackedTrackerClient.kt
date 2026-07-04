@@ -172,6 +172,12 @@ class ApiBackedTrackerClient(
                     if (request.categories.isNotEmpty()) {
                         addQueryParameter("categories", request.categories.joinToString(","))
                     }
+                    // Propagate sort/order/period — the Go API accepts all three
+                    // (search.go GetSearch reads sort + order + category; period is
+                    // a pass-through for providers that support it).
+                    addQueryParameter("sort", request.sort.name.lowercase())
+                    addQueryParameter("order", request.sortOrder.name.lowercase())
+                    request.period?.let { addQueryParameter("period", it.name.lowercase()) }
                 }
                 .build()
             val body = getString(url.toString())

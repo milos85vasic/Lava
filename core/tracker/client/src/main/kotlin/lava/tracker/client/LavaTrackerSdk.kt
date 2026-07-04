@@ -1,5 +1,6 @@
 package lava.tracker.client
 
+import android.util.Log
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -324,13 +325,18 @@ class LavaTrackerSdk @Inject constructor(
     suspend fun downloadHttpFile(trackerId: String, id: String): HttpDownloadResult? {
         val client = try {
             clientFor(trackerId)
-        } catch (_: Throwable) {
+        } catch (t: Throwable) {
+            Log.w("LavaTrackerSdk", "downloadHttpFile: cannot resolve client for trackerId='$trackerId'", t)
             return null
         }
-        val feature = client.getFeature(HttpDownloadableTracker::class) ?: return null
+        val feature = client.getFeature(HttpDownloadableTracker::class) ?: run {
+            Log.w("LavaTrackerSdk", "downloadHttpFile: trackerId='$trackerId' does not declare HTTP_DOWNLOAD")
+            return null
+        }
         return try {
             feature.downloadHttpFile(id)
-        } catch (_: Throwable) {
+        } catch (t: Throwable) {
+            Log.w("LavaTrackerSdk", "downloadHttpFile: fetch failed trackerId='$trackerId' id='$id'", t)
             null
         }
     }

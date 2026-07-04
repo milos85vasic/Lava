@@ -233,7 +233,10 @@ internal class TopicViewModel @Inject constructor(
         // (rutracker / rutor). The active descriptor's capability set is the
         // single source of truth (Capability Honesty, 6.E) — resolved off the
         // tracker SDK via the network seam, never a hardcoded id (§6.R).
-        when (resolveProviderDownloadKindUseCase(providerId)) {
+        logger.d { "TorrentFileClick: providerId='$providerId', topicId='$id'" }
+        val kind = resolveProviderDownloadKindUseCase(providerId)
+        logger.d { "TorrentFileClick: resolved download kind=$kind" }
+        when (kind) {
             ProviderDownloadKind.HTTP -> downloadHttpFile()
             // TORRENT and NONE both take the legacy `.torrent` path: NONE keeps
             // the prior behaviour (the download button only shows for torrent
@@ -246,7 +249,9 @@ internal class TopicViewModel @Inject constructor(
     }
 
     private fun downloadTorrentFile(title: String) = intent {
-        if (isAuthorizedUseCase()) {
+        val authorized = isAuthorizedUseCase()
+        logger.d { "downloadTorrentFile: authorized=$authorized, providerId='$providerId', topicId='$id'" }
+        if (authorized) {
             analytics.event(
                 AnalyticsTracker.Events.DOWNLOAD_TORRENT,
                 mapOf(AnalyticsTracker.Params.TOPIC_ID to id.toString()),
@@ -290,7 +295,9 @@ internal class TopicViewModel @Inject constructor(
         )
         postSideEffect(TopicSideEffect.ShowDownloadProgress)
         reduce { state.copy(downloadState = DownloadState.Started) }
+        logger.d { "downloadHttpFile: start providerId='$providerId', topicId='$id'" }
         val uri = downloadHttpFileUseCase(providerId, id)
+        logger.d { "downloadHttpFile: result uri=${uri != null}" }
         if (uri != null) {
             intent { reduce { state.copy(downloadState = DownloadState.Completed(uri)) } }
         } else {
