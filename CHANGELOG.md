@@ -1,5 +1,17 @@
 # Changelog
 
+## Lava-Android-1.3.14-1080 — 2026-07-04 (search filters now honored end-to-end + archiveorg download 502 fix — NOT YET DISTRIBUTED)
+
+**Previous published:** Lava-Android-1.3.13-1079.
+
+- **Search sort / order / period filters now reach the wire (user-facing fix, Bug 1 + Bug 2).** In the multi-provider streaming search path, `SearchResultViewModel.observeStreamMultiSearch` hard-coded `SearchRequest(sort=DATE, sortOrder=DESCENDING)` and dropped `filter.sort`, `filter.order`, `filter.period`; separately, `ApiBackedTrackerClient.search` never appended `sort`/`order`/`period` to the `GET /v1/{provider}/search` URL. Both are now propagated from the `Filter` (from `SavedStateHandle`) through `SearchRequest` and onto the wire, so changing sort to Seeds / order to Ascending / period to Today actually changes the results. Commit `441e321e`.
+- **archiveorg `.torrent`/file download 502 fixed (server-side).** The Go API's `GET /http-download/*id` Gin catch-all captured the wildcard `*id` with a leading `/`; `TrimPrefix` now strips it so the upstream file id resolves instead of 502-ing. Commit `05d14d4a`. (archiveorg itself remains egress-gated on VPN-egress hosts per the per-destination-routing operator-infra item — this fix removes the route-level 502 so the provider works once egress is reachable.)
+- **§6.Y:** versionCode 1079→1080; versionName 1.3.13→1.3.14 (user-facing search-filter fix).
+
+**Coverage status (§6.AK / §6.Z — HONEST):** the filter-propagation fix is covered by executed JVM unit tests (`SearchResultViewModel` filter→`SearchRequest` propagation + `ApiBackedTrackerClient` sort/order/period wire tests, both falsifiability-rehearsed); the archiveorg fix by Go contract + unit regression tests. **NO device Challenge has yet been EXECUTED against the 1080 artifact** — the §6.AK cycle-coverage gate + §6.Z pre-distribute device evidence are NOT satisfied. Per §6.AK/§6.Z this version MUST NOT be distributed until a device Challenge that drives the "change sort → verify results" journey runs RED-then-GREEN on the §6.I matrix. Device gate currently §6.AH-blocked on the dev host (no in-container KVM); nezha Linux gate-host or operator device required.
+
+**Channel:** firebase-app-distribution — BLOCKED on the §6.AK covering-Challenge execution + §6.Z gate + §6.AA two-stage + operator-provided Firebase creds.
+
 ## Lava-Android-1.3.13-1079 — 2026-07-03 (LAN-proxy `.torrent` download fix — device-GREEN)
 
 **Previous published:** Lava-Android-1.3.12-1077. (Supersedes the undistributed §6.Y dev-stub 1.3.12-1078.)

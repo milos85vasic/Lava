@@ -116,8 +116,8 @@ The app launched successfully, `MainActivity` reached `RESUMED`, and ~74 ms afte
 
 ### 2.4 Ranked root-cause hypotheses
 
-1. **Most likely: the test harness or a concurrent operation uninstalled the package mid-test.**
-   - The `deletePackageX` reason string in `ActivityManager` means the package was removed (or its data was cleared) through the PackageManager while instrumentation was active.
+1. **PENDING_FORENSICS: the test harness or a concurrent operation uninstalled the package mid-test (strongest candidate — direct observed evidence).**
+   - CONFIRMED: the `deletePackageX` reason string in `ActivityManager` means the package was removed (or its data was cleared) through the PackageManager while instrumentation was active.
    - `run-iteration.sh` does call `adb uninstall` at the **start** of each iteration (lines 53-54), but the log timestamps show the uninstall happening ~13 seconds **after** the test started and after `MainActivity` was already displayed.
    - Possible sub-causes:
      - A stale `adb uninstall` from a previous iteration that was delayed by ADB transport latency and arrived during this run.
@@ -129,13 +129,13 @@ The app launched successfully, `MainActivity` reached `RESUMED`, and ~74 ms afte
    - The `NetworkScheduler` SQLite constraint error in logcat line 1492 is from Google Play Services and is unrelated, but it demonstrates non-trivial background activity on the emulator image.
    - If the emulator container or ADB bridge flapped, the host-side tooling may have issued a package reset as a recovery action.
 
-3. **Less likely: the app triggered a self-uninstall or device-admin action.**
-   - No Lava code path is known to request package uninstallation.
-   - No `DeviceAdminReceiver` or `DELETE_PACKAGES` permission use was observed.
+3. **PENDING_FORENSICS: the app triggered a self-uninstall or device-admin action (weakest candidate — no supporting evidence).**
+   - CONFIRMED: no Lava code path requests package uninstallation.
+   - CONFIRMED: no `DeviceAdminReceiver` or `DELETE_PACKAGES` permission use was observed.
 
 ### 2.5 Correlation with provider flow
 
-Because the process was killed during the first screen (`MainActivity`), the test never reached the onboarding provider selection, login, search, topic, or download phases. Therefore this failure is **orthogonal to the `nnmclub` provider logic** and to the credential-empty issue described in Section 1. The same crash signature would likely occur for any provider/query pair if the same race condition repeats.
+Because the process was killed during the first screen (`MainActivity`), the test never reached the onboarding provider selection, login, search, topic, or download phases. Therefore this failure is **orthogonal to the `nnmclub` provider logic** and to the credential-empty issue described in Section 1 (CONFIRMED: the kill preceded provider selection). UNCONFIRMED: whether the same crash signature recurs for any provider/query pair — that depends on the PENDING_FORENSICS race condition above and is not yet reproduced.
 
 ---
 

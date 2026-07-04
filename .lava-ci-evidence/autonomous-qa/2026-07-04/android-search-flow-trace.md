@@ -320,7 +320,7 @@ Because:
 
 ## 11. Additional silent-failure risks
 
-- **Null `Filter.query`:** `onSubmit()` trims the query but does not block an empty string; `SearchRequest(query = "")` is sent and likely returns empty.
+- **Null `Filter.query`:** `onSubmit()` trims the query but does not block an empty string; `SearchRequest(query = "")` is sent. UNCONFIRMED: the backend's response to an empty query is not captured (no probe evidence); the client-side gap (no empty-query guard) is CONFIRMED by the `onSubmit()` source read.
 - **Provider ID serialization mismatch:** `ProviderIdsKey = "pids"` is a hardcoded contract between `SearchInputNavigation` and `SearchResultNavigation`. A future change on one side breaks the other with no compile-time safety.
 - **Dynamic provider descriptor mismatch:** If the LAN API advertises a provider with `capabilities` that do not include `SEARCH`, the provider is silently skipped in `streamMultiSearch`; the user sees fewer results than selected chips imply.
 - **`ApiBaseUrlHolder` empty:** If the onboarding API-selection step is bypassed or fails to write the holder, every dynamic provider request builds a URL with an empty host and fails at the transport layer, producing `Error` or `Empty` depending on error handling.
