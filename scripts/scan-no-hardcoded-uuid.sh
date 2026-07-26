@@ -25,6 +25,9 @@
 #   docs/superpowers/specs/*.md                 — design docs
 #   docs/superpowers/plans/*.md                 — implementation plans
 #   *_test.go, *Test.kt, *Tests.kt, *Test.java  — synthetic test fixtures
+#   lava-api-go/third_party/modernc-libc/       — generated/vendored upstream
+#     libc syscall tables (not Lava-authored; literals originate in the upstream
+#     modernc.org/libc generator)
 #   the IETF "nil" UUID <vm-instance-uuid-redacted> — the canonical
 #     "no UUID" sentinel/placeholder (RFC 4122 §4.1.7); semantically an empty
 #     value, never a real production identifier (cf. the .env.example exemption).
@@ -48,7 +51,7 @@ cd "$(dirname "$0")/.."
 # silence what would otherwise be real diagnostic output.
 uuid_violations=$(
   git ls-files -z \
-    | grep -zvE '^\.env\.example$|^\.lava-ci-evidence/|^docs/superpowers/(specs|plans)/|_test\.go$|(Test\.kt|Tests\.kt|Test\.java)$|\.db$' \
+    | grep -zvE '^\.env\.example$|^\.lava-ci-evidence/|^docs/superpowers/(specs|plans)/|_test\.go$|(Test\.kt|Tests\.kt|Test\.java)$|\.db$|^lava-api-go/third_party/modernc-libc/' \
     | while IFS= read -r -d '' p; do
         [[ -f "$p" ]] || continue
         # A file is a violation iff it contains a UUID that is NOT the IETF

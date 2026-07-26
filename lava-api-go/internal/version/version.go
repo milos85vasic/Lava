@@ -19,10 +19,16 @@ const (
 	// provider error path (writeProviderError default branch) + search.go +
 	// the best-effort Firebase-Crashlytics-bridge webhook forwarder
 	// (LAVA_API_FIREBASE_CRASHLYTICS_ENABLED + LAVA_API_NONFATAL_WEBHOOK_URL).
-	Name = "2.3.33"
+	// 2.3.34: F3 fix — Android x86_64 app-seccomp legacy-syscall crash. The
+	// embedded build (GOOS=android GOARCH=amd64) uses modernc/libc's musl
+	// fast-path which issued raw lstat/stat/open/... syscalls that Android's
+	// x86_64 seccomp allowlist blocks (SIGSYS). A modernc/libc fork
+	// (third_party/modernc-libc, replace directive) remaps them to the *at
+	// forms at the X__syscallN dispatcher. arm64 was never affected.
+	Name = "2.3.34"
 
 	// Code is the integer release counter. New tags MUST increment.
-	Code = 2333
+	Code = 2334
 )
 
 // SourceHash is the 64-hex sha256 of the EXACT lava-api-go source codebase that

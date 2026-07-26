@@ -56,7 +56,7 @@ cd "$(dirname "$0")/.."
 
 candidates=$(
   git ls-files -z \
-    | grep -zvE '^\.env\.example$|^\.lava-ci-evidence/|^submodules/|^tests/|_test\.go$|(Test\.kt|Tests\.kt|Test\.java)$|/test/|/androidTest/|fixtures/|^CHANGELOG\.md$|\.md$|\.json$|\.xml$|\.yml$|\.yaml$|\.html$|\.pdf$|\.docx$|\.db$' \
+    | grep -zvE '^\.env\.example$|^\.lava-ci-evidence/|^submodules/|^lava-api-go/third_party/modernc-libc/|^tests/|_test\.go$|(Test\.kt|Tests\.kt|Test\.java)$|/test/|/androidTest/|fixtures/|^CHANGELOG\.md$|\.md$|\.json$|\.xml$|\.yml$|\.yaml$|\.html$|\.pdf$|\.docx$|\.db$' \
     | while IFS= read -r -d '' p; do
         [[ -f "$p" ]] && printf '%s\0' "$p"
       done \

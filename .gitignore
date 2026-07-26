@@ -158,3 +158,6 @@ tests/check-markdown-export-sync/.fin
 .lava-ci-evidence/**/api-server-*.log
 
 Submodules/
+
+# autonomous-qa emulator runtime state (per-run)
+scripts/autonomous-qa/.emu-state

@@ -385,6 +385,10 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.rules)
+    // UiAutomator: the apiapp QA path launches the sibling api-app (a separate
+    // process/UI) whose "Back to Lava client" button the client-bound
+    // ComposeTestRule cannot reach — Challenge70 taps it cross-process via UiDevice.
+    androidTestImplementation(libs.androidx.test.uiautomator)
     // L1 fix (2026-05-05): force-upgrade Espresso core to 3.7.0 so the
     // matrix runs on Android 16 (API 36) without hitting the
     // `InputManager.getInstance NoSuchMethodException` from Espresso

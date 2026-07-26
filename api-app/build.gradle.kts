@@ -129,8 +129,13 @@ android {
         // (Challenge01ApiAppColdStartTest PASS on thinker containerized-KVM,
         // .lava-ci-evidence/1076-apiapp-gate/) and §6.AA two-stage distributed
         // (debug 6mn8lmmqke928 + release 15l34kl1d1138). versionName HELD (diagnostics-only).
-        versionCode = 23
-        versionName = "0.2.11"
+        // §6.Y post-distribution bump: 23 (debug+release distributed) → 24 for the
+        // F3 fix — the embedded liblavaapi.so no longer SIGSYS-crashes on x86_64
+        // (Android seccomp legacy-syscall remap in the modernc/libc fork). This is
+        // a real user-facing crash fix on x86_64 devices/emulators → versionName
+        // patch bump 0.2.11 → 0.2.12 (§6.Y.3).
+        versionCode = 24
+        versionName = "0.2.12"
         // EncryptedSharedPreferences (androidx.security-crypto) requires API 23+
         // — the per-install auth-key store ([ApiKeyStore]) relies on it. The
         // standalone API-server app reasonably targets API 23+ (the client app

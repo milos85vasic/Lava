@@ -26,6 +26,7 @@ Exemptions (kept in lockstep with the §6.R clause body):
   .lava-ci-evidence/                          — forensic anchors + matrix evidence
   docs/**/*.md                                — design docs, plans, incident notes
   submodules/                                 — submodules vendored at pinned hash
+  lava-api-go/third_party/modernc-libc/        — generated/vendored upstream code
   *_test.go, *Test.kt, *Tests.kt, *Test.java  — synthetic test fixtures
   src/test/, src/androidTest/                 — test source roots
   fixtures/                                   — test HTML/JSON fixtures

@@ -16,3 +16,6 @@ testdata/fuzz/.cache/
 # golangci-lint cache (written by scripts/golangci-lint.sh inside the mount)
 .golangci-cache/
 /lava-api-go
+
+# Host build artifact from `go build ./cmd/lavaapi-cshared` (F3 verification)
+/lavaapi-cshared

@@ -42,8 +42,22 @@ internal fun CategorySelectionDialog(
         Dialog(
             onDismissRequest = onDismiss,
             content = {
-                Column(modifier = Modifier.clip(AppTheme.shapes.large)) {
+                // §6.Q: bound the dialog content height. A plain Column measures
+                // its non-weighted child with maxHeight = Infinity; PagesScreen's
+                // inner Scaffold/HorizontalPager then propagate that infinity to the
+                // CategorySelectionList / CategorySelectionScreen LazyLists (which use
+                // fillMaxHeight()/fillMaxSize()), throwing
+                // "Vertically scrollable component was measured with an infinity
+                // maximum height constraints" (Crashlytics c7c8ccc). fillMaxHeight on
+                // the Column + weight(1f) on PagesScreen give the pager a bounded
+                // height so the nested LazyColumns are measured with finite constraints.
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight(0.9f)
+                        .clip(AppTheme.shapes.large),
+                ) {
                     PagesScreen(
+                        modifier = Modifier.weight(1f),
                         pages = listOf(
                             Page(labelResId = R.string.search_screen_filter_categories_current) {
                                 CategorySelectionList(

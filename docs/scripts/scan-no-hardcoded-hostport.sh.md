@@ -28,8 +28,9 @@ literals avoids false positives on `Map<String, Int>` declarations or
 
 Exemptions (lockstep with §6.R clause body):
   .env.example, .lava-ci-evidence/, submodules/, tests, fixtures/,
-  CHANGELOG.md, *.md, *.json, *.xml, *.yml, *.yaml — external config
-  and docs are legitimate homes for these literals.
+  lava-api-go/third_party/modernc-libc/, CHANGELOG.md, *.md, *.json,
+  *.xml, *.yml, *.yaml — external config and docs are legitimate homes
+  for these literals.
 
 Loopback hosts (localhost / 127.x.x.x / 0.0.0.0) are filtered AFTER
 the file-level exemption — those are not "hardcoded connection

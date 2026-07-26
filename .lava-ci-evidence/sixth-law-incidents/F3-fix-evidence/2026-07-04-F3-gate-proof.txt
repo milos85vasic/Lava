@@ -1,0 +1,7 @@
+=== SIGSYS count (want 0) ===
+0
+=== /health ===
+=== /health probe result: OK after 9s ===
+{"status":"alive"}
+=== mdns advertiser (embed booted) ===
+07-04 22:24:54.301   545   837 I serviceDiscovery: [MdnsAdvertiser] Adding service name: Lava API, type: _lava-api-dev._tcp, hostAddresses: , port: 8443, network: null, txtRecord: storage=sqliteengine=go-devversion=2.3.33platform=android with ID 2 and subtype null

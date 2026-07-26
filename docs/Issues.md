@@ -151,3 +151,80 @@ QA video frames 0020-0025. NEW UX, contributes to #1. CODE-FIX in 1076 (#9 selec
 
 QA video frames 0001/0005: single Lava icon launched; co-mingling NOT visually confirmed. Needs on-device package check (applicationIdSuffix .dev + launcher label). OPEN/UNCONFIRMED. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #10.
 
+## LVA-009 — lava-api-go source-hash manifest stale after go.mod replace additions
+
+**Status:** Queued
+**Type:** Bug
+
+Bug P0 lava-api-go: TestSourceHash_ManifestMatchesLive fails because the embedded source-hash manifest does not match current lava-api-go source after adding replace directives for docprocessor, llmorchestrator, llmprovider, visionengine. Rebuild via build-cshared.sh and commit refreshed manifest.
+
+## LVA-010 — lava-api-go TestVersionBinaryContract crashes Go compiler on modernc.org/sqlite
+
+**Status:** Queued
+**Type:** Bug
+
+Bug P0 lava-api-go: TestVersionBinaryContract_MatchesVersionPackage fails with a runtime GC panic inside the Go compiler while compiling modernc.org/sqlite/lib. This appears to be a transient runtime resource issue or a toolchain bug with Go 1.26.0 plus modernc.org/sqlite v1.53.0. Needs isolation, resource-limit tuning, and possibly a toolchain SDK bump.
+
+## LVA-011 — lava-api-go missing replace directives for HelixQA transitive local modules
+
+**Status:** Queued
+**Type:** Bug
+
+Bug P0 lava-api-go: submodules/helixqa depends on digital.vasic.docprocessor, llmorchestrator, llmprovider, visionengine. lava-api-go/go.mod did not replace these local vasic-digital modules, so go mod tidy and tests failed with network resolution errors. Replace directives were added; go mod tidy succeeded.
+
+## LVA-012 — 6.R scanner flags generated modernc-libc vendored files
+
+**Status:** Queued
+**Type:** Bug
+
+Bug P1 lava-api-go: scripts/scan-no-hardcoded-uuid.sh, ipv4.sh, and hostport.sh flagged lava-api-go/third_party/modernc-libc generated/vendored files containing UUID mailing-list IDs and IPv4-looking section numbers. Added file-level exemption matching the submodules/ exemption pattern.
+
+## LVA-013 — Missing 6.Z device evidence for client 1080 and api-app 24
+
+**Status:** Queued
+**Type:** Task
+
+Task P0 Android: the 1080 client and 24 api-app cycles were distributed without per-AVD containerized emulator evidence. Need to execute the covering Challenge matrix, generate real-device-verification rows, and backfill the evidence files.
+
+## LVA-014 — Device gate durable fixes for AVD name, WaitForBoot liveness, matrix images
+
+**Status:** Queued
+**Type:** Task
+
+Task P0 Android/Containers: emulator matrix runner still suffers from AVD-name collisions, WaitForBoot liveness gaps, and stale/out-of-sync container images. Port fixes from containers submodule and validate on the gating matrix.
+
+## LVA-015 — Crashlytics nested-scroll fatal unresolved
+
+**Status:** Queued
+**Type:** Bug
+
+Bug P0 Android: Crashlytics issue for nested-scroll fatal in tracker settings is still open. Add regression Challenge and structural test, then close the issue with a closure log.
+
+## LVA-016 — Submodule upstream divergence
+
+**Status:** Queued
+**Type:** Task
+
+Task P0 infra: llm_orchestrator (14), llm_provider (11), llms_verifier (36), security (6), vision_engine (20) are behind upstream. Evaluate changes, bump pins deliberately, and run cross-repo tests.
+
+## LVA-017 — CONTINUATION.md stale after gap sweep
+
+**Status:** Queued
+**Type:** Task
+
+Task P1 docs: docs/CONTINUATION.md last-updated line and open-issue list are stale relative to the 2026-07-26 gap sweep. Update banner and append new findings.
+
+## LVA-018 — Missing script docs per 11.4.18
+
+**Status:** Queued
+**Type:** Task
+
+Task P1 docs: several scripts introduced in recent cycles lack external user guides under docs/scripts/<name>.md. Audit all scripts and backfill docs.
+
+## LVA-019 — Coverage ledger partial/gap overlap and missing per-release ledgers
+
+**Status:** Queued
+**Type:** Task
+
+Task P1 process: coverage ledger has partial/gap overlap and lacks per-release ledger snapshots. Normalize the registry and add release-attestation ledgers.
+

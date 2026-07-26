@@ -28,6 +28,8 @@ Exemptions (kept in lockstep with the §6.R clause body):
   .lava-ci-evidence/sixth-law-incidents/      — forensic anchors
   docs/superpowers/specs/*.md                 — design docs
   docs/superpowers/plans/*.md                 — implementation plans
+  submodules/                                  — pinned upstream code
+  lava-api-go/third_party/modernc-libc/        — generated/vendored upstream code
   *_test.go, *Test.kt, *Tests.kt, *Test.java  — synthetic test fixtures
 ```
 

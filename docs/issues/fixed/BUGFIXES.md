@@ -1,5 +1,20 @@
 # Lava — Bug Fix Audit Trail
 
+> **Revision (2026-07-04, F3 api-app x86_64 embed SIGSYS/lstat crash → FIXED live):**
+> the on-device `:api-app` embed (`liblavaapi.so`) crashed on startup on Android
+> x86_64 emulators with `Fatal signal 31 (SIGSYS)` / `seccomp prevented call to
+> disallowed x86_64 system call 6` (lstat). Root cause: `modernc.org/libc`'s
+> ccgo-translated musl for `linux/amd64` issues raw LEGACY path syscalls that
+> Android's x86_64 app-seccomp allowlist BLOCKS (only the `*at` variants pass).
+> Fixed via a `modernc.org/libc` fork at `lava-api-go/third_party/modernc-libc`
+> (`replace` in `lava-api-go/go.mod`) that remaps the blocked legacy syscalls to
+> their `*at` equivalents at the single `X__syscallN` dispatcher choke point.
+> Live gate PASS (`.lava-ci-evidence/sixth-law-incidents/F3-fix-evidence/`):
+> `SIGSYS` count 0, `/health` → `{"status":"alive"}`, embed mDNS advertiser up.
+> Full entry below (`## 2026-07-04 — api-app x86_64 embed …`). arm64 was never
+> affected (musl there emits `*at` natively). Includes the F4 emulator-WAN
+> misdiagnosis correction (no code change owed).
+
 > **Revision (2026-07-04, goapi archiveorg /http-download 502 → root-cause fix):**
 > `/v1/archiveorg/http-download/{id}` returned HTTP 502 with body `{}` for a valid bare identifier.
 > Root cause: the route uses a Gin wildcard path parameter (`*id`), so `c.Param("id")` returned
@@ -134,6 +149,93 @@ Format per entry:
 **Fix commit:** SHA
 **Forensic anchor:** (optional) what surfaced the bug
 ```
+
+---
+
+## 2026-07-04 — api-app x86_64 embed crashed on startup with SIGSYS (seccomp blocked lstat) — modernc/libc legacy-syscall remap
+
+**Root cause (CONFIRMED — live tombstone + captured logcat):** the on-device
+`:api-app` (package `digital.vasic.lava.api.dev`) embeds `lava-api-go` as
+`liblavaapi.so`. On Android x86_64 emulators the embed died ~3s after launch with
+`Fatal signal 31 (SIGSYS), code 1 (SYS_SECCOMP)`, `seccomp prevented call to
+disallowed x86_64 system call 6` (`rax=0x6` = `lstat`), backtrace in
+`internal/runtime/syscall/linux.Syscall6`. The raw legacy path syscall originates
+in `modernc.org/libc`'s ccgo-translated musl for `linux/amd64`
+(`ccgo_linux_amd64.go`, function `_fstatat_kstat`, lines 135228-135300), whose
+x86_64 fast-path issues the LEGACY path syscalls directly: `lstat`=6, `stat`=4,
+`open`=2, `access`=21, `readlink`=89, `unlink`=87, `rmdir`=84, `mkdir`=83,
+`chmod`=90, `chown`=92, `lchown`=94, `rename`=82, `link`=86, `symlink`=88,
+`mknod`=133. Android's x86_64 app-seccomp allowlist BLOCKS these — only the `*at`
+variants are permitted. arm64 was never affected: musl there emits the `*at`
+forms natively, so real arm64 devices never crashed; the defect is
+x86_64-emulator-specific. `modernc.org/sqlite` (the embed's SQLite storage)
+drives the file-stat path at startup.
+
+**Affected files:**
+- `lava-api-go/go.mod` — added `replace modernc.org/libc => ./third_party/modernc-libc`
+  (line 293) pinning the embed to the local fork.
+- `lava-api-go/third_party/modernc-libc/syscall_musl_seccomp_amd64.go` (new) —
+  `remapLegacyPathSyscall(n, a1, a2, a3)` maps each blocked legacy syscall to its
+  Android-safe `*at` equivalent (`newfstatat`/`openat`/`faccessat`/`readlinkat`/
+  `unlinkat`/`mkdirat`/`fchmodat`/`fchownat`/`renameat`/`linkat`/`symlinkat`/
+  `mknodat`) via a `seccompAt(...)` helper, all rooted at `AT_FDCWD=-100`
+  (`unlinkat`+`AT_REMOVEDIR` for `rmdir`, `newfstatat`+`AT_SYMLINK_NOFOLLOW` for
+  `lstat`).
+- `lava-api-go/third_party/modernc-libc/syscall_musl_seccomp_other.go` (new) —
+  no-op `remapLegacyPathSyscall` stub for the non-amd64 arches
+  (arm64/arm/386/loong64/ppc64le/s390x/riscv64), preserving upstream behavior.
+- `lava-api-go/third_party/modernc-libc/syscall_musl.go` — the hand-written
+  `X__syscallN` dispatcher (the SINGLE choke point every ccgo-translated syscall
+  passes through: `___syscall_cp`, `X__syscall1`, `X__syscall2`, `X__syscall3`)
+  now calls `remapLegacyPathSyscall(...)` first and returns its result when the
+  syscall matched.
+
+**Fix:** intercept the blocked legacy path syscalls at the one dispatcher choke
+point and re-issue them as their `*at` equivalents. The remap is a strict
+identity for every arch except amd64 (the stub returns `(0, false)`), so arm64
+real devices keep upstream behavior byte-for-byte. An earlier attempt patching
+`libc_linux_amd64.go` had no effect because that file is NOT in the
+`GOOS=android GOARCH=amd64` build set — the musl-derived ccgo path compiles for
+android/amd64, and `GOOS=android` ≠ `GOOS=linux` for filename build constraints
+(verified via `go list`). All 4 Android ABIs compile clean (amd64 remap +
+arm64/arm/386 stub); host `internal/{storage,mobile,cache}` tests stay green with
+the remap in place (behavior intact).
+
+**Verification test/challenge:** live gate PASS on the x86_64 emulator, captured
+evidence at `.lava-ci-evidence/sixth-law-incidents/F3-fix-evidence/`:
+`2026-07-04-F3-gate-proof.txt` records `SIGSYS` count = 0 (was 3 — `syscall 6
+(lstat)`, process died ~3s), `/health` returned `{"status":"alive"}` (real HTTP
+200 from the embedded Go API on the x86_64 emulator), and the embed booted its
+mDNS advertiser (`[MdnsAdvertiser] Adding service name: Lava API, type:
+_lava-api-dev._tcp, port: 8443 … engine=go-dev version=2.3.33 platform=android`);
+`2026-07-04-apiapp-x86_64-NOCRASH-logcat.txt` is the full crash-free logcat. The
+autonomous-QA harness confirmed `apiapp embed healthy after 6s (on-device /health
+200 over TLS)`. Incident + root-cause records:
+`.lava-ci-evidence/sixth-law-incidents/2026-07-04-search-not-working-root-causes.json`
+(finding F3) and
+`.lava-ci-evidence/sixth-law-incidents/2026-07-04-F3-fix-status.md` (RESOLVED).
+
+**Fix commit:** `<pending-commit>` (this fix; the main stream will commit).
+
+**Forensic anchor:** operator report — "search does not work and we cannot use
+the apps"; systematic-debugging Phase 1 traced the api-app "detected API" path to
+this SIGSYS/lstat crash (finding F3, the primary root cause of that path). The
+goapi (host-API) path was already GREEN (finding F2, Challenge70 archiveorg×story
+PASS); only the on-device api-app embed path was blocked by F3, and only on
+x86_64 emulators.
+
+**F4 correction (no code change — MISDIAGNOSIS reversed):** an earlier finding
+claimed the emulator had "no guest WAN" from a failing `ping 8.8.8.8`. That was an
+ICMP false-negative: qemu user-mode networking (slirp) + rootless podman DROP raw
+ICMP but FORWARD TCP/UDP. Live re-test on the same running emulator CONFIRMED
+validated WAN: guest `toybox nc www.gutenberg.org 80` → `HTTP/1.1 302 Found`;
+`dumpsys connectivity` shows the default network `IS_VALIDATED` with the
+`INTERNET` capability; the container itself `curl https://www.gutenberg.org/` →
+`200`. No emulator-WAN fix is owed.
+
+`Classification:` project-specific (the fork is a Lava-embed workaround for the
+Android x86_64 app-seccomp allowlist; the underlying "remap legacy path syscalls
+to their `*at` forms at the libc syscall dispatcher" technique is reusable).
 
 ---
 

@@ -121,6 +121,9 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToString
 import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.Until
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.BuildConfig
@@ -368,7 +371,7 @@ class Challenge70AutonomousQaProviderMatrixTest {
      */
     private class OnboardingNetworkUnavailable(
         val stage: String,
-        cause: ComposeTimeoutException,
+        cause: Throwable? = null,
     ) : Exception("onboarding network stage unavailable: $stage", cause)
 
     private fun runOnboardingToMainApp() {
@@ -448,7 +451,15 @@ class Challenge70AutonomousQaProviderMatrixTest {
                 composeRule.onNodeWithContentDescription("api-cloud-add").performClick()
             }
             "apiapp" -> {
+                // Launching the on-device API fires SiblingAppLauncher's intent
+                // (EXTRA_START_API + EXTRA_RETURN_TO). The sibling api-app comes to
+                // the FOREGROUND in its OWN process, showing its "Running" screen +
+                // a "Back to Lava client" button. composeRule is bound to the CLIENT
+                // process, so it cannot see or tap that cross-process button — drive
+                // it with UiAutomator, then let the return intent (carrying the
+                // embed host/port) flow back to advance ApiSelection -> Providers.
                 composeRule.onNodeWithContentDescription("api-ondevice-launch").performClick()
+                returnFromApiAppToClient()
             }
             "direct" -> {
                 when {
@@ -468,6 +479,48 @@ class Challenge70AutonomousQaProviderMatrixTest {
                 composeRule.onNodeWithContentDescription("api-cloud-add").performClick()
             }
         }
+    }
+
+    /**
+     * apiapp backend only: after [selectApiBackend] launches the sibling api-app,
+     * that app owns the foreground in its OWN process (its "Running" screen with a
+     * "Back to Lava client" button). The client-bound [composeRule] cannot see or
+     * tap a different process's UI, so drive it with UiAutomator: tap the return
+     * button, which fires the return intent (carrying the on-device embed's
+     * host/port) back to the client and advances ApiSelection -> Providers.
+     *
+     * If the button never appears the api-app failed to present its Running screen
+     * (embed did not start) — a real cross-app dependency being unavailable, which
+     * per the ApiSelection contract is an honest network-unavailable signal (SKIP),
+     * not a client-UI FAIL.
+     */
+    private fun returnFromApiAppToClient() {
+        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        // Either label is valid: "Back to Lava client" when the api-app knows it
+        // was launched from the client, "Open Lava client" otherwise.
+        val label = device.wait(Until.findObject(By.textContains("Back to Lava client")), 30_000)
+            ?: device.wait(Until.findObject(By.textContains("Open Lava client")), 5_000)
+            ?: throw OnboardingNetworkUnavailable(
+                "api-app return button (embed did not present its Running screen)",
+            )
+        // The Compose Button exposes its label as a NON-clickable child TextView; a
+        // coordinate tap on that label does NOT register as a Button click (device
+        // evidence 2026-07-04: "Clicking on non-clickable object … Back to Lava
+        // client", api-app stayed foreground, embed Requests-served=0). Walk up to
+        // the nearest clickable ancestor (the Button itself) and click THAT.
+        var target = label
+        var hops = 0
+        while (!target.isClickable && hops < 6) {
+            val parent = target.parent ?: break
+            target = parent
+            hops++
+        }
+        target.click()
+        // Wait for the CLIENT process to be foreground again so composeRule can see
+        // a compose hierarchy on the resumed onboarding wizard.
+        val clientPkg = InstrumentationRegistry.getInstrumentation().targetContext.packageName
+        device.wait(Until.hasObject(By.pkg(clientPkg).depth(0)), 20_000)
+        composeRule.waitForIdle()
     }
 
     /**

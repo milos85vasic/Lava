@@ -1,11 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<testsuite name="lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest" tests="1" failures="0" errors="0" skipped="1" time="67.873" timestamp="2026-07-03T22:16:27" hostname="localhost">
+<testsuite name="lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest" tests="1" failures="0" errors="0" skipped="0" time="50.999" timestamp="2026-07-04T19:05:12" hostname="localhost">
   <properties>
     <property name="device" value="sdk_gphone64_x86_64 - 14" />
     <property name="flavor" value="" />
     <property name="project" value=":app" />
   </properties>
-  <testcase name="autonomousMatrix_onboard_search_topic_download" classname="lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest" time="66.727">
-    <skipped />
-  </testcase>
+  <testcase name="autonomousMatrix_onboard_search_topic_download" classname="lava.app.challenges.Challenge70AutonomousQaProviderMatrixTest" time="49.105" />
 </testsuite>
