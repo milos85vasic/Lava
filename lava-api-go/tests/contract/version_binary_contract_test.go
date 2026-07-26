@@ -28,6 +28,7 @@ package contract
 
 import (
 	"bytes"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
@@ -41,6 +42,17 @@ import (
 
 // buildLavaAPIGo builds cmd/lava-api-go to a temp dir and returns the
 // binary path. Mirrors buildHealthprobe in healthcheck_contract_test.go.
+//
+// LVA-010: the child `go build` compiles modernc.org/sqlite/lib — the
+// single largest package in the dependency graph — and an unbounded
+// parallel compile of it alongside the rest of the graph triggered a
+// transient runtime GC panic inside the Go compiler (Go 1.26 toolchain
+// built with GOEXPERIMENT=nodwarf5). Per §6.T.2 the build is therefore
+// bounded: -p=2 caps concurrent compile processes and GOMAXPROCS=2 caps
+// per-process compiler threads, unless the operator already exported
+// GOMAXPROCS (an explicit override is respected). Neither flag changes
+// the produced binary — -p only schedules compile jobs and GOMAXPROCS
+// is a property of the go command's own runtime, not of the target.
 func buildLavaAPIGo(t *testing.T) string {
 	t.Helper()
 	if runtime.GOOS == "windows" {
@@ -50,8 +62,11 @@ func buildLavaAPIGo(t *testing.T) string {
 	apigoDir := filepath.Join(root, "lava-api-go")
 	binPath := filepath.Join(t.TempDir(), "lava-api-go")
 
-	cmd := exec.Command("go", "build", "-trimpath", "-o", binPath, "./cmd/lava-api-go")
+	cmd := exec.Command("go", "build", "-p=2", "-trimpath", "-o", binPath, "./cmd/lava-api-go")
 	cmd.Dir = apigoDir
+	if _, ok := os.LookupEnv("GOMAXPROCS"); !ok {
+		cmd.Env = append(os.Environ(), "GOMAXPROCS=2")
+	}
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {

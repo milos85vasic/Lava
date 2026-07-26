@@ -27,6 +27,13 @@
 #                                                            # NOTE: a sub-minimum --avds list is a
 #                                                            # development-iteration run, NOT a
 #                                                            # §6.AE.2-conformant gate matrix.
+#       [--container-image REF]                            # containerized-runner image. Default:
+#                                                            # ghcr.io/vasic-digital/lava-android-emulator:api{api}-x86_64
+#                                                            # The {api} token is substituted per AVD
+#                                                            # api level by the Containers runner
+#                                                            # (LVA-014 fix #1); a REF without {api}
+#                                                            # is used verbatim for every AVD.
+#       [--container-runtime podman|docker]                # default: podman
 #       [--latest-api 36]                                    # override "latest stable" (default matrix only)
 #       [--add-tv]                                           # add TV-class AVD when feature touches TvActivity
 #       [--add-foldable]                                     # add foldable AVD
@@ -61,6 +68,27 @@
 # script proceeds rather than exiting 2 — that is not a host gap, it is
 # the OS-correct accelerated path.
 #
+# LVA-014 (2026-07-26) durable device-gate fixes:
+#   1. AVD-NAME RESOLUTION — the Containers runner resolves the AVD names
+#      actually BAKED into each emulator image (`avdmanager list avd`
+#      inside the image) instead of assuming the requested name exists.
+#      The §6.AE.2 matrix names (CZ_API34_Phone, ...) are ADVISORY: on an
+#      api-level match the image's baked AVD (e.g. "default") is booted;
+#      an exact name match is used verbatim; no match fails FAST naming
+#      the available baked AVDs. Root cause of the 2026-07-04 "boot
+#      hang": the api34 image bakes exactly one AVD named "default", the
+#      runner passed CZ_API34_Phone, the entrypoint exited in ~4s, and
+#      WaitForBoot misreported it as a boot timeout.
+#   2. CONTAINER LIVENESS — pkg/emulator Containerized.WaitForBoot now
+#      checks the emulator container is still running on every poll
+#      iteration and, on exit, fails immediately with the container's
+#      captured logs (fetched before --rm reaps them).
+#   3. IMAGE PREFLIGHT — before building/delegating, this script verifies
+#      every image the matrix needs is present locally (instantiating
+#      the {api} template per distinct api level) and pulls the missing
+#      ones; a pull failure is an honest operator-facing error with the
+#      local-build fallback command, never a silent skip.
+#
 # Inheritance: HelixConstitution + Lava §6.AE + §6.X + §6.I.
 # Classification: project-specific (Lava AVD list + APK paths; runtime
 # delegation is universal per §6.X).
@@ -87,10 +115,17 @@ BOOT_TIMEOUT=""                 # forwarded to emulator-matrix --boot-timeout (d
 # resolved runner is containerized (Linux + /dev/kvm), and accepts
 # --container-runtime (default podman). These are forwarded ONLY when the
 # resolved runner is containerized; on a host-direct (macOS+HVF / Windows+WHPX)
-# resolution the CLI ignores them. The default image is the canonical
-# Android-SDK-bearing emulator image documented in
-# submodules/containers/pkg/emulator/Containerfile.
-CONTAINER_IMAGE="ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64"
+# resolution the CLI ignores them.
+#
+# LVA-014 fix #1+#3 (2026-07-26): the default image reference carries the
+# {api} TEMPLATE TOKEN, which the Containers runner substitutes with each
+# AVD's api level at Boot time — one reference covers the whole multi-api
+# §6.AE.2 matrix (api28 row → ...:api28-x86_64, api34 row → ...:api34-x86_64).
+# An explicit --container-image without {api} is used verbatim for every AVD
+# (the pre-LVA-014 behavior). The preflight below (fix #3) verifies every
+# instantiated image exists locally and pulls the missing ones with an
+# honest error on failure — no silent skip.
+CONTAINER_IMAGE="ghcr.io/vasic-digital/lava-android-emulator:api{api}-x86_64"
 CONTAINER_RUNTIME="podman"      # podman|docker
 
 # §6.AE.2 minimum AVD matrix. Format: name:apiLevel:formFactor.
@@ -119,7 +154,7 @@ while [[ $# -gt 0 ]]; do
         --add-tv)        ADD_TV=1; shift ;;
         --add-foldable)  ADD_FOLDABLE=1; shift ;;
         --include-helixqa) INCLUDE_HELIXQA=1; shift ;;
-        -h|--help)       sed -n '3,66p' "$0"; exit 0 ;;
+        -h|--help)       sed -n '3,93p' "$0"; exit 0 ;;
         *)               echo "ERROR: unknown argument: $1" >&2; exit 2 ;;
     esac
 done
@@ -288,6 +323,84 @@ EOF
 fi
 
 echo "==> §6.X acceleration resolved: accel=$ACCEL_BACKEND runner=$RESOLVED_RUNNER (platform=$PLATFORM)"
+
+# --- LVA-014 fix #3: emulator-image preflight (containerized runner only) ---
+#
+# Verify every emulator image the matrix needs is present LOCALLY, and
+# pull the missing §6.AE.2 ones with clear progress. A pull failure is an
+# honest operator-facing error (exit 1) — never a silent skip that later
+# surfaces as a misleading per-AVD boot failure.
+#
+# Needed-image derivation:
+#   - CONTAINER_IMAGE contains the {api} template token → instantiate it
+#     once per DISTINCT api level in the AVD list (the default matrix
+#     yields api28/api30/api34/api<latest>).
+#   - CONTAINER_IMAGE has no {api} token → that single image is needed
+#     verbatim (the pre-LVA-014 single-image behavior).
+if [[ "$RESOLVED_RUNNER" == "containerized" ]]; then
+    declare -a NEEDED_IMAGES=()
+    if [[ "$CONTAINER_IMAGE" == *"{api}"* ]]; then
+        declare -A SEEN_APIS=()
+        IFS=',' read -ra AVD_ENTRIES <<< "$AVDS_JOINED"
+        for entry in "${AVD_ENTRIES[@]}"; do
+            api_level="$(echo "$entry" | cut -d: -f2 | tr -d '[:space:]')"
+            if [[ -z "$api_level" || "$api_level" == "0" ]]; then
+                echo "ERROR: AVD entry '$entry' has no api level but --container-image uses the {api} template" >&2
+                exit 2
+            fi
+            if [[ -z "${SEEN_APIS[$api_level]:-}" ]]; then
+                SEEN_APIS[$api_level]=1
+                NEEDED_IMAGES+=("${CONTAINER_IMAGE//\{api\}/$api_level}")
+            fi
+        done
+    else
+        NEEDED_IMAGES+=("$CONTAINER_IMAGE")
+    fi
+
+    echo "==> LVA-014 image preflight: ${#NEEDED_IMAGES[@]} emulator image(s) required"
+    PREFLIGHT_FAILED=0
+    idx=0
+    for img in "${NEEDED_IMAGES[@]}"; do
+        idx=$((idx + 1))
+        if "$CONTAINER_RUNTIME" image inspect "$img" >/dev/null 2>&1; then
+            echo "    [$idx/${#NEEDED_IMAGES[@]}] present locally: $img"
+            continue
+        fi
+        echo "    [$idx/${#NEEDED_IMAGES[@]}] MISSING locally: $img — pulling..."
+        PULL_LOG="$(mktemp -t lava-image-pull-XXXXXX.log)"
+        if "$CONTAINER_RUNTIME" pull "$img" 2>&1 | tee "$PULL_LOG"; then
+            echo "    [$idx/${#NEEDED_IMAGES[@]}] pulled OK: $img"
+            rm -f "$PULL_LOG"
+        else
+            # Honest failure (§6.J): name the image, surface the pull
+            # error tail, and give the local-build fallback from
+            # submodules/containers/pkg/emulator/Containerfile. NO silent
+            # skip — a missing image the matrix needs is a gate blocker.
+            api_hint="$(echo "$img" | sed -n 's/.*api\([0-9][0-9]*\).*/\1/p')"
+            cat >&2 <<EOF
+
+==> ERROR: required emulator image is unavailable: $img
+    The image is not present locally and '$CONTAINER_RUNTIME pull' failed.
+    Pull error (last lines):
+$(tail -n 5 "$PULL_LOG" | sed 's/^/      /')
+    Operator options:
+      1. Build the image locally from submodules/containers/pkg/emulator/Containerfile:
+           (cd submodules/containers && $CONTAINER_RUNTIME build \\
+               --build-arg API_LEVEL=${api_hint:-NN} --build-arg ABI=x86_64 \\
+               -f pkg/emulator/Containerfile -t $img .)
+      2. Authenticate to the registry ('$CONTAINER_RUNTIME login ghcr.io') and re-run.
+      3. Reduce the matrix with --avds to api levels whose images exist locally
+         (development-iteration run, NOT a §6.AE.2-conformant gate matrix).
+    This is an honest preflight failure (LVA-014 fix #3), not a silent skip.
+EOF
+            rm -f "$PULL_LOG"
+            PREFLIGHT_FAILED=1
+        fi
+    done
+    if [[ "$PREFLIGHT_FAILED" == "1" ]]; then
+        exit 1
+    fi
+fi
 
 # --- on-gate-host: build (if not --no-build) + delegate to Containers CLI ---
 if [[ "$NO_BUILD" == "0" ]]; then

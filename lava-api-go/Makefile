@@ -7,7 +7,7 @@ build:
 	go build -o bin/healthprobe ./cmd/healthprobe
 
 test:
-	go test -race -count=1 ./...
+	GOMAXPROCS=2 go test -race -count=1 ./...
 
 # vet — go's built-in correctness analyzer (a strict subset of golangci's govet).
 vet:

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>run-matrix.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptsautonomous-qarun-matrix.sh-user-guide"><code>scripts/autonomous-qa/run-matrix.sh</code>
+— User Guide</h1>
+<p><strong>Last verified:</strong> 2026-07-26 (LVA-018 script-docs
+backfill cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.18
+(script docs), §11.4.128 (evidence layout); Lava §6.AG / §6.AH / §6.X
+(containerized emulators), §6.J (anti-bluff verdicts)
+<strong>Classification:</strong> project-specific</p>
+<h2 id="overview">Overview</h2>
+<p>Orchestrates the autonomous-QA backend × provider × query matrix —
+<strong>ONE backend at a time</strong> (operator rule: never run both
+APIs at once):</p>
+<pre><code>backend up → boot ONE containerized KVM emulator (kept alive)
+  → for each provider-subset × query:
+      FRESH install + record + run Challenge70 (via run-iteration.sh)
+  → tear emulator down → backend down → write curated summary.md</code></pre>
+<p>Plan:
+<code>docs/superpowers/plans/2026-06-29-autonomous-qa-backend-provider-matrix.md</code>.</p>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/autonomous-qa/run-matrix.sh</span> <span class="at">--backend</span> goapi<span class="kw">|</span><span class="ex">apiapp</span> <span class="dt">\</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    [--queries 1080p,mp3] [--subsets all] <span class="pp">[--</span><span class="ss">external</span><span class="pp">-</span><span class="ss">backend</span><span class="pp">]</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Keystone (Phase 0): single provider, single query</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/autonomous-qa/run-matrix.sh</span> <span class="at">--backend</span> goapi <span class="at">--subsets</span> rutracker <span class="at">--queries</span> 1080p</span></code></pre></div>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--backend goapi\|apiapp</code></td>
+<td>Which API backend the on-device client targets (required)</td>
+</tr>
+<tr>
+<td><code>--queries &lt;csv&gt;</code></td>
+<td>Search queries to run per subset (default
+<code>1080p,mp3</code>)</td>
+</tr>
+<tr>
+<td><code>--subsets all\|&lt;csv1&gt;;&lt;csv2&gt;</code></td>
+<td><code>all</code> = every non-empty subset of the API-backed
+providers (31 subsets, see <code>lib-subsets.sh</code>); otherwise
+<code>;</code>-separated CSV groups,
+e.g. <code>"rutracker;kinozal,nnmclub"</code></td>
+</tr>
+<tr>
+<td><code>--external-backend</code></td>
+<td>Assume the backend is already up + healthy out-of-band (e.g. thinker
+via <code>distribute-api-remote.sh</code>); the script skips
+bring-up/teardown</td>
+</tr>
+</tbody>
+</table>
+<p>Only <strong>API-backed</strong> provider ids
+(<code>QA_PROVIDERS</code> in <code>lib-subsets.sh</code>: rutracker,
+nnmclub, kinozal, archiveorg, gutenberg) are honored. <code>rutor</code>
+(bundled-only) and <code>iptorrents</code> (Jackett-only) are dropped
+with a warning — neither API backend vends them via
+<code>GET /v1/providers</code>, so Challenge70 would only SKIP opaquely
+inside the emulator.</p>
+<h2 id="evidence-layout">Evidence layout</h2>
+<pre><code>.lava-ci-evidence/autonomous-qa/&lt;date&gt;/&lt;backend&gt;/
+  summary.md                  # curated matrix table + totals
+  &lt;subset-slug&gt;-&lt;query&gt;/      # per-iteration evidence (see run-iteration.sh)
+    verdict.json  junit.xml  raw/</code></pre>
+<h2 id="anti-bluff-properties-6.j">Anti-bluff properties (§6.J)</h2>
+<ul>
+<li>Any stale <code>verdict.json</code> is deleted
+<strong>before</strong> each iteration, so a prior-run PASS can never be
+misread when <code>run-iteration.sh</code> dies early
+(sixth-law-incidents 2026-07-03 missing-APK/stale-verdict PASS
+bluff).</li>
+<li>An iteration with no <code>verdict.json</code> is recorded
+<strong>FAIL</strong> (a setup error is never a pass — no test
+executed).</li>
+<li>A non-zero iteration exit code can <strong>never</strong> be counted
+PASS, even if the verdict file says PASS (defense-in-depth).</li>
+<li>Unknown/garbled verdict tokens classify as FAIL
+(<code>qa_classify</code>).</li>
+</ul>
+<h2 id="exit-codes">Exit codes</h2>
+<ul>
+<li><code>0</code> — matrix ran to completion (per-iteration verdicts
+live in <code>summary.md</code>; the script itself does not fail on
+iteration FAILs)</li>
+<li><code>2</code> — usage error, unknown backend, or no API-backed
+subsets remain after filtering</li>
+</ul>
+<h2 id="companion-files">Companion files</h2>
+<ul>
+<li><code>scripts/autonomous-qa/run-iteration.sh</code> — one matrix
+cell (install, record, run, verdict)</li>
+<li><code>scripts/autonomous-qa/lib-subsets.sh</code> — provider-subset
+enumeration</li>
+<li><code>scripts/autonomous-qa/lib-emulator.sh</code> — containerized
+KVM emulator lifecycle</li>
+<li><code>scripts/autonomous-qa/lib-backend.sh</code> — backend bring-up
+/ targeting / teardown</li>
+<li><code>scripts/autonomous-qa/lib-summary.sh</code> — verdict parsing
+/ classification helpers</li>
+<li><code>scripts/autonomous-qa/aggregate-evidence.sh</code> — rolls the
+matrix up into the §6.AK distribute-gate artifacts</li>
+</ul>
+</body>
+</html>

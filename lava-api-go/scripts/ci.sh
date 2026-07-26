@@ -75,17 +75,19 @@ fi
 
 # 3. go vet
 log "step 3/5  go vet ./..."
-go vet ./...
+GOMAXPROCS=2 go vet ./...
 
 # 4. go build
 log "step 4/5  go build ./..."
-go build ./...
+GOMAXPROCS=2 go build ./...
 
 # 5. go test (race-detected, single-iteration). Tests run in BOTH modes —
 # --quick still runs the full unit-test suite. --quick only skips the
 # heavyweight gates (fuzz, gosec, govulncheck, k6 load, image build).
+# GOMAXPROCS=2 per §6.T.2 (LVA-010: unbounded parallel compiles of
+# modernc.org/sqlite/lib triggered a transient in-compiler GC panic).
 log "step 5/5  go test -race -count=1 ./..."
-go test -race -count=1 ./...
+GOMAXPROCS=2 go test -race -count=1 ./...
 
 if $QUICK; then
   log "ci OK (quick — only steps 1-5)"

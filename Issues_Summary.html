@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Issues_Summary</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="issues_summary">Issues_Summary</h1>
+<p>Open workable items (current_location = Issues), regenerated from the
+SQLite single-source-of-truth (§11.4.12).</p>
+<h2 id="counts-by-type-status">Counts by Type × Status</h2>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Status</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bug</td>
+<td>In progress</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Bug</td>
+<td>Operator-blocked</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Bug</td>
+<td>Queued</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Task</td>
+<td>In progress</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Task</td>
+<td>Queued</td>
+<td>3</td>
+</tr>
+<tr>
+<td><strong>TOTAL</strong></td>
+<td></td>
+<td><strong>17</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="items">Items</h2>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>ATM ID</th>
+<th>Type</th>
+<th>Status</th>
+<th>Severity</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LVA-008</td>
+<td>Bug</td>
+<td>In progress</td>
+<td>P1</td>
+<td>Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at
+activity-destroy: IllegalStateException ‘State must be at least CREATED
+to be moved to DESTROYED’ on the inner search/search_input entry.
+Root-caused (2026-06-08): the inner nested NavController’s host is the
+outer addNestedNavigation NavBackStackEntry, driven to DESTROYED out
+from under the inner controller while search_input is still INITIALIZED.
+FALSIFIED on device: nav 2.9.1-&gt;2.9.8, LenientTeardownRule
+(uncatchable process death), atomic popUpTo replace. Feature WORKS
+(result row renders pre-teardown). Candidate fixes ranked in incident
+JSON (inner NavHost Activity-scoped LifecycleOwner; move search to outer
+NavHost; ON_STOP pop). Forensics:
+.lava-ci-evidence/sixth-law-incidents/2026-06-08-navbackstackentry-teardown-crash-2.9.1-incomplete.json</td>
+</tr>
+<tr>
+<td>LVA-013</td>
+<td>Task</td>
+<td>Queued</td>
+<td>—</td>
+<td>Task P0 Android: the 1080 client and 24 api-app cycles were
+distributed without per-AVD containerized emulator evidence. Need to
+execute the covering Challenge matrix, generate real-device-verification
+rows, and backfill the evidence files.</td>
+</tr>
+<tr>
+<td>LVA-019</td>
+<td>Task</td>
+<td>Queued</td>
+<td>—</td>
+<td>Task P1 process: coverage ledger has partial/gap overlap and lacks
+per-release ledger snapshots. Normalize the registry and add
+release-attestation ledgers.</td>
+</tr>
+<tr>
+<td>LVA-079</td>
+<td>Bug</td>
+<td>In progress</td>
+<td>P1</td>
+<td>QA video 2026-06-25 (frames 0040 vs 0060 vs 0125): input chip bar
+and results filter chips show different provider sets, and the results
+chip set CHANGES between two identical queries. 1076 fixed the INPUT
+chips (observeAll filtered+sorted) but the input-vs-RESULTS divergence +
+run-to-run instability is distinct and still open. Source:
+.lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md issue
+#3.</td>
+</tr>
+<tr>
+<td>LVA-081</td>
+<td>Task</td>
+<td>In progress</td>
+<td>P2</td>
+<td>Operator directive: fetch+pull+merge latest codebase from all
+submodules. Frozen-by-default overridden for this cycle. Must
+build-verify after each bump; revert+report any submodule whose bump
+breaks the build.</td>
+</tr>
+<tr>
+<td>LVA-082</td>
+<td>Task</td>
+<td>Queued</td>
+<td>P3</td>
+<td>Operator asked to use Firebase CLI to pull Crashlytics. Verified
+Firebase CLI 14.17.0 exposes only crashlytics:symbols:upload +
+mappingfile:* (NO issue/non-fatal read). bq CLI absent. Crashlytics
+dashboard read requires console or a BigQuery export not configured.
+Fallback: in-repo §6.AC telemetry + known crash tickets; operator to
+paste console items for full triage. §11.4.6 honest record.</td>
+</tr>
+<tr>
+<td>LVA-083</td>
+<td>Bug</td>
+<td>In progress</td>
+<td>P0</td>
+<td>QA video 2026-06-25 frames 0060-0140: every search fails (blank ~25s
+then Error/Retry; ‘prince’ stays blank). KNOWN-class
+(anonymous/provider-mismatch). CODE-FIX landed in 1076
+(SearchInputViewModel observeAll filtered+sorted + loading/empty state)
+but 1076 NOT yet distributed/device-verified. Pending §6.Z gate. Source:
+.lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
+#1.</td>
+</tr>
+<tr>
+<td>LVA-084</td>
+<td>Bug</td>
+<td>In progress</td>
+<td>P0</td>
+<td>QA video frames 0030 vs 0040/0060: onboarded only YTS but search
+used RuTracker/RuTor/IA/Gutenberg etc. KNOWN (§6.L 57th/59th). CODE-FIX
+in 1076 (chips from ProviderConfigRepository.observeAll()
+searchEnabled&amp;&amp;isEnabled). Pending §6.Z device verification.
+Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
+#2.</td>
+</tr>
+<tr>
+<td>LVA-085</td>
+<td>Bug</td>
+<td>In progress</td>
+<td>P1</td>
+<td>QA video frames 0060/0125/0130: results chips render internal
+provider key not displayName. KNOWN-class (§6.L 60th displayLabel).
+CODE-FIX in 1076 (friendly chip names). Pending §6.Z verification.
+Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
+#4.</td>
+</tr>
+<tr>
+<td>LVA-086</td>
+<td>Bug</td>
+<td>In progress</td>
+<td>P1</td>
+<td>QA video frames 0060-0110: pure blank ~25s, no
+spinner/skeleton/no-results; ‘prince’ stays blank with no error. NEW.
+CODE-FIX in 1076 (loading/empty state branches). Pending §6.Z
+verification. Source:
+.lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
+#5.</td>
+</tr>
+<tr>
+<td>LVA-087</td>
+<td>Bug</td>
+<td>In progress</td>
+<td>P2</td>
+<td>QA video frames 0007/0010/0015 vs 0020-0030. NEW. CODE-FIX in 1076
+(#6 count bound to real descriptor list). Pending §6.Z verification.
+Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
+#6.</td>
+</tr>
+<tr>
+<td>LVA-088</td>
+<td>Bug</td>
+<td>In progress</td>
+<td>P2</td>
+<td>QA video frames 0012/0015. 1076 investigation: NOT a §6.R hardcoding
+violation (config-driven preset). ‘On this network’ label for a
+cloud/remote preset still worth confirming. Pending §6.Z verification.
+Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
+#7.</td>
+</tr>
+<tr>
+<td>LVA-089</td>
+<td>Bug</td>
+<td>In progress</td>
+<td>P2</td>
+<td>QA video frames 0012/0015. NEW UX. CODE-FIX in 1076 (discovered-API
+friendly name). Pending §6.Z verification. Source:
+.lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
+#8.</td>
+</tr>
+<tr>
+<td>LVA-090</td>
+<td>Bug</td>
+<td>In progress</td>
+<td>P3</td>
+<td>QA video frames 0020-0025. NEW UX, contributes to #1. CODE-FIX in
+1076 (#9 select-all handling). Pending §6.Z verification. Source:
+.lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
+#9.</td>
+</tr>
+<tr>
+<td>LVA-091</td>
+<td>Bug</td>
+<td>Queued</td>
+<td>P3</td>
+<td>QA video frames 0001/0005: single Lava icon launched; co-mingling
+NOT visually confirmed. Needs on-device package check
+(applicationIdSuffix .dev + launcher label). OPEN/UNCONFIRMED. Source:
+.lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
+#10.</td>
+</tr>
+<tr>
+<td>LVA-3</td>
+<td>Task</td>
+<td>In progress</td>
+<td>P1</td>
+<td>Pin 208e2c8 is 53 commits behind origin/main 883ccc1. Highest-impact
+new clauses: §11.4.93/95/106 (workable-items SQLite DB tracked in git +
+md to DB sync engine), §11.4.79 (own-org submodules in CodeGraph),
+§11.4.85 (stress/chaos), §11.4.98, §11.4.102. Pin-bump is
+operator-gated; decision owed on §6.AD.3 Path B vs SQLite DB.
+<strong>Source:</strong> self-discovered —
+.lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</td>
+</tr>
+<tr>
+<td>LVA-5</td>
+<td>Bug</td>
+<td>Operator-blocked</td>
+<td>P0</td>
+<td>67th-cycle: the LAVA_FIREBASE_TOKEN default-expansion printed the
+token to the session transcript (NOT committed to git). Operator MUST
+rotate per §6.H clause 6 (firebase logout; firebase login:ci).
+<strong>Source:</strong> self-discovered —
+.lava-ci-evidence/sixth-law-incidents/2026-05-20-firebase-token-echo-leak.json</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

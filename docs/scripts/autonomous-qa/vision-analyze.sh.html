@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>vision-analyze.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptsautonomous-qavision-analyze.sh-user-guide"><code>scripts/autonomous-qa/vision-analyze.sh</code>
+— User Guide</h1>
+<p><strong>Last verified:</strong> 2026-07-26 (LVA-018 script-docs
+backfill cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.18
+(script docs); Lava §6.AB (anti-bluff test-suite reinforcement), §6.J /
+§6.L (anti-bluff) <strong>Classification:</strong> project-specific</p>
+<h2 id="overview">Overview</h2>
+<p>Vision + log analysis of recorded autonomous-QA materials. Reads the
+RAW media/logs an iteration produced (see <code>run-iteration.sh</code>)
+and emits a CURATED <code>vision-analysis.md</code> flagging the §6.AB
+<strong>non-crashing defect classes</strong> that a green JUnit verdict
+can hide from a real user:</p>
+<ul>
+<li><strong>blank / white / monochrome render</strong> — color
+heuristics (ffmpeg signalstats)</li>
+<li><strong>stuck / frozen screen</strong> — ffmpeg
+<code>freezedetect</code></li>
+<li><strong>wrong screen reached / missing download affordance</strong>
+— OCR (ONLY if tesseract is present)</li>
+<li><strong>crashes / ANRs</strong> — <code>logcat.txt</code> grep</li>
+</ul>
+<p>Expected raw layout per iteration:</p>
+<pre><code>&lt;iter&gt;/raw/{rec_*.mp4 | qa_rec_*.mp4}   chunked screenrecord
+&lt;iter&gt;/raw/logcat.txt                   threadtime logcat
+&lt;iter&gt;/raw/gradle-connected.log         connectedDebugAndroidTest stdout (secondary cross-ref)
+&lt;iter&gt;/verdict.json                     curated JUnit verdict (optional cross-ref)</code></pre>
+<h2 id="anti-bluff-contract-6.j-6.ab-6.l">Anti-bluff contract (§6.J /
+§6.AB / §6.L)</h2>
+<p>The script <strong>NEVER prints a defect-free (CLEAN) verdict for
+analysis it did not actually perform</strong>:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ffmpeg missing</td>
+<td>exit 2 (TOOL-MISSING), no verdict</td>
+</tr>
+<tr>
+<td>no analyzable recordings AND no log</td>
+<td>exit 2 (CANNOT-ANALYZE)</td>
+</tr>
+<tr>
+<td>recordings missing/unreadable, or logcat missing</td>
+<td>verdict <strong>INCOMPLETE</strong>, exit 2 (never CLEAN)</td>
+</tr>
+<tr>
+<td>tesseract absent</td>
+<td>OCR checks SKIPPED + said so plainly; screen-content claims are NOT
+fabricated</td>
+</tr>
+</tbody>
+</table>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One iteration -&gt; &lt;dir&gt;/vision-analysis.md</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/autonomous-qa/vision-analyze.sh</span> <span class="at">--iteration-dir</span> <span class="op">&lt;</span>dir<span class="op">&gt;</span> <span class="pp">[</span><span class="ss">opts</span><span class="pp">]</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Roll up every iteration subdir -&gt; &lt;backend-dir&gt;/vision-analysis.md</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/autonomous-qa/vision-analyze.sh</span> <span class="at">--cycle-dir</span> <span class="op">&lt;</span>backend-dir<span class="op">&gt;</span> <span class="pp">[</span><span class="ss">opts</span><span class="pp">]</span></span></code></pre></div>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Option</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--keep-frames</code></td>
+<td>delete on exit</td>
+<td>keep extracted PNG frames (under <code>raw/.vision-frames/</code>,
+already gitignored; frames are NEVER committed)</td>
+</tr>
+<tr>
+<td><code>--package &lt;pkg&gt;</code></td>
+<td><code>digital.vasic.lava.client.dev</code></td>
+<td>app package for the logcat crash grep</td>
+</tr>
+<tr>
+<td><code>--expect-tokens &lt;csv&gt;</code></td>
+<td><code>download,magnet,torrent,seed,size</code></td>
+<td>OCR affordance tokens to confirm result/download UI</td>
+</tr>
+<tr>
+<td><code>--ocr-frames &lt;N&gt;</code></td>
+<td><code>24</code></td>
+<td>max frames to OCR per recording</td>
+</tr>
+<tr>
+<td><code>-h\|--help</code></td>
+<td>—</td>
+<td>show help</td>
+</tr>
+</tbody>
+</table>
+<h2
+id="detection-heuristics-tunable-constants-at-the-top-of-the-script">Detection
+heuristics (tunable constants at the top of the script)</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SAMPLE_FPS</code></td>
+<td>1</td>
+<td>frames extracted per second of recording</td>
+</tr>
+<tr>
+<td><code>UNIFORM_FULL_RANGE_MAX</code></td>
+<td>40</td>
+<td><code>YMAX-YMIN ≤</code> this ⇒ frame draws ~nothing (uniform)</td>
+</tr>
+<tr>
+<td><code>WHITE_YAVG_MIN</code> / <code>BLACK_YAVG_MAX</code></td>
+<td>200 / 32</td>
+<td>uniform-frame white/black classification</td>
+</tr>
+<tr>
+<td><code>BLANK_RUN_FRAMES</code></td>
+<td>5</td>
+<td>≥ this many CONSECUTIVE uniform frames ⇒ stuck-blank defect</td>
+</tr>
+<tr>
+<td><code>BLANK_FRACTION_PCT</code></td>
+<td>50</td>
+<td>≥ this % of frames uniform ⇒ blank-dominated defect</td>
+</tr>
+<tr>
+<td><code>FREEZE_SECONDS</code> / <code>FREEZE_NOISE</code></td>
+<td>10 / <code>-60dB</code></td>
+<td>freezedetect minimum frozen span / noise tolerance</td>
+</tr>
+</tbody>
+</table>
+<h2 id="exit-codes">Exit codes</h2>
+<ul>
+<li><code>0</code> — <strong>CLEAN</strong> (recordings analyzed, no
+blank/frozen/OCR/crash defects)</li>
+<li><code>1</code> — <strong>DEFECTS-FOUND</strong></li>
+<li><code>2</code> — <strong>CANNOT-ANALYZE / INCOMPLETE /
+TOOL-MISSING</strong></li>
+</ul>
+<p>Cycle-rollup mode exits <code>1</code> if any iteration found
+defects, else <code>2</code> if any iteration was INCOMPLETE, else
+<code>0</code>; it writes a per-iteration table plus cycle totals
+(<code>CLEAN=n DEFECTS-FOUND=n INCOMPLETE=n</code>).</p>
+<h2 id="dependencies">Dependencies</h2>
+<p><code>ffmpeg</code> (REQUIRED — <code>FFMPEG</code> env override),
+<code>tesseract</code> (optional — OCR), imagemagick (optional,
+informational only).</p>
+<h2 id="companion-files">Companion files</h2>
+<ul>
+<li><code>scripts/autonomous-qa/run-iteration.sh</code> — produces the
+raw materials analyzed here</li>
+<li><code>scripts/autonomous-qa/record-qa-session.sh</code> — the
+standalone recorder</li>
+<li><code>scripts/autonomous-qa/aggregate-evidence.sh</code> — the
+JUnit-side rollup (this script is the vision-side complement)</li>
+</ul>
+</body>
+</html>

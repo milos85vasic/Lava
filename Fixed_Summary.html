@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Fixed_Summary</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="fixed_summary">Fixed_Summary</h1>
+<p>Closed workable items (current_location = Fixed), regenerated from
+the SQLite single-source-of-truth (§11.4.53).</p>
+<h2 id="counts-by-type-status">Counts by Type × Status</h2>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Status</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bug</td>
+<td>Completed (→ Fixed.md)</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Bug</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>30</td>
+</tr>
+<tr>
+<td>Feature</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Task</td>
+<td>Completed (→ Fixed.md)</td>
+<td>29</td>
+</tr>
+<tr>
+<td>Task</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>9</td>
+</tr>
+<tr>
+<td>Task</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>1</td>
+</tr>
+<tr>
+<td><strong>TOTAL</strong></td>
+<td></td>
+<td><strong>74</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="items">Items</h2>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Level</th>
+<th>Status</th>
+<th>Type</th>
+<th>Fixed-In Tag(s)</th>
+<th>One-line description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>P2</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-009 — After the 3-layer claude vision bridge fix (helixqa
+aef46e5d), the HelixQA autonomous vision QA GENUINELY drives the Lava
+app on the Genymotion VM: it analyzes screenshots and decides actions
+(vision-screen-changed PASS; rationale ‘Current screen is the Android
+home launcher … launching the Lava client app’). Remaining blocker: the
+‘launch’ action dispatch returns ‘exit status 127’ (command not found) —
+visionnav step 2 dispatch ‘launch digital.vasic.lava.client.dev’. The
+derived launch action is ‘shell monkey -p digital.vasic.lava.client.dev
+1’; the ADB actor appears to run it without the ‘adb -s <serial>’ prefix
+(treating ‘shell’ as a command) OR adb is not on the dispatch subprocess
+PATH. Fix in helixqa pkg actor/bridge ADB dispatch. Evidence:
+.lava-ci-evidence/helixqa/vm-qa-vision2-20260608T182251Z/ (4/4 reached
+vision+navigation, 1 ERROR + 3 FAILED on the launch-dispatch 127, NOT
+bridge errors anymore).</td>
+</tr>
+<tr>
+<td>2</td>
+<td>P2</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-010 — internal/router/router.go Build() registers the
+/v1/:provider route group without the provider-resolution middleware, so
+those handlers panic-recover to 500 in production instead of resolving a
+provider. Surfaced by the new router_test.go (W4) which asserts
+resolution (non-404) — the routes resolve but to a 500, not a working
+provider dispatch. Confirm whether production wires the middleware
+elsewhere (real server bootstrap) or this is a real gap. Evidence:
+router_test.go note + internal/router/router.go.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>P3</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-011 — core/testing TestEndpointsRepository.add() stores an
+Endpoint.Rutracker and can raise a duplicate-conflict for it, but the
+real EndpointsRepositoryImpl.add() early-returns for Rutracker (if
+(endpoint is Endpoint.Rutracker) return) and never stores it. A future
+test asserting ‘adding Rutracker is a no-op’ would pass against the fake
+while exercising different behavior than production — a latent
+§Third-Law bluff-fake. Fix: add the Rutracker no-op branch + doc to the
+fake. Flagged by the W6 core/domain UseCase agent (2026-06-09).</td>
+</tr>
+<tr>
+<td>4</td>
+<td>P2</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-012 — core/testing TestVisitedRepository,
+TestFavoritesRepository, TestBookmarksRepository have
+observe/contains/add/etc methods that are TODO(‘Not yet implemented’)
+(throw). They are unusable for behavioral wiring — feature ViewModel
+tests (account, visited, rating) work around them with local in-memory
+fakes. Per the Third Law these shared fakes should be
+behaviorally-equivalent to the real repos so tests can use them
+directly. Flagged by the rating+visited VM-test agent (2026-06-09). Fix:
+implement the stubs as real in-memory fakes matching the real repo
+contracts + add equivalence tests.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-014 — core/testing
+TestSuggestsRepository.observeSuggests/addSuggest threw TODO(); clear()
+no-op. Real SuggestsRepositoryImpl emits newest-first (timestamp DESC) +
+case-insensitive UPSERT (id=lowercase().hashCode(), REPLACE) + clear
+deletes all. Unusable stub = Third-Law bluff fake.</td>
+</tr>
+<tr>
+<td>6</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-015 — core/testing TestSearchHistoryRepository.add used
+positional id (it.size) + always appended (no dedup) + insertion order,
+while real SearchHistoryRepositoryImpl uses content-derived Filter.id()
++ <span class="citation" data-cites="Insert">@Insert</span> REPLACE
+UPSERT + ORDER BY timestamp DESC. The existing
+TestSearchHistoryRepositoryTest asserted the fake-shaped behavior (ids
+[0,2], oldest-first) — a bluff test.</td>
+</tr>
+<tr>
+<td>7</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-016 — feature/rating RatingViewModelTest’s local
+RealObserveRatingRequestUseCase re-implements
+ObserveRatingRequestUseCaseImpl but OMITS the 3rd condition (engagement:
+pinned&gt;1 OR other&gt;3 OR visited&gt;5 OR bookmarks&gt;2). The test
+‘Show rating request is rendered when conditions are met’ seeds ZERO
+engagement + asserts Show, but the REAL use case would emit Hide for
+that user state. Second-Law/§6.J bluff: re-implements internal business
+logic + asserts an outcome production would not produce. Fix: wire the
+real ObserveRatingRequestUseCaseImpl (deep tree:
+ObserveSearchHistory/Visited[-&gt;EnrichTopics]/Bookmarks use cases over
+shared in-memory fakes, now usable post LVA-012/015) + seed engagement
+in the Show test. Source: parallel fake-audit 2026-06-09.</td>
+</tr>
+<tr>
+<td>8</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-017 — feature/favorites InMemoryFavoritesRepository.add +
+feature/topic FakeFavoritesRepository.add append without dedup, while
+FavoritesRepositoryImpl/FavoriteTopicDao are <span class="citation"
+data-cites="Insert">@Insert</span> REPLACE (id PK). LATENT: no test
+re-adds a duplicate id, so unexercised. Tighten add() to replace-by-id
+for consistency with LVA-011..015. Source: parallel fake-audit
+2026-06-09.</td>
+</tr>
+<tr>
+<td>9</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-018 —
+PreferencesStorage.getHistorySyncPeriod()/getCredentialsSyncPeriod()
+(interface + Impl) have zero production call sites; sync-period values
+are surfaced via getSettings() instead. Orphaned per-field-getter
+leftover (no Favorites/Bookmarks counterpart). Remove decl + override.
+Source: parallel dead-code audit 2026-06-09 (codebase otherwise clean: 0
+shipped TODO(), 0 if(false), 0 silent-no-op effect methods).</td>
+</tr>
+<tr>
+<td>10</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-020 — internal/archiveorg search.go/browse.go/topic.go decoded
+creator/title/year/date as string/*string; archive.org returns these as
+JSON arrays for multi-author/date items → json.Unmarshal fails the
+ENTIRE response (every result), not one row. Found by parallel Go
+bug-hunt.</td>
+</tr>
+<tr>
+<td>11</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-021 — internal/observability/nonfatal.go underlyingTypeName
+returned “error” for any error without Name() or the 2 context sentinels
+— i.e. virtually every real
+<em>fs.PathError/</em>net.OpError/*url.Error/pgx error → §6.AC per-type
+triage defeated. Existing nonfatal_errorclass_test was a bluff (only
+tested Name()-implementers).</td>
+</tr>
+<tr>
+<td>12</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-022 — internal/gutenberg/utils.go bestFormatName +
+pickBestFormatURL exact-matched bare MIME keys (text/plain) but Gutendex
+always suffixes charset (text/plain; charset=utf-8) → blank Format label
++ skipped preferred ordering for text-only books.</td>
+</tr>
+<tr>
+<td>13</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-023 — internal/rutracker/provider.go ProviderAdapter.Login
+returned success.User.Id (numeric data-uid) as AuthToken; the real
+session cookie is User.Token. Login ‘succeeds’ but every authenticated
+v1 call (favorites/add-comment/download) sends a non-cookie value → 401.
+No e2e login test existed (why it shipped).</td>
+</tr>
+<tr>
+<td>14</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-024 — internal/rutracker/provider.go fromTopicPage wedged the
+size string into a synthetic file entry → topic detail screen shows one
+nonsense ‘Size’ file instead of the real list. The existing
+TestFromTopicPage asserted the bogus file (bluff).</td>
+</tr>
+<tr>
+<td>15</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-025 — internal/handlers/v1 LoginOpts has only CaptchaCode (used
+as the answer) but rutracker needs CaptchaCode=dynamic-field-NAME
+(cap_code_<sid>) + CaptchaValue=answer. The adapter sets both to the
+answer (self-acknowledged TODO provider.go:221). Needs LoginOpts +
+OpenAPI model change (CaptchaValue field) — deferred. Found by parallel
+Go bug-hunt.</td>
+</tr>
+<tr>
+<td>16</td>
+<td>—</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-026 — internal/handlers/v1/captcha.go serves c.Data(200,
+image/png, …) but rutracker.FetchCaptcha captures the real Content-Type,
+dropped by the adapter (no ContentType field on provider.CaptchaImage).
+Minor (most decoders sniff). Found by parallel Go bug-hunt.</td>
+</tr>
+<tr>
+<td>17</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-027 — KinozalSearchParser parsed the size string into a local
+var then emitted sizeBytes=null, so every Kinozal row dropped size (size
+sort/filter + cross-tracker ranking blind). Found by parallel Kotlin
+tracker bug-hunt.</td>
+</tr>
+<tr>
+<td>18</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-028 — NnmclubSearchParser reads row.select(‘td’) but never maps
+cells[4] (ISO yyyy-MM-dd date) into TorrentItem.publishDate → Nnmclub
+results have no date. Found by parallel Kotlin tracker bug-hunt. (Also
+UNCONFIRMED: nnmclub/kinozal parseSize Latin-only regex may miss
+Cyrillic units in real HTML — kinozal already handles both as of
+LVA-027.)</td>
+</tr>
+<tr>
+<td>19</td>
+<td>—</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-029 — core/models HostUtils.isLocalHost runs the fc00::/7
+unique-local check (startsWith fc/fd + take(4) hex in 0xfc00..0xfdff) on
+ANY host string without requiring an IPv6 literal, so a DNS host like
+fcba.example.com / fdcdn.net is routed as LAN (http://host:8080) instead
+of https://host/forum/ → no green dot, every request fails. Fix: gate on
+contains(‘:’) before the hex parse. Found by parallel core/network
+bug-hunt.</td>
+</tr>
+<tr>
+<td>20</td>
+<td>—</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-030 —
+doc_processor/helixqa/llm_orchestrator/llm_provider/llms_verifier/vision_engine
+CLAUDE.md lack the §6.R No-Hardcoding inheritance block;
+scripts/check-constitution.sh full-run exits 1 on them. Pre-existing
+from the 5-dep + helixqa adoption; orthogonal to the 60e2d66
+constitution bump. Each needs a submodule commit + push + parent pin
+bump (helixqa is always-track-upstream per Q9). Surfaced by full
+check-constitution during the constitution-bump cycle.</td>
+</tr>
+<tr>
+<td>21</td>
+<td>P2</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-031 — scan-no-hardcoded-uuid.sh flags VM UUID +
+NavBackStackEntry UUIDs in 14 tracked genymotion evidence files →
+check-constitution exit 1. Redacted per e767b701 precedent.</td>
+</tr>
+<tr>
+<td>22</td>
+<td>P1</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-032 — fromCategoryPage/fromFavoritesDto called
+AsForumTopicDtoTorrent ignoring the union discriminator → Topic variants
+render as empty fake-torrent rows. Fixed via
+AsForumTopicDtoTorrentChecked.</td>
+</tr>
+<tr>
+<td>23</td>
+<td>P2</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-033 — RuTorTopicParser dropped the Добавлен date despite the
+fixture carrying it. Added dotted DD-MM-YYYY shape to
+RuTorDateParser.</td>
+</tr>
+<tr>
+<td>24</td>
+<td>P1</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-034 — host:port-only packing dropped the per-instance key →
+list-selected on-device Lava-API endpoint 401s (withKeyOverride dead).
+Fixed via #-sentinel encoded packing.</td>
+</tr>
+<tr>
+<td>25</td>
+<td>P2</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-035 — Added PagingDataLoaderTest (append-terminal off-by-one +
+refresh-error regression), production byte-identical.</td>
+</tr>
+<tr>
+<td>26</td>
+<td>P2</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-036 — github/master and gitlab/master diverged at d2a2151 with
+unique non-doc go.mod content each; LVA-030 commit landed
+gitlab+working-tree but github refused non-FF. Needs a content-merge
+decision (operator-gated, NO force-push per §6.T.3).</td>
+</tr>
+<tr>
+<td>27</td>
+<td>P2</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-037 — scan-no-hardcoded-hostport.sh regex had /test/ but not
+top-level tests/ → flagged
+tests/check-constitution/test_no_hardcoded_hostport.sh →
+check-constitution exit 1 → pre-push blocked. Added ^tests/
+exemption.</td>
+</tr>
+<tr>
+<td>28</td>
+<td>P2</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-038 — Wave-3 parallel-fleet find; fixed in f3b2d269;
+falsifiability-proven; main-stream re-verified.</td>
+</tr>
+<tr>
+<td>29</td>
+<td>P2</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-039 — Wave-3 parallel-fleet find; fixed in 9f895502;
+falsifiability-proven; main-stream re-verified.</td>
+</tr>
+<tr>
+<td>30</td>
+<td>P1</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-040 — Wave-3 parallel-fleet find; fixed in 8e0720ab;
+falsifiability-proven; main-stream re-verified.</td>
+</tr>
+<tr>
+<td>31</td>
+<td>P2</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-041 — Wave-3 parallel-fleet find; fixed in 0cecbe4e;
+falsifiability-proven; main-stream re-verified.</td>
+</tr>
+<tr>
+<td>32</td>
+<td>P2</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-042 — Wave-3 parallel-fleet find; fixed in a11aee32;
+falsifiability-proven; main-stream re-verified.</td>
+</tr>
+<tr>
+<td>33</td>
+<td>P2</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-043 — Wave-3 parallel-fleet find; fixed in c117caeb;
+falsifiability-proven; main-stream re-verified.</td>
+</tr>
+<tr>
+<td>34</td>
+<td>P3</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>LVA-044 — archiveorg/gutenberg wire a real HTTP-download impl that
+is deliberately not exposed (no capability) → user-unreachable. Not a
+bluff (§6.E honest), a functionality gap. Needs a new capability +
+feature interface.</td>
+</tr>
+<tr>
+<td>35</td>
+<td>P2</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-045 — Wave-3 parallel-fleet find; fixed in c37995a7;
+falsifiability-proven; main-stream re-verified.</td>
+</tr>
+<tr>
+<td>36</td>
+<td>P2</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-046 — AsAuthResponseDtoSuccess() blind-decodes a WrongCredits
+union into non-pointer UserDto with no error → Login returns
+Success:true AuthToken:’’ for wrong creds → every authed call 401s.
+LVA-032 class. Fixed via AsAuthResponseDtoSuccessChecked.</td>
+</tr>
+<tr>
+<td>37</td>
+<td>P2</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-047 — case-sensitive startsWith rejected
+magnet:?xt=urn:BTIH:<hash>; fixed to regionMatches ignoreCase.</td>
+</tr>
+<tr>
+<td>38</td>
+<td>P2</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-048 — SearchInputNavigation openSearchInput appends
+filter.author?.name under AuthorIdKey instead of AuthorNameKey. Flagged
+by wave-4 §6.Q agent (out of its scope). Needs fix + roundtrip
+test.</td>
+</tr>
+<tr>
+<td>39</td>
+<td>P3</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-049 — appendOptionalParams passes raw query; a query with
+&amp;/? corrupts the route. Add Uri.encode at call sites + roundtrip
+test.</td>
+</tr>
+<tr>
+<td>40</td>
+<td>P3</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-050 — All 4 test bodies pass (XML failures=0) but a teardown
+RuntimeException makes Gradle report FAILED. Quarantine/fix the
+teardown.</td>
+</tr>
+<tr>
+<td>41</td>
+<td>P2</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-051 — scripts/record-device-session.sh + hermetic path test
+landed; device-bound capture UNCONFIRMED without a live device.</td>
+</tr>
+<tr>
+<td>42</td>
+<td>P3</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>LVA-052 — HTTP_DOWNLOAD UI wiring. A full impl exists on branch
+worktree-agent-ad695086c8735d60a (commit c8951eee) but it re-derived
+LVA-044 substrate → conflicts with master’s landed LVA-044; needs a
+clean re-apply of the LVA-052 net-new files
+(HttpDownloadSource/DownloadHttpFileUseCase/DownloadService.downloadHttpFile/SDK.downloadHttpFile)
+on top of master. Topic-screen Compose routing (provider id through nav)
+still OWED.</td>
+</tr>
+<tr>
+<td>43</td>
+<td>P1</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-053 — Kotlin removeLast() desugars to java.util.List.removeLast
+(JDK21 SequencedCollection) absent on Android &lt;35 → a PostBr followed
+by Hr crashes the topic screen. Fixed to removeAt(lastIndex) + 28
+converter tests.</td>
+</tr>
+<tr>
+<td>44</td>
+<td>P1</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-054 — LVA-053 class: Kotlin stdlib these desugar to java.util.*
+methods absent below API35. Sweep all modules + add a lint/detekt
+guard.</td>
+</tr>
+<tr>
+<td>45</td>
+<td>P3</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-055 — scripts/run-test-pg.sh runs only ./internal/cache +
+./tests/integration; add ./internal/storage so its Postgres legs run in
+the canonical harness.</td>
+</tr>
+<tr>
+<td>46</td>
+<td>P2</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-056 — scan-no-hardcoded-ipv4.sh regex lacked top-level tests/ →
+flagged tests/device-recording synthetic 127.0.0.1:6555 →
+check-constitution exit 1 (LVA-037 class). Added ^tests/.</td>
+</tr>
+<tr>
+<td>47</td>
+<td>P2</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-057 — GetMultiSearch continued past an unknown ?providers= id
+with no provider_error event and no failed counter, while
+total_providers still counted it — the user’s requested provider
+vanished with zero client signal. Now emits provider_error + counts
+failed.</td>
+</tr>
+<tr>
+<td>48</td>
+<td>P2</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-058 — The ipv4/hostport/uuid source-literal scanners scanned the
+tracked binary SQLite SSoT docs/workable_items.db, which stores ticket
+text quoting IP/host/UUID literals, producing a Binary file matches
+violation. Added .db exemption to all three.</td>
+</tr>
+<tr>
+<td>49</td>
+<td>P3</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-059 — multi-search auto-discovery emits providers in
+non-deterministic map order (cosmetic).</td>
+</tr>
+<tr>
+<td>50</td>
+<td>P1</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-060 — FavoriteTopicEntity/VisitedTopicEntity toTopic()
+reconstructed Torrent vs BaseTopic without checking date/magnetLink, so
+a magnet-only favorited or visited torrent was read back as BaseTopic
+and became un-downloadable, and getTorrents() filtered it out entirely.
+Added both fields to the discriminator.</td>
+</tr>
+<tr>
+<td>51</td>
+<td>P3</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-061 — self-signed cert reused across restarts without
+re-checking IP-SAN; LAN IP change → host-mismatch.</td>
+</tr>
+<tr>
+<td>52</td>
+<td>P3</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-062 — wave-6 §6.N.2 found CM-WORKABLE-ITEMS-SYNC clause-3 was
+uncovered; sweep other gates.</td>
+</tr>
+<tr>
+<td>53</td>
+<td>P3</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-063 — Added 9 falsifiable tests for the credentials dialog
+SubmitDialog flows, §6.G verified filter, and the credentials_manager
+FirstTimeSetup/AddNew/Edit/DismissEdit lifecycle.</td>
+</tr>
+<tr>
+<td>54</td>
+<td>P3</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-064 — The TLS reuse gate checks IP-SAN coverage but not
+certificate expiry, so a persisted cert past its NotAfter is silently
+reused; add an expiry check to the reuse gate with a test.</td>
+</tr>
+<tr>
+<td>55</td>
+<td>P3</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-065 — SearchViewModel was not inspected in depth this loop;
+audit its error and paging-state branches and add falsifiable coverage
+where real gaps exist.</td>
+</tr>
+<tr>
+<td>56</td>
+<td>P2</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-066 — Operator flagged a new Jackett version. Booted
+lscr.io/linuxserver/jackett v0.24.2040-ls426 via podman in the loopback
+topology: api_key bootstrap + Torznab /caps endpoint served valid XML at
+the exact path IPTorrentsJackettApi uses; JVM parser tests green; pinned
+the validated digest in .env.example.</td>
+</tr>
+<tr>
+<td>57</td>
+<td>P3</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-067 — LVA-052 scoped favorites/visited topic downloads to the
+active-tracker default because the favorite/visited Room rows store no
+provider id; add a providerId column + migration so an
+archiveorg/gutenberg favorite routes to HTTP_DOWNLOAD.</td>
+</tr>
+<tr>
+<td>58</td>
+<td>P3</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-068 — tls.go only re-checks cert expiry at Start; a
+multi-month-running embed could serve a leaf that expires without a
+restart. Add a periodic re-mint check.</td>
+</tr>
+<tr>
+<td>59</td>
+<td>P3</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-069 — handleSseEvent raw-JSON parsing
+(provider_start/results/provider_done/provider_error) and onRetryClick
+Error-state re-dispatch are untested production branches.</td>
+</tr>
+<tr>
+<td>60</td>
+<td>P3</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-070 — LVA-067 laid the providerId Room column; complete it by
+threading providerId through
+ToggleFavoriteUseCase/AddLocalFavoriteUseCase/GetTopicUseCase + the
+Topic/TopicPage models (write) and TopicModel + favorites/visited
+side-effects to openTopic(id,providerId) (read), mirroring
+search_result.</td>
+</tr>
+<tr>
+<td>61</td>
+<td>P3</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-071 — observeSseSearch internally constructs the SseClient with
+a hardcoded https base; inject it so the full SSE error to Error to
+retry path is hermetically testable against a MockWebServer.</td>
+</tr>
+<tr>
+<td>62</td>
+<td>P3</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-072 — LVA-068 rotates the embed leaf mid-process but the swap is
+silent; emit a RecordWarning on rotation with feature/operation/old+new
+NotAfter/IP-SANs context (no secrets per §6.H). A wave-10 attempt was
+discarded because its falsifiability rehearsal was inconclusive and the
+SourceHash contract failed; redo with a test that fails when the actual
+rotation-path RecordWarning call is removed.</td>
+</tr>
+<tr>
+<td>63</td>
+<td>P1</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-073 — Per operator accept-with-telemetry decision,
+NavTeardownCrashReporter (chained uncaught handler) tags the known
+upstream androidx nav-teardown ISE with attributable §6.AC Crashlytics
+context before the process dies, so it surfaces as a known/triageable
+defect; 6 falsifiable JVM tests; wired into LavaApplication.</td>
+</tr>
+<tr>
+<td>64</td>
+<td>P2</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-074 — A sleeping VM screen idles the render pipeline causing
+SurfaceFlinger commit timeouts and spurious No-compose-hierarchies
+Challenge failures; the runner now wakes and keeps the screen on, proven
+by C00/C01/C07/C08 going green after the wake.</td>
+</tr>
+<tr>
+<td>65</td>
+<td>medium</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-076 — Gradle validation BUILD FAILED on clean .cxx: process
+JavaRes consumed buildCshared output without a declared edge; D8 OOM on
+2g heap. Declared dependency plus bumped heap to 4g.</td>
+</tr>
+<tr>
+<td>66</td>
+<td>medium</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-077 — App has no connectedReleaseAndroidTest because
+testBuildType is debug; added scripts run-release-canary.sh to validate
+the exact R8 release APK cold-start on the Genymotion VM per clause
+6.Z.</td>
+</tr>
+<tr>
+<td>67</td>
+<td>medium</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-078 — Root containerignore blanket-excluded submodules but
+go.mod replaces parent submodules X; in-container go build failed on
+missing replacement dirs. Excluded only nested git and build, kept
+source.</td>
+</tr>
+<tr>
+<td>68</td>
+<td>P1</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-080 — 1076 built but never distributed (last-distributed=1075).
+Operator directive: rebuild, gate, distribute all 4 variants. Infra
+confirmed UP this session: thinker+nezha reachable, T7 writable,
+JDK17/Gradle8.9/podman5.8.2 present.</td>
+</tr>
+<tr>
+<td>69</td>
+<td>P3</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-092 — QA video 0001-0155: app did not crash/ANR; brand logo
+renders red. LVA-008 search-back crash + Sync-toggle crash + §6.AB
+white-icon were NOT triggered on screen here (remain open under their
+own tickets). Informational record. Source:
+.lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
+#11.</td>
+</tr>
+<tr>
+<td>70</td>
+<td>P1</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-1 — 67th-cycle full-suite flaky test (fixed-awaitState-count vs
+Room Flow .first() off the StandardTestDispatcher). Fixed in the 68th
+cycle (Commit 1) via bounded await-until-selectedProvider loop;
+falsifiability-rehearsed. <strong>Source:</strong> self-discovered —
+.lava-ci-evidence/sixth-law-incidents/2026-05-20-flaky-credentialsviewmodeltest.json</td>
+</tr>
+<tr>
+<td>71</td>
+<td>P1</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-2 — Per-OS emulator acceleration (Containers c1871138 +
+6aff7ea8): macOS gate runner is host-direct+HVF. PROVEN by C00
+cold-start canary + full 37-class Challenge suite on Pixel_8/API35 (43
+pass / 3 credential-skip / 0 fail). RESOLVED 2026-05-20.
+<strong>Source:</strong> self-discovered —
+.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json</td>
+</tr>
+<tr>
+<td>72</td>
+<td>P1</td>
+<td>Implemented (→ Fixed.md)</td>
+<td>Feature</td>
+<td>—</td>
+<td>LVA-4 — HelixConstitution §11.4.93/95/106 materialization. Go CLI
+(modernc.org/sqlite, no CGO) with
+init/add/update/close/reopen/gen/verify/import/export. Operator
+directive §6.L 68th invocation, key prefix LVA. Superseded by migration
+to the canonical constitution binary
+(docs/tickets/MIGRATION-TO-CANONICAL.md). <strong>Source:</strong>
+operator-report — docs/tickets/DESIGN.md</td>
+</tr>
+<tr>
+<td>73</td>
+<td>P2</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-6 — §11.4.79 (new) requires own-org submodules IN the codegraph
+index; Lava currently EXCLUDES submodules/ per docs/CODEGRAPH.md +
+63rd-cycle policy. Reconcile .codegraph config + docs when pin is
+bumped. <strong>Source:</strong> self-discovered —
+.lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</td>
+</tr>
+<tr>
+<td>74</td>
+<td>P2</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-7 — §11.4.85 (new universal anchor) mandates a stress + chaos
+test class. Lava has no chaos/stress suite today. Assess + scaffold when
+pin is bumped. <strong>Source:</strong> self-discovered —
+.lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

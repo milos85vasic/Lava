@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>lib-emulator.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptsautonomous-qalib-emulator.sh-user-guide"><code>scripts/autonomous-qa/lib-emulator.sh</code>
+— User Guide</h1>
+<p><strong>Last verified:</strong> 2026-07-26 (LVA-018 script-docs
+backfill cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.18
+(script docs); Lava §6.AG / §6.AH / §6.X (containerized emulators), §6.R
+(no-hardcoding, slirp exemption) <strong>Classification:</strong>
+project-specific</p>
+<h2 id="overview">Overview</h2>
+<p>Sourceable library of thin Lava glue replicating
+<code>submodules/containers/pkg/emulator/containerized.go</code> to boot
+the §6.X <strong>containerized KVM Android emulator</strong> image and
+wire host adb. The emulator process runs INSIDE a podman container
+(image built from the submodule Containerfile), NEVER host-direct, NEVER
+a live device. The image bundles the AVD <code>default</code>, an adb
+keypair, and a socat bridge (container <code>0.0.0.0:5575</code> →
+<code>127.0.0.1:5555</code> adbd).</p>
+<h2 id="functions">Functions</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>emu_pick_port</code></td>
+<td>Pick a free TCP port on loopback</td>
+</tr>
+<tr>
+<td><code>emu_boot [avd]</code></td>
+<td>Boot the container (cold boot); prints the container name; persists
+state</td>
+</tr>
+<tr>
+<td><code>emu_authorize_adb &lt;container&gt;</code></td>
+<td>Copy the image’s baked adb key out and point the host adb client at
+it (<code>ADB_VENDOR_KEYS</code>)</td>
+</tr>
+<tr>
+<td><code>emu_connect &lt;adb_port&gt;</code></td>
+<td><code>adb connect</code>; prints the adb serial
+(<code>127.0.0.1:&lt;port&gt;</code>)</td>
+</tr>
+<tr>
+<td><code>emu_wait_boot &lt;serial&gt; [timeout_secs]</code></td>
+<td>Poll <code>sys.boot_completed</code> + <code>pm</code> ready
+(default 360 s); dumps container logs on timeout</td>
+</tr>
+<tr>
+<td><code>emu_fix_network &lt;serial&gt;</code></td>
+<td>Ensure the guest has an active default network (see below)</td>
+</tr>
+<tr>
+<td><code>emu_cleanup_orphans</code></td>
+<td>Remove leftover <code>lava-emu-*</code> containers from an
+interrupted run</td>
+</tr>
+<tr>
+<td><code>emu_teardown [container]</code></td>
+<td>Remove the container + the state file</td>
+</tr>
+</tbody>
+</table>
+<h2 id="state-configuration">State + configuration</h2>
+<ul>
+<li>State file: <code>scripts/autonomous-qa/.emu-state</code>
+(<code>CONTAINER</code> / <code>ADB_PORT</code> /
+<code>CONSOLE_PORT</code>) — written by <code>emu_boot</code>, removed
+by <code>emu_teardown</code>.</li>
+<li><code>EMU_IMAGE</code> (env, default
+<code>ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64</code>) —
+the emulator image.</li>
+<li>Container run flags:
+<code>--userns=keep-id --device /dev/kvm</code>, host-loopback port
+publishing only, <code>ANDROID_COLD_BOOT=true</code>.</li>
+</ul>
+<h2
+id="emu_fix_network-the-eth0ndc-default-network-fix"><code>emu_fix_network</code>
+— the eth0/ndc default-network fix</h2>
+<p>On some hosts (observed: podman 4.9.3 on thinker.local) the emulator
+boots with eth0 DOWN and Android never registers it as a framework
+network — apps see “Network unreachable” because Android routes
+per-network via netd mark-based tables. The function (root via
+<code>su 0</code> inside the guest) brings eth0 up and adds it to the
+default physical network (netId 100) through <code>ndc</code>, retrying
+up to 8 times until the slirp gateway pings. Self-gating + idempotent:
+if the gateway already answers it no-ops; it never fails the run — the
+iteration records the REAL outcome (anti-bluff: a stalled onboarding
+shows as SKIP/FAIL).</p>
+<p><strong>§6.R note:</strong> the <code>10.0.2.x</code> literals are
+platform-FIXED Android-emulator QEMU user-mode (slirp) constants
+hardwired by the emulator — <code>10.0.2.2</code> = host-loopback alias,
+<code>10.0.2.3</code> = built-in DNS, <code>10.0.2.15</code> = the guest
+NIC. They are the emulator equivalent of <code>127.0.0.1</code> and
+cannot drift; the §6.R IPv4 scanner carries a narrow path+range
+exemption for the <code>10.0.2.0/24</code> slirp range scoped to this
+helper (see <code>scripts/scan-no-hardcoded-ipv4.sh</code>).</p>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> scripts/autonomous-qa/lib-emulator.sh</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">emu_cleanup_orphans</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="va">CONTAINER</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="ex">emu_boot</span> default<span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="va">ADB_PORT</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="fu">grep</span> <span class="st">&#39;^ADB_PORT=&#39;</span> scripts/autonomous-qa/.emu-state <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-d</span><span class="op">=</span> <span class="at">-f2</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">emu_authorize_adb</span> <span class="st">&quot;</span><span class="va">$CONTAINER</span><span class="st">&quot;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="va">SERIAL</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="ex">emu_connect</span> <span class="st">&quot;</span><span class="va">$ADB_PORT</span><span class="st">&quot;</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="ex">emu_wait_boot</span> <span class="st">&quot;</span><span class="va">$SERIAL</span><span class="st">&quot;</span> 360</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="ex">emu_fix_network</span> <span class="st">&quot;</span><span class="va">$SERIAL</span><span class="st">&quot;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># ... run tests against $SERIAL ...</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="ex">emu_teardown</span></span></code></pre></div>
+<h2 id="companion-files">Companion files</h2>
+<ul>
+<li><code>scripts/autonomous-qa/run-matrix.sh</code>,
+<code>run-nav-challenges.sh</code>,
+<code>release-coldstart-canary.sh</code> — the consumers</li>
+<li><code>submodules/containers/pkg/emulator/</code> — the canonical Go
+implementation this mirrors</li>
+<li><code>docs/scripts/run-emulator-tests.sh.md</code> — the sibling
+Containers-driven emulator runner</li>
+</ul>
+</body>
+</html>

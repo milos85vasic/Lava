@@ -152,7 +152,72 @@ Format per entry:
 
 ---
 
-## 2026-07-04 — api-app x86_64 embed crashed on startup with SIGSYS (seccomp blocked lstat) — modernc/libc legacy-syscall remap
+## 2026-07-26 — lava-api-go contract test intermittently crashed the Go compiler on modernc.org/sqlite (LVA-010)
+
+**Root cause (isolated):** `TestVersionBinaryContract_MatchesVersionPackage`
+(`lava-api-go/tests/contract/version_binary_contract_test.go`) shells
+`go build ./cmd/lava-api-go`, whose graph compiles `modernc.org/sqlite/lib`
+v1.53.0 — the module's most expensive package. The child build ran unbounded
+(`-p`=host CPUs, no `GOMAXPROCS`), maximizing memory pressure and the
+concurrency window for a transient in-compiler GC panic on the Fedora
+`nodwarf5`-experiment toolchain (go1.26.2-X:nodwarf5). The panic did NOT
+reproduce in 3 controlled attempts on this host (peak RSS 1.14 GB cold+race);
+no OOM signature (62 GB RAM).
+
+**Fix:** resource caps per §6.T.2 — the contract test's child build now runs
+with `-p=2` + `GOMAXPROCS=2` (operator override respected);
+`lava-api-go/Makefile` `test` target and `lava-api-go/scripts/ci.sh` steps
+3–5 (`go vet`/`go build`/`go test`) are `GOMAXPROCS=2`-prefixed like the
+existing `vet`/`cover` idiom. Files:
+`lava-api-go/tests/contract/version_binary_contract_test.go`,
+`lava-api-go/Makefile`, `lava-api-go/scripts/ci.sh`.
+
+**Verification:** contract test PASS 3/3 consecutive (8.4s/6.2s/5.8s);
+cold-cache + race worst case PASS (133.7s, peak RSS 1.14 GB);
+`go build ./...` + `go vet ./...` green. Fix commit: this cycle's
+push-cleanup commit (see git log). **Residual risk:** mitigation, not proven
+cure — if the panic recurs, the definitive fix is a pristine upstream Go SDK
+instead of the Fedora experiment build.
+
+---
+
+## 2026-07-26 — API↔embed source-hash manifest drifted from lava-api-go source (LVA-009)
+
+**Root cause:** `core/apiengine/src/main/resources/api-source.hash` was not
+refreshed after `f1a2c362` added `lava-api-go/third_party/modernc-libc/` and
+the `go.mod` replace directives, so the §11.4.69 API↔embed source-sync gate
+failed (`TestSourceHash_ManifestMatchesLive` + ci.sh gate): committed
+`1134ae2b…` vs live `06aa08f8…`.
+
+**Fix:** rebuilt the embed via `lava-api-go/scripts/build-cshared.sh` — all
+3 ABIs (arm64-v8a, x86_64, armeabi-v7a) built OK, `LavaApi*` symbols verified
+via `llvm-nm -D`; the script refreshed the manifest to the live hash.
+
+**Verification:** ci.sh "API↔embed source-sync gate (no drift)" prints
+`OK: on-device API embed source hash matches lava-api-go (no drift)`.
+Fix commit: `4a7a328c`.
+
+---
+
+## 2026-07-26 — llm_orchestrator github↔gitlab mirror fork (LVA-036)
+
+**Root cause:** the two mirrors diverged at `d2a2151`; gitlab's unique commit
+`a98ae84` (LVA-030 inheritance pointer-blocks) sat on the old governance-doc
+structure while the github canonical lineage had restructured to the §6.AD
+pointer form (zero unique sections either direction at section level).
+
+**Fix:** §11.4.113 merge-onto-latest-main (no force-push, §6.T.3):
+`git merge --no-ff gitlab-mirror/master`, conflicts in
+`AGENTS.md`/`CLAUDE.md`/`CONSTITUTION.md` resolved to the canonical (HEAD)
+content — the gitlab-side sections exist in the canonical lineage's
+restructured form; `go build ./...` green. Merge commit `d6cc248` pushed to
+BOTH mirrors.
+
+**Verification:** `git ls-remote` on
+`github.com:HelixDevelopment/LLMOrchestrator` and
+`gitlab.com:vasic-digital/llmorchestrator` report the same HEAD `d6cc24855685`.
+
+---
 
 **Root cause (CONFIRMED — live tombstone + captured logcat):** the on-device
 `:api-app` (package `digital.vasic.lava.api.dev`) embeds `lava-api-go` as

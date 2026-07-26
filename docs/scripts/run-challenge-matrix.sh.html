@@ -244,17 +244,67 @@
 <h1
 id="scriptsrun-challenge-matrixsh--user-guide"><code>scripts/run-challenge-matrix.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-05-16 (HelixQA Option 1 wiring
-landed — <code>--include-helixqa</code> flag added)
-<strong>Inheritance:</strong> HelixConstitution §11.4.18 + Lava §6.AE.6
-+ §6.X (Container-Submodule Emulator Wiring) + §6.I (Multi-Emulator
-Container Matrix)</p>
+<p><strong>Last verified:</strong> 2026-07-26 (LVA-014 durable
+device-gate fixes — AVD-name resolution, WaitForBoot container-liveness,
+emulator-image preflight) <strong>Inheritance:</strong>
+HelixConstitution §11.4.18 + Lava §6.AE.6 + §6.X (Container-Submodule
+Emulator Wiring) + §6.I (Multi-Emulator Container Matrix)</p>
 <h2 id="overview">Overview</h2>
 <p>Operator entry point for §6.AE gate-mode Challenge Test runs.
 Pre-bakes the §6.AE.2 minimum AVD matrix (API 28 / 30 / 34 / latest
 stable × phone + tablet) and delegates to
 <code>submodules/containers/cmd/emulator-matrix --runner=containerized</code>
 per §6.X.</p>
+<h2 id="lva-014-durable-device-gate-fixes-2026-07-26">LVA-014 durable
+device-gate fixes (2026-07-26)</h2>
+<p>The 2026-07-04 "device gate boot hang" was diagnosed as an
+<strong>AVD-name mismatch</strong>: the baked emulator images
+(<code>ghcr.io/vasic-digital/lava-android-emulator:apiNN-x86_64</code>)
+bake exactly ONE AVD named <code>default</code>, but the runner passed
+the §6.AE.2 matrix names (<code>CZ_API34_Phone</code>, …) verbatim. The
+image entrypoint exited in ~4s ("AVD not found"), the container's
+<code>--rm</code> reaped the log, and <code>WaitForBoot</code> polled
+the dead forwarded port to its deadline, misreporting the 4s exit as a
+boot timeout. Three durable fixes:</p>
+<ol type="1">
+<li><strong>AVD-name resolution</strong>
+(<code>submodules/containers/pkg/emulator/avdresolve.go</code>, wired
+into <code>Containerized.Boot</code>) — the runner queries the AVDs
+actually baked into each image (<code>avdmanager list avd</code> inside
+a throwaway <code>--rm --entrypoint avdmanager</code> container) and
+maps the requested <code>name:api:form</code> entry to a real baked AVD.
+Exact name match → used verbatim (the proven
+<code>--avds "default:34:phone"</code> workaround is byte-compatible).
+Api-level match → the baked name is substituted with a stderr note (the
+requested name was advisory). No match → Boot fails FAST, before any
+container is launched, naming the available baked AVDs.</li>
+<li><strong>Container liveness in WaitForBoot</strong>
+(<code>submodules/containers/pkg/emulator/containerized.go</code>) —
+every poll iteration first checks <code>podman/docker inspect</code>
+that the emulator container is still running; on exit it fails
+immediately with the container's captured logs
+(<code>&lt;runtime&gt; logs --tail 100</code>, fetched before
+<code>--rm</code> reaps them; an already-reaped container is reported
+honestly). EMU-1 semantics are preserved: a <code>Containerized</code>
+without a Boot-set container name performs no liveness exec, and every
+liveness exec is bound to the WaitForBoot deadline context.</li>
+<li><strong>Emulator-image preflight</strong> (this script,
+containerized runner only) — before building the APK, the script
+instantiates the <code>{api}</code> image template per distinct api
+level in the matrix, checks each image with
+<code>&lt;runtime&gt; image inspect</code>, and pulls the missing ones
+with live progress. A pull failure is an honest operator-facing error
+(exit 1) that names the image, shows the pull error tail, and prints the
+local-build fallback command from
+<code>submodules/containers/pkg/emulator/Containerfile</code> — never a
+silent skip.</li>
+</ol>
+<p>The default <code>--container-image</code> is now the template
+<code>ghcr.io/vasic-digital/lava-android-emulator:api{api}-x86_64</code>;
+the runner substitutes <code>{api}</code> with each AVD's api level at
+Boot time, so one reference covers the whole multi-api matrix. A
+<code>--container-image</code> without <code>{api}</code> is used
+verbatim for every AVD (the pre-LVA-014 single-image behavior).</p>
 <h2 id="honest-pre-flight">Honest pre-flight</h2>
 <p>The script DETECTS the §6.X-debt darwin/arm64 host gap (no
 <code>/dev/kvm</code> available to podman containers; macOS HVF not
@@ -293,8 +343,17 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Use on a macOS host-direct+HVF run where the default CZ_API* images are not provisioned.</span></span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-challenge-matrix.sh <span class="at">--avds</span> <span class="st">&quot;CZ_API35_Phone_Fresh:35:phone&quot;</span> <span class="at">--no-build</span></span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co"># ALSO invoke the 11 HelixQA Challenge scripts (Option 1 wiring)</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-challenge-matrix.sh <span class="at">--include-helixqa</span></span></code></pre></div>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Single-AVD smoke run against the locally present api34 image (the requested</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co"># name is advisory — the runner resolves the image&#39;s baked AVD, e.g. &quot;default&quot;)</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-challenge-matrix.sh <span class="at">--avds</span> <span class="st">&quot;CZ_API34_Phone:34:phone&quot;</span> <span class="at">--no-build</span> <span class="dt">\</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">--test-class</span> lava.app.challenges.Challenge00ColdStartTest</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Pin one explicit image for every AVD (pre-LVA-014 single-image behavior)</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-challenge-matrix.sh <span class="dt">\</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">--container-image</span> ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="co"># ALSO invoke the 11 HelixQA Challenge scripts (Option 1 wiring)</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-challenge-matrix.sh <span class="at">--include-helixqa</span></span></code></pre></div>
 <h2 id="inputs">Inputs</h2>
 <table>
 <thead>
@@ -338,6 +397,18 @@ image id (e.g. <code>android-35-phone</code>) or the runner fails with
 <td><code>--latest-api &lt;N&gt;</code></td>
 <td>Override the "latest stable" API level (default: 36; ignored when
 <code>--avds</code> is set)</td>
+</tr>
+<tr>
+<td><code>--container-image &lt;ref&gt;</code></td>
+<td>Containerized-runner image. Default:
+<code>ghcr.io/vasic-digital/lava-android-emulator:api{api}-x86_64</code>
+— the <code>{api}</code> token is substituted per AVD api level by the
+runner (LVA-014 fix #1). A ref without <code>{api}</code> is used
+verbatim for every AVD.</td>
+</tr>
+<tr>
+<td><code>--container-runtime &lt;podman|docker&gt;</code></td>
+<td>Container runtime CLI (default: podman).</td>
 </tr>
 <tr>
 <td><code>--add-tv</code></td>
@@ -399,7 +470,8 @@ per-script logs — only when <code>--include-helixqa</code> is set</li>
 <tr>
 <td>1</td>
 <td>At least one AVD failed boot OR at least one test failed (real
-Containers CLI exit)</td>
+Containers CLI exit), OR the LVA-014 image preflight failed (missing
+image + pull failure — honest error with local-build fallback)</td>
 </tr>
 <tr>
 <td>2</td>
