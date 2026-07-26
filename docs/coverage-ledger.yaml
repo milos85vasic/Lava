@@ -21,9 +21,9 @@
 # Invariant values: pass | gap | n/a | "waiver: <rationale>" | "pass: <rationale>"
 metadata:
   schema_version: 1
-  generated_at: "2026-07-04T11:48:18Z"
+  generated_at: "2026-07-26T18:30:28Z"
   generator: "scripts/generate-coverage-ledger.sh"
-  commit_sha: "00cb2188c5d89fe6d970240639ce39bb2b2cae17"
+  commit_sha: "b587bf6a4e814140df6c56037c29387fd21f3dfa"
   mandate: "HelixConstitution §11.4.25 Full-Automation-Coverage Mandate"
 
 rows:
@@ -846,14 +846,14 @@ rows:
   - path: "lava-api-go"
     kind: "api"
     status: "covered"
-    unit_test_count: 223
+    unit_test_count: 229
     integration_test_count: 2
     challenge_count: 0
     challenges: []
     sample_tests:
       - "adapter_test.go"
-      - "altsvc_test.go"
-      - "announce_unit_test.go"
+      - "all_musl_test.go"
+      - "all_non_musl_test.go"
     invariants:
       anti_bluff: "pass: tests/contract/healthcheck_contract_test.go is the canonical §6.A real-binary contract test; tests/e2e/ + tests/parity/ run against real Postgres in podman per §6.B (container Up is not application-healthy)"
       working_capability: "pass: 87 _test.go + integration tests gated by -Pintegration=true + real Postgres bring-up via docker-compose.test.yml per §6.A/§6.B"
@@ -894,7 +894,7 @@ rows:
   - path: "submodules/challenges"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 126
+    unit_test_count: 127
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -939,7 +939,7 @@ rows:
   - path: "submodules/containers"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 181
+    unit_test_count: 314
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -999,7 +999,7 @@ rows:
   - path: "submodules/helixqa"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 391
+    unit_test_count: 392
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -1029,7 +1029,7 @@ rows:
   - path: "submodules/llm_orchestrator"
     kind: "submodule"
     status: "gap"
-    unit_test_count: 32
+    unit_test_count: 37
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -1044,7 +1044,7 @@ rows:
   - path: "submodules/llm_provider"
     kind: "submodule"
     status: "gap"
-    unit_test_count: 79
+    unit_test_count: 81
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -1059,7 +1059,7 @@ rows:
   - path: "submodules/llms_verifier"
     kind: "submodule"
     status: "gap"
-    unit_test_count: 287
+    unit_test_count: 318
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -1149,7 +1149,7 @@ rows:
   - path: "submodules/security"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 38
+    unit_test_count: 43
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -1179,7 +1179,7 @@ rows:
   - path: "submodules/vision_engine"
     kind: "submodule"
     status: "gap"
-    unit_test_count: 24
+    unit_test_count: 25
     integration_test_count: 0
     challenge_count: 0
     challenges: []

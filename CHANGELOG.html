@@ -205,6 +205,21 @@ file id resolves instead of 502-ing. Commit <code>05d14d4a</code>.
 (archiveorg itself remains egress-gated on VPN-egress hosts per the
 per-destination-routing operator-infra item — this fix removes the
 route-level 502 so the provider works once egress is reachable.)</li>
+<li><strong>Category picker no longer crashes (Crashlytics #1
+<code>c7c8cccad09f72bd7bb95455226109b8</code>, nested-scroll FATAL,
+§6.Q).</strong> Opening the search-result category picker could crash
+with
+<code>IllegalStateException: Vertically scrollable component was measured with an infinity maximum height</code>
+— a plain <code>Column</code> fed unbounded height into a lazy list
+(<code>fillMaxHeight()</code>). The dialog's Column is now
+height-bounded (<code>Modifier.fillMaxHeight(0.9f)</code>) and its
+<code>PagesScreen</code> weighted (<code>Modifier.weight(1f)</code>), so
+the lazy list receives a finite height.
+<code>feature/search_result/src/main/kotlin/lava/search/result/categories/CategorySelectionDialog.kt</code>.
+Commit <code>&lt;pending&gt;</code>. <strong>Still OWED (§6.Q,
+honest):</strong> a reproduce-first Compose UI Challenge + a §6.Q
+scanner CHECK 3 for <code>fillMax*</code>-bounded lazy layouts under a
+plain <code>Column</code> — not written this cycle.</li>
 <li><strong>§6.Y:</strong> versionCode 1079→1080; versionName
 1.3.13→1.3.14 (user-facing search-filter fix).</li>
 </ul>
@@ -468,6 +483,48 @@ Archive crawl topics that omit a comments section; the full fix for IA
 crawl topics that omit most fields is a tracked follow-up (a niche,
 non-crashing case).</li>
 </ul>
+<h2
+id="lava-api-app-0212-24--2026-07-04-on-device-api-starts-on-x86_64--embed-startup-crash-fixed-on-device-search-serves-results">Lava-API-App-0.2.12-24
+— 2026-07-04 (on-device API starts on x86_64 — embed startup crash
+FIXED; on-device search serves results)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.11-23.</p>
+<ul>
+<li><strong>On-device Lava API (api-app) now starts correctly on x86_64
+devices/emulators (user-facing fix, F3).</strong> The embedded API
+engine (<code>liblavaapi.so</code>) crashed immediately on start on
+Android x86_64 (SIGSYS — the OS app sandbox blocked a low-level file
+call the embedded engine issued), so the "detected API" / on-device
+engine path was unusable on x86_64 emulators and x86_64 devices. The
+engine now issues only Android-permitted system calls and starts
+cleanly: the health check returns alive and mDNS advertises
+<code>_lava-api-dev._tcp</code>. arm64 phones were never affected.
+Commit <code>&lt;pending&gt;</code>.</li>
+<li><strong>On-device API now serves search (F3, proven live).</strong>
+With the engine no longer crashing, the on-device API path returns real
+results over the device's network: archiveorg, torrents-csv, and
+gutenberg queries all returned live results on an x86_64 emulator.
+Commit <code>&lt;pending&gt;</code>.</li>
+<li><strong>§6.Y:</strong> versionCode 23→24; versionName 0.2.11→0.2.12
+(restores on-device functionality on x86_64).</li>
+</ul>
+<p><strong>Coverage status (§6.AK / §6.Z — HONEST):</strong>
+live-verified on an x86_64 emulator — <code>SIGSYS</code> count 0,
+<code>/health</code> → <code>{"status":"alive"}</code>, embed mDNS
+<code>_lava-api-dev._tcp:8443</code> advertised; on-device search
+returned real results over the guest WAN (archiveorg×story HTTP 200 ~50
+results, archiveorg×linux ~50, torrentscsv×1080p ~25, gutenberg×linux
+~1). Evidence:
+<code>.lava-ci-evidence/sixth-law-incidents/F3-fix-evidence/</code>.
+Full root-cause + affected-files record in
+<code>docs/issues/fixed/BUGFIXES.md</code>. <strong>A Compose UI
+Challenge that drives the api-app → client search journey end-to-end is
+still OWED (F5, in progress)</strong> — the api-app's Compose "Back to
+Lava client" button resists UiAutomator clicks (a test-automation
+limitation, NOT a product defect; the on-device search is proven by the
+direct evidence above).</p>
+<p><strong>Channel:</strong> firebase-app-distribution-api-app — pending
+the §6.Z pre-distribute gate + §6.AA two-stage + operator-provided
+Firebase creds.</p>
 <h2
 id="lava-api-app-0211-23--2026-06-26-post-1076-parity-bump--genymotion-gate-c66-device-evidence-cycle-coverage-gate">Lava-API-App-0.2.11-23
 — 2026-06-26 (post-1076 parity bump — Genymotion gate, C66 device

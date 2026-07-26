@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>COMMIT-PUSH-PIPELINE</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="commitpush-pipeline-dedicated-hook-validation-script-2026-07-26">Commit/Push
+Pipeline — Dedicated Hook-Validation Script (2026-07-26)</h1>
+<h2 id="what-happened">What happened</h2>
+<p>Routine <code>git push</code> on the main repo was effectively
+blocked: the git <code>pre-push</code> hook
+(<code>.githooks/pre-push</code>, wired via <code>core.hooksPath</code>)
+ran the full <code>scripts/ci.sh --changed-only</code> gradle gate
+(Spotless + unit tests + strict constitutional scans + hermetic bash
+suites) on <strong>every</strong> push — many minutes per invocation —
+and the §11.4.32 <code>verify-all-constitution-rules.sh</code> sweep
+stage was terminating the gate run early (see diagnosis below), so
+pushes were rejected outright.</p>
+<h2 id="diagnosis-2026-07-26">Diagnosis (2026-07-26)</h2>
+<ul>
+<li><strong>Layer 1</strong> of the hook (Seventh Law
+commit-message/pattern checks: Bluff-Audit stamps, mock-the-SUT,
+gate-shaping-file stamps, §6.Y/§6.Z/§6.AK evidence checks, script-doc
+sync, classification lines) <strong>passed</strong> for the two pending
+commits (<code>b587bf6a</code>, <code>f1a2c362</code>) — verified by
+simulating the hook with the real push range on stdin with Layer 2
+stripped.</li>
+<li><strong>Layer 2</strong> (<code>scripts/ci.sh --changed-only</code>)
+ran ~8 minutes and its output ended at the
+<code>§11.4.32 verify-all-constitution-rules sweep (STRICT)</code> stage
+without the trailing PASS lines. A full-output rerun of the sweep (54
+gates) showed <strong>52 PASS / 2 FAIL</strong> — the two failing gates
+were <code>markdown-export-sync</code> (§11.4.65: missing/stale
+<code>.html</code>/<code>.pdf</code> siblings for 9 in-scope docs) and
+<code>coverage-ledger</code> (§11.4.25: stale
+<code>unit_test_count</code> rows for <code>submodules/containers</code>
+and <code>submodules/helixqa</code>). Both were fixed on 2026-07-26 by
+regenerating the siblings
+(<code>scripts/sync-markdown-exports.sh --regenerate-all</code>, 247/247
+ok) and the ledger (<code>scripts/generate-coverage-ledger.sh</code>);
+both gates re-verified PASS. The earlier “BUILD SUCCESSFUL” gradle lines
+were green; the blocker was the sweep, not the build or the tests.</li>
+<li>Conclusion: the gate logic itself is sound, but wiring it as an
+automatic git hook made every push slow and, when the sweep failed,
+impossible. That violates the operator mandate that the commit/push
+mechanism must be <strong>always unblocked</strong>.</li>
+</ul>
+<h2 id="resolution-the-mandatory-approach">Resolution — the mandatory
+approach</h2>
+<p>Per operator directive (2026-07-26): <em>“We MUST have dedicated
+script to run hook validations, and commit and push mechanism ALWAYS
+unblocked!”</em></p>
+<ol type="1">
+<li><strong>Hooks disconnected from git.</strong>
+<code>core.hooksPath</code> is unset in the main repo (no submodule ever
+had one). <code>.githooks/pre-push</code> is kept
+<strong>unmodified</strong> — its checks are not deleted, only decoupled
+from the <code>git push</code> code path. <code>--no-verify</code> is
+never used.</li>
+<li><strong>Dedicated script is the single entrypoint.</strong> <a
+href="../scripts/commit-push-all.sh"><code>scripts/commit-push-all.sh</code></a>
+runs the pipeline: submodule sync → commit → <strong>hook validations as
+an explicit stage</strong> (the unmodified
+<code>.githooks/pre-push</code> logic fed the real push range; Layer 1
+always, Layer 2 unless <code>LAVA_SYNC_SKIP_CI=1</code>) → push to
+<strong>all</strong> upstreams (<code>github</code> +
+<code>gitlab</code>, §2.1) → recursive green verification.</li>
+<li><strong>Direct <code>git push</code> of the main repo is no longer
+the workflow.</strong> Use the script. It is idempotent and safe to
+re-run.</li>
+</ol>
+<h2 id="constitutional-anchor">Constitutional anchor</h2>
+<p>This approach is mandated universally by the HelixConstitution
+submodule anchor <strong>§11.4.234 — Dedicated hook-validation script;
+commit/push mechanism always unblocked</strong> (added 2026-07-26,
+classification: universal). Consumers bind their own script path,
+upstream list, and gate commands as DATA per §11.4.35; Lava’s binding is
+<code>scripts/commit-push-all.sh</code> with remotes <code>github</code>
++ <code>gitlab</code> and the Layer-2 gate
+<code>scripts/ci.sh --changed-only</code>.</p>
+<h2 id="references">References</h2>
+<ul>
+<li>Script: <code>scripts/commit-push-all.sh</code></li>
+<li>Script doc: <code>docs/scripts/commit-push-all.sh.md</code></li>
+<li>Hook (preserved, disconnected): <code>.githooks/pre-push</code></li>
+<li>CI gate: <code>scripts/ci.sh</code></li>
+<li>Constitution: <code>constitution/Constitution.md</code> §11.4.234,
+§2, §2.1</li>
+</ul>
+</body>
+</html>
