@@ -1,5 +1,19 @@
 # Changelog
 
+## Lava-Android-1.3.15-1081 — 2026-07-27 (production-readiness sweep — 8 LVA gaps closed, Crashlytics crash fix, device-gate durability)
+
+**Previous published:** Lava-Android-1.3.14-1080.
+
+- **Crashlytics FATAL #1 `c7c8ccc` fully closed — Categories filter picker no longer crashes on any device (§6.O).** The nested-scroll `IllegalStateException` (CategorySelectionDialog unbounded Column feeding infinite height into LazyLists) now has reproduce-first closure: Challenge71 device-level Compose UI Test, `CategorySelectionDialogBoundedHeightRegressionTest` JVM structural guard, and §6.Q scanner CHECK 3 (Dialog blocks with lazy layouts must carry a height-bound token). Issue closed with full closure log at `.lava-ci-evidence/crashlytics-resolved/2026-07-26-nested-scroll-category-selection-dialog.md`.
+- **Device-gate infrastructure hardened (LVA-014).** `scripts/run-challenge-matrix.sh` gained: image `{api}` template token for multi-API matrix coverage, `--container-image` / `--container-runtime` CLI flags, and image preflight (verifies every required emulator image exists locally before booting, pulls missing ones with honest error on failure). Containers submodule advanced to `746efe3` (avdresolve baked-AVD resolution, WaitForBoot container-liveness check, per-api image template). C00 cold-start PASS in 51.1s on CZ_API34_Phone (`.lava-ci-evidence/LVA-014-smoke/`).
+- **Go compiler GC-panic on modernc.org/sqlite mitigated (LVA-010).** Unbounded parallel compilation of the CGo-heavy sqlite package triggered a transient runtime GC panic inside `go build` (Go 1.26 nodwarf5 toolchain). `GOMAXPROCS=2` / `-p=2` applied across `lava-api-go/Makefile`, `scripts/ci.sh`, and `contract/version_binary_contract_test.go` per §6.T.2. Contract test PASS (3.09s, no panic).
+- **Submodule pins all at upstream tips (LVA-016).** containers → `746efe3`, llm_orchestrator → `d6cc248` (github+gitlab fork union-merged, LVA-036). All 24 submodules clean, zero divergent.
+- **14 missing script docs backfilled (LVA-018).** External user guides added under `docs/scripts/` for all autonomous-qa scripts (7) + action-prefix-expand hook.
+- **Tracker workable-items DB repaired.** 11 false duplicate rows removed; Issues.md consolidated 27→17 open items.
+- **§6.Y:** versionCode 1080→1081; versionName 1.3.14→1.3.15.
+
+**Coverage status (§6.AK / §6.Z):** C00 cold-start PASS on containerized KVM emulator (boot 51.1s, `.lava-ci-evidence/LVA-014-smoke/`). C71 Categories dialog Challenge written and compiled but NOT YET device-executed. Full §6.I matrix (API 28/30/34/latest) pending emulator image availability on this host — only api34 baked-AVD present locally.
+
 ## Lava-Android-1.3.14-1080 — 2026-07-04 (search filters now honored end-to-end + archiveorg download 502 fix — NOT YET DISTRIBUTED)
 
 **Previous published:** Lava-Android-1.3.13-1079.
