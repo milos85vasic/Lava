@@ -134,7 +134,10 @@ android {
         // (Android seccomp legacy-syscall remap in the modernc/libc fork). This is
         // a real user-facing crash fix on x86_64 devices/emulators → versionName
         // patch bump 0.2.11 → 0.2.12 (§6.Y.3).
-        versionCode = 24
+        // §6.Y production-readiness sweep: container submodule pin advance,
+        // device-gate preflight, WaitForBoot liveness. versionName held
+        // (diagnostics-only app; no user-facing functional change).
+        versionCode = 25
         versionName = "0.2.12"
         // EncryptedSharedPreferences (androidx.security-crypto) requires API 23+
         // — the per-install auth-key store ([ApiKeyStore]) relies on it. The
