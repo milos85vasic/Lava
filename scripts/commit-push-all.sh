@@ -116,7 +116,13 @@ run_hook_checks() {
       echo "refs/heads/$BRANCH $local_sha refs/heads/$BRANCH $remote_sha" | bash .githooks/pre-push "$remote" "$(git remote get-url "$remote")"
     fi
   done
-  [ "$any" = "0" ] && echo "Stage 1: nothing unpushed yet — checks deferred to Stage 4 push."
+  if [ "$any" = "0" ]; then
+    echo "Stage 3: nothing unpushed yet — checks deferred to Stage 4 push."
+  fi
+  # Always succeed: reaching this point means every per-remote check passed.
+  # (A trailing `[ ... ] && echo` would return 1 under set -e when $any=1 and
+  # silently kill the pipeline after a fully-green validation stage.)
+  return 0
 }
 
 # ---------------------------------------------------------------------

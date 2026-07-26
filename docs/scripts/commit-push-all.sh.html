@@ -242,7 +242,7 @@
 </head>
 <body>
 <h1
-id="scriptscommit-push-allsh"><code>scripts/commit-push-all.sh</code></h1>
+id="scriptscommit-push-all.sh"><code>scripts/commit-push-all.sh</code></h1>
 <p>Dedicated commit + push pipeline that runs the pre-push hook logic as
 an <strong>explicit stage</strong> instead of a git hook.</p>
 <h2 id="why-it-exists-2026-07-26">Why it exists (2026-07-26)</h2>
@@ -262,6 +262,10 @@ script invokes its logic explicitly, so no gate is lost; it just no
 longer fires automatically inside <code>git push</code>.</p>
 <h2 id="what-it-does">What it does</h2>
 <table>
+<colgroup>
+<col style="width: 46%" />
+<col style="width: 53%" />
+</colgroup>
 <thead>
 <tr>
 <th>Stage</th>
@@ -275,7 +279,7 @@ longer fires automatically inside <code>git push</code>.</p>
 default-branch tip; also inits + syncs the constitution nested
 submodules (<code>anti_bluff</code>, <code>continuum</code>,
 <code>session_orchestrator</code>, <code>token_optimizer</code>).
-helixqa's 27 third-party mirrors under <code>tools/opensource/</code>
+helixqa’s 27 third-party mirrors under <code>tools/opensource/</code>
 are intentionally left uninitialized (reference mirrors, not build
 inputs).</td>
 </tr>
@@ -311,6 +315,15 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_SYNC_NO_SUBMODULE_PULL</span><span class="op">=</span>1 <span class="ex">scripts/commit-push-all.sh</span> <span class="st">&quot;msg&quot;</span></span></code></pre></div>
 <p>Idempotent — safe to re-run; each stage no-ops when there is nothing
 to do.</p>
+<h2 id="stage-contracts">Stage contracts</h2>
+<ul>
+<li>Every stage function returns 0 when its checks pass — including via
+an explicit <code>return 0</code>, never an incidental exit status (a
+trailing <code>[ ... ] &amp;&amp; echo</code> under <code>set -e</code>
+once killed the pipeline after a fully-green validation stage; fixed
+2026-07-26 in <code>725b066a</code>).</li>
+<li>The pipeline NEVER pushes when any validation stage fails.</li>
+</ul>
 <h2 id="relationship-to-the-constitution">Relationship to the
 constitution</h2>
 <p>The Local-Only CI/CD rule requires the <em>gate</em> to run; it does

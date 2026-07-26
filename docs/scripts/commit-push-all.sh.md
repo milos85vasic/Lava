@@ -42,6 +42,14 @@ LAVA_SYNC_NO_SUBMODULE_PULL=1 scripts/commit-push-all.sh "msg"
 
 Idempotent — safe to re-run; each stage no-ops when there is nothing to do.
 
+## Stage contracts
+
+- Every stage function returns 0 when its checks pass — including via an
+  explicit `return 0`, never an incidental exit status (a trailing
+  `[ ... ] && echo` under `set -e` once killed the pipeline after a
+  fully-green validation stage; fixed 2026-07-26 in `725b066a`).
+- The pipeline NEVER pushes when any validation stage fails.
+
 ## Relationship to the constitution
 
 The Local-Only CI/CD rule requires the *gate* to run; it does not require
