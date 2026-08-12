@@ -213,8 +213,30 @@ rotate per §6.H clause 6 (firebase logout; firebase login:ci).
 id="lva-008-c11-search_input-navbackstackentry-teardown-crash-nested-navhost-lifecycle">LVA-008
 — C11 search_input NavBackStackEntry teardown crash (nested-NavHost
 lifecycle)</h2>
-<p><strong>Status:</strong> In progress <strong>Type:</strong> Bug
-<strong>Severity:</strong> P1 <strong>Created-By:</strong> AI</p>
+<p><strong>Status:</strong> Operator-blocked <strong>Type:</strong> Bug
+<strong>Operator-Block-Details:</strong> WHAT: All 8 app-level candidate
+fixes are implemented + device-falsified (containerized-KVM gate, real
+JUnit XML evidence): inner-NavHost Activity-scoped LifecycleOwner,
+move-to-outer-NavHost, ON_STOP force-pop (NavTeardownGuard), nav-compose
+2.9.1-&gt;2.9.8-&gt;2.10.0-alpha bump, LenientTeardownRule (uncatchable
+— process-fatal, not JUnit-catchable), atomic popUpTo replace,
+launchSingleTop dedupe, and full nested-NavHost-architecture collapse to
+single Activity-hosted multi-back-stack NavHost. Every attempt
+reproduces the identical IllegalStateException on C06+C11. Confirmed
+upstream androidx-navigation defect (b/244910446 family), no fixed
+version through 2.10.0-alpha04. WHY: Systematic-debugging Iron Law: 3+
+failed fixes each revealing the same underlying defect in a different
+place = architectural problem, not grounds for a 9th ad-hoc app-level
+attempt. Minimal repro already authored and filing-ready at
+docs/lva008-upstream-repro/ (README.md, MinimalRepro.kt, analysis.md).
+UNBLOCK: AndroidX ships a navigation-compose release that fixes the
+nested-NavHost teardown ordering (b/244910446 family), OR a
+Google/AndroidX engineer confirms a workaround this project hasn’t
+tried. WHO: docs/lva008-upstream-repro/README.md (repro package ready to
+file);
+.lava-ci-evidence/sixth-law-incidents/2026-06-30-keystone-offmain-nav-and-lva008.json
+(latest incident record) <strong>Severity:</strong> P1
+<strong>Created-By:</strong> AI</p>
 <p>Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at
 activity-destroy: IllegalStateException ‘State must be at least CREATED
 to be moved to DESTROYED’ on the inner search/search_input entry.
