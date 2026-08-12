@@ -53,26 +53,6 @@ Operator directive: fetch+pull+merge latest codebase from all submodules. Frozen
 
 Operator asked to use Firebase CLI to pull Crashlytics. Verified Firebase CLI 14.17.0 exposes only crashlytics:symbols:upload + mappingfile:* (NO issue/non-fatal read). bq CLI absent. Crashlytics dashboard read requires console or a BigQuery export not configured. Fallback: in-repo §6.AC telemetry + known crash tickets; operator to paste console items for full triage. §11.4.6 honest record.
 
-## LVA-083 — Video #1 — Search returns ZERO results then 'Something went wrong' Error (primary function unusable)
-
-**Status:** In progress
-**Type:** Bug
-**Severity:** P0
-**Created-By:** AI
-**Assigned-To:** AI
-
-QA video 2026-06-25 frames 0060-0140: every search fails (blank ~25s then Error/Retry; 'prince' stays blank). KNOWN-class (anonymous/provider-mismatch). CODE-FIX landed in 1076 (SearchInputViewModel observeAll filtered+sorted + loading/empty state) but 1076 NOT yet distributed/device-verified. Pending §6.Z gate. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #1.
-
-## LVA-084 — Video #2 — Onboarded provider (YTS) is NOT the provider set used by Search; unconfigured providers active as filters
-
-**Status:** In progress
-**Type:** Bug
-**Severity:** P0
-**Created-By:** AI
-**Assigned-To:** AI
-
-QA video frames 0030 vs 0040/0060: onboarded only YTS but search used RuTracker/RuTor/IA/Gutenberg etc. KNOWN (§6.L 57th/59th). CODE-FIX in 1076 (chips from ProviderConfigRepository.observeAll() searchEnabled&&isEnabled). Pending §6.Z device verification. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #2.
-
 ## LVA-085 — Video #4 — Provider id labels shown raw/lowercased ('torrentdownloads','archiveorg','kinozal','yts') in results filter chips
 
 **Status:** In progress
@@ -141,13 +121,6 @@ QA video frames 0020-0025. NEW UX, contributes to #1. CODE-FIX in 1076 (#9 selec
 **Created-By:** AI
 
 QA video frames 0001/0005: single Lava icon launched; co-mingling NOT visually confirmed. Needs on-device package check (applicationIdSuffix .dev + launcher label). OPEN/UNCONFIRMED. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #10.
-
-## LVA-013 — Missing 6.Z device evidence for client 1080 and api-app 24
-
-**Status:** Queued
-**Type:** Task
-
-Task P0 Android: the 1080 client and 24 api-app cycles were distributed without per-AVD containerized emulator evidence. Need to execute the covering Challenge matrix, generate real-device-verification rows, and backfill the evidence files.
 
 ## LVA-019 — Coverage ledger partial/gap overlap and missing per-release ledgers
 
