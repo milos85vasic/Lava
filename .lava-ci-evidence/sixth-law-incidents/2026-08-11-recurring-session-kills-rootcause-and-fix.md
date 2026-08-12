@@ -85,10 +85,11 @@ evidence:
   the default name Python's `threading` module gives to a process's initial
   thread; on this host `MainThread`-named processes killed in the incident #3
   cascade are separate from the two `claude`-named processes killed in the
-  same event. This makes it more likely the 2 killed processes here were a
+  same event. This is consistent with the 2 killed processes here being a
   **Python-based child** of that session (e.g. an MCP server subprocess)
-  rather than the `claude` Node.js CLI process itself — but this is
-  **UNCONFIRMED**, not proven.
+  rather than the `claude` Node.js CLI process itself.
+  UNCONFIRMED: exact identity of these 2 processes — no process accounting
+  (`acct`/`psacct`) was enabled on this host to recover it retroactively.
 - What **is** proven regardless of identity: **whatever** those 2 processes
   were, they were still direct, un-detached members of `session-59.scope`
   after 2h42m of runtime — i.e., they had not been moved into any other
