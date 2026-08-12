@@ -1,11 +1,3 @@
-## LVA-3 — Adopt HelixConstitution §11.4.79–106 (pin 53 commits behind)
-
-**Status:** In progress
-**Type:** Task
-**Severity:** P1
-
-Pin 208e2c8 is 53 commits behind origin/main 883ccc1. Highest-impact new clauses: §11.4.93/95/106 (workable-items SQLite DB tracked in git + md to DB sync engine), §11.4.79 (own-org submodules in CodeGraph), §11.4.85 (stress/chaos), §11.4.98, §11.4.102. Pin-bump is operator-gated; decision owed on §6.AD.3 Path B vs SQLite DB. **Source:** self-discovered — .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md
-
 ## LVA-5 — Rotate Firebase CI token (printed to session transcript)
 
 **Status:** Operator-blocked
