@@ -21,9 +21,9 @@
 # Invariant values: pass | gap | n/a | "waiver: <rationale>" | "pass: <rationale>"
 metadata:
   schema_version: 1
-  generated_at: "2026-08-10T16:55:41Z"
+  generated_at: "2026-08-12T10:20:58Z"
   generator: "scripts/generate-coverage-ledger.sh"
-  commit_sha: "1d5b14809df59a49e2ee9692c0a1f27a3de8b5ea"
+  commit_sha: "d1eee1f2f3126fab9bc90ed4a2a397b4a896828e"
   mandate: "HelixConstitution §11.4.25 Full-Automation-Coverage Mandate"
 
 rows:
@@ -321,7 +321,7 @@ rows:
     status: "covered"
     unit_test_count: 1
     integration_test_count: 0
-    challenge_count: 17
+    challenge_count: 18
     challenges:
       - "C2"
       - "C3"
@@ -339,6 +339,7 @@ rows:
       - "C58"
       - "C59"
       - "C62"
+      - "C71"
       - "HEURISTIC"
     sample_tests:
       - "SearchViewModelTest.kt"
