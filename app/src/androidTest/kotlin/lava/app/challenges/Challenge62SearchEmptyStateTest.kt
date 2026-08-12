@@ -109,7 +109,11 @@ import kotlinx.coroutines.runBlocking
 import lava.app.LenientTeardownRule
 import lava.app.OnboardingBypassRule
 import lava.credentials.ProviderConfigRepository
+import lava.tracker.api.AuthType
+import lava.tracker.api.RemoteTrackerDescriptor
+import lava.tracker.api.TrackerCapability
 import lava.tracker.client.ApiBaseUrlHolder
+import lava.tracker.registry.TrackerRegistry
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -155,12 +159,19 @@ class Challenge62SearchEmptyStateTest {
     @InstallIn(SingletonComponent::class)
     interface ProviderSeedEntryPoint {
         fun providerConfigRepository(): ProviderConfigRepository
+        fun trackerRegistry(): TrackerRegistry
     }
 
     private fun providerRepo(): ProviderConfigRepository {
         val app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
         return EntryPointAccessors.fromApplication(app, ProviderSeedEntryPoint::class.java)
             .providerConfigRepository()
+    }
+
+    private fun registry(): TrackerRegistry {
+        val app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
+        return EntryPointAccessors.fromApplication(app, ProviderSeedEntryPoint::class.java)
+            .trackerRegistry()
     }
 
     @Before
@@ -186,12 +197,33 @@ class Challenge62SearchEmptyStateTest {
             apiBaseUrl = server.url("/").toString().trimEnd('/'),
             key = TEST_AUTH_KEY,
         )
+
+        // §6.AK root-cause fix (2026-08-10): SEEDED_PROVIDER ("rutracker") is a
+        // BUNDLED compiled-in factory that ignores ApiBaseUrlHolder entirely — only
+        // the dynamic ApiBackedTrackerClient installed by
+        // DefaultTrackerRegistry.populateFrom() reads it. OnboardingBypassRule
+        // skips the real onboarding flow, so populateFrom() never runs, and this
+        // test's MockWebServer was a no-op. See C58 for the full analysis
+        // (identical setup pattern).
+        registry().populateFrom(
+            listOf(
+                RemoteTrackerDescriptor(
+                    trackerId = SEEDED_PROVIDER,
+                    displayName = SEEDED_PROVIDER,
+                    baseUrls = emptyList(),
+                    capabilities = setOf(TrackerCapability.SEARCH),
+                    authType = AuthType.NONE,
+                    encoding = "UTF-8",
+                ),
+            ),
+        )
     }
 
     @After
     fun tearDown() {
         server.shutdown()
         ApiBaseUrlHolder.reset()
+        registry().populateFrom(emptyList())
         runCatching { runBlocking { providerRepo().keepOnlySearchEnabled(emptySet()) } }
     }
 

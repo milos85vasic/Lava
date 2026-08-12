@@ -3,6 +3,7 @@ package lava.search.result.filter
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import lava.designsystem.component.BodyLarge
@@ -32,7 +33,16 @@ internal fun FilterCategoryItem(
         onDismiss = dialogState::hide,
     )
     FilterBarItem(label = stringResource(R.string.search_screen_filter_category_label)) {
-        FilterBarItemContent(onClick = dialogState::show) {
+        // §6.AK follow-up (2026-08-11): Row/Column don't add their own
+        // semantics node, so FilterBar's rows flatten into one accessibility
+        // level — a text+click selector for "Any" alone is ambiguous with
+        // FilterAuthorItem's identically-worded default value. Tag this
+        // surface explicitly so Challenge Tests (and any future test) can
+        // target the category filter unambiguously.
+        FilterBarItemContent(
+            modifier = Modifier.testTag(FILTER_CATEGORY_VALUE_TEST_TAG),
+            onClick = dialogState::show,
+        ) {
             BodyLarge(
                 modifier = Modifier
                     .weight(1f)
@@ -56,3 +66,12 @@ internal fun FilterCategoryItem(
         }
     }
 }
+
+/**
+ * Compose UI test tag for the category filter's clickable value surface
+ * (renders "Any" / a category name / an N-selected counter). Not a §6.R
+ * connection/credential literal — a UI test identifier, same class as the
+ * content-description strings ("Search", "Expand filters", …) Challenge
+ * Tests already target directly.
+ */
+const val FILTER_CATEGORY_VALUE_TEST_TAG = "filter_category_value"

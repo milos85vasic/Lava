@@ -110,7 +110,11 @@ import kotlinx.coroutines.runBlocking
 import lava.app.LenientTeardownRule
 import lava.app.OnboardingBypassRule
 import lava.credentials.ProviderConfigRepository
+import lava.tracker.api.AuthType
+import lava.tracker.api.RemoteTrackerDescriptor
+import lava.tracker.api.TrackerCapability
 import lava.tracker.client.ApiBaseUrlHolder
+import lava.tracker.registry.TrackerRegistry
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -162,12 +166,19 @@ class Challenge58SearchReturnsResultsTest {
     @InstallIn(SingletonComponent::class)
     interface ProviderSeedEntryPoint {
         fun providerConfigRepository(): ProviderConfigRepository
+        fun trackerRegistry(): TrackerRegistry
     }
 
     private fun providerRepo(): ProviderConfigRepository {
         val app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
         return EntryPointAccessors.fromApplication(app, ProviderSeedEntryPoint::class.java)
             .providerConfigRepository()
+    }
+
+    private fun registry(): TrackerRegistry {
+        val app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
+        return EntryPointAccessors.fromApplication(app, ProviderSeedEntryPoint::class.java)
+            .trackerRegistry()
     }
 
     @Before
@@ -199,12 +210,40 @@ class Challenge58SearchReturnsResultsTest {
             apiBaseUrl = server.url("/").toString().trimEnd('/'),
             key = TEST_AUTH_KEY,
         )
+
+        // §6.AK root-cause fix (2026-08-10): SEEDED_PROVIDER ("rutracker") is one
+        // of the 7 BUNDLED compiled-in factories (TrackerClientModule.register at
+        // DI time) — the real, direct-to-rutracker.org RuTrackerClientFactory, NOT
+        // the mockable ApiBackedTrackerClient. ApiBaseUrlHolder only feeds the
+        // DYNAMIC client that DefaultTrackerRegistry.populateFrom() installs; a
+        // bundled provider ignores it entirely. OnboardingBypassRule (used above)
+        // deliberately skips onboarding, so the real populateFrom() call the
+        // ApiSelection step normally makes NEVER runs — this test's MockWebServer
+        // was previously a no-op and the app was silently hitting the real
+        // rutracker.org site, which this sandboxed emulator cannot reach,
+        // explaining the observed hang. Install the dynamic mock-backed client for
+        // SEEDED_PROVIDER explicitly so search actually routes to MockWebServer.
+        registry().populateFrom(
+            listOf(
+                RemoteTrackerDescriptor(
+                    trackerId = SEEDED_PROVIDER,
+                    displayName = SEEDED_PROVIDER,
+                    baseUrls = emptyList(),
+                    capabilities = setOf(TrackerCapability.SEARCH),
+                    authType = AuthType.NONE,
+                    encoding = "UTF-8",
+                ),
+            ),
+        )
     }
 
     @After
     fun tearDown() {
         server.shutdown()
         ApiBaseUrlHolder.reset()
+        // Restore the bundled fallback set (§6.AK fix above) so a sibling test
+        // doesn't inherit this test's dynamic mock-backed registration.
+        registry().populateFrom(emptyList())
         // Disable the seeded provider so it does not leak as a search-enabled chip
         // into sibling tests that expect a fresh "no onboarded providers" state.
         runCatching { runBlocking { providerRepo().keepOnlySearchEnabled(emptySet()) } }

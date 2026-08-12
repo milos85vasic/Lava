@@ -1,0 +1,20 @@
+==> --avds override active: default §6.AE.2 matrix REPLACED with operator list
+    (sub-minimum lists are development-iteration runs, not §6.AE.2-conformant gate matrices)
+==> §6.AE Challenge matrix runner
+    test class: lava.app.challenges.Challenge59SearchUsesOnboardedProvidersTest
+    evidence dir: .lava-ci-evidence/lva014-c00-c71-c58-c59-device-gate/Challenge59SearchUsesOnboardedProvidersTest
+    AVDs: CZ_API34_Phone:34:phone
+    include-helixqa: 0
+==> §6.X acceleration resolved: accel=kvm runner=containerized (platform=Linux)
+==> LVA-014 image preflight: 1 emulator image(s) required
+    [1/1] present locally: ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64
+==> containerized runner: --container-image=ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64 --container-runtime=podman
+==> Delegating to Containers/cmd/emulator-matrix --runner=auto (resolves to containerized on Linux)
+[§6.X] runner=auto resolved to containerized (accel=kvm, goos=linux)
+[§6.X] runner=containerized image=ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64 runtime=podman
+[containerized] requested AVD "CZ_API34_Phone" is not baked into image ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64; using baked AVD "default" (api 34 matches requested api 34; requested name was advisory)
+Matrix run finished. Attestation: .lava-ci-evidence/lva014-c00-c71-c58-c59-device-gate/Challenge59SearchUsesOnboardedProvidersTest/real-device-verification.json
+  [1] CZ_API34_Phone            api=34 phone FAIL
+       error: signal: killed
+Gating: TRUE  (serial run, --dev=false — clause-6.I-clause-7-eligible)
+MATRIX FAILED — at least one AVD did not pass. tag.sh MUST refuse this commit.

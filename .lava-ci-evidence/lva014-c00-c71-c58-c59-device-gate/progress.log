@@ -1,0 +1,18 @@
+Starting run at 2026-08-09T13:30:14Z
+=== cleaning up orphaned emulator container from killed prior run (§6.M zombie cleanup) ===
+Error: container bcf37352cab0f32546aaab780a3c4c0fc1738cbeb2fa18aa6ed7856582e873d6 conmon exited prematurely, exit code could not be retrieved: conmon process killed
+bcf37352cab0
+Phase 1: Building debug + androidTest APKs at 2026-08-09T13:32:57Z
+=== Challenge00CrashSurvivalTest starting 2026-08-10T19:05:12+03:00 ===
+=== Challenge00CrashSurvivalTest EXIT_CODE=0 2026-08-10T19:20:38+03:00 ===
+=== Challenge71CategorySelectionDialogBoundedHeightTest starting 2026-08-10T19:20:38+03:00 ===
+=== Challenge71CategorySelectionDialogBoundedHeightTest EXIT_CODE=1 2026-08-10T19:33:19+03:00 ===
+=== Challenge58SearchReturnsResultsTest starting 2026-08-10T19:33:19+03:00 ===
+=== Challenge58SearchReturnsResultsTest EXIT_CODE=1 2026-08-10T19:47:01+03:00 ===
+=== Challenge59SearchUsesOnboardedProvidersTest starting 2026-08-10T19:47:01+03:00 ===
+=== Challenge59SearchUsesOnboardedProvidersTest EXIT_CODE=1 2026-08-10T19:59:46+03:00 ===
+=== Challenge60InputResultsChipsAgreeTest starting 2026-08-10T19:59:46+03:00 ===
+=== Challenge60InputResultsChipsAgreeTest EXIT_CODE=1 2026-08-10T20:13:17+03:00 ===
+=== Challenge62SearchEmptyStateTest starting 2026-08-10T20:13:17+03:00 ===
+=== Challenge62SearchEmptyStateTest EXIT_CODE=1 2026-08-10T20:26:17+03:00 ===
+ALL_DONE 2026-08-10T20:26:17+03:00

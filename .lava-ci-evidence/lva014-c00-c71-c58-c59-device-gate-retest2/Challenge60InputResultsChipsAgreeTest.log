@@ -1,0 +1,7 @@
+[§6.X] runner=auto resolved to containerized (accel=kvm, goos=linux)
+[§6.X] runner=containerized image=ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64 runtime=podman
+[containerized] requested AVD "CZ_API34_Phone" is not baked into image ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64; using baked AVD "default" (api 34 matches requested api 34; requested name was advisory)
+Matrix run finished. Attestation: .lava-ci-evidence/lva014-c00-c71-c58-c59-device-gate-retest2/Challenge60InputResultsChipsAgreeTest/real-device-verification.json
+  [1] CZ_API34_Phone            api=34 phone PASS
+Gating: TRUE  (serial run, --dev=false — clause-6.I-clause-7-eligible)
+MATRIX PASSED — every AVD booted and every test passed.

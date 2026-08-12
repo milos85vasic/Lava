@@ -1,0 +1,24 @@
+{
+  "all_passed": false,
+  "finished_at": "2026-08-10T19:47:01+03:00",
+  "gating": true,
+  "runner": "containers-submodule",
+  "runtime": "podman",
+  "rows": [
+    {
+      "avd": "CZ_API34_Phone",
+      "api_level": 34,
+      "form_factor": "phone",
+      "boot_seconds": 202.386637884,
+      "test_class": "lava.app.challenges.Challenge58SearchReturnsResultsTest",
+      "test_passed": false,
+      "test_seconds": 600.186162986,
+      "test_error": "signal: killed",
+      "gradle_log_path": "CZ_API34_Phone/gradle.log",
+      "diag": {},
+      "failure_summaries": [],
+      "concurrent": 1
+    }
+  ],
+  "started_at": "2026-08-10T19:33:20+03:00"
+}

@@ -11,6 +11,8 @@ same commit so the index stays trustworthy. Stale state in this file
 is itself a §6.J spirit issue — the file claims a guarantee, the
 repo has drifted, the agent acts on the claim.
 
+> **🟢🐞📱 2026-08-11/12 (LVA-083/084 + C71 CRASHLYTICS REGRESSION DEVICE-VERIFIED GREEN — real §6.AK test-infra bug found + fixed; host-instability root-cause fully diagnosed).** Operator directive: full anti-bluff audit against the constitution + open workable items, systematic remediation, no bluff. Real root cause found via device execution (not source-reading): `OnboardingBypassRule` (used by Challenge58/59/60/61/62/71 to skip real onboarding) never calls `TrackerRegistry.populateFrom()` — the ONE call that installs the mock-reachable `ApiBackedTrackerClient` in place of a BUNDLED compiled-in provider client (rutracker/rutor/archiveorg/etc., registered directly in `TrackerClientModule`). So all 6 tests' `MockWebServer` + `ApiBaseUrlHolder.set(...)` setup was silently inert — the app was hitting the real, unreachable-from-sandbox site instead. This is a TEST-INFRASTRUCTURE bug, not a production bug (logcat confirmed the real LVA-083/084 production fix — explicit provider-set resolution in `SearchInputViewModel` — was already correct: `pids=rutracker` reached the route). **Fix:** all 6 tests now call `registry().populateFrom(listOf(RemoteTrackerDescriptor(...)))` in `@Before` / `populateFrom(emptyList())` in `@After`. **Device-verified GREEN, all 6, real emulator (containerized KVM, this Linux host — confirmed genuinely gate-eligible, unlike prior macOS-hosted §6.X-debt sessions):** Challenge58 (closes LVA-083), Challenge59 (closes LVA-084), Challenge60, Challenge61, Challenge62, Challenge71 (closes the 1.3.15-1081 Crashlytics FATAL c7c8ccc regression — the categories-dialog nested-scroll crash). Challenge71 needed one follow-up fix after the registry fix let it reach a NEW, real, separate bug: `FilterAuthorItem` and `FilterCategoryItem` both default their value text to the shared "Any" string, and plain `Row`/`Column` add no semantics-tree boundary of their own — so a text+click selector matched 2 nodes. Fixed with a `testTag` (`FILTER_CATEGORY_VALUE_TEST_TAG`, `feature/search_result/.../FilterCategoryItem.kt`) — first testTag in this codebase, standard Compose-testing practice. **§6.M forensic note (host stability, non-code):** 4 Claude Code process interruptions this session — root-caused: (1) real, authenticated `systemctl poweroff` via an SSH session from LAN IP 192.168.1.87; (2) `user@1000.service` mass-SIGKILL cascade DESPITE `Linger=yes` being active since 2026-06-21 — confirmed this exact class fired 4× in 29h, root cause: ALT Linux's compiled-in `KillUserProcesses=true` default overrides linger when ALL SSH sessions close simultaneously (PID 1 itself issues the kill, not a manual command); (3) an ordinary session-scope SIGTERM tied to one undetached SSH session. Full writeup + exact operator-executable permanent fix (a `logind.conf.d` drop-in, requires root — not applied by the agent, `sudo` is never run) at `.lava-ci-evidence/sixth-law-incidents/2026-08-11-recurring-session-kills-rootcause-and-fix.md`. **Also this session:** credential leak fixed (`OnboardingViewModel.kt` logged the raw provider session token via `LoginResult`'s default `toString()` — §6.H/§6.AC); `markdown-export-sync` + `coverage-ledger` gates fixed (8 gap rows → 0, all via honest waivers with real citations, no bluff); 3 hermetic `check-constitution.sh` tests fixed (root cause: concurrent device-gate evidence files lacked the `runner`/`runtime` stamp `check-emulator-runner-tag.sh` correctly flagged — `scripts/run-challenge-matrix.sh` still needs a small post-processing addition to stamp this by construction, flagged not yet fixed); stale tracker fixtures refreshed (nnmclub BLOCK resolved as a mislabeled hand-crafted fixture, not a real refresh — 6 rutor fixtures live-refreshed, 4 left honestly stale with recorded live-network evidence that a blind refresh would break passing assertions); LVA-6/LVA-7/Firebase-token doc staleness corrected in this file's §3/§4; LVA-013 confirmed moot (1080/api-app-24 were never actually distributed); 2 new real findings recorded as LVA-093/LVA-094 (cold-start race window + silent non-retried startup-fetch-failure, both P2, both confirmed by source-reading only — device-instrumentation impact explicitly UNCONFIRMED). **NEXT:** commit this work in logically-grouped commits with Bluff-Audit stamps (in progress); then operator's queued directive — rebuild all services/apps, wire systemd `--user` units (no sudo) for API/infra with wrapper scripts, rebuild all Android flavors, Firebase-distribute every variant via Firebase CLI (token in `~/api_keys.sh`) — gated on this project's own §6.Z/§6.AA distribute rules, not a rubber-stamp.
+
 > **✅🧹🚀 2026-07-27 (SESSION COMPLETE — sweep committed+verified+pushed; debug APK built; CHANGELOG 1.3.15-1081; LIVE TESTING + Firebase distribute STAGED — operator action needed for .env auth rotation).** All work from the production-readiness sweep committed, verified (Go vet/test/build PASS with GOMAXPROCS=2, JVM structural tests PASS, androidTest compiles), and pushed to both github+gitlab mirrors via `commit-push-all.sh` (2 commits: sweep commit `fb50bfa2` + version bump `11bc6dba` + changelog `4b7edda9`). Debug APK and androidTest APK both BUILD SUCCESSFUL (app vc=1081, api-app vc=25). **OPERATOR ACTION NEEDED FOR FIREBASE DISTRIBUTE:** `firebase-distribute.sh --app client --debug-only` blocked on Phase 1 Gates 4+5 — .env needs (a) fresh `LAVA_AUTH_OBFUSCATION_PEPPER` rotation, (b) `LAVA_AUTH_CURRENT_CLIENT_NAME=android-1.3.15-1081`, (c) `android-1.3.15-1081:<uuid>` appended to `LAVA_AUTH_ACTIVE_CLIENTS`. CHANGELOG 1.3.15-1081 entry + per-version snapshot `firebase-app-distribution/1.3.15-1081.md` written. Constitution submodule pinned at `6bf67ce` (already at upstream tip). Full matrix device gate (§6.I API 28/30/34/latest) needs emulator images for APIs other than 34.
 >
 > **🟢🧹🚀 2026-07-26 (PRODUCTION-READINESS SWEEP — 8 LVA gaps closed with reproduce-first evidence; tracker deduplicated; live testing + distribute NEXT).** Operator directive: "Fix any other shortcomings, gaps, weak spots, danger zones and issues we can find so project is closest possible to production ready! Once all done do full live testing of the whole system — all infrastructure and all apps (boot up proper emulator using containers Submodule)! Once all is validated and verified distribute all services and apps using firebase distribute! commit and push all submodules and main repo fully recursively to all upstreams! pay attention that we have constitution submodule up to date with the latest codebase changes from all upstreams at all times!" CLOSED THIS SWEEP: **LVA-009** (embed source-hash manifest rebuilt via build-cshared.sh, 3 ABIs OK, commit 4a7a328c); **LVA-010** (Go compiler GC panic on modernc.org/sqlite — root-caused to unbounded `-p`=8 compile on the Fedora nodwarf5 toolchain; §6.T.2 caps `-p=2`/`GOMAXPROCS=2` in the contract test + lava-api-go Makefile + ci.sh; 3/3 PASS + cold-race PASS; residual risk = toolchain, documented); **LVA-014** (device-gate durable fixes: `pkg/emulator/avdresolve.go` baked-AVD resolution with config.ini API join, `WaitForBoot` container-liveness fail-fast with log capture before --rm, per-api image template + preflight; containers `746efe3` PUSHED with Bluff-Audit stamps; LIVE-validated: C00 PASS gating=true boot 51.1s, negative path fails honest in 3s); **LVA-015** (Crashlytics c7c8ccc closure: §6.Q scanner CHECK 3 + `CategorySelectionDialogBoundedHeightRegressionTest` + Challenge C71 + closure log; RED→GREEN rehearsed); **LVA-016** (all submodule pins at upstream tips); **LVA-017** (this file); **LVA-018** (14 missing script docs under docs/scripts/{autonomous-qa,hooks}/); **LVA-036** (llm_orchestrator github↔gitlab fork union-merged, both mirrors at `d6cc248`). **TRACKER REPAIR:** docs/workable_items.db had 11 false duplicate rows (every LVA-009..019 in BOTH Issues+Fixed; LVA-013/019 falsely marked Completed/Fixed) — duplicates deleted (items + doc_segments), DB↔MD resynced, gate green, Issues.md 27→17 open (LVA-013 stays Queued pending this cycle's device evidence; LVA-019 stays Queued). §6.T.4 BUGFIXES.md entries added for LVA-009/010/036. STILL OPEN (operator-gated): LVA-008 nav-teardown decision, LVA-3, LVA-082, public-provider egress toggle, nnmclub Turnstile. NEXT: full live testing on the container emulator matrix (client + api-app + lava-api-go infra) → §6.AA two-stage Firebase distribute → final recursive push.
@@ -777,32 +779,34 @@ Bumping a pin is a deliberate operator action; never auto-update.
 
 **2026-06-03 reconciliation (operator-directed "obtain latest versions of all Submodules"):** every submodule advanced to its latest unified `main` and ALL upstreams reconciled to convergence via **fast-forward only — NO force-push** (per the new constitution §11.4.113). All github↔gitlab divergence resolved: every diverged mirror was `gitlab`-behind-`github` (a strict ancestor), so `gitlab` was fast-forwarded to the `github` tip; no merge commits needed, no commits lost. CONTINUATION §4.5 OWED#2 (mirror divergence) is CLOSED. ⚠️ **Build-verification of these advanced pins against the Lava build is OWED** (the full Android + Go build was not run on this host) — verify before any release/distribute.
 
+> **§6.S refresh 2026-08-09 (live audit, read-only, no pins changed):** the table below was regenerated from a real `git submodule status` + per-submodule `fetch`/`ls-remote` sweep — the pins recorded here had drifted stale for months (only `mdns`/`tracker_sdk` were still accurate) despite 4+ pin-bumping commits landing since the table was last hand-edited. Two GENUINE GitHub↔GitLab mirror mismatches were found (`panoptic`, `tracker_sdk` — GitLab is a real ancestor of GitHub, not just a local-config gap) and are flagged below; reconciling them requires an explicit `git push gitlab` per submodule, which is a shared-remote action an agent should not take without operator sign-off. "Commits behind own upstream" is informational only (pins are deliberately frozen by policy) unless flagged otherwise.
+
 | Submodule | Pin | Mirrors | Notes |
 |---|---|---|---|
-| `auth` | `a3fc97d` | GitHub + GitLab | helix-deps.yaml + §11.4.78 CodeGraph cascade; gitlab FF-reconciled 2026-06-03 |
-| `cache` | `7853368` | GitHub + GitLab | helix-deps.yaml present; gitlab FF-reconciled 2026-06-03 |
-| `challenges` | `dfb5f9c` | GitHub + GitLab | helix-deps.yaml + flat layout (Panoptic dep declared) |
-| `concurrency` | `711499e` | GitHub + GitLab | helix-deps.yaml present |
-| `config` | `344073f` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh; gitlab FF-reconciled 2026-06-03 |
-| `containers` | `6f4f415` | GitHub + GitLab | per-OS procWalker (Linux /proc + macOS `ps`) + conditional `--device /dev/kvm` (§6.AH-debt); SELinux relabel cross-platform; per-OS emulator acceleration |
-| `database` | `d822b33` | GitHub + GitLab | helix-deps.yaml present |
-| `discovery` | `11bb596` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh; gitlab FF-reconciled 2026-06-03 |
-| `helixqa` | `dd3cf1d` | GitHub | HelixDevelopment org; always-track-upstream per §6.AD Q9 waiver; bumped 2026-06-08 `5112906`→`dd3cf1d` to escape a broken pin whose `go.mod` carried unresolved conflict markers (L124/131/138) that broke `lava-api-go`'s Go build |
-| `doc_processor` | `7750140` | GitHub | vasic-digital/DocProcessor; added 2026-06-08 — HelixQA `go.mod` sibling dep (`digital.vasic.docprocessor`) per §11.4.27/§11.4.28 (own-org deps reachable from root) |
-| `llm_orchestrator` | `d2a2151` | GitHub | vasic-digital/LLMOrchestrator; added 2026-06-08 — HelixQA sibling dep (`digital.vasic.llmorchestrator`) |
-| `llm_provider` | `d3da070` | GitHub | vasic-digital/LLMProvider; added 2026-06-08 — HelixQA sibling dep (`digital.vasic.llmprovider`) |
-| `llms_verifier` | `9302b5c` | GitHub | vasic-digital/LLMsVerifier; added 2026-06-08 — HelixQA sibling dep (`digital.vasic.llmsverifier`, module at `/llm-verifier`) |
-| `vision_engine` | `f96bf56` | GitHub | vasic-digital/VisionEngine; added 2026-06-08 — HelixQA sibling dep (`digital.vasic.visionengine`) |
-| `http3` | `7ddc6e8` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh; gitlab FF-reconciled 2026-06-03 |
-| `mdns` | `ba1d2385` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh (already converged) |
-| `middleware` | `ccf237a` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
-| `observability` | `73bbd1b` | GitHub + GitLab | helix-deps.yaml present; gitlab FF-reconciled 2026-06-03 |
-| `panoptic` (ROOT: `Lava/panoptic`) | `2f8e7c2` | GitHub + GitLab | added at project root 2026-06-03 (flattened from the stray `challenges/Panoptic` nesting per CONST-051(C)); gitlab FF-reconciled to github tip |
-| `ratelimiter` | `92b01ea` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh; gitlab FF-reconciled 2026-06-03 |
-| `recovery` | `0eb87cf` | GitHub + GitLab | helix-deps.yaml + install_upstreams.sh |
-| `security` | `16ae574` | GitHub + GitLab | helix-deps.yaml present; gitlab FF-reconciled 2026-06-03 |
-| `tracker_sdk` | `7afc37aa` | GitHub (origin) | already at origin/main (converged) |
-| `constitution` | `d90ab87` | universal (HelixConstitution: github+gitlab+gitflic+gitverse) | **§11.4.113 absolute no-force-push + merge-onto-latest-main mandate** (2026-06-03); converged on all 4 upstreams |
+| `auth` | `0ae1f5d3` | GitHub + GitLab (converged) | helix-deps.yaml + install_upstreams.sh present |
+| `cache` | `6a9a3e5e` | GitHub + GitLab (converged) | helix-deps.yaml + install_upstreams.sh present |
+| `challenges` | `41d1a134` | GitHub + GitLab (converged) | helix-deps.yaml + install_upstreams.sh present; 4 commits behind own upstream tip `072724af` |
+| `concurrency` | `32b7efae` | GitHub + GitLab (converged) | helix-deps.yaml + install_upstreams.sh present |
+| `config` | `8d3f1e08` | GitHub + GitLab (converged) | helix-deps.yaml + install_upstreams.sh present |
+| `containers` | `746efe33` | GitHub + GitLab (converged) | per-OS procWalker + conditional `--device /dev/kvm`; 4 commits behind own upstream tip `83275f8b` |
+| `database` | `8adb19c1` | GitHub + GitLab (converged) | helix-deps.yaml + install_upstreams.sh present |
+| `discovery` | `0e491a35` | GitHub + GitLab (converged) | helix-deps.yaml + install_upstreams.sh present |
+| `helixqa` | `40d410d2` | GitHub + GitLab (converged — **doc correction: NOT GitHub-only**, a working GitLab mirror exists) | HelixDevelopment org; always-track-upstream per §6.AD Q9 waiver; 12 commits behind own upstream tip `db18c402` |
+| `doc_processor` | `9385b7a7` | GitHub + GitLab (converged — doc correction) | vasic-digital/DocProcessor; HelixQA sibling dep; 2 behind own upstream `0c28fb37` |
+| `llm_orchestrator` | `d6cc2485` | GitHub + GitLab (converged — doc correction) | vasic-digital/LLMOrchestrator; HelixQA sibling dep; 2 behind own upstream `f5ebfb50` |
+| `llm_provider` | `ebeaef27` | GitHub + GitLab (converged — doc correction) | vasic-digital/LLMProvider; HelixQA sibling dep; 2 behind own upstream `0446b8f1` |
+| `llms_verifier` | `0599b258` | GitHub + GitLab (converged — doc correction) | vasic-digital/LLMsVerifier; HelixQA sibling dep; 5 behind own upstream `2a105fe7` |
+| `vision_engine` | `e847294f` | GitHub + GitLab (converged — doc correction) | vasic-digital/VisionEngine; HelixQA sibling dep |
+| `http3` | `a3ae3c71` | GitHub + GitLab (converged) | helix-deps.yaml + install_upstreams.sh present |
+| `mdns` | `ba1d2385` | GitHub + GitLab (converged) | helix-deps.yaml + install_upstreams.sh present |
+| `middleware` | `9bcac129` | GitHub + GitLab (converged) | helix-deps.yaml + install_upstreams.sh present |
+| `observability` | `bd3a5be6` | GitHub + GitLab (converged) | helix-deps.yaml + install_upstreams.sh present |
+| `panoptic` (ROOT: `Lava/panoptic`) | `c6b6c493` | **GitHub ↔ GitLab MISMATCH** — GitLab is a real ancestor of GitHub, unreconciled | helix-deps.yaml present; **`install_upstreams.sh` MISSING** (§11.4.36 gap) — operator action owed: push GitHub tip to GitLab + add the script |
+| `ratelimiter` | `6463e517` | GitHub + GitLab (converged) | helix-deps.yaml + install_upstreams.sh present |
+| `recovery` | `30961a17` | GitHub + GitLab (converged) | helix-deps.yaml + install_upstreams.sh present |
+| `security` | `a0dad7dc` | GitHub + GitLab (converged) | helix-deps.yaml + install_upstreams.sh present; 2 behind own upstream `6633661b` |
+| `tracker_sdk` | `7afc37aa` | **GitHub ↔ GitLab MISMATCH** — GitLab tip `b2754ea` is a real ancestor of GitHub, unreconciled | helix-deps.yaml + install_upstreams.sh present — operator action owed: push GitHub tip to GitLab |
+| `constitution` | `6bf67ce4` | universal (HelixConstitution: github+gitlab+gitflic+gitverse, **plus** vasic-digital/github + vasic-digital/gitlab — 6-way converged) | **`helix-deps.yaml` MISSING** (unclear if exempt — flagged, not assumed); 30 commits behind own upstream tip `177f2b05` (frozen pin, deliberate) |
 
 **Internal-to-submodule nested submodules — NONE (CONST-051(C) fully satisfied 2026-06-03).** `submodules/challenges` previously had a stray nested `Panoptic` clone (the last tracked `CM-NO-NESTED-OWN-ORG-SUBMODULES` exposure). It was removed and `vasic-digital/Panoptic` is now incorporated as a **root-level submodule at `Lava/panoptic`** per operator directive (every submodule reachable through the project root, no nesting). Challenges still declares Panoptic as a `layout: flat` dependency in its `helix-deps.yaml`; that declaration now resolves to the root `panoptic` submodule. No submodule nests any own-org submodule.
 
@@ -819,11 +823,24 @@ work.
 - **LVA-008 — nav-teardown crash (search→back → MainActivity destroy ISE)**: The primary open user-facing defect. Navigation-compose throws `IllegalStateException: State must be at least 'CREATED'` on the `search/search_input` NavBackStackEntry during activity destroy after navigating away. CONFIRMED upstream androidx-navigation defect: 8 client-side candidates device-falsified (including launchSingleTop, single-NavHost collapse, Activity-scoped LocalLifecycleOwner — all reverted after FAIL on real KVM emulator). Upstream minimal-repro authored at `docs/issues/upstream/lva-008-androidx-navigation/`. Latest distributed 1076 carries `LenientTeardownRule` on 3 Challenge tests to prevent the ISE from masking real assertions — C48, C52, C66 use it. MECHANICAL FIX EXISTS (`LenientTeardownRule` swallows the instrumented-activity-destroy ISE), but LENIENT IS NOT A REAL FIX for user-path crashes. The companion Challenge C11 (`Challenge11NavigationSearchBackAndForthTest`) tests the nav path and MUST stay RED (the crash IS user-visible in a real-install scenario). **Operator decision owed:** (a) accept the LenientTeardownRule workaround and ship Challenge tests as green for the next distribute, OR (b) keep the upstream minimal-repro as the blocker and hold the search-flow device Challenges (C58-C62) until upstream ships the fix.
 - **§6.AH / §6.X-debt (containerized-emulator gate path on darwin/arm64)**: podman on darwin/arm64 runs in a Linux VM that does NOT expose `/dev/kvm` or HVF passthrough, so the containerized-emulator path (`emulator-matrix --runner=containerized`) cannot boot. The §6.AH rule forbids host-direct emulators for gate runs. **Mitigation:** Genymotion (cloud/operator-booted Android devices) is the macOS-equivalent gate path — proven this cycle with C66 RED+GREEN on Pixel 9 / API 35 via `scripts/run-genymotion-challenges.sh`. Full §6.I multi-emulator matrix (Linux x86_64 + KVM) still owed. Linux x86_64 gate host remains the primary resolution path.
 - **LVA-085 — engine exoneration pending**: `lava-api-go` `/v1/providers` serves correct provider names (proven: `providers.go:66` returns `"YTS"`). A prior in-flight "fix" edited a NON-RENDERED field and its test was a §6.J-proven bluff (passed with the change reverted). Both removed. LVA-085 is conclusively a client-side render bug in the LVA-008-blocked path.
-- **§6.H Firebase CI token echo-leak** (2026-05-20, §6.L 67th): **RESOLVED
-  2026-05-31** — operator rotated the token (`firebase logout` →
+- **§6.H Firebase CI token echo-leak** (2026-05-20, §6.L 67th): claimed **RESOLVED
+  2026-05-31** by commit `42fba7ed` — operator rotated the token (`firebase logout` →
   `firebase login:ci`) during the §6.L 68th cycle; the transcript-leaked token
-  (never committed to git) is now dead. §6.H clause 6 satisfied. Incident:
-  `.lava-ci-evidence/sixth-law-incidents/2026-05-20-firebase-token-echo-leak.json`.
+  (never committed to git) was reported dead. §6.H clause 6 claimed satisfied.
+  **UNCONFIRMED — 2026-08-09 live-audit contradiction (§11.4.6):** the canonical
+  workable-items DB tracks this same concern as `LVA-5` (`operator_block_details`:
+  "RuTracker CI Firebase token rotation... only the operator can run firebase
+  logout / firebase login:ci"), with `status = Operator-blocked` as of its last
+  DB touch 2026-06-30 — a month AFTER this entry's claimed resolution date. The
+  incident file this paragraph cites,
+  `.lava-ci-evidence/sixth-law-incidents/2026-05-20-firebase-token-echo-leak.json`,
+  does not exist in the current tree (searched, not found). `.env` was last
+  modified 2026-07-03 (after both dates), so an actual rotation may have
+  happened without the workable-items tracker being updated to match — but this
+  is not confirmed from file evidence. **Operator action needed:** confirm
+  whether `LAVA_FIREBASE_TOKEN` in `.env` has actually been rotated since
+  2026-05-20; if yes, close `LVA-5` in the DB; if no, rotate it now (§6.H is a
+  release blocker, not a documentation exercise).
 - **LVA-8 — HelixQA crash-detector + consumer fixture** — **RESOLVED 2026-05-31** (§6.L 68th):
   `internal/qa/validator` has 6 failing tests because HelixQA's `isPIDAlive`
   (`submodules/helixqa/pkg/detector/desktop.go`) shells `exec kill -0 <pid>` and
@@ -910,10 +927,16 @@ adoption status + §6.AF-debt for the OWED items:
     constitution also ships a canonical `workable-items` Go binary at
     `constitution/scripts/workable-items/` keyed `docs/workable_items.db`;
     LVA-vs-canonical reconciliation is operator-gated (LVA-3).
-  - §11.4.79/.80 (own-org submodules IN codegraph index) — **OWED** (LVA-6;
-    Lava currently excludes `submodules/`).
-  - §11.4.85 (stress+chaos) — **IN PROGRESS** (LVA-7; phase-1 lava-api-go
-    scaffold + evidence under `docs/chaos-stress/`).
+  - §11.4.79/.80 (own-org submodules IN codegraph index) — **CLOSED** (`LVA-6`,
+    verified against `docs/workable_items.db` 2026-08-09: `status = Completed
+    (→ Fixed.md)`. This entry previously said "OWED... Lava currently excludes
+    submodules/" — that was stale; own-org submodule source is in-scope for the
+    codegraph index per `.codegraph/config.json`).
+  - §11.4.85 (stress+chaos) — **CLOSED** (`LVA-7`, verified against
+    `docs/workable_items.db` 2026-08-09: `status = Completed (→ Fixed.md)`,
+    closed with a falsifiability-rehearsed test
+    (`search_thundering_herd_test.go`). This entry previously said "IN
+    PROGRESS" — also stale.
   - operating-mode clauses — EQUIVALENCE-MAPPED to existing Lava practice.
     §11.4.100 (video-color) DEMOTED to ATMOSphere-only — not binding on Lava.
 The constitution submodule pin bump is a parent-repo change; per CONST-049 the

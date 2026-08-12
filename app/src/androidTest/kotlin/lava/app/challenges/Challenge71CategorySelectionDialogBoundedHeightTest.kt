@@ -86,11 +86,11 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
@@ -108,7 +108,12 @@ import kotlinx.coroutines.runBlocking
 import lava.app.LenientTeardownRule
 import lava.app.OnboardingBypassRule
 import lava.credentials.ProviderConfigRepository
+import lava.search.result.filter.FILTER_CATEGORY_VALUE_TEST_TAG
+import lava.tracker.api.AuthType
+import lava.tracker.api.RemoteTrackerDescriptor
+import lava.tracker.api.TrackerCapability
 import lava.tracker.client.ApiBaseUrlHolder
+import lava.tracker.registry.TrackerRegistry
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -153,12 +158,19 @@ class Challenge71CategorySelectionDialogBoundedHeightTest {
     @InstallIn(SingletonComponent::class)
     interface ProviderSeedEntryPoint {
         fun providerConfigRepository(): ProviderConfigRepository
+        fun trackerRegistry(): TrackerRegistry
     }
 
     private fun providerRepo(): ProviderConfigRepository {
         val app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
         return EntryPointAccessors.fromApplication(app, ProviderSeedEntryPoint::class.java)
             .providerConfigRepository()
+    }
+
+    private fun registry(): TrackerRegistry {
+        val app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
+        return EntryPointAccessors.fromApplication(app, ProviderSeedEntryPoint::class.java)
+            .trackerRegistry()
     }
 
     @Before
@@ -185,12 +197,36 @@ class Challenge71CategorySelectionDialogBoundedHeightTest {
             apiBaseUrl = server.url("/").toString().trimEnd('/'),
             key = TEST_AUTH_KEY,
         )
+
+        // §6.AK root-cause fix (2026-08-10): SEEDED_PROVIDER ("rutracker") is a
+        // BUNDLED compiled-in factory that ignores ApiBaseUrlHolder entirely — only
+        // the dynamic ApiBackedTrackerClient installed by
+        // DefaultTrackerRegistry.populateFrom() reads it. OnboardingBypassRule
+        // skips the real onboarding flow, so populateFrom() never runs, and this
+        // test's MockWebServer was a no-op (the app was silently hitting the real
+        // rutracker.org, unreachable from this sandboxed emulator — the actual
+        // cause of the observed 45s ComposeTimeoutException waiting for the first
+        // search result row, well before the dialog under test is ever reached).
+        // See C58 for the full analysis (identical setup pattern).
+        registry().populateFrom(
+            listOf(
+                RemoteTrackerDescriptor(
+                    trackerId = SEEDED_PROVIDER,
+                    displayName = SEEDED_PROVIDER,
+                    baseUrls = emptyList(),
+                    capabilities = setOf(TrackerCapability.SEARCH),
+                    authType = AuthType.NONE,
+                    encoding = "UTF-8",
+                ),
+            ),
+        )
     }
 
     @After
     fun tearDown() {
         server.shutdown()
         ApiBaseUrlHolder.reset()
+        registry().populateFrom(emptyList())
         runCatching { runBlocking { providerRepo().keepOnlySearchEnabled(emptySet()) } }
     }
 
@@ -242,7 +278,18 @@ class Challenge71CategorySelectionDialogBoundedHeightTest {
         // THE CRASH TRIGGER on the pre-fix code: this opens
         // CategorySelectionDialog, whose unbounded Column fed infinite height
         // into the nested LazyLists.
-        composeRule.onNode(hasText("Any") and hasClickAction()).performClick()
+        //
+        // §6.AK follow-up fix (2026-08-11): FilterAuthorItem ALSO defaults its
+        // value to the shared "Any" string (search_screen_filter_any) when no
+        // author is set, so a text+click selector alone matched TWO nodes once
+        // the mock-registry fix above let the filter bar actually render both
+        // rows (previously the test never got this far — it hung on the
+        // search-results wait). `onSiblings()` does NOT disambiguate either:
+        // plain Row/Column add no semantics node of their own, so FilterBar's
+        // rows flatten into one accessibility level (confirmed by re-running:
+        // still matched 2 nodes). Target the explicit test tag added to
+        // FilterCategoryItem instead.
+        composeRule.onNodeWithTag(FILTER_CATEGORY_VALUE_TEST_TAG).performClick()
 
         // PRIMARY ASSERTION on user-visible state: the dialog rendered — its
         // "Current" page tab and its bottom-bar Apply/Cancel actions compose.

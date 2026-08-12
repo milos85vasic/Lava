@@ -1,0 +1,34 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.9/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :buildSrc:checkKotlinGradlePluginConfigurationErrors
+> Task :buildSrc:compileKotlin UP-TO-DATE
+> Task :buildSrc:compileJava NO-SOURCE
+> Task :buildSrc:compileGroovy NO-SOURCE
+> Task :buildSrc:pluginDescriptors UP-TO-DATE
+> Task :buildSrc:processResources UP-TO-DATE
+> Task :buildSrc:classes UP-TO-DATE
+> Task :buildSrc:jar UP-TO-DATE
+> Task :tracker_sdk:api:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :tracker_sdk:api:compileKotlin UP-TO-DATE
+> Task :tracker_sdk:api:compileJava NO-SOURCE
+> Task :tracker_sdk:api:processResources NO-SOURCE
+> Task :tracker_sdk:api:classes UP-TO-DATE
+> Task :tracker_sdk:api:jar UP-TO-DATE
+> Task :tracker_sdk:registry:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :tracker_sdk:registry:compileKotlin UP-TO-DATE
+> Task :tracker_sdk:registry:compileJava NO-SOURCE
+> Task :tracker_sdk:registry:processResources NO-SOURCE
+> Task :tracker_sdk:registry:classes UP-TO-DATE
+> Task :tracker_sdk:registry:jar UP-TO-DATE
+> Task :tracker_sdk:mirror:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :tracker_sdk:mirror:compileKotlin UP-TO-DATE
+> Task :tracker_sdk:mirror:compileJava NO-SOURCE
+> Task :tracker_sdk:mirror:processResources NO-SOURCE
+> Task :tracker_sdk:mirror:classes UP-TO-DATE
+> Task :tracker_sdk:mirror:jar UP-TO-DATE
+> Task :tracker_sdk:testing:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :tracker_sdk:testing:compileKotlin UP-TO-DATE
+> Task :tracker_sdk:testing:compileJava NO-SOURCE
+> Task :tracker_sdk:testing:processResources NO-SOURCE
+> Task :tracker_sdk:testing:classes UP-TO-DATE
+> Task :tracker_sdk:testing:jar UP-TO-DATE
