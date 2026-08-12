@@ -1295,5 +1295,18 @@ sibling cold-start race finding LVA-093. Real-world frequency and
 user-visible impact are UNCONFIRMED without device instrumentation – no
 build or test was executed for this specific finding, only source
 reading.</p>
+<h2
+id="lva-081-fetchpullmerge-latest-from-all-submodules-build-verify-operator-directive-2026-06-26">LVA-081
+— Fetch/pull/merge latest from all submodules + build-verify (operator
+directive 2026-06-26)</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+.lava-ci-evidence/bluff-hunt/2026-08-12-lva-081-submodule-bump-evidence.md
+<strong>Severity:</strong> P2 <strong>Created-By:</strong> AI
+<strong>Assigned-To:</strong> AI</p>
+<p>Operator directive: fetch+pull+merge latest codebase from all
+submodules. Frozen-by-default overridden for this cycle. Must
+build-verify after each bump; revert+report any submodule whose bump
+breaks the build.</p>
 </body>
 </html>
