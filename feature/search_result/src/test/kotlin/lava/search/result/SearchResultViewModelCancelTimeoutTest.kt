@@ -17,6 +17,7 @@ import lava.domain.usecase.EnrichFilterUseCase
 import lava.domain.usecase.ObserveAuthStateUseCase
 import lava.domain.usecase.ObserveSearchPagingDataUseCase
 import lava.domain.usecase.ObserveSettingsUseCase
+import lava.domain.usecase.StartupProvidersGate
 import lava.domain.usecase.ToggleFavoriteUseCase
 import lava.models.auth.AuthState
 import lava.models.search.Filter
@@ -253,6 +254,9 @@ class SearchResultViewModelCancelTimeoutTest {
             observeSettingsUseCase = ObserveSettingsUseCase(TestSettingsRepository()),
             analytics = noopAnalytics,
             sdk = LavaTrackerSdk(registry = registry),
+            // LVA-093: this suite tests cancel/timeout, not the cold-start
+            // race — pre-mark ready so search proceeds immediately.
+            providersReadyGate = StartupProvidersGate().apply { markReady() },
         )
     }
 

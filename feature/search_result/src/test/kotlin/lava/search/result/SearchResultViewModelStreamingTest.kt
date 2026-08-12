@@ -15,6 +15,7 @@ import lava.domain.usecase.EnrichFilterUseCase
 import lava.domain.usecase.ObserveAuthStateUseCase
 import lava.domain.usecase.ObserveSearchPagingDataUseCase
 import lava.domain.usecase.ObserveSettingsUseCase
+import lava.domain.usecase.StartupProvidersGate
 import lava.domain.usecase.ToggleFavoriteUseCase
 import lava.models.auth.AuthState
 import lava.models.search.Filter
@@ -43,6 +44,8 @@ import lava.tracker.client.LavaTrackerSdk
 import lava.tracker.registry.DefaultTrackerRegistry
 import lava.tracker.registry.TrackerClientFactory
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -101,6 +104,24 @@ class SearchResultViewModelStreamingTest {
     private fun descriptor(id: String): TrackerDescriptor = object : TrackerDescriptor {
         override val trackerId: String = id
         override val displayName: String = "Tracker ${id.uppercase()}"
+        override val baseUrls: List<MirrorUrl> = listOf(
+            MirrorUrl(url = "https://$id.test", isPrimary = true, priority = 0, protocol = Protocol.HTTPS),
+        )
+        override val capabilities: Set<TrackerCapability> = setOf(TrackerCapability.SEARCH)
+        override val authType: AuthType = AuthType.NONE
+        override val encoding: String = "UTF-8"
+        override val expectedHealthMarker: String = "ok"
+    }
+
+    /**
+     * Same shape as [descriptor] but with an EXPLICIT [displayName], distinct
+     * from the raw [id], so LVA-085 tests can assert the resolved chip label
+     * is the human-readable name — not merely "some non-raw string" — and so
+     * a mutation that falls back to the raw id is unambiguously distinguishable.
+     */
+    private fun descriptorNamed(id: String, name: String): TrackerDescriptor = object : TrackerDescriptor {
+        override val trackerId: String = id
+        override val displayName: String = name
         override val baseUrls: List<MirrorUrl> = listOf(
             MirrorUrl(url = "https://$id.test", isPrimary = true, priority = 0, protocol = Protocol.HTTPS),
         )
@@ -289,6 +310,11 @@ class SearchResultViewModelStreamingTest {
         sortParam: String? = null,
         orderParam: String? = null,
         periodParam: String? = null,
+        // LVA-093: defaults to already-ready so every EXISTING test in this
+        // file (none of which target the cold-start race) keeps its prior
+        // unblocked-immediately behavior. The two LVA-093 tests below pass an
+        // explicit NOT-ready gate.
+        providersReadyGate: StartupProvidersGate = StartupProvidersGate().apply { markReady() },
     ): SearchResultViewModel {
         pagingFake = FakeObserveSearchPagingDataUseCase()
         addHistoryFake = FakeAddSearchHistoryUseCase()
@@ -313,6 +339,7 @@ class SearchResultViewModelStreamingTest {
             observeSettingsUseCase = ObserveSettingsUseCase(TestSettingsRepository()),
             analytics = analytics,
             sdk = LavaTrackerSdk(registry = registry),
+            providersReadyGate = providersReadyGate,
         )
     }
 
@@ -527,5 +554,192 @@ class SearchResultViewModelStreamingTest {
             )
             // The default fields must still pass through unchanged.
             assertEquals("ubuntu", request.query)
+        }
+
+    // CHALLENGE — LVA-085 regression (2026-06-25 QA video #4, frames
+    // 0060/0125/0130: results filter chips rendered raw provider ids like
+    // "archiveorg"/"torrentdownloads"/"kinozal"/"yts" instead of their
+    // display names). `SearchResultScreen.ProviderFilterChipBar` renders
+    // from `state.providerDisplayNames[pid] ?: pid` the INSTANT
+    // `filterProviderChipIds` (sourced from `filter.providerIds`) is
+    // non-empty — i.e. on the FIRST composed frame of the `Streaming`
+    // state. Before the fix, `providerDisplayNames` started as `emptyMap()`
+    // and was populated ONLY as async `MultiSearchEvent.ProviderStart`
+    // events streamed in (one per provider), so that first frame always
+    // fell back to the raw id. This test asserts the display name is
+    // ALREADY resolved on the very first `Streaming` state emission —
+    // i.e. before ANY `ProviderStart` event could possibly have been
+    // applied — which is only true if the resolution happens eagerly
+    // (this fix) rather than reactively (the pre-fix behavior).
+    //
+    // FALSIFIABILITY (§6.J / Sixth Law clause 2 — PERFORMED):
+    //  Mutation: reverted the seed `reduce` in
+    //    `SearchResultViewModel.observeStreamMultiSearch` back to the
+    //    pre-fix shape (`providerDisplayNames` left untouched,
+    //    `ProviderStreamStatus.displayName = pid`).
+    //  Observed-Failure: `AssertionError: the results filter chip's display
+    //    name MUST be resolved on the very first Streaming state, before
+    //    any ProviderStart event — NOT fall back to the raw provider id
+    //    expected:<Archive.org> but was:<null>`
+    //  Reverted: yes — re-applied the fix, test passes again.
+    @Test
+    fun streaming_search_seeds_providerDisplayNames_on_first_Streaming_state_before_any_ProviderStart_event() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val vm = createViewModel(
+                providerIds = listOf("archiveorg"),
+                clients = listOf(
+                    FixedResultClient(
+                        descriptor = descriptorNamed("archiveorg", "Archive.org"),
+                        items = listOf(item("archiveorg", "t1", "Free Book")),
+                    ),
+                ),
+            )
+
+            vm.test(this) {
+                runOnCreate()
+
+                // Pump state emissions until the first Streaming state (the
+                // one produced by observeStreamMultiSearch's seed `reduce`,
+                // strictly BEFORE any per-provider ProviderStart/ProviderResults
+                // event has a chance to be applied) — this is exactly the
+                // state a real user's first composed frame reads from.
+                var seedState: SearchPageState? = null
+                var guard = 0
+                while (seedState == null && guard < 20) {
+                    val next = awaitState()
+                    if (next.searchContent is SearchResultContent.Streaming) {
+                        seedState = next
+                    }
+                    guard += 1
+                }
+                val streamingSeed = seedState
+                    ?: error("Streaming state was never emitted — streaming path did not execute")
+
+                // §6.J primary — user-visible state: the results filter chip's
+                // resolved label on the VERY FIRST frame the user sees.
+                assertEquals(
+                    "the results filter chip's display name MUST be resolved on the " +
+                        "very first Streaming state, before any ProviderStart event " +
+                        "— NOT fall back to the raw provider id",
+                    "Archive.org",
+                    streamingSeed.providerDisplayNames["archiveorg"],
+                )
+
+                cancelAndIgnoreRemainingItems()
+            }
+        }
+
+    // ======================= LVA-093 (cold-start race) =======================
+    //
+    // Reproduces the operator's report: a search fired immediately after app
+    // launch, before the cold-start dynamic-provider repopulation coroutine
+    // has finished, must NOT silently resolve against whatever tracker client
+    // happens to be registered at that instant. [SearchResultViewModel
+    // .observeStreamMultiSearch] now awaits [StartupProvidersGate.awaitReady]
+    // BEFORE calling `sdk.streamMultiSearch(...)` — these tests prove that
+    // wiring against the REAL ViewModel + REAL SDK + REAL registry, using the
+    // same [CapturingClient] technique the sort/order/period test above uses
+    // to observe exactly when `search()` is (or is not yet) invoked.
+    //
+    // ## FALSIFIABILITY REHEARSAL (§6.J clause 2 / Sixth Law clause 2)
+    //
+    //   Mutation: in SearchResultViewModel.observeStreamMultiSearch, delete
+    //     the `providersReadyGate.awaitReady()` line.
+    //   Observed-Failure:
+    //     `streaming search does not resolve the tracker client before the
+    //     readiness gate opens` FAILS at
+    //     `assertNull("the tracker client MUST NOT be touched before the
+    //     readiness gate opens", capturing.lastRequest)` →
+    //     AssertionError: expected null but was SearchRequest(query=ubuntu...)
+    //     — the client is called immediately, proving the race is back.
+    //   Reverted: yes — restoring the `awaitReady()` call makes both tests
+    //     below pass again.
+
+    // CHALLENGE — the load-bearing anti-bluff proof: while the gate is NOT
+    // ready, the tracker client is genuinely untouched; once markReady() is
+    // called, the SAME already-running intent proceeds and calls it.
+    @Test
+    fun `streaming search does not resolve the tracker client before the readiness gate opens`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val capturing = CapturingClient(descriptor("p1"))
+            val gate = StartupProvidersGate() // deliberately NOT marked ready
+            val vm = createViewModel(
+                providerIds = listOf("p1"),
+                clients = listOf(capturing),
+                providersReadyGate = gate,
+            )
+
+            vm.test(this) {
+                runOnCreate()
+
+                // §6.J primary #1 — with UnconfinedTestDispatcher the intent
+                // already ran eagerly up to the awaitReady() suspension point,
+                // so by this line the tracker client MUST NOT have been
+                // touched yet — proving the race is closed, not just delayed.
+                assertNull(
+                    "the tracker client MUST NOT be resolved/called before " +
+                        "the cold-start readiness gate opens — was ${capturing.lastRequest}",
+                    capturing.lastRequest,
+                )
+
+                // The cold-start repopulation concludes — let the now-unblocked
+                // coroutine run to completion (TestCoroutineScheduler.advanceUntilIdle
+                // is the stable, dispatcher-agnostic way to drain queued
+                // continuations; the same technique CancelTimeoutTest uses via
+                // advanceTimeBy for its own timeout scenario).
+                gate.markReady()
+                mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+                cancelAndIgnoreRemainingItems()
+            }
+
+            // §6.J primary #2 — AFTER the gate opens, the SAME search proceeds
+            // and the client is genuinely invoked with the user's real query.
+            val request = capturing.lastRequest
+                ?: error("CapturingClient.search was never called after markReady() — the search never resumed")
+            assertEquals("ubuntu", request.query)
+        }
+
+    // CHALLENGE — the graceful-degradation guarantee: if the gate is NEVER
+    // marked ready (e.g. an unexpected bug elsewhere left it stuck), the
+    // search still proceeds once its bounded timeout elapses rather than
+    // hanging the user's UI forever.
+    @Test
+    fun `streaming search proceeds anyway once the readiness gate's bounded wait times out`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val capturing = CapturingClient(descriptor("p1"))
+            val gate = StartupProvidersGate() // never marked ready in this test
+            val vm = createViewModel(
+                providerIds = listOf("p1"),
+                clients = listOf(capturing),
+                providersReadyGate = gate,
+            )
+
+            vm.test(this) {
+                runOnCreate()
+                assertNull(
+                    "the client MUST NOT be touched before the gate's timeout elapses",
+                    capturing.lastRequest,
+                )
+
+                // Advance virtual time past StartupProvidersGate.DEFAULT_AWAIT_TIMEOUT_MS
+                // (5_000ms) — the gate is still NOT ready, but the bounded wait
+                // must give up rather than hang the search forever.
+                mainDispatcherRule.testDispatcher.scheduler.advanceTimeBy(5_100L)
+                cancelAndIgnoreRemainingItems()
+            }
+
+            // §6.J primary — the search proceeded despite the gate never
+            // opening, proving the timeout fallback genuinely unblocks the UI.
+            assertEquals(
+                "the search MUST proceed once the bounded wait times out, even " +
+                    "though the gate was never marked ready",
+                "ubuntu",
+                capturing.lastRequest?.query,
+            )
+            assertFalse(
+                "the gate itself remains honestly not-ready — the timeout is a " +
+                    "documented degradation, not a fake success",
+                gate.ready.value,
+            )
         }
 }

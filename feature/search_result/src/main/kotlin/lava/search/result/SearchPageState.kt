@@ -108,3 +108,40 @@ internal val SearchPageState.categories
         is SearchResultContent.Unauthorized -> emptyList()
         is SearchResultContent.Streaming -> emptyList()
     }
+
+/**
+ * LVA-086 (2026-06-25 QA video issue #5 — "pure black body for ~25s, no
+ * spinner/skeleton/no-results" while a multi-provider search is in flight).
+ *
+ * The Streaming-provider-filtered items list [SearchResultScreen] renders —
+ * extracted here (rather than computed inline in the Composable) so a JVM
+ * ViewModel/state test can exercise the *exact* production logic the screen
+ * renders from, not a hand-copied duplicate of it. Empty for every
+ * non-Streaming [SearchResultContent] variant.
+ */
+internal val SearchPageState.streamingFilteredItems: List<TopicModel<Torrent>>
+    get() {
+        val content = searchContent
+        if (content !is SearchResultContent.Streaming) return emptyList()
+        return selectedFilterProvider?.let { pid ->
+            content.items.filter { it.providerId == pid }
+        } ?: content.items
+    }
+
+/**
+ * LVA-086 — true exactly when the search-results screen must render the
+ * loading spinner: a multi-provider stream is in flight ([SearchResultContent.Streaming]),
+ * no (filtered) items have arrived yet, AND at least one provider is still
+ * [StreamStatus.SEARCHING]. Before the 2026-06-25 fix, none of the render
+ * branches covered this window — the screen rendered a blank body for the
+ * full client-side search timeout, indistinguishable from a hang. See
+ * `SearchResultViewModelLoadingEmptyStateTest` for the regression coverage +
+ * falsifiability rehearsal.
+ */
+internal val SearchPageState.showsStreamingLoadingIndicator: Boolean
+    get() {
+        val content = searchContent
+        return content is SearchResultContent.Streaming &&
+            streamingFilteredItems.isEmpty() &&
+            content.activeProviders.any { it.status == StreamStatus.SEARCHING }
+    }

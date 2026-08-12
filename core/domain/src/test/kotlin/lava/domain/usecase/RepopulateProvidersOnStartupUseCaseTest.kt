@@ -2,6 +2,7 @@ package lava.domain.usecase
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import lava.common.analytics.AnalyticsTracker
 import lava.data.provider.InMemoryProviderCatalogStore
 import lava.data.provider.ProviderCatalogRepository
 import lava.models.settings.Endpoint
@@ -106,6 +107,32 @@ class RepopulateProvidersOnStartupUseCaseTest {
     }
 
     /**
+     * LVA-093/LVA-094: captures the readiness gate + §6.AC telemetry so the
+     * use case's own contract (mark-ready-exactly-once, record-every-failed-attempt)
+     * is asserted directly against a REAL [StartupProvidersGate] and a
+     * recording (not mocked-SUT) [AnalyticsTracker] fake — the legitimate
+     * outermost telemetry boundary, per §6.J Second Law.
+     */
+    private lateinit var gate: StartupProvidersGate
+    private lateinit var analytics: RecordingAnalytics
+
+    /** Records every non-fatal recorded, in call order, for assertion. */
+    private class RecordingAnalytics : AnalyticsTracker {
+        data class NonFatal(val throwable: Throwable, val context: Map<String, String>)
+
+        val nonFatals = mutableListOf<NonFatal>()
+
+        override fun event(name: String, params: Map<String, String>) {}
+        override fun setUserId(userId: String?) {}
+        override fun setProperty(key: String, value: String?) {}
+        override fun recordNonFatal(throwable: Throwable, context: Map<String, String>) {
+            nonFatals += NonFatal(throwable, context)
+        }
+        override fun recordWarning(message: String, context: Map<String, String>) {}
+        override fun log(message: String) {}
+    }
+
+    /**
      * The 4 bundled providers a cold-started registry holds before any dynamic
      * fetch (the "only 4 providers" baseline the operator reported).
      */
@@ -168,6 +195,8 @@ class RepopulateProvidersOnStartupUseCaseTest {
         sdk = LavaTrackerSdk(registry)
 
         settings = TestSettingsRepository()
+        gate = StartupProvidersGate()
+        analytics = RecordingAnalytics()
     }
 
     @After
@@ -223,6 +252,8 @@ class RepopulateProvidersOnStartupUseCaseTest {
             apiBaseUrlBuilder = SseBaseUrlBuilder { host, port -> "http://$host:$port" },
             endpointsRepository = endpoints,
             apiKeyProvider = fakeApiKeyProvider,
+            providersReadyGate = gate,
+            analytics = analytics,
         )
     }
 
@@ -444,8 +475,11 @@ class RepopulateProvidersOnStartupUseCaseTest {
             settings.setEndpoint(Endpoint.GoApi(host = server.hostName, port = server.port, key = "k"))
             // The api-app returns 500 — the real FetchProvidersUseCase maps this
             // to Result.failure (it does NOT throw); the use case must NOT clear
-            // the registry.
+            // the registry. LVA-094 adds a single retry, so BOTH attempts must
+            // be enqueued or the second request would block on an empty
+            // MockWebServer dispatch queue.
             server.enqueue(MockResponse().setResponseCode(500).setBody("boom"))
+            server.enqueue(MockResponse().setResponseCode(500).setBody("boom again"))
 
             val repopulated = buildUseCase().invoke()
 
@@ -459,6 +493,192 @@ class RepopulateProvidersOnStartupUseCaseTest {
                 "the bundled providers MUST remain intact after a fetch failure — was $after",
                 bundledIds.toSet(),
                 after,
+            )
+        }
+
+    // ======================= LVA-093 (cold-start race) =======================
+    //
+    // §6.J primary assertion: the readiness gate the search entry point awaits
+    // ([lava.search.result.SearchResultViewModel]) MUST be released exactly
+    // once the repopulation ATTEMPT concludes — on every exit path, success or
+    // failure — so a search fired immediately after cold start can never be
+    // left waiting forever, and (per SearchResultViewModelStreamingTest) can
+    // never silently resolve against a stale registry while this use case is
+    // still mid-flight.
+    //
+    // FALSIFIABILITY (§6.J clause 2): delete the `finally { providersReadyGate
+    // .markReady() }` wrapper in RepopulateProvidersOnStartupUseCase.invoke()
+    // (i.e. call markReady() only inside the success branch, as an ordinary
+    // statement after `trackerRegistry.populateFrom(descriptors)`). The
+    // `cold start marks the providers-ready gate even when the fetch
+    // ultimately fails` test below then FAILS: `assertTrue("the gate MUST be
+    // marked ready ...", gate.ready.value)` → AssertionError, because the
+    // failure path (`onFailure = { false }`) never reaches the deleted call.
+
+    // CHALLENGE — success path.
+    @Test
+    fun `cold start marks the providers-ready gate after a successful repopulation`() =
+        runTest {
+            assertFalse("the gate MUST start not-ready", gate.ready.value)
+            settings.setEndpoint(Endpoint.GoApi(host = server.hostName, port = server.port, key = "k"))
+            server.enqueue(
+                MockResponse().setResponseCode(200)
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(catalogueJson()),
+            )
+
+            buildUseCase().invoke()
+
+            assertTrue(
+                "the gate MUST be marked ready once the repopulation attempt " +
+                    "concludes, unblocking any search awaiting it",
+                gate.ready.value,
+            )
+        }
+
+    // CHALLENGE — failure path (the case a naive success-only markReady()
+    // placement would miss — the exact mutation the falsifiability rehearsal
+    // above targets).
+    @Test
+    fun `cold start marks the providers-ready gate even when the fetch ultimately fails`() =
+        runTest {
+            assertFalse("the gate MUST start not-ready", gate.ready.value)
+            settings.setEndpoint(Endpoint.GoApi(host = server.hostName, port = server.port, key = "k"))
+            server.enqueue(MockResponse().setResponseCode(500).setBody("boom"))
+            server.enqueue(MockResponse().setResponseCode(500).setBody("boom again"))
+
+            buildUseCase().invoke()
+
+            assertTrue(
+                "the gate MUST be marked ready even when the fetch fails — " +
+                    "otherwise a search fired at cold start would wait until " +
+                    "its own bounded timeout instead of the (usually much " +
+                    "faster) repopulation-concluded signal",
+                gate.ready.value,
+            )
+        }
+
+    // CHALLENGE — the non-GoApi fast path (an early `return false`) MUST also
+    // release the gate; this is the path most likely to be missed by a naive
+    // `try { ...; markReady(); return result }`-without-`finally` refactor.
+    @Test
+    fun `cold start marks the providers-ready gate on the non-GoApi fast path too`() =
+        runTest {
+            assertFalse("the gate MUST start not-ready", gate.ready.value)
+
+            buildUseCase().invoke()
+
+            assertTrue(
+                "the gate MUST be marked ready on the early-return (non-GoApi) " +
+                    "path too — the fast path is the MOST likely to be missed " +
+                    "by a naive non-finally markReady() placement",
+                gate.ready.value,
+            )
+        }
+
+    // ==================== LVA-094 (silent failure + retry) ====================
+    //
+    // §6.J primary assertion: a catalogue-fetch failure MUST surface to
+    // telemetry (not vanish silently) AND MUST be retried once before the use
+    // case gives up for the rest of the process lifetime.
+    //
+    // FALSIFIABILITY (§6.J clause 2): revert `fetchWithRetry` to the original
+    // single-attempt `fetchProvidersUseCase(apiBaseUrl, goApi.key)` (no retry,
+    // no recordFetchFailure call). Both tests below then FAIL:
+    //  - `a fetch failure is recorded via telemetry...` fails at
+    //    `assertEquals("exactly 2 non-fatals...", 2, analytics.nonFatals.size)`
+    //    → AssertionError: expected:<2> but was:<0> (nothing was ever recorded).
+    //  - `a transient fetch failure is retried...` fails at
+    //    `assertTrue("the startup re-populate MUST report success on retry",
+    //    repopulated)` → AssertionError, because the single attempt hits the
+    //    500 and never gets a chance at the enqueued 200.
+
+    // CHALLENGE — every failed attempt (including the final one) is recorded.
+    @Test
+    fun `a fetch failure is recorded via telemetry with the attempt number, for every failed attempt`() =
+        runTest {
+            settings.setEndpoint(Endpoint.GoApi(host = server.hostName, port = server.port, key = "k"))
+            server.enqueue(MockResponse().setResponseCode(500).setBody("boom-1"))
+            server.enqueue(MockResponse().setResponseCode(500).setBody("boom-2"))
+
+            val repopulated = buildUseCase().invoke()
+
+            assertFalse("both attempts failing MUST report no-repopulate", repopulated)
+            // PRIMARY — the failure is no longer silent: exactly one non-fatal
+            // per failed attempt reaches the operator's telemetry feed.
+            assertEquals(
+                "exactly 2 non-fatals MUST be recorded (one per failed attempt) " +
+                    "— was ${analytics.nonFatals.size}",
+                2,
+                analytics.nonFatals.size,
+            )
+            assertEquals("1", analytics.nonFatals[0].context["attempt"])
+            assertEquals("2", analytics.nonFatals[1].context["attempt"])
+            analytics.nonFatals.forEach { recorded ->
+                assertEquals(
+                    "startup_provider_repopulate_failed",
+                    recorded.context[AnalyticsTracker.Params.ERROR],
+                )
+                assertEquals("fetchProviders", recorded.context[AnalyticsTracker.Params.OPERATION])
+            }
+        }
+
+    // CHALLENGE — the retry actually rescues a transient failure: the SECOND
+    // attempt succeeding is enough for the use case to report success and
+    // fully repopulate the registry, and only ONE non-fatal (for the first,
+    // failed attempt) is recorded — the retry's own success is not an error.
+    @Test
+    fun `a transient fetch failure is retried and succeeds on the second attempt`() =
+        runTest {
+            settings.setEndpoint(Endpoint.GoApi(host = server.hostName, port = server.port, key = "k"))
+            server.enqueue(MockResponse().setResponseCode(500).setBody("transient-blip"))
+            server.enqueue(
+                MockResponse().setResponseCode(200)
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(catalogueJson()),
+            )
+
+            val repopulated = buildUseCase().invoke()
+
+            // PRIMARY — the retry rescues the cold start: success, not a
+            // process-lifetime degradation from a single transient blip.
+            assertTrue("the startup re-populate MUST report success on retry", repopulated)
+            val after = sdk.listAvailableTrackers().map { it.trackerId }.toSet()
+            assertEquals(
+                "the retry-rescued fetch MUST fully repopulate the registry " +
+                    "with all 12 providers — was $after",
+                allTwelveIds.toSet(),
+                after,
+            )
+            // SECONDARY — exactly the first (failed) attempt is recorded; the
+            // successful retry is not itself logged as a failure.
+            assertEquals(
+                "exactly 1 non-fatal MUST be recorded (the first attempt only) " +
+                    "— was ${analytics.nonFatals.size}",
+                1,
+                analytics.nonFatals.size,
+            )
+            assertEquals("1", analytics.nonFatals.single().context["attempt"])
+        }
+
+    // CHALLENGE — the success path (no failures at all) records nothing —
+    // telemetry is for real failures only, never noise on the happy path.
+    @Test
+    fun `a successful fetch on the first attempt records no telemetry`() =
+        runTest {
+            settings.setEndpoint(Endpoint.GoApi(host = server.hostName, port = server.port, key = "k"))
+            server.enqueue(
+                MockResponse().setResponseCode(200)
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(catalogueJson()),
+            )
+
+            buildUseCase().invoke()
+
+            assertTrue(
+                "a clean first-attempt success MUST NOT record any non-fatal " +
+                    "— was ${analytics.nonFatals.size}",
+                analytics.nonFatals.isEmpty(),
             )
         }
 }

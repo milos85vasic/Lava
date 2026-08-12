@@ -1,10 +1,12 @@
 package lava.domain.usecase
 
 import kotlinx.coroutines.flow.first
+import lava.common.analytics.AnalyticsTracker
 import lava.data.api.repository.EndpointsRepository
 import lava.data.api.repository.SettingsRepository
 import lava.models.settings.Endpoint
 import lava.network.sse.SseBaseUrlBuilder
+import lava.tracker.api.RemoteTrackerDescriptor
 import lava.tracker.registry.TrackerRegistry
 import javax.inject.Inject
 
@@ -59,6 +61,26 @@ import javax.inject.Inject
  * `:core:domain` does not take a hard dependency on `:core:tracker:client`'s
  * `ApiBaseUrlHolder` object (the production binding lives in `:app`).
  *
+ * ## Cold-start race + silent-failure closure (LVA-093 / LVA-094, 2026-08)
+ *
+ * This use case runs off the main thread in a fire-and-forget coroutine
+ * (`LavaApplication.onCreate()`'s `startupScope.launch { ... }`) so it cannot
+ * block app startup. Before LVA-093/LVA-094 closed, nothing awaited that
+ * coroutine's completion (a search fired immediately after launch could
+ * silently resolve against the stale bundled registry — LVA-093) and a
+ * catalogue-fetch failure was swallowed with no telemetry and no retry
+ * (LVA-094). Both are now closed:
+ *
+ *  - [providersReadyGate] is marked ready — via [StartupProvidersGate.markReady]
+ *    — in a `finally` block wrapping the ENTIRE body, so every return path
+ *    (non-GoApi fast path, fetch success, fetch failure) releases any
+ *    consumer awaiting readiness (the search entry point,
+ *    [lava.search.result.SearchResultViewModel]) exactly once.
+ *  - [fetchWithRetry] performs a single retry on a failed catalogue fetch and
+ *    records a §6.AC non-fatal via [analytics] for EVERY failed attempt
+ *    (including the final one), so a cold-start repopulation failure is no
+ *    longer invisible to the operator.
+ *
  * @return `true` if the dynamic catalogue was successfully fetched and the
  *   registry repopulated; `false` if it degraded to bundled (non-GoApi endpoint,
  *   unreachable API, or fetch failure). The Boolean is for test assertions and
@@ -76,38 +98,99 @@ class RepopulateProvidersOnStartupUseCase @Inject constructor(
     // 2026-06-14 existing-install KEY-RESTORE (search-auth fix). See
     // [restoreActiveEndpointKey].
     private val apiKeyProvider: ApiKeyProvider,
+    // LVA-093 (2026-08): unblocks a search fired before this cold-start
+    // attempt has concluded. See [StartupProvidersGate].
+    private val providersReadyGate: StartupProvidersGate,
+    // LVA-094 (2026-08): §6.AC non-fatal telemetry for the catalogue-fetch
+    // failure path. See [fetchWithRetry].
+    private val analytics: AnalyticsTracker,
 ) {
     suspend operator fun invoke(): Boolean {
-        // Restore the per-instance Lava-Auth key onto the active endpoint BEFORE
-        // anything reads it for search (existing installs whose persisted
-        // settings.endpoint carries host:port but NO key — the key was never
-        // packed into the Room Endpoint row, only into the same-session
-        // settings.endpoint that a pre-2026-06-14 onboarding wrote without it).
-        restoreActiveEndpointKey()
-        // Heal the active endpoint BEFORE reading it (existing installs whose
-        // onboarding pre-dates the 2026-06-14 settings.endpoint write).
-        reconcileActiveEndpoint()
-        val endpoint = runCatching { settingsRepository.getSettings().endpoint }.getOrNull()
-        val goApi = endpoint as? Endpoint.GoApi ?: return false
-        val apiBaseUrl = apiBaseUrlBuilder.build(goApi.host, goApi.port)
-        return fetchProvidersUseCase(apiBaseUrl, goApi.key).fold(
-            onSuccess = { descriptors ->
-                // Set the ACTIVE lava-api-go base URL the registry's
-                // ApiBackedTrackerClient factory reads BEFORE populateFrom, so
-                // each dynamic client targets the chosen instance — identical
-                // ordering to OnboardingViewModel.fetchAndPopulateProviders.
-                // Pass the per-endpoint key too so the cold-start-built dynamic
-                // clients authenticate their /v1/{id}/{op} calls — otherwise a
-                // restart would 401 every search ("Something went wrong") even
-                // though the same-session onboarding worked (2026-06-14 fix).
-                activator.activate(apiBaseUrl, goApi.key)
-                trackerRegistry.populateFrom(descriptors)
-                true
-            },
-            // §6.AB: a fetch failure leaves the bundled registry intact (never a
-            // blank list). NEVER throws — FetchProvidersUseCase already captured
-            // the failure into Result.failure; we just decline to repopulate.
-            onFailure = { false },
+        try {
+            // Restore the per-instance Lava-Auth key onto the active endpoint BEFORE
+            // anything reads it for search (existing installs whose persisted
+            // settings.endpoint carries host:port but NO key — the key was never
+            // packed into the Room Endpoint row, only into the same-session
+            // settings.endpoint that a pre-2026-06-14 onboarding wrote without it).
+            restoreActiveEndpointKey()
+            // Heal the active endpoint BEFORE reading it (existing installs whose
+            // onboarding pre-dates the 2026-06-14 settings.endpoint write).
+            reconcileActiveEndpoint()
+            val endpoint = runCatching { settingsRepository.getSettings().endpoint }.getOrNull()
+            val goApi = endpoint as? Endpoint.GoApi ?: return false
+            val apiBaseUrl = apiBaseUrlBuilder.build(goApi.host, goApi.port)
+            return fetchWithRetry(apiBaseUrl, goApi).fold(
+                onSuccess = { descriptors ->
+                    // Set the ACTIVE lava-api-go base URL the registry's
+                    // ApiBackedTrackerClient factory reads BEFORE populateFrom, so
+                    // each dynamic client targets the chosen instance — identical
+                    // ordering to OnboardingViewModel.fetchAndPopulateProviders.
+                    // Pass the per-endpoint key too so the cold-start-built dynamic
+                    // clients authenticate their /v1/{id}/{op} calls — otherwise a
+                    // restart would 401 every search ("Something went wrong") even
+                    // though the same-session onboarding worked (2026-06-14 fix).
+                    activator.activate(apiBaseUrl, goApi.key)
+                    trackerRegistry.populateFrom(descriptors)
+                    true
+                },
+                // §6.AB: a fetch failure leaves the bundled registry intact (never a
+                // blank list). NEVER throws — [fetchWithRetry] already captured the
+                // failure into Result.failure (+ recorded it, LVA-094); we just
+                // decline to repopulate.
+                onFailure = { false },
+            )
+        } finally {
+            // LVA-093: release any search awaiting readiness. Runs on EVERY exit
+            // path of this function (early `return false`, success, failure, or
+            // an unexpected throw) so the gate can never be left stuck open.
+            providersReadyGate.markReady()
+        }
+    }
+
+    /**
+     * LVA-094: the catalogue fetch used to be a single attempt whose failure
+     * was swallowed by the caller with `onFailure = { false }` — no
+     * telemetry, no retry, degraded for the rest of the process lifetime with
+     * no trace of WHY. This adds:
+     *  1. a single retry attempt — a transient blip (the LAN link not fully
+     *     up yet at cold start, a momentary DNS hiccup) resolves on the
+     *     second try without any operator involvement;
+     *  2. a §6.AC non-fatal recorded for EVERY failed attempt (including the
+     *     final one), so the failure is visible in the telemetry feed instead
+     *     of vanishing into a silently-returned `false`.
+     * Still NEVER throws — mirrors [FetchProvidersUseCase]'s own contract.
+     */
+    private suspend fun fetchWithRetry(
+        apiBaseUrl: String,
+        goApi: Endpoint.GoApi,
+    ): Result<List<RemoteTrackerDescriptor>> {
+        val first = fetchProvidersUseCase(apiBaseUrl, goApi.key)
+        if (first.isSuccess) return first
+        recordFetchFailure(first.exceptionOrNull(), attempt = 1)
+
+        val retry = fetchProvidersUseCase(apiBaseUrl, goApi.key)
+        if (retry.isFailure) {
+            recordFetchFailure(retry.exceptionOrNull(), attempt = 2)
+        }
+        return retry
+    }
+
+    /** §6.AC: records the startup catalogue-fetch failure so it is triageable
+     * remotely instead of silently degrading with no trace. */
+    private fun recordFetchFailure(cause: Throwable?, attempt: Int) {
+        val error = cause
+            ?: IllegalStateException("startup provider repopulation failed with no captured cause")
+        analytics.recordNonFatal(
+            error,
+            mapOf(
+                AnalyticsTracker.Params.FEATURE to "startup_provider_repopulate",
+                AnalyticsTracker.Params.MODULE to "core:domain",
+                AnalyticsTracker.Params.OPERATION to "fetchProviders",
+                AnalyticsTracker.Params.ERROR to "startup_provider_repopulate_failed",
+                AnalyticsTracker.Params.ERROR_CLASS to error::class.simpleName.orEmpty(),
+                AnalyticsTracker.Params.ERROR_MESSAGE to (error.message?.take(512) ?: ""),
+                ATTEMPT_PARAM to attempt.toString(),
+            ),
         )
     }
 
@@ -188,6 +271,11 @@ class RepopulateProvidersOnStartupUseCase @Inject constructor(
                 settingsRepository.setEndpoint(roomGoApis.last())
             }
         }
+    }
+
+    private companion object {
+        /** §6.AC context key: which attempt (1st or 2nd/retry) failed. */
+        const val ATTEMPT_PARAM = "attempt"
     }
 }
 

@@ -605,6 +605,22 @@ ApiSelection flow Welcome omits the (unknowable-yet) number.
 "ApiSelection flow MUST NOT pin a premature Welcome count; was 2 expected null".
 Reverted.
 
+**Re-verification (2026-08-12, LVA-087 independent re-check, evidence
+`.lava-ci-evidence/test-runs/2026-08-12-lva087-welcome-provider-count-reverify.md`):** the
+fix was re-confirmed correct and unchanged — no production code edit was needed.
+`:feature:onboarding:testDebugUnitTest --tests OnboardingViewModelVideoFixesTest` run fresh:
+`BUILD SUCCESSFUL`, 7/7 PASS. Fresh falsifiability rehearsal hardcoded
+`welcomeProviderCount = 4` (the literal "4" the operator originally reported) at
+`OnboardingViewModel.kt:472`; the same command then reported `BUILD FAILED`, `7 tests
+completed, 2 failed`, with the two LVA-087-covering tests failing with
+`ApiSelection flow MUST NOT pin a premature Welcome count; was 4 expected null, but
+was:<4>` and `legacy-flow Welcome count MUST equal the provider list the user sees next
+expected:<2> but was:<4>`; reverted, re-ran, `BUILD SUCCESSFUL` 7/7 again. **Outstanding
+per §6.AK:** the JVM layer is verified; the device Compose UI Challenge
+(`Challenge63WelcomeCountMatchesPickerTest`) is authored but not yet executed against a
+real device/emulator (none available in this session) — LVA-087 stays
+JVM-verified/device-pending, not fully closed, until C63 runs GREEN on the §6.Z gate.
+
 ### #7 [MEDIUM, UNCONFIRMED → resolved] — `lava.app:7777` preset + "On this network" label
 
 **§6.R verdict: NOT a violation.** The `lava.app:7777` preset is NOT a hardcoded

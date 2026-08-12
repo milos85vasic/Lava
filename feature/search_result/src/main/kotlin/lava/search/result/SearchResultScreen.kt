@@ -329,9 +329,19 @@ private fun SearchResultList(
             }
 
             is SearchResultContent.Streaming -> {
-                val filteredItems = state.selectedFilterProvider?.let { pid ->
-                    state.searchContent.items.filter { it.providerId == pid }
-                } ?: state.searchContent.items
+                // LVA-086 / 2026-06-25 video-cluster fix (#5 — no loading indicator).
+                // `streamingFilteredItems` + `showsStreamingLoadingIndicator` are
+                // extracted to SearchPageState.kt so the exact render predicate is
+                // unit-testable from a JVM ViewModel/state test (see
+                // SearchResultViewModelLoadingEmptyStateTest) — not a hand-copied
+                // duplicate of this logic. While at least one provider is still
+                // SEARCHING, show a loading spinner below whatever incremental
+                // results have arrived. Before this, a freshly-started
+                // multi-provider search rendered a BLANK screen (no items yet + no
+                // spinner) — perceived as a hang. The terminal Empty / Error /
+                // Content states are produced by handleStreamEnd() once every
+                // provider reaches a terminal state.
+                val filteredItems = state.streamingFilteredItems
                 items(items = filteredItems) { model ->
                     TopicListItem(
                         modifier = Modifier.padding(
@@ -344,16 +354,7 @@ private fun SearchResultList(
                         onFavoriteClick = { onAction(SearchResultAction.FavoriteClick(model)) },
                     )
                 }
-                // 2026-06-25 video-cluster fix (#5 — no loading indicator).
-                // While at least one provider is still SEARCHING, show a loading
-                // spinner below whatever incremental results have arrived. Before
-                // this, a freshly-started multi-provider search rendered a BLANK
-                // screen (no items yet + no spinner) — perceived as a hang. The
-                // terminal Empty / Error / Content states are produced by
-                // handleStreamEnd() once every provider reaches a terminal state.
-                if (filteredItems.isEmpty() &&
-                    state.searchContent.activeProviders.any { it.status == StreamStatus.SEARCHING }
-                ) {
+                if (state.showsStreamingLoadingIndicator) {
                     loadingItem()
                 }
             }

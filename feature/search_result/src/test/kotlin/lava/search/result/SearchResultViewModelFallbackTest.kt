@@ -14,6 +14,7 @@ import lava.domain.usecase.EnrichFilterUseCase
 import lava.domain.usecase.ObserveAuthStateUseCase
 import lava.domain.usecase.ObserveSearchPagingDataUseCase
 import lava.domain.usecase.ObserveSettingsUseCase
+import lava.domain.usecase.StartupProvidersGate
 import lava.domain.usecase.ToggleFavoriteUseCase
 import lava.models.auth.AuthState
 import lava.models.search.Filter
@@ -206,6 +207,10 @@ class SearchResultViewModelFallbackTest {
             sdk = lava.tracker.client.LavaTrackerSdk(
                 registry = lava.tracker.registry.DefaultTrackerRegistry(),
             ),
+            // LVA-093: this suite drives the legacy (non-streaming) paging
+            // path, not the cold-start race; pre-mark ready so it proceeds
+            // immediately, preserving existing behavior.
+            providersReadyGate = StartupProvidersGate().apply { markReady() },
         )
     }
 

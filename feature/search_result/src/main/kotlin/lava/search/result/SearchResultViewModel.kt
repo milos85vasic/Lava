@@ -22,6 +22,7 @@ import lava.domain.usecase.EnrichFilterUseCase
 import lava.domain.usecase.ObserveAuthStateUseCase
 import lava.domain.usecase.ObserveSearchPagingDataUseCase
 import lava.domain.usecase.ObserveSettingsUseCase
+import lava.domain.usecase.StartupProvidersGate
 import lava.domain.usecase.ToggleFavoriteUseCase
 import lava.logger.api.LoggerFactory
 import lava.models.auth.isAuthorized
@@ -64,6 +65,9 @@ internal class SearchResultViewModel @Inject constructor(
     private val observeSettingsUseCase: ObserveSettingsUseCase,
     private val analytics: AnalyticsTracker,
     private val sdk: LavaTrackerSdk,
+    // LVA-093 (2026-08): cold-start provider-repopulation readiness gate — see
+    // [StartupProvidersGate] KDoc for the race this closes.
+    private val providersReadyGate: StartupProvidersGate,
 ) : ViewModel(), ContainerHost<SearchPageState, SearchResultSideEffect> {
     private val logger = loggerFactory.get("SearchResultViewModel")
     private val mutableFilter = MutableStateFlow(savedStateHandle.filter)
@@ -148,20 +152,62 @@ internal class SearchResultViewModel @Inject constructor(
         // Register this job so back-press can cancel it immediately.
         activeSearchJob = currentCoroutineContext()[Job]
 
+        // LVA-085 (2026-06-25 QA video #4): eagerly resolve every requested
+        // provider's display name from the live tracker registry — the SAME
+        // source `lava.search.input.ProviderDisplayNameResolver` uses for the
+        // search-input chip bar (`LavaTrackerSdk.listAvailableTrackers()` →
+        // `trackerId to displayName`) — and seed it into `providerDisplayNames`
+        // in the SAME reduce that opens the `Streaming` state.
+        //
+        // Root cause: `providerDisplayNames` used to start as `emptyMap()` and
+        // was populated ONLY as each provider's async `MultiSearchEvent
+        // .ProviderStart` arrived (one event per provider, dispatched from
+        // inside `sdk.streamMultiSearch`'s per-provider coroutines — see
+        // `applyMultiSearchEvent` below). `SearchResultScreen
+        // .ProviderFilterChipBar` renders from this map via
+        // `providerDisplayNames[pid] ?: pid` the INSTANT `filterProviderChipIds`
+        // is non-empty — i.e. on the very first composed frame of the
+        // `Streaming` state, strictly before any `ProviderStart` event can
+        // possibly have arrived. Every results-screen chip therefore rendered
+        // the raw provider id ("archiveorg", "torrentdownloads", "kinozal",
+        // "yts") instead of its display name ("Archive.org",
+        // "TorrentDownloads", "Kinozal.tv", "YTS") for at least that first
+        // frame — exactly what the 2026-06-25 QA video captured at frames
+        // 0060/0125/0130. `listAvailableTrackers()` is a synchronous,
+        // in-memory registry lookup (no network I/O), so resolving it here
+        // costs nothing and removes the race entirely.
+        val resolvedDisplayNames = sdk.listAvailableTrackers()
+            .filter { it.trackerId in providerIds }
+            .associate { it.trackerId to it.displayName }
+
         reduce {
             state.copy(
+                providerDisplayNames = state.providerDisplayNames + resolvedDisplayNames,
                 searchContent = SearchResultContent.Streaming(
                     items = emptyList(),
                     activeProviders = providerIds.map { pid ->
                         ProviderStreamStatus(
                             providerId = pid,
-                            displayName = pid,
+                            displayName = resolvedDisplayNames[pid] ?: pid,
                             status = StreamStatus.SEARCHING,
                         )
                     },
                 ),
             )
         }
+
+        // LVA-093 (cold-start race): wait — bounded — for the cold-start
+        // dynamic-provider repopulation to conclude BEFORE resolving any
+        // tracker client below. Without this, a search fired immediately
+        // after app launch could silently resolve `providerIds` against the
+        // stale/bundled registry state that exists before
+        // `RepopulateProvidersOnStartupUseCase` finishes installing the
+        // user's configured dynamic clients via `TrackerRegistry.populateFrom`.
+        // The "Streaming" state above is already visible to the user, so this
+        // wait is invisible UI-wise in the common case (repopulation is a
+        // fast LAN round-trip); the bound in [StartupProvidersGate] prevents
+        // this from ever turning into an indefinite hang.
+        providersReadyGate.awaitReady()
 
         val request = SearchRequest(
             query = filter.query.orEmpty(),

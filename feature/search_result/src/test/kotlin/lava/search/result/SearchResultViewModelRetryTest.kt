@@ -14,6 +14,7 @@ import lava.domain.usecase.EnrichFilterUseCase
 import lava.domain.usecase.ObserveAuthStateUseCase
 import lava.domain.usecase.ObserveSearchPagingDataUseCase
 import lava.domain.usecase.ObserveSettingsUseCase
+import lava.domain.usecase.StartupProvidersGate
 import lava.domain.usecase.ToggleFavoriteUseCase
 import lava.models.auth.AuthState
 import lava.models.search.Filter
@@ -225,6 +226,10 @@ class SearchResultViewModelRetryTest {
                 override fun log(message: String) {}
             },
             sdk = LavaTrackerSdk(registry = registry),
+            // LVA-093: no test in this file exercises the cold-start race —
+            // the gate is pre-marked ready so search proceeds immediately,
+            // preserving this suite's existing (non-gated) behavior.
+            providersReadyGate = StartupProvidersGate().apply { markReady() },
         )
     }
 
