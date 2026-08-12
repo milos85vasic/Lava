@@ -1358,5 +1358,21 @@ Challenge66SelectAllDoesNotEnableAuthProvidersTest) is 48 days / ~7
 versions stale per SS6.AK – device gate was occupied by a parallel
 LVA-087 verification agent this cycle, could not re-run. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #9.</p>
+<h2
+id="lva-079-video-3-search-input-chips-vs-results-filter-chips-disagree-results-chip-set-non-deterministic-run-to-run">LVA-079
+— Video #3 — search-input chips vs results-filter chips disagree +
+results chip set non-deterministic run-to-run</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+.lava-ci-evidence/bluff-hunt/2026-08-12-lva-079-verification-summary.md
+<strong>Severity:</strong> P1 <strong>Created-By:</strong> AI
+<strong>Assigned-To:</strong> AI</p>
+<p>QA video 2026-06-25 (frames 0040 vs 0060 vs 0125): input chip bar and
+results filter chips show different provider sets, and the results chip
+set CHANGES between two identical queries. 1076 fixed the INPUT chips
+(observeAll filtered+sorted) but the input-vs-RESULTS divergence +
+run-to-run instability is distinct and still open. Source:
+.lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md issue
+#3.</p>
 </body>
 </html>
