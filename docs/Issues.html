@@ -177,7 +177,7 @@
 </head>
 <body>
 <h2
-id="lva-3--adopt-helixconstitution-11479106-pin-53-commits-behind">LVA-3
+id="lva-3-adopt-helixconstitution-11.4.79106-pin-53-commits-behind">LVA-3
 — Adopt HelixConstitution §11.4.79–106 (pin 53 commits behind)</h2>
 <p><strong>Status:</strong> In progress <strong>Type:</strong> Task
 <strong>Severity:</strong> P1</p>
@@ -189,16 +189,16 @@ operator-gated; decision owed on §6.AD.3 Path B vs SQLite DB.
 <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</p>
 <h2
-id="lva-5--rotate-firebase-ci-token-printed-to-session-transcript">LVA-5
+id="lva-5-rotate-firebase-ci-token-printed-to-session-transcript">LVA-5
 — Rotate Firebase CI token (printed to session transcript)</h2>
 <p><strong>Status:</strong> Operator-blocked <strong>Type:</strong> Bug
 <strong>Operator-Block-Details:</strong> WHAT: RuTracker CI Firebase
 token rotation WHY: Agent cannot rotate credentials; only the operator
 can run firebase logout / firebase login:ci UNBLOCK: Operator rotates
 the Firebase CI token (no token value ever committed, §11.4.10): [A] run
-"firebase logout" then "firebase login:ci" and write the new token to
+“firebase logout” then “firebase login:ci” and write the new token to
 LAVA_FIREBASE_TOKEN in the gitignored .env (recommended); [B] mint a
-fresh token via "firebase login:ci --no-localhost" in a clean shell and
+fresh token via “firebase login:ci –no-localhost” in a clean shell and
 update LAVA_FIREBASE_TOKEN in .env; [C] rotate via the Firebase console
 (Project Settings -&gt; Service accounts) and update .env. Unblock
 signal: a Firebase distribute run authenticates with the new token and
@@ -210,15 +210,15 @@ rotate per §6.H clause 6 (firebase logout; firebase login:ci).
 <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/sixth-law-incidents/2026-05-20-firebase-token-echo-leak.json</p>
 <h2
-id="lva-008--c11-search_input-navbackstackentry-teardown-crash-nested-navhost-lifecycle">LVA-008
+id="lva-008-c11-search_input-navbackstackentry-teardown-crash-nested-navhost-lifecycle">LVA-008
 — C11 search_input NavBackStackEntry teardown crash (nested-NavHost
 lifecycle)</h2>
 <p><strong>Status:</strong> In progress <strong>Type:</strong> Bug
 <strong>Severity:</strong> P1 <strong>Created-By:</strong> AI</p>
 <p>Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at
-activity-destroy: IllegalStateException 'State must be at least CREATED
-to be moved to DESTROYED' on the inner search/search_input entry.
-Root-caused (2026-06-08): the inner nested NavController's host is the
+activity-destroy: IllegalStateException ‘State must be at least CREATED
+to be moved to DESTROYED’ on the inner search/search_input entry.
+Root-caused (2026-06-08): the inner nested NavController’s host is the
 outer addNestedNavigation NavBackStackEntry, driven to DESTROYED out
 from under the inner controller while search_input is still INITIALIZED.
 FALSIFIED on device: nav 2.9.1-&gt;2.9.8, LenientTeardownRule
@@ -228,7 +228,7 @@ JSON (inner NavHost Activity-scoped LifecycleOwner; move search to outer
 NavHost; ON_STOP pop). Forensics:
 .lava-ci-evidence/sixth-law-incidents/2026-06-08-navbackstackentry-teardown-crash-2.9.1-incomplete.json</p>
 <h2
-id="lva-079--video-3--search-input-chips-vs-results-filter-chips-disagree--results-chip-set-non-deterministic-run-to-run">LVA-079
+id="lva-079-video-3-search-input-chips-vs-results-filter-chips-disagree-results-chip-set-non-deterministic-run-to-run">LVA-079
 — Video #3 — search-input chips vs results-filter chips disagree +
 results chip set non-deterministic run-to-run</h2>
 <p><strong>Status:</strong> In progress <strong>Type:</strong> Bug
@@ -242,7 +242,7 @@ run-to-run instability is distinct and still open. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md issue
 #3.</p>
 <h2
-id="lva-081--fetchpullmerge-latest-from-all-submodules--build-verify-operator-directive-2026-06-26">LVA-081
+id="lva-081-fetchpullmerge-latest-from-all-submodules-build-verify-operator-directive-2026-06-26">LVA-081
 — Fetch/pull/merge latest from all submodules + build-verify (operator
 directive 2026-06-26)</h2>
 <p><strong>Status:</strong> In progress <strong>Type:</strong> Task
@@ -253,72 +253,20 @@ submodules. Frozen-by-default overridden for this cycle. Must
 build-verify after each bump; revert+report any submodule whose bump
 breaks the build.</p>
 <h2
-id="lva-082--crashlytics-read-not-available-via-firebase-cli--only-symbolsmappingfile-upload-no-issueslist-bq-absent">LVA-082
+id="lva-082-crashlytics-read-not-available-via-firebase-cli-only-symbolsmappingfile-upload-no-issueslist-bq-absent">LVA-082
 — Crashlytics read NOT available via Firebase CLI — only
 symbols/mappingfile upload; no issues:list; bq absent</h2>
 <p><strong>Status:</strong> Queued <strong>Type:</strong> Task
 <strong>Severity:</strong> P3 <strong>Created-By:</strong> AI</p>
 <p>Operator asked to use Firebase CLI to pull Crashlytics. Verified
-Firebase CLI 14.17.0 exposes only crashlytics<span class="emoji"
-data-emoji="symbols">🔣</span>upload + mappingfile:* (NO issue/non-fatal
-read). bq CLI absent. Crashlytics dashboard read requires console or a
-BigQuery export not configured. Fallback: in-repo §6.AC telemetry +
-known crash tickets; operator to paste console items for full triage.
-§11.4.6 honest record.</p>
+Firebase CLI 14.17.0 exposes only crashlytics:symbols:upload +
+mappingfile:* (NO issue/non-fatal read). bq CLI absent. Crashlytics
+dashboard read requires console or a BigQuery export not configured.
+Fallback: in-repo §6.AC telemetry + known crash tickets; operator to
+paste console items for full triage. §11.4.6 honest record.</p>
 <h2
-id="lva-083--video-1--search-returns-zero-results-then-something-went-wrong-error-primary-function-unusable">LVA-083
-— Video #1 — Search returns ZERO results then 'Something went wrong'
-Error (primary function unusable)</h2>
-<p><strong>Status:</strong> In progress <strong>Type:</strong> Bug
-<strong>Severity:</strong> P0 <strong>Created-By:</strong> AI
-<strong>Assigned-To:</strong> AI</p>
-<p>QA video 2026-06-25 frames 0060-0140: every search fails (blank ~25s
-then Error/Retry; 'prince' stays blank). KNOWN-class
-(anonymous/provider-mismatch). CODE-FIX landed in 1076
-(SearchInputViewModel observeAll filtered+sorted + loading/empty state)
-but 1076 NOT yet distributed/device-verified. Pending §6.Z gate. Source:
-.lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #1.</p>
-<h2
-id="lva-084--video-2--onboarded-provider-yts-is-not-the-provider-set-used-by-search-unconfigured-providers-active-as-filters">LVA-084
-— Video #2 — Onboarded provider (YTS) is NOT the provider set used by
-Search; unconfigured providers active as filters</h2>
-<p><strong>Status:</strong> In progress <strong>Type:</strong> Bug
-<strong>Severity:</strong> P0 <strong>Created-By:</strong> AI
-<strong>Assigned-To:</strong> AI</p>
-<p>QA video frames 0030 vs 0040/0060: onboarded only YTS but search used
-RuTracker/RuTor/IA/Gutenberg etc. KNOWN (§6.L 57th/59th). CODE-FIX in
-1076 (chips from ProviderConfigRepository.observeAll()
-searchEnabled&amp;&amp;isEnabled). Pending §6.Z device verification.
-Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
-#2.</p>
-<h2
-id="lva-085--video-4--provider-id-labels-shown-rawlowercased-torrentdownloadsarchiveorgkinozalyts-in-results-filter-chips">LVA-085
-— Video #4 — Provider id labels shown raw/lowercased
-('torrentdownloads','archiveorg','kinozal','yts') in results filter
-chips</h2>
-<p><strong>Status:</strong> In progress <strong>Type:</strong> Bug
-<strong>Severity:</strong> P1 <strong>Created-By:</strong> AI
-<strong>Assigned-To:</strong> AI</p>
-<p>QA video frames 0060/0125/0130: results chips render internal
-provider key not displayName. KNOWN-class (§6.L 60th displayLabel).
-CODE-FIX in 1076 (friendly chip names). Pending §6.Z verification.
-Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
-#4.</p>
-<h2
-id="lva-086--video-5--no-empty-state-and-no-loading-indicator-on-search-results-perceived-hang">LVA-086
-— Video #5 — No empty-state and no loading indicator on search results
-(perceived hang)</h2>
-<p><strong>Status:</strong> In progress <strong>Type:</strong> Bug
-<strong>Severity:</strong> P1 <strong>Created-By:</strong> AI
-<strong>Assigned-To:</strong> AI</p>
-<p>QA video frames 0060-0110: pure blank ~25s, no
-spinner/skeleton/no-results; 'prince' stays blank with no error. NEW.
-CODE-FIX in 1076 (loading/empty state branches). Pending §6.Z
-verification. Source:
-.lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #5.</p>
-<h2
-id="lva-087--video-6--welcome-claims-4-providers-available-but-picker-lists-12">LVA-087
-— Video #6 — Welcome claims '4 providers available' but picker lists
+id="lva-087-video-6-welcome-claims-4-providers-available-but-picker-lists-12">LVA-087
+— Video #6 — Welcome claims ‘4 providers available’ but picker lists
 ~12</h2>
 <p><strong>Status:</strong> In progress <strong>Type:</strong> Bug
 <strong>Severity:</strong> P2 <strong>Created-By:</strong> AI
@@ -328,19 +276,19 @@ id="lva-087--video-6--welcome-claims-4-providers-available-but-picker-lists-12">
 Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #6.</p>
 <h2
-id="lva-088--video-7--choose-your-api-shows-lavaapp7777-preset--mislabeled-on-this-network">LVA-088
-— Video #7 — 'Choose your API' shows 'lava.app:7777' preset + mislabeled
-'On this network'</h2>
+id="lva-088-video-7-choose-your-api-shows-lava.app7777-preset-mislabeled-on-this-network">LVA-088
+— Video #7 — ‘Choose your API’ shows ‘lava.app:7777’ preset + mislabeled
+‘On this network’</h2>
 <p><strong>Status:</strong> In progress <strong>Type:</strong> Bug
 <strong>Severity:</strong> P2 <strong>Created-By:</strong> AI
 <strong>Assigned-To:</strong> AI</p>
 <p>QA video frames 0012/0015. 1076 investigation: NOT a §6.R hardcoding
-violation (config-driven preset). 'On this network' label for a
+violation (config-driven preset). ‘On this network’ label for a
 cloud/remote preset still worth confirming. Pending §6.Z verification.
 Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #7.</p>
 <h2
-id="lva-089--video-8--mdns-discovered-api-shows-raw-ip-19216801078443-with-no-friendly-name">LVA-089
+id="lva-089-video-8-mdns-discovered-api-shows-raw-ip-192.168.0.1078443-with-no-friendly-name">LVA-089
 — Video #8 — mDNS-discovered API shows raw IP 192.168.0.107:8443 with no
 friendly name</h2>
 <p><strong>Status:</strong> In progress <strong>Type:</strong> Bug
@@ -350,8 +298,8 @@ friendly name</h2>
 friendly name). Pending §6.Z verification. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #8.</p>
 <h2
-id="lva-090--video-9--onboarding-select-all-silently-enables-auth-requiring-captchaform-login-providers">LVA-090
-— Video #9 — Onboarding 'Select all' silently enables auth-requiring
+id="lva-090-video-9-onboarding-select-all-silently-enables-auth-requiring-captchaform-login-providers">LVA-090
+— Video #9 — Onboarding ‘Select all’ silently enables auth-requiring
 (Captcha/Form Login) providers</h2>
 <p><strong>Status:</strong> In progress <strong>Type:</strong> Bug
 <strong>Severity:</strong> P3 <strong>Created-By:</strong> AI
@@ -360,9 +308,9 @@ id="lva-090--video-9--onboarding-select-all-silently-enables-auth-requiring-capt
 1076 (#9 select-all handling). Pending §6.Z verification. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #9.</p>
 <h2
-id="lva-091--video-10--app-id-co-mingling-debug-dev--release-both-labeled-lava--unconfirmed-in-video">LVA-091
+id="lva-091-video-10-app-id-co-mingling-debug-.dev-release-both-labeled-lava-unconfirmed-in-video">LVA-091
 — Video #10 — App-ID co-mingling (debug .dev + release both labeled
-'Lava') — UNCONFIRMED in video</h2>
+‘Lava’) — UNCONFIRMED in video</h2>
 <p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
 <strong>Severity:</strong> P3 <strong>Created-By:</strong> AI</p>
 <p>QA video frames 0001/0005: single Lava icon launched; co-mingling NOT
@@ -371,15 +319,7 @@ visually confirmed. Needs on-device package check (applicationIdSuffix
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #10.</p>
 <h2
-id="lva-013--missing-6z-device-evidence-for-client-1080-and-api-app-24">LVA-013
-— Missing 6.Z device evidence for client 1080 and api-app 24</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task</p>
-<p>Task P0 Android: the 1080 client and 24 api-app cycles were
-distributed without per-AVD containerized emulator evidence. Need to
-execute the covering Challenge matrix, generate real-device-verification
-rows, and backfill the evidence files.</p>
-<h2
-id="lva-019--coverage-ledger-partialgap-overlap-and-missing-per-release-ledgers">LVA-019
+id="lva-019-coverage-ledger-partialgap-overlap-and-missing-per-release-ledgers">LVA-019
 — Coverage ledger partial/gap overlap and missing per-release
 ledgers</h2>
 <p><strong>Status:</strong> Queued <strong>Type:</strong> Task</p>
@@ -387,75 +327,23 @@ ledgers</h2>
 per-release ledger snapshots. Normalize the registry and add
 release-attestation ledgers.</p>
 <h2
-id="lva-093--cold-start-race-search-can-hit-bundleddirect-client-before-dynamic-provider-repopulation-completes">LVA-093
-— Cold-start race: search can hit bundled/direct client before dynamic
-provider repopulation completes</h2>
+id="lva-095-on-device-api-keyless-mdns-endpoint-does-not-readpersist-local-api-app-key">LVA-095
+— on-device API keyless mDNS endpoint does not read/persist local
+api-app key</h2>
 <p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
-<strong>Severity:</strong> P2 <strong>Created-By:</strong> AI</p>
-<p>app/src/main/kotlin/digital/vasic/lava/client/LavaApplication.kt:95-105
-launches RepopulateProvidersOnStartupUseCase.repopulateProviders()
-fire-and-forget on Dispatchers.Default inside Application.onCreate() --
-it is not awaited.
-app/src/main/kotlin/digital/vasic/lava/client/MainActivity.kt:105-135
-gates the splash screen ONLY on local prefs (theme/showOnboarding)
-loading and has no dependency on repopulateProviders() completion.
-Consequently the splash can dismiss and the user can reach the search
-screen while the network round-trip inside
-core/domain/src/main/kotlin/lava/domain/usecase/RepopulateProvidersOnStartupUseCase.kt:80-112
-is still in flight. If the user searches during that window, any
-provider id the catalogue vends that overlaps a BUNDLED compiled-in
-provider id (rutracker/rutor/nnmclub/kinozal/archiveorg/gutenberg -- see
-core/tracker/client/src/main/kotlin/lava/tracker/client/di/TrackerClientModule.kt:297-303)
-resolves to the direct-to-site bundled client for that one search
-instead of the user's configured API endpoint. Once the fetch completes,
-all later searches in that session are correctly dynamic -- this is a
-real, narrow-window, self-healing defect, not a permanent break. No
-existing test covers this exact race: the closest test,
-RepopulateProvidersOnStartupUseCaseTest, exercises the use case in
-isolation and does not measure or force the
-Application.onCreate-to-first-interactive-search timing window.
-CONFIRMED by static source-reading this session (2026-08-10/11), part of
-the LVA-083/084 root-cause investigation that also found the
-OnboardingBypassRule-skips-populateFrom test bug in
-Challenge58/59/60/61/62/71. Real-world frequency and user-visible impact
-are UNCONFIRMED without device instrumentation -- no build or test was
-executed for this specific finding, only source reading. Closure needs
-either (a) a device-level Challenge Test that measures or deliberately
-forces this race and asserts correct provider resolution once
-repopulation completes, or (b) a product decision to gate the splash
-screen / first search on repopulation completion (with a timeout +
-fallback) instead of racing it.</p>
-<h2
-id="lva-094--cold-start-provider-repopulation-failure-is-silent-and-never-retried-for-the-rest-of-the-process-lifetime">LVA-094
-— Cold-start provider repopulation failure is silent and never retried
-for the rest of the process lifetime</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
-<strong>Severity:</strong> P2 <strong>Created-By:</strong> AI</p>
-<p>RepopulateProvidersOnStartupUseCase's single cold-start
-provider-catalogue fetch attempt fails silently on failure:
-RepopulateProvidersOnStartupUseCase.kt:110 returns false with no
-user-visible notice (unlike onboarding's own fetch-failure path, which
-surfaces a PROVIDER_CATALOG_FALLBACK_NOTICE), no retry, and no other
-production code path re-invokes populateFrom() for the rest of that
-process's lifetime. Confirmed: the only two production call sites for
-populateFrom are OnboardingViewModel.kt:950-998 (onboarding flow) and
-this startup use case (app cold start) -- there is no periodic worker
-and no connectivity-change listener that re-triggers it. A transient
-failure at exact boot time (network not yet associated, VPN/Wi-Fi still
-connecting, momentarily unreachable LAN lava-api-go/api-app endpoint)
-means a user who configured a non-bundled API endpoint during onboarding
-silently falls back to bundled/direct-to-site tracker clients for the
-ENTIRE app session, with zero indication anything degraded, until the
-process restarts (a fresh attempt) or the user re-runs onboarding. Fix
-direction, documented as the finding only and not yet implemented:
-either add a retry affordance / silent background retry with backoff, or
-at minimum record a non-fatal telemetry event per this project's own
-section 6.AC Comprehensive Non-Fatal Telemetry Mandate so the failure is
-visible in Crashlytics instead of invisible. CONFIRMED by static
-source-reading this session (2026-08-10/11), same investigation as the
-sibling cold-start race finding LVA-093. Real-world frequency and
-user-visible impact are UNCONFIRMED without device instrumentation -- no
-build or test was executed for this specific finding, only source
-reading.</p>
+<strong>Severity:</strong> P1 <strong>Created-By:</strong> AI</p>
+<p>OnboardingViewModelDynamicProvidersTest &gt; ‘selecting a keyless
+on-device API reads and persists the local api key for search auth’
+FAILS: AssertionError - the local api-app key MUST be read + persisted
+onto the keyless mDNS-selected endpoint (was
+GoApi(host=localhost.localdomain, port=42873, platform=null,
+storage=null, key=null)). Discovered 2026-08-12 while running the
+combined test suite after merging 4 parallel LVA-085/086/087/093/094
+fixes - confirmed genuinely pre-existing and unrelated to any of those 4
+changes (git log shows the test file’s last touch was commit b3cb6de2,
+predating this session; none of the 4 merged branches touch
+onboarding/api-key/mDNS code per git diff –name-only). Not yet
+root-caused - source: real gradle test run,
+feature/onboarding/build/test-results/testDebugUnitTest/.</p>
 </body>
 </html>

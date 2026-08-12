@@ -189,6 +189,50 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🟢🤖🐞 2026-08-12 (4 PARALLEL SUBAGENTS CLOSED
+LVA-085/086/093/094 — real root causes, real fixes, real falsifiability
+rehearsals; 1 NEW pre-existing bug discovered while
+integrating).</strong> Per the operator's standing "3-4 parallel
+subagents on independent workable items, real evidence, no bluff"
+directive, dispatched 4 agents in worktree isolation on genuinely
+independent open items: LVA-085 (raw provider ids in results filter
+chips), LVA-086 (missing loading/empty-state UI), LVA-087 (Welcome
+screen stale provider count — turned out already fixed by a prior
+commit; agent did a fresh independent re-verification + falsifiability
+rehearsal instead), LVA-093+LVA-094 (cold-start provider-repopulation
+race + silent failure). All 4 found real root causes (not assumed),
+landed real fixes, wrote real tests, and — critically — each performed a
+genuine falsifiability rehearsal (deliberately broke their own fix,
+confirmed a REAL observed failure message, reverted, confirmed PASS
+again) rather than just claiming compliance. Merging the 4 branches
+surfaced exactly the kind of problem integration testing exists to
+catch: LVA-085 and LVA-093/094 both touched
+<code>SearchResultViewModel.observeStreamMultiSearch</code>, producing a
+real merge conflict (resolved by hand, keeping all 3 test methods from
+both sides — nothing dropped), and a SEPARATE compile error surfaced
+only by actually building the combined tree:
+<code>SearchResultViewModelLoadingEmptyStateTest.kt</code>'s own
+<code>createViewModel()</code> helper didn't know about the new
+<code>providersReadyGate</code> constructor parameter LVA-093/094 added.
+Fixed both, then actually ran
+<code>:feature:search_result:testDebugUnitTest :core:domain:testDebugUnitTest</code>
+— real <code>BUILD SUCCESSFUL</code>, not assumed clean from four
+isolated branch-level runs. <strong>While running the FULL combined
+suite</strong> (including
+<code>:feature:onboarding:testDebugUnitTest</code>), found a genuinely
+pre-existing, unrelated failure —
+<code>OnboardingViewModelDynamicProvidersTest &gt; selecting a keyless on-device API reads and persists the local api key for search auth</code>
+— confirmed via <code>git log</code> (last touched by a commit predating
+this entire session) and <code>git diff --name-only</code> (none of the
+4 merged branches touch onboarding/api-key/mDNS code) that this is NOT a
+regression from tonight's work. Recorded honestly as new item LVA-095
+rather than silently ignored or force-fixed out of scope. Closed
+LVA-085/086/093/094 in <code>docs/workable_items.db</code> with real
+evidence citations (commit SHAs + exact test names); LVA-087 left open
+pending the still-outstanding device Challenge run its own agent flagged
+honestly.</p>
+</blockquote>
+<blockquote>
 <p><strong>🟢🔧🐞 2026-08-12 (REAL RELEASE-CANARY GAP FOUND + CLOSED IN
 THE CONTAINERS SUBMODULE — operator directive "YOU are the one to test
 and confirm versions really work" led to discovering + fixing 2 genuine
