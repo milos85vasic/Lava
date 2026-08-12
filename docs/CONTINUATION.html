@@ -189,6 +189,70 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🟢🔧🐞 2026-08-12 (REAL RELEASE-CANARY GAP FOUND + CLOSED IN
+THE CONTAINERS SUBMODULE — operator directive "YOU are the one to test
+and confirm versions really work" led to discovering + fixing 2 genuine
+latent bugs, not a rubber-stamp).</strong> After the operator confirmed
+the debug builds work and authorized release distribute, the operator's
+very next message overrode reliance on that verbal confirmation alone:
+"YOU are the one to test and confirm versions really work and no bluff
+of any kind!!!" Investigating how to actually verify a RELEASE (not
+debug) APK surfaced two real, hard constraints (confirmed live, not
+assumed): (1) AGP generates no <code>connectedReleaseAndroidTest</code>
+task without explicit config; (2) forcing <code>isDebuggable=true</code>
+to work around that <strong>disables R8 entirely regardless of
+<code>isMinifyEnabled</code></strong> (Gradle's own warning: "All code
+optimizations and obfuscation are disabled for debuggable builds") —
+proving nothing about the real shipped artifact, which is exactly the
+class of bug behind the 1.2.19 incident that birthed §6.AA. Asked the
+operator how to proceed; they chose "extend the Containers submodule to
+support this properly" over a manual-only fallback. Discovered
+<code>submodules/containers/pkg/emulator/canary.go</code>
+(<code>RunCanary</code>) ALREADY existed for exactly this (install
+release APK, launch, watch logcat for FATAL — no instrumentation needed)
+but was HARD-CODED host-direct-only, violating this project's own §6.AH
+on Linux. Closed that gap for real: added a <code>RunADBCommand</code>
+primitive to the <code>Emulator</code> interface (implemented
+identically by both <code>AndroidEmulator</code> and
+<code>Containerized</code>), a <code>CanaryConfig.Emu</code> injection
+point, and <code>--runner=auto|host-direct|containerized</code> on
+<code>cmd/emulator-canary</code> (Containers commit
+<code>7fa49f7</code>, full <code>pkg/emulator</code> test suite PASS,
+new tests with a genuine falsifiability rehearsal that failed with a
+REAL observed error, not a guessed one). <strong>The FIRST real
+end-to-end run against the actual 1.3.15-1082 release APK then surfaced
+a SECOND real bug</strong>: the canary reported
+<code>activity_resumed: false</code> — but its own captured
+<code>dumpsys activity activities</code> output (added as new on-failure
+diagnostic capture, §6.AC) showed <code>state=RESUMED</code> for the
+correctly-launched activity. Root cause: the canary's string-match only
+recognized the pre-Android-12-ish <code>mResumedActivity</code> dumpsys
+field name; API 34 uses
+<code>topResumedActivity=</code>/<code>ResumedActivity:</code> instead —
+a latent bug that existed since the canary was first written, only
+surfaced because this was literally the first time it had ever been run
+end-to-end against a real emulator. Fixed with a regression test built
+from the REAL captured dumpsys text (Containers commit
+<code>0381fe0</code>). <strong>Re-verified after both fixes: genuine
+PASS for both apps' actual release APKs</strong> —
+<code>digital.vasic.lava.client</code> 1.3.15-1082 AND
+<code>digital.vasic.lava.api</code> 0.2.12-25, both
+<code>activity_resumed: true, fatal_detected: false, passed: true</code>.
+Both Containers commits pushed to github+gitlab; Lava's
+<code>submodules/containers</code> pin bumped <code>746efe33</code> →
+<code>0381fe0</code>. New Lava-side tooling:
+<code>scripts/run-release-canary-containerized.sh</code> (sibling to the
+pre-existing Genymotion-based <code>scripts/run-release-canary.sh</code>
+— that one can't run on THIS host, <code>gmtool</code> isn't installed
+here, confirmed live). This is exactly the "no bluff of any kind" the
+operator demanded: two real, previously-undetected bugs found and fixed
+by actually trying to use the tool for its real purpose, not by
+inspection or by trusting a green build. <strong>NEXT:</strong> proceed
+to §6.AA Stage 2 (release) distribute for both apps, now backed by
+genuine release-artifact device evidence in addition to the operator's
+debug-build confirmation.</p>
+</blockquote>
+<blockquote>
 <p><strong>🟢🚀📦📱 2026-08-12 (BOTH apps' debug builds DISTRIBUTED —
 Lava-Android-1.3.15-1082 + Lava-API-App-0.2.12-25; "make it happen"
 deploy phase substantially complete).</strong> Following the client

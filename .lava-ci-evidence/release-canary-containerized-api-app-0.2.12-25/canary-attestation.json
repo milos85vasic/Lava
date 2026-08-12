@@ -1,0 +1,13 @@
+{
+  "started_at": "2026-08-12T19:27:25+02:00",
+  "finished_at": "2026-08-12T19:28:09+02:00",
+  "apk_path": "releases/api-app/0.2.12/android-release/digital.vasic.lava.api-0.2.12-release.apk",
+  "package_name": "digital.vasic.lava.api",
+  "launch_activity": "lava.api.app.MainActivity",
+  "avd": "CZ_API34_Phone",
+  "api_level": 34,
+  "boot_seconds": 1.182678923,
+  "activity_resumed": true,
+  "fatal_detected": false,
+  "passed": true
+}
