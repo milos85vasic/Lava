@@ -203,6 +203,19 @@ func writeProviderError(c *gin.Context, err error) {
 		writeJSON(c, http.StatusUnauthorized, gin.H{})
 	case errors.Is(err, provider.ErrCircuitOpen):
 		writeJSON(c, http.StatusServiceUnavailable, gin.H{})
+	case errors.Is(err, provider.ErrUpstreamChallenged):
+		// §6.AC: worth tracking HOW OFTEN the upstream's own bot-mitigation
+		// blocks us, even though this is a classified (not "unexpected")
+		// error — an operator watching this metric can tell a genuine
+		// external-block episode from a code regression.
+		observability.RecordNonFatal(c.Request.Context(), err, observability.NonFatalAttributes{
+			observability.AttrFeature:   "provider",
+			observability.AttrOperation: c.FullPath(),
+			observability.AttrEndpoint:  c.FullPath(),
+			observability.AttrTrackerID: currentProviderID(c),
+			observability.AttrRequestID: requestID(c),
+		})
+		writeJSON(c, http.StatusServiceUnavailable, gin.H{})
 	default:
 		// Unexpected provider error — surface to telemetry (§6.AC).
 		observability.RecordNonFatal(c.Request.Context(), err, observability.NonFatalAttributes{

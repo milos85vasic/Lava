@@ -26,6 +26,79 @@ import (
 	"golang.org/x/net/html/charset"
 )
 
+// ErrCloudflareChallenge is returned when rutracker.org's Cloudflare edge
+// answers a request with an active bot-mitigation challenge (Turnstile /
+// "Managed Challenge") instead of the real page. This is an EXTERNAL,
+// network-reputation-level block — no amount of header/cookie tuning on
+// this HTTP client can pass a genuine JS-execution challenge, since Go's
+// net/http (like curl) does not run JavaScript. Distinguishing this from
+// a generic upstream error matters because the two have completely
+// different remediations: a code bug is fixed here; a Cloudflare
+// challenge requires either a JS-capable client (out of scope for this
+// package) or waiting out / rotating past whatever triggered the
+// elevated challenge posture for this egress IP.
+//
+// Forensic anchor (2026-08-12): live reproduction against the real
+// rutracker.org/forum/login.php from this service's actual egress IP
+// returned HTTP 403 with response header `cf-mitigated: challenge` and a
+// Content-Security-Policy referencing https://challenges.cloudflare.com
+// (Cloudflare Turnstile). Before this fix, that response fell through to
+// the generic "neither token nor login form" branch, which the caller
+// classified as ErrNoData → an unhelpful 502 with body {} — no signal at
+// all that a Cloudflare challenge was the actual cause. A prior 2026-05-12
+// mitigation (see docs/issues/fixed/BUGFIXES.md "rutracker-cloudflare-
+// mitigation") solved a SOFTER form of Cloudflare bot detection (missing
+// browser headers/cookies) in the separate Kotlin client — that same
+// mitigation was verified NOT sufficient against this harder JS-challenge
+// posture (tested live with proper headers + a warmed cookie jar; still
+// 403 cf-mitigated:challenge), so this package does not claim to defeat
+// the challenge — only to SURFACE it honestly instead of masking it as a
+// generic parse failure.
+var ErrCloudflareChallenge = errors.New("rutracker: blocked by Cloudflare bot-challenge (JS execution required); this is an external network/reputation block, not a Lava defect")
+
+// isCloudflareChallenge reports whether an upstream response is a
+// Cloudflare bot-mitigation challenge rather than a real rutracker.org
+// page. The `cf-mitigated: challenge` response header is Cloudflare's own,
+// unambiguous signal (see the ErrCloudflareChallenge forensic anchor) —
+// checked in preference to guessing from status code alone, since a plain
+// 403 can also be a legitimate rutracker.org access-denied response.
+func isCloudflareChallenge(status int, headers http.Header) bool {
+	if status != http.StatusForbidden {
+		return false
+	}
+	return strings.EqualFold(headers.Get("cf-mitigated"), "challenge")
+}
+
+// setBrowserHeaders sets a realistic browser fingerprint on an outgoing
+// rutracker.org request. Before this fix, requests carried NO User-Agent
+// at all, so Go's http.Client sent the default "Go-http-client/1.1" — an
+// unambiguous non-browser fingerprint that bot-detection systems key on
+// directly. Matches the browser-class headers already proven to help
+// against rutracker's SOFTER Cloudflare posture in the separate Kotlin
+// client (docs/issues/fixed/BUGFIXES.md "rutracker-cloudflare-
+// mitigation", 2026-05-12) — Chrome-124-class UA, Accept, Accept-Language.
+func setBrowserHeaders(req *http.Request) {
+	req.Header.Set("User-Agent",
+		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "+
+			"(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+	req.Header.Set("Accept",
+		"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
+}
+
+// newBrowserRequest is http.NewRequestWithContext plus setBrowserHeaders,
+// so every outgoing rutracker.org request carries a realistic fingerprint
+// by construction — a caller cannot forget the headers by using this
+// instead of the raw stdlib constructor directly.
+func newBrowserRequest(ctx context.Context, method, url string, body io.Reader) (*http.Request, error) {
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
+	if err != nil {
+		return nil, err
+	}
+	setBrowserHeaders(req)
+	return req, nil
+}
+
 // readBodyDecoded reads resp.Body and transcodes it from the upstream's
 // declared charset to UTF-8. rutracker.org serves
 // `text/html; charset=Windows-1251` (and a `<meta charset="Windows-1251">`
@@ -167,6 +240,23 @@ func NewClient(base string) *Client {
 		http: &http.Client{
 			Timeout:   30 * time.Second,
 			Transport: transport,
+			// Deliberately NO cookie Jar: this package threads cookies
+			// manually via an explicit `cookie string` parameter on every
+			// call (Login -> fetchUserProfile -> ...), a design forced by
+			// CheckRedirect=ErrUseLastResponse below (the load-bearing
+			// auth token arrives on a 302 response header, not a page body,
+			// so redirects are never auto-followed). A cookie Jar was
+			// tried during the 2026-08-12 Cloudflare-challenge
+			// investigation to let a cf_clearance token persist across
+			// calls, but it broke TestLogin_Success_FetchesProfile for
+			// real: the Jar auto-attached previously-stored cookies
+			// (e.g. bb_ssl) ALONGSIDE the manually-set Cookie header,
+			// producing a duplicated/malformed Cookie value on the
+			// profile-fetch request. Reverted — see
+			// internal/rutracker/client_test.go for the regression this
+			// would reintroduce if a Jar is added again without also
+			// reconciling it against the manual cookie-threading design.
+			//
 			// SP-3.5 (2026-04-29) forensic anchor #2: rutracker's
 			// successful POST /forum/login.php returns
 			//   HTTP/2 302
@@ -264,7 +354,7 @@ func (c *Client) Fetch(ctx context.Context, path, cookie string) ([]byte, int, e
 	)
 	err := c.breaker.Execute(func() error {
 		return c.doWithRetry(ctx, func() (bool, error) {
-			req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+path, nil)
+			req, err := newBrowserRequest(ctx, http.MethodGet, c.base+path, nil)
 			if err != nil {
 				return false, err
 			}
@@ -312,7 +402,7 @@ func (c *Client) FetchWithHeaders(ctx context.Context, path, cookie string) ([]b
 	)
 	err := c.breaker.Execute(func() error {
 		return c.doWithRetry(ctx, func() (bool, error) {
-			req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.base+path, nil)
+			req, err := newBrowserRequest(ctx, http.MethodGet, c.base+path, nil)
 			if err != nil {
 				return false, err
 			}
@@ -359,7 +449,7 @@ func (c *Client) PostFormWithHeaders(ctx context.Context, path string, form url.
 	encoded := form.Encode()
 	err := c.breaker.Execute(func() error {
 		return c.doWithRetry(ctx, func() (bool, error) {
-			req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+path, strings.NewReader(encoded))
+			req, err := newBrowserRequest(ctx, http.MethodPost, c.base+path, strings.NewReader(encoded))
 			if err != nil {
 				return false, err
 			}
@@ -405,7 +495,7 @@ func (c *Client) GetURL(ctx context.Context, fullURL, cookie string) ([]byte, in
 	)
 	err := c.breaker.Execute(func() error {
 		return c.doWithRetry(ctx, func() (bool, error) {
-			req, err := http.NewRequestWithContext(ctx, http.MethodGet, fullURL, nil)
+			req, err := newBrowserRequest(ctx, http.MethodGet, fullURL, nil)
 			if err != nil {
 				return false, err
 			}
@@ -453,7 +543,7 @@ func (c *Client) PostForm(ctx context.Context, path string, form url.Values, coo
 	encoded := form.Encode()
 	err := c.breaker.Execute(func() error {
 		return c.doWithRetry(ctx, func() (bool, error) {
-			req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.base+path, strings.NewReader(encoded))
+			req, err := newBrowserRequest(ctx, http.MethodPost, c.base+path, strings.NewReader(encoded))
 			if err != nil {
 				return false, err
 			}

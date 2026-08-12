@@ -345,6 +345,8 @@ func mapError(err error) error {
 		return provider.ErrCircuitOpen
 	case errors.Is(err, ErrNoData):
 		return provider.ErrNoData
+	case errors.Is(err, ErrCloudflareChallenge):
+		return provider.ErrUpstreamChallenged
 	case errors.Is(err, ErrUnknown):
 		return provider.ErrUnknown
 	default:

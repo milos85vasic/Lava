@@ -381,6 +381,103 @@ func TestLogin_NoData_ErrNoData(t *testing.T) {
 	}
 }
 
+// TestLogin_CloudflareChallenge_ErrCloudflareChallenge reproduces the real
+// bug found live on 2026-08-12: an operator-reported "API request failed:
+// HTTP 429" during RuTracker login onboarding traced back (via a direct
+// curl reproduction against the real rutracker.org/forum/login.php from
+// this service's actual egress IP) to a genuine Cloudflare Turnstile
+// challenge — HTTP 403 with header `cf-mitigated: challenge`. This
+// fixture uses that EXACT captured header, not a synthetic guess.
+//
+// Before this fix, that response fell through to Branch 3 (ErrNoData) —
+// a generic "upstream response didn't parse" that gave the operator zero
+// signal a Cloudflare challenge was the actual cause, indistinguishable
+// from a genuine Lava-side bug. This test proves Login now classifies it
+// distinctly.
+func TestLogin_CloudflareChallenge_ErrCloudflareChallenge(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("cf-mitigated", "challenge")
+		w.Header().Set("server", "cloudflare")
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = w.Write([]byte("<html>Just a moment...</html>"))
+	}))
+	defer srv.Close()
+
+	c := NewClient(srv.URL)
+	out, err := c.Login(context.Background(), LoginParams{Username: "x", Password: "y"})
+	if !errors.Is(err, ErrCloudflareChallenge) {
+		t.Fatalf("Login err=%v want ErrCloudflareChallenge", err)
+	}
+	if errors.Is(err, ErrNoData) {
+		t.Errorf("Login err=%v must NOT also be classified as the generic ErrNoData — that's exactly the discrimination this fix adds", err)
+	}
+	if out != nil {
+		t.Errorf("Login out=%+v want nil on ErrCloudflareChallenge", out)
+	}
+}
+
+// TestLogin_PlainForbidden_NOT_ClassifiedAsCloudflareChallenge is the
+// discriminating negative case: a plain 403 WITHOUT the cf-mitigated
+// header (e.g. a genuine rutracker.org access-denied response, or any
+// other upstream forbidding us for a non-Cloudflare reason) must NOT be
+// misclassified as a Cloudflare challenge — that would hide a real,
+// different problem behind the wrong diagnosis.
+func TestLogin_PlainForbidden_NOT_ClassifiedAsCloudflareChallenge(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = w.Write([]byte("<html>access denied</html>"))
+	}))
+	defer srv.Close()
+
+	c := NewClient(srv.URL)
+	_, err := c.Login(context.Background(), LoginParams{Username: "x", Password: "y"})
+	if errors.Is(err, ErrCloudflareChallenge) {
+		t.Fatalf("Login err=%v must NOT classify a plain 403 (no cf-mitigated header) as a Cloudflare challenge", err)
+	}
+	if !errors.Is(err, ErrNoData) {
+		t.Fatalf("Login err=%v want ErrNoData for a plain unrecognized 403", err)
+	}
+}
+
+// TestNewBrowserRequest_SetsRealisticUserAgent catches the real bug found
+// live alongside the Cloudflare-challenge investigation: every outgoing
+// rutracker.org request previously carried NO User-Agent at all, so Go's
+// http.Client sent the default "Go-http-client/1.1" — an unambiguous
+// non-browser fingerprint bot-detection systems key on directly.
+func TestNewBrowserRequest_SetsRealisticUserAgent(t *testing.T) {
+	req, err := newBrowserRequest(context.Background(), http.MethodGet, "http://example.invalid", nil)
+	if err != nil {
+		t.Fatalf("newBrowserRequest error: %v", err)
+	}
+	ua := req.Header.Get("User-Agent")
+	if ua == "" {
+		t.Fatal("User-Agent header is empty — would fall back to Go's bot-fingerprint default")
+	}
+	if strings.Contains(ua, "Go-http-client") {
+		t.Fatalf("User-Agent=%q still looks like Go's default bot fingerprint", ua)
+	}
+	if !strings.Contains(ua, "Chrome") {
+		t.Errorf("User-Agent=%q does not look like a realistic browser fingerprint", ua)
+	}
+}
+
+// TestClient_HasNoCookieJar is a regression guard for a REAL mistake made
+// and caught during the 2026-08-12 Cloudflare-challenge investigation: a
+// cookie Jar was added to let a Cloudflare cf_clearance token persist
+// across calls, but it broke TestLogin_Success_FetchesProfile for real —
+// the Jar auto-attached previously-stored cookies (e.g. bb_ssl) ALONGSIDE
+// this package's existing manual `cookie string` parameter-threading,
+// producing a duplicated/malformed Cookie header on the profile-fetch
+// request. This package's cookie handling is deliberately manual (see
+// NewClient's KDoc); a Jar must NOT be reintroduced without also
+// reconciling it against that design.
+func TestClient_HasNoCookieJar(t *testing.T) {
+	c := NewClient("http://example.invalid")
+	if c.http.Jar != nil {
+		t.Fatal("Client.http.Jar is set — this package manages cookies manually via an explicit parameter; a Jar duplicates cookies onto that manual header (see TestLogin_Success_FetchesProfile, which broke for real when a Jar was added during the 2026-08-12 investigation)")
+	}
+}
+
 // TestLogin_FormPresentNoCaptchaNoWrong_ErrUnknown — the body has the
 // login-form marker but no captcha and no "неверный пароль" sentence ⇒
 // ErrUnknown (the Kotlin `throw Unknown` branch).

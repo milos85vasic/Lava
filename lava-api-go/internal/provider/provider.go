@@ -30,6 +30,17 @@ var (
 	ErrCircuitOpen  = errors.New("provider: circuit breaker open")
 	ErrNoData       = errors.New("provider: no data")
 	ErrUnknown      = errors.New("provider: unknown error")
+
+	// ErrUpstreamChallenged means the upstream tracker's own bot-mitigation
+	// (e.g. a Cloudflare JS challenge) is actively blocking this request —
+	// an external, network-reputation-level condition, not a defect in
+	// this provider adapter or a problem with the caller's credentials.
+	// Distinct from ErrForbidden (which means THIS API rejected the
+	// caller) and from ErrNoData (a generic "upstream response didn't
+	// parse" catch-all) — a caller that wants to distinguish "try again
+	// later, this is external" from "something is broken" needs this
+	// third case.
+	ErrUpstreamChallenged = errors.New("provider: upstream bot-mitigation challenge active")
 )
 
 // ErrUnsupported is returned when a provider does not declare a

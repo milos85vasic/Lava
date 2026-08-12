@@ -195,6 +195,16 @@ func (c *Client) Login(ctx context.Context, p LoginParams) (*gen.AuthResponseDto
 	}
 
 	if !bytes.Contains(body, loginFormMarker) {
+		// Distinguish a Cloudflare bot-mitigation challenge from a
+		// genuinely unrecognized upstream response BEFORE falling through
+		// to the generic ErrNoData — see ErrCloudflareChallenge's KDoc for
+		// the forensic anchor. This is a real, observed failure mode: the
+		// upstream returns 403 with no login-form marker in the body,
+		// which previously landed in Branch 3 (ErrNoData) with zero signal
+		// that a Cloudflare challenge — not a Lava defect — was the cause.
+		if isCloudflareChallenge(status, headers) {
+			return nil, ErrCloudflareChallenge
+		}
 		// Branch 3 — neither token nor login-form: the upstream said
 		// something LoginUseCase doesn't know how to interpret. Maps to
 		// the Kotlin `throw NoData` branch.
