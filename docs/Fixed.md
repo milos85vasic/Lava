@@ -764,3 +764,14 @@ Operator directive: fetch+pull+merge latest codebase from all submodules. Frozen
 
 Pin 208e2c8 is 53 commits behind origin/main 883ccc1. Highest-impact new clauses: §11.4.93/95/106 (workable-items SQLite DB tracked in git + md to DB sync engine), §11.4.79 (own-org submodules in CodeGraph), §11.4.85 (stress/chaos), §11.4.98, §11.4.102. Pin-bump is operator-gated; decision owed on §6.AD.3 Path B vs SQLite DB. **Source:** self-discovered — .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md
 
+## LVA-087 — Video #6 — Welcome claims '4 providers available' but picker lists ~12
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/bluff-hunt/2026-08-12-lva-087-device-verification-evidence.md
+**Severity:** P2
+**Created-By:** AI
+**Assigned-To:** AI
+
+QA video frames 0007/0010/0015 vs 0020-0030. NEW. CODE-FIX in 1076 (#6 count bound to real descriptor list). Pending §6.Z verification. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #6.
+

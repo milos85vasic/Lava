@@ -36,16 +36,6 @@ QA video 2026-06-25 (frames 0040 vs 0060 vs 0125): input chip bar and results fi
 
 Operator asked to use Firebase CLI to pull Crashlytics. Verified Firebase CLI 14.17.0 exposes only crashlytics:symbols:upload + mappingfile:* (NO issue/non-fatal read). bq CLI absent. Crashlytics dashboard read requires console or a BigQuery export not configured. Fallback: in-repo §6.AC telemetry + known crash tickets; operator to paste console items for full triage. §11.4.6 honest record.
 
-## LVA-087 — Video #6 — Welcome claims '4 providers available' but picker lists ~12
-
-**Status:** In progress
-**Type:** Bug
-**Severity:** P2
-**Created-By:** AI
-**Assigned-To:** AI
-
-QA video frames 0007/0010/0015 vs 0020-0030. NEW. CODE-FIX in 1076 (#6 count bound to real descriptor list). Pending §6.Z verification. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #6.
-
 ## LVA-088 — Video #7 — 'Choose your API' shows 'lava.app:7777' preset + mislabeled 'On this network'
 
 **Status:** In progress
