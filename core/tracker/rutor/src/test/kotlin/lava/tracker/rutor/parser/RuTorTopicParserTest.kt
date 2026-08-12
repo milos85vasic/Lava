@@ -23,7 +23,7 @@ class RuTorTopicParserTest {
 
     @Test
     fun `topic-normal extracts title size hash and description`() {
-        val html = loader.load("topic", "topic-normal-2026-07-02.html")
+        val html = loader.load("topic", "topic-normal-2026-08-10.html")
         val detail = parser.parse(html, topicIdHint = "1052665")
 
         // Sixth Law clause 2 anchor: exact title text the user sees.
@@ -64,7 +64,7 @@ class RuTorTopicParserTest {
         // "Добавлен" (added/publish date "11-09-2025 12:32:55") — all three are
         // user-visible on the topic screen. Dropping publishDate is the LVA-028
         // bug class (present in the HTML, mapped to null in the domain model).
-        val html = loader.load("topic", "topic-normal-2026-07-02.html")
+        val html = loader.load("topic", "topic-normal-2026-08-10.html")
         val detail = parser.parse(html, topicIdHint = "1052665")
 
         assertEquals(1, detail.torrent.seeders)
@@ -79,7 +79,7 @@ class RuTorTopicParserTest {
 
     @Test
     fun `topic-with-files reports an empty file list per AJAX-loaded contract`() {
-        val html = loader.load("topic", "topic-with-files-2026-07-02.html")
+        val html = loader.load("topic", "topic-with-files-2026-08-10.html")
         val detail = parser.parse(html, topicIdHint = "1050403")
 
         // Even though the page declares "Файлы (1)", the topic HTML never carries the
@@ -101,7 +101,7 @@ class RuTorTopicParserTest {
 
     @Test
     fun `topic-with-long-description surfaces a long description without click-to-expand text`() {
-        val html = loader.load("topic", "topic-with-long-description-2026-07-02.html")
+        val html = loader.load("topic", "topic-with-long-description-2026-08-10.html")
         val detail = parser.parse(html, topicIdHint = "1049192")
 
         val description = detail.description.orEmpty()

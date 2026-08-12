@@ -59,7 +59,7 @@ class RuTorLoginParserTest {
 
     @Test
     fun `bare login form GET response is classified as FormDisplayed`() {
-        val html = loader.load("login", "login-form-2026-07-02.html")
+        val html = loader.load("login", "login-form-2026-08-10.html")
         val classification = parser.classify(html)
         assertEquals(RuTorLoginParser.Outcome.FormDisplayed, classification.outcome)
         assertEquals(AuthState.Unauthenticated, parser.parse(html).state)
@@ -68,7 +68,7 @@ class RuTorLoginParserTest {
     @Test
     fun `malformed truncated HTML does not throw and produces Malformed-or-FormDisplayed`() {
         // Truncate the login form fixture mid-form to simulate a connection drop.
-        val full = loader.load("login", "login-form-2026-07-02.html")
+        val full = loader.load("login", "login-form-2026-08-10.html")
         val truncated = full.substringBefore("<input type=\"password\"") +
             // Drop closing tags too — Jsoup will tolerate this but the form may now be
             // missing the password input, which the classifier reads as not-a-form.

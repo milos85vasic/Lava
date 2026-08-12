@@ -24,7 +24,7 @@ class RuTorSearchParserTest {
 
     @Test
     fun `normal search results contain at least 10 torrents with sizes`() {
-        val html = loader.load("search", "search-normal-2026-07-02.html")
+        val html = loader.load("search", "search-normal-2026-08-10.html")
         val result = parser.parse(html, pageHint = 0)
 
         assertTrue(
@@ -55,7 +55,7 @@ class RuTorSearchParserTest {
 
     @Test
     fun `empty search results have no items and totalPages defaults to 1`() {
-        val html = loader.load("search", "search-empty-2026-07-02.html")
+        val html = loader.load("search", "search-empty-2026-08-10.html")
         val result = parser.parse(html, pageHint = 0)
 
         assertTrue("empty page must surface no items, got ${result.items.size}", result.items.isEmpty())

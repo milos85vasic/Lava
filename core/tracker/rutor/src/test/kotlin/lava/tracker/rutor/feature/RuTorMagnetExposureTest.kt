@@ -55,7 +55,7 @@ class RuTorMagnetExposureTest {
 
     @Test
     fun `getMagnetLink exposes the parsed magnet after the topic page surfaces it`() = runBlocking {
-        val topicHtml = loader.load("topic", "topic-normal-2026-07-02.html")
+        val topicHtml = loader.load("topic", "topic-normal-2026-08-10.html")
         // RuTorTopic does a two-fetch dance: /torrent/<id> then /descriptions/<id>.files.
         server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse =
@@ -95,7 +95,7 @@ class RuTorMagnetExposureTest {
 
     @Test
     fun `getMagnetLink exposes the parsed magnet after a search row surfaces it`() = runBlocking {
-        val html = loader.load("search", "search-normal-2026-07-02.html")
+        val html = loader.load("search", "search-normal-2026-08-10.html")
         server.enqueue(MockResponse().setBody(html).setResponseCode(200))
         val baseUrl = server.url("/").toString().trimEnd('/')
 

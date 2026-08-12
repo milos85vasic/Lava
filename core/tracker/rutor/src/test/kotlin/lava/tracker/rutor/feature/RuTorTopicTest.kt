@@ -51,7 +51,7 @@ class RuTorTopicTest {
 
     @Test
     fun `getTopic merges file fragment from descriptions endpoint into TopicDetail`() = runBlocking {
-        val topicHtml = loader.load("topic", "topic-with-files-2026-07-02.html")
+        val topicHtml = loader.load("topic", "topic-with-files-2026-08-10.html")
         val filesHtml = loader.load("files", "files-multi-2026-04-30.html")
         server.dispatcher = pathDispatcher(
             mapOf(
@@ -83,7 +83,7 @@ class RuTorTopicTest {
 
     @Test
     fun `getTopic gracefully degrades when descriptions endpoint returns 404`() = runBlocking {
-        val topicHtml = loader.load("topic", "topic-normal-2026-07-02.html")
+        val topicHtml = loader.load("topic", "topic-normal-2026-08-10.html")
         server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse =
                 if (request.path?.contains("/torrent/") == true) {
@@ -105,7 +105,7 @@ class RuTorTopicTest {
 
     @Test
     fun `getTopicPage returns the same TopicDetail wrapped in a single-page envelope`() = runBlocking {
-        val topicHtml = loader.load("topic", "topic-normal-2026-07-02.html")
+        val topicHtml = loader.load("topic", "topic-normal-2026-08-10.html")
         server.dispatcher = pathDispatcher(
             mapOf(
                 "/torrent/1052665" to topicHtml,
