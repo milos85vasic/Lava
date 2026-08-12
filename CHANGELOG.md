@@ -1,5 +1,24 @@
 # Changelog
 
+## Lava-Android-1.3.15-1082 — 2026-08-12 (§6.Z device-verification closure — same feature set as 1081, first real device proof)
+
+**Previous published:** Lava-Android-1.3.14-1080 (1080/1081 were built but never distributed — blocked on this cycle's §6.Z device-evidence gate).
+
+- **LVA-083/LVA-084 (search results P0) — device-verified GREEN for the first time.** The underlying production fix (`SearchInputViewModel` provider-ID resolution) already shipped in source; what was missing was real device proof it works. Root-caused a **test-infrastructure** bug, not a production one: `OnboardingBypassRule` (used by 6 Challenge tests) skipped `TrackerRegistry.populateFrom()`, so those Challenges were exercising an empty provider registry and silently passing against nothing. Fixed the 6 affected Challenge tests (`Challenge58`–`Challenge62`, `Challenge71`) to seed the registry correctly; verified the real onboarding flow (`OnboardingViewModel`) already calls `populateFrom()` correctly in production.
+- **Crashlytics FATAL `c7c8ccc` (Categories filter dialog) — device-verified GREEN.** `Challenge71CategorySelectionDialogBoundedHeightTest` had an ambiguous Compose selector (`hasText("Any")` matched 2 nodes — Category and Author filters share the same default label). Fixed via a dedicated `testTag` (`FILTER_CATEGORY_VALUE_TEST_TAG`) on `FilterCategoryItem`. Real device run: PASS in 254s on a containerized KVM emulator, `.lava-ci-evidence/lva014-c00-c71-c58-c59-device-gate-retest4/Challenge71/real-device-verification.json`.
+- **§6.H credential-leak fix.** `OnboardingViewModel` was logging a `LoginResult`'s default `toString()`, which included the raw session token. Replaced with an explicit field-by-field debug log that never serializes the token.
+- **§11.4.25 coverage ledger:** 8 gap rows closed with evidence-backed waivers; regenerated fresh (57 covered / 9 partial / 0 gap).
+- **§6.M host-stability:** root-caused 4 recurring Claude Code session-kill incidents via `journalctl` forensics; documented the permanent (operator-executable, no-sudo-required-for-the-fix-itself) remediation.
+- **§6.Y:** versionCode 1081→1082; versionName HELD at 1.3.15 (no new user-facing functionality — see rationale in `app/build.gradle.kts`).
+
+**Coverage status (§6.AK / §6.Z):** all 7 affected Challenges executed + confirmed PASS on a containerized KVM emulator this cycle (real device, not host-direct). Several needed more than one attempt — 5 of 7 first attempts died at exactly `test_seconds≈600` from unrelated host contention (a second concurrent session, stray processes), not from the code under test; isolating with `--test-timeout 20m` and rerunning against a quiet host confirmed genuine PASS for every one. Per-test confirmed-PASS evidence (directories under `.lava-ci-evidence/`):
+  - `lva014-c00-c71-c58-c59-device-gate/Challenge00CrashSurvivalTest/`
+  - `lva014-c00-c71-c58-c59-device-gate-retest/Challenge59SearchUsesOnboardedProvidersTest/`
+  - `lva014-c00-c71-c58-c59-device-gate-retest2/{Challenge58SearchReturnsResultsTest,Challenge60InputResultsChipsAgreeTest,Challenge61ResultsChipsShowDisplayNamesTest,Challenge62SearchEmptyStateTest}/`
+  - `lva014-c00-c71-c58-c59-device-gate-retest4/Challenge71/`
+
+  This closes the exact gap 1081's own CHANGELOG entry flagged honestly ("C71 ... compiled but NOT YET device-executed").
+
 ## Lava-Android-1.3.15-1081 — 2026-07-27 (production-readiness sweep — 8 LVA gaps closed, Crashlytics crash fix, device-gate durability)
 
 **Previous published:** Lava-Android-1.3.14-1080.

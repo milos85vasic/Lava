@@ -178,6 +178,70 @@
 <body>
 <h1 id="changelog">Changelog</h1>
 <h2
+id="lava-android-1315-1082--2026-08-12-6z-device-verification-closure--same-feature-set-as-1081-first-real-device-proof">Lava-Android-1.3.15-1082
+— 2026-08-12 (§6.Z device-verification closure — same feature set as
+1081, first real device proof)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.14-1080
+(1080/1081 were built but never distributed — blocked on this cycle's
+§6.Z device-evidence gate).</p>
+<ul>
+<li><strong>LVA-083/LVA-084 (search results P0) — device-verified GREEN
+for the first time.</strong> The underlying production fix
+(<code>SearchInputViewModel</code> provider-ID resolution) already
+shipped in source; what was missing was real device proof it works.
+Root-caused a <strong>test-infrastructure</strong> bug, not a production
+one: <code>OnboardingBypassRule</code> (used by 6 Challenge tests)
+skipped <code>TrackerRegistry.populateFrom()</code>, so those Challenges
+were exercising an empty provider registry and silently passing against
+nothing. Fixed the 6 affected Challenge tests
+(<code>Challenge58</code>–<code>Challenge62</code>,
+<code>Challenge71</code>) to seed the registry correctly; verified the
+real onboarding flow (<code>OnboardingViewModel</code>) already calls
+<code>populateFrom()</code> correctly in production.</li>
+<li><strong>Crashlytics FATAL <code>c7c8ccc</code> (Categories filter
+dialog) — device-verified GREEN.</strong>
+<code>Challenge71CategorySelectionDialogBoundedHeightTest</code> had an
+ambiguous Compose selector (<code>hasText("Any")</code> matched 2 nodes
+— Category and Author filters share the same default label). Fixed via a
+dedicated <code>testTag</code>
+(<code>FILTER_CATEGORY_VALUE_TEST_TAG</code>) on
+<code>FilterCategoryItem</code>. Real device run: PASS in 254s on a
+containerized KVM emulator,
+<code>.lava-ci-evidence/lva014-c00-c71-c58-c59-device-gate-retest4/Challenge71/real-device-verification.json</code>.</li>
+<li><strong>§6.H credential-leak fix.</strong>
+<code>OnboardingViewModel</code> was logging a
+<code>LoginResult</code>'s default <code>toString()</code>, which
+included the raw session token. Replaced with an explicit field-by-field
+debug log that never serializes the token.</li>
+<li><strong>§11.4.25 coverage ledger:</strong> 8 gap rows closed with
+evidence-backed waivers; regenerated fresh (57 covered / 9 partial / 0
+gap).</li>
+<li><strong>§6.M host-stability:</strong> root-caused 4 recurring Claude
+Code session-kill incidents via <code>journalctl</code> forensics;
+documented the permanent (operator-executable,
+no-sudo-required-for-the-fix-itself) remediation.</li>
+<li><strong>§6.Y:</strong> versionCode 1081→1082; versionName HELD at
+1.3.15 (no new user-facing functionality — see rationale in
+<code>app/build.gradle.kts</code>).</li>
+</ul>
+<p><strong>Coverage status (§6.AK / §6.Z):</strong> all 7 affected
+Challenges executed + confirmed PASS on a containerized KVM emulator
+this cycle (real device, not host-direct). Several needed more than one
+attempt — 5 of 7 first attempts died at exactly
+<code>test_seconds≈600</code> from unrelated host contention (a second
+concurrent session, stray processes), not from the code under test;
+isolating with <code>--test-timeout 20m</code> and rerunning against a
+quiet host confirmed genuine PASS for every one. Per-test confirmed-PASS
+evidence (directories under <code>.lava-ci-evidence/</code>):</p>
+<ul>
+<li><code>lva014-c00-c71-c58-c59-device-gate/Challenge00CrashSurvivalTest/</code></li>
+<li><code>lva014-c00-c71-c58-c59-device-gate-retest/Challenge59SearchUsesOnboardedProvidersTest/</code></li>
+<li><code>lva014-c00-c71-c58-c59-device-gate-retest2/{Challenge58SearchReturnsResultsTest,Challenge60InputResultsChipsAgreeTest,Challenge61ResultsChipsShowDisplayNamesTest,Challenge62SearchEmptyStateTest}/</code></li>
+<li><code>lva014-c00-c71-c58-c59-device-gate-retest4/Challenge71/</code></li>
+</ul>
+<p>This closes the exact gap 1081's own CHANGELOG entry flagged honestly
+("C71 ... compiled but NOT YET device-executed").</p>
+<h2
 id="lava-android-1315-1081--2026-07-27-production-readiness-sweep--8-lva-gaps-closed-crashlytics-crash-fix-device-gate-durability">Lava-Android-1.3.15-1081
 — 2026-07-27 (production-readiness sweep — 8 LVA gaps closed,
 Crashlytics crash fix, device-gate durability)</h2>

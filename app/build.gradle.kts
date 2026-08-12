@@ -93,7 +93,16 @@ android {
         // real crash fix (Crashlytics c7c8ccc), device-gate stability,
         // Go compiler GC-panic cap. versionName bump warranted (user-facing
         // crash fix + infrastructure stability).
-        versionCode = 1081
+        // §6.Y bump (2026-08-12): production code touched after 1081's last
+        // distribute point (FilterCategoryItem.kt testTag +
+        // OnboardingViewModel.kt credential-log redaction) — both are
+        // behavior-invisible to users (a test hook, a log-line redaction);
+        // the user-visible feature set is identical to what 1081 already
+        // describes (LVA-083/084 search fix + the c7c8ccc crash fix). What's
+        // NEW this cycle is the first-ever real DEVICE verification of both,
+        // closing the §6.Z gate that had blocked 1080/1081 from ever being
+        // distributed. versionName HELD per §6.Y clause 3.
+        versionCode = 1082
         versionName = "1.3.15"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/

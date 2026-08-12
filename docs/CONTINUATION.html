@@ -189,6 +189,50 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🟢🚀 2026-08-12 (§6.Y bump 1081→1082 + push confirmed on both
+mirrors — entering the deploy phase).</strong> All 8 commits from the
+2026-08-11/12 anti-bluff sweep (below) are confirmed pushed and
+converged: local <code>HEAD</code> matches <code>github/master</code>
+and <code>gitlab/master</code> exactly (independently verified via
+<code>git ls-remote</code>, not just the pipeline's own exit code — the
+pipeline's Stage 5 verify step hit a <code>git submodule foreach</code>
+misattribution bug on <code>constitution</code> that was chased down and
+confirmed benign: manual re-check of all 22 submodules shows 100%
+clean/converged). Two real gate rejections were hit and fixed for real
+reasons along the way, not bypassed: (1) a §11.4.6
+no-guessing-vocabulary violation in the incident report ("likely"
+without an <code>UNCONFIRMED:</code> prefix), (2) a stale
+<code>docs/coverage-ledger.yaml</code> (Challenge71's testTag fix newly
+qualified <code>search_result</code> for C71 coverage, changing the
+ledger's real content). versionCode bumped 1081→1082 (versionName HELD
+at 1.3.15 — no new user-facing functionality, see rationale in
+<code>app/build.gradle.kts</code>) because production code
+(<code>FilterCategoryItem.kt</code> testTag,
+<code>OnboardingViewModel.kt</code> credential-log redaction) landed
+after 1081's last-distribute point per §6.Y. New CHANGELOG entry added
+for 1.3.15-1082 with per-test evidence-path citations (corrected once
+already — my first draft cited only <code>retest4</code>, which in fact
+only holds C71; the real evidence for C00/C58/C59/C60/C61/C62 is spread
+across
+<code>lva014-c00-c71-c58-c59-device-gate{,-retest,-retest2}/</code>, all
+independently re-verified before writing the corrected claim).
+<strong>NEXT (in progress):</strong> rebuild the debug APK + androidTest
+APK off this exact commit SHA, re-run the §6.Z-mandatory Challenge set
+against the fresh artifact (version bumped, so the prior evidence's SHA
+no longer matches — §6.Z clause 2 requires same-SHA evidence), package
+it into the
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.15-1082-test-evidence.{md,json}</code>
+path <code>firebase-distribute.sh</code> actually checks, then Stage-1
+debug-only Firebase distribute per §6.AA (release stage only after
+operator confirms the debug build on-device). Firebase token confirmed
+present + matching between <code>~/api_keys.sh</code>
+(<code>FIRBASE_CLI_TOKEN</code>, typo'd name) and <code>.env</code>
+(<code>LAVA_FIREBASE_TOKEN</code>) — byte-length compared, not printed.
+After Android distribute: api-app + lava-api-go rebuild, then systemd
+<code>--user</code> service wiring (no sudo/su) per the operator's
+queued task.</p>
+</blockquote>
+<blockquote>
 <p><strong>🟢🐞📱 2026-08-11/12 (LVA-083/084 + C71 CRASHLYTICS
 REGRESSION DEVICE-VERIFIED GREEN — real §6.AK test-infra bug found +
 fixed; host-instability root-cause fully diagnosed).</strong> Operator
