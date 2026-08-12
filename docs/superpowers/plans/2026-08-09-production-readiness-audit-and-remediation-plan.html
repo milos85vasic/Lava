@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-08-09-production-readiness-audit-and-remediation-plan</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1
+id="production-readiness-audit--remediation-plan--2026-08-09">Production-Readiness
+Audit + Remediation Plan — 2026-08-09</h1>
+<p><strong>Status:</strong> LIVE DOCUMENT — being updated as background
+verification (constitutional sweep, containerized device gate)
+completes. Read <code>docs/CONTINUATION.md</code> §0 for the current
+pointer; this file is the point-by-point punch list behind it.</p>
+<p><strong>Why this exists.</strong> The operator asked for a full
+anti-bluff audit against the constitution, an inventory of every open
+workable item, identification of every gap/inconsistency/danger zone,
+and a systematic plan to close each one with real, executed, non-bluff
+evidence. This document is that plan. Every claim below is either (a)
+independently verified against the actual repo/DB state in this session
+(not trusted from a subagent's summary alone), or (b) explicitly marked
+PENDING with what will confirm it.</p>
+<p><strong>Session interruption note (forensic, §6.M).</strong> The
+Claude Code process was killed mid-session twice (once ~15:55, once
+~18:5x) while long-running verification agents were in flight. Both
+times <code>uptime</code> confirmed continuous host uptime — these were
+process-level interruptions, not host power events. No git-tracked work
+was lost; one in-flight device-gate attempt had to be redone from a very
+early stage (it had only logged its runner selection before being
+killed). Lesson applied: long-running verification (the constitutional
+sweep, the device-gate Challenge run) now executes as direct background
+shell commands from the main session rather than nested inside
+subagents, which is more resilient to this class of interruption.</p>
+<hr />
+<h2 id="1-executive-summary">1. Executive summary</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Count</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Confirmed-fixed this session</td>
+<td>3</td>
+<td>credential leak (§6.H/§6.AC), <code>markdown-export-sync</code>
+gate, <code>coverage-ledger</code> gate</td>
+</tr>
+<tr>
+<td>Confirmed already-fixed-in-source, pending device verification</td>
+<td>8</td>
+<td>LVA-083, LVA-084, LVA-085, LVA-086, LVA-087, LVA-088, LVA-089,
+LVA-090</td>
+</tr>
+<tr>
+<td>Genuinely unconfirmed, needs device/operator input</td>
+<td>1</td>
+<td>LVA-091 (app-ID co-mingling)</td>
+</tr>
+<tr>
+<td>Doc-staleness corrections applied</td>
+<td>4</td>
+<td>submodule pin table, LVA-6 status, LVA-7 status,
+Firebase-token-resolution claim</td>
+</tr>
+<tr>
+<td>Structurally operator-gated (no agent can close these)</td>
+<td>4</td>
+<td>Firebase CI token rotation, 2× GitLab mirror push, LVA-008 upstream
+Android bug</td>
+</tr>
+<tr>
+<td>Verification runs in flight</td>
+<td>2</td>
+<td>full 54-gate constitutional sweep; 6-Challenge containerized device
+gate</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Bottom line so far:</strong> nothing found this session
+indicates the product is fundamentally broken — the P0 "search is
+completely unusable" reports (LVA-083/084) already have real root-caused
+fixes in source from a 2026-06-25/06-26 cycle; they were simply never
+verified on a device before being left as open tickets. The
+constitutional-gate debt is almost entirely mechanical staleness
+(regenerate a ledger, regenerate doc exports), not missing engineering.
+The remaining real risk concentrations are: (1) whether the
+device-verifiable fixes actually pass on a real emulator (verification
+in flight), (2) two credential/mirror items that require the operator's
+hands, and (3) one confirmed upstream Android framework bug (LVA-008)
+that Lava's own code cannot fix.</p>
+<hr />
+<h2 id="2-fixed-and-independently-verified-this-session">2. Fixed and
+independently verified this session</h2>
+<h3 id="21-credential-leak--onboardingviewmodelkt659-6h--6ac">2.1
+Credential leak — <code>OnboardingViewModel.kt:659</code> (§6.H /
+§6.AC)</h3>
+<p><code>LoginResult</code> is a Kotlin <code>data class</code> with a
+raw <code>sessionToken: String?</code> field and no custom
+<code>toString()</code>;
+<code>logger.d { "...result=$loginResult" }</code> therefore wrote the
+session token to logcat on every login. <strong>Verified by reading the
+class definition directly</strong> (not trusted from any agent claim).
+Fixed: log now emits only
+<code>state</code>/<code>hasSessionToken</code>/<code>hasCaptcha</code>.
+Not yet committed (bundled into the consolidated commit — see §6).</p>
+<h3 id="22-markdown-export-sync-gate">2.2
+<code>markdown-export-sync</code> gate</h3>
+<p>Was FAILING (8 stale HTML/PDF exports: <code>CHANGELOG.md</code>,
+<code>docs/CONTINUATION.md</code>, <code>docs/Fixed.md</code>,
+<code>docs/Issues.md</code>). Regenerated; <strong>re-ran the check
+script directly myself</strong>:
+<code>checked 265 in-scope .md file(s); 0 problem(s)</code>. Confirmed
+PASS.</p>
+<h3 id="23-coverage-ledger-gate-11425">2.3 <code>coverage-ledger</code>
+gate (§11.4.25)</h3>
+<p>Was stale (last generated 2026-07-26, months of module changes
+since). Regenerated via <code>scripts/generate-coverage-ledger.sh</code>
+(66 rows: 49 covered / 9 partial / 8 gap) and <strong>re-ran
+<code>scripts/check-coverage-ledger.sh --strict</code> directly
+myself</strong>: exit 0, "ledger is well-formed, complete, and fresh".
+The 8 remaining <code>gap</code> rows
+(<code>core/analytics-firebase</code>, <code>core/apiengine</code>,
+<code>core/applink</code>, and 5 HelixQA-sibling submodules:
+<code>doc_processor</code>/<code>llm_orchestrator</code>/<code>llm_provider</code>/<code>llms_verifier</code>/
+<code>vision_engine</code>) are a real, separately-tracked item — see
+§4.3 (LVA-019).</p>
+<h3 id="24-documentation-staleness-in-docscontinuationmd">2.4
+Documentation staleness in <code>docs/CONTINUATION.md</code></h3>
+<ul>
+<li>§3 submodule pin table: 22 of 24 rows were stale (some by 2+
+months); regenerated from a live <code>git submodule status</code> +
+per-submodule fetch sweep.</li>
+<li>Flagged (not silently fixed): 2 real GitHub↔︎GitLab mirror mismatches
+(<code>panoptic</code>, <code>tracker_sdk</code> — GitLab is a real
+ancestor of GitHub); fixing requires a <code>git push</code> to a shared
+remote, which needs operator sign-off (see §5.2).</li>
+<li><code>LVA-6</code> and <code>LVA-7</code>: doc said "OWED"/"IN
+PROGRESS"; DB ground truth (<code>docs/workable_items.db</code>) says
+both <code>Completed (→ Fixed.md)</code>. Corrected.</li>
+<li>Firebase CI token: doc claimed "RESOLVED 2026-05-31"; DB
+(<code>LVA-5</code>) says <code>Operator-blocked</code> as of
+2026-06-30, and the incident file the doc cites doesn't exist in the
+tree. Marked honestly UNCONFIRMED rather than picking a side — see
+§5.1.</li>
+</ul>
+<hr />
+<h2
+id="3-confirmed-already-fixed-in-source-pending-only-device-verification">3.
+Confirmed already-fixed-in-source, pending only device verification</h2>
+<p>All 8 below trace to the same operator QA-video cluster
+(<code>.lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md</code>).
+For each, I (or a dispatched agent whose specific file:line claims I
+spot-verified — see §3.9) read the actual production code and the actual
+reproduce-first Challenge Test before accepting the classification. None
+required a new code fix; all trace to a real prior fix commit.</p>
+<table>
+<thead>
+<tr>
+<th>Ticket</th>
+<th>Symptom</th>
+<th>Fix location</th>
+<th>Covering Challenge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LVA-083 (P0)</td>
+<td>Search returns zero results / "Something went wrong"</td>
+<td><code>SearchInputViewModel.kt:104-109</code> — explicit
+onboarded-provider set, never the old <code>null</code>-means-all
+sentinel</td>
+<td><code>Challenge58SearchReturnsResultsTest</code></td>
+</tr>
+<tr>
+<td>LVA-084 (P0)</td>
+<td>Onboarded provider (YTS) not the one Search uses</td>
+<td>same fix as LVA-083
+(<code>observeAll().filter { searchEnabled &amp;&amp; isEnabled }</code>)</td>
+<td><code>Challenge59SearchUsesOnboardedProvidersTest</code></td>
+</tr>
+<tr>
+<td>LVA-085 (P1)</td>
+<td>Provider chip labels raw/lowercased</td>
+<td><code>ProviderCatalogRepository.kt:217</code>
+<code>friendlyDisplayName()</code> humanizes blank/id-equal display
+names at the adapter boundary</td>
+<td><code>Challenge61ResultsChipsShowDisplayNamesTest</code></td>
+</tr>
+<tr>
+<td>LVA-086 (P1)</td>
+<td>No empty/loading state, looked hung</td>
+<td><code>SearchResultScreen.kt:347-358</code> renders a loading spinner
+while streaming with zero items; <code>handleStreamEnd()</code> always
+terminates into Content/Empty/Error</td>
+<td><code>Challenge62SearchEmptyStateTest</code></td>
+</tr>
+<tr>
+<td>LVA-087 (P2)</td>
+<td>Welcome says "4 providers", picker shows ~12</td>
+<td><code>OnboardingViewModel.kt:472</code> sets
+<code>welcomeProviderCount = null</code> when
+<code>apiSelectionEnabled</code> (true in production), so the stale
+exact count never renders</td>
+<td><code>Challenge63WelcomeCountMatchesPickerTest</code></td>
+</tr>
+<tr>
+<td>LVA-088 (P2)</td>
+<td>Cloud API preset mislabeled "On this network"</td>
+<td><code>ApiSelectionStep.kt:254,376</code> gives cloud-default rows an
+explicit "Cloud / remote server" subtitle</td>
+<td>(covered by onboarding Challenges)</td>
+</tr>
+<tr>
+<td>LVA-089 (P2)</td>
+<td>mDNS API shown as raw IP, no name</td>
+<td><code>ApiSelectionStep.kt:162,329,385-388</code> resolves the mDNS
+instance name from a host:port-keyed map when present</td>
+<td><code>Challenge65MdnsShowsFriendlyNameTest</code></td>
+</tr>
+<tr>
+<td>LVA-090 (P3)</td>
+<td>"Select all" silently enabled auth-requiring providers</td>
+<td><code>OnboardingViewModel.kt:592-622</code>
+<code>onToggleAllProviders()</code> only auto-selects
+<code>requiresNoCredentials()</code> providers</td>
+<td><code>Challenge66SelectAllDoesNotEnableAuthProvidersTest</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="39-independent-verification-note">3.9 Independent verification
+note</h3>
+<p>I personally read <code>SearchInputViewModel.kt</code> in full (§3
+LVA-083/084) and <code>Challenge58SearchReturnsResultsTest.kt</code> in
+full (confirmed it is a genuine, non-bluff test: real
+MainActivity→ViewModel→SDK→OkHttp path, MockWebServer only at the socket
+boundary, primary assertion on a rendered result row, documented
+reproduce-first mutation protocol). I spot-checked LVA-090's
+<code>onToggleAllProviders</code> directly against the reporting agent's
+claim and found it accurate, including the exact commit
+(<code>a300b3b0</code>). The remaining LVA-085/086/087/088/089 citations
+are trusted from the dispatched agent's report on the strength of that
+spot-check plus the specificity of every citation (exact file:line,
+exact function names) — a standard I judge acceptable but weaker than
+full independent re-reading of all 6.</p>
+<h3
+id="310-one-unresolved-side-observation-not-a-ticket-logged-here-so-it-isnt-lost">3.10
+One unresolved side-observation (not a ticket, logged here so it isn't
+lost)</h3>
+<p><code>ProvidersStep.kt:74</code>'s "Select all" checkbox label
+computes <code>allSelected</code> from <em>all</em> providers, while the
+ViewModel's toggle-direction decision only considers
+no-credential-reachable providers. When credential-required providers
+exist and stay unselected, the checkbox may never flip to "Deselect all"
+even once every reachable provider is selected. Does NOT reproduce
+LVA-090's reported symptom (auth providers being silently enabled) —
+flagged as a possible follow-up, not fixed this session, not
+blocking.</p>
+<hr />
+<h2 id="4-genuinely-open-needs-more-than-whats-in-this-repo">4.
+Genuinely open, needs more than what's in this repo</h2>
+<h3 id="41-lva-091-p3--app-id-co-mingling-unconfirmed">4.1 LVA-091 (P3)
+— App-ID co-mingling, UNCONFIRMED</h3>
+<p>Source inspection across 3 independent layers
+(<code>applicationId</code>/<code>applicationIdSuffix</code> in
+<code>app/build.gradle.kts</code>, per-build-type <code>app_name</code>
+string override, per-build-type launcher icon override) shows strong
+evidence debug and release ARE already distinguishable (different
+package id, different label, different icon color). The ticket's own
+title says UNCONFIRMED. <strong>Closure requires an on-device
+check</strong> (<code>adb shell pm list packages | grep lava</code> + a
+visual launcher check) — folded into the device-gate run in §5.3 if time
+permits; otherwise this is the one item where "needs a real device, not
+just source reading" is a legitimate, non-bluff blocker.</p>
+<h3
+id="42-lva-008-p1--nav-teardown-crash--confirmed-upstream-defect-not-lavas">4.2
+LVA-008 (P1) — nav-teardown crash — confirmed upstream defect, not
+Lava's</h3>
+<p>8 client-side candidate fixes have been device-falsified over prior
+cycles; a minimal repro is authored for upstream androidx-navigation.
+This is not something any amount of further Lava-side work will close —
+it needs either an androidx-navigation fix to land upstream, or an
+operator decision to ship with the existing
+<code>LenientTeardownRule</code> test-harness workaround (which only
+suppresses the teardown-time exception in tests, not in the shipped app)
+permanently. <strong>Operator decision owed</strong>, not additional
+engineering.</p>
+<h3 id="43-lva-019-p1--coverage-ledger-gap-rows">4.3 LVA-019 (P1) —
+coverage-ledger gap rows</h3>
+<p>8 modules show <code>gap</code> status in the freshly-regenerated
+ledger: <code>core/analytics-firebase</code>,
+<code>core/apiengine</code>, <code>core/applink</code>, plus 5
+HelixQA-sibling Go submodules (<code>doc_processor</code>,
+<code>llm_orchestrator</code>, <code>llm_provider</code>,
+<code>llms_verifier</code>, <code>vision_engine</code>). The gate itself
+passes (gaps are tracked, not blocking), but per the "no work forgotten"
+mandate these are real coverage holes worth a follow-up session — not
+addressed here because closing 8 modules' test coverage properly is
+multi-session scope, not a mechanical fix.</p>
+<h3
+id="44-lva-013-p0-per-body--missing-6z-device-evidence-for-already-shipped-1080--api-app-24">4.4
+LVA-013 (P0 per body) — missing §6.Z device evidence for already-shipped
+1080 / api-app 24</h3>
+<p>Folded into the device-gate work in §5.3 as a secondary objective
+once the 1081 Challenge set completes, resources permitting.</p>
+<hr />
+<h2
+id="5-structurally-operator-gated-cannot-be-closed-by-an-agent-full-stop">5.
+Structurally operator-gated (cannot be closed by an agent, full
+stop)</h2>
+<h3
+id="51-firebase-ci-token--contradictory-status-needs-operator-confirmation">5.1
+Firebase CI token — contradictory status, needs operator
+confirmation</h3>
+<p>One commit claims rotation happened 2026-05-31; the workable-items DB
+says <code>LVA-5</code> is still <code>Operator-blocked</code> as of
+2026-06-30; <code>.env</code> was touched 2026-07-03 (after both dates)
+so a rotation may have happened without the tracker being updated.
+<strong>I cannot determine which is true from file evidence, and only
+the operator can actually rotate
+<code>LAVA_FIREBASE_TOKEN</code></strong> (the ticket's own unblock
+instructions say so explicitly). Action needed: confirm current token
+validity, or rotate it
+(<code>firebase logout &amp;&amp; firebase login:ci</code>), then close
+<code>LVA-5</code> in the DB.</p>
+<h3 id="52-two-githubgitlab-mirror-mismatches">5.2 Two GitHub↔︎GitLab
+mirror mismatches</h3>
+<p><code>panoptic</code> and <code>submodules/tracker_sdk</code> both
+have a GitLab tip that is a real, unreconciled ancestor of the GitHub
+tip. Fixing this is a <code>git push gitlab</code> per submodule — a
+shared-remote action I won't take without explicit sign-off per this
+session's operating constraints. <code>panoptic</code> is additionally
+missing <code>install_upstreams.sh</code> (§11.4.36 gap) — I can add
+that script without pushing anything if that's useful groundwork; say so
+if wanted.</p>
+<h3
+id="53-real-device-verification-of-the-8-already-fixed-tickets--the-crash-regression">5.3
+Real-device verification of the 8 already-fixed tickets + the crash
+regression</h3>
+<p>This is IN PROGRESS as a background containerized-KVM Challenge run
+(see §6) — not operator-gated, just genuinely takes real wall-clock time
+(cold emulator boot ×6 test classes). Will update this section with
+PASS/FAIL evidence per test the moment it completes.</p>
+<hr />
+<h2
+id="6-in-flight-verification-background-main-thread-resilient-to-process-kills">6.
+In-flight verification (background, main-thread, resilient to process
+kills)</h2>
+<ol type="1">
+<li><strong>Full 54-gate constitutional sweep</strong>
+(<code>scripts/verify-all-constitution-rules.sh</code>) — re-running
+from a clean state now that both known failures (§2.2, §2.3) are fixed.
+Expect a materially better pass count than the last completed run
+(53/54, single ledger failure, recorded 2026-07-26).</li>
+<li><strong>Containerized device gate</strong>, 6 Challenge Tests
+against the current build on a real containerized-KVM emulator (this
+Linux host, confirmed <code>/dev/kvm</code> + <code>podman</code>
+available — the exact gate path prior macOS-hosted sessions in this
+project's history could never reach):
+<code>Challenge00CrashSurvivalTest</code> (cold-start canary) →
+<code>Challenge71CategorySelectionDialogBoundedHeightTest</code> (closes
+the 1.3.15-1081 Crashlytics regression) →
+<code>Challenge58SearchReturnsResultsTest</code> (closes LVA-083) →
+<code>Challenge59SearchUsesOnboardedProvidersTest</code> (closes
+LVA-084) → <code>Challenge60InputResultsChipsAgreeTest</code> →
+<code>Challenge62SearchEmptyStateTest</code> (closes LVA-086). Evidence
+lands incrementally at
+<code>.lava-ci-evidence/lva014-c00-c71-c58-c59-device-gate/</code> as
+each test finishes, specifically so a third process interruption (if it
+happens) doesn't lose already-completed results.</li>
+</ol>
+<hr />
+<h2 id="7-what-done-looks-like-for-this-cycle">7. What "done" looks like
+for this cycle</h2>
+<p>Once §6's two runs complete:</p>
+<ol type="1">
+<li>Update this document + <code>docs/CONTINUATION.md</code> with the
+real PASS/FAIL evidence (not before — no claiming green ahead of the
+actual run per §6.J/§6.Z).</li>
+<li>If all 6 Challenges pass: LVA-083, LVA-084, LVA-086 close for real
+(device-verified, not just source-verified); LVA-085/087/088/089/090
+stay source-verified-only unless their own Challenges also got a slot;
+the 1.3.15-1081 Crashlytics regression closes.</li>
+<li>If anything fails: that's a genuine finding, not a setback to hide —
+root-cause it via the same systematic-debugging process used throughout
+this session before touching the fix.</li>
+<li>Bundle every working-tree change from this session into one
+well-documented, Bluff-Audit-stamped commit (credential-fix,
+CONTINUATION corrections, coverage-ledger, doc exports) — not before the
+device-gate evidence exists, since the commit should carry real evidence
+paths, not promises.</li>
+<li>Present the operator with the short, genuinely-irreducible punch
+list from §5 — token rotation, 2 mirror pushes, LVA-008 upstream
+decision, LVA-091 device check — as the honest remainder between
+"everything an agent can verify is verified" and "100% shipped."</li>
+</ol>
+</body>
+</html>

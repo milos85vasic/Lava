@@ -276,27 +276,6 @@ them directly. Flagged by the rating+visited VM-test agent (2026-06-09).
 Fix: implement the stubs as real in-memory fakes matching the real repo
 contracts + add equivalence tests.</p>
 <h2
-id="lva-013--testendpointsrepositoryobserveall-seeds-rutracker-but-real-impl-never-emits-rutracker-deeper-third-law-divergence">LVA-013
-— TestEndpointsRepository.observeAll seeds [Rutracker] but real impl
-never emits Rutracker (deeper Third-Law divergence)</h2>
-<p><strong>Status:</strong> Completed (→ Fixed.md)
-<strong>Type:</strong> Task <strong>Evidence:</strong> core/testing
-TestEndpointsRepository.observeAll filterNot Rutracker + no-seed
-(matches EndpointsRepositoryImpl); 4 phantom-seed test methods rewritten
-across 3 files; Bluff-Audit: mutation reintroducing onStart seed →
-core/testing TestEndpointsRepositoryEquivalenceTest expected:&lt;[]&gt;
-but was:&lt;[Rutracker]&gt; + core/domain TestInfrastructureContractTest
-'Fresh-install first observe MUST emit []... Got: [Rutracker]',
-reverted; GREEN core:testing 24/0, core:domain 57/0, feature:connection
-10/0 <strong>Severity:</strong> P3 <strong>Created-By:</strong> AI</p>
-<p>Beyond LVA-011 (add no-op, fixed): the fake's observeAll() seeds +
-emits [Endpoint.Rutracker] while the real
-EndpointsRepositoryImpl.observeAll() filterNot{it is Rutracker} + purges
-Rutracker every observe (never emits it). ~12 consumer tests
-(core/domain + core/testing) are written around the fake's [Rutracker]
-seed contract, so fixing the fake requires updating those tests in
-lockstep. Flagged by the LVA-011 agent (2026-06-09).</p>
-<h2
 id="lva-014--testsuggestsrepository-was-a-todo-throw-stub-lva-012-bluff-class">LVA-014
 — TestSuggestsRepository was a TODO-throw stub (LVA-012 bluff
 class)</h2>
@@ -390,24 +369,6 @@ are surfaced via getSettings() instead. Orphaned per-field-getter
 leftover (no Favorites/Bookmarks counterpart). Remove decl + override.
 Source: parallel dead-code audit 2026-06-09 (codebase otherwise clean: 0
 shipped TODO(), 0 if(false), 0 silent-no-op effect methods).</p>
-<h2
-id="lva-019--nnmclub-isauthorised-profile-link-fallback-was-dead-unquoted-css-attribute-selectors">LVA-019
-— nnmclub IsAuthorised profile-link fallback was dead (unquoted CSS
-attribute selectors)</h2>
-<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
-Bug <strong>Evidence:</strong> internal/nnmclub/login.go selectors
-quoted; login_isauthorised_branch_test.go (IsAuthorised 77.8→88.9%);
-Bluff-Audit: revert to unquoted →
-TestIsAuthorised_ProfileLinkFallback_NoLoginLink fails 'expected
-IsAuthorised=true', reverted; nnmclub tests + index_anon/logged_in
-fixtures pass; api-source.hash regenerated, sourcehash contract GREEN
-<strong>Created-By:</strong> AI</p>
-<p>internal/nnmclub/login.go IsAuthorised used unquoted CSS attribute
-selectors a[href*=login.php]/a[href*=profile.php]; an unquoted value
-containing '.' is not a valid CSS identifier so cascadia/goquery matched
-NOTHING — the profile-link auth-detection fallback was dead code. Fixed
-to quoted form a[href*="..."]. Found by parallel hermetic-coverage
-agent; real production bug.</p>
 <h2 id="lva-7--11485-stress--chaos-test-scaffold">LVA-7 — §11.4.85
 stress + chaos test scaffold</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -1145,5 +1106,16 @@ C00 gate on thinker -&gt; §6.AA two-stage Firebase distribute</h2>
 directive: rebuild, gate, distribute all 4 variants. Infra confirmed UP
 this session: thinker+nezha reachable, T7 writable,
 JDK17/Gradle8.9/podman5.8.2 present.</p>
+<h2
+id="lva-036--llm_orchestrator-githubgitlab-pre-existing-mirror-fork-non-ff-blocks-6w-convergence">LVA-036
+— llm_orchestrator github↔︎gitlab pre-existing mirror fork (non-FF)
+blocks §6.W convergence</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Task <strong>Evidence:</strong> docs/issues/fixed/BUGFIXES.md
+<strong>Severity:</strong> P2</p>
+<p>github/master and gitlab/master diverged at d2a2151 with unique
+non-doc go.mod content each; LVA-030 commit landed gitlab+working-tree
+but github refused non-FF. Needs a content-merge decision
+(operator-gated, NO force-push per §6.T.3).</p>
 </body>
 </html>
