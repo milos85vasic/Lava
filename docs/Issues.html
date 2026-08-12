@@ -304,7 +304,18 @@ id="lva-090-video-9-onboarding-select-all-silently-enables-auth-requiring-captch
 <strong>Severity:</strong> P3 <strong>Created-By:</strong> AI
 <strong>Assigned-To:</strong> AI</p>
 <p>QA video frames 0020-0025. NEW UX, contributes to #1. CODE-FIX in
-1076 (#9 select-all handling). Pending §6.Z verification. Source:
+1076 (#9 select-all handling):
+OnboardingViewModel.onToggleAllProviders() + requiresNoCredentials()
+correctly gate select-all to no-auth-only providers, cited to Issue #9
+in-source. UNIT-LEVEL RE-VERIFIED 2026-08-12 (this cycle):
+OnboardingViewModelVideoFixesTest ‘select all enables only no-credential
+providers’ PASS, fresh execution (timestamp 2026-08-12T21:07, not
+cached). Existing DEVICE-LEVEL evidence at
+.lava-ci-evidence/genymotion/c66-redesign-{RED,GREEN}-20260626/ (proper
+RED-then-GREEN falsifiability pair,
+Challenge66SelectAllDoesNotEnableAuthProvidersTest) is 48 days / ~7
+versions stale per SS6.AK – device gate was occupied by a parallel
+LVA-087 verification agent this cycle, could not re-run. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #9.</p>
 <h2
 id="lva-091-video-10-app-id-co-mingling-debug-.dev-release-both-labeled-lava-unconfirmed-in-video">LVA-091

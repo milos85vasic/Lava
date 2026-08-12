@@ -74,7 +74,7 @@ QA video frames 0012/0015. NEW UX. CODE-FIX in 1076 (discovered-API friendly nam
 **Created-By:** AI
 **Assigned-To:** AI
 
-QA video frames 0020-0025. NEW UX, contributes to #1. CODE-FIX in 1076 (#9 select-all handling). Pending §6.Z verification. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #9.
+QA video frames 0020-0025. NEW UX, contributes to #1. CODE-FIX in 1076 (#9 select-all handling): OnboardingViewModel.onToggleAllProviders() + requiresNoCredentials() correctly gate select-all to no-auth-only providers, cited to Issue #9 in-source. UNIT-LEVEL RE-VERIFIED 2026-08-12 (this cycle): OnboardingViewModelVideoFixesTest 'select all enables only no-credential providers' PASS, fresh execution (timestamp 2026-08-12T21:07, not cached). Existing DEVICE-LEVEL evidence at .lava-ci-evidence/genymotion/c66-redesign-{RED,GREEN}-20260626/ (proper RED-then-GREEN falsifiability pair, Challenge66SelectAllDoesNotEnableAuthProvidersTest) is 48 days / ~7 versions stale per SS6.AK -- device gate was occupied by a parallel LVA-087 verification agent this cycle, could not re-run. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #9.
 
 ## LVA-091 — Video #10 — App-ID co-mingling (debug .dev + release both labeled 'Lava') — UNCONFIRMED in video
 
