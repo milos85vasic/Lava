@@ -125,6 +125,40 @@ waivers:
   # module is exercised by downstream Challenge*Test.kt OR is a structural
   # primitive consumed by feature/* whose runtime is covered.
   # ---------------------------------------------------------------------------
+  # 2026-08-10 backfill: core/analytics-firebase, core/apiengine, core/applink
+  # were newly split out of :app / :api-app (Decoupled Reusable Architecture)
+  # and each already carries real *Test.kt coverage that the generator counts
+  # correctly (unit_test_count 3/3/1) — the rows landed at status=gap only
+  # because invariants 1/2/3/4/6 require the same waiver-backed human
+  # judgement every other core/* row above already gets (the generator's
+  # challenges_for_feature() cross-reference is feature/*-only; core/* rows
+  # always pass an empty feature_name, so i1/i2/i6 can never be inferred
+  # mechanically for ANY core/* row — this is not unique to these three).
+  # ---------------------------------------------------------------------------
+  - path: core/analytics-firebase
+    invariants:
+      documented: "pass: same as core/auth (core/CLAUDE.md scope)"
+      documented_promise: "pass: per cross-cutting A — shared AnalyticsTracker surface consumed by BOTH :app and :api-app per Decoupled Reusable Architecture (extracted 2026-06-13 from :app-local firebase/); documented via FirebaseInitializer.kt + FirebaseProvidesModuleTest KDoc"
+      no_open_bugs: "pass: per cross-cutting B — the 2026-05-05 Firebase-init cold-start crash was fixed in commit 6758b732 (per-SDK runCatching hardening); FirebaseInitializerTest is the §6.O regression-immunity gate; the JobCancellationException non-fatal noise (Crashlytics issue 7df61fdba64f9928b067624d6db395ca) is filtered by FirebaseAnalyticsTracker.isCancellationOrWraps() per its KDoc; no module-attributed entry in docs/issues/fixed/BUGFIXES.md or .lava-ci-evidence/sixth-law-incidents/"
+      four_layer: "pass: 3 *Test.kt (FirebaseAnalyticsTrackerTest, FirebaseInitializerTest, FirebaseProvidesModuleTest) + app/src/androidTest/kotlin/lava/app/challenges/Challenge13FirebaseColdStartResilienceTest.kt (runtime — its own KDoc names FirebaseInitializerTest as its matching JVM validation test post the 2026-06-13 module extraction) + Bluff-Audit stamp (commit 6758b732) + pre-build scripts/check-constitution.sh"
+      anti_bluff: "pass: FirebaseInitializerTest's §6.O falsifiability rehearsal is documented in its own KDoc (removing a runCatching block reproduces the 2026-05-05 forensic anchor, asserted via the captured `warn` callback — user/operator-visible state per Sixth Law clause 3); FirebaseAnalyticsTrackerTest verifies real cancellation-filtering + Crashlytics recordException wiring with only the SDK client mocked (permitted outermost boundary, not the SUT)"
+      working_capability: "pass: FirebaseProvidesModuleTest proves the SAME @Provides factory both :app and :api-app's Hilt graphs invoke resolves to the real Firebase-backed tracker (not NoOpAnalyticsTracker) when a Crashlytics sink is present; LavaApplication wires FirebaseInitializer.initialize at real app startup, exercised end-to-end by Challenge13 on the gating matrix"
+  - path: core/apiengine
+    invariants:
+      documented: "pass: same as core/auth (core/CLAUDE.md scope)"
+      documented_promise: "pass: per cross-cutting A — ApiEngine.kt KDoc documents the Start/Stop/Status lifecycle contract exposed by the embedded lava-api-go c-shared library over JNI; api-app/ is the sole production consumer (ApiEngineController.kt)"
+      no_open_bugs: "pass: per cross-cutting B — the 2026-06-02 apiengine-missing-serialization-plugin bug (ConfigDto/StatusDto serializers absent, api-app Phase E Challenges C02-C04 timed out) is fixed + regression-guarded by ConfigSerializationTest per docs/issues/fixed/BUGFIXES.md; the 2026-06-06 embed-drift bug (buildCshared missing source inputs) is fixed by the scripts/compute-api-source-hash.sh + scripts/check-api-app-sync.sh CI gate (wired into scripts/ci.sh) per docs/issues/fixed/BUGFIXES.md; the 2026-07-04 F3 SIGSYS/seccomp crash (.lava-ci-evidence/sixth-law-incidents/2026-07-04-search-not-working-root-causes.json) is root-caused to lava-api-go's embedded musl libc, NOT this module, and is FIXED per docs/CONTINUATION.md 2026-07-04 entry"
+      four_layer: "pass: 3 *Test.kt (ConfigSerializationTest, FakeApiEngineTest, NativeApiEngineContractTest) + api-app/src/androidTest/kotlin/lava/api/app/challenges/Challenge01-07 (runtime, real emulator — NativeApiEngine.kt KDoc: 'unit-testing this class is impossible on the JVM... verified by the Phase E Compose UI Challenge against a real emulator') + scripts/check-api-app-sync.sh pre-build drift gate + Bluff-Audit stamps"
+      anti_bluff: "pass: FakeApiEngineTest verifies FakeApiEngine's Third-Law behavioral equivalence (single-instance-per-engine, stop-is-not-a-silent-no-op, auth-always-on, startAttempts TOCTOU counter) to the real internal/mobile contract per its own KDoc; ConfigSerializationTest is the §6.T.1 reproduction test for the 2026-06-02 forensic anchor — RED (SerializationException) with the compiler plugin removed, GREEN with it applied, per docs/issues/fixed/BUGFIXES.md"
+      working_capability: "pass: consumed by api-app/src/main/kotlin/lava/api/app/control/ApiEngineController.kt (real production wiring, not a stub) and exercised end-to-end by api-app's own Challenge01ApiAppColdStartTest / Challenge02ApiAppBootAndServeTest / Challenge03StopRestartTest / Challenge05ApiEmbedSourceHashMatchesTest / Challenge06CopyKeyTest / Challenge07OpenClientTest on real Android emulators; the ledger generator's challenges_for_feature() only scans app/src/androidTest/kotlin/lava/app/challenges/ (the :app module) — it does not walk api-app/src/androidTest/, which is why challenge_count mechanically reads 0 for this row despite real Challenge coverage existing in the sibling app module"
+  - path: core/applink
+    invariants:
+      documented: "pass: same as core/auth (core/CLAUDE.md scope)"
+      documented_promise: "pass: per cross-cutting A — AppLinkContract.kt KDoc documents the single source of truth for the :app <-> :api-app intent contract (extras, loopback host, READ_API_KEY permission); SiblingAppLauncher.kt KDoc documents the install-check / launch / download-fallback contract"
+      no_open_bugs: "pass: per cross-cutting B — no module-attributed entry in docs/issues/fixed/BUGFIXES.md or .lava-ci-evidence/sixth-law-incidents/"
+      four_layer: "pass: 1 *Test.kt (SiblingAppLauncherTest, Robolectric) + app/src/androidTest/kotlin/lava/app/challenges/Challenge70AutonomousQaProviderMatrixTest.kt (runtime, exercises SiblingAppLauncher's intent) + Bluff-Audit stamp (falsifiability rehearsal documented in the test's own KDoc) + pre-build scripts/check-constitution.sh"
+      anti_bluff: "pass: SiblingAppLauncherTest's SUT is the REAL PackageManagerSiblingAppLauncher, only the Android PackageManager system-service boundary is mocked (permitted per Anti-Bluff Pact / Seventh Law clause 4); its documented FALSIFIABILITY REHEARSAL (download-URL-not-market-scheme mutation) is recorded in the test's own KDoc with the observed AssertionError"
+      working_capability: "pass: consumed by app/src/main/kotlin/digital/vasic/lava/client/MainActivity.kt + MobileNavigation.kt + OnboardingAppLinkModule.kt (real production wiring) and feature/menu/src/main/kotlin/lava/menu/MenuScreen.kt (Open/Install-companion-app menu row); AppLinkContract extras are exercised by MainActivity's onNewIntent handoff path and Challenge70AutonomousQaProviderMatrixTest.kt"
   - path: core/auth
     invariants:
       documented: "pass: core/CLAUDE.md + AGENTS.md pointer-block per §6.AD applies transitively to core/auth"
@@ -498,6 +532,32 @@ waivers:
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence"
       anti_bluff: "pass: per §11.4.28 the submodule's own test floor; Lava-side discovery covered by Challenge24MenuDiscoveryTest (real NsdManager broadcast) + LocalNetworkDiscoveryContractTest"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor; Lava integration via core/data + core/domain test suite"
+  # ---------------------------------------------------------------------------
+  # 2026-08-10 backfill: doc_processor, llm_orchestrator, llm_provider,
+  # llms_verifier, vision_engine — 5 own-org (vasic-digital + HelixDevelopment)
+  # standalone Go modules added 2026-06-08 solely as sibling dependencies
+  # submodules/helixqa/go.mod's `replace` directives require to resolve
+  # (`go build ./cmd/helixqa` fails without them — "reading ../doc_processor/
+  # go.mod: no such file or directory"). Documented at
+  # docs/qa/helixqa-dependency-submodules.md. Each carries a large REAL Go
+  # test suite in its own repo (the generator's unit_test_count correctly
+  # counts them: 21/37/81/318/25) but, per §11.4.28 (Submodules-as-equal-
+  # codebase), that suite is upstream-owned test debt tracked in each
+  # submodule's own repo/CI — not a Lava-side gap. Lava does not import these
+  # packages directly (no `digital.vasic.*` import in lava-api-go non-test
+  # source); they exist purely to keep HelixQA's own build green. This
+  # mirrors the existing submodules/helixqa waiver below (working_capability/
+  # anti_bluff/four_layer stay explicit "waiver:", not "pass:", because there
+  # is no Lava-side integration surface yet to verify against).
+  # ---------------------------------------------------------------------------
+  - path: submodules/doc_processor
+    invariants:
+      documented_promise: "pass: submodules/doc_processor/README.md + CONSTITUTION.md + AGENTS.md; standalone project-not-aware Go module per CONST-051(B)"
+      working_capability: "waiver: upstream test debt tracked in the DocProcessor repo, not Lava-side — added 2026-06-08 solely to satisfy submodules/helixqa/go.mod's replace directive per docs/qa/helixqa-dependency-submodules.md; no direct import from Lava/lava-api-go source (go.mod replace-only)"
+      anti_bluff: "waiver: see working_capability waiver"
+      four_layer: "waiver: see working_capability waiver"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/doc_processor/CLAUDE.md + AGENTS.md + CONSTITUTION.md exist"
+      no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence — no Lava-side integration code yet (no surface to break); 21 _test.go in the submodule's own tree are upstream's regression floor"
   - path: submodules/helixqa
     invariants:
       documented_promise: "pass: HelixDevelopment-owned QA orchestration framework; HelixQA/README.md + CONSTITUTION.md"
@@ -514,6 +574,30 @@ waivers:
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence — §6.A 569-failing-healthcheck forensic anchor closed by tests/contract/healthcheck_contract_test.go"
       anti_bluff: "pass: per §11.4.28 the submodule's own test floor; tests/contract/healthcheck_contract_test.go IS the canonical §6.A real-binary contract test for HTTP/3 surface"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor; Lava integration via lava-api-go tests/contract + tests/e2e"
+  - path: submodules/llm_orchestrator
+    invariants:
+      documented_promise: "pass: submodules/llm_orchestrator/README.md + CONSTITUTION.md + AGENTS.md; standalone Go module for managing headless CLI agents per CONST-051(B)"
+      working_capability: "waiver: upstream test debt tracked in the LLMOrchestrator repo, not Lava-side — added 2026-06-08 solely to satisfy submodules/helixqa/go.mod's replace directive per docs/qa/helixqa-dependency-submodules.md; no direct import from Lava/lava-api-go source (go.mod replace-only)"
+      anti_bluff: "waiver: see working_capability waiver"
+      four_layer: "waiver: see working_capability waiver"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/llm_orchestrator/CLAUDE.md + AGENTS.md + CONSTITUTION.md exist"
+      no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence — no Lava-side integration code yet (no surface to break); 37 _test.go in the submodule's own tree are upstream's regression floor"
+  - path: submodules/llm_provider
+    invariants:
+      documented_promise: "pass: submodules/llm_provider/README.md + CONSTITUTION.md + AGENTS.md; generic reusable Go module for LLM provider abstractions per CONST-051(B)"
+      working_capability: "waiver: upstream test debt tracked in the LLMProvider repo, not Lava-side — added 2026-06-08 solely to satisfy submodules/helixqa/go.mod's replace directive per docs/qa/helixqa-dependency-submodules.md; no direct import from Lava/lava-api-go source (go.mod replace-only)"
+      anti_bluff: "waiver: see working_capability waiver"
+      four_layer: "waiver: see working_capability waiver"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/llm_provider/CLAUDE.md + AGENTS.md + CONSTITUTION.md exist"
+      no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence — no Lava-side integration code yet (no surface to break); 81 _test.go in the submodule's own tree are upstream's regression floor"
+  - path: submodules/llms_verifier
+    invariants:
+      documented_promise: "pass: submodules/llms_verifier/README.md + CONSTITUTION.md + AGENTS.md; standalone LLM verification platform per CONST-051(B)"
+      working_capability: "waiver: upstream test debt tracked in the LLMsVerifier repo, not Lava-side — added 2026-06-08 solely to satisfy submodules/helixqa/go.mod's replace directive per docs/qa/helixqa-dependency-submodules.md; no direct import from Lava/lava-api-go source (go.mod replace-only)"
+      anti_bluff: "waiver: see working_capability waiver"
+      four_layer: "waiver: see working_capability waiver"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/llms_verifier/CLAUDE.md + AGENTS.md + CONSTITUTION.md exist"
+      no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence — no Lava-side integration code yet (no surface to break); 317 _test.go + 1 test_*.sh in the submodule's own tree are upstream's regression floor"
   - path: submodules/mdns
     invariants:
       documented_promise: "pass: submodules/mdns/README.md + CONSTITUTION.md; integrated via JmDNS broadcast in proxy + NsdManager in Android client"
@@ -562,6 +646,14 @@ waivers:
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence — tracker-credentials-in-git-history closed per .lava-ci-evidence/sixth-law-incidents/2026-05-13-tracker-credentials-in-git-history.json"
       anti_bluff: "pass: per §11.4.28 the submodule's own test floor; Lava-side cryptographic correctness verified by core/network AesGcmTest + HKDFTest with real cipher operations per §6.H credential security inviolability"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor; Lava integration via core/network crypto suite + scripts/scan-no-hardcoded-* gates"
+  - path: submodules/vision_engine
+    invariants:
+      documented_promise: "pass: submodules/vision_engine/README.md + CONSTITUTION.md + AGENTS.md; standalone computer-vision + LLM-vision toolkit per CONST-051(B); consumer analysis at docs/autonomous-qa/VISIONENGINE-INTEGRATION-2026-07-02.md"
+      working_capability: "waiver: upstream test debt tracked in the VisionEngine repo, not Lava-side — added 2026-06-08 solely to satisfy submodules/helixqa/go.mod's replace directive per docs/qa/helixqa-dependency-submodules.md (imported by submodules/helixqa/pkg/{autonomous,issuedetector,navigator}, not by lava-api-go directly); docs/autonomous-qa/VISIONENGINE-INTEGRATION-2026-07-02.md is a read-only integration ASSESSMENT, not a shipped Lava-side consumer"
+      anti_bluff: "waiver: see working_capability waiver"
+      four_layer: "waiver: see working_capability waiver"
+      documented: "pass: per §6.AD inheritance pointer-block; submodules/vision_engine/CLAUDE.md + AGENTS.md + CONSTITUTION.md exist"
+      no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence — no Lava-side integration code yet (no surface to break); 25 _test.go in the submodule's own tree are upstream's regression floor"
   - path: submodules/tracker_sdk
     invariants:
       documented_promise: "pass: submodules/tracker_sdk/README.md + CONSTITUTION.md + docs/sdk-developer-guide.md cover the per-tracker recipe"
