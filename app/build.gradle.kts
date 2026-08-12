@@ -102,8 +102,16 @@ android {
         // NEW this cycle is the first-ever real DEVICE verification of both,
         // closing the §6.Z gate that had blocked 1080/1081 from ever being
         // distributed. versionName HELD per §6.Y clause 3.
-        versionCode = 1082
-        versionName = "1.3.15"
+        // §6.Y bump (2026-08-12, 2nd this cycle): 4 parallel-subagent fixes
+        // landed after 1082 was distributed (both stages) — LVA-085 (raw
+        // provider ids in results filter chips), LVA-086 (missing loading/
+        // empty-state UI), LVA-093/LVA-094 (cold-start provider-repopulation
+        // race + silent failure). All 4 are real, user-facing behavior
+        // changes (not test-only/log-only), so versionName bumps per §6.Y
+        // clause 3 ("user-facing bug fix shipping to testers/users -> patch
+        // bump").
+        versionCode = 1083
+        versionName = "1.3.16"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/
         // become runnable on a connected device. The custom runner installs

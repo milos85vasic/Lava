@@ -1,5 +1,16 @@
 # Changelog
 
+## Lava-Android-1.3.16-1083 — 2026-08-12 (4 parallel-subagent fixes: search chip labels, loading state, cold-start race)
+
+**Previous published:** Lava-Android-1.3.15-1082.
+
+- **LVA-085 — search-results filter chips no longer show raw provider ids.** Chips previously showed strings like "archiveorg"/"torrentdownloads"/"kinozal"/"yts" on the first rendered frame instead of proper display names ("Archive.org", "Torrent Downloads", "Kinozal", "YTS"). Root cause: the display-name map was populated only by async per-provider events, arriving after the first composed frame. Fix: eager synchronous resolution via the live tracker registry in the same state update that opens the results screen.
+- **LVA-086 — search results now show a loading indicator / empty-state instead of a blank screen.** A fresh multi-provider search previously rendered nothing for up to ~25 seconds before any results/error appeared, looking like a hang. The render logic existed but had no test coverage and was unverifiable; extracted to named, tested properties so the Compose screen and the test consume the exact same logic.
+- **LVA-093/LVA-094 — cold-start search race + silent provider-repopulation failure closed.** A search fired immediately after app launch could silently resolve against the wrong (bundled/default) tracker client if the startup provider-repopulation coroutine hadn't finished yet. Fixed with a bounded readiness gate (5s timeout fallback) the search now awaits. A repopulation failure was also previously silent and never retried for the rest of the process lifetime; now retried once and recorded via non-fatal telemetry (§6.AC).
+- **§6.Y:** versionCode 1082→1083; versionName 1.3.15→1.3.16 (real user-facing fixes, patch bump per §6.Y clause 3).
+
+**Coverage status (§6.AK / §6.Z):** all 4 fixes carry real JVM-level test coverage (ViewModel/UseCase tests using real implementations per this project's Anti-Bluff Pact) with falsifiability rehearsals performed and recorded in the landing commits. Device-level (Compose UI Challenge) verification for these specific fixes is not yet part of this cycle's evidence — the existing device-gate Challenges (C58/C59/etc.) cover the broader search flow these fixes sit within, but no NEW dedicated Challenge was authored this cycle for LVA-085/086/093/094 individually.
+
 ## Lava-Android-1.3.15-1082 — 2026-08-12 (§6.Z device-verification closure — same feature set as 1081, first real device proof)
 
 **Previous published:** Lava-Android-1.3.14-1080 (1080/1081 were built but never distributed — blocked on this cycle's §6.Z device-evidence gate).
