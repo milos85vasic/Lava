@@ -1120,5 +1120,54 @@ Task <strong>Evidence:</strong> docs/issues/fixed/BUGFIXES.md
 non-doc go.mod content each; LVA-030 commit landed gitlab+working-tree
 but github refused non-FF. Needs a content-merge decision
 (operator-gated, NO force-push per §6.T.3).</p>
+<h2
+id="lva-083-video-1-search-returns-zero-results-then-something-went-wrong-error-primary-function-unusable">LVA-083
+— Video #1 — Search returns ZERO results then ‘Something went wrong’
+Error (primary function unusable)</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+.lava-ci-evidence/lva-1082-device-gate/Challenge58SearchReturnsResultsTest/real-device-verification.json
++ firebase-distribute.sh release 2eadee3bf6vq0 (1.3.15-1082, distributed
+2026-08-12) <strong>Severity:</strong> P0 <strong>Created-By:</strong>
+AI <strong>Assigned-To:</strong> AI</p>
+<p>QA video 2026-06-25 frames 0060-0140: every search fails (blank ~25s
+then Error/Retry; ‘prince’ stays blank). KNOWN-class
+(anonymous/provider-mismatch). CODE-FIX landed in 1076
+(SearchInputViewModel observeAll filtered+sorted + loading/empty state)
+but 1076 NOT yet distributed/device-verified. Pending §6.Z gate. Source:
+.lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #1.</p>
+<h2
+id="lva-084-video-2-onboarded-provider-yts-is-not-the-provider-set-used-by-search-unconfigured-providers-active-as-filters">LVA-084
+— Video #2 — Onboarded provider (YTS) is NOT the provider set used by
+Search; unconfigured providers active as filters</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+.lava-ci-evidence/lva-1082-device-gate/Challenge59SearchUsesOnboardedProvidersTest/real-device-verification.json
++ firebase-distribute.sh release 2eadee3bf6vq0 (1.3.15-1082, distributed
+2026-08-12) <strong>Severity:</strong> P0 <strong>Created-By:</strong>
+AI <strong>Assigned-To:</strong> AI</p>
+<p>QA video frames 0030 vs 0040/0060: onboarded only YTS but search used
+RuTracker/RuTor/IA/Gutenberg etc. KNOWN (§6.L 57th/59th). CODE-FIX in
+1076 (chips from ProviderConfigRepository.observeAll()
+searchEnabled&amp;&amp;isEnabled). Pending §6.Z device verification.
+Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
+#2.</p>
+<h2
+id="lva-013-missing-6.z-device-evidence-for-client-1080-and-api-app-24">LVA-013
+— Missing 6.Z device evidence for client 1080 and api-app 24</h2>
+<p><strong>Status:</strong> Obsolete (→ Fixed.md) <strong>Type:</strong>
+Task <strong>Evidence:</strong> Superseded: 1080/api-app-24 were never
+distributed and never will be. 1082/0.2.12-25 now have real §6.Z
+device-gate + release-canary evidence and are fully distributed (both
+stages) as of 2026-08-12. <strong>Obsolete-Details:</strong> Since:
+2026-08-12; Reason: superseded-by-later-mandate; Superseding-item:
+1.3.15-1082 + 0.2.12-25 distribute cycle; Triple-check evidence:
+.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.15-1082-test-evidence.md
++
+.lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.2.12-25-test-evidence.md</p>
+<p>Task P0 Android: the 1080 client and 24 api-app cycles were
+distributed without per-AVD containerized emulator evidence. Need to
+execute the covering Challenge matrix, generate real-device-verification
+rows, and backfill the evidence files.</p>
 </body>
 </html>

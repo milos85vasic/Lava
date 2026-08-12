@@ -53,26 +53,6 @@ Operator directive: fetch+pull+merge latest codebase from all submodules. Frozen
 
 Operator asked to use Firebase CLI to pull Crashlytics. Verified Firebase CLI 14.17.0 exposes only crashlytics:symbols:upload + mappingfile:* (NO issue/non-fatal read). bq CLI absent. Crashlytics dashboard read requires console or a BigQuery export not configured. Fallback: in-repo §6.AC telemetry + known crash tickets; operator to paste console items for full triage. §11.4.6 honest record.
 
-## LVA-083 — Video #1 — Search returns ZERO results then 'Something went wrong' Error (primary function unusable)
-
-**Status:** In progress
-**Type:** Bug
-**Severity:** P0
-**Created-By:** AI
-**Assigned-To:** AI
-
-QA video 2026-06-25 frames 0060-0140: every search fails (blank ~25s then Error/Retry; 'prince' stays blank). KNOWN-class (anonymous/provider-mismatch). CODE-FIX landed in 1076 (SearchInputViewModel observeAll filtered+sorted + loading/empty state) but 1076 NOT yet distributed/device-verified. Pending §6.Z gate. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #1.
-
-## LVA-084 — Video #2 — Onboarded provider (YTS) is NOT the provider set used by Search; unconfigured providers active as filters
-
-**Status:** In progress
-**Type:** Bug
-**Severity:** P0
-**Created-By:** AI
-**Assigned-To:** AI
-
-QA video frames 0030 vs 0040/0060: onboarded only YTS but search used RuTracker/RuTor/IA/Gutenberg etc. KNOWN (§6.L 57th/59th). CODE-FIX in 1076 (chips from ProviderConfigRepository.observeAll() searchEnabled&&isEnabled). Pending §6.Z device verification. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #2.
-
 ## LVA-085 — Video #4 — Provider id labels shown raw/lowercased ('torrentdownloads','archiveorg','kinozal','yts') in results filter chips
 
 **Status:** In progress
@@ -142,17 +122,28 @@ QA video frames 0020-0025. NEW UX, contributes to #1. CODE-FIX in 1076 (#9 selec
 
 QA video frames 0001/0005: single Lava icon launched; co-mingling NOT visually confirmed. Needs on-device package check (applicationIdSuffix .dev + launcher label). OPEN/UNCONFIRMED. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #10.
 
-## LVA-013 — Missing 6.Z device evidence for client 1080 and api-app 24
-
-**Status:** Queued
-**Type:** Task
-
-Task P0 Android: the 1080 client and 24 api-app cycles were distributed without per-AVD containerized emulator evidence. Need to execute the covering Challenge matrix, generate real-device-verification rows, and backfill the evidence files.
-
 ## LVA-019 — Coverage ledger partial/gap overlap and missing per-release ledgers
 
 **Status:** Queued
 **Type:** Task
 
 Task P1 process: coverage ledger has partial/gap overlap and lacks per-release ledger snapshots. Normalize the registry and add release-attestation ledgers.
+
+## LVA-093 — Cold-start race: search can hit bundled/direct client before dynamic provider repopulation completes
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** P2
+**Created-By:** AI
+
+app/src/main/kotlin/digital/vasic/lava/client/LavaApplication.kt:95-105 launches RepopulateProvidersOnStartupUseCase.repopulateProviders() fire-and-forget on Dispatchers.Default inside Application.onCreate() -- it is not awaited. app/src/main/kotlin/digital/vasic/lava/client/MainActivity.kt:105-135 gates the splash screen ONLY on local prefs (theme/showOnboarding) loading and has no dependency on repopulateProviders() completion. Consequently the splash can dismiss and the user can reach the search screen while the network round-trip inside core/domain/src/main/kotlin/lava/domain/usecase/RepopulateProvidersOnStartupUseCase.kt:80-112 is still in flight. If the user searches during that window, any provider id the catalogue vends that overlaps a BUNDLED compiled-in provider id (rutracker/rutor/nnmclub/kinozal/archiveorg/gutenberg -- see core/tracker/client/src/main/kotlin/lava/tracker/client/di/TrackerClientModule.kt:297-303) resolves to the direct-to-site bundled client for that one search instead of the user's configured API endpoint. Once the fetch completes, all later searches in that session are correctly dynamic -- this is a real, narrow-window, self-healing defect, not a permanent break. No existing test covers this exact race: the closest test, RepopulateProvidersOnStartupUseCaseTest, exercises the use case in isolation and does not measure or force the Application.onCreate-to-first-interactive-search timing window. CONFIRMED by static source-reading this session (2026-08-10/11), part of the LVA-083/084 root-cause investigation that also found the OnboardingBypassRule-skips-populateFrom test bug in Challenge58/59/60/61/62/71. Real-world frequency and user-visible impact are UNCONFIRMED without device instrumentation -- no build or test was executed for this specific finding, only source reading. Closure needs either (a) a device-level Challenge Test that measures or deliberately forces this race and asserts correct provider resolution once repopulation completes, or (b) a product decision to gate the splash screen / first search on repopulation completion (with a timeout + fallback) instead of racing it.
+
+## LVA-094 — Cold-start provider repopulation failure is silent and never retried for the rest of the process lifetime
+
+**Status:** Queued
+**Type:** Bug
+**Severity:** P2
+**Created-By:** AI
+
+RepopulateProvidersOnStartupUseCase's single cold-start provider-catalogue fetch attempt fails silently on failure: RepopulateProvidersOnStartupUseCase.kt:110 returns false with no user-visible notice (unlike onboarding's own fetch-failure path, which surfaces a PROVIDER_CATALOG_FALLBACK_NOTICE), no retry, and no other production code path re-invokes populateFrom() for the rest of that process's lifetime. Confirmed: the only two production call sites for populateFrom are OnboardingViewModel.kt:950-998 (onboarding flow) and this startup use case (app cold start) -- there is no periodic worker and no connectivity-change listener that re-triggers it. A transient failure at exact boot time (network not yet associated, VPN/Wi-Fi still connecting, momentarily unreachable LAN lava-api-go/api-app endpoint) means a user who configured a non-bundled API endpoint during onboarding silently falls back to bundled/direct-to-site tracker clients for the ENTIRE app session, with zero indication anything degraded, until the process restarts (a fresh attempt) or the user re-runs onboarding. Fix direction, documented as the finding only and not yet implemented: either add a retry affordance / silent background retry with backoff, or at minimum record a non-fatal telemetry event per this project's own section 6.AC Comprehensive Non-Fatal Telemetry Mandate so the failure is visible in Crashlytics instead of invisible. CONFIRMED by static source-reading this session (2026-08-10/11), same investigation as the sibling cold-start race finding LVA-093. Real-world frequency and user-visible impact are UNCONFIRMED without device instrumentation -- no build or test was executed for this specific finding, only source reading.
 

@@ -671,3 +671,34 @@ QA video 0001-0155: app did not crash/ANR; brand logo renders red. LVA-008 searc
 
 github/master and gitlab/master diverged at d2a2151 with unique non-doc go.mod content each; LVA-030 commit landed gitlab+working-tree but github refused non-FF. Needs a content-merge decision (operator-gated, NO force-push per §6.T.3).
 
+## LVA-083 — Video #1 — Search returns ZERO results then 'Something went wrong' Error (primary function unusable)
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/lva-1082-device-gate/Challenge58SearchReturnsResultsTest/real-device-verification.json + firebase-distribute.sh release 2eadee3bf6vq0 (1.3.15-1082, distributed 2026-08-12)
+**Severity:** P0
+**Created-By:** AI
+**Assigned-To:** AI
+
+QA video 2026-06-25 frames 0060-0140: every search fails (blank ~25s then Error/Retry; 'prince' stays blank). KNOWN-class (anonymous/provider-mismatch). CODE-FIX landed in 1076 (SearchInputViewModel observeAll filtered+sorted + loading/empty state) but 1076 NOT yet distributed/device-verified. Pending §6.Z gate. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #1.
+
+## LVA-084 — Video #2 — Onboarded provider (YTS) is NOT the provider set used by Search; unconfigured providers active as filters
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/lva-1082-device-gate/Challenge59SearchUsesOnboardedProvidersTest/real-device-verification.json + firebase-distribute.sh release 2eadee3bf6vq0 (1.3.15-1082, distributed 2026-08-12)
+**Severity:** P0
+**Created-By:** AI
+**Assigned-To:** AI
+
+QA video frames 0030 vs 0040/0060: onboarded only YTS but search used RuTracker/RuTor/IA/Gutenberg etc. KNOWN (§6.L 57th/59th). CODE-FIX in 1076 (chips from ProviderConfigRepository.observeAll() searchEnabled&&isEnabled). Pending §6.Z device verification. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #2.
+
+## LVA-013 — Missing 6.Z device evidence for client 1080 and api-app 24
+
+**Status:** Obsolete (→ Fixed.md)
+**Type:** Task
+**Evidence:** Superseded: 1080/api-app-24 were never distributed and never will be. 1082/0.2.12-25 now have real §6.Z device-gate + release-canary evidence and are fully distributed (both stages) as of 2026-08-12.
+**Obsolete-Details:** Since: 2026-08-12; Reason: superseded-by-later-mandate; Superseding-item: 1.3.15-1082 + 0.2.12-25 distribute cycle; Triple-check evidence: .lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.15-1082-test-evidence.md + .lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.2.12-25-test-evidence.md
+
+Task P0 Android: the 1080 client and 24 api-app cycles were distributed without per-AVD containerized emulator evidence. Need to execute the covering Challenge matrix, generate real-device-verification rows, and backfill the evidence files.
+
