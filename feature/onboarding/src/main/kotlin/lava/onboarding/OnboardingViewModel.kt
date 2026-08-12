@@ -656,7 +656,15 @@ class OnboardingViewModel @Inject constructor(
                             password = config.password,
                         ),
                     )
-                    logger.d { "cred path: login($currentId) result=$loginResult" }
+                    // §6.H/§6.AC: LoginResult is a data class with a raw sessionToken
+                    // field; its default toString() would leak the session token into
+                    // logcat. Log only the non-sensitive shape.
+                    logger.d {
+                        "cred path: login($currentId) result=" +
+                            "state=${loginResult?.state} " +
+                            "hasSessionToken=${loginResult?.sessionToken != null} " +
+                            "hasCaptcha=${loginResult?.captchaChallenge != null}"
+                    }
                     // Sweep Finding #7 closure (2026-05-17, §6.L 59th):
                     // distinguish loginResult == null (tracker does not
                     // support auth — see ProviderLoginViewModel.kt:279)
