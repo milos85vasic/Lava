@@ -1,0 +1,89 @@
+{
+  "channel": "firebase-app-distribution",
+  "version_name": "1.3.15",
+  "version_code": 1082,
+  "commit_sha": "7fae0c12f54e13e255c5e2ed7d0a7d49a1d133ed",
+  "artifact": {
+    "app_id": "digital.vasic.lava.client.dev",
+    "apk_path": "app/build/outputs/apk/debug/app-debug.apk",
+    "aapt_verified_version_code": "1082",
+    "aapt_verified_version_name": "1.3.15"
+  },
+  "timestamp": "2026-08-12T17:15:05+02:00",
+  "authored_utc": "2026-08-12T15:15:05Z",
+  "combined_distribute_authorization": "n/a — §6.AA two-stage: this evidence backs Stage 1 (debug-only). Stage 2 (release) appended after operator device verification.",
+  "covering_challenges": {
+    "Challenge00CrashSurvivalTest": "PASS",
+    "Challenge58SearchReturnsResultsTest": "PASS",
+    "Challenge59SearchUsesOnboardedProvidersTest": "PASS",
+    "Challenge60InputResultsChipsAgreeTest": "PASS",
+    "Challenge61ResultsChipsShowDisplayNamesTest": "PASS",
+    "Challenge62SearchEmptyStateTest": "PASS",
+    "Challenge71CategorySelectionDialogBoundedHeightTest": "PASS"
+  },
+  "device_gate": {
+    "runner": "containers-submodule",
+    "runtime": "podman",
+    "container_image": "ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64",
+    "avd": "default (baked; requested CZ_API34_Phone was advisory, api-level matched)",
+    "api_level": 34,
+    "form_factor": "phone",
+    "cold_boot": true,
+    "gate_host": "Linux x86_64, KVM (nezha)",
+    "gating": true,
+    "note": "Challenge61's first attempt (run started 17:05:29) failed with a container boot-exit (exit code 0, boot_error, NOT a test/code defect) caused by resource contention from a concurrent podman image rebuild the operator's agent ran in parallel on the same host. Retried alone with no concurrent heavy work; PASS on retry. Evidence directory suffix '-retry' on that one row reflects this.",
+    "rows": [
+      {
+        "test_class": "lava.app.challenges.Challenge00CrashSurvivalTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 43.79095222, "test_passed": true, "test_seconds": 93.054131601,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/lva-1082-device-gate/Challenge00CrashSurvivalTest/"
+      },
+      {
+        "test_class": "lava.app.challenges.Challenge58SearchReturnsResultsTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 39.025472584, "test_passed": true, "test_seconds": 82.636780879,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/lva-1082-device-gate/Challenge58SearchReturnsResultsTest/"
+      },
+      {
+        "test_class": "lava.app.challenges.Challenge59SearchUsesOnboardedProvidersTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 38.846989584, "test_passed": true, "test_seconds": 86.493329315,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/lva-1082-device-gate/Challenge59SearchUsesOnboardedProvidersTest/"
+      },
+      {
+        "test_class": "lava.app.challenges.Challenge60InputResultsChipsAgreeTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 49.124707803, "test_passed": true, "test_seconds": 134.867164841,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/lva-1082-device-gate/Challenge60InputResultsChipsAgreeTest/"
+      },
+      {
+        "test_class": "lava.app.challenges.Challenge61ResultsChipsShowDisplayNamesTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 36.900428585, "test_passed": true, "test_seconds": 73.403779713,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/lva-1082-device-gate/Challenge61ResultsChipsShowDisplayNamesTest-retry/",
+        "first_attempt": "FAILED — container boot-exit due to concurrent host resource contention (see device_gate.note); NOT a test/code defect"
+      },
+      {
+        "test_class": "lava.app.challenges.Challenge62SearchEmptyStateTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 38.990397187, "test_passed": true, "test_seconds": 78.440828633,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/lva-1082-device-gate/Challenge62SearchEmptyStateTest/"
+      },
+      {
+        "test_class": "lava.app.challenges.Challenge71CategorySelectionDialogBoundedHeightTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 36.955398631, "test_passed": true, "test_seconds": 79.864064425,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/lva-1082-device-gate/Challenge71CategorySelectionDialogBoundedHeightTest/"
+      }
+    ]
+  },
+  "scope_honesty": "This closes the exact §6.Z gap flagged honestly in 1081's own CHANGELOG entry (C71 compiled but not device-executed) plus extends coverage to the 5 other search/onboarding Challenges that a same-session root-cause investigation found were silently exercising an empty provider registry (OnboardingBypassRule never called TrackerRegistry.populateFrom() — a test-infrastructure bug, not a production one). All 7 rows above are real executions against the exact 1082 commit SHA, not source-compiled-only claims."
+}

@@ -1,0 +1,21 @@
+{
+  "all_passed": true,
+  "finished_at": "2026-08-12T17:12:57+02:00",
+  "gating": true,
+  "rows": [
+    {
+      "avd": "CZ_API34_Phone",
+      "api_level": 34,
+      "form_factor": "phone",
+      "boot_seconds": 36.955398631,
+      "test_class": "lava.app.challenges.Challenge71CategorySelectionDialogBoundedHeightTest",
+      "test_passed": true,
+      "test_seconds": 79.864064425,
+      "gradle_log_path": "CZ_API34_Phone/gradle.log",
+      "diag": {},
+      "failure_summaries": [],
+      "concurrent": 1
+    }
+  ],
+  "started_at": "2026-08-12T17:10:56+02:00"
+}

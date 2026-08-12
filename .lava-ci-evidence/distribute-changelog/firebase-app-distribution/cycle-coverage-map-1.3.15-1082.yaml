@@ -1,0 +1,44 @@
+# §6.AK cycle-coverage-map for Lava-Android-1.3.15-1082
+#
+# Each CHANGELOG-claimed user-visible change for 1.3.15-1082 MUST have at least
+# one covering device Challenge that was EXECUTED + PASSED on the §6.Z gate
+# (and therefore is recorded in the same-SHA 1.3.15-1082-test-evidence.json).
+#
+# HONEST SCOPE (§6.J / §11.4.6): this cycle's user-visible claims are BOTH
+# device-verification closures of fixes that already shipped in source across
+# 1080/1081 (which were built but never distributed) — not new production
+# behavior. The discriminating Challenges below are the ones that would have
+# FAILED before the underlying fix landed (LVA-083/084, c7c8ccc); they now
+# genuinely pass against the real onboarded-provider registry, not an empty
+# one (the OnboardingBypassRule test-infra bug this cycle also fixed).
+version: "1.3.15-1082"
+claims:
+  - fix: "LVA-083/LVA-084 search results P0 — device-verified GREEN for the first time (production fix already in source; SearchInputViewModel provider-ID resolution)"
+    covering_challenges:
+      # C58/C59 drive the exact search-after-onboarding path LVA-083/084 cover.
+      # Both would FAIL against an empty provider registry (the OnboardingBypassRule
+      # bug this cycle fixed) or against the pre-fix SearchInputViewModel.
+      - "lava.app.challenges.Challenge58SearchReturnsResultsTest"
+      - "lava.app.challenges.Challenge59SearchUsesOnboardedProvidersTest"
+      # C60/C62 cover adjacent search-UI states (chip agreement, empty state)
+      # that exercise the same provider-resolution path.
+      - "lava.app.challenges.Challenge60InputResultsChipsAgreeTest"
+      - "lava.app.challenges.Challenge62SearchEmptyStateTest"
+  - fix: "Crashlytics FATAL c7c8ccc (Categories filter dialog nested-scroll crash) — device-verified GREEN"
+    covering_challenges:
+      # C71 is the discriminating regression test: before the fix, opening the
+      # Categories dialog crashed via IllegalStateException (unbounded Column
+      # feeding infinite height into a LazyList). It ran + PASSED on the real
+      # commit this cycle, closing the exact gap 1081's own CHANGELOG flagged
+      # honestly ("compiled but NOT YET device-executed").
+      - "lava.app.challenges.Challenge71CategorySelectionDialogBoundedHeightTest"
+  - fix: "§6.H credential-leak fix (OnboardingViewModel no longer logs the raw session token)"
+    covering_challenges:
+      # No dedicated Challenge asserts on log content (this is a log-hygiene
+      # fix, not a rendered-UI behavior change) — the onboarding-flow
+      # Challenges below exercise the exact code path that used to log the
+      # token, confirming the flow still completes correctly post-redaction.
+      - "lava.app.challenges.Challenge59SearchUsesOnboardedProvidersTest"
+  - fix: "Cold-start survival (unchanged this cycle, re-verified as the load-bearing canary per §6.Z.4)"
+    covering_challenges:
+      - "lava.app.challenges.Challenge00CrashSurvivalTest"
