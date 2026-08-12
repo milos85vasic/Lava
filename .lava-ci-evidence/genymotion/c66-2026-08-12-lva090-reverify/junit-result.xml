@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="lava.app.challenges.Challenge66SelectAllDoesNotEnableAuthProvidersTest" tests="1" failures="0" errors="0" skipped="0" time="22.954" timestamp="2026-08-12T21:26:31" hostname="localhost">
+  <properties>
+    <property name="device" value="sdk_gphone64_x86_64 - 14" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="selectAll_leavesAuthRequiringProvidersUnselected" classname="lava.app.challenges.Challenge66SelectAllDoesNotEnableAuthProvidersTest" time="21.07" />
+</testsuite>

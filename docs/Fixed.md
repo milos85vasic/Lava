@@ -775,3 +775,14 @@ Pin 208e2c8 is 53 commits behind origin/main 883ccc1. Highest-impact new clauses
 
 QA video frames 0007/0010/0015 vs 0020-0030. NEW. CODE-FIX in 1076 (#6 count bound to real descriptor list). Pending §6.Z verification. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #6.
 
+## LVA-090 — Video #9 — Onboarding 'Select all' silently enables auth-requiring (Captcha/Form Login) providers
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/genymotion/c66-2026-08-12-lva090-reverify/verdict.txt
+**Severity:** P3
+**Created-By:** AI
+**Assigned-To:** AI
+
+QA video frames 0020-0025. NEW UX, contributes to #1. CODE-FIX in 1076 (#9 select-all handling): OnboardingViewModel.onToggleAllProviders() + requiresNoCredentials() correctly gate select-all to no-auth-only providers, cited to Issue #9 in-source. UNIT-LEVEL RE-VERIFIED 2026-08-12 (this cycle): OnboardingViewModelVideoFixesTest 'select all enables only no-credential providers' PASS, fresh execution (timestamp 2026-08-12T21:07, not cached). Existing DEVICE-LEVEL evidence at .lava-ci-evidence/genymotion/c66-redesign-{RED,GREEN}-20260626/ (proper RED-then-GREEN falsifiability pair, Challenge66SelectAllDoesNotEnableAuthProvidersTest) is 48 days / ~7 versions stale per SS6.AK -- device gate was occupied by a parallel LVA-087 verification agent this cycle, could not re-run. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #9.
+

@@ -1,0 +1,24 @@
+# Challenge66 device re-verification — 2026-08-12
+device: sdk_gphone64_x86_64 - 14 (containerized emulator, lava-emu-CZ_API34_Phone)
+module: app  test-class: lava.app.challenges.Challenge66SelectAllDoesNotEnableAuthProvidersTest
+
+GREEN (unmodified production code, 2026-08-12T21:26:31):
+  gradle exit: 0
+  BUILD SUCCESSFUL in 4m 3s
+  testcase selectAll_leavesAuthRequiringProvidersUnselected PASSED (21.07s)
+
+RED (falsifiability rehearsal — OnboardingViewModel.kt:606
+  item.requiresNoCredentials() replaced with literal `true`,
+  reproducing the LVA-090 defect: select-all bulk-enabling
+  auth-requiring providers):
+  gradle exit: 1
+  BUILD FAILED in 2m 7s
+  testcase selectAll_leavesAuthRequiringProvidersUnselected FAILED
+  java.lang.AssertionError: 'Select all' must NOT silently enable
+    auth-requiring providers. ... DIAG: total=5 afterClear=0
+    afterSelectNoCred=5
+
+GREEN after revert (git diff verified empty before re-run):
+  gradle exit: 0
+  BUILD SUCCESSFUL in 2m 7s
+  testcase selectAll_leavesAuthRequiringProvidersUnselected PASSED

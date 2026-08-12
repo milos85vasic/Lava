@@ -197,7 +197,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
-<td>37</td>
+<td>38</td>
 </tr>
 <tr>
 <td>Feature</td>
@@ -227,7 +227,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>84</strong></td>
+<td><strong>85</strong></td>
 </tr>
 </tbody>
 </table>
@@ -1118,6 +1118,28 @@ verification. Source:
 <tr>
 <td>76</td>
 <td>P3</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-090 — QA video frames 0020-0025. NEW UX, contributes to #1.
+CODE-FIX in 1076 (#9 select-all handling):
+OnboardingViewModel.onToggleAllProviders() + requiresNoCredentials()
+correctly gate select-all to no-auth-only providers, cited to Issue #9
+in-source. UNIT-LEVEL RE-VERIFIED 2026-08-12 (this cycle):
+OnboardingViewModelVideoFixesTest ‘select all enables only no-credential
+providers’ PASS, fresh execution (timestamp 2026-08-12T21:07, not
+cached). Existing DEVICE-LEVEL evidence at
+.lava-ci-evidence/genymotion/c66-redesign-{RED,GREEN}-20260626/ (proper
+RED-then-GREEN falsifiability pair,
+Challenge66SelectAllDoesNotEnableAuthProvidersTest) is 48 days / ~7
+versions stale per SS6.AK – device gate was occupied by a parallel
+LVA-087 verification agent this cycle, could not re-run. Source:
+.lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
+#9.</td>
+</tr>
+<tr>
+<td>77</td>
+<td>P3</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
 <td>—</td>
@@ -1129,7 +1151,7 @@ own tickets). Informational record. Source:
 #11.</td>
 </tr>
 <tr>
-<td>77</td>
+<td>78</td>
 <td>P2</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -1170,7 +1192,7 @@ screen / first search on repopulation completion (with a timeout +
 fallback) instead of racing it.</td>
 </tr>
 <tr>
-<td>78</td>
+<td>79</td>
 <td>P2</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -1203,7 +1225,7 @@ build or test was executed for this specific finding, only source
 reading.</td>
 </tr>
 <tr>
-<td>79</td>
+<td>80</td>
 <td>P1</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -1215,7 +1237,7 @@ falsifiability-rehearsed. <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/sixth-law-incidents/2026-05-20-flaky-credentialsviewmodeltest.json</td>
 </tr>
 <tr>
-<td>80</td>
+<td>81</td>
 <td>P1</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -1228,7 +1250,7 @@ pass / 3 credential-skip / 0 fail). RESOLVED 2026-05-20.
 .lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json</td>
 </tr>
 <tr>
-<td>81</td>
+<td>82</td>
 <td>P1</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -1242,7 +1264,7 @@ operator-gated; decision owed on §6.AD.3 Path B vs SQLite DB.
 .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</td>
 </tr>
 <tr>
-<td>82</td>
+<td>83</td>
 <td>P1</td>
 <td>Implemented (→ Fixed.md)</td>
 <td>Feature</td>
@@ -1256,7 +1278,7 @@ to the canonical constitution binary
 operator-report — docs/tickets/DESIGN.md</td>
 </tr>
 <tr>
-<td>83</td>
+<td>84</td>
 <td>P2</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -1268,7 +1290,7 @@ bumped. <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</td>
 </tr>
 <tr>
-<td>84</td>
+<td>85</td>
 <td>P2</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>

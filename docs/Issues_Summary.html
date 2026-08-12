@@ -192,7 +192,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Bug</td>
 <td>In progress</td>
-<td>4</td>
+<td>3</td>
 </tr>
 <tr>
 <td>Bug</td>
@@ -212,7 +212,7 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>10</strong></td>
+<td><strong>9</strong></td>
 </tr>
 </tbody>
 </table>
@@ -307,27 +307,6 @@ Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 friendly name). Pending §6.Z verification. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #8.</td>
-</tr>
-<tr>
-<td>LVA-090</td>
-<td>Bug</td>
-<td>In progress</td>
-<td>P3</td>
-<td>QA video frames 0020-0025. NEW UX, contributes to #1. CODE-FIX in
-1076 (#9 select-all handling):
-OnboardingViewModel.onToggleAllProviders() + requiresNoCredentials()
-correctly gate select-all to no-auth-only providers, cited to Issue #9
-in-source. UNIT-LEVEL RE-VERIFIED 2026-08-12 (this cycle):
-OnboardingViewModelVideoFixesTest ‘select all enables only no-credential
-providers’ PASS, fresh execution (timestamp 2026-08-12T21:07, not
-cached). Existing DEVICE-LEVEL evidence at
-.lava-ci-evidence/genymotion/c66-redesign-{RED,GREEN}-20260626/ (proper
-RED-then-GREEN falsifiability pair,
-Challenge66SelectAllDoesNotEnableAuthProvidersTest) is 48 days / ~7
-versions stale per SS6.AK – device gate was occupied by a parallel
-LVA-087 verification agent this cycle, could not re-run. Source:
-.lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
-#9.</td>
 </tr>
 <tr>
 <td>LVA-091</td>
