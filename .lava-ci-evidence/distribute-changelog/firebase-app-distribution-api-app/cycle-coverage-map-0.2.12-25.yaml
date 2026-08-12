@@ -1,0 +1,28 @@
+# §6.AK cycle-coverage-map for Lava-API-App-0.2.12-25
+#
+# Each CHANGELOG-claimed user-visible change for 0.2.12-25 MUST have at least
+# one covering device Challenge that was EXECUTED + PASSED on the §6.Z gate
+# (and therefore is recorded in the same-SHA 0.2.12-25-test-evidence.json).
+#
+# HONEST SCOPE (§6.J / §11.4.6): this cycle ships NO functional change — 25 is
+# the same §6.Y version-parity bump that landed alongside the client's 1081
+# (commit 11bc6dba). The api-app source is byte-identical to 24 apart from the
+# versionCode/versionName bump. The only claim this map covers is that the app
+# still launches + serves + survives stop/restart + shows notifications +
+# matches its embedded-engine source hash + supports key-copy — i.e. re-running
+# the full available Challenge set as a health check on the unchanged code,
+# NOT proving a new fix. Challenge07 (open-client) is deliberately NOT listed
+# as covering evidence for any claim: it FAILED this run on a pre-existing,
+# documented, non-regression test-automation limitation (F5, see CHANGELOG
+# 0.2.12-24 entry) — per §6.AK clause 6, an unverified/failing item is never
+# cited as covering evidence.
+version: "0.2.12-25"
+claims:
+  - fix: "Version-parity bump, no functional change — re-verifies the app still launches, serves, survives stop/restart, shows notifications, and matches its embedded-engine source hash on the unchanged 24 codebase"
+    covering_challenges:
+      - "lava.api.app.challenges.Challenge01ApiAppColdStartTest"
+      - "lava.api.app.challenges.Challenge02ApiAppBootAndServeTest"
+      - "lava.api.app.challenges.Challenge03StopRestartTest"
+      - "lava.api.app.challenges.Challenge04NotificationActionsTest"
+      - "lava.api.app.challenges.Challenge05ApiEmbedSourceHashMatchesTest"
+      - "lava.api.app.challenges.Challenge06CopyKeyTest"

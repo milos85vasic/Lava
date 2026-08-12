@@ -189,6 +189,36 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🟢🚀📦📱 2026-08-12 (BOTH apps' debug builds DISTRIBUTED —
+Lava-Android-1.3.15-1082 + Lava-API-App-0.2.12-25; "make it happen"
+deploy phase substantially complete).</strong> Following the client
+distribute below, api-app 0.2.12-25 also distributed successfully on the
+FIRST attempt (no auth-pepper/client-name gates apply to it — "server
+artifact, no client pepper", confirmed by
+<code>firebase-distribute.sh</code> itself). Release
+<code>7jbtkmp6dfc90</code> at the same Firebase console. Device gate:
+6/7 Challenges (C01–C06) executed + PASS on the same containerized KVM
+matrix; C07 (open-client) FAILED but this is a PRE-EXISTING, documented,
+non-regression test-automation limitation (F5 — the Compose "Back to
+Lava client" button resists UiAutomator taps) already flagged honestly
+in 24's own CHANGELOG entry, confirmed via <code>git log</code> that the
+assertion is unchanged since the test was authored
+(<code>d5694551</code>) — not something this cycle broke. Per §6.AK
+clause 6, the cycle-coverage-map does NOT cite C07 as covering evidence
+for any claim (25 makes no functional claim beyond version-parity, so
+none was needed to). Evidence:
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.2.12-25-test-evidence.{md,json}</code>
++ <code>.lava-ci-evidence/api-app-0.2.12-25-device-gate/</code>.
+<strong>Standing status:</strong> both apps' DEBUG variants are live on
+Firebase App Distribution; RELEASE-stage distribute for both is
+explicitly withheld pending operator on-device confirmation of the debug
+builds per §6.AA — this is a deliberate stop, not an oversight.
+lava-api-go is rebuilt, verified running current source via systemd, and
+wired to start on boot without a login session. Remaining from the
+operator's "make it happen" directive: operator confirms debug builds
+on-device → release-stage distribute for both apps.</p>
+</blockquote>
+<blockquote>
 <p><strong>🟢🚀📦 2026-08-12 (Lava-Android-1.3.15-1082 DEBUG DISTRIBUTED
 to Firebase App Distribution — first real §6.Z-gated client distribute
 since 1076/1077; systemd <code>--user</code> service wiring

@@ -1,0 +1,47 @@
+{
+  "channel": "firebase-app-distribution-api-app",
+  "version_name": "0.2.12",
+  "version_code": 25,
+  "commit_sha": "unknown",
+  "commit_sha_note": "The distribute-advancing commit cannot embed its own git SHA (§6.AK Check 10 self-reference). artifact.tested_code_sha pins the actual commit the device gate ran against.",
+  "artifact": {
+    "app_id": "digital.vasic.lava.api.dev",
+    "apk_path": "api-app/build/outputs/apk/debug/api-app-debug.apk",
+    "aapt_verified_version_code": "25",
+    "aapt_verified_version_name": "0.2.12",
+    "tested_code_sha": "595712d442a0e1bca4ffcb031b90413b9764ef81"
+  },
+  "timestamp": "2026-08-12T18:20:00+02:00",
+  "authored_utc": "2026-08-12T16:20:00Z",
+  "combined_distribute_authorization": "n/a — §6.AA two-stage: this evidence backs Stage 1 (debug-only).",
+  "covering_challenges": {
+    "Challenge01ApiAppColdStartTest": "PASS",
+    "Challenge02ApiAppBootAndServeTest": "PASS",
+    "Challenge03StopRestartTest": "PASS",
+    "Challenge04NotificationActionsTest": "PASS",
+    "Challenge05ApiEmbedSourceHashMatchesTest": "PASS",
+    "Challenge06CopyKeyTest": "PASS",
+    "Challenge07OpenClientTest": "FAIL (pre-existing, documented, non-regression test-automation limitation — see honesty note below; NOT claimed as a covering Challenge for any CHANGELOG claim in cycle-coverage-map-0.2.12-25.yaml)"
+  },
+  "device_gate": {
+    "runner": "containers-submodule",
+    "runtime": "podman",
+    "container_image": "ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64",
+    "avd": "default (baked; requested CZ_API34_Phone was advisory, api-level matched)",
+    "api_level": 34,
+    "form_factor": "phone",
+    "cold_boot": true,
+    "gate_host": "Linux x86_64, KVM (nezha)",
+    "gating": true,
+    "rows": [
+      {"test_class": "lava.api.app.challenges.Challenge01ApiAppColdStartTest", "boot_seconds": 36.743487841, "test_passed": true, "test_seconds": 60.334931814, "concurrent": 1, "evidence_dir": ".lava-ci-evidence/api-app-0.2.12-25-device-gate/Challenge01ApiAppColdStartTest/"},
+      {"test_class": "lava.api.app.challenges.Challenge02ApiAppBootAndServeTest", "boot_seconds": 36.720872452, "test_passed": true, "test_seconds": 57.138212161, "concurrent": 1, "evidence_dir": ".lava-ci-evidence/api-app-0.2.12-25-device-gate/Challenge02ApiAppBootAndServeTest/"},
+      {"test_class": "lava.api.app.challenges.Challenge03StopRestartTest", "boot_seconds": 37.113157573, "test_passed": true, "test_seconds": 59.313807938, "concurrent": 1, "evidence_dir": ".lava-ci-evidence/api-app-0.2.12-25-device-gate/Challenge03StopRestartTest/"},
+      {"test_class": "lava.api.app.challenges.Challenge04NotificationActionsTest", "boot_seconds": 36.742460859, "test_passed": true, "test_seconds": 58.896488077, "concurrent": 1, "evidence_dir": ".lava-ci-evidence/api-app-0.2.12-25-device-gate/Challenge04NotificationActionsTest/"},
+      {"test_class": "lava.api.app.challenges.Challenge05ApiEmbedSourceHashMatchesTest", "boot_seconds": 36.549935815, "test_passed": true, "test_seconds": 62.776642925, "concurrent": 1, "evidence_dir": ".lava-ci-evidence/api-app-0.2.12-25-device-gate/Challenge05ApiEmbedSourceHashMatchesTest/"},
+      {"test_class": "lava.api.app.challenges.Challenge06CopyKeyTest", "boot_seconds": 36.615305931, "test_passed": true, "test_seconds": 66.318955564, "concurrent": 1, "evidence_dir": ".lava-ci-evidence/api-app-0.2.12-25-device-gate/Challenge06CopyKeyTest/"},
+      {"test_class": "lava.api.app.challenges.Challenge07OpenClientTest", "test_passed": false, "test_error": "java.lang.AssertionError: PRIMARY: tapping Open-client MUST fire an ACTION_VIEW launch Intent through startActivity (the not-installed download path), but the monitor recorded 0 matching hit(s)", "evidence_dir": ".lava-ci-evidence/api-app-0.2.12-25-device-gate/Challenge07OpenClientTest/", "honesty_note": "Pre-existing, documented (CHANGELOG 0.2.12-24 F5 note), non-regression test-automation limitation (the Compose 'Back to Lava client' button resists UiAutomator's programmatic tap). Confirmed via git log the assertion has been unchanged since the test was authored (commit d5694551). Recorded here honestly rather than omitted; not claimed as covering evidence for any CHANGELOG claim."}
+    ]
+  },
+  "scope_honesty": "0.2.12-25 is a version-parity bump with no functional source change since 24 (which was built but never distributed). The device gate here is a re-verification of the SAME feature set 24's own evidence already covered less thoroughly (24 only ran Genymotion + Challenge01; this cycle ran the full available 7-Challenge set on the containerized KVM matrix). C07's failure is not new and is honestly disclosed rather than silently dropped from the evidence file."
+}

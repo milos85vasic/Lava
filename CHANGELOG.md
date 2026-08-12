@@ -165,6 +165,13 @@ fast "Error — Retry" rather than a hang — that's the correct, honest behavio
   measure is fixed + guarded by a structural scanner so the class cannot recur.
 - **P2 (partial):** improved tolerance for Internet Archive crawl topics that omit a comments section; the full fix for IA crawl topics that omit most fields is a tracked follow-up (a niche, non-crashing case).
 
+## Lava-API-App-0.2.12-25 — 2026-08-12 (version-parity bump, no functional change — first §6.Z-gated distribute since 23)
+
+**Previous published:** Lava-API-App-0.2.11-23 (24 was built but never distributed).
+
+- **No functional change.** 25 is the same §6.Y version-parity bump that landed alongside the client's 1081 (commit `11bc6dba`, 2026-07-27); the api-app source is unchanged since 24.
+- **§6.Z device gate — 6/7 executed + PASS, 1 known pre-existing gap.** C01 (cold-start), C02 (boot-and-serve), C03 (stop/restart), C04 (notification actions), C05 (embed source-hash match), C06 (copy-key) all executed + PASSED on a containerized KVM emulator against this exact build. C07 (open-client) FAILED — this is the SAME pre-existing test-automation limitation 24's own CHANGELOG entry already documented honestly ("the api-app's Compose 'Back to Lava client' button resists UiAutomator clicks — a test-automation limitation, NOT a product defect"; tracked as F5). Not a new regression: confirmed via `git log` that Challenge07OpenClientTest has carried this exact assertion since it was written (`d5694551`).
+
 ## Lava-API-App-0.2.12-24 — 2026-07-04 (on-device API starts on x86_64 — embed startup crash FIXED; on-device search serves results)
 
 **Previous published:** Lava-API-App-0.2.11-23.
