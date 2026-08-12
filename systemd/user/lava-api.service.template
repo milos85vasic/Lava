@@ -1,0 +1,21 @@
+[Unit]
+Description=Lava API (lava-api-go) container service
+Documentation=https://github.com/milos85vasic/Lava/blob/master/docs/scripts/systemd-install.sh.md
+After=network-online.target podman.socket
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=__LAVA_REPO_ROOT__
+ExecStart=__LAVA_REPO_ROOT__/start.sh
+ExecStop=__LAVA_REPO_ROOT__/stop.sh
+ExecReload=__LAVA_REPO_ROOT__/stop.sh
+ExecReload=__LAVA_REPO_ROOT__/start.sh
+TimeoutStartSec=300
+TimeoutStopSec=120
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target
