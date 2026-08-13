@@ -1,0 +1,21 @@
+{
+  "all_passed": true,
+  "finished_at": "2026-08-13T10:33:26+02:00",
+  "gating": true,
+  "rows": [
+    {
+      "avd": "CZ_API34_Phone",
+      "api_level": 34,
+      "form_factor": "phone",
+      "boot_seconds": 71.945005466,
+      "test_class": "lava.api.app.challenges.Challenge01ApiAppColdStartTest,lava.api.app.challenges.Challenge02ApiAppBootAndServeTest,lava.api.app.challenges.Challenge03StopRestartTest,lava.api.app.challenges.Challenge04NotificationActionsTest",
+      "test_passed": true,
+      "test_seconds": 116.372586798,
+      "gradle_log_path": "CZ_API34_Phone/gradle.log",
+      "diag": {},
+      "failure_summaries": [],
+      "concurrent": 1
+    }
+  ],
+  "started_at": "2026-08-13T10:29:58+02:00"
+}

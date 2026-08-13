@@ -1,0 +1,8 @@
+{
+  "platform": "Linux",
+  "host_arch": "x86_64",
+  "kvm_available_on_host": 1,
+  "hvf_available_on_host": 0,
+  "resolved_accel_backend": "kvm",
+  "gate_eligible": true
+}
