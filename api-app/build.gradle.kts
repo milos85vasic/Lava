@@ -137,8 +137,15 @@ android {
         // §6.Y production-readiness sweep: container submodule pin advance,
         // device-gate preflight, WaitForBoot liveness. versionName held
         // (diagnostics-only app; no user-facing functional change).
-        versionCode = 25
-        versionName = "0.2.12"
+        // 26 (§6.Y, this cycle): the embedded lava-api-go engine (liblavaapi.so,
+        // rebuilt this cycle for all 3 ABIs) now correctly classifies a
+        // Cloudflare bot-mitigation challenge on RuTracker login as a distinct
+        // 503 (with browser-realistic outbound headers) instead of a generic,
+        // misleading 502 — a real correctness + telemetry improvement to this
+        // app's embedded API surface. versionName patch bump 0.2.12 → 0.2.13
+        // (§6.Y.3).
+        versionCode = 26
+        versionName = "0.2.13"
         // EncryptedSharedPreferences (androidx.security-crypto) requires API 23+
         // — the per-install auth-key store ([ApiKeyStore]) relies on it. The
         // standalone API-server app reasonably targets API 23+ (the client app
