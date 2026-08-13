@@ -15,6 +15,7 @@ import lava.common.relaunch
 import lava.credentials.ProviderConfigRepository
 import lava.domain.usecase.AddSuggestUseCase
 import lava.domain.usecase.ObserveSuggestsUseCase
+import lava.domain.usecase.StartupProvidersGate
 import lava.logger.api.LoggerFactory
 import lava.models.search.Suggest
 import lava.search.input.components.ProviderChip
@@ -35,6 +36,16 @@ internal class SearchInputViewModel @Inject constructor(
     private val analytics: AnalyticsTracker,
     private val providerConfigRepository: ProviderConfigRepository,
     private val displayNameResolver: ProviderDisplayNameResolver,
+    // LVA-085 x LVA-093 composition follow-up (2026-08-13): the same
+    // cold-start readiness gate SearchResultViewModel awaits before reading
+    // the tracker registry — see [StartupProvidersGate] KDoc. This screen is
+    // reached BEFORE the results screen, so it is at least as exposed to the
+    // race: a search fired immediately after cold launch could read
+    // `displayNameResolver.displayNames()` (backed by
+    // `LavaTrackerSdk.listAvailableTrackers()`) before
+    // `RepopulateProvidersOnStartupUseCase` has installed the dynamic
+    // providers, silently falling back to raw provider ids in the chip bar.
+    private val providersReadyGate: StartupProvidersGate,
 ) : ViewModel(), ContainerHost<SearchInputState, SearchInputSideEffect> {
     private val logger = loggerFactory.get("SearchInputViewModel")
     private val filter = savedStateHandle.filter
@@ -81,6 +92,12 @@ internal class SearchInputViewModel @Inject constructor(
     private fun loadOnboardedChips() = intent {
         val onboarded = onboardedSearchableProviders()
         selectedProviders = onboarded.toSet()
+        // LVA-085 x LVA-093 composition follow-up: await the cold-start
+        // registry-readiness gate BEFORE resolving display names — NOT
+        // before `onboardedSearchableProviders()` above, which reads the
+        // user's persisted onboarding config (Room), an entirely different
+        // data source unrelated to the dynamic tracker-registry race.
+        providersReadyGate.awaitReady()
         val names = displayNameResolver.displayNames()
         reduce {
             state.copy(

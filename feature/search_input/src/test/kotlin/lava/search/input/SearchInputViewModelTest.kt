@@ -17,6 +17,7 @@ import lava.database.dao.ProviderConfigDao
 import lava.database.entity.ProviderConfigEntity
 import lava.domain.usecase.AddSuggestUseCase
 import lava.domain.usecase.ObserveSuggestsUseCase
+import lava.domain.usecase.StartupProvidersGate
 import lava.models.search.Suggest
 import lava.testing.TestDispatchers
 import lava.testing.logger.TestLoggerFactory
@@ -113,6 +114,18 @@ class SearchInputViewModelTest {
         override fun displayNames(): Map<String, String> = names
     }
 
+    /**
+     * Mutable variant of [FakeDisplayNames] for the LVA-085 x LVA-093
+     * composition regression below — its [names] snapshot can change
+     * mid-test, simulating `TrackerRegistry.populateFrom` swapping in the
+     * dynamic (real display name) catalogue after the bundled/stale state.
+     */
+    private class MutableFakeDisplayNames(initial: Map<String, String> = emptyMap()) :
+        ProviderDisplayNameResolver {
+        var names: Map<String, String> = initial
+        override fun displayNames(): Map<String, String> = names
+    }
+
     private lateinit var suggestsRepo: FakeSuggestsRepository
     private lateinit var dao: FakeProviderConfigDao
     private lateinit var configRepo: ProviderConfigRepository
@@ -121,6 +134,10 @@ class SearchInputViewModelTest {
         scheduler: kotlinx.coroutines.test.TestCoroutineScheduler,
         savedState: SavedStateHandle = SavedStateHandle(),
         displayNames: Map<String, String> = emptyMap(),
+        // LVA-093: defaults to already-ready so every EXISTING test in this
+        // file (none of which target the cold-start race) keeps its prior
+        // unblocked-immediately behavior.
+        providersReadyGate: StartupProvidersGate = StartupProvidersGate().apply { markReady() },
     ): SearchInputViewModel {
         suggestsRepo = FakeSuggestsRepository()
         dao = FakeProviderConfigDao()
@@ -134,6 +151,7 @@ class SearchInputViewModelTest {
             analytics = NoopAnalytics(),
             providerConfigRepository = configRepo,
             displayNameResolver = FakeDisplayNames(displayNames),
+            providersReadyGate = providersReadyGate,
         )
     }
 
@@ -208,6 +226,84 @@ class SearchInputViewModelTest {
             assertTrue(
                 "no phantom hardcoded provider may appear",
                 chips.none { it.providerId in setOf("rutracker", "rutor", "archiveorg", "gutenberg") },
+            )
+        }
+
+    // CHALLENGE — LVA-085 x LVA-093 composition (2026-08-13). This screen is
+    // reached BEFORE the search-result screen, so it is at least as exposed
+    // to the cold-start race as SearchResultViewModel was (see
+    // SearchResultViewModelStreamingTest's composed regression for the full
+    // root-cause writeup). Proves the chip bar's resolved display name comes
+    // from the registry state AFTER the cold-start readiness gate opens, not
+    // whatever stale/bundled snapshot existed when `loadOnboardedChips()`
+    // first ran.
+    //
+    // ## FALSIFIABILITY REHEARSAL (§6.J clause 2 / Sixth Law clause 2 — PERFORMED)
+    //
+    //   Mutation: moved `providersReadyGate.awaitReady()` in
+    //     SearchInputViewModel.loadOnboardedChips back to AFTER the
+    //     `displayNameResolver.displayNames()` call (the pre-fix ordering).
+    //   Observed-Failure: `onCreate resolves the chip display name only
+    //     after the cold-start registry catches up` FAILED —
+    //     AssertionError: "the chip bar MUST show the registry's resolved
+    //     display name once it becomes available — NOT the stale bundled
+    //     fallback" expected:<Archive.org> but was:<archiveorg>.
+    //   Reverted: yes — restoring the awaitReady()-before-resolution
+    //     ordering makes this test (and the rest of the file) pass again.
+    @Test
+    fun onCreate_resolves_the_chip_display_name_only_after_the_cold_start_registry_catches_up() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            val gate = StartupProvidersGate() // deliberately NOT marked ready
+            // Stale/bundled snapshot: "archiveorg" resolves to its raw id —
+            // the same shape `names[id] ?: id` falls back to.
+            val resolver = MutableFakeDisplayNames(mapOf("archiveorg" to "archiveorg"))
+            suggestsRepo = FakeSuggestsRepository()
+            dao = FakeProviderConfigDao()
+            configRepo = ProviderConfigRepository(dao)
+            val dispatchers = TestDispatchers(UnconfinedTestDispatcher(testScheduler))
+            val vm = SearchInputViewModel(
+                savedStateHandle = SavedStateHandle(),
+                observeSuggestsUseCase = ObserveSuggestsUseCase(suggestsRepo),
+                saveSuggestUseCase = AddSuggestUseCase(suggestsRepo, dispatchers),
+                loggerFactory = TestLoggerFactory(),
+                analytics = NoopAnalytics(),
+                providerConfigRepository = configRepo,
+                displayNameResolver = resolver,
+                providersReadyGate = gate,
+            )
+            onboard("archiveorg")
+
+            vm.test(this) {
+                runOnCreate()
+
+                // §6.J primary #1 — the chip bar MUST NOT have resolved
+                // anything from the resolver yet; the gate is not ready.
+                assertTrue(
+                    "the chip bar MUST stay empty until the cold-start " +
+                        "readiness gate opens",
+                    vm.container.stateFlow.value.providerChips.isEmpty(),
+                )
+
+                // Simulate RepopulateProvidersOnStartupUseCase's real
+                // sequence: the registry gains its authoritative display
+                // name THEN the gate opens.
+                resolver.names = mapOf("archiveorg" to "Archive.org")
+                gate.markReady()
+                mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+                cancelAndIgnoreRemainingItems()
+            }
+
+            // §6.J primary #2 — user-visible state: the chip label MUST
+            // reflect the registry's resolved display name, not the stale
+            // bundled fallback.
+            val chips = vm.container.stateFlow.value.providerChips
+            assertEquals(
+                "the chip bar MUST show the registry's resolved display " +
+                    "name once it becomes available — NOT the stale bundled " +
+                    "fallback",
+                "Archive.org",
+                chips.singleOrNull { it.providerId == "archiveorg" }?.displayName,
             )
         }
 
