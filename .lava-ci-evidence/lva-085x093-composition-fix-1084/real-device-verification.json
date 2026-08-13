@@ -1,0 +1,21 @@
+{
+  "all_passed": true,
+  "finished_at": "2026-08-13T17:31:03+02:00",
+  "gating": true,
+  "rows": [
+    {
+      "avd": "CZ_API34_Phone",
+      "api_level": 34,
+      "form_factor": "phone",
+      "boot_seconds": 94.599137341,
+      "test_class": "lava.app.challenges.Challenge61ResultsChipsShowDisplayNamesTest",
+      "test_passed": true,
+      "test_seconds": 421.41016375,
+      "gradle_log_path": "CZ_API34_Phone/gradle.log",
+      "diag": {},
+      "failure_summaries": [],
+      "concurrent": 1
+    }
+  ],
+  "started_at": "2026-08-13T17:22:16+02:00"
+}

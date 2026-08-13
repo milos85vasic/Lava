@@ -110,8 +110,18 @@ android {
         // changes (not test-only/log-only), so versionName bumps per §6.Y
         // clause 3 ("user-facing bug fix shipping to testers/users -> patch
         // bump").
-        versionCode = 1083
-        versionName = "1.3.16"
+        // §6.Y bump (2026-08-13, 3rd this cycle): 1083 was distributed (both
+        // stages) and the operator reported "nothing of reported issues has
+        // been fixed at all" on real-device retest. Root-caused a genuine
+        // LVA-085 x LVA-093 composition race (commit 843f8107) — the chip
+        // display-name resolution ran BEFORE the cold-start readiness gate,
+        // so a first-search-after-launch could still show raw provider ids
+        // despite both individual fixes' unit tests passing. User-facing
+        // behavior change -> versionName patch bump per §6.Y clause 3. This
+        // build is NOT to be distributed until device-Challenge evidence
+        // confirms the fix on the real containerized emulator (§6.AK/§6.Z).
+        versionCode = 1084
+        versionName = "1.3.17"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/
         // become runnable on a connected device. The custom runner installs

@@ -1,0 +1,31 @@
+# §6.AK cycle-coverage-map for Lava-Android-1.3.17-1084
+#
+# Each CHANGELOG-claimed user-visible change for 1.3.17-1084 MUST have at
+# least one covering device Challenge (or per-artifact test, per §6.AK's
+# own "device Challenge OR per-artifact device test" wording) that was
+# EXECUTED + PASSED and is present in the same-cycle §6.Z evidence file.
+#
+# Schema note: each claim's covering_challenges list items MUST be bare
+# FQN/test-name strings only (no free prose as list items -- the mechanical
+# scanner in scripts/check-cycle-coverage.sh treats every quoted list item
+# under a claim as a name to verify, regardless of nesting).
+version: "1.3.17-1084"
+claims:
+  - fix: "LVA-085 x LVA-093 composition race closed on the search-results chip bar (SearchResultViewModel)"
+    covering_challenges:
+      - "Challenge61ResultsChipsShowDisplayNamesTest"
+      - "SearchResultViewModelStreamingTest"
+
+  - fix: "Same composition race closed on the search-input chip bar (SearchInputViewModel) -- second, independent instance"
+    covering_challenges:
+      - "Challenge59SearchUsesOnboardedProvidersTest"
+      - "SearchInputViewModelTest"
+
+  - fix: "LVA-094 silent-failure retry/telemetry -- re-audited, no issue found"
+    covering_challenges:
+      - "RepopulateProvidersOnStartupUseCaseTest"
+
+  - fix: "RuTracker Cloudflare-challenge classification -- re-audited, no issue found"
+    covering_challenges:
+      - "TestLogin_CloudflareChallenge_ErrCloudflareChallenge"
+      - "TestLogin_PlainForbidden_NOT_ClassifiedAsCloudflareChallenge"

@@ -1,5 +1,16 @@
 # Changelog
 
+## Lava-Android-1.3.17-1084 — 2026-08-13 (LVA-085 x LVA-093 composition race — closes it on BOTH search chip bars)
+
+**Previous published:** Lava-Android-1.3.16-1083.
+
+- **Root cause found after operator retest reported the 1083 chip-label fix "still garbage."** LVA-085 (raw provider ids in chips) and LVA-093 (cold-start provider-repopulation readiness gate) landed in 1083, each with a passing isolated unit test — but the two were never tested TOGETHER. `SearchResultViewModel.observeStreamMultiSearch` read the tracker registry for display names (LVA-085) BEFORE awaiting the cold-start readiness gate (LVA-093), so on a genuine cold start the display-name read could still see the stale/bundled registry and fall back to raw provider ids — silently reintroducing the exact bug LVA-085 claimed to fix. Neither fix's own test caught it because each test's default fixture pre-marks the gate ready before exercising its own concern in isolation.
+- **Fixed in `SearchResultViewModel` (search-results screen).** Moved `providersReadyGate.awaitReady()` to run before the eager display-name resolution and the initial loading-state reduce, so the first frame the user sees reads the same already-settled registry the actual search uses. Commit `843f8107`.
+- **Found + fixed a SECOND, independent instance on the search-input screen.** `SearchInputViewModel.loadOnboardedChips()` (the chip bar shown when the user opens Search, before results) read the same tracker registry with **no readiness-gate awareness at all** — it never had the gate wired in. This screen is reached earlier than the results screen, so it was likely the more visible source of "still shows raw ids." Added the same `StartupProvidersGate` dependency and await, mirroring the results-screen fix. Commit `8634efd9`.
+- **Both fixes are real-device verified, not just JVM-tested**, per this project's own standard that JVM-level passes are necessary but never sufficient: `Challenge61ResultsChipsShowDisplayNamesTest` and `Challenge59SearchUsesOnboardedProvidersTest` both PASSED on a containerized KVM emulator (CZ_API34_Phone, §6.X-conformant `runner=containerized`) against this exact build.
+- **Re-audited the other two 1083 claims (LVA-094 silent-failure retry/telemetry, RuTracker Cloudflare-classification).** `LavaApplication.onCreate()`'s wiring of `RepopulateProvidersOnStartupUseCase` reviewed and confirmed structurally sound (try/finally gate release on every exit path). The 5 RuTracker Cloudflare-classification Go tests (including a discrimination test that confirms it does NOT over-classify plain 403s) re-run and confirmed passing. No further issues found in either.
+- **§6.Y:** versionCode 1083→1084; versionName 1.3.16→1.3.17 (real user-facing fix, patch bump per §6.Y clause 3).
+
 ## Lava-Android-1.3.16-1083 — 2026-08-12 (4 parallel-subagent fixes: search chip labels, loading state, cold-start race)
 
 **Previous published:** Lava-Android-1.3.15-1082.
