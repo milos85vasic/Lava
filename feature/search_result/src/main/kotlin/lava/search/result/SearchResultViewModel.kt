@@ -152,6 +152,28 @@ internal class SearchResultViewModel @Inject constructor(
         // Register this job so back-press can cancel it immediately.
         activeSearchJob = currentCoroutineContext()[Job]
 
+        // LVA-085 x LVA-093 composition fix (2026-08-13): the readiness wait
+        // MUST happen BEFORE resolving display names, not after. Originally
+        // (LVA-093, commit 9d85c5cf) this wait was placed AFTER the initial
+        // Streaming-state reduce, on the reasoning that the wait only guards
+        // `sdk.streamMultiSearch`'s tracker-client resolution below. That
+        // missed that LVA-085 (commit 80c9380d, landed the SAME cycle) added
+        // an EARLIER `sdk.listAvailableTrackers()` read — the display-name
+        // resolution — inside that same pre-wait reduce. On a genuine cold
+        // start, if `RepopulateProvidersOnStartupUseCase` has not finished
+        // yet, that earlier read silently returned the stale/bundled
+        // registry, reintroducing the exact raw-provider-id bug LVA-085
+        // claimed to fix (chips render "archiveorg" instead of
+        // "Archive.org") — invisible to both fixes' own unit tests because
+        // each test suite's default fixture pre-marks the gate ready before
+        // exercising its own concern in isolation. Awaiting the gate FIRST
+        // — bounded by [StartupProvidersGate.DEFAULT_AWAIT_TIMEOUT_MS] (5s,
+        // independent of and far shorter than the 25s search timeout) —
+        // means the very first frame the user sees (both the loading
+        // indicator, LVA-086, and the resolved chip labels, LVA-085) reads
+        // the SAME already-settled registry the actual search below uses.
+        providersReadyGate.awaitReady()
+
         // LVA-085 (2026-06-25 QA video #4): eagerly resolve every requested
         // provider's display name from the live tracker registry — the SAME
         // source `lava.search.input.ProviderDisplayNameResolver` uses for the
@@ -195,19 +217,6 @@ internal class SearchResultViewModel @Inject constructor(
                 ),
             )
         }
-
-        // LVA-093 (cold-start race): wait — bounded — for the cold-start
-        // dynamic-provider repopulation to conclude BEFORE resolving any
-        // tracker client below. Without this, a search fired immediately
-        // after app launch could silently resolve `providerIds` against the
-        // stale/bundled registry state that exists before
-        // `RepopulateProvidersOnStartupUseCase` finishes installing the
-        // user's configured dynamic clients via `TrackerRegistry.populateFrom`.
-        // The "Streaming" state above is already visible to the user, so this
-        // wait is invisible UI-wise in the common case (repopulation is a
-        // fast LAN round-trip); the bound in [StartupProvidersGate] prevents
-        // this from ever turning into an indefinite hang.
-        providersReadyGate.awaitReady()
 
         val request = SearchRequest(
             query = filter.query.orEmpty(),

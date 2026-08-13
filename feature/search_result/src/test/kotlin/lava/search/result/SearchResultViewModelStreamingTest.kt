@@ -28,6 +28,7 @@ import lava.testing.logger.TestLoggerFactory
 import lava.testing.repository.TestSettingsRepository
 import lava.testing.rule.MainDispatcherRule
 import lava.tracker.api.AuthType
+import lava.tracker.api.RemoteTrackerDescriptor
 import lava.tracker.api.TrackerCapability
 import lava.tracker.api.TrackerClient
 import lava.tracker.api.TrackerDescriptor
@@ -627,6 +628,145 @@ class SearchResultViewModelStreamingTest {
 
                 cancelAndIgnoreRemainingItems()
             }
+        }
+
+    // =============== LVA-085 x LVA-093 COMPOSITION (2026-08-13) ===============
+    //
+    // Reproduces the operator's "nothing has been fixed" report. LVA-085 and
+    // LVA-093 each shipped with a passing, isolated unit test — but neither
+    // test exercised the ACTUAL cold-start composition: LVA-085's display-name
+    // resolution (`sdk.listAvailableTrackers()`) originally ran BEFORE
+    // LVA-093's readiness wait (`providersReadyGate.awaitReady()`), so on a
+    // genuine cold start — before `RepopulateProvidersOnStartupUseCase` has
+    // installed the dynamic providers via `TrackerRegistry.populateFrom` —
+    // the display-name read silently saw the stale bundled registry and fell
+    // back to the raw provider id, reintroducing exactly the bug LVA-085
+    // claimed to fix. Invisible to both fixes' own tests because each test's
+    // default fixture pre-marks the gate ready before exercising its own
+    // concern in isolation. This test drives both concerns TOGETHER: the gate
+    // starts NOT ready, and the registry's authoritative display name only
+    // becomes available at the SAME moment the gate opens — mirroring
+    // `RepopulateProvidersOnStartupUseCase`'s real sequence
+    // (`trackerRegistry.populateFrom(descriptors)` then, in its `finally`
+    // block, `providersReadyGate.markReady()`).
+    //
+    // ## FALSIFIABILITY REHEARSAL (§6.J clause 2 / Sixth Law clause 2 — PERFORMED)
+    //
+    //   Mutation: moved `providersReadyGate.awaitReady()` in
+    //     SearchResultViewModel.observeStreamMultiSearch back to AFTER the
+    //     `resolvedDisplayNames` computation + seed `reduce` (the pre-fix
+    //     ordering).
+    //   Observed-Failure: `streaming search resolves the correct display name
+    //     only after the cold-start registry catches up` FAILED —
+    //     `AssertionError: the results filter chip MUST show the registry's
+    //     resolved display name once it becomes available — NOT the stale
+    //     bundled fallback expected:<Archive.org> but was:<archiveorg>` — the
+    //     raw id leaked through, proving the composition race is back.
+    //   Reverted: yes — restoring the `awaitReady()`-before-resolution
+    //     ordering makes this test pass again.
+    @Test
+    fun `streaming search resolves the correct display name only after the cold-start registry catches up`() =
+        runTest(mainDispatcherRule.testDispatcher) {
+            // Bundled fallback: "archiveorg" is registered but its display name is
+            // UNRESOLVED (the same shape `resolvedDisplayNames[pid] ?: pid` falls
+            // back to) — the state the registry is in BEFORE the cold-start
+            // dynamic-provider repopulation completes.
+            val capturing = CapturingClient(descriptorNamed("archiveorg", "archiveorg"))
+            val registry = DefaultTrackerRegistry()
+            registry.register(factoryFor(capturing))
+            // Any dynamic (API-backed) client populateFrom would install resolves
+            // back to the SAME capturing instance, so the eventual search stays
+            // observable through populateFrom's client swap.
+            registry.setApiClientFactory { capturing }
+
+            val gate = StartupProvidersGate() // deliberately NOT marked ready
+            pagingFake = FakeObserveSearchPagingDataUseCase()
+            addHistoryFake = FakeAddSearchHistoryUseCase()
+            val savedState = SavedStateHandle(
+                mutableMapOf<String, Any?>(
+                    queryKey to "ubuntu",
+                    providerIdsKey to "archiveorg",
+                ),
+            )
+            val vm = SearchResultViewModel(
+                savedStateHandle = savedState,
+                loggerFactory = TestLoggerFactory(),
+                observeSearchPagingDataUseCase = pagingFake,
+                addSearchHistoryUseCase = addHistoryFake,
+                enrichFilterUseCase = FakeEnrichFilterUseCase(),
+                toggleFavoriteUseCase = FakeToggleFavoriteUseCase(),
+                observeAuthStateUseCase = FakeObserveAuthStateUseCase(),
+                observeSettingsUseCase = ObserveSettingsUseCase(TestSettingsRepository()),
+                analytics = RecordingAnalytics(),
+                sdk = LavaTrackerSdk(registry = registry),
+                providersReadyGate = gate,
+            )
+
+            vm.test(this) {
+                runOnCreate()
+
+                // §6.J primary #1 — the search MUST NOT have resolved anything yet;
+                // the gate is not ready.
+                assertNull(
+                    "the tracker client MUST NOT be touched before the cold-start " +
+                        "readiness gate opens",
+                    capturing.lastRequest,
+                )
+
+                // Simulate RepopulateProvidersOnStartupUseCase's real sequence:
+                // install the dynamic descriptor (the authoritative display name)
+                // THEN mark the gate ready.
+                registry.populateFrom(
+                    listOf(
+                        RemoteTrackerDescriptor(
+                            trackerId = "archiveorg",
+                            displayName = "Archive.org",
+                            baseUrls = listOf(
+                                MirrorUrl(
+                                    url = "https://archiveorg.test",
+                                    isPrimary = true,
+                                    priority = 0,
+                                    protocol = Protocol.HTTPS,
+                                ),
+                            ),
+                            capabilities = setOf(TrackerCapability.SEARCH),
+                            authType = AuthType.NONE,
+                            encoding = "UTF-8",
+                        ),
+                    ),
+                )
+                gate.markReady()
+                mainDispatcherRule.testDispatcher.scheduler.advanceUntilIdle()
+
+                var streamingState: SearchPageState? = null
+                var guard = 0
+                while (streamingState == null && guard < 20) {
+                    val next = awaitState()
+                    if (next.searchContent is SearchResultContent.Streaming) {
+                        streamingState = next
+                    }
+                    guard += 1
+                }
+                val state = streamingState
+                    ?: error("Streaming state was never emitted after the gate opened")
+
+                // §6.J primary #2 — user-visible state: the chip label MUST reflect
+                // the registry's resolved display name, not the stale bundled
+                // fallback.
+                assertEquals(
+                    "the results filter chip MUST show the registry's resolved " +
+                        "display name once it becomes available — NOT the stale " +
+                        "bundled fallback",
+                    "Archive.org",
+                    state.providerDisplayNames["archiveorg"],
+                )
+
+                cancelAndIgnoreRemainingItems()
+            }
+
+            // §6.J secondary — the search itself still genuinely executed against
+            // the (same, populateFrom-resolved) client once the gate opened.
+            assertEquals("ubuntu", capturing.lastRequest?.query)
         }
 
     // ======================= LVA-093 (cold-start race) =======================
