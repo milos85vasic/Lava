@@ -35,7 +35,24 @@ fun String.isLocalHost(): Boolean {
     val hostWithoutPort = original.substringBeforeLast(":")
     val lowercase = hostWithoutPort.lowercase()
 
-    if (lowercase == "localhost" || lowercase.endsWith(".local") || lowercase.endsWith(".local.")) {
+    // "localhost.localdomain" is the standard reverse-DNS canonical name for
+    // 127.0.0.1 on Linux/Unix systems (the conventional /etc/hosts entry:
+    // "127.0.0.1 localhost localhost.localdomain"). Any host resolution that
+    // goes through a reverse-lookup on such a system (as MockWebServer's
+    // hostName does in tests, and as some Android network-stack resolutions
+    // can too) returns this form, not the bare "localhost" the prior check
+    // alone recognized — leaving a genuinely local endpoint misclassified as
+    // remote and silently dropping the local api-app key (LVA-095: reproduced
+    // by OnboardingViewModelDynamicProvidersTest's
+    // "selecting a keyless on-device API..." test, was
+    // GoApi(host=localhost.localdomain, ..., key=null)). "localdomain" is not
+    // a registrable public TLD (same non-routable-by-convention class as
+    // ".local", RFC 6762), so this exact match introduces no spoofing risk.
+    if (lowercase == "localhost" ||
+        lowercase == "localhost.localdomain" ||
+        lowercase.endsWith(".local") ||
+        lowercase.endsWith(".local.")
+    ) {
         return true
     }
 

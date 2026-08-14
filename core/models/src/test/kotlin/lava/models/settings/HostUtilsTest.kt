@@ -101,6 +101,22 @@ class HostUtilsTest {
     }
 
     @Test
+    fun `LVA-095 localhost_localdomain is local`() {
+        // Regression: "localhost.localdomain" is the standard reverse-DNS
+        // canonical name for 127.0.0.1 on Linux/Unix (/etc/hosts convention:
+        // "127.0.0.1 localhost localhost.localdomain"). Real host resolutions
+        // that go through a reverse lookup — MockWebServer.hostName in tests,
+        // and some Android network-stack resolutions on-device — return this
+        // form, not bare "localhost". Before the fix, this was misclassified
+        // as remote, so OnboardingViewModel.withLocalApiKeyIfMissing() never
+        // attached the local api-app's key to a keyless on-device endpoint —
+        // every subsequent /v1/{provider}/{search,login} call then 401'd,
+        // regardless of whether the tracker itself required credentials.
+        assertTrue("localhost.localdomain".isLocalHost())
+        assertTrue("localhost.localdomain:8443".isLocalHost())
+    }
+
+    @Test
     fun `LVA-029 public hosts starting with fc or fd are not local`() {
         // Regression: hosts beginning with the ULA hex prefix "fc"/"fd" must NOT
         // be misclassified as IPv6 unique-local addresses. They are public
