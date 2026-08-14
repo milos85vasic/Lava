@@ -347,6 +347,16 @@ internal class SearchResultViewModel @Inject constructor(
      * not a secret).
      */
     private fun recordProviderFailure(event: MultiSearchEvent.ProviderFailure) {
+        // §6.AC local-trace gap (2026-08-14): the cause was previously ONLY
+        // sent to remote Crashlytics via analytics.recordNonFatal/recordWarning
+        // below — invisible to on-device logcat and to CI/device-gate
+        // evidence capture (which has no Crashlytics read API). Logging it
+        // locally too makes a search failure's exact cause (HTTP status,
+        // exception class, message) diagnosable from a captured logcat alone.
+        logger.e(t = event.cause) {
+            "provider search failed: providerId=${event.providerId} reason=${event.reason} " +
+                "causeClass=${event.cause?.let { it::class.simpleName }}"
+        }
         val baseContext = mapOf(
             AnalyticsTracker.Params.FEATURE to "search",
             AnalyticsTracker.Params.OPERATION to "streamMultiSearch",

@@ -120,7 +120,18 @@ android {
         // behavior change -> versionName patch bump per §6.Y clause 3. This
         // build is NOT to be distributed until device-Challenge evidence
         // confirms the fix on the real containerized emulator (§6.AK/§6.Z).
-        versionCode = 1084
+        // §6.Y bump (2026-08-14, 4th this cycle): §6.H credential-leak incident
+        // (.lava-ci-evidence/sixth-law-incidents/2026-08-14-lava-auth-active-clients-echo-leak.json)
+        // — a diagnostic command's broken redaction printed all 14
+        // LAVA_AUTH_ACTIVE_CLIENTS UUIDs (including this version's own
+        // identity) into the session transcript. All 14 rotated + the HMAC
+        // secret rotated; this build bakes in the NEW android-1.3.17-1085
+        // identity. Also carries new local (logcat) diagnostic logging for
+        // per-provider search failures in SearchResultViewModel, previously
+        // visible only via remote Crashlytics. Both are internal/security
+        // changes, not new user-facing functionality -> versionCode bump
+        // only per §6.Y clause 3; versionName held at 1.3.17.
+        versionCode = 1085
         versionName = "1.3.17"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/
@@ -313,8 +324,7 @@ val generateLavaAuthClassRelease = tasks.register("generateLavaAuthClassRelease"
 }
 
 afterEvaluate {
-    // Wire variant-specific compile/KSP tasks to the correct generation task
-    // AND add the variant-specific generated dir to that variant's source set.
+    // Wire variant-specific compile/KSP tasks to the correct generation task.
     // Using Gradle's task API (not AGP variant API) for compatibility.
     tasks.matching { it.name in listOf("compileDebugKotlin", "kspDebugKotlin") }.configureEach {
         dependsOn(generateLavaAuthClassDebug)
@@ -322,15 +332,42 @@ afterEvaluate {
     tasks.matching { it.name in listOf("compileReleaseKotlin", "kspReleaseKotlin") }.configureEach {
         dependsOn(generateLavaAuthClassRelease)
     }
-
-    // Add generated source dirs per variant source set.
-    android.sourceSets.matching { it.name == "debug" }.configureEach {
-        kotlin.srcDir(layout.buildDirectory.dir("generated/lava-auth/debug"))
-    }
-    android.sourceSets.matching { it.name == "release" }.configureEach {
-        kotlin.srcDir(layout.buildDirectory.dir("generated/lava-auth/release"))
-    }
 }
+
+// LVA-098 (2026-08-14): root-caused via real-device evidence — the
+// afterEvaluate { android.sourceSets["debug"].kotlin.srcDir(...) } pattern
+// that used to live here NEVER actually reached compileDebugKotlin's source
+// set on AGP 8.6.1 + Kotlin 2.1.0: generateLavaAuthClassDebug genuinely ran
+// and wrote build/generated/lava-auth/debug/lava/auth/LavaAuthGenerated.kt
+// to disk (proving the dependsOn wiring above IS correct), but the file was
+// absent from EVERY classesN.dex in app-debug.apk (confirmed via
+// dexdump -l xml across all 20 dex files — zero class_def_item matches; the
+// only "LavaAuthGenerated" occurrence in the APK was the string-literal
+// argument to AuthInterceptorModule's own Class.forName(...) call). Net
+// effect: on a REAL, non-instrumented device launch (confirmed via a live
+// containerized emulator canary run, not connectedDebugAndroidTest, ruling
+// out an instrumentation-only classloader difference), the reflective
+// lookup threw ClassNotFoundException on every boot, AuthInterceptorModule
+// silently fell back to the empty StubLavaAuthBlobProvider, and every
+// authenticated request left the device with NO Lava-Auth header — the root
+// cause of "no tracker can log in, search fails even for anonymous
+// providers" (they all route through lava-api-go's AuthMiddleware, which
+// correctly 401's a request with no header at all).
+//
+// Confirmed empirically (a throwaway task dumping compileDebugKotlin.sources
+// and grepping for "lava-auth") that:
+//   - wrapping the srcDir registration in afterEvaluate: 0 matches (bug)
+//   - the AGP Variant API (androidComponents.onVariants { variant.sources
+//     .kotlin.addStaticSourceDirectory(...) }) ALSO fired correctly at
+//     configuration time but STILL 0 matches — this Kotlin/AGP version
+//     combination's compileDebugKotlin task does not read from AGP's Sources
+//     model for this source-set-augmentation path
+//   - calling android.sourceSets.getByName("debug").kotlin.srcDir(...)
+//     EAGERLY (top-level script statement, NOT wrapped in afterEvaluate):
+//     1 match — this is the fix below. The bug was specifically the
+//     afterEvaluate wrapper, not the API choice.
+android.sourceSets.getByName("debug").kotlin.srcDir(layout.buildDirectory.dir("generated/lava-auth/debug"))
+android.sourceSets.getByName("release").kotlin.srcDir(layout.buildDirectory.dir("generated/lava-auth/release"))
 
 dependencies {
     // Task 3.1 (2026-06-03): shared cross-app linking contract + launcher.

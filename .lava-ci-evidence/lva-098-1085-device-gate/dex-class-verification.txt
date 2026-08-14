@@ -1,0 +1,27 @@
+LVA-098 root-cause verification: lava.auth.LavaAuthGenerated as an actual
+class_def_item (not just a string literal) in the built debug APK's dex
+files, verified via `dexdump -l xml` against every classesN.dex.
+
+BEFORE fix (app-debug.apk built from unfixed app/build.gradle.kts):
+  - grep for "LavaAuthGenerated" across dexdump -l xml output of all 20
+    classesN.dex files: 0 matches (class genuinely absent from every dex;
+    the class name only appeared as a string constant — the Class.forName
+    argument — findable via `strings`, which is why an earlier naive check
+    using `strings` on the dex produced a false "class exists" reading).
+
+AFTER fix (app-debug.apk rebuilt with the corrected app/build.gradle.kts):
+  FOUND as class definition in classes8.dex:
+    <class name="LavaAuthGenerated"
+    <constructor name="LavaAuthGenerated"
+     type="lava.auth.LavaAuthGenerated"
+
+Real-device confirmation (containerized emulator, non-instrumented
+LavaApplication launch via `adb shell am start`, NOT connectedDebugAndroidTest):
+  08-14 12:28:36.015  2100  2100 I AuthInterceptorModule: [authblob-diag]
+    LavaAuthGenerated FOUND, instance=lava.auth.LavaAuthGenerated@1141f9
+
+(prior to the fix, the same real-device check produced:)
+  08-14 11:20:19.238  5630  5630 W AuthInterceptorModule: [authblob-diag]
+    LavaAuthGenerated NOT FOUND (ClassNotFoundException) — falling back to
+    StubLavaAuthBlobProvider (empty blob, NO Lava-Auth header will ever be
+    sent): lava.auth.LavaAuthGenerated

@@ -1,5 +1,18 @@
 # Changelog
 
+## Lava-Android-1.3.17-1085 — 2026-08-14 (LVA-098 — P0: fixed "no tracker can log in, search fails for every provider")
+
+**Previous published:** Lava-Android-1.3.17-1084.
+
+- **Root cause: `lava.auth.LavaAuthGenerated` was written to disk by the build-time codegen task every build, but never actually compiled into the APK.** `app/build.gradle.kts`'s `afterEvaluate { android.sourceSets["debug"].kotlin.srcDir(...) }` pattern (wiring the generated auth-blob-provider source into the Kotlin compilation) ran too late on this project's AGP 8.6.1 + Kotlin 2.1.0 combination for `compileDebugKotlin`/`compileReleaseKotlin` to pick it up. Confirmed via `dexdump -l xml` across all 20 `classesN.dex` files in a built debug APK: zero `class_def_item` matches for the class — it existed only as a string-literal constant (the reflective `Class.forName(...)` call's argument).
+- **User-visible effect on every real device, every prior build:** `AuthInterceptorModule` silently fell back to an empty stub auth-blob provider, so **every authenticated request left the device with no `Lava-Auth` header at all** — this is exactly the reported "not a single tracker can log in through onboarding, and the ones which don't require login can't search either", since every tracker flow routes through `lava-api-go`'s auth middleware, which correctly 401s a headerless request regardless of tracker/credentials.
+- **Fix:** moved the source-directory registration to an eager, top-level statement (outside `afterEvaluate`), proven via a throwaway diagnostic task dumping `compileDebugKotlin`'s actual declared sources (0 matches before, 1 match after). An AGP Variant-API alternative was tried first and ruled out — it fires correctly at configuration time but this project's KGP version doesn't read from that model for this integration path.
+- **Verified genuinely fixed, not just source-patched:** real, non-instrumented device launch (containerized emulator, `adb shell am start` — not `connectedDebugAndroidTest`, ruling out an instrumentation-only classloader confound) now logs `LavaAuthGenerated FOUND` instead of `ClassNotFoundException`; `Challenge70AutonomousQaProviderMatrixTest` PASSED end-to-end against the real backend (512.7s); server-side `lava-api-go` logs independently confirm `hdr_present=true`, `MATCHED active client=android-1.3.17-1085`, and search/topic-browse/download all returning HTTP 200 during the passing run.
+- **Also landed (§6.AC, permanent local telemetry, not temp diagnostics):** logcat-visible logging in the client's auth-blob-provider resolution and the server's auth middleware + a global request logger — closing a real gap where a 401 was previously indistinguishable from "request never arrived" from server logs alone.
+- **§6.Y:** versionCode 1084→1085; versionName HELD at 1.3.17 (internal/security fix + diagnostics, no new user-facing feature surface, per §6.Y clause 3 — though the USER-VISIBLE EFFECT of this fix is that search/login work again at all).
+
+**Coverage status (§6.AK / §6.Z):** full evidence at `.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.17-1085-test-evidence.md`, real-device attestation at `.lava-ci-evidence/lva-098-1085-device-gate/`.
+
 ## Lava-Android-1.3.17-1084 — 2026-08-13 (LVA-085 x LVA-093 composition race — closes it on BOTH search chip bars)
 
 **Previous published:** Lava-Android-1.3.16-1083.

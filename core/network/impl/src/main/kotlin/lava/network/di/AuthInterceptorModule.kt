@@ -54,12 +54,27 @@ internal object AuthInterceptorModule {
      * unaffected.
      */
     private fun tryLoadGenerated(): LavaAuthBlobProvider? {
+        // LVA-098 (2026-08-14, §6.AC): this fallback used to be completely
+        // silent — a ClassNotFoundException here means every request goes
+        // out with NO Lava-Auth header at all (StubLavaAuthBlobProvider's
+        // getBlob() returns empty), and nothing anywhere logged WHY. That
+        // silence is what let the real LVA-098 bug (app/build.gradle.kts's
+        // generated-source directory never reaching compileDebugKotlin, so
+        // lava.auth.LavaAuthGenerated compiled to disk but never into the
+        // APK's dex) go undetected on every real device. Using
+        // android.util.Log directly (not the DI'd LoggerFactory, which
+        // isn't available yet at this static/early binding-decision point).
+        // Kept permanently, not a temp diagnostic — one log line at boot.
         return try {
             val cls = Class.forName("lava.auth.LavaAuthGenerated")
-            cls.getDeclaredConstructor().newInstance() as? LavaAuthBlobProvider
-        } catch (_: ClassNotFoundException) {
+            val instance = cls.getDeclaredConstructor().newInstance() as? LavaAuthBlobProvider
+            android.util.Log.i("AuthInterceptorModule", "[authblob-diag] LavaAuthGenerated FOUND, instance=$instance")
+            instance
+        } catch (e: ClassNotFoundException) {
+            android.util.Log.w("AuthInterceptorModule", "[authblob-diag] LavaAuthGenerated NOT FOUND (ClassNotFoundException) — falling back to StubLavaAuthBlobProvider (empty blob, NO Lava-Auth header will ever be sent): ${e.message}")
             null
-        } catch (_: ReflectiveOperationException) {
+        } catch (e: ReflectiveOperationException) {
+            android.util.Log.w("AuthInterceptorModule", "[authblob-diag] LavaAuthGenerated reflective instantiation FAILED — falling back to stub: ${e.javaClass.simpleName}: ${e.message}")
             null
         }
     }

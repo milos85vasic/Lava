@@ -18,6 +18,7 @@ package router
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -65,6 +66,18 @@ func Build(deps Deps) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 	engine.Use(gin.Recovery())
+	// LVA-098 (2026-08-14, §6.AC): global first/last middleware logging
+	// every request's method+path and FINAL status code — independent of
+	// any per-middleware (auth, provider, etc.) logging that might never
+	// fire if that specific middleware isn't even wired into the chain for
+	// a given deployment. This is what let the LVA-098 investigation prove
+	// a request DID reach the Go app (and got a genuine 401) rather than
+	// silently vanishing somewhere upstream. Kept permanently.
+	engine.Use(func(c *gin.Context) {
+		log.Printf("[req-diag] >>> %s %s remote=%s", c.Request.Method, c.Request.URL.Path, c.Request.RemoteAddr)
+		c.Next()
+		log.Printf("[req-diag] <<< %s %s status=%d", c.Request.Method, c.Request.URL.Path, c.Writer.Status())
+	})
 	engine.Use(middleware.FirebaseTelemetry(deps.Firebase))
 
 	// /health + /ready MUST be registered BEFORE the auth middleware so the

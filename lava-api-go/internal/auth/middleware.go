@@ -22,6 +22,7 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"encoding/hex"
+	"log"
 	"net/http"
 	"time"
 
@@ -54,29 +55,45 @@ func NewMiddleware(cfg *config.Config, l *ladder.Ladder) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		hdr := c.GetHeader(fieldName)
+		// LVA-098 (2026-08-14, §6.AC): this middleware used to log NOTHING
+		// on rejection, so a genuine 401 was indistinguishable from "request
+		// never arrived" purely from `podman logs` — that silence is what
+		// made the LVA-098 client-side auth-blob bug (Class.forName never
+		// finding the codegen'd class, so every request left the device
+		// with no header at all) far harder to root-cause than it needed to
+		// be. Logging only the header-presence boolean, the blob LENGTH, and
+		// the computed HASH (a one-way HMAC digest — reveals nothing about
+		// the secret or the plaintext UUID, safe per §6.H) — never the raw
+		// header value. Kept permanently, not a temp diagnostic.
+		log.Printf("[auth-diag] path=%s hdr_present=%v active_count=%d retired_count=%d",
+			c.Request.URL.Path, hdr != "", len(active), len(retired))
 		if hdr == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
 		}
 		blob, err := base64.StdEncoding.DecodeString(hdr)
 		if err != nil || len(blob) == 0 {
+			log.Printf("[auth-diag] base64 decode failed or empty: err=%v len=%d", err, len(blob))
 			l.RecordFailure(c.ClientIP(), time.Now())
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
 		}
 
 		hash := hashUUIDBlob(secret, blob)
+		log.Printf("[auth-diag] blob_len=%d computed_hash=%s", len(blob), hash)
 		// Zeroize plaintext blob bytes per §6.H.
 		for i := range blob {
 			blob[i] = 0
 		}
 
 		if name, ok := constantTimeMapLookup(active, hash); ok {
+			log.Printf("[auth-diag] MATCHED active client=%s", name)
 			c.Set("client_name", name)
 			l.Reset(c.ClientIP())
 			c.Next()
 			return
 		}
+		log.Printf("[auth-diag] NO MATCH in active (%d entries) or retired (%d entries)", len(active), len(retired))
 
 		if name, ok := constantTimeMapLookup(retired, hash); ok {
 			c.AbortWithStatusJSON(http.StatusUpgradeRequired, gin.H{

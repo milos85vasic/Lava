@@ -1,0 +1,16 @@
+# §6.AK cycle-coverage-map for Lava-Android-1.3.17-1085
+#
+# Each CHANGELOG-claimed user-visible change for 1.3.17-1085 MUST have at
+# least one covering device Challenge (or per-artifact test, per §6.AK's
+# own "device Challenge OR per-artifact device test" wording) that was
+# EXECUTED + PASSED and is present in the same-cycle §6.Z evidence file.
+#
+# Schema note: each claim's covering_challenges list items MUST be bare
+# FQN/test-name strings only (no free prose as list items -- the mechanical
+# scanner in scripts/check-cycle-coverage.sh treats every quoted list item
+# under a claim as a name to verify, regardless of nesting).
+version: "1.3.17-1085"
+claims:
+  - fix: "LVA-098 -- lava.auth.LavaAuthGenerated build-wiring fix restores the Lava-Auth header on every authenticated request"
+    covering_challenges:
+      - "Challenge70AutonomousQaProviderMatrixTest"

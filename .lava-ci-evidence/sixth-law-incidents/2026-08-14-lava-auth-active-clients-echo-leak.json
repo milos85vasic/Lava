@@ -1,0 +1,18 @@
+{
+  "date": "2026-08-14",
+  "classification": "credential-leak",
+  "severity": "high",
+  "clause": "§6.H clause 6 (leak response protocol)",
+  "summary": "A diagnostic Bash command intended to redact LAVA_AUTH_ACTIVE_CLIENTS before printing used a flawed sed pattern (`s/(LAVA_AUTH_ACTIVE_CLIENTS=).{0,20}/\\1<redacted>/`) that only replaced the first ~20 characters of the matched value. The remainder of the real value — the full comma-separated name:uuid list for all 14 historically-active Android client identities, including the current android-1.3.17-1084 entry — was printed verbatim into the session transcript (a Bash tool_result, not a committed file).",
+  "root_cause": "sed 's/PATTERN.{0,20}/replacement/' only replaces the matched span; content after the matched span in the same line is unaffected and passes through unchanged. The command was invoked as part of re-diagnosing a false '0 LAVA_AUTH vars' finding that itself was later found to be a separate diagnostic-tool artifact (podman exec into a distroless image with no `env` binary silently failing with exit 127, not a real empty-environment condition).",
+  "exposure_surface": "This session's Bash tool_result output, visible in the conversation transcript. NOT committed to git, NOT written to any tracked file, NOT pushed to any remote.",
+  "affected_secrets": "14 Lava-Auth client-identity UUIDs (LAVA_AUTH_ACTIVE_CLIENTS entries) spanning android-1.2.7-1027 through android-1.3.17-1084, plus by extension the currently-active android-1.3.17-1084 identity used by the just-distributed release.",
+  "operator_action_required": [
+    "Rotate LAVA_AUTH_OBFUSCATION_PEPPER and regenerate/re-baked client UUIDs is NOT sufficient alone -- the exposed values are the plaintext UUIDs themselves, which are independent of the pepper (pepper only obfuscates them at-rest inside the APK; the backend's trust boundary is the UUID's HMAC hash under LAVA_AUTH_HMAC_SECRET).",
+    "Recommended: rotate LAVA_AUTH_HMAC_SECRET (invalidates the HMAC hashes derived from the leaked UUIDs, even if the UUIDs themselves are known) AND generate fresh UUIDs for any client identity considered still in active use, particularly android-1.3.17-1084.",
+    "Requires an app rebuild + redistribute cycle after rotation, per the same §6.P/§6.AA gates already exercised earlier this session.",
+    "Historical entries (1.2.x, 1.3.13, 1.3.15, 1.3.16) are for versions already superseded; operator should judge whether those warrant rotation too or can be left as dead entries (per §6.P, re-distributing an old versionCode is already forbidden, so their practical exposure is limited to the HMAC-secret-rotation umbrella above)."
+  ],
+  "prevention": "Do not construct ad-hoc partial-redaction sed/awk patterns against secret-bearing output. Prefer: (a) grep -c for presence/absence checks, (b) sha256sum of the whole matched line for equality checks without ever printing content, (c) if length/format must be inspected, do it in a script that computes and prints ONLY the derived boolean/length, never the matched substring at all.",
+  "reverted": "n/a -- nothing was written to a persistent artifact; the leak is confined to the conversation transcript and cannot be unilaterally 'reverted' by the agent. Flagged to the operator for their own judgment on transcript handling."
+}

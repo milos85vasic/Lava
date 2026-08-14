@@ -4,6 +4,35 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# LVA-097 (2026-08-14): explicitly export .env into THIS process's
+# environment before delegating to tools/lava-containers. Nothing
+# downstream (lava-containers -> submodules/containers/pkg/compose ->
+# the podman-compose/docker-compose CLI it shells out to) ever reads
+# .env as a file — pkg/compose's exec.CommandContext calls inherit
+# only THIS process's os.Environ(), never parse .env themselves.
+# Defensive-only: under an interactive shell where an operator had
+# manually sourced .env, LAVA_AUTH_* etc. would already be present by
+# accident; under systemd (lava-api.service's ExecStart=start.sh) the
+# service starts with no inherited environment, so this line is what
+# makes ${LAVA_AUTH_ACTIVE_CLIENTS}-style compose substitutions resolve
+# at all in that path. NOTE (§11.4.6 honesty correction): an earlier
+# `podman exec lava-api-go env | grep -c LAVA_AUTH` returning 0 was
+# INITIALLY treated as proof the container had an empty allowlist —
+# that was a diagnostic-tool artifact (the distroless runtime image has
+# no `env` binary at all, so the command silently exited 127; `podman
+# inspect --format '{{.Config.Env}}'` later confirmed the vars were
+# correctly present all along). This line's actual root-caused
+# justification is the systemd-no-inherited-env path, not the
+# retracted 0-vars finding. LVA-098 (the real cause of the reported
+# "nothing can log in / search" symptom) was a client-side Kotlin
+# build-script bug, unrelated to this file — see app/build.gradle.kts.
+if [ -f "$SCRIPT_DIR/.env" ]; then
+    set -a
+    # shellcheck disable=SC1091
+    source "$SCRIPT_DIR/.env"
+    set +a
+fi
+
 # ------------------------------------------------------------------------------
 # Lava Container Start Script
 # ------------------------------------------------------------------------------

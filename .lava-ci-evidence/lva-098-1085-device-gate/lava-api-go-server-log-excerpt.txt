@@ -1,0 +1,33 @@
+2026/08/14 12:57:00 WARN non-fatal event error="provider: unknown error: archiveorg: do request: Get \"https://archive.org/advancedsearch.php?output=json&page=1&q=ubuntu&rows=50&sort%5B%5D=downloads+desc\": net/http: TLS handshake timeout" error_class=*errors.errorString feature=provider operation=/v1/:provider/search endpoint=/v1/:provider/search tracker_id=archiveorg request_id=""
+{"err":"http 502 on GET /v1/:provider/search","fields":{"event.elapsed":"10.345273907s","http.method":"GET","http.path":"/v1/:provider/search","http.status":"502"},"level":"WARN","msg":"firebase noop RecordNonFatal","reason":"no credentials path","time":"2026-08-14T12:57:00.232Z"}
+2026/08/14 12:57:00 [req-diag] <<< GET /v1/archiveorg/search status=502
+2026/08/14 13:07:25 http: TLS handshake error from 192.168.1.90:58726: EOF
+2026/08/14 13:07:33 [req-diag] >>> GET /providers remote=192.168.1.90:44348
+2026/08/14 13:07:33 [req-diag] <<< GET /providers status=200
+2026/08/14 13:08:25 [req-diag] >>> GET /v1/archiveorg/search remote=192.168.1.90:44348
+2026/08/14 13:08:25 [auth-diag] path=/v1/archiveorg/search hdr_present=true active_count=15 retired_count=0
+2026/08/14 13:08:25 [auth-diag] blob_len=16 computed_hash=4be99aeaa69476576fa9fff32877295977626af34aebdd7ce2483f7e10ae536c
+2026/08/14 13:08:25 [auth-diag] MATCHED active client=android-1.3.17-1085
+2026/08/14 13:08:36 WARN non-fatal event error="provider: unknown error: archiveorg: do request: Get \"https://archive.org/advancedsearch.php?output=json&page=1&q=ubuntu&rows=50&sort%5B%5D=downloads+desc\": net/http: TLS handshake timeout" error_class=*errors.errorString feature=provider operation=/v1/:provider/search endpoint=/v1/:provider/search tracker_id=archiveorg request_id=""
+{"err":"http 502 on GET /v1/:provider/search","fields":{"event.elapsed":"10.523706916s","http.method":"GET","http.path":"/v1/:provider/search","http.status":"502"},"level":"WARN","msg":"firebase noop RecordNonFatal","reason":"no credentials path","time":"2026-08-14T13:08:36.343Z"}
+2026/08/14 13:08:36 [req-diag] <<< GET /v1/archiveorg/search status=502
+2026/08/14 13:08:42 [req-diag] >>> GET /v1/archiveorg/search remote=192.168.1.90:44348
+2026/08/14 13:08:42 [auth-diag] path=/v1/archiveorg/search hdr_present=true active_count=15 retired_count=0
+2026/08/14 13:08:42 [auth-diag] blob_len=16 computed_hash=4be99aeaa69476576fa9fff32877295977626af34aebdd7ce2483f7e10ae536c
+2026/08/14 13:08:42 [auth-diag] MATCHED active client=android-1.3.17-1085
+2026/08/14 13:08:44 [req-diag] <<< GET /v1/archiveorg/search status=200
+2026/08/14 13:08:49 [req-diag] >>> GET /v1/archiveorg/topic/ArchiveIt-Collection-641/page remote=192.168.1.90:44348
+2026/08/14 13:08:49 [auth-diag] path=/v1/archiveorg/topic/ArchiveIt-Collection-641/page hdr_present=true active_count=15 retired_count=0
+2026/08/14 13:08:49 [auth-diag] blob_len=16 computed_hash=4be99aeaa69476576fa9fff32877295977626af34aebdd7ce2483f7e10ae536c
+2026/08/14 13:08:49 [auth-diag] MATCHED active client=android-1.3.17-1085
+2026/08/14 13:08:49 [req-diag] <<< GET /v1/archiveorg/topic/ArchiveIt-Collection-641/page status=200
+2026/08/14 13:08:54 [req-diag] >>> GET /v1/archiveorg/topic/ArchiveIt-Collection-641/page remote=192.168.1.90:44348
+2026/08/14 13:08:54 [auth-diag] path=/v1/archiveorg/topic/ArchiveIt-Collection-641/page hdr_present=true active_count=15 retired_count=0
+2026/08/14 13:08:54 [auth-diag] blob_len=16 computed_hash=4be99aeaa69476576fa9fff32877295977626af34aebdd7ce2483f7e10ae536c
+2026/08/14 13:08:54 [auth-diag] MATCHED active client=android-1.3.17-1085
+2026/08/14 13:08:55 [req-diag] <<< GET /v1/archiveorg/topic/ArchiveIt-Collection-641/page status=200
+2026/08/14 13:08:55 [req-diag] >>> GET /v1/archiveorg/http-download/ArchiveIt-Collection-641 remote=192.168.1.90:44348
+2026/08/14 13:08:55 [auth-diag] path=/v1/archiveorg/http-download/ArchiveIt-Collection-641 hdr_present=true active_count=15 retired_count=0
+2026/08/14 13:08:55 [auth-diag] blob_len=16 computed_hash=4be99aeaa69476576fa9fff32877295977626af34aebdd7ce2483f7e10ae536c
+2026/08/14 13:08:55 [auth-diag] MATCHED active client=android-1.3.17-1085
+2026/08/14 13:08:56 [req-diag] <<< GET /v1/archiveorg/http-download/ArchiveIt-Collection-641 status=200
