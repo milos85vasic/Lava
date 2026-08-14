@@ -202,6 +202,15 @@ fast "Error — Retry" rather than a hang — that's the correct, honest behavio
   measure is fixed + guarded by a structural scanner so the class cannot recur.
 - **P2 (partial):** improved tolerance for Internet Archive crawl topics that omit a comments section; the full fix for IA crawl topics that omit most fields is a tracked follow-up (a niche, non-crashing case).
 
+## Lava-API-App-0.2.13-27 — 2026-08-14 (embedded engine: permanent §6.AC auth/request telemetry — parity bump, api-app itself unaffected by LVA-098)
+
+**Previous published:** Lava-API-App-0.2.13-26.
+
+- **Embedded lava-api-go engine (liblavaapi.so) rebuilt for all 3 ABIs with the same-cycle LVA-098 fix's permanent §6.AC diagnostic logging.** This is a genuine embed-source change (not a needless re-distribute): the auth middleware and global request router now log header-presence/hash and request/status outcomes locally, closing a gap where a 401 was indistinguishable from "request never arrived." **api-app itself is NOT affected by the LVA-098 bug** — that bug was specifically `lava.auth.LavaAuthGenerated` never compiling into `:app`'s (the client's) dex; api-app uses a completely different auth-key delivery path (`ApiKeyProvider`) and was never in the affected code path. This bump exists solely because api-app's embedded binary genuinely changed.
+- **§6.Y:** versionCode 26→27; versionName HELD at 0.2.13 (diagnostics-only embed change, no functional/user-visible behavior change per §6.Y clause 3).
+
+**Coverage status (§6.AK / §6.Z):** device gate executed against this exact build (versionCode 27) — `Challenge01ApiAppColdStartTest`, `Challenge02ApiAppBootAndServeTest`, `Challenge03StopRestartTest`, `Challenge04NotificationActionsTest` all PASSED on a containerized KVM emulator (370.3s). Evidence: `.lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.2.13-27-test-evidence.md`, raw run at `.lava-ci-evidence/api-app-0.2.13-27-device-gate/`.
+
 ## Lava-API-App-0.2.13-26 — 2026-08-13 (embedded engine: Cloudflare-challenge classification + realistic outbound headers)
 
 **Previous published:** Lava-API-App-0.2.12-25.

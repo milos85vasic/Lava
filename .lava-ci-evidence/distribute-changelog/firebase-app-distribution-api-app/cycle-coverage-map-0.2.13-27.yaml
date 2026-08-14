@@ -1,0 +1,12 @@
+# §6.AK cycle-coverage-map for Lava-API-App-0.2.13-27
+#
+# Schema: each claim's covering_challenges list items MUST be bare
+# FQN/test-name strings only.
+version: "0.2.13-27"
+claims:
+  - fix: "Embedded lava-api-go engine rebuilt with permanent §6.AC auth/request telemetry (parity bump; api-app itself unaffected by LVA-098)"
+    covering_challenges:
+      - "Challenge01ApiAppColdStartTest"
+      - "Challenge02ApiAppBootAndServeTest"
+      - "Challenge03StopRestartTest"
+      - "Challenge04NotificationActionsTest"

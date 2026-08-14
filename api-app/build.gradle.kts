@@ -137,14 +137,21 @@ android {
         // §6.Y production-readiness sweep: container submodule pin advance,
         // device-gate preflight, WaitForBoot liveness. versionName held
         // (diagnostics-only app; no user-facing functional change).
-        // 26 (§6.Y, this cycle): the embedded lava-api-go engine (liblavaapi.so,
+        // 26 (§6.Y, prior cycle): the embedded lava-api-go engine (liblavaapi.so,
         // rebuilt this cycle for all 3 ABIs) now correctly classifies a
         // Cloudflare bot-mitigation challenge on RuTracker login as a distinct
         // 503 (with browser-realistic outbound headers) instead of a generic,
         // misleading 502 — a real correctness + telemetry improvement to this
         // app's embedded API surface. versionName patch bump 0.2.12 → 0.2.13
         // (§6.Y.3).
-        versionCode = 26
+        // 27 (§6.Y, 2026-08-14, LVA-098 cycle): this app does NOT share the
+        // client-side lava.auth.LavaAuthGenerated bug (that class only exists
+        // in :app) — api-app is unaffected by LVA-098 itself. Bumped ONLY
+        // because its embedded liblavaapi.so picked up lava-api-go's new
+        // permanent §6.AC diagnostic logging (auth-blob header-presence +
+        // global request/status logging), a genuine embed-source change, not
+        // a needless re-distribute. versionName HELD (diagnostics-only).
+        versionCode = 27
         versionName = "0.2.13"
         // EncryptedSharedPreferences (androidx.security-crypto) requires API 23+
         // — the per-install auth-key store ([ApiKeyStore]) relies on it. The
