@@ -1,0 +1,12 @@
+schema_version: 1
+host:
+  hostname: nezha
+protected_drives:
+  - serial: S4EWNS0X108183F   # nvme1n1 — system drive (/boot/efi, [SWAP], /home) — NEVER a track target
+tracks:
+  - id: track1
+    role: main
+    drive_serial: "511240401212000405"   # nvme0n1 — the project data drive
+    mount: /run/media/milosvasic/DATA4TB
+    fs: btrfs
+    branch: master
