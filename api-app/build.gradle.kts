@@ -151,7 +151,10 @@ android {
         // permanent §6.AC diagnostic logging (auth-blob header-presence +
         // global request/status logging), a genuine embed-source change, not
         // a needless re-distribute. versionName HELD (diagnostics-only).
-        versionCode = 27
+        // §6.Y post-distribution bump (2026-08-14): 27 debug+release both
+        // Firebase-distributed this cycle. Bumping first, per the standing
+        // mandate, before any new code lands in this cycle.
+        versionCode = 28
         versionName = "0.2.13"
         // EncryptedSharedPreferences (androidx.security-crypto) requires API 23+
         // — the per-install auth-key store ([ApiKeyStore]) relies on it. The

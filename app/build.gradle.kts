@@ -131,7 +131,10 @@ android {
         // visible only via remote Crashlytics. Both are internal/security
         // changes, not new user-facing functionality -> versionCode bump
         // only per §6.Y clause 3; versionName held at 1.3.17.
-        versionCode = 1085
+        // §6.Y post-distribution bump (2026-08-14): 1085 debug+release both
+        // Firebase-distributed this cycle (LVA-098 fix). Bumping first, per
+        // the standing mandate, before any new code lands in this cycle.
+        versionCode = 1086
         versionName = "1.3.17"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/
