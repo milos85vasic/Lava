@@ -197,7 +197,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
-<td>39</td>
+<td>40</td>
 </tr>
 <tr>
 <td>Feature</td>
@@ -207,7 +207,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td>Task</td>
 <td>Completed (→ Fixed.md)</td>
-<td>31</td>
+<td>32</td>
 </tr>
 <tr>
 <td>Task</td>
@@ -227,7 +227,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>86</strong></td>
+<td><strong>88</strong></td>
 </tr>
 </tbody>
 </table>
@@ -1066,6 +1066,19 @@ breaks the build.</td>
 </tr>
 <tr>
 <td>72</td>
+<td>P3</td>
+<td>Completed (→ Fixed.md)</td>
+<td>Task</td>
+<td>—</td>
+<td>LVA-082 — Operator asked to use Firebase CLI to pull Crashlytics.
+Verified Firebase CLI 14.17.0 exposes only crashlytics:symbols:upload +
+mappingfile:* (NO issue/non-fatal read). bq CLI absent. Crashlytics
+dashboard read requires console or a BigQuery export not configured.
+Fallback: in-repo §6.AC telemetry + known crash tickets; operator to
+paste console items for full triage. §11.4.6 honest record.</td>
+</tr>
+<tr>
+<td>73</td>
 <td>P0</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -1079,7 +1092,7 @@ but 1076 NOT yet distributed/device-verified. Pending §6.Z gate. Source:
 #1.</td>
 </tr>
 <tr>
-<td>73</td>
+<td>74</td>
 <td>P0</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -1092,7 +1105,7 @@ Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #2.</td>
 </tr>
 <tr>
-<td>74</td>
+<td>75</td>
 <td>P1</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -1105,7 +1118,7 @@ verification. Source:
 #4.</td>
 </tr>
 <tr>
-<td>75</td>
+<td>76</td>
 <td>P1</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -1118,7 +1131,7 @@ verification. Source:
 #5.</td>
 </tr>
 <tr>
-<td>76</td>
+<td>77</td>
 <td>P2</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -1130,7 +1143,7 @@ verification. Source:
 #6.</td>
 </tr>
 <tr>
-<td>77</td>
+<td>78</td>
 <td>P3</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -1152,7 +1165,7 @@ LVA-087 verification agent this cycle, could not re-run. Source:
 #9.</td>
 </tr>
 <tr>
-<td>78</td>
+<td>79</td>
 <td>P3</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -1165,7 +1178,7 @@ own tickets). Informational record. Source:
 #11.</td>
 </tr>
 <tr>
-<td>79</td>
+<td>80</td>
 <td>P2</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -1206,7 +1219,7 @@ screen / first search on repopulation completion (with a timeout +
 fallback) instead of racing it.</td>
 </tr>
 <tr>
-<td>80</td>
+<td>81</td>
 <td>P2</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -1239,7 +1252,27 @@ build or test was executed for this specific finding, only source
 reading.</td>
 </tr>
 <tr>
-<td>81</td>
+<td>82</td>
+<td>P1</td>
+<td>Fixed (→ Fixed.md)</td>
+<td>Bug</td>
+<td>—</td>
+<td>LVA-095 — OnboardingViewModelDynamicProvidersTest &gt; ‘selecting a
+keyless on-device API reads and persists the local api key for search
+auth’ FAILS: AssertionError - the local api-app key MUST be read +
+persisted onto the keyless mDNS-selected endpoint (was
+GoApi(host=localhost.localdomain, port=42873, platform=null,
+storage=null, key=null)). Discovered 2026-08-12 while running the
+combined test suite after merging 4 parallel LVA-085/086/087/093/094
+fixes - confirmed genuinely pre-existing and unrelated to any of those 4
+changes (git log shows the test file’s last touch was commit b3cb6de2,
+predating this session; none of the 4 merged branches touch
+onboarding/api-key/mDNS code per git diff –name-only). Not yet
+root-caused - source: real gradle test run,
+feature/onboarding/build/test-results/testDebugUnitTest/.</td>
+</tr>
+<tr>
+<td>83</td>
 <td>P1</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
@@ -1251,7 +1284,7 @@ falsifiability-rehearsed. <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/sixth-law-incidents/2026-05-20-flaky-credentialsviewmodeltest.json</td>
 </tr>
 <tr>
-<td>82</td>
+<td>84</td>
 <td>P1</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -1264,7 +1297,7 @@ pass / 3 credential-skip / 0 fail). RESOLVED 2026-05-20.
 .lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json</td>
 </tr>
 <tr>
-<td>83</td>
+<td>85</td>
 <td>P1</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -1278,7 +1311,7 @@ operator-gated; decision owed on §6.AD.3 Path B vs SQLite DB.
 .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</td>
 </tr>
 <tr>
-<td>84</td>
+<td>86</td>
 <td>P1</td>
 <td>Implemented (→ Fixed.md)</td>
 <td>Feature</td>
@@ -1292,7 +1325,7 @@ to the canonical constitution binary
 operator-report — docs/tickets/DESIGN.md</td>
 </tr>
 <tr>
-<td>85</td>
+<td>87</td>
 <td>P2</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>
@@ -1304,7 +1337,7 @@ bumped. <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</td>
 </tr>
 <tr>
-<td>86</td>
+<td>88</td>
 <td>P2</td>
 <td>Completed (→ Fixed.md)</td>
 <td>Task</td>

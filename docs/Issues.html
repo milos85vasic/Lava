@@ -238,18 +238,6 @@ JSON (inner NavHost Activity-scoped LifecycleOwner; move search to outer
 NavHost; ON_STOP pop). Forensics:
 .lava-ci-evidence/sixth-law-incidents/2026-06-08-navbackstackentry-teardown-crash-2.9.1-incomplete.json</p>
 <h2
-id="lva-082-crashlytics-read-not-available-via-firebase-cli-only-symbolsmappingfile-upload-no-issueslist-bq-absent">LVA-082
-— Crashlytics read NOT available via Firebase CLI — only
-symbols/mappingfile upload; no issues:list; bq absent</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Task
-<strong>Severity:</strong> P3 <strong>Created-By:</strong> AI</p>
-<p>Operator asked to use Firebase CLI to pull Crashlytics. Verified
-Firebase CLI 14.17.0 exposes only crashlytics:symbols:upload +
-mappingfile:* (NO issue/non-fatal read). bq CLI absent. Crashlytics
-dashboard read requires console or a BigQuery export not configured.
-Fallback: in-repo §6.AC telemetry + known crash tickets; operator to
-paste console items for full triage. §11.4.6 honest record.</p>
-<h2
 id="lva-088-video-7-choose-your-api-shows-lava.app7777-preset-mislabeled-on-this-network">LVA-088
 — Video #7 — ‘Choose your API’ shows ‘lava.app:7777’ preset + mislabeled
 ‘On this network’</h2>
@@ -290,24 +278,5 @@ ledgers</h2>
 <p>Task P1 process: coverage ledger has partial/gap overlap and lacks
 per-release ledger snapshots. Normalize the registry and add
 release-attestation ledgers.</p>
-<h2
-id="lva-095-on-device-api-keyless-mdns-endpoint-does-not-readpersist-local-api-app-key">LVA-095
-— on-device API keyless mDNS endpoint does not read/persist local
-api-app key</h2>
-<p><strong>Status:</strong> Queued <strong>Type:</strong> Bug
-<strong>Severity:</strong> P1 <strong>Created-By:</strong> AI</p>
-<p>OnboardingViewModelDynamicProvidersTest &gt; ‘selecting a keyless
-on-device API reads and persists the local api key for search auth’
-FAILS: AssertionError - the local api-app key MUST be read + persisted
-onto the keyless mDNS-selected endpoint (was
-GoApi(host=localhost.localdomain, port=42873, platform=null,
-storage=null, key=null)). Discovered 2026-08-12 while running the
-combined test suite after merging 4 parallel LVA-085/086/087/093/094
-fixes - confirmed genuinely pre-existing and unrelated to any of those 4
-changes (git log shows the test file’s last touch was commit b3cb6de2,
-predating this session; none of the 4 merged branches touch
-onboarding/api-key/mDNS code per git diff –name-only). Not yet
-root-caused - source: real gradle test run,
-feature/onboarding/build/test-results/testDebugUnitTest/.</p>
 </body>
 </html>

@@ -202,17 +202,17 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Bug</td>
 <td>Queued</td>
-<td>2</td>
+<td>1</td>
 </tr>
 <tr>
 <td>Task</td>
 <td>Queued</td>
-<td>2</td>
+<td>1</td>
 </tr>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>8</strong></td>
+<td><strong>6</strong></td>
 </tr>
 </tbody>
 </table>
@@ -263,18 +263,6 @@ per-release ledger snapshots. Normalize the registry and add
 release-attestation ledgers.</td>
 </tr>
 <tr>
-<td>LVA-082</td>
-<td>Task</td>
-<td>Queued</td>
-<td>P3</td>
-<td>Operator asked to use Firebase CLI to pull Crashlytics. Verified
-Firebase CLI 14.17.0 exposes only crashlytics:symbols:upload +
-mappingfile:* (NO issue/non-fatal read). bq CLI absent. Crashlytics
-dashboard read requires console or a BigQuery export not configured.
-Fallback: in-repo §6.AC telemetry + known crash tickets; operator to
-paste console items for full triage. §11.4.6 honest record.</td>
-</tr>
-<tr>
 <td>LVA-088</td>
 <td>Bug</td>
 <td>In progress</td>
@@ -305,25 +293,6 @@ NOT visually confirmed. Needs on-device package check
 (applicationIdSuffix .dev + launcher label). OPEN/UNCONFIRMED. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #10.</td>
-</tr>
-<tr>
-<td>LVA-095</td>
-<td>Bug</td>
-<td>Queued</td>
-<td>P1</td>
-<td>OnboardingViewModelDynamicProvidersTest &gt; ‘selecting a keyless
-on-device API reads and persists the local api key for search auth’
-FAILS: AssertionError - the local api-app key MUST be read + persisted
-onto the keyless mDNS-selected endpoint (was
-GoApi(host=localhost.localdomain, port=42873, platform=null,
-storage=null, key=null)). Discovered 2026-08-12 while running the
-combined test suite after merging 4 parallel LVA-085/086/087/093/094
-fixes - confirmed genuinely pre-existing and unrelated to any of those 4
-changes (git log shows the test file’s last touch was commit b3cb6de2,
-predating this session; none of the 4 merged branches touch
-onboarding/api-key/mDNS code per git diff –name-only). Not yet
-root-caused - source: real gradle test run,
-feature/onboarding/build/test-results/testDebugUnitTest/.</td>
 </tr>
 <tr>
 <td>LVA-5</td>
