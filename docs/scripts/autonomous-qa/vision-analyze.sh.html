@@ -242,7 +242,7 @@
 </head>
 <body>
 <h1
-id="scriptsautonomous-qavision-analyze.sh-user-guide"><code>scripts/autonomous-qa/vision-analyze.sh</code>
+id="scriptsautonomous-qavision-analyzesh--user-guide"><code>scripts/autonomous-qa/vision-analyze.sh</code>
 — User Guide</h1>
 <p><strong>Last verified:</strong> 2026-07-26 (LVA-018 script-docs
 backfill cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.18
@@ -268,15 +268,11 @@ heuristics (ffmpeg signalstats)</li>
 &lt;iter&gt;/raw/logcat.txt                   threadtime logcat
 &lt;iter&gt;/raw/gradle-connected.log         connectedDebugAndroidTest stdout (secondary cross-ref)
 &lt;iter&gt;/verdict.json                     curated JUnit verdict (optional cross-ref)</code></pre>
-<h2 id="anti-bluff-contract-6.j-6.ab-6.l">Anti-bluff contract (§6.J /
+<h2 id="anti-bluff-contract-6j--6ab--6l">Anti-bluff contract (§6.J /
 §6.AB / §6.L)</h2>
 <p>The script <strong>NEVER prints a defect-free (CLEAN) verdict for
 analysis it did not actually perform</strong>:</p>
 <table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr>
 <th>Situation</th>
@@ -311,11 +307,6 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Roll up every iteration subdir -&gt; &lt;backend-dir&gt;/vision-analysis.md</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/autonomous-qa/vision-analyze.sh</span> <span class="at">--cycle-dir</span> <span class="op">&lt;</span>backend-dir<span class="op">&gt;</span> <span class="pp">[</span><span class="ss">opts</span><span class="pp">]</span></span></code></pre></div>
 <table>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
 <thead>
 <tr>
 <th>Option</th>
@@ -346,7 +337,7 @@ already gitignored; frames are NEVER committed)</td>
 <td>max frames to OCR per recording</td>
 </tr>
 <tr>
-<td><code>-h\|--help</code></td>
+<td><code>-h|--help</code></td>
 <td>—</td>
 <td>show help</td>
 </tr>
@@ -356,11 +347,6 @@ already gitignored; frames are NEVER committed)</td>
 id="detection-heuristics-tunable-constants-at-the-top-of-the-script">Detection
 heuristics (tunable constants at the top of the script)</h2>
 <table>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
 <thead>
 <tr>
 <th>Constant</th>

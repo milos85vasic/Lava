@@ -242,7 +242,7 @@
 </head>
 <body>
 <h1
-id="scriptsautonomous-qarun-iteration.sh-user-guide"><code>scripts/autonomous-qa/run-iteration.sh</code>
+id="scriptsautonomous-qarun-iterationsh--user-guide"><code>scripts/autonomous-qa/run-iteration.sh</code>
 — User Guide</h1>
 <p><strong>Last verified:</strong> 2026-07-26 (LVA-018 script-docs
 backfill cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.18
@@ -277,10 +277,10 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 <code>--query</code>, <code>--serial</code>, <code>--evidence-dir</code>
 are required; <code>--api-url</code> defaults to
 <code>https://127.0.0.1:8443</code>.</p>
-<h2 id="the-goapi-auth-key-6.ak-6.h">The goapi auth key (§6.AK /
+<h2 id="the-goapi-auth-key-6ak--6h">The goapi auth key (§6.AK /
 §6.H)</h2>
 <p>For the <code>goapi</code> backend the client must authenticate
-<code>/v1</code> with the Go API’s configured Lava-Auth key. The script
+<code>/v1</code> with the Go API's configured Lava-Auth key. The script
 derives it from the same root <code>.env</code> the compose stack feeds
 the container (<code>LAVA_AUTH_ACTIVE_CLIENTS: name:uuid</code>) — it
 needs the UUID only, NOT the HMAC secret. The derived key is
@@ -292,7 +292,7 @@ recorded honestly).</p>
 <p>Challenge70 logs <code>C70-RESULT ... DOWNLOAD-OK</code> only after
 the user-visible download/magnet affordance is confirmed on screen —
 hard evidence the real user flow reached the download. Separately, the
-test’s <code>MainActivity</code> teardown can crash with the known-open
+test's <code>MainActivity</code> teardown can crash with the known-open
 upstream defect <strong>LVA-008</strong> (a process-FATAL
 <code>IllegalStateException</code> at activity destroy) that fails the
 JUnit run without being a product defect. Signals grepped from logcat +
@@ -307,10 +307,6 @@ LVA-008 phrases</li>
 <code>AssertionError</code>)</li>
 </ul>
 <table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr>
 <th>Condition</th>
@@ -350,10 +346,10 @@ incident).</p>
 <ul>
 <li><code>0</code> — verdict PASS</li>
 <li><code>1</code> — verdict FAIL/SKIP</li>
-<li><code>2</code> — usage error or setup error (e.g. missing APK; a
+<li><code>2</code> — usage error or setup error (e.g. missing APK; a
 FAIL verdict is written)</li>
 </ul>
-<h2 id="verdict.json-fields"><code>verdict.json</code> fields</h2>
+<h2 id="verdictjson-fields"><code>verdict.json</code> fields</h2>
 <p><code>backend</code>, <code>providers</code>, <code>query</code>,
 <code>serial</code>, <code>gradle_rc</code>, <code>tests</code>,
 <code>failures</code>, <code>errors</code>, <code>skipped</code>,

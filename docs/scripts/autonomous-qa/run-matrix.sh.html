@@ -242,7 +242,7 @@
 </head>
 <body>
 <h1
-id="scriptsautonomous-qarun-matrix.sh-user-guide"><code>scripts/autonomous-qa/run-matrix.sh</code>
+id="scriptsautonomous-qarun-matrixsh--user-guide"><code>scripts/autonomous-qa/run-matrix.sh</code>
 — User Guide</h1>
 <p><strong>Last verified:</strong> 2026-07-26 (LVA-018 script-docs
 backfill cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.18
@@ -267,10 +267,6 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Keystone (Phase 0): single provider, single query</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/autonomous-qa/run-matrix.sh</span> <span class="at">--backend</span> goapi <span class="at">--subsets</span> rutracker <span class="at">--queries</span> 1080p</span></code></pre></div>
 <table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr>
 <th>Flag</th>
@@ -279,7 +275,7 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="
 </thead>
 <tbody>
 <tr>
-<td><code>--backend goapi\|apiapp</code></td>
+<td><code>--backend goapi|apiapp</code></td>
 <td>Which API backend the on-device client targets (required)</td>
 </tr>
 <tr>
@@ -288,15 +284,15 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="
 <code>1080p,mp3</code>)</td>
 </tr>
 <tr>
-<td><code>--subsets all\|&lt;csv1&gt;;&lt;csv2&gt;</code></td>
+<td><code>--subsets all|&lt;csv1&gt;;&lt;csv2&gt;</code></td>
 <td><code>all</code> = every non-empty subset of the API-backed
 providers (31 subsets, see <code>lib-subsets.sh</code>); otherwise
-<code>;</code>-separated CSV groups,
-e.g. <code>"rutracker;kinozal,nnmclub"</code></td>
+<code>;</code>-separated CSV groups, e.g.
+<code>"rutracker;kinozal,nnmclub"</code></td>
 </tr>
 <tr>
 <td><code>--external-backend</code></td>
-<td>Assume the backend is already up + healthy out-of-band (e.g. thinker
+<td>Assume the backend is already up + healthy out-of-band (e.g. thinker
 via <code>distribute-api-remote.sh</code>); the script skips
 bring-up/teardown</td>
 </tr>
@@ -314,7 +310,7 @@ inside the emulator.</p>
   summary.md                  # curated matrix table + totals
   &lt;subset-slug&gt;-&lt;query&gt;/      # per-iteration evidence (see run-iteration.sh)
     verdict.json  junit.xml  raw/</code></pre>
-<h2 id="anti-bluff-properties-6.j">Anti-bluff properties (§6.J)</h2>
+<h2 id="anti-bluff-properties-6j">Anti-bluff properties (§6.J)</h2>
 <ul>
 <li>Any stale <code>verdict.json</code> is deleted
 <strong>before</strong> each iteration, so a prior-run PASS can never be

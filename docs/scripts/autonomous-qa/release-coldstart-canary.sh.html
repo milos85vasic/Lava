@@ -242,7 +242,7 @@
 </head>
 <body>
 <h1
-id="scriptsautonomous-qarelease-coldstart-canary.sh-user-guide"><code>scripts/autonomous-qa/release-coldstart-canary.sh</code>
+id="scriptsautonomous-qarelease-coldstart-canarysh--user-guide"><code>scripts/autonomous-qa/release-coldstart-canary.sh</code>
 — User Guide</h1>
 <p><strong>Last verified:</strong> 2026-07-26 (LVA-018 script-docs
 backfill cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.18
@@ -270,18 +270,13 @@ three):</p>
 launch,</li>
 <li>the app process is ALIVE (<code>pidof</code>) — a cold-start crash
 kills it,</li>
-<li>the app’s activity is the TOP resumed activity
+<li>the app's activity is the TOP resumed activity
 (<code>dumpsys</code>) — not just a lingering background service.</li>
 </ol>
 <h2 id="usage">Usage</h2>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/autonomous-qa/release-coldstart-canary.sh</span> [--apk <span class="op">&lt;</span>path<span class="op">&gt;</span>] [--evidence-dir <span class="op">&lt;</span>dir<span class="op">&gt;</span>]</span></code></pre></div>
 <table>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
 <thead>
 <tr>
 <th>Flag</th>
@@ -309,7 +304,7 @@ the release variant carries NO <code>.dev</code> suffix.</p>
   verdict.json                      # variant/package/apk_sha256/fatal_count/pid/top_activity/verdict/note
   raw/release-coldstart-logcat.txt  # full logcat dump after the 20 s settle
   raw/release-coldstart.png         # screencap after launch</code></pre>
-<p>The APK’s sha256 is recorded in <code>verdict.json</code> so the
+<p>The APK's sha256 is recorded in <code>verdict.json</code> so the
 canary is pinned to the exact artifact about to be distributed
 (§6.Z).</p>
 <h2 id="exit-codes">Exit codes</h2>

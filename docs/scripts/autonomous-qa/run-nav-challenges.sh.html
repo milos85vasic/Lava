@@ -242,7 +242,7 @@
 </head>
 <body>
 <h1
-id="scriptsautonomous-qarun-nav-challenges.sh-user-guide"><code>scripts/autonomous-qa/run-nav-challenges.sh</code>
+id="scriptsautonomous-qarun-nav-challengessh--user-guide"><code>scripts/autonomous-qa/run-nav-challenges.sh</code>
 — User Guide</h1>
 <p><strong>Last verified:</strong> 2026-07-26 (LVA-018 script-docs
 backfill cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.18
@@ -252,10 +252,10 @@ project-specific</p>
 <h2 id="overview">Overview</h2>
 <p>Boots ONE containerized-KVM emulator (via
 <code>lib-emulator.sh</code> — the same path the autonomous-QA matrix
-uses) and runs the §6.AK cycle-coverage-map’s supporting nav Challenges
+uses) and runs the §6.AK cycle-coverage-map's supporting nav Challenges
 (C24 / C46 / C55) against the already-built debug APK, then tears the
 emulator down. Captures the JUnit XML + per-test verdict so the §6.Z
-device evidence can record each Challenge’s pass/fail with a real
+device evidence can record each Challenge's pass/fail with a real
 device.</p>
 <h2 id="usage">Usage</h2>
 <div class="sourceCode" id="cb1"><pre
@@ -271,7 +271,7 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 <code>app/build/outputs/apk/debug/app-debug.apk</code> (missing → exit
 2). Class filtering happens via the instrumentation runner argument
 (<code>-Pandroid.testInstrumentationRunnerArguments.class=&lt;comma-separated FQNs&gt;</code>),
-NOT gradle’s <code>--tests</code> — mirroring
+NOT gradle's <code>--tests</code> — mirroring
 <code>run-iteration.sh</code>.</p>
 <h2 id="harness-side-setup-why-the-extra-steps">Harness-side setup (why
 the extra steps)</h2>
@@ -281,17 +281,17 @@ the extra steps)</h2>
 <li><strong><code>POST_NOTIFICATIONS</code> pre-granted</strong> —
 otherwise LeakCanary (debug-only) launches its RequestPermissionActivity
 mid-test → the system GrantPermissionsActivity pops OVER MainActivity →
-the next Compose query throws “No compose hierarchies found”. (API 33+
+the next Compose query throws "No compose hierarchies found". (API 33+
 only; ignored on older.)</li>
 <li><strong>Keyguard dismissed + screen woken BEFORE
 instrumentation</strong> — a cold-booted emulator can present the
-lockscreen, so the first Challenge’s MainActivity has no reachable
+lockscreen, so the first Challenge's MainActivity has no reachable
 compose hierarchy (the 1077 keyguard incident;
 <code>run-genymotion-challenges.sh</code> applies the same fix).</li>
 <li><strong>Logcat captured</strong> to
 <code>&lt;evidence-dir&gt;/raw/logcat.txt</code> for the whole run.</li>
 </ul>
-<h2 id="evidence-exit">Evidence + exit</h2>
+<h2 id="evidence--exit">Evidence + exit</h2>
 <pre><code>&lt;evidence-dir&gt;/
   *.xml                 # curated JUnit results (copied from androidTest-results/connected)
   raw/logcat.txt

@@ -247,6 +247,43 @@ test suite into one invocation; produces per-run attestation JSON at
 <li>(Full-mode only) Parity, mutation, fixture-freshness, Compose UI
 Challenge Tests on connected device</li>
 </ol>
+<h2
+id="forbidden-files-check-scoped-to-git-ls-files--added-2026-08-20">Forbidden-files
+check scoped to <code>git ls-files</code> — added 2026-08-20</h2>
+<p>Fixes a real false-positive in Pipeline step 1: the check previously
+used a raw <code>find .</code> over the working directory, which also
+walked (a) other worktrees checked out under
+<code>.claude/worktrees/agent-*/</code> — each is a DIFFERENT branch's
+file tree, physically nested under this repo's working directory by the
+harness but irrelevant to what the CURRENT branch is about to push — and
+(b) vendored third-party content inside nested submodules-of-submodules
+(e.g. HelixQA's <code>tools/opensource/*</code>, which legitimately
+ships upstream <code>.github/workflows/*</code> files as that nested
+repo's own concern). Both classes produced spurious
+<code>FORBIDDEN HOSTED-CI FILES</code> rejections on a push whose own
+tracked tree contained zero such files. Fixed by scoping the scan to
+<code>git ls-files</code> (this branch's actually-tracked files only) —
+submodules naturally excluded as gitlinks (not descended into without
+<code>--recurse-submodules</code>, which is deliberately not passed;
+submodule-internal governance is scoped separately per §6.F), other
+worktrees naturally excluded since their files aren't part of this
+branch's tree at all.</p>
+<p>Bluff-Audit: scripts/ci.sh Hosted-CI forbidden-files check Mutation:
+<code>git add -f</code> a real
+<code>.github/workflows/mutation-test.yml</code> fixture into the
+tracked tree, confirming the NEW <code>git ls-files</code>-scoped check
+still correctly DETECTS a genuine violation (true-positive preserved).
+Observed-Failure: N/A for this direction (positive detection confirmed);
+the OLD <code>find .</code>-based check was separately confirmed to
+false-positive on real, pre-existing, untracked content under
+<code>.claude/worktrees/</code> and
+<code>submodules/helixqa/tools/opensource/*</code> during an actual
+<code>git push</code> attempt against this exact commit range — that
+rejection is the falsifiability evidence for the bug this fix closes.
+Reverted: yes — the mutation fixture was <code>git reset</code> +
+<code>rm -rf</code>'d immediately after the positive-detection check
+passed; confirmed via <code>git status --short</code> showing a clean
+tree before this commit.</p>
 <h2 id="6ae-matrix-gate-separate-entry-point">§6.AE matrix gate
 (separate entry point)</h2>
 <p>For §6.AE.2 gate-mode runs producing per-AVD attestation:

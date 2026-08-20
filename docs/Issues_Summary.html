@@ -179,7 +179,7 @@
 <h1 id="issues_summary">Issues_Summary</h1>
 <p>Open workable items (current_location = Issues), regenerated from the
 SQLite single-source-of-truth (§11.4.12).</p>
-<h2 id="counts-by-type-status">Counts by Type × Status</h2>
+<h2 id="counts-by-type--status">Counts by Type × Status</h2>
 <table>
 <thead>
 <tr>
@@ -203,13 +203,6 @@ SQLite single-source-of-truth (§11.4.12).</p>
 </table>
 <h2 id="items">Items</h2>
 <table>
-<colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-</colgroup>
 <thead>
 <tr>
 <th>ATM ID</th>
@@ -226,9 +219,9 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <td>Operator-blocked</td>
 <td>P1</td>
 <td>Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at
-activity-destroy: IllegalStateException ‘State must be at least CREATED
-to be moved to DESTROYED’ on the inner search/search_input entry.
-Root-caused (2026-06-08): the inner nested NavController’s host is the
+activity-destroy: IllegalStateException 'State must be at least CREATED
+to be moved to DESTROYED' on the inner search/search_input entry.
+Root-caused (2026-06-08): the inner nested NavController's host is the
 outer addNestedNavigation NavBackStackEntry, driven to DESTROYED out
 from under the inner controller while search_input is still INITIALIZED.
 FALSIFIED on device: nav 2.9.1-&gt;2.9.8, LenientTeardownRule

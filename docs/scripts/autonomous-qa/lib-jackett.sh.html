@@ -242,11 +242,11 @@
 </head>
 <body>
 <h1
-id="scriptsautonomous-qalib-jackett.sh-user-guide"><code>scripts/autonomous-qa/lib-jackett.sh</code>
+id="scriptsautonomous-qalib-jackettsh--user-guide"><code>scripts/autonomous-qa/lib-jackett.sh</code>
 — User Guide</h1>
 <p><strong>Last verified:</strong> 2026-07-26 (LVA-018 script-docs
 backfill cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.18
-(script docs); Lava §6.B (“Up” is not healthy), §6.H (no secret echo),
+(script docs); Lava §6.B ("Up" is not healthy), §6.H (no secret echo),
 §6.J (fail loudly), §6.R (no-hardcoding), §6.U (no sudo)
 <strong>Classification:</strong> project-specific</p>
 <h2 id="overview">Overview</h2>
@@ -255,7 +255,7 @@ backfill cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.18
 lava-api-go can serve Cloudflare-protected tracker searches (notably
 IPTorrents) in the Phase-2 autonomous-QA matrix.</p>
 <p>It is a thin autonomous-QA wrapper around the SAME mechanism the
-project’s canonical validator
+project's canonical validator
 (<code>scripts/validate-jackett-sidecar.sh</code>) uses: rootless podman
 (preferred) or docker — NO sudo — driving
 <code>tools/lava-containers/docker-compose.jackett.yml</code> with
@@ -272,10 +272,6 @@ the Jackett / FlareSolverr images are pulled with HEALTHCHECKs baked
 in.</p>
 <h2 id="functions">Functions</h2>
 <table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr>
 <th>Function</th>
@@ -302,11 +298,6 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">jackett_down</span>    <span class="co"># tear it all down</span></span></code></pre></div>
 <h2 id="env-knobs-all-optional">Env knobs (all optional)</h2>
 <table>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
 <thead>
 <tr>
 <th>Variable</th>
@@ -339,7 +330,7 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 <code>LAVA_JACKETT_HOST_PORT</code>,
 <code>LAVA_FLARESOLVERR_HOST_PORT</code>,
 <code>LAVA_JACKETT_BIND_HOST</code>, …</p>
-<h2 id="readiness-contract-anti-bluff-6.b-6.j">Readiness contract
+<h2 id="readiness-contract-anti-bluff-6b--6j">Readiness contract
 (anti-bluff §6.B / §6.J)</h2>
 <p><code>jackett_up</code> does NOT assert
 <code>container State==running</code>; it polls the REAL user-visible

@@ -242,11 +242,11 @@
 </head>
 <body>
 <h1
-id="scriptsautonomous-qalib-backend.sh-user-guide"><code>scripts/autonomous-qa/lib-backend.sh</code>
+id="scriptsautonomous-qalib-backendsh--user-guide"><code>scripts/autonomous-qa/lib-backend.sh</code>
 — User Guide</h1>
 <p><strong>Last verified:</strong> 2026-07-26 (LVA-018 script-docs
 backfill cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.18
-(script docs); Lava §6.B (“Up” is not healthy), §6.H (credentials),
+(script docs); Lava §6.B ("Up" is not healthy), §6.H (credentials),
 §6.AK (device-gate auth) <strong>Classification:</strong>
 project-specific</p>
 <h2 id="overview">Overview</h2>
@@ -267,10 +267,6 @@ adb reverse needed.</li>
 </ul>
 <h2 id="functions">Functions</h2>
 <table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr>
 <th>Function</th>
@@ -318,7 +314,7 @@ goapi: raw <code>podman compose</code> (podman-compose) cannot handle
 the <code>network_mode: host</code> services + the <code>lava-net</code>
 network; the Go orchestrator parses the compose correctly.</li>
 <li><strong>The api-app auto-start intent is the ONLY headless
-trigger</strong> that binds the embed’s listener:
+trigger</strong> that binds the embed's listener:
 <code>am start -n digital.vasic.lava.api.dev/lava.api.app.MainActivity --ez lava.applink.START_API true</code>
 (AppLinkContract.EXTRA_START_API). A plain LAUNCHER launch leaves the
 engine Stopped. <code>POST_NOTIFICATIONS</code> is pre-granted so the
@@ -346,7 +342,7 @@ failed (no lock).</p>
 <h2 id="companion-files">Companion files</h2>
 <ul>
 <li><code>scripts/autonomous-qa/run-matrix.sh</code> — the consumer</li>
-<li><code>start.sh</code> / <code>stop.sh</code> — the project’s blessed
+<li><code>start.sh</code> / <code>stop.sh</code> — the project's blessed
 Go-backend bring-up/teardown</li>
 <li><code>docs/ON_DEVICE_API.md</code> — the <code>:api-app</code> embed
 architecture</li>

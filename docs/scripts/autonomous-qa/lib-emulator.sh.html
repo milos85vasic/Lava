@@ -242,7 +242,7 @@
 </head>
 <body>
 <h1
-id="scriptsautonomous-qalib-emulator.sh-user-guide"><code>scripts/autonomous-qa/lib-emulator.sh</code>
+id="scriptsautonomous-qalib-emulatorsh--user-guide"><code>scripts/autonomous-qa/lib-emulator.sh</code>
 — User Guide</h1>
 <p><strong>Last verified:</strong> 2026-07-26 (LVA-018 script-docs
 backfill cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.18
@@ -260,10 +260,6 @@ keypair, and a socat bridge (container <code>0.0.0.0:5575</code> →
 <code>127.0.0.1:5555</code> adbd).</p>
 <h2 id="functions">Functions</h2>
 <table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr>
 <th>Function</th>
@@ -282,7 +278,7 @@ state</td>
 </tr>
 <tr>
 <td><code>emu_authorize_adb &lt;container&gt;</code></td>
-<td>Copy the image’s baked adb key out and point the host adb client at
+<td>Copy the image's baked adb key out and point the host adb client at
 it (<code>ADB_VENDOR_KEYS</code>)</td>
 </tr>
 <tr>
@@ -310,7 +306,7 @@ interrupted run</td>
 </tr>
 </tbody>
 </table>
-<h2 id="state-configuration">State + configuration</h2>
+<h2 id="state--configuration">State + configuration</h2>
 <ul>
 <li>State file: <code>scripts/autonomous-qa/.emu-state</code>
 (<code>CONTAINER</code> / <code>ADB_PORT</code> /
@@ -324,11 +320,11 @@ the emulator image.</li>
 publishing only, <code>ANDROID_COLD_BOOT=true</code>.</li>
 </ul>
 <h2
-id="emu_fix_network-the-eth0ndc-default-network-fix"><code>emu_fix_network</code>
+id="emu_fix_network--the-eth0ndc-default-network-fix"><code>emu_fix_network</code>
 — the eth0/ndc default-network fix</h2>
 <p>On some hosts (observed: podman 4.9.3 on thinker.local) the emulator
 boots with eth0 DOWN and Android never registers it as a framework
-network — apps see “Network unreachable” because Android routes
+network — apps see "Network unreachable" because Android routes
 per-network via netd mark-based tables. The function (root via
 <code>su 0</code> inside the guest) brings eth0 up and adds it to the
 default physical network (netId 100) through <code>ndc</code>, retrying

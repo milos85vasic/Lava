@@ -177,16 +177,16 @@
 </head>
 <body>
 <h2
-id="lva-5-rotate-firebase-ci-token-printed-to-session-transcript">LVA-5
+id="lva-5--rotate-firebase-ci-token-printed-to-session-transcript">LVA-5
 — Rotate Firebase CI token (printed to session transcript)</h2>
 <p><strong>Status:</strong> Operator-blocked <strong>Type:</strong> Bug
 <strong>Operator-Block-Details:</strong> WHAT: RuTracker CI Firebase
 token rotation WHY: Agent cannot rotate credentials; only the operator
 can run firebase logout / firebase login:ci UNBLOCK: Operator rotates
 the Firebase CI token (no token value ever committed, §11.4.10): [A] run
-“firebase logout” then “firebase login:ci” and write the new token to
+"firebase logout" then "firebase login:ci" and write the new token to
 LAVA_FIREBASE_TOKEN in the gitignored .env (recommended); [B] mint a
-fresh token via “firebase login:ci –no-localhost” in a clean shell and
+fresh token via "firebase login:ci --no-localhost" in a clean shell and
 update LAVA_FIREBASE_TOKEN in .env; [C] rotate via the Firebase console
 (Project Settings -&gt; Service accounts) and update .env. Unblock
 signal: a Firebase distribute run authenticates with the new token and
@@ -198,7 +198,7 @@ rotate per §6.H clause 6 (firebase logout; firebase login:ci).
 <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/sixth-law-incidents/2026-05-20-firebase-token-echo-leak.json</p>
 <h2
-id="lva-008-c11-search_input-navbackstackentry-teardown-crash-nested-navhost-lifecycle">LVA-008
+id="lva-008--c11-search_input-navbackstackentry-teardown-crash-nested-navhost-lifecycle">LVA-008
 — C11 search_input NavBackStackEntry teardown crash (nested-NavHost
 lifecycle)</h2>
 <p><strong>Status:</strong> Operator-blocked <strong>Type:</strong> Bug
@@ -217,18 +217,18 @@ failed fixes each revealing the same underlying defect in a different
 place = architectural problem, not grounds for a 9th ad-hoc app-level
 attempt. Minimal repro already authored and filing-ready at
 docs/lva008-upstream-repro/ (README.md, MinimalRepro.kt, analysis.md).
-UNBLOCK: AndroidX ships a navigation-compose release that fixes the
-nested-NavHost teardown ordering (b/244910446 family), OR a
-Google/AndroidX engineer confirms a workaround this project hasn’t
+UNBLOCK: [A] AndroidX ships a navigation-compose release that fixes the
+nested-NavHost teardown ordering (b/244910446 family). [B] A
+Google/AndroidX engineer confirms a workaround this project hasn't
 tried. WHO: docs/lva008-upstream-repro/README.md (repro package ready to
 file);
 .lava-ci-evidence/sixth-law-incidents/2026-06-30-keystone-offmain-nav-and-lva008.json
 (latest incident record) <strong>Severity:</strong> P1
 <strong>Created-By:</strong> AI</p>
 <p>Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at
-activity-destroy: IllegalStateException ‘State must be at least CREATED
-to be moved to DESTROYED’ on the inner search/search_input entry.
-Root-caused (2026-06-08): the inner nested NavController’s host is the
+activity-destroy: IllegalStateException 'State must be at least CREATED
+to be moved to DESTROYED' on the inner search/search_input entry.
+Root-caused (2026-06-08): the inner nested NavController's host is the
 outer addNestedNavigation NavBackStackEntry, driven to DESTROYED out
 from under the inner controller while search_input is still INITIALIZED.
 FALSIFIED on device: nav 2.9.1-&gt;2.9.8, LenientTeardownRule

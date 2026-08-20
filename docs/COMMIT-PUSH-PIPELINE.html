@@ -177,7 +177,7 @@
 </head>
 <body>
 <h1
-id="commitpush-pipeline-dedicated-hook-validation-script-2026-07-26">Commit/Push
+id="commitpush-pipeline--dedicated-hook-validation-script-2026-07-26">Commit/Push
 Pipeline — Dedicated Hook-Validation Script (2026-07-26)</h1>
 <h2 id="what-happened">What happened</h2>
 <p>Routine <code>git push</code> on the main repo was effectively
@@ -211,18 +211,18 @@ and <code>submodules/helixqa</code>). Both were fixed on 2026-07-26 by
 regenerating the siblings
 (<code>scripts/sync-markdown-exports.sh --regenerate-all</code>, 247/247
 ok) and the ledger (<code>scripts/generate-coverage-ledger.sh</code>);
-both gates re-verified PASS. The earlier “BUILD SUCCESSFUL” gradle lines
+both gates re-verified PASS. The earlier "BUILD SUCCESSFUL" gradle lines
 were green; the blocker was the sweep, not the build or the tests.</li>
 <li>Conclusion: the gate logic itself is sound, but wiring it as an
 automatic git hook made every push slow and, when the sweep failed,
 impossible. That violates the operator mandate that the commit/push
 mechanism must be <strong>always unblocked</strong>.</li>
 </ul>
-<h2 id="resolution-the-mandatory-approach">Resolution — the mandatory
+<h2 id="resolution--the-mandatory-approach">Resolution — the mandatory
 approach</h2>
-<p>Per operator directive (2026-07-26): <em>“We MUST have dedicated
+<p>Per operator directive (2026-07-26): <em>"We MUST have dedicated
 script to run hook validations, and commit and push mechanism ALWAYS
-unblocked!”</em></p>
+unblocked!"</em></p>
 <ol type="1">
 <li><strong>Hooks disconnected from git.</strong>
 <code>core.hooksPath</code> is unset in the main repo (no submodule ever
@@ -247,7 +247,7 @@ re-run.</li>
 submodule anchor <strong>§11.4.234 — Dedicated hook-validation script;
 commit/push mechanism always unblocked</strong> (added 2026-07-26,
 classification: universal). Consumers bind their own script path,
-upstream list, and gate commands as DATA per §11.4.35; Lava’s binding is
+upstream list, and gate commands as DATA per §11.4.35; Lava's binding is
 <code>scripts/commit-push-all.sh</code> with remotes <code>github</code>
 + <code>gitlab</code> and the Layer-2 gate
 <code>scripts/ci.sh --changed-only</code>.</p>

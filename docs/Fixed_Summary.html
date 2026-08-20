@@ -179,7 +179,7 @@
 <h1 id="fixed_summary">Fixed_Summary</h1>
 <p>Closed workable items (current_location = Fixed), regenerated from
 the SQLite single-source-of-truth (§11.4.53).</p>
-<h2 id="counts-by-type-status">Counts by Type × Status</h2>
+<h2 id="counts-by-type--status">Counts by Type × Status</h2>
 <table>
 <thead>
 <tr>
@@ -232,15 +232,7 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 </tbody>
 </table>
 <h2 id="items">Items</h2>
-<table style="width:100%;">
-<colgroup>
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-</colgroup>
+<table>
 <thead>
 <tr>
 <th>#</th>
@@ -261,13 +253,13 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <td>LVA-009 — After the 3-layer claude vision bridge fix (helixqa
 aef46e5d), the HelixQA autonomous vision QA GENUINELY drives the Lava
 app on the Genymotion VM: it analyzes screenshots and decides actions
-(vision-screen-changed PASS; rationale ‘Current screen is the Android
-home launcher … launching the Lava client app’). Remaining blocker: the
-‘launch’ action dispatch returns ‘exit status 127’ (command not found) —
-visionnav step 2 dispatch ‘launch digital.vasic.lava.client.dev’. The
-derived launch action is ‘shell monkey -p digital.vasic.lava.client.dev
-1’; the ADB actor appears to run it without the ‘adb -s <serial>’ prefix
-(treating ‘shell’ as a command) OR adb is not on the dispatch subprocess
+(vision-screen-changed PASS; rationale 'Current screen is the Android
+home launcher … launching the Lava client app'). Remaining blocker: the
+'launch' action dispatch returns 'exit status 127' (command not found) —
+visionnav step 2 dispatch 'launch digital.vasic.lava.client.dev'. The
+derived launch action is 'shell monkey -p digital.vasic.lava.client.dev
+1'; the ADB actor appears to run it without the 'adb -s <serial>' prefix
+(treating 'shell' as a command) OR adb is not on the dispatch subprocess
 PATH. Fix in helixqa pkg actor/bridge ADB dispatch. Evidence:
 .lava-ci-evidence/helixqa/vm-qa-vision2-20260608T182251Z/ (4/4 reached
 vision+navigation, 1 ERROR + 3 FAILED on the launch-dispatch 127, NOT
@@ -298,7 +290,7 @@ router_test.go note + internal/router/router.go.</td>
 Endpoint.Rutracker and can raise a duplicate-conflict for it, but the
 real EndpointsRepositoryImpl.add() early-returns for Rutracker (if
 (endpoint is Endpoint.Rutracker) return) and never stores it. A future
-test asserting ‘adding Rutracker is a no-op’ would pass against the fake
+test asserting 'adding Rutracker is a no-op' would pass against the fake
 while exercising different behavior than production — a latent
 §Third-Law bluff-fake. Fix: add the Rutracker no-op branch + doc to the
 fake. Flagged by the W6 core/domain UseCase agent (2026-06-09).</td>
@@ -311,7 +303,7 @@ fake. Flagged by the W6 core/domain UseCase agent (2026-06-09).</td>
 <td>—</td>
 <td>LVA-012 — core/testing TestVisitedRepository,
 TestFavoritesRepository, TestBookmarksRepository have
-observe/contains/add/etc methods that are TODO(‘Not yet implemented’)
+observe/contains/add/etc methods that are TODO('Not yet implemented')
 (throw). They are unusable for behavioral wiring — feature ViewModel
 tests (account, visited, rating) work around them with local in-memory
 fakes. Per the Third Law these shared fakes should be
@@ -352,8 +344,7 @@ deletes all. Unusable stub = Third-Law bluff fake.</td>
 <td>LVA-015 — core/testing TestSearchHistoryRepository.add used
 positional id (it.size) + always appended (no dedup) + insertion order,
 while real SearchHistoryRepositoryImpl uses content-derived Filter.id()
-+ <span class="citation" data-cites="Insert">@Insert</span> REPLACE
-UPSERT + ORDER BY timestamp DESC. The existing
++ @Insert REPLACE UPSERT + ORDER BY timestamp DESC. The existing
 TestSearchHistoryRepositoryTest asserted the fake-shaped behavior (ids
 [0,2], oldest-first) — a bluff test.</td>
 </tr>
@@ -363,11 +354,11 @@ TestSearchHistoryRepositoryTest asserted the fake-shaped behavior (ids
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
 <td>—</td>
-<td>LVA-016 — feature/rating RatingViewModelTest’s local
+<td>LVA-016 — feature/rating RatingViewModelTest's local
 RealObserveRatingRequestUseCase re-implements
 ObserveRatingRequestUseCaseImpl but OMITS the 3rd condition (engagement:
 pinned&gt;1 OR other&gt;3 OR visited&gt;5 OR bookmarks&gt;2). The test
-‘Show rating request is rendered when conditions are met’ seeds ZERO
+'Show rating request is rendered when conditions are met' seeds ZERO
 engagement + asserts Show, but the REAL use case would emit Hide for
 that user state. Second-Law/§6.J bluff: re-implements internal business
 logic + asserts an outcome production would not produce. Fix: wire the
@@ -384,11 +375,10 @@ in the Show test. Source: parallel fake-audit 2026-06-09.</td>
 <td>—</td>
 <td>LVA-017 — feature/favorites InMemoryFavoritesRepository.add +
 feature/topic FakeFavoritesRepository.add append without dedup, while
-FavoritesRepositoryImpl/FavoriteTopicDao are <span class="citation"
-data-cites="Insert">@Insert</span> REPLACE (id PK). LATENT: no test
-re-adds a duplicate id, so unexercised. Tighten add() to replace-by-id
-for consistency with LVA-011..015. Source: parallel fake-audit
-2026-06-09.</td>
+FavoritesRepositoryImpl/FavoriteTopicDao are @Insert REPLACE (id PK).
+LATENT: no test re-adds a duplicate id, so unexercised. Tighten add() to
+replace-by-id for consistency with LVA-011..015. Source: parallel
+fake-audit 2026-06-09.</td>
 </tr>
 <tr>
 <td>10</td>
@@ -433,11 +423,11 @@ bug-hunt.</td>
 <td>Bug</td>
 <td>—</td>
 <td>LVA-021 — internal/observability/nonfatal.go underlyingTypeName
-returned “error” for any error without Name() or the 2 context sentinels
-— i.e. virtually every real
-<em>fs.PathError/</em>net.OpError/*url.Error/pgx error → §6.AC per-type
-triage defeated. Existing nonfatal_errorclass_test was a bluff (only
-tested Name()-implementers).</td>
+returned "error" for any error without Name() or the 2 context sentinels
+— i.e. virtually every real *fs.PathError/*net.OpError/*url.Error/pgx
+error → §6.AC per-type triage defeated. Existing
+nonfatal_errorclass_test was a bluff (only tested
+Name()-implementers).</td>
 </tr>
 <tr>
 <td>14</td>
@@ -458,7 +448,7 @@ always suffixes charset (text/plain; charset=utf-8) → blank Format label
 <td>—</td>
 <td>LVA-023 — internal/rutracker/provider.go ProviderAdapter.Login
 returned success.User.Id (numeric data-uid) as AuthToken; the real
-session cookie is User.Token. Login ‘succeeds’ but every authenticated
+session cookie is User.Token. Login 'succeeds' but every authenticated
 v1 call (favorites/add-comment/download) sends a non-cookie value → 401.
 No e2e login test existed (why it shipped).</td>
 </tr>
@@ -470,7 +460,7 @@ No e2e login test existed (why it shipped).</td>
 <td>—</td>
 <td>LVA-024 — internal/rutracker/provider.go fromTopicPage wedged the
 size string into a synthetic file entry → topic detail screen shows one
-nonsense ‘Size’ file instead of the real list. The existing
+nonsense 'Size' file instead of the real list. The existing
 TestFromTopicPage asserted the bogus file (bluff).</td>
 </tr>
 <tr>
@@ -493,9 +483,10 @@ Go bug-hunt.</td>
 <td>Task</td>
 <td>—</td>
 <td>LVA-026 — internal/handlers/v1/captcha.go serves c.Data(200,
-image/png, …) but rutracker.FetchCaptcha captures the real Content-Type,
-dropped by the adapter (no ContentType field on provider.CaptchaImage).
-Minor (most decoders sniff). Found by parallel Go bug-hunt.</td>
+image/png, ...) but rutracker.FetchCaptcha captures the real
+Content-Type, dropped by the adapter (no ContentType field on
+provider.CaptchaImage). Minor (most decoders sniff). Found by parallel
+Go bug-hunt.</td>
 </tr>
 <tr>
 <td>19</td>
@@ -514,7 +505,7 @@ tracker bug-hunt.</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
 <td>—</td>
-<td>LVA-028 — NnmclubSearchParser reads row.select(‘td’) but never maps
+<td>LVA-028 — NnmclubSearchParser reads row.select('td') but never maps
 cells[4] (ISO yyyy-MM-dd date) into TorrentItem.publishDate → Nnmclub
 results have no date. Found by parallel Kotlin tracker bug-hunt. (Also
 UNCONFIRMED: nnmclub/kinozal parseSize Latin-only regex may miss
@@ -532,7 +523,7 @@ unique-local check (startsWith fc/fd + take(4) hex in 0xfc00..0xfdff) on
 ANY host string without requiring an IPv6 literal, so a DNS host like
 fcba.example.com / fdcdn.net is routed as LAN (http://host:8080) instead
 of https://host/forum/ → no green dot, every request fails. Fix: gate on
-contains(‘:’) before the hex parse. Found by parallel core/network
+contains(':') before the hex parse. Found by parallel core/network
 bug-hunt.</td>
 </tr>
 <tr>
@@ -705,7 +696,7 @@ falsifiability-proven; main-stream re-verified.</td>
 <td>—</td>
 <td>LVA-046 — AsAuthResponseDtoSuccess() blind-decodes a WrongCredits
 union into non-pointer UserDto with no error → Login returns
-Success:true AuthToken:’’ for wrong creds → every authed call 401s.
+Success:true AuthToken:'' for wrong creds → every authed call 401s.
 LVA-032 class. Fixed via AsAuthResponseDtoSuccessChecked.</td>
 </tr>
 <tr>
@@ -765,7 +756,7 @@ landed; device-bound capture UNCONFIRMED without a live device.</td>
 <td>—</td>
 <td>LVA-052 — HTTP_DOWNLOAD UI wiring. A full impl exists on branch
 worktree-agent-ad695086c8735d60a (commit c8951eee) but it re-derived
-LVA-044 substrate → conflicts with master’s landed LVA-044; needs a
+LVA-044 substrate → conflicts with master's landed LVA-044; needs a
 clean re-apply of the LVA-052 net-new files
 (HttpDownloadSource/DownloadHttpFileUseCase/DownloadService.downloadHttpFile/SDK.downloadHttpFile)
 on top of master. Topic-screen Compose routing (provider id through nav)
@@ -820,7 +811,7 @@ check-constitution exit 1 (LVA-037 class). Added ^tests/.</td>
 <td>—</td>
 <td>LVA-057 — GetMultiSearch continued past an unknown ?providers= id
 with no provider_error event and no failed counter, while
-total_providers still counted it — the user’s requested provider
+total_providers still counted it — the user's requested provider
 vanished with zero client signal. Now emits provider_error + counts
 failed.</td>
 </tr>
@@ -1081,11 +1072,12 @@ breaks the build.</td>
 <td>Task</td>
 <td>—</td>
 <td>LVA-082 — Operator asked to use Firebase CLI to pull Crashlytics.
-Verified Firebase CLI 14.17.0 exposes only crashlytics:symbols:upload +
-mappingfile:* (NO issue/non-fatal read). bq CLI absent. Crashlytics
-dashboard read requires console or a BigQuery export not configured.
-Fallback: in-repo §6.AC telemetry + known crash tickets; operator to
-paste console items for full triage. §11.4.6 honest record.</td>
+Verified Firebase CLI 14.17.0 exposes only crashlytics<span
+class="emoji" data-emoji="symbols">🔣</span>upload + mappingfile:* (NO
+issue/non-fatal read). bq CLI absent. Crashlytics dashboard read
+requires console or a BigQuery export not configured. Fallback: in-repo
+§6.AC telemetry + known crash tickets; operator to paste console items
+for full triage. §11.4.6 honest record.</td>
 </tr>
 <tr>
 <td>74</td>
@@ -1094,7 +1086,7 @@ paste console items for full triage. §11.4.6 honest record.</td>
 <td>Bug</td>
 <td>—</td>
 <td>LVA-083 — QA video 2026-06-25 frames 0060-0140: every search fails
-(blank ~25s then Error/Retry; ‘prince’ stays blank). KNOWN-class
+(blank ~25s then Error/Retry; 'prince' stays blank). KNOWN-class
 (anonymous/provider-mismatch). CODE-FIX landed in 1076
 (SearchInputViewModel observeAll filtered+sorted + loading/empty state)
 but 1076 NOT yet distributed/device-verified. Pending §6.Z gate. Source:
@@ -1134,7 +1126,7 @@ verification. Source:
 <td>Bug</td>
 <td>—</td>
 <td>LVA-086 — QA video frames 0060-0110: pure blank ~25s, no
-spinner/skeleton/no-results; ‘prince’ stays blank with no error. NEW.
+spinner/skeleton/no-results; 'prince' stays blank with no error. NEW.
 CODE-FIX in 1076 (loading/empty state branches). Pending §6.Z
 verification. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
@@ -1159,7 +1151,7 @@ verification. Source:
 <td>Bug</td>
 <td>—</td>
 <td>LVA-088 — QA video frames 0012/0015. 1076 investigation: NOT a §6.R
-hardcoding violation (config-driven preset). ‘On this network’ label for
+hardcoding violation (config-driven preset). 'On this network' label for
 a cloud/remote preset still worth confirming. Pending §6.Z verification.
 Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #7.</td>
@@ -1186,13 +1178,13 @@ CODE-FIX in 1076 (#9 select-all handling):
 OnboardingViewModel.onToggleAllProviders() + requiresNoCredentials()
 correctly gate select-all to no-auth-only providers, cited to Issue #9
 in-source. UNIT-LEVEL RE-VERIFIED 2026-08-12 (this cycle):
-OnboardingViewModelVideoFixesTest ‘select all enables only no-credential
-providers’ PASS, fresh execution (timestamp 2026-08-12T21:07, not
+OnboardingViewModelVideoFixesTest 'select all enables only no-credential
+providers' PASS, fresh execution (timestamp 2026-08-12T21:07, not
 cached). Existing DEVICE-LEVEL evidence at
 .lava-ci-evidence/genymotion/c66-redesign-{RED,GREEN}-20260626/ (proper
 RED-then-GREEN falsifiability pair,
 Challenge66SelectAllDoesNotEnableAuthProvidersTest) is 48 days / ~7
-versions stale per SS6.AK – device gate was occupied by a parallel
+versions stale per SS6.AK -- device gate was occupied by a parallel
 LVA-087 verification agent this cycle, could not re-run. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #9.</td>
@@ -1231,7 +1223,7 @@ own tickets). Informational record. Source:
 <td>LVA-093 —
 app/src/main/kotlin/digital/vasic/lava/client/LavaApplication.kt:95-105
 launches RepopulateProvidersOnStartupUseCase.repopulateProviders()
-fire-and-forget on Dispatchers.Default inside Application.onCreate() –
+fire-and-forget on Dispatchers.Default inside Application.onCreate() --
 it is not awaited.
 app/src/main/kotlin/digital/vasic/lava/client/MainActivity.kt:105-135
 gates the splash screen ONLY on local prefs (theme/showOnboarding)
@@ -1241,11 +1233,11 @@ screen while the network round-trip inside
 core/domain/src/main/kotlin/lava/domain/usecase/RepopulateProvidersOnStartupUseCase.kt:80-112
 is still in flight. If the user searches during that window, any
 provider id the catalogue vends that overlaps a BUNDLED compiled-in
-provider id (rutracker/rutor/nnmclub/kinozal/archiveorg/gutenberg – see
+provider id (rutracker/rutor/nnmclub/kinozal/archiveorg/gutenberg -- see
 core/tracker/client/src/main/kotlin/lava/tracker/client/di/TrackerClientModule.kt:297-303)
 resolves to the direct-to-site bundled client for that one search
-instead of the user’s configured API endpoint. Once the fetch completes,
-all later searches in that session are correctly dynamic – this is a
+instead of the user's configured API endpoint. Once the fetch completes,
+all later searches in that session are correctly dynamic -- this is a
 real, narrow-window, self-healing defect, not a permanent break. No
 existing test covers this exact race: the closest test,
 RepopulateProvidersOnStartupUseCaseTest, exercises the use case in
@@ -1255,7 +1247,7 @@ CONFIRMED by static source-reading this session (2026-08-10/11), part of
 the LVA-083/084 root-cause investigation that also found the
 OnboardingBypassRule-skips-populateFrom test bug in
 Challenge58/59/60/61/62/71. Real-world frequency and user-visible impact
-are UNCONFIRMED without device instrumentation – no build or test was
+are UNCONFIRMED without device instrumentation -- no build or test was
 executed for this specific finding, only source reading. Closure needs
 either (a) a device-level Challenge Test that measures or deliberately
 forces this race and asserts correct provider resolution once
@@ -1269,17 +1261,17 @@ fallback) instead of racing it.</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
 <td>—</td>
-<td>LVA-094 — RepopulateProvidersOnStartupUseCase’s single cold-start
+<td>LVA-094 — RepopulateProvidersOnStartupUseCase's single cold-start
 provider-catalogue fetch attempt fails silently on failure:
 RepopulateProvidersOnStartupUseCase.kt:110 returns false with no
-user-visible notice (unlike onboarding’s own fetch-failure path, which
+user-visible notice (unlike onboarding's own fetch-failure path, which
 surfaces a PROVIDER_CATALOG_FALLBACK_NOTICE), no retry, and no other
 production code path re-invokes populateFrom() for the rest of that
-process’s lifetime. Confirmed: the only two production call sites for
+process's lifetime. Confirmed: the only two production call sites for
 populateFrom are OnboardingViewModel.kt:950-998 (onboarding flow) and
-this startup use case (app cold start) – there is no periodic worker and
-no connectivity-change listener that re-triggers it. A transient failure
-at exact boot time (network not yet associated, VPN/Wi-Fi still
+this startup use case (app cold start) -- there is no periodic worker
+and no connectivity-change listener that re-triggers it. A transient
+failure at exact boot time (network not yet associated, VPN/Wi-Fi still
 connecting, momentarily unreachable LAN lava-api-go/api-app endpoint)
 means a user who configured a non-bundled API endpoint during onboarding
 silently falls back to bundled/direct-to-site tracker clients for the
@@ -1287,12 +1279,12 @@ ENTIRE app session, with zero indication anything degraded, until the
 process restarts (a fresh attempt) or the user re-runs onboarding. Fix
 direction, documented as the finding only and not yet implemented:
 either add a retry affordance / silent background retry with backoff, or
-at minimum record a non-fatal telemetry event per this project’s own
+at minimum record a non-fatal telemetry event per this project's own
 section 6.AC Comprehensive Non-Fatal Telemetry Mandate so the failure is
 visible in Crashlytics instead of invisible. CONFIRMED by static
 source-reading this session (2026-08-10/11), same investigation as the
 sibling cold-start race finding LVA-093. Real-world frequency and
-user-visible impact are UNCONFIRMED without device instrumentation – no
+user-visible impact are UNCONFIRMED without device instrumentation -- no
 build or test was executed for this specific finding, only source
 reading.</td>
 </tr>
@@ -1302,17 +1294,17 @@ reading.</td>
 <td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
 <td>—</td>
-<td>LVA-095 — OnboardingViewModelDynamicProvidersTest &gt; ‘selecting a
+<td>LVA-095 — OnboardingViewModelDynamicProvidersTest &gt; 'selecting a
 keyless on-device API reads and persists the local api key for search
-auth’ FAILS: AssertionError - the local api-app key MUST be read +
+auth' FAILS: AssertionError - the local api-app key MUST be read +
 persisted onto the keyless mDNS-selected endpoint (was
 GoApi(host=localhost.localdomain, port=42873, platform=null,
 storage=null, key=null)). Discovered 2026-08-12 while running the
 combined test suite after merging 4 parallel LVA-085/086/087/093/094
 fixes - confirmed genuinely pre-existing and unrelated to any of those 4
-changes (git log shows the test file’s last touch was commit b3cb6de2,
+changes (git log shows the test file's last touch was commit b3cb6de2,
 predating this session; none of the 4 merged branches touch
-onboarding/api-key/mDNS code per git diff –name-only). Not yet
+onboarding/api-key/mDNS code per git diff --name-only). Not yet
 root-caused - source: real gradle test run,
 feature/onboarding/build/test-results/testDebugUnitTest/.</td>
 </tr>

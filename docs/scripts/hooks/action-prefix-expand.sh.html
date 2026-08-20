@@ -242,14 +242,14 @@
 </head>
 <body>
 <h1
-id="scriptshooksaction-prefix-expand.sh-user-guide"><code>scripts/hooks/action-prefix-expand.sh</code>
+id="scriptshooksaction-prefix-expandsh--user-guide"><code>scripts/hooks/action-prefix-expand.sh</code>
 — User Guide</h1>
 <p><strong>Last verified:</strong> 2026-07-26 (LVA-018 script-docs
 backfill cycle) <strong>Inheritance:</strong> HelixConstitution
 §11.4.140 (action-prefix mandate), §11.4.109 (anti-forgetting), §11.4.35
 (canonical root), §11.4.28 (decoupling), §11.4.18 (script docs); Lava
 §6.AI / §6.AJ <strong>Classification:</strong> project-specific (the
-<code>.claude/</code> wiring is Lava’s; the expander it delegates to is
+<code>.claude/</code> wiring is Lava's; the expander it delegates to is
 universal, inherited from the constitution submodule)</p>
 <h2 id="overview">Overview</h2>
 <p>A Claude Code <code>UserPromptSubmit</code> hook — LAYER 2 of the
@@ -263,13 +263,13 @@ reads the action registry at
 <code>$HELIX_ACTION_REGISTRY</code> override) and emits the
 <code>additionalContext</code> JSON for a registered action prefix.</p>
 <p>Per the Decoupled Reusable Architecture rule this wrapper is the
-Lava-domain glue tying the submodule into Lava’s <code>.claude/</code>
+Lava-domain glue tying the submodule into Lava's <code>.claude/</code>
 wiring; per §6.AD the submodule is pinned and its tracked files are
 never edited Lava-side.</p>
 <h2 id="contract-claude-code-userpromptsubmit-hook">Contract (Claude
 Code UserPromptSubmit hook)</h2>
 <ul>
-<li>Receives the event JSON on <strong>stdin</strong> (the user’s prompt
+<li>Receives the event JSON on <strong>stdin</strong> (the user's prompt
 at <code>.prompt</code>).</li>
 <li><strong>Exit 0 + JSON body</strong>
 <code>{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":"&lt;text&gt;"}}</code>
@@ -279,7 +279,7 @@ expansion).</li>
 through unchanged).</li>
 <li>The delegate <strong>fails open</strong>: any internal error
 degrades to pass-through, never blocks the prompt. This wrapper
-preserves that — a missing or non-executable delegate (e.g. submodule
+preserves that — a missing or non-executable delegate (e.g. submodule
 not checked out) is a clean pass- through with a one-line stderr
 note.</li>
 </ul>
@@ -287,10 +287,6 @@ note.</li>
 id="behaviour-delegated-verbatim-to-the-constitution-expander">Behaviour
 (delegated verbatim to the constitution expander)</h2>
 <table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr>
 <th>Input shape</th>
@@ -327,13 +323,13 @@ override, used by the hermetic test to point at the canonical expander
 without relying on <code>CLAUDE_PROJECT_DIR</code>.</li>
 </ul>
 <p>Delegate resolution order: <code>LAVA_ACTION_PREFIX_EXPANDER</code> →
-<code>CLAUDE_PROJECT_DIR</code> → this script’s own location
+<code>CLAUDE_PROJECT_DIR</code> → this script's own location
 (<code>scripts/hooks/</code> → repo root →
 <code>constitution/</code>).</p>
 <h2 id="side-effects">Side effects</h2>
 <p>None. Read-only (reads the registry, reads stdin). Fail-open by
 design.</p>
-<h2 id="usage-manual-testing">Usage / manual testing</h2>
+<h2 id="usage--manual-testing">Usage / manual testing</h2>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Registered action → additionalContext JSON on stdout</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">printf</span> <span class="st">&#39;%s&#39;</span> <span class="st">&#39;{&quot;prompt&quot;:&quot;BACKGROUND :: run the bluff hunt&quot;}&#39;</span> <span class="dt">\</span></span>

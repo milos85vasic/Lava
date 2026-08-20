@@ -411,6 +411,17 @@ verbatim for every AVD.</td>
 <td>Container runtime CLI (default: podman).</td>
 </tr>
 <tr>
+<td><code>--extra-apk &lt;path&gt;</code></td>
+<td>Additional APK installed on each AVD AFTER the client APK, before
+instrumentation runs. <strong>Repeatable</strong> — pass more than once
+to install several companion APKs. Forwarded verbatim, in order, to the
+Containers CLI's own repeatable <code>--extra-apk</code> flag
+(<code>MatrixConfig.ExtraAPKPaths</code>). Use for Challenges needing a
+second app on the SAME device (e.g. Challenge72's on-device api-app
+companion for same-device mDNS discovery). Added for the §6.X gate
+wiring that closes the two-app-on-one-emulator capability gap.</td>
+</tr>
+<tr>
 <td><code>--add-tv</code></td>
 <td>Add a TV-class AVD to the matrix</td>
 </tr>

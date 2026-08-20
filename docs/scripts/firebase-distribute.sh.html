@@ -245,6 +245,36 @@ the <code>cycle-coverage:</code> header + per-Challenge
 <code>challenge:</code> rows) and
 <code>&lt;vname&gt;-&lt;code&gt;-cycle-coverage-map.yaml</code> under
 the channel dir for this gate to pass on a real distribute.</p>
+<h2 id="lva-019-coverage-ledger-snapshot--added-2026-08-20">LVA-019
+coverage-ledger snapshot — added 2026-08-20</h2>
+<p>Closes the firebase-distribute portion of LVA-019 (§11.4.25
+per-release coverage ledger). Immediately after the §6.AK cycle-coverage
+Gate 7 block, the script invokes
+<code>scripts/snapshot-coverage-ledger.sh "$APP_VERSION-$APP_VERSION_CODE"</code>,
+which regenerates <code>docs/coverage-ledger.yaml</code> (via
+<code>scripts/generate-coverage-ledger.sh --quiet</code>) and copies the
+freshly-generated file to
+<code>.lava-ci-evidence/coverage-ledger-snapshots/&lt;version&gt;-&lt;code&gt;.yaml</code>
+— a permanent, per-release historical record of coverage-ledger state at
+the exact moment that version was distributed. This mirrors the existing
+<code>&lt;vname&gt;-&lt;code&gt;-cycle-coverage-map.yaml</code>
+per-release snapshot pattern already used by the §6.AK gate above
+it.</p>
+<p>The step is <strong>advisory, not a release gate</strong> — a
+snapshot failure logs a <code>WARNING</code> and the distribute
+continues, because the coverage ledger's own STRICT gate
+(<code>scripts/check-coverage-ledger.sh --strict</code>, wired into
+<code>scripts/verify-all-constitution-rules.sh</code>) already enforces
+ledger health elsewhere in local CI; this step exists purely to freeze a
+historical copy, not to re-litigate ledger correctness at distribute
+time. Companion script: <code>scripts/snapshot-coverage-ledger.sh</code>
+(documented separately). Bluff-Audit rehearsal: the snapshot mechanism
+was smoke-tested during Task 4 of the 2026-08-20
+workable-items-backlog-closure plan — a <code>0.0.0-test</code> snapshot
+was generated, diffed byte-for-byte against the live
+<code>docs/coverage-ledger.yaml</code>, confirmed identical, then
+removed; this proves the snapshot step correctly captures ledger state
+as of the wiring commit rather than a stale or hand-authored copy.</p>
 <h2 id="maintenance">Maintenance</h2>
 <p>When this script is modified, update this document in the same commit
 (CM-SCRIPT-DOCS-SYNC requires it). Per §11.4.18, the documentation MUST

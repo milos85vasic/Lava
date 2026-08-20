@@ -404,6 +404,16 @@ waiver overrides (committed)</li>
 presence + freshness + row coverage)</li>
 <li><code>tests/check-constitution/test_coverage_ledger.sh</code> —
 hermetic falsifiability rehearsals (6 fixtures)</li>
+<li><code>scripts/snapshot-coverage-ledger.sh</code> — LVA-019
+per-release snapshot mechanism. Per-release frozen copies of this ledger
+are written by <code>scripts/snapshot-coverage-ledger.sh</code> to
+<code>.lava-ci-evidence/coverage-ledger-snapshots/&lt;version&gt;-&lt;code&gt;.yaml</code>
+at each Firebase distribute, mirroring the existing
+<code>cycle-coverage-map-&lt;version&gt;-&lt;code&gt;.yaml</code>
+per-release snapshot pattern used for the §6.AK device-coverage gate.
+Wired (advisory, non-blocking) into
+<code>scripts/firebase-distribute.sh</code> immediately after the §6.AK
+Phase-1 Gate 7 block.</li>
 </ul>
 <h2 id="cross-references">Cross-references</h2>
 <ul>

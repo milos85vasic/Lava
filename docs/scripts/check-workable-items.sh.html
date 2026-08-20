@@ -247,10 +247,10 @@ single-source-of-truth) + §11.4.95 (DB tracked-in-git, never
 gitignored). Gate ID: <code>CM-WORKABLE-ITEMS-SYNC</code>.</p>
 <p><strong>Type:</strong> Local CI gate (invoked by
 <code>scripts/verify-all-constitution-rules.sh</code>).</p>
-<p><strong>Last verified:</strong> 2026-07-01 (re-verified against
-<code>scripts/check-workable-items.sh</code> at HEAD — canonical-binary
-build + <code>validate</code>/<code>diff</code>/<code>git-tracked</code>
-steps below match the script's four-step flow).</p>
+<p><strong>Last verified:</strong> 2026-08-20 (re-verified against
+<code>scripts/check-workable-items.sh</code> at HEAD — ledger-filtered
+<code>validate</code> step added;
+<code>diff</code>/<code>git-tracked</code> steps unchanged).</p>
 <h2 id="what-it-does">What it does</h2>
 <p>Verifies Lava's workable-items tracker is internally consistent,
 using the <strong>canonical</strong> <code>workable-items</code> Go
@@ -261,7 +261,12 @@ binary shipped in the constitution submodule
 <li>Builds the canonical binary if absent (from inside the module dir;
 <code>CGO_ENABLED=1</code> is required — cgo sqlite driver).</li>
 <li><code>workable-items validate --db docs/workable_items.db</code> —
-closed-set + §11.4.91 invariants.</li>
+closed-set + §11.4.91 invariants, <strong>filtered against the exemption
+ledger</strong> at
+<code>docs/superpowers/specs/2026-08-20-workable-items-evidence-exemptions.md</code>
+(see "Exemption ledger" below). A violation whose
+<code>(atm_id, history_id)</code> is not listed in the ledger's
+machine-readable block still fails the gate.</li>
 <li><code>workable-items diff --db docs/workable_items.db --issues docs/Issues.md --fixed docs/Fixed.md</code>
 — exits 1 on DB↔︎Markdown divergence
 (CM-WORKABLE-ITEMS-MD-DB-IN-SYNC).</li>
@@ -272,6 +277,36 @@ CM-WORKABLE-ITEMS-DB-TRACKED).</li>
 <p>Replaced the retired <code>CM-LVA-TICKETS-SYNC</code> gate (bespoke
 <code>tools/lava-tickets/</code> system, migrated 2026-05-31 per
 <code>docs/tickets/MIGRATION-TO-CANONICAL.md</code>).</p>
+<h2 id="exemption-ledger--added-2026-08-20">Exemption ledger — added
+2026-08-20</h2>
+<p>67 pre-existing <code>validate</code> violations (dated 2026-06-09,
+predating this gate's strict wiring) have no honest fabrication-free
+fix: 49 point at evidence files bulk-deleted by commit
+<code>56f2417795c9</code> with the workable-items binary offering no
+"mark historically deleted, narrative stands" mechanism; 2 (same item,
+two history rows) name a malformed path that never existed under either
+its literal or <code>..</code>-normalized form; 16 have closure
+narratives naming a test class/module but no single unambiguous
+still-existing file (only bare module directories match — using one as
+"evidence" would be a guess). Two further violations (LVA-013 history
+ids 202/203) genuinely had two still-existing, unambiguous evidence
+files embedded in their own narrative and were FIXED via
+<code>correct-history-evidence</code>, not exempted.</p>
+<p>Per the same §6.D Behavioral Coverage Contract precedent as
+<code>docs/superpowers/specs/2026-04-30-sp3a-coverage-exemptions.md</code>:
+every exemption is a named, dated, individually-investigated row — never
+a blanket waiver. <code>LAVA_WORKABLE_ITEMS_EXEMPTIONS</code> overrides
+the ledger path for hermetic testing. Full investigation + per-category
+reasoning:
+<code>docs/superpowers/specs/2026-08-20-workable-items-evidence-exemptions.md</code>.</p>
+<p>Falsifiability rehearsal (this session): removed the
+<code>LVA-009|16</code> line from the ledger → gate correctly FAILED
+with
+<code>CM-WORKABLE-ITEMS-SYNC: unexempted validate violation(s)</code>;
+restored the line → gate correctly PASSED again.
+<code>docs/workable_items.db</code> was independently confirmed
+unaffected by the rehearsal (<code>git diff</code> showed zero bytes
+changed on the DB across the mutate/restore cycle).</p>
 <h2 id="usage">Usage</h2>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/check-workable-items.sh</span></code></pre></div>

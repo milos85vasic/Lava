@@ -242,7 +242,7 @@
 </head>
 <body>
 <h1
-id="scriptscommit-push-all.sh"><code>scripts/commit-push-all.sh</code></h1>
+id="scriptscommit-push-allsh"><code>scripts/commit-push-all.sh</code></h1>
 <p>Dedicated commit + push pipeline that runs the pre-push hook logic as
 an <strong>explicit stage</strong> instead of a git hook.</p>
 <h2 id="why-it-exists-2026-07-26">Why it exists (2026-07-26)</h2>
@@ -262,10 +262,6 @@ script invokes its logic explicitly, so no gate is lost; it just no
 longer fires automatically inside <code>git push</code>.</p>
 <h2 id="what-it-does">What it does</h2>
 <table>
-<colgroup>
-<col style="width: 46%" />
-<col style="width: 53%" />
-</colgroup>
 <thead>
 <tr>
 <th>Stage</th>
@@ -279,7 +275,7 @@ longer fires automatically inside <code>git push</code>.</p>
 default-branch tip; also inits + syncs the constitution nested
 submodules (<code>anti_bluff</code>, <code>continuum</code>,
 <code>session_orchestrator</code>, <code>token_optimizer</code>).
-helixqa’s 27 third-party mirrors under <code>tools/opensource/</code>
+helixqa's 27 third-party mirrors under <code>tools/opensource/</code>
 are intentionally left uninitialized (reference mirrors, not build
 inputs).</td>
 </tr>

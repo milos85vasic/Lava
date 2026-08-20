@@ -242,7 +242,7 @@
 </head>
 <body>
 <h1
-id="scriptsautonomous-qalib-remote.sh-user-guide"><code>scripts/autonomous-qa/lib-remote.sh</code>
+id="scriptsautonomous-qalib-remotesh--user-guide"><code>scripts/autonomous-qa/lib-remote.sh</code>
 — User Guide</h1>
 <p><strong>Last verified:</strong> 2026-07-26 (LVA-018 script-docs
 backfill cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.18
@@ -254,9 +254,9 @@ project-specific</p>
 (run-on-thinker)</strong>: co-locate the ENTIRE autonomous-QA heavy
 stack on <code>thinker.local</code> so build (gradle) + containerized
 KVM emulator (podman) + adb + <code>connectedAndroidTest</code> +
-backend all share thinker’s loopback. This is the only topology where
-gradle’s adb reaches the emulator and the on-emulator client reaches the
-backend without WAN/adb tunnels — the Containers submodule’s
+backend all share thinker's loopback. This is the only topology where
+gradle's adb reaches the emulator and the on-emulator client reaches the
+backend without WAN/adb tunnels — the Containers submodule's
 <code>pkg/emulator/containerized.go</code> drives LOCAL podman only (no
 SSH path), so the emulator MUST be local to whichever host runs the
 matrix; that host is thinker (<code>/dev/kvm</code> + 16 cores).</p>
@@ -265,10 +265,6 @@ same identity that authenticates today (<code>~/.ssh/id_ed25519</code>,
 confirmed via <code>ssh -G</code>).</p>
 <h2 id="functions">Functions</h2>
 <table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr>
 <th>Function</th>
@@ -285,7 +281,7 @@ confirmed via <code>ssh -G</code>).</p>
 <tr>
 <td><code>remote_sync_repo</code></td>
 <td>rsync the repo → thinker (excludes build/.git/recordings, INCLUDES
-the gitignored <code>.env</code> so the Go backend’s
+the gitignored <code>.env</code> so the Go backend's
 <code>LAVA_AUTH_*</code> + tracker creds reach thinker);
 <code>--delete</code> keeps the remote tree a faithful mirror</td>
 </tr>
@@ -301,14 +297,9 @@ stream straight back</td>
 </tbody>
 </table>
 <h2
-id="configuration-from-.env-gitignored-config-not-secrets-per-6.r">Configuration
+id="configuration-from-env-gitignored--config-not-secrets-per-6r">Configuration
 (from <code>.env</code>, gitignored — config, not secrets per §6.R)</h2>
 <table>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
 <thead>
 <tr>
 <th>Variable</th>

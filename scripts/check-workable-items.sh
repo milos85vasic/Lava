@@ -10,7 +10,11 @@
 # This gate:
 #   1. builds the canonical binary if absent (from inside the module dir;
 #      CGO_ENABLED=1 is required — cgo sqlite driver);
-#   2. runs `validate` (closed-set + §11.4.91 invariants);
+#   2. runs `validate` (closed-set + §11.4.91 invariants), filtered against the
+#      §6.D-pattern exemption ledger at docs/superpowers/specs/2026-08-20-
+#      workable-items-evidence-exemptions.md — every exemption is a named,
+#      dated, individually-investigated (atm_id, history_id) pair, never a
+#      blanket waiver; a violation absent from the ledger still fails the gate;
 #   3. runs `diff` (exit 1 on DB↔Markdown divergence — CM-WORKABLE-ITEMS-MD-DB-IN-SYNC);
 #   4. asserts docs/workable_items.db is git-tracked (§11.4.95 CM-WORKABLE-ITEMS-DB-TRACKED).
 #
@@ -72,8 +76,47 @@ if [[ -z "$WI_BIN" ]]; then
   WI_BIN="$BIN_DIR/$_built_name"
 fi
 
-# 1. Validate DB invariants (closed sets + §11.4.91 floor).
-"$WI_BIN" validate --db "$DB"
+# 1. Validate DB invariants (closed sets + §11.4.91 floor), filtered against
+# the §6.D-pattern exemption ledger (docs/superpowers/specs/2026-08-20-workable-items-evidence-exemptions.md
+# — same precedent as the SP-3a coverage-exemption ledger). Every exemption is a
+# named, dated, investigated (atm_id, history_id) pair; a violation NOT listed
+# in the ledger still fails the gate. This is never a blanket waiver — see the
+# ledger's own header for what does and does not qualify for an entry.
+LEDGER="${LAVA_WORKABLE_ITEMS_EXEMPTIONS:-docs/superpowers/specs/2026-08-20-workable-items-evidence-exemptions.md}"
+
+VALIDATE_OUT="$("$WI_BIN" validate --db "$DB" 2>&1)" || true
+if printf '%s\n' "$VALIDATE_OUT" | grep -q '^validate: 0 violation'; then
+  : # clean — nothing to filter
+elif printf '%s\n' "$VALIDATE_OUT" | grep -q '^validate: [0-9]\+ violation'; then
+  # Extract exempted (atm_id, history_id) pairs from the ledger's fenced block.
+  EXEMPT_SET=""
+  if [[ -f "$LEDGER" ]]; then
+    EXEMPT_SET="$(sed -n '/^```exemptions$/,/^```$/p' "$LEDGER" | sed '1d;$d')"
+  fi
+  UNEXEMPTED=""
+  while IFS= read -r line; do
+    [[ "$line" == "  - "* ]] || continue
+    atm_id="$(printf '%s\n' "$line" | sed -E 's/^  - ([A-Za-z0-9_-]+):.*/\1/')"
+    hist_id="$(printf '%s\n' "$line" | grep -oE 'history id=[0-9]+' | grep -oE '[0-9]+')"
+    pair="${atm_id}|${hist_id}"
+    if ! printf '%s\n' "$EXEMPT_SET" | grep -qxF "$pair"; then
+      UNEXEMPTED="${UNEXEMPTED}${line}"$'\n'
+    fi
+  done <<< "$VALIDATE_OUT"
+  if [[ -n "$UNEXEMPTED" ]]; then
+    echo "CM-WORKABLE-ITEMS-SYNC: unexempted validate violation(s) — not in $LEDGER:" >&2
+    printf '%s' "$UNEXEMPTED" >&2
+    exit 1
+  fi
+  exempted_count="$(printf '%s\n' "$EXEMPT_SET" | grep -c '.' || true)"
+  echo "CM-WORKABLE-ITEMS-SYNC: validate found violations, all $exempted_count-ledger-exempted (see $LEDGER) — no fabricated evidence, per-row investigated"
+else
+  # Unexpected validate output shape (not "0 violation" or "N violation") —
+  # a real failure (build error, DB corruption) must not be silently swallowed.
+  echo "CM-WORKABLE-ITEMS-SYNC: validate produced unexpected output:" >&2
+  printf '%s\n' "$VALIDATE_OUT" >&2
+  exit 1
+fi
 
 # 2. DB ↔ Markdown sync (CM-WORKABLE-ITEMS-MD-DB-IN-SYNC). `diff` exits 1 on divergence.
 if ! "$WI_BIN" diff --db "$DB" --issues "$ISSUES" --fixed "$FIXED"; then

@@ -177,7 +177,7 @@
 </head>
 <body>
 <h2
-id="lva-1-deflake-credentialsviewmodeltest-select-provider-updates-selectedprovider">LVA-1
+id="lva-1--deflake-credentialsviewmodeltest--select-provider-updates-selectedprovider">LVA-1
 — Deflake CredentialsViewModelTest &gt; select provider updates
 selectedProvider</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -189,7 +189,7 @@ feature/credentials/src/test/kotlin/lava/feature/credentials/CredentialsViewMode
 (Commit 1) via bounded await-until-selectedProvider loop;
 falsifiability-rehearsed. <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/sixth-law-incidents/2026-05-20-flaky-credentialsviewmodeltest.json</p>
-<h2 id="lva-2-6.x-debt-darwinarm64-emulator-acceleration-sub-debt">LVA-2
+<h2 id="lva-2--6x-debt-darwinarm64-emulator-acceleration-sub-debt">LVA-2
 — §6.X-debt darwin/arm64 emulator-acceleration sub-debt</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong>
@@ -201,7 +201,7 @@ gate runner is host-direct+HVF. PROVEN by C00 cold-start canary + full
 0 fail). RESOLVED 2026-05-20. <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json</p>
 <h2
-id="lva-009-helixqa-vm-qa-launch-dispatch-exit-127-vision-works-action-dispatch-command-not-found">LVA-009
+id="lva-009--helixqa-vm-qa-launch-dispatch-exit-127-vision-works-action-dispatch-command-not-found">LVA-009
 — HelixQA VM QA launch-dispatch exit 127 (vision works, action-dispatch
 command-not-found)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -213,19 +213,19 @@ app, exit-127 gone) <strong>Severity:</strong> P2
 <p>After the 3-layer claude vision bridge fix (helixqa aef46e5d), the
 HelixQA autonomous vision QA GENUINELY drives the Lava app on the
 Genymotion VM: it analyzes screenshots and decides actions
-(vision-screen-changed PASS; rationale ‘Current screen is the Android
-home launcher … launching the Lava client app’). Remaining blocker: the
-‘launch’ action dispatch returns ‘exit status 127’ (command not found) —
-visionnav step 2 dispatch ‘launch digital.vasic.lava.client.dev’. The
-derived launch action is ‘shell monkey -p digital.vasic.lava.client.dev
-1’; the ADB actor appears to run it without the ‘adb -s <serial>’ prefix
-(treating ‘shell’ as a command) OR adb is not on the dispatch subprocess
+(vision-screen-changed PASS; rationale 'Current screen is the Android
+home launcher … launching the Lava client app'). Remaining blocker: the
+'launch' action dispatch returns 'exit status 127' (command not found) —
+visionnav step 2 dispatch 'launch digital.vasic.lava.client.dev'. The
+derived launch action is 'shell monkey -p digital.vasic.lava.client.dev
+1'; the ADB actor appears to run it without the 'adb -s <serial>' prefix
+(treating 'shell' as a command) OR adb is not on the dispatch subprocess
 PATH. Fix in helixqa pkg actor/bridge ADB dispatch. Evidence:
 .lava-ci-evidence/helixqa/vm-qa-vision2-20260608T182251Z/ (4/4 reached
 vision+navigation, 1 ERROR + 3 FAILED on the launch-dispatch 127, NOT
 bridge errors anymore).</p>
 <h2
-id="lva-010-lava-api-go-router-mounts-v1provider-group-without-provider-middleware-handlers-panic500">LVA-010
+id="lva-010--lava-api-go-router-mounts-v1provider-group-without-provider-middleware-handlers-panic500">LVA-010
 — lava-api-go router mounts /v1/{provider} group WITHOUT provider
 middleware (handlers panic→500)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -242,7 +242,7 @@ dispatch. Confirm whether production wires the middleware elsewhere
 (real server bootstrap) or this is a real gap. Evidence: router_test.go
 note + internal/router/router.go.</p>
 <h2
-id="lva-011-testendpointsrepository.add-third-law-divergence-stores-rutracker-real-impl-no-ops-it">LVA-011
+id="lva-011--testendpointsrepositoryadd-third-law-divergence-stores-rutracker-real-impl-no-ops-it">LVA-011
 — TestEndpointsRepository.add Third-Law divergence (stores Rutracker;
 real impl no-ops it)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -253,12 +253,12 @@ core/testing TestEndpointsRepository Rutracker no-op + equivalence test
 Endpoint.Rutracker and can raise a duplicate-conflict for it, but the
 real EndpointsRepositoryImpl.add() early-returns for Rutracker (if
 (endpoint is Endpoint.Rutracker) return) and never stores it. A future
-test asserting ‘adding Rutracker is a no-op’ would pass against the fake
+test asserting 'adding Rutracker is a no-op' would pass against the fake
 while exercising different behavior than production — a latent
 §Third-Law bluff-fake. Fix: add the Rutracker no-op branch + doc to the
 fake. Flagged by the W6 core/domain UseCase agent (2026-06-09).</p>
 <h2
-id="lva-012-coretesting-testvisitedfavoritesbookmarks-repositories-are-todo-throw-stub-bluff-fakes">LVA-012
+id="lva-012--coretesting-testvisitedfavoritesbookmarks-repositories-are-todo-throw-stub-bluff-fakes">LVA-012
 — core/testing TestVisited/Favorites/Bookmarks repositories are
 TODO-throw stub bluff-fakes</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -268,7 +268,7 @@ equivalence tests <strong>Severity:</strong> P2
 <strong>Created-By:</strong> AI</p>
 <p>core/testing TestVisitedRepository, TestFavoritesRepository,
 TestBookmarksRepository have observe/contains/add/etc methods that are
-TODO(‘Not yet implemented’) (throw). They are unusable for behavioral
+TODO('Not yet implemented') (throw). They are unusable for behavioral
 wiring — feature ViewModel tests (account, visited, rating) work around
 them with local in-memory fakes. Per the Third Law these shared fakes
 should be behaviorally-equivalent to the real repos so tests can use
@@ -276,7 +276,7 @@ them directly. Flagged by the rating+visited VM-test agent (2026-06-09).
 Fix: implement the stubs as real in-memory fakes matching the real repo
 contracts + add equivalence tests.</p>
 <h2
-id="lva-014-testsuggestsrepository-was-a-todo-throw-stub-lva-012-bluff-class">LVA-014
+id="lva-014--testsuggestsrepository-was-a-todo-throw-stub-lva-012-bluff-class">LVA-014
 — TestSuggestsRepository was a TODO-throw stub (LVA-012 bluff
 class)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -284,15 +284,15 @@ class)</h2>
 TestSuggestsRepository implemented (in-memory, case-insensitive UPSERT
 id=lowercase().hashCode(), newest-first, clear) +
 TestSuggestsRepositoryTest (4 tests); Bluff-Audit: drop dedup filterNot
-→ ‘case-insensitive UPSERT MUST keep one row expected:&lt;1&gt; but
-was:&lt;2&gt;’, reverted; core:testing 31/0, feature:menu 17/0
+→ 'case-insensitive UPSERT MUST keep one row expected:&lt;1&gt; but
+was:&lt;2&gt;', reverted; core:testing 31/0, feature:menu 17/0
 <strong>Created-By:</strong> AI</p>
 <p>core/testing TestSuggestsRepository.observeSuggests/addSuggest threw
 TODO(); clear() no-op. Real SuggestsRepositoryImpl emits newest-first
 (timestamp DESC) + case-insensitive UPSERT (id=lowercase().hashCode(),
 REPLACE) + clear deletes all. Unusable stub = Third-Law bluff fake.</p>
 <h2
-id="lva-015-testsearchhistoryrepository-positional-id-no-upsert-wrong-ordering-third-law-divergence-bluff-test">LVA-015
+id="lva-015--testsearchhistoryrepository-positional-id--no-upsert--wrong-ordering-third-law-divergence--bluff-test">LVA-015
 — TestSearchHistoryRepository positional-id + no-UPSERT + wrong ordering
 (Third-Law divergence + bluff test)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -300,19 +300,18 @@ id="lva-015-testsearchhistoryrepository-positional-id-no-upsert-wrong-ordering-t
 TestSearchHistoryRepository content-derived id (replicates Filter.id())
 + UPSERT + newest-first; TestSearchHistoryRepositoryTest rewritten to
 real contract (6 tests); Bluff-Audit: revert to positional-append →
-‘upserts the same logical search’ + ‘dedups searches that differ only by
-sort’ FAILED expected:&lt;1&gt; but was:&lt;2&gt;, reverted;
+'upserts the same logical search' + 'dedups searches that differ only by
+sort' FAILED expected:&lt;1&gt; but was:&lt;2&gt;, reverted;
 core:testing 31/0, feature:menu 17/0, feature:search 9/0
 <strong>Created-By:</strong> AI</p>
 <p>core/testing TestSearchHistoryRepository.add used positional id
 (it.size) + always appended (no dedup) + insertion order, while real
-SearchHistoryRepositoryImpl uses content-derived Filter.id() + <span
-class="citation" data-cites="Insert">@Insert</span> REPLACE UPSERT +
-ORDER BY timestamp DESC. The existing TestSearchHistoryRepositoryTest
-asserted the fake-shaped behavior (ids [0,2], oldest-first) — a bluff
-test.</p>
+SearchHistoryRepositoryImpl uses content-derived Filter.id() + @Insert
+REPLACE UPSERT + ORDER BY timestamp DESC. The existing
+TestSearchHistoryRepositoryTest asserted the fake-shaped behavior (ids
+[0,2], oldest-first) — a bluff test.</p>
 <h2
-id="lva-016-ratingviewmodeltest-realobserveratingrequestusecase-drops-the-engagement-gate-active-bluff">LVA-016
+id="lva-016--ratingviewmodeltest-realobserveratingrequestusecase-drops-the-engagement-gate-active-bluff">LVA-016
 — RatingViewModelTest RealObserveRatingRequestUseCase drops the
 engagement gate (ACTIVE bluff)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -321,15 +320,15 @@ ObserveRatingRequestUseCaseImpl made public (Fifth Law); feature/rating
 RatingViewModelTest now wires the REAL use case over LVA-012/015-fixed
 shared fakes, seeds real engagement (3 bookmarks&gt;2) in the 4
 Show-path tests. Bluff-Audit: neutralize seedEngagement → 4 Show-path
-tests FAIL ‘TurbineAssertionError: No value produced in 3s’ (real
+tests FAIL 'TurbineAssertionError: No value produced in 3s' (real
 engagement gate the old fake dropped), 2 Hide tests pass; reverted.
 GREEN feature:rating 6/0, core:domain 57/0 <strong>Created-By:</strong>
 AI</p>
-<p>feature/rating RatingViewModelTest’s local
+<p>feature/rating RatingViewModelTest's local
 RealObserveRatingRequestUseCase re-implements
 ObserveRatingRequestUseCaseImpl but OMITS the 3rd condition (engagement:
 pinned&gt;1 OR other&gt;3 OR visited&gt;5 OR bookmarks&gt;2). The test
-‘Show rating request is rendered when conditions are met’ seeds ZERO
+'Show rating request is rendered when conditions are met' seeds ZERO
 engagement + asserts Show, but the REAL use case would emit Hide for
 that user state. Second-Law/§6.J bluff: re-implements internal business
 logic + asserts an outcome production would not produce. Fix: wire the
@@ -338,25 +337,24 @@ ObserveSearchHistory/Visited[-&gt;EnrichTopics]/Bookmarks use cases over
 shared in-memory fakes, now usable post LVA-012/015) + seed engagement
 in the Show test. Source: parallel fake-audit 2026-06-09.</p>
 <h2
-id="lva-017-feature-favoritestopic-local-fakes-add-lacks-replace-dedup-latent">LVA-017
+id="lva-017--feature-favoritestopic-local-fakes-add-lacks-replace-dedup-latent">LVA-017
 — feature favorites/topic local fakes: add() lacks REPLACE dedup
 (LATENT)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong> feature/favorites
 InMemoryFavoritesRepository.add + feature/topic
 FakeFavoritesRepository.add now dedup-by-id (REPLACE) + 2 falsifiability
-tests. Bluff-Audit: revert to append → ‘expected:&lt;[7]&gt; but
-was:&lt;[7, 7]&gt;’, reverted; feature:favorites 6/0, feature:topic 4/0
+tests. Bluff-Audit: revert to append → 'expected:&lt;[7]&gt; but
+was:&lt;[7, 7]&gt;', reverted; feature:favorites 6/0, feature:topic 4/0
 <strong>Created-By:</strong> AI</p>
 <p>feature/favorites InMemoryFavoritesRepository.add + feature/topic
 FakeFavoritesRepository.add append without dedup, while
-FavoritesRepositoryImpl/FavoriteTopicDao are <span class="citation"
-data-cites="Insert">@Insert</span> REPLACE (id PK). LATENT: no test
-re-adds a duplicate id, so unexercised. Tighten add() to replace-by-id
-for consistency with LVA-011..015. Source: parallel fake-audit
-2026-06-09.</p>
+FavoritesRepositoryImpl/FavoriteTopicDao are @Insert REPLACE (id PK).
+LATENT: no test re-adds a duplicate id, so unexercised. Tighten add() to
+replace-by-id for consistency with LVA-011..015. Source: parallel
+fake-audit 2026-06-09.</p>
 <h2
-id="lva-018-corepreferences-dead-getters-gethistorysyncperiodgetcredentialssyncperiod-zero-call-sites">LVA-018
+id="lva-018--corepreferences-dead-getters-gethistorysyncperiodgetcredentialssyncperiod-zero-call-sites">LVA-018
 — core/preferences dead getters
 getHistorySyncPeriod/getCredentialsSyncPeriod (zero call sites)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -371,15 +369,15 @@ are surfaced via getSettings() instead. Orphaned per-field-getter
 leftover (no Favorites/Bookmarks counterpart). Remove decl + override.
 Source: parallel dead-code audit 2026-06-09 (codebase otherwise clean: 0
 shipped TODO(), 0 if(false), 0 silent-no-op effect methods).</p>
-<h2 id="lva-7-11.4.85-stress-chaos-test-scaffold">LVA-7 — §11.4.85
+<h2 id="lva-7--11485-stress--chaos-test-scaffold">LVA-7 — §11.4.85
 stress + chaos test scaffold</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong>
 lava-api-go/internal/handlers/v1/search_thundering_herd_test.go — 512
 concurrent identical-key reqs through REAL read-through cache; asserts
 all-200 + post-burst upstream loads=0 (convergence) + no goroutine-leak
-+ -race clean. Bluff-Audit: delete cache.Set in search.go → ‘convergence
-FAILED: post-burst loads=1 (want 0)’, reverted. First runnable §11.4.85
++ -race clean. Bluff-Audit: delete cache.Set in search.go → 'convergence
+FAILED: post-burst loads=1 (want 0)', reverted. First runnable §11.4.85
 chaos dim beyond phase-1; evidence JSON committed.
 <strong>Severity:</strong> P2</p>
 <p>§11.4.85 (new universal anchor) mandates a stress + chaos test class.
@@ -387,14 +385,14 @@ Lava has no chaos/stress suite today. Assess + scaffold when pin is
 bumped. <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</p>
 <h2
-id="lva-020-archiveorg-array-valued-creatortitleyeardate-fails-the-whole-searchbrowsetopic-response">LVA-020
+id="lva-020--archiveorg-array-valued-creatortitleyeardate-fails-the-whole-searchbrowsetopic-response">LVA-020
 — archiveorg array-valued creator/title/year/date fails the WHOLE
 search/browse/topic response</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> flexString type
 (string|number|array→joined) in internal/archiveorg/flexstring.go;
 structs+map sites in search/browse/topic.go converted;
-flexstring_test.go. Bluff-Audit: route ‘[’ away from array case →
+flexstring_test.go. Bluff-Audit: route '[' away from array case →
 TestSearchResponse_ArrayValuedFields + TestMetadataResponse +
 TestFlexString FAIL, reverted; go test GREEN, api-source.hash
 regenerated, sourcehash contract GREEN <strong>Created-By:</strong>
@@ -405,23 +403,22 @@ JSON arrays for multi-author/date items → json.Unmarshal fails the
 ENTIRE response (every result), not one row. Found by parallel Go
 bug-hunt.</p>
 <h2
-id="lva-021-observability-error_class-collapses-to-literal-error-for-all-real-typed-errors-telemetry-blindness">LVA-021
-— observability error_class collapses to literal “error” for all real
+id="lva-021--observability-error_class-collapses-to-literal-error-for-all-real-typed-errors-telemetry-blindness">LVA-021
+— observability error_class collapses to literal "error" for all real
 typed errors (telemetry blindness)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> underlyingTypeName fallback →
 fmt.Sprintf(%T, err); nonfatal_typed_errorclass_test.go (unnamed typed +
-*fs.PathError chain + context sentinels). Bluff-Audit: revert to “error”
-→ TestClassOf_UnnamedTypedError + _StdlibTypedError FAIL ‘collapsed to
-error’, reverted; GREEN <strong>Created-By:</strong> AI</p>
+*fs.PathError chain + context sentinels). Bluff-Audit: revert to "error"
+→ TestClassOf_UnnamedTypedError + _StdlibTypedError FAIL 'collapsed to
+error', reverted; GREEN <strong>Created-By:</strong> AI</p>
 <p>internal/observability/nonfatal.go underlyingTypeName returned
-“error” for any error without Name() or the 2 context sentinels —
-i.e. virtually every real
-<em>fs.PathError/</em>net.OpError/*url.Error/pgx error → §6.AC per-type
-triage defeated. Existing nonfatal_errorclass_test was a bluff (only
-tested Name()-implementers).</p>
+"error" for any error without Name() or the 2 context sentinels — i.e.
+virtually every real *fs.PathError/*net.OpError/*url.Error/pgx error →
+§6.AC per-type triage defeated. Existing nonfatal_errorclass_test was a
+bluff (only tested Name()-implementers).</p>
 <h2
-id="lva-022-gutenberg-bestformatname-returns-blank-label-for-charset-suffixed-gutendex-mime-keys">LVA-022
+id="lva-022--gutenberg-bestformatname-returns-blank-label-for-charset-suffixed-gutendex-mime-keys">LVA-022
 — gutenberg bestFormatName returns blank label for charset-suffixed
 Gutendex MIME keys</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -436,7 +433,7 @@ exact-matched bare MIME keys (text/plain) but Gutendex always suffixes
 charset (text/plain; charset=utf-8) → blank Format label + skipped
 preferred ordering for text-only books.</p>
 <h2
-id="lva-023-v1-login-returns-user.id-profile-data-uid-as-authtoken-instead-of-user.token-session-cookie">LVA-023
+id="lva-023--v1-login-returns-userid-profile-data-uid-as-authtoken-instead-of-usertoken-session-cookie">LVA-023
 — v1 login returns User.Id (profile data-uid) as AuthToken instead of
 User.Token (session cookie)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -444,36 +441,36 @@ Bug <strong>Evidence:</strong> provider.go AuthToken:
 success.User.Token; provider_adapter_e2e_test.go
 TestAdapter_Login_ReturnsSessionCookieNotDataUID_E2E (real POST
 /login.php→/index.php→/profile.php flow). Bluff-Audit: revert to User.Id
-→ test FAILS ‘AuthToken = the data-uid 99999’, reverted; GREEN
+→ test FAILS 'AuthToken = the data-uid 99999', reverted; GREEN
 <strong>Created-By:</strong> AI</p>
 <p>internal/rutracker/provider.go ProviderAdapter.Login returned
 success.User.Id (numeric data-uid) as AuthToken; the real session cookie
-is User.Token. Login ‘succeeds’ but every authenticated v1 call
+is User.Token. Login 'succeeds' but every authenticated v1 call
 (favorites/add-comment/download) sends a non-cookie value → 401. No e2e
 login test existed (why it shipped).</p>
 <h2
-id="lva-024-v1-gettopic-fabricates-a-bogus-topicfilenamesize-from-the-torrent-size-string">LVA-024
-— v1 GetTopic fabricates a bogus TopicFile{Name:“Size”} from the torrent
+id="lva-024--v1-gettopic-fabricates-a-bogus-topicfilenamesize-from-the-torrent-size-string">LVA-024
+— v1 GetTopic fabricates a bogus TopicFile{Name:"Size"} from the torrent
 size string</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> provider.go drops the synthetic Files
 entry; provider_mapping_test.go TestFromTopicPage rewritten to assert
 len(Files)==0. Bluff-Audit: restore the Size-file line →
-TestFromTopicPage FAILS ‘want 0 entries’, reverted; GREEN
+TestFromTopicPage FAILS 'want 0 entries', reverted; GREEN
 <strong>Created-By:</strong> AI</p>
 <p>internal/rutracker/provider.go fromTopicPage wedged the size string
 into a synthetic file entry → topic detail screen shows one nonsense
-‘Size’ file instead of the real list. The existing TestFromTopicPage
+'Size' file instead of the real list. The existing TestFromTopicPage
 asserted the bogus file (bluff).</p>
 <h2
-id="lva-027-kinozal-search-sizebytes-hardcoded-null-every-result-drops-its-size">LVA-027
+id="lva-027--kinozal-search-sizebytes-hardcoded-null--every-result-drops-its-size">LVA-027
 — Kinozal search sizeBytes hardcoded null — every result drops its
 size</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> KinozalSizeParser (binary mult,
 comma/dot, Latin+Cyrillic units) + KinozalSearchParser sizeBytes wired;
 KinozalSizeParserTest 5 tests incl end-to-end. Bluff-Audit: revert
-sizeBytes→null → ‘search row carries sizeBytes end to end FAILED’,
+sizeBytes→null → 'search row carries sizeBytes end to end FAILED',
 reverted; :core:tracker:kinozal:test GREEN <strong>Created-By:</strong>
 AI</p>
 <p>KinozalSearchParser parsed the size string into a local var then
@@ -481,7 +478,7 @@ emitted sizeBytes=null, so every Kinozal row dropped size (size
 sort/filter + cross-tracker ranking blind). Found by parallel Kotlin
 tracker bug-hunt.</p>
 <h2
-id="lva-025-v1-captcha-login-sends-the-answer-under-the-wrong-form-field-name-captcha-login-can-never-succeed">LVA-025
+id="lva-025--v1-captcha-login-sends-the-answer-under-the-wrong-form-field-name-captcha-login-can-never-succeed">LVA-025
 — v1 captcha login sends the answer under the wrong form-field name
 (captcha login can never succeed)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -495,33 +492,33 @@ answer (self-acknowledged TODO provider.go:221). Needs LoginOpts +
 OpenAPI model change (CaptchaValue field) — deferred. Found by parallel
 Go bug-hunt.</p>
 <h2
-id="lva-026-v1-captcha-response-hardcodes-imagepng-discards-upstream-content-type">LVA-026
+id="lva-026--v1-captcha-response-hardcodes-imagepng-discards-upstream-content-type">LVA-026
 — v1 captcha response hardcodes image/png, discards upstream
 Content-Type</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong>
 .lava-ci-evidence/workable-items/LVA-025-026-evidence.md
 <strong>Created-By:</strong> AI</p>
-<p>internal/handlers/v1/captcha.go serves c.Data(200, image/png, …) but
-rutracker.FetchCaptcha captures the real Content-Type, dropped by the
-adapter (no ContentType field on provider.CaptchaImage). Minor (most
+<p>internal/handlers/v1/captcha.go serves c.Data(200, image/png, ...)
+but rutracker.FetchCaptcha captures the real Content-Type, dropped by
+the adapter (no ContentType field on provider.CaptchaImage). Minor (most
 decoders sniff). Found by parallel Go bug-hunt.</p>
 <h2
-id="lva-028-nnmclub-search-publishdate-dropped-date-column-present-parseable">LVA-028
+id="lva-028--nnmclub-search-publishdate-dropped-date-column-present--parseable">LVA-028
 — Nnmclub search publishDate dropped (date column present +
 parseable)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
 .lava-ci-evidence/workable-items/LVA-028-evidence.md
 <strong>Created-By:</strong> AI</p>
-<p>NnmclubSearchParser reads row.select(‘td’) but never maps cells[4]
+<p>NnmclubSearchParser reads row.select('td') but never maps cells[4]
 (ISO yyyy-MM-dd date) into TorrentItem.publishDate → Nnmclub results
 have no date. Found by parallel Kotlin tracker bug-hunt. (Also
 UNCONFIRMED: nnmclub/kinozal parseSize Latin-only regex may miss
 Cyrillic units in real HTML — kinozal already handles both as of
 LVA-027.)</p>
 <h2
-id="lva-029-islocalhost-fcfd-false-positive-misclassifies-public-hosts-as-ipv6-unique-local">LVA-029
+id="lva-029--islocalhost-fcfd-false-positive-misclassifies-public-hosts-as-ipv6-unique-local">LVA-029
 — isLocalHost() fc/fd false-positive misclassifies public hosts as IPv6
 unique-local</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -533,10 +530,10 @@ check (startsWith fc/fd + take(4) hex in 0xfc00..0xfdff) on ANY host
 string without requiring an IPv6 literal, so a DNS host like
 fcba.example.com / fdcdn.net is routed as LAN (http://host:8080) instead
 of https://host/forum/ → no green dot, every request fails. Fix: gate on
-contains(‘:’) before the hex parse. Found by parallel core/network
+contains(':') before the hex parse. Found by parallel core/network
 bug-hunt.</p>
 <h2
-id="lva-6-11.4.79-reconcile-codegraph-index-policy-own-org-submodules-in-index">LVA-6
+id="lva-6--11479-reconcile-codegraph-index-policy-own-org-submodules-in-index">LVA-6
 — §11.4.79 reconcile codegraph index policy (own-org submodules IN
 index)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -549,7 +546,7 @@ policy. Reconcile .codegraph config + docs when pin is bumped.
 <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</p>
 <h2
-id="lva-031-genymotion-vmnav-uuids-in-tracked-evidence-trip-6.r-scanner">LVA-031
+id="lva-031--genymotion-vmnav-uuids-in-tracked-evidence-trip-6r-scanner">LVA-031
 — Genymotion VM+nav UUIDs in tracked evidence trip §6.R scanner</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
@@ -559,7 +556,7 @@ Bug <strong>Evidence:</strong>
 14 tracked genymotion evidence files → check-constitution exit 1.
 Redacted per e767b701 precedent.</p>
 <h2
-id="lva-032-rutracker-browsefavorites-blind-cast-topictorrent-type-confusion">LVA-032
+id="lva-032--rutracker-browsefavorites-blind-cast-topictorrent-type-confusion">LVA-032
 — rutracker browse/favorites blind-cast Topic→Torrent type
 confusion</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -569,7 +566,7 @@ Bug <strong>Evidence:</strong>
 <p>fromCategoryPage/fromFavoritesDto called AsForumTopicDtoTorrent
 ignoring the union discriminator → Topic variants render as empty
 fake-torrent rows. Fixed via AsForumTopicDtoTorrentChecked.</p>
-<h2 id="lva-033-rutor-topic-page-drops-добавлен-publishdate">LVA-033 —
+<h2 id="lva-033--rutor-topic-page-drops-добавлен-publishdate">LVA-033 —
 rutor topic page drops Добавлен publishDate</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
@@ -578,7 +575,7 @@ Bug <strong>Evidence:</strong>
 <p>RuTorTopicParser dropped the Добавлен date despite the fixture
 carrying it. Added dotted DD-MM-YYYY shape to RuTorDateParser.</p>
 <h2
-id="lva-034-room-endpoint-list-converter-drops-goapi-platformstoragekey-on-round-trip">LVA-034
+id="lva-034--room-endpoint-list-converter-drops-goapi-platformstoragekey-on-round-trip">LVA-034
 — Room endpoint-list converter drops GoApi platform/storage/key on
 round-trip</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -589,7 +586,7 @@ Bug <strong>Evidence:</strong>
 on-device Lava-API endpoint 401s (withKeyOverride dead). Fixed via
 #-sentinel encoded packing.</p>
 <h2
-id="lva-035-pagingdataloader-pagination-state-machine-had-zero-tests">LVA-035
+id="lva-035--pagingdataloader-pagination-state-machine-had-zero-tests">LVA-035
 — PagingDataLoader pagination state-machine had zero tests</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong>
@@ -598,7 +595,7 @@ id="lva-035-pagingdataloader-pagination-state-machine-had-zero-tests">LVA-035
 <p>Added PagingDataLoaderTest (append-terminal off-by-one +
 refresh-error regression), production byte-identical.</p>
 <h2
-id="lva-030-6-recently-added-submodules-missing-6.r-inheritance-pointer-pre-existing-6.ad-debt">LVA-030
+id="lva-030--6-recently-added-submodules-missing-6r-inheritance-pointer-pre-existing-6ad-debt">LVA-030
 — 6 recently-added submodules missing §6.R inheritance pointer
 (pre-existing §6.AD-debt)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -613,7 +610,7 @@ constitution bump. Each needs a submodule commit + push + parent pin
 bump (helixqa is always-track-upstream per Q9). Surfaced by full
 check-constitution during the constitution-bump cycle.</p>
 <h2
-id="lva-037-6.r-hostport-scanner-flags-its-own-tests-hermetic-fixture-missing-tests-exemption">LVA-037
+id="lva-037--6r-hostport-scanner-flags-its-own-tests-hermetic-fixture-missing-tests-exemption">LVA-037
 — §6.R hostport scanner flags its own tests/ hermetic fixture (missing
 tests/ exemption)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -625,7 +622,7 @@ tests/ → flagged tests/check-constitution/test_no_hardcoded_hostport.sh
 → check-constitution exit 1 → pre-push blocked. Added ^tests/
 exemption.</p>
 <h2
-id="lva-038-brotli-middleware-emitted-content-encoding-br-on-bodyless-204304-statusallowsbody-dead-code">LVA-038
+id="lva-038--brotli-middleware-emitted-content-encoding-br-on-bodyless-204304-statusallowsbody-dead-code">LVA-038
 — brotli middleware emitted Content-Encoding br on bodyless 204/304
 (statusAllowsBody dead code)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -635,7 +632,7 @@ Bug <strong>Evidence:</strong>
 <p>Wave-3 parallel-fleet find; fixed in f3b2d269; falsifiability-proven;
 main-stream re-verified.</p>
 <h2
-id="lva-039-providerloginviewmodel.onreloadcaptchaclick-leaves-stale-serviceunavailable-banner">LVA-039
+id="lva-039--providerloginviewmodelonreloadcaptchaclick-leaves-stale-serviceunavailable-banner">LVA-039
 — ProviderLoginViewModel.onReloadCaptchaClick leaves stale
 serviceUnavailable banner</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -645,7 +642,7 @@ Bug <strong>Evidence:</strong>
 <p>Wave-3 parallel-fleet find; fixed in 9f895502; falsifiability-proven;
 main-stream re-verified.</p>
 <h2
-id="lva-040-onboarding-anonymous-mode-choice-never-persisted-to-provider_configs">LVA-040
+id="lva-040--onboarding-anonymous-mode-choice-never-persisted-to-provider_configs">LVA-040
 — onboarding anonymous-mode choice never persisted to
 provider_configs</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -655,7 +652,7 @@ Bug <strong>Evidence:</strong>
 <p>Wave-3 parallel-fleet find; fixed in 8e0720ab; falsifiability-proven;
 main-stream re-verified.</p>
 <h2
-id="lva-041-syncperiod.day-background-sync-flex-interval-6.days-should-be-6.hours-workmanager-clamp">LVA-041
+id="lva-041--syncperiodday-background-sync-flex-interval-6days-should-be-6hours-workmanager-clamp">LVA-041
 — SyncPeriod.DAY background-sync flex interval 6.days should be 6.hours
 (WorkManager clamp)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -665,7 +662,7 @@ Bug <strong>Evidence:</strong>
 <p>Wave-3 parallel-fleet find; fixed in 0cecbe4e; falsifiability-proven;
 main-stream re-verified.</p>
 <h2
-id="lva-042-syncoutbox-fifo-third-law-fake-divergence-createdat-regression-coverage">LVA-042
+id="lva-042--syncoutbox-fifo-third-law-fake-divergence--createdat-regression-coverage">LVA-042
 — SyncOutbox FIFO Third-Law fake divergence + createdAt regression
 coverage</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -675,7 +672,7 @@ coverage</h2>
 <p>Wave-3 parallel-fleet find; fixed in a11aee32; falsifiability-proven;
 main-stream re-verified.</p>
 <h2
-id="lva-043-6.e-reverse-gate-phantom-capability-honesty-assertion">LVA-043
+id="lva-043--6e-reverse-gate-phantom-capability-honesty-assertion">LVA-043
 — §6.E reverse-gate phantom-capability honesty assertion</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong>
@@ -684,7 +681,7 @@ id="lva-043-6.e-reverse-gate-phantom-capability-honesty-assertion">LVA-043
 <p>Wave-3 parallel-fleet find; fixed in c117caeb; falsifiability-proven;
 main-stream re-verified.</p>
 <h2
-id="lva-045-6.ai-debt-cm-covenant-114--11.4.128-141-propagation-gate-slash-command-docs">LVA-045
+id="lva-045--6ai-debt-cm-covenant-114--114128-141-propagation-gate--slash-command-docs">LVA-045
 — §6.AI-debt CM-COVENANT-114-* §11.4.128-141 propagation gate +
 slash-command docs</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -694,7 +691,7 @@ slash-command docs</h2>
 <p>Wave-3 parallel-fleet find; fixed in c37995a7; falsifiability-proven;
 main-stream re-verified.</p>
 <h2
-id="lva-046-rutracker-login-reported-fake-success-on-wrong-credentials-blind-authresponsedto-union-accessor-ignored-discriminator">LVA-046
+id="lva-046--rutracker-login-reported-fake-success-on-wrong-credentials-blind-authresponsedto-union-accessor-ignored-discriminator">LVA-046
 — rutracker Login reported fake success on wrong credentials (blind
 AuthResponseDto union accessor ignored discriminator)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -703,10 +700,10 @@ Bug <strong>Evidence:</strong>
 <strong>Severity:</strong> P2</p>
 <p>AsAuthResponseDtoSuccess() blind-decodes a WrongCredits union into
 non-pointer UserDto with no error → Login returns Success:true
-AuthToken:’’ for wrong creds → every authed call 401s. LVA-032 class.
+AuthToken:'' for wrong creds → every authed call 401s. LVA-032 class.
 Fixed via AsAuthResponseDtoSuccessChecked.</p>
 <h2
-id="lva-047-magnetlinkvalidator-rejects-case-insensitive-urnbtih-prefix-rfc-8141">LVA-047
+id="lva-047--magnetlinkvalidator-rejects-case-insensitive-urnbtih-prefix-rfc-8141">LVA-047
 — MagnetLinkValidator rejects case-insensitive urn:btih prefix (RFC
 8141)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -716,7 +713,7 @@ Bug <strong>Evidence:</strong>
 <p>case-sensitive startsWith rejected magnet:?xt=urn:BTIH:<hash>; fixed
 to regionMatches ignoreCase.</p>
 <h2
-id="lva-044-add-http_download-trackercapability-so-archiveorggutenberg-can-surface-their-working-http-file-download">LVA-044
+id="lva-044--add-http_download-trackercapability-so-archiveorggutenberg-can-surface-their-working-http-file-download">LVA-044
 — Add HTTP_DOWNLOAD TrackerCapability so archiveorg/gutenberg can
 surface their working HTTP file download</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
@@ -728,7 +725,7 @@ deliberately not exposed (no capability) → user-unreachable. Not a bluff
 (§6.E honest), a functionality gap. Needs a new capability + feature
 interface.</p>
 <h2
-id="lva-051-11.4.128-always-on-device-recorder-skeleton-deterministic-path-test-device-capture-owed">LVA-051
+id="lva-051--114128-always-on-device-recorder-skeleton--deterministic-path-test-device-capture-owed">LVA-051
 — §11.4.128 always-on device-recorder skeleton + deterministic-path test
 (device capture OWED)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -738,7 +735,7 @@ id="lva-051-11.4.128-always-on-device-recorder-skeleton-deterministic-path-test-
 <p>scripts/record-device-session.sh + hermetic path test landed;
 device-bound capture UNCONFIRMED without a live device.</p>
 <h2
-id="lva-048-featuresearch_input-writes-author-name-under-authoridkey-wrong-nav-key">LVA-048
+id="lva-048--featuresearch_input-writes-author-name-under-authoridkey-wrong-nav-key">LVA-048
 — feature/search_input writes author NAME under AuthorIdKey (wrong nav
 key)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -749,7 +746,7 @@ Bug <strong>Evidence:</strong>
 under AuthorIdKey instead of AuthorNameKey. Flagged by wave-4 §6.Q agent
 (out of its scope). Needs fix + roundtrip test.</p>
 <h2
-id="lva-049-navigation-route-values-not-url-encoded-reserved-chars-in-search-query-corrupt-route">LVA-049
+id="lva-049--navigation-route-values-not-url-encoded-reserved-chars-in-search-query-corrupt-route">LVA-049
 — navigation route values not URL-encoded (reserved chars in search
 query corrupt route)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -759,7 +756,7 @@ Task <strong>Evidence:</strong>
 <p>appendOptionalParams passes raw query; a query with &amp;/? corrupts
 the route. Add Uri.encode at call sites + roundtrip test.</p>
 <h2
-id="lva-050-a11ycontentdescriptiontest-teardown-runtimeexception-robolectric-robomonitoringinstrumentation-reds-coredesignsystemtest-despite-assertions-passing">LVA-050
+id="lva-050--a11ycontentdescriptiontest-teardown-runtimeexception-robolectric-robomonitoringinstrumentation-reds-coredesignsystemtest-despite-assertions-passing">LVA-050
 — A11yContentDescriptionTest teardown RuntimeException (Robolectric
 RoboMonitoringInstrumentation) reds :core:designsystem:test despite
 assertions passing</h2>
@@ -771,7 +768,7 @@ Task <strong>Evidence:</strong>
 RuntimeException makes Gradle report FAILED. Quarantine/fix the
 teardown.</p>
 <h2
-id="lva-053-postconverters.removelast-crashes-topic-screen-on-android-api-35-nosuchmethoderror">LVA-053
+id="lva-053--postconvertersremovelast-crashes-topic-screen-on-android-api-35-nosuchmethoderror">LVA-053
 — PostConverters.removeLast() crashes topic screen on Android &lt;API 35
 (NoSuchMethodError)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -783,7 +780,7 @@ SequencedCollection) absent on Android &lt;35 → a PostBr followed by Hr
 crashes the topic screen. Fixed to removeAt(lastIndex) + 28 converter
 tests.</p>
 <h2
-id="lva-056-6.r-ipv4-scanner-flags-device-recorder-tests-hermetic-fixture-missing-tests-exemption">LVA-056
+id="lva-056--6r-ipv4-scanner-flags-device-recorder-tests-hermetic-fixture-missing-tests-exemption">LVA-056
 — §6.R IPv4 scanner flags device-recorder tests/ hermetic fixture
 (missing tests/ exemption)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -794,7 +791,7 @@ Bug <strong>Evidence:</strong>
 tests/device-recording synthetic 127.0.0.1:6555 → check-constitution
 exit 1 (LVA-037 class). Added ^tests/.</p>
 <h2
-id="lva-052-wire-http_download-into-the-topicdownload-ui-consume-httpdownloadabletracker-write-artifact-to-disk">LVA-052
+id="lva-052--wire-http_download-into-the-topicdownload-ui-consume-httpdownloadabletracker-write-artifact-to-disk">LVA-052
 — Wire HTTP_DOWNLOAD into the topic/download UI (consume
 HttpDownloadableTracker, write artifact to disk)</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
@@ -803,13 +800,13 @@ HttpDownloadableTracker, write artifact to disk)</h2>
 <strong>Severity:</strong> P3</p>
 <p>HTTP_DOWNLOAD UI wiring. A full impl exists on branch
 worktree-agent-ad695086c8735d60a (commit c8951eee) but it re-derived
-LVA-044 substrate → conflicts with master’s landed LVA-044; needs a
+LVA-044 substrate → conflicts with master's landed LVA-044; needs a
 clean re-apply of the LVA-052 net-new files
 (HttpDownloadSource/DownloadHttpFileUseCase/DownloadService.downloadHttpFile/SDK.downloadHttpFile)
 on top of master. Topic-screen Compose routing (provider id through nav)
 still OWED.</p>
 <h2
-id="lva-054-audit-codebase-for-removelastremovefirstgetfirstgetlast-sequencedcollection-calls-that-crash-on-android-api35">LVA-054
+id="lva-054--audit-codebase-for-removelastremovefirstgetfirstgetlast-sequencedcollection-calls-that-crash-on-android-api35">LVA-054
 — Audit codebase for removeLast/removeFirst/getFirst/getLast
 SequencedCollection calls that crash on Android &lt;API35</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -819,7 +816,7 @@ SequencedCollection calls that crash on Android &lt;API35</h2>
 <p>LVA-053 class: Kotlin stdlib these desugar to java.util.* methods
 absent below API35. Sweep all modules + add a lint/detekt guard.</p>
 <h2
-id="lva-055-run-test-pg.sh-integration-list-omits-.internalstorage-postgres-legs-skipped-by-canonical-harness">LVA-055
+id="lva-055--run-test-pgsh-integration-list-omits-internalstorage-postgres-legs-skipped-by-canonical-harness">LVA-055
 — run-test-pg.sh integration list omits ./internal/storage (Postgres
 legs skipped by canonical harness)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -830,7 +827,7 @@ legs skipped by canonical harness)</h2>
 ./tests/integration; add ./internal/storage so its Postgres legs run in
 the canonical harness.</p>
 <h2
-id="lva-057-multi-search-sse-silently-drops-unknown-requested-providers">LVA-057
+id="lva-057--multi-search-sse-silently-drops-unknown-requested-providers">LVA-057
 — multi-search SSE silently drops unknown requested providers</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
@@ -838,10 +835,10 @@ Bug <strong>Evidence:</strong>
 <strong>Severity:</strong> P2</p>
 <p>GetMultiSearch continued past an unknown ?providers= id with no
 provider_error event and no failed counter, while total_providers still
-counted it — the user’s requested provider vanished with zero client
+counted it — the user's requested provider vanished with zero client
 signal. Now emits provider_error + counts failed.</p>
 <h2
-id="lva-058-6.r-scanners-flag-binary-workable_items.db-ssot-lva-037056-class">LVA-058
+id="lva-058--6r-scanners-flag-binary-workable_itemsdb-ssot-lva-037056-class">LVA-058
 — §6.R scanners flag binary workable_items.db SSoT (LVA-037/056
 class)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -853,7 +850,7 @@ binary SQLite SSoT docs/workable_items.db, which stores ticket text
 quoting IP/host/UUID literals, producing a Binary file matches
 violation. Added .db exemption to all three.</p>
 <h2
-id="lva-060-favoritevisited-torrent-reconstruction-drops-magnetlink-and-date">LVA-060
+id="lva-060--favoritevisited-torrent-reconstruction-drops-magnetlink-and-date">LVA-060
 — favorite/visited Torrent reconstruction drops magnetLink and date</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
@@ -865,7 +862,7 @@ favorited or visited torrent was read back as BaseTopic and became
 un-downloadable, and getTorrents() filtered it out entirely. Added both
 fields to the discriminator.</p>
 <h2
-id="lva-059-sort-providerregistry.ids-consumers-for-deterministic-multi-search-sse-provider-ordering">LVA-059
+id="lva-059--sort-providerregistryids-consumers-for-deterministic-multi-search-sse-provider-ordering">LVA-059
 — sort ProviderRegistry.IDs() consumers for deterministic multi-search
 SSE provider ordering</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -875,7 +872,7 @@ Task <strong>Evidence:</strong>
 <p>multi-search auto-discovery emits providers in non-deterministic map
 order (cosmetic).</p>
 <h2
-id="lva-061-mobiletls.go-regenerate-embed-cert-when-persisted-ip-sans-no-longer-cover-device-lan-ip">LVA-061
+id="lva-061--mobiletlsgo-regenerate-embed-cert-when-persisted-ip-sans-no-longer-cover-device-lan-ip">LVA-061
 — mobile/tls.go regenerate embed cert when persisted IP-SANs no longer
 cover device LAN IP</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -885,7 +882,7 @@ Task <strong>Evidence:</strong>
 <p>self-signed cert reused across restarts without re-checking IP-SAN;
 LAN IP change → host-mismatch.</p>
 <h2
-id="lva-062-audit-gate-shaping-scripts-for-uncovered-clauses-each-gate-clause-needs-a-branch-covering-falsifiability-sub-test">LVA-062
+id="lva-062--audit-gate-shaping-scripts-for-uncovered-clauses-each-gate-clause-needs-a-branch-covering-falsifiability-sub-test">LVA-062
 — audit gate-shaping scripts for uncovered clauses (each gate clause
 needs a branch-covering falsifiability sub-test)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -895,7 +892,7 @@ needs a branch-covering falsifiability sub-test)</h2>
 <p>wave-6 §6.N.2 found CM-WORKABLE-ITEMS-SYNC clause-3 was uncovered;
 sweep other gates.</p>
 <h2
-id="lva-063-cover-credentialsviewmodel-credentialsmanager-vault-lifecycle-branches">LVA-063
+id="lva-063--cover-credentialsviewmodel--credentialsmanager-vault-lifecycle-branches">LVA-063
 — cover CredentialsViewModel + CredentialsManager vault lifecycle
 branches</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -906,7 +903,7 @@ branches</h2>
 flows, §6.G verified filter, and the credentials_manager
 FirstTimeSetup/AddNew/Edit/DismissEdit lifecycle.</p>
 <h2
-id="lva-066-validate-new-jackett-release-against-the-lava-torznab-sidecar-integration">LVA-066
+id="lva-066--validate-new-jackett-release-against-the-lava-torznab-sidecar-integration">LVA-066
 — validate new Jackett release against the Lava Torznab sidecar
 integration</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -919,7 +916,7 @@ topology: api_key bootstrap + Torznab /caps endpoint served valid XML at
 the exact path IPTorrentsJackettApi uses; JVM parser tests green; pinned
 the validated digest in .env.example.</p>
 <h2
-id="lva-064-loadorcreatetls-does-not-detect-expired-persisted-cert-notafter-passed">LVA-064
+id="lva-064--loadorcreatetls-does-not-detect-expired-persisted-cert-notafter-passed">LVA-064
 — loadOrCreateTLS does not detect expired persisted cert (NotAfter
 passed)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -930,7 +927,7 @@ Task <strong>Evidence:</strong>
 so a persisted cert past its NotAfter is silently reused; add an expiry
 check to the reuse gate with a test.</p>
 <h2
-id="lva-065-audit-featuresearch-searchviewmodel-for-untested-errorpaging-branches">LVA-065
+id="lva-065--audit-featuresearch-searchviewmodel-for-untested-errorpaging-branches">LVA-065
 — audit feature/search SearchViewModel for untested error/paging
 branches</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -941,7 +938,7 @@ branches</h2>
 and paging-state branches and add falsifiable coverage where real gaps
 exist.</p>
 <h2
-id="lva-068-proactively-re-mint-embed-tls-leaf-mid-process-when-it-crosses-the-expiry-margin">LVA-068
+id="lva-068--proactively-re-mint-embed-tls-leaf-mid-process-when-it-crosses-the-expiry-margin">LVA-068
 — proactively re-mint embed TLS leaf mid-process when it crosses the
 expiry margin</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -952,7 +949,7 @@ Task <strong>Evidence:</strong>
 embed could serve a leaf that expires without a restart. Add a periodic
 re-mint check.</p>
 <h2
-id="lva-069-cover-searchresultviewmodel-sse-raw-json-parsing-onretryclick-re-dispatch">LVA-069
+id="lva-069--cover-searchresultviewmodel-sse-raw-json-parsing--onretryclick-re-dispatch">LVA-069
 — cover SearchResultViewModel SSE raw-JSON parsing + onRetryClick
 re-dispatch</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -963,7 +960,7 @@ re-dispatch</h2>
 (provider_start/results/provider_done/provider_error) and onRetryClick
 Error-state re-dispatch are untested production branches.</p>
 <h2
-id="lva-073-6.ac-telemetry-instrumentation-for-the-accepted-lva-008-nav-teardown-crash">LVA-073
+id="lva-073--6ac-telemetry-instrumentation-for-the-accepted-lva-008-nav-teardown-crash">LVA-073
 — §6.AC telemetry instrumentation for the accepted LVA-008 nav-teardown
 crash</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -976,7 +973,7 @@ ISE with attributable §6.AC Crashlytics context before the process dies,
 so it surfaces as a known/triageable defect; 6 falsifiable JVM tests;
 wired into LavaApplication.</p>
 <h2
-id="lva-072-6.ac-telemetry-on-mid-process-embed-tls-cert-rotation-lva-068-swap-is-silent">LVA-072
+id="lva-072--6ac-telemetry-on-mid-process-embed-tls-cert-rotation-lva-068-swap-is-silent">LVA-072
 — §6.AC telemetry on mid-process embed TLS cert rotation (LVA-068 swap
 is silent)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -990,7 +987,7 @@ discarded because its falsifiability rehearsal was inconclusive and the
 SourceHash contract failed; redo with a test that fails when the actual
 rotation-path RecordWarning call is removed.</p>
 <h2
-id="lva-074-genymotion-runner-must-wakestay-on-the-vm-screen-before-connecteddebugandroidtest">LVA-074
+id="lva-074--genymotion-runner-must-wakestay-on-the-vm-screen-before-connecteddebugandroidtest">LVA-074
 — Genymotion runner must wake+stay-on the VM screen before
 connectedDebugAndroidTest</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1002,7 +999,7 @@ commit timeouts and spurious No-compose-hierarchies Challenge failures;
 the runner now wakes and keeps the screen on, proven by C00/C01/C07/C08
 going green after the wake.</p>
 <h2
-id="lva-070-thread-source-providerid-through-favoritevisited-writeread-path-to-complete-http_download-routing">LVA-070
+id="lva-070--thread-source-providerid-through-favoritevisited-writeread-path-to-complete-http_download-routing">LVA-070
 — thread source providerId through favorite/visited write+read path to
 complete HTTP_DOWNLOAD routing</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -1016,7 +1013,7 @@ Topic/TopicPage models (write) and TopicModel + favorites/visited
 side-effects to openTopic(id,providerId) (read), mirroring
 search_result.</p>
 <h2
-id="lva-071-inject-sseclient-base-url-into-searchresultviewmodel.observessesearch-for-hermetic-mockwebserver-testing">LVA-071
+id="lva-071--inject-sseclient--base-url-into-searchresultviewmodelobservessesearch-for-hermetic-mockwebserver-testing">LVA-071
 — inject SseClient + base-URL into
 SearchResultViewModel.observeSseSearch for hermetic MockWebServer
 testing</h2>
@@ -1028,7 +1025,7 @@ testing</h2>
 https base; inject it so the full SSE error to Error to retry path is
 hermetically testable against a MockWebServer.</p>
 <h2
-id="lva-067-persist-per-row-providerid-on-favoritevisited-rows-so-their-topics-can-route-to-http_download">LVA-067
+id="lva-067--persist-per-row-providerid-on-favoritevisited-rows-so-their-topics-can-route-to-http_download">LVA-067
 — persist per-row providerId on favorite/visited rows so their topics
 can route to HTTP_DOWNLOAD</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -1040,7 +1037,7 @@ active-tracker default because the favorite/visited Room rows store no
 provider id; add a providerId column + migration so an
 archiveorg/gutenberg favorite routes to HTTP_DOWNLOAD.</p>
 <h2
-id="lva-4-lva-workable-items-ticket-system-sqlite-db-go-cli-mdhtmlpdfdocx-export">LVA-4
+id="lva-4--lva-workable-items-ticket-system-sqlite-db--go-cli--mdhtmlpdfdocx-export">LVA-4
 — LVA workable-items ticket system (SQLite DB + Go CLI +
 md/HTML/PDF/DOCX export)</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
@@ -1055,7 +1052,7 @@ to the canonical constitution binary
 (docs/tickets/MIGRATION-TO-CANONICAL.md). <strong>Source:</strong>
 operator-report — docs/tickets/DESIGN.md</p>
 <h2
-id="lva-076-apiengine-processjavares-buildcshared-task-dependency-gradle-heap">LVA-076
+id="lva-076--apiengine-processjavares-buildcshared-task-dependency--gradle-heap">LVA-076
 — apiengine processJavaRes buildCshared task dependency + Gradle
 heap</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -1065,7 +1062,7 @@ docs/CONTINUATION.md <strong>Severity:</strong> medium</p>
 consumed buildCshared output without a declared edge; D8 OOM on 2g heap.
 Declared dependency plus bumped heap to 4g.</p>
 <h2
-id="lva-077-release-cold-start-canary-script-for-the-r8-release-artifact">LVA-077
+id="lva-077--release-cold-start-canary-script-for-the-r8-release-artifact">LVA-077
 — release cold-start canary script for the R8 release artifact</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong>
@@ -1074,7 +1071,7 @@ docs/CONTINUATION.md <strong>Severity:</strong> medium</p>
 debug; added scripts run-release-canary.sh to validate the exact R8
 release APK cold-start on the Genymotion VM per clause 6.Z.</p>
 <h2
-id="lva-078-restore-lava-api-go-container-image-build-broken-containerignore">LVA-078
+id="lva-078--restore-lava-api-go-container-image-build-broken-containerignore">LVA-078
 — restore lava-api-go container image build broken containerignore</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Bug <strong>Evidence:</strong>
@@ -1083,7 +1080,7 @@ docs/CONTINUATION.md <strong>Severity:</strong> medium</p>
 parent submodules X; in-container go build failed on missing replacement
 dirs. Excluded only nested git and build, kept source.</p>
 <h2
-id="lva-092-video-11-negative-finding-no-crashanrwhite-icon-observed-in-this-recording-recorded-for-completeness">LVA-092
+id="lva-092--video-11--negative-finding-no-crashanrwhite-icon-observed-in-this-recording-recorded-for-completeness">LVA-092
 — Video #11 — Negative finding: NO crash/ANR/white-icon observed in this
 recording (recorded for completeness)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -1097,7 +1094,7 @@ Informational record. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #11.</p>
 <h2
-id="lva-080-distribute-10761.3.12-api-app-22-build_and_release---6.z-c00-gate-on-thinker---6.aa-two-stage-firebase-distribute">LVA-080
+id="lva-080--distribute-10761312--api-app-22-build_and_release---6z-c00-gate-on-thinker---6aa-two-stage-firebase-distribute">LVA-080
 — Distribute 1076/1.3.12 (+ api-app 22): build_and_release -&gt; §6.Z
 C00 gate on thinker -&gt; §6.AA two-stage Firebase distribute</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -1110,7 +1107,7 @@ directive: rebuild, gate, distribute all 4 variants. Infra confirmed UP
 this session: thinker+nezha reachable, T7 writable,
 JDK17/Gradle8.9/podman5.8.2 present.</p>
 <h2
-id="lva-036-llm_orchestrator-githubgitlab-pre-existing-mirror-fork-non-ff-blocks-6.w-convergence">LVA-036
+id="lva-036--llm_orchestrator-githubgitlab-pre-existing-mirror-fork-non-ff-blocks-6w-convergence">LVA-036
 — llm_orchestrator github↔︎gitlab pre-existing mirror fork (non-FF)
 blocks §6.W convergence</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1121,8 +1118,8 @@ non-doc go.mod content each; LVA-030 commit landed gitlab+working-tree
 but github refused non-FF. Needs a content-merge decision
 (operator-gated, NO force-push per §6.T.3).</p>
 <h2
-id="lva-083-video-1-search-returns-zero-results-then-something-went-wrong-error-primary-function-unusable">LVA-083
-— Video #1 — Search returns ZERO results then ‘Something went wrong’
+id="lva-083--video-1--search-returns-zero-results-then-something-went-wrong-error-primary-function-unusable">LVA-083
+— Video #1 — Search returns ZERO results then 'Something went wrong'
 Error (primary function unusable)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
@@ -1131,13 +1128,13 @@ Bug <strong>Evidence:</strong>
 2026-08-12) <strong>Severity:</strong> P0 <strong>Created-By:</strong>
 AI <strong>Assigned-To:</strong> AI</p>
 <p>QA video 2026-06-25 frames 0060-0140: every search fails (blank ~25s
-then Error/Retry; ‘prince’ stays blank). KNOWN-class
+then Error/Retry; 'prince' stays blank). KNOWN-class
 (anonymous/provider-mismatch). CODE-FIX landed in 1076
 (SearchInputViewModel observeAll filtered+sorted + loading/empty state)
 but 1076 NOT yet distributed/device-verified. Pending §6.Z gate. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #1.</p>
 <h2
-id="lva-084-video-2-onboarded-provider-yts-is-not-the-provider-set-used-by-search-unconfigured-providers-active-as-filters">LVA-084
+id="lva-084--video-2--onboarded-provider-yts-is-not-the-provider-set-used-by-search-unconfigured-providers-active-as-filters">LVA-084
 — Video #2 — Onboarded provider (YTS) is NOT the provider set used by
 Search; unconfigured providers active as filters</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1153,7 +1150,7 @@ searchEnabled&amp;&amp;isEnabled). Pending §6.Z device verification.
 Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #2.</p>
 <h2
-id="lva-013-missing-6.z-device-evidence-for-client-1080-and-api-app-24">LVA-013
+id="lva-013--missing-6z-device-evidence-for-client-1080-and-api-app-24">LVA-013
 — Missing 6.Z device evidence for client 1080 and api-app 24</h2>
 <p><strong>Status:</strong> Obsolete (→ Fixed.md) <strong>Type:</strong>
 Task <strong>Evidence:</strong> Superseded: 1080/api-app-24 were never

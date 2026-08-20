@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-08-20-workable-items-evidence-exemptions</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="workable-items-evidence-path-exemption-ledger">Workable-Items
+Evidence-Path Exemption Ledger</h1>
+<p>Per the Constitutional §6.D Behavioral Coverage Contract pattern
+(same precedent as
+<code>docs/superpowers/specs/2026-04-30-sp3a-coverage-exemptions.md</code>):
+every gate exemption is listed here individually with reason,
+investigation method, and date. Blanket waivers are forbidden —
+<code>scripts/check-workable-items.sh</code> parses the machine-readable
+block below and rejects the gate on ANY
+<code>CM-WORKABLE-ITEMS-SYNC</code> violation whose
+<code>(atm_id, history_id)</code> pair is not listed here verbatim.
+Adding a row to this file does not fabricate evidence — it is a
+documented acknowledgment that no honest resolvable-artifact fix exists
+for that specific closure, with the investigation that proves it.</p>
+<blockquote>
+<p><strong>See also: Seventh Law clause 5 (Recurring Bluff
+Hunt).</strong> An exemption whose stated reason no longer holds (e.g.
+the cited deletion commit turns out to have a live successor file, or
+the workable-items binary later gains a mark-historically-deleted
+mechanism) MUST be closed by fixing the underlying
+<code>item_history</code> row via <code>correct-history-evidence</code>
+and removing its ledger row — never by leaving a stale exemption in
+place once a real fix becomes possible.</p>
+</blockquote>
+<h2 id="background">Background</h2>
+<p>On 2026-06-28, commit
+<code>56f2417795c98408ebbb6b62ed4ac029526c5ad8</code> ("evidence cleanup
++ submodule pin advances") bulk-deleted the entire
+<code>.lava-ci-evidence/workable-items/</code> directory of per-item
+evidence files that 49 of the 51 LVA-N closures recorded in June 2026
+pointed at. A separate, unmerged investigation branch (commit
+<code>6a56a394</code>, 2026-08-20) individually triaged all 78
+<code>validate</code> violations that existed at the time, fixed 20 of
+them where the closure narrative embedded a still-existing literal file
+path (via <code>correct-history-evidence</code>, never a hand-edit of
+the SQLite file), and left the remaining 58 open with per-item reasoning
+recorded in a gitignored scratch file. This session (2026-08-20)
+independently re-derived the same triage against the current DB state —
+confirming the same root cause for the deleted-evidence class via
+<code>git log --all --diff-filter=D</code> on every one of the 49
+affected paths (not a re-read of the prior branch's notes) — fixed 2
+further violations (LVA-013 history ids 202/203, whose narrative already
+named two still-existing, unambiguous evidence files that only needed
+disaggregating into one path per row), and is recording the remaining 67
+as an explicit, auditable exemption ledger rather than leaving
+<code>CM-WORKABLE-ITEMS-SYNC</code> permanently red with no path to a
+passing gate.</p>
+<h2
+id="category-a--evidence-bulk-deleted-by-commit-56f2417795c9-2026-06-28-no-live-replacement">Category
+A — evidence bulk-deleted by commit <code>56f2417795c9</code>
+(2026-06-28), no live replacement</h2>
+<p>49 items. Verified by running
+<code>git log --all --diff-filter=D --format=%H -- &lt;path&gt;</code>
+against every one of the paths below and confirming the deleting commit
+is exactly <code>56f2417795c98408ebbb6b62ed4ac029526c5ad8</code> (script
+output cross-checked, zero anomalies). The workable-items binary has no
+subcommand to mark historical evidence "deleted, closure narrative
+stands" (checked <code>--help</code>, <code>schema.sql</code>,
+<code>evidence.go</code>, <code>correct_evidence.go</code> in
+<code>constitution/scripts/workable-items/</code> — none exists).
+Inventing a replacement evidence path would be fabrication; leaving the
+row unexempted would permanently block every future push for a defect in
+tooling this project doesn't control the pin of on a whim
+(<code>constitution/</code> is frozen-by-default, CONST-049
+pipeline).</p>
+<table>
+<thead>
+<tr>
+<th>ATM-ID</th>
+<th>History-ID</th>
+<th>Event</th>
+<th>Date</th>
+<th>Evidence path (deleted)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LVA-025</td>
+<td>51</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-025-026-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-026</td>
+<td>52</td>
+<td>Implemented</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-025-026-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-028</td>
+<td>53</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-028-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-029</td>
+<td>54</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-029-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-030</td>
+<td>67</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-030-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-032</td>
+<td>63</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-032-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-033</td>
+<td>64</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-033-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-034</td>
+<td>65</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-034-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-035</td>
+<td>66</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-035-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-037</td>
+<td>71</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-037-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-038</td>
+<td>80</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-038-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-039</td>
+<td>81</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-039-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-040</td>
+<td>82</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-040-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-041</td>
+<td>83</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-041-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-042</td>
+<td>84</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-042-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-043</td>
+<td>85</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-043-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-044</td>
+<td>96</td>
+<td>Implemented</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-044-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-045</td>
+<td>86</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-045-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-046</td>
+<td>94</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-046-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-047</td>
+<td>95</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-047-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-048</td>
+<td>98</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-048-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-049</td>
+<td>99</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-049-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-050</td>
+<td>100</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-050-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-051</td>
+<td>97</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-051-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-052</td>
+<td>111</td>
+<td>Implemented</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-052-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-053</td>
+<td>102</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-053-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-054</td>
+<td>112</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-054-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-055</td>
+<td>113</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-055-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-056</td>
+<td>107</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-056-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-057</td>
+<td>117</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-057-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-058</td>
+<td>118</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-058-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-059</td>
+<td>120</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-059-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-060</td>
+<td>119</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-060-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-061</td>
+<td>121</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-061-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-062</td>
+<td>122</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-062-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-063</td>
+<td>124</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-063-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-064</td>
+<td>129</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-064-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-065</td>
+<td>130</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-065-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-066</td>
+<td>128</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-066-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-067</td>
+<td>148</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-067-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-068</td>
+<td>135</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-068-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-069</td>
+<td>136</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-069-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-070</td>
+<td>146</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-070-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-071</td>
+<td>147</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-071-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-072</td>
+<td>143</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-072-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-073</td>
+<td>141</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-073-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-074</td>
+<td>145</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-074-evidence.md</code></td>
+</tr>
+<tr>
+<td>LVA-2</td>
+<td>9</td>
+<td>Completed</td>
+<td>2026-05-31</td>
+<td><code>.lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64</code></td>
+</tr>
+<tr>
+<td>LVA-4</td>
+<td>149</td>
+<td>Implemented</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/LVA-4-evidence.md</code></td>
+</tr>
+</tbody>
+</table>
+<h2
+id="category-b--malformed-path-never-existed-under-either-literal-form">Category
+B — malformed path, never existed under either literal form</h2>
+<p>2 items (same underlying item, LVA-6/LVA-031, recorded on two history
+rows). Path is
+<code>.lava-ci-evidence/workable-items/../codegraph/lva6-groundtruth-20260609.md</code>.
+Verified via <code>git log --all --format=%H</code> (not
+<code>--diff-filter=D</code>) on BOTH the literal string and its
+<code>..</code>-normalized form
+<code>.lava-ci-evidence/codegraph/lva6-groundtruth-20260609.md</code> —
+zero commits in either case. This was never a deletion; the path was
+wrong from the moment it was recorded.</p>
+<table>
+<thead>
+<tr>
+<th>ATM-ID</th>
+<th>History-ID</th>
+<th>Event</th>
+<th>Date</th>
+<th>Evidence path (never existed)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LVA-031</td>
+<td>62</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/../codegraph/lva6-groundtruth-20260609.md</code></td>
+</tr>
+<tr>
+<td>LVA-6</td>
+<td>55</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td><code>.lava-ci-evidence/workable-items/../codegraph/lva6-groundtruth-20260609.md</code></td>
+</tr>
+</tbody>
+</table>
+<h2
+id="category-c--narrative-closure-with-no-unambiguous-resolvable-file">Category
+C — narrative closure with no unambiguous resolvable file</h2>
+<p>16 items. The closure narrative names a test class, module, or
+feature area (e.g. "core/testing TestEndpointsRepository Rutracker no-op
++ equivalence test") but does not embed one specific, still-existing
+FILE path with a slash and extension — only bare module/package
+directories match a path-shaped regex (<code>core/testing</code>,
+<code>core/domain</code>, <code>feature/rating</code>,
+<code>feature/favorites</code>, <code>feature/topic</code>,
+<code>core/preferences</code>, <code>submodules/helixqa</code>).
+Recording a directory as "evidence" for a specific behavioral fix would
+be a guess, not proof — indistinguishable from picking one of several
+plausible files, which the Seventh Law clause 4 forbidden-pattern list
+and this project's own prior 2026-08-20 triage both declined to do
+("picking one would have been a guess, so they were deliberately left
+alone"). Left open pending either a richer closure-time evidence
+discipline going forward, or operator decision to accept a specific file
+per item.</p>
+<table>
+<thead>
+<tr>
+<th>ATM-ID</th>
+<th>History-ID</th>
+<th>Event</th>
+<th>Date</th>
+<th>Narrative (truncated)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LVA-009</td>
+<td>16</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td>submodules/helixqa pin 639f7652 (launch verb builds launcher intent)
++ .lava-ci-…</td>
+</tr>
+<tr>
+<td>LVA-011</td>
+<td>18</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td>commit d9a4eaaa core/testing TestEndpointsRepository Rutracker no-op
++ equivalen…</td>
+</tr>
+<tr>
+<td>LVA-012</td>
+<td>19</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td>commit d28ddd22 core/testing Visited/Favorites/Bookmarks fakes
+implemented + 13 …</td>
+</tr>
+<tr>
+<td>LVA-013</td>
+<td>20</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td>core/testing TestEndpointsRepository.observeAll filterNot Rutracker
++ no-seed (m…</td>
+</tr>
+<tr>
+<td>LVA-014</td>
+<td>23</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td>core/testing TestSuggestsRepository implemented (in-memory,
+case-insensitive UPS…</td>
+</tr>
+<tr>
+<td>LVA-015</td>
+<td>24</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td>core/testing TestSearchHistoryRepository content-derived id
+(replicates Filter.i…</td>
+</tr>
+<tr>
+<td>LVA-016</td>
+<td>28</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td>core/domain ObserveRatingRequestUseCaseImpl made public (Fifth Law);
+feature/rat…</td>
+</tr>
+<tr>
+<td>LVA-017</td>
+<td>29</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td>feature/favorites InMemoryFavoritesRepository.add + feature/topic
+FakeFavoritesR…</td>
+</tr>
+<tr>
+<td>LVA-018</td>
+<td>30</td>
+<td>Completed</td>
+<td>2026-06-09</td>
+<td>core/preferences PreferencesStorage[Impl]
+getHistorySyncPeriod/getCredentialsSyn…</td>
+</tr>
+<tr>
+<td>LVA-019</td>
+<td>32</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td>internal/nnmclub/login.go selectors quoted;
+login_isauthorised_branch_test.go (I…</td>
+</tr>
+<tr>
+<td>LVA-020</td>
+<td>35</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td>flexString type (string/number/array→joined) in
+internal/archiveorg/flexstring.g…</td>
+</tr>
+<tr>
+<td>LVA-021</td>
+<td>37</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td>underlyingTypeName fallback → fmt.Sprintf(%T, err);
+nonfatal_typed_errorclass_te…</td>
+</tr>
+<tr>
+<td>LVA-022</td>
+<td>39</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td>matchFormatByPrefix helper; bestFormatName+pickBestFormatURL
+prefix-match; utils…</td>
+</tr>
+<tr>
+<td>LVA-023</td>
+<td>41</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td>provider.go AuthToken: success.User.Token;
+provider_adapter_e2e_test.go TestAdap…</td>
+</tr>
+<tr>
+<td>LVA-024</td>
+<td>43</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td>provider.go drops the synthetic Files entry;
+provider_mapping_test.go TestFromTo…</td>
+</tr>
+<tr>
+<td>LVA-027</td>
+<td>47</td>
+<td>Fixed</td>
+<td>2026-06-09</td>
+<td>KinozalSizeParser (binary mult, comma/dot, Latin+Cyrillic units) +
+KinozalSearch…</td>
+</tr>
+</tbody>
+</table>
+<h2 id="machine-readable-exemption-set">Machine-readable exemption
+set</h2>
+<p>Parsed verbatim by <code>scripts/check-workable-items.sh</code>. One
+<code>ATM-ID|history-id</code> pair per line inside the fenced block;
+nothing else in this file is parsed. A violation whose
+<code>(atm_id, history_id)</code> is not listed here fails the gate.</p>
+<pre class="exemptions"><code>LVA-009|16
+LVA-011|18
+LVA-012|19
+LVA-013|20
+LVA-014|23
+LVA-015|24
+LVA-016|28
+LVA-017|29
+LVA-018|30
+LVA-019|32
+LVA-020|35
+LVA-021|37
+LVA-022|39
+LVA-023|41
+LVA-024|43
+LVA-025|51
+LVA-026|52
+LVA-027|47
+LVA-028|53
+LVA-029|54
+LVA-030|67
+LVA-031|62
+LVA-032|63
+LVA-033|64
+LVA-034|65
+LVA-035|66
+LVA-037|71
+LVA-038|80
+LVA-039|81
+LVA-040|82
+LVA-041|83
+LVA-042|84
+LVA-043|85
+LVA-044|96
+LVA-045|86
+LVA-046|94
+LVA-047|95
+LVA-048|98
+LVA-049|99
+LVA-050|100
+LVA-051|97
+LVA-052|111
+LVA-053|102
+LVA-054|112
+LVA-055|113
+LVA-056|107
+LVA-057|117
+LVA-058|118
+LVA-059|120
+LVA-060|119
+LVA-061|121
+LVA-062|122
+LVA-063|124
+LVA-064|129
+LVA-065|130
+LVA-066|128
+LVA-067|148
+LVA-068|135
+LVA-069|136
+LVA-070|146
+LVA-071|147
+LVA-072|143
+LVA-073|141
+LVA-074|145
+LVA-2|9
+LVA-4|149
+LVA-6|55</code></pre>
+</body>
+</html>
