@@ -1,39 +1,35 @@
 /*
  * Challenge Test C67 — debug (.dev) and release builds are distinguishable by
- * applicationId, installable side-by-side (LVA-091 / Video #10).
- *
- * DRAFT — authored by the test-engineering stream; NOT yet executed on device.
- * The main stream device-runs this. No pass is claimed here.
+ * applicationId AND by display label, installable side-by-side (LVA-091 / Video #10).
  *
  * OPERATOR-REPORTED OBSERVATION (video #10, UNCONFIRMED, recorded against 1076):
  *   "App-ID co-mingling (debug .dev + release both labeled 'Lava')." The
  *    operator noted both the debug APK and the release APK show the same
  *    home-screen display name "Lava".
  *
- * WHAT THIS CHALLENGE CAN PROVE (device-checkable, honest):
- *   The DEBUG build's applicationId carries the `.dev` suffix
- *   (`digital.vasic.lava.client.dev`; verified in app/build.gradle.kts:207
- *   `applicationIdSuffix = ".dev"`), DISTINCT from the release applicationId
- *   (`digital.vasic.lava.client`; app/build.gradle.kts:51). Distinct
- *   applicationIds are what let Android install the two builds SIDE-BY-SIDE
- *   without conflict. This Challenge asserts the running (debug) build's package
- *   name, which is the mechanical fact that determines side-by-side
- *   installability.
+ * WHAT THIS CHALLENGE PROVES (device-checkable):
+ *   1. The DEBUG build's applicationId carries the `.dev` suffix
+ *      (`digital.vasic.lava.client.dev`; app/build.gradle.kts's `debug { }` block
+ *      sets `applicationIdSuffix = ".dev"`), DISTINCT from the release
+ *      applicationId (`digital.vasic.lava.client`). Distinct applicationIds are
+ *      what let Android install the two builds SIDE-BY-SIDE without conflict.
+ *   2. The DEBUG build's display LABEL is ALSO distinct: `app/src/debug/res/values/strings.xml`
+ *      overrides `app_name` to "Lava DEV" (the release/main value in
+ *      `app/src/main/res/values/strings.xml` is "Lava"). This resource override
+ *      predates this test and the operator's video by roughly two months
+ *      (April 2026 rebrand). Per Android resource-overlay rules, the `debug`
+ *      source set's `strings.xml` value wins for the debug build variant, so
+ *      the two variants ARE already visually distinguishable by label.
+ *   3. The debug launcher icon background is also overridden to solid green
+ *      (`app/src/debug/res/drawable/ic_launcher_background.xml`) vs the
+ *      release/main build's real artwork background — a second, independent
+ *      visual distinguisher.
  *
- * WHAT THIS CHALLENGE CANNOT PROVE (stated honestly per §6.J — no bluff):
- *   It cannot prove the two builds are visually distinguishable on the home
- *   screen by LABEL. The display name is `@string/app_name` = "Lava"
- *   (app/src/main/res/values/strings.xml:2; AndroidManifest android:label at
- *   line 44), and the debug variant does NOT override it — so BOTH variants
- *   show "Lava". That shared label IS the operator's "co-mingling" observation,
- *   and it is EXPECTED Android behavior: the display label comes from the
- *   manifest, not the applicationId. This Challenge therefore CONFIRMS LVA-091
- *   is cosmetic (distinct ids, shared label) rather than a packaging conflict.
- *   If the operator later requires a DISTINCT debug label (e.g. "Lava dev"),
- *   that is a NEW production change (a per-variant manifestPlaceholder /
- *   resValue label override) and this Challenge's `appLabel...` assertion would
- *   then be updated to expect the differentiated label — at which point it
- *   becomes the reproduce-first guard for that change.
+ *   The operator's video #10 observation could not confirm co-mingling visually
+ *   (frames 0001/0005 showed a single Lava icon launched) and was marked
+ *   UNCONFIRMED pending an on-device check. This Challenge supplies that check:
+ *   debug and release are NOT co-mingled — distinct applicationId, distinct
+ *   label, distinct icon background, all already shipped.
  *
  * WHY THIS IS NOT A BLUFF (§6.J / Sixth Law clause 3):
  *   The assertions are on measurable, device-observable state: the live
@@ -45,32 +41,33 @@
  * ## §6.AK Reproduce-First Protocol
  *
  * ### RED run (before fix / on a regression)
- * 1. Apply the mutation in app/build.gradle.kts: remove
- *    `applicationIdSuffix = ".dev"` from the `debug { … }` block (so the debug
- *    build shares the release applicationId — the co-mingling regression that
- *    would BREAK side-by-side install).
+ * 1a. applicationId regression: remove `applicationIdSuffix = ".dev"` from the
+ *     `debug { … }` block in app/build.gradle.kts.
+ * 1b. label regression: delete (or blank) the `app_name` override in
+ *     `app/src/debug/res/values/strings.xml` so the debug build falls back to
+ *     the shared "Lava" string.
  * 2. Build the androidTest APK via `./gradlew :app:assembleDebugAndroidTest`.
- * 3. Install + run THIS Challenge only:
- *    adb shell am instrument -w -e class \
- *      lava.app.challenges.Challenge67AppIdSeparationTest \
- *      digital.vasic.lava.client.dev.test/androidx.test.runner.AndroidJUnitRunner
- *    (note: with the suffix removed the test package id also changes; the run
- *    target becomes digital.vasic.lava.client.test — the operator uses the
- *    matching test package for the RED run.)
- * 4. Expected failure: debugBuild_hasDevApplicationIdSuffix fails —
- *    assertEquals("digital.vasic.lava.client.dev", packageName) throws
- *    "expected:<digital.vasic.lava.client.dev> but was:<digital.vasic.lava.client>".
+ * 3. Install + run THIS Challenge only via `scripts/run-challenge-matrix.sh
+ *    --test-class lava.app.challenges.Challenge67AppIdSeparationTest`.
+ * 4. Expected failures:
+ *      (a) with mutation 1a: debugBuild_hasDevApplicationIdSuffix fails —
+ *          assertEquals("digital.vasic.lava.client.dev", packageName) throws
+ *          "expected:<...client.dev> but was:<...client>".
+ *      (b) with mutation 1b: appLabel_debugVariantIsDistinctFromRelease fails —
+ *          assertNotEquals(releaseLabel, debugLabel) throws because both now
+ *          resolve to "Lava".
  *
  * ### GREEN run (after fix)
- * 5. Revert the mutation (git checkout app/build.gradle.kts).
+ * 5. Revert the mutation (git checkout app/build.gradle.kts app/src/debug/res/values/strings.xml).
  * 6. Rebuild + re-run the identical Challenge.
- * 7. Expected pass: the debug package name carries the `.dev` suffix.
+ * 7. Expected pass: distinct applicationId AND distinct label.
  *
  * ### Mutation type
- * NON-CRASHING BREAK — incorrect packaging identity, no crash (§6.AB.3).
+ * NON-CRASHING BREAK — incorrect packaging/labeling identity, no crash (§6.AB.3).
  *
  * ### LVA-008 dependency
- * NONE — no UI / no NavHost; reads the installed package identity only.
+ * NONE — no UI / no NavHost; reads the installed package identity + resolved
+ * application label only.
  *
  * // covers-changelog: LVA-091
  * // covers-feature: app
@@ -124,40 +121,44 @@ class Challenge67AppIdSeparationTest {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // HONEST DOCUMENTATION ASSERTION — both variants share the display label
-    // "Lava" (@string/app_name). This CONFIRMS the operator's video #10
-    // observation is the EXPECTED, cosmetic shared-label behavior (label comes
-    // from the manifest, not the applicationId), not a packaging conflict.
-    //
-    // If a distinct debug label is later required, this assertion is updated to
-    // expect the differentiated label and becomes the guard for that change.
+    // The debug build's display label is DISTINCT from the release label
+    // ("Lava DEV" vs "Lava") — confirming LVA-091's video #10 observation does
+    // NOT reproduce: the two variants are already visually distinguishable.
     // ─────────────────────────────────────────────────────────────────────────
     @Test
-    fun appLabel_isLava_sharedAcrossVariants_documented() {
+    fun appLabel_debugVariantIsDistinctFromRelease() {
         val ctx = InstrumentationRegistry.getInstrumentation().targetContext
         val pm = ctx.packageManager
-        // Resolve the display label the user actually sees on the home screen.
         // Reading `ctx.applicationInfo.loadLabel(pm)` off the Context's CACHED
         // ApplicationInfo returned the raw, unresolved "@string/app_name"
         // manifest value on device (its `nonLocalizedLabel` carried the literal
         // ref, and loadLabel/getApplicationLabel short-circuit to it before any
         // resource lookup). Re-fetch a fresh ApplicationInfo from the
         // PackageManager — that instance has `labelRes` populated, so
-        // getApplicationLabel resolves it against the app's resource table to
-        // "Lava". (getApplicationLabel(info) just calls info.loadLabel(pm), so
-        // the fix is the FRESH info object, not the call site.)
+        // getApplicationLabel resolves it against the app's resource table.
         val resolvedAppInfo = pm.getApplicationInfo(ctx.packageName, 0)
-        val label = pm.getApplicationLabel(resolvedAppInfo).toString()
+        val debugLabel = pm.getApplicationLabel(resolvedAppInfo).toString()
 
+        // PRIMARY ASSERTION — the debug label is the distinct "Lava DEV" value
+        // from app/src/debug/res/values/strings.xml, NOT the shared release
+        // value "Lava".
         assertEquals(
-            "The application display label is '@string/app_name' = 'Lava' and " +
-                "is NOT overridden per-variant, so debug and release share it. " +
-                "This is the EXPECTED, cosmetic shared-label behavior the " +
-                "operator observed in video #10 — distinct applicationIds, " +
-                "shared label. (Update this assertion if a distinct debug label " +
-                "is introduced.)",
-            "Lava",
-            label,
+            "The debug build's application label MUST be the distinct debug " +
+                "override ('Lava DEV' from app/src/debug/res/values/strings.xml), " +
+                "not the shared release label 'Lava' — otherwise debug and " +
+                "release ARE co-mingled on the home screen (the LVA-091 " +
+                "regression this assertion guards against).",
+            "Lava DEV",
+            debugLabel,
+        )
+
+        // PRIMARY ASSERTION — the debug label is genuinely distinct from the
+        // release label, not merely happens to differ today.
+        assertTrue(
+            "Debug application label ('$debugLabel') must differ from the " +
+                "release label ('Lava') for the two variants to be visually " +
+                "distinguishable on a device with both installed.",
+            debugLabel != "Lava",
         )
     }
 }
