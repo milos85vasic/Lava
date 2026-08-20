@@ -21,9 +21,9 @@
 # Invariant values: pass | gap | n/a | "waiver: <rationale>" | "pass: <rationale>"
 metadata:
   schema_version: 1
-  generated_at: "2026-08-12T18:59:09Z"
+  generated_at: "2026-08-20T12:16:37Z"
   generator: "scripts/generate-coverage-ledger.sh"
-  commit_sha: "2b3af3bf5ca7e26201a9d507b60fb80a7ca2c307"
+  commit_sha: "995c210df635824646b5594def630a46e54065ed"
   mandate: "HelixConstitution §11.4.25 Full-Automation-Coverage Mandate"
 
 rows:
@@ -240,7 +240,7 @@ rows:
     status: "covered"
     unit_test_count: 8
     integration_test_count: 0
-    challenge_count: 20
+    challenge_count: 21
     challenges:
       - "C20"
       - "C21"
@@ -261,6 +261,7 @@ rows:
       - "C65"
       - "C66"
       - "C70"
+      - "C72"
       - "HEURISTIC"
     sample_tests:
       - "AuthTypeDisplayTest.kt"
@@ -832,7 +833,7 @@ rows:
   - path: "app"
     kind: "app"
     status: "covered"
-    unit_test_count: 74
+    unit_test_count: 75
     integration_test_count: 0
     challenge_count: 0
     challenges: []
