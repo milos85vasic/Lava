@@ -23,12 +23,25 @@ cd "$REPO_ROOT"
 
 SNAPSHOT_DIR=".lava-ci-evidence/coverage-ledger-snapshots"
 SNAPSHOT_PATH="$SNAPSHOT_DIR/$VERSION_CODE_TAG.yaml"
+LEDGER_PATH="docs/coverage-ledger.yaml"
+
+# Was the tracked ledger clean before we touched it? If so, we're responsible
+# for leaving it clean afterward too — this script takes a snapshot, it does
+# not mutate tracked state.
+LEDGER_WAS_CLEAN=0
+if [[ -z "$(git status --porcelain "$LEDGER_PATH" 2>/dev/null)" ]]; then
+    LEDGER_WAS_CLEAN=1
+fi
 
 echo "==> LVA-019: regenerating docs/coverage-ledger.yaml"
-bash scripts/generate-coverage-ledger.sh --quiet 2>/dev/null || bash scripts/generate-coverage-ledger.sh
+bash scripts/generate-coverage-ledger.sh --quiet
 
 mkdir -p "$SNAPSHOT_DIR"
-cp docs/coverage-ledger.yaml "$SNAPSHOT_PATH"
+cp "$LEDGER_PATH" "$SNAPSHOT_PATH"
+
+if [[ "$LEDGER_WAS_CLEAN" -eq 1 ]] && [[ -n "$(git status --porcelain "$LEDGER_PATH" 2>/dev/null)" ]]; then
+    git checkout -- "$LEDGER_PATH"
+fi
 
 echo "==> Snapshot written: $SNAPSHOT_PATH"
 exit 0

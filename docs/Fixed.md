@@ -849,3 +849,11 @@ QA video frames 0012/0015. NEW UX. CODE-FIX in 1076 (discovered-API friendly nam
 
 QA video frames 0001/0005: single Lava icon launched; co-mingling NOT visually confirmed. Needs on-device package check (applicationIdSuffix .dev + launcher label). OPEN/UNCONFIRMED. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #10.
 
+## LVA-019 — Coverage ledger partial/gap overlap and missing per-release ledgers
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items-closures/2026-08-20-lva-019-closure.md
+
+Task P1 process: coverage ledger has partial/gap overlap and lacks per-release ledger snapshots. Normalize the registry and add release-attestation ledgers.
+
