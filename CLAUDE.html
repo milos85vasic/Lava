@@ -333,6 +333,99 @@ per-tracker capability matrix and
 <code>docs/sdk-developer-guide.md</code> for the seven-step recipe to
 add a new one. The repo is a fork of <code>andrikeev/Flow</code>,
 rebranded to Lava. All code/comments/docs are English.</p>
+<h2
+id="multi-track-development-system-adoption-6am-added-2026-08-14">Multi-Track
+Development System Adoption (§6.AM, added 2026-08-14)</h2>
+<p><strong>Forensic anchor — verbatim operator directive
+(2026-08-14):</strong> <em>"Make sure this project does fully switch to
+complete and full use and integration with constitution Submodule and
+multi-track development System and current project directory as Track 1
+(main track). We will be enabling and adding more tracks in near future!
+This MUST BE default and only way of working and respecting all rules,
+guidelines, all tech stacks, mandatory constraints and everything
+derived from and through the latest version (codebase) of the
+constitution Submodule — from now on forevermore !!!"</em> Plus: <em>"Do
+not forget to commit and push all work to all upstreams - all submodules
+fully recursively and main repo, also full switch to multi-track system
+and full constitution use with no exception!"</em></p>
+<p><strong>Rule.</strong> Lava adopts the HelixConstitution multi-track
+development engine (<code>constitution/scripts/multitrack/</code>,
+§11.4.176/§11.4.178/§11.4.179/§11.4.180/§11.4.181/§11.4.182/§11.4.187/§11.4.191/§11.4.192/§11.4.196/§11.4.198)
+as the <strong>default and only way of working</strong> from this commit
+forward — every rule, guideline, tech-stack constraint, and mandatory
+constraint derived from the constitution submodule's latest pulled
+codebase applies through this engine, with no exception, standing
+indefinitely ("forevermore" per the operator's own word).</p>
+<ol type="1">
+<li><strong>Track topology (this host, <code>nezha</code>).</strong>
+Per-host config at <code>config/multitrack/nezha.yaml</code>
+(schema_version 1, hostname <code>nezha</code>). <strong>Track 1
+(<code>track1</code>, role <code>main</code>)</strong> is the
+<strong>current project directory</strong> —
+<code>/run/media/milosvasic/DATA4TB/Projects/lava</code> on drive
+<code>nvme0n1</code> (stable serial <code>511240401212000405</code>,
+btrfs, sole mountpoint <code>/run/media/milosvasic/DATA4TB</code>),
+branch <code>master</code>. The system drive <code>nvme1n1</code>
+(serial <code>S4EWNS0X108183F</code>, carrying <code>/boot/efi</code> +
+<code>[SWAP]</code> + <code>/home</code>) is registered under
+<code>protected_drives</code> and MUST NEVER be targeted as a track
+(§11.4.111 resolve-by-stable-serial-never-by-index; §12/§11.4.133
+host+target safety).</li>
+<li><strong>Bootstrap wiring.</strong>
+<code>constitution/scripts/multitrack/multitrack_bootstrap.sh "$(pwd)"</code>
+was run and completed exit 0: the <code>claude-cwd-hook</code> symlink
+is installed at <code>~/.local/bin/claude-cwd-hook</code> (pointing at
+this project's constitution copy), the per-host config loads with
+<code>MT_TRACK_COUNT=1</code>, and the alias orchestrator reconciled
+successfully. Re-run the bootstrap idempotently any time the topology
+changes (new track added, new drive attached) — it is safe to re-invoke
+and never auto-mounts/formats a drive (§11.4.133/§9-D8).</li>
+<li><strong>Track 1's drive-readiness reads
+<code>STATUS=NON-EMPTY</code>, and that is correct, not a
+defect.</strong> <code>mt_plan()</code>'s
+READY/NON-EMPTY/ABSENT/PROTECTED-CONFLICT status vocabulary is oriented
+around provisioning a <em>fresh</em> drive for a <em>new</em> track;
+Track 1 here is the <em>pre-existing, already-mounted,
+already-in-use</em> Lava checkout being registered post-hoc, so it will
+always show NON-EMPTY (it has real data + mountpoints) rather than READY
+(which presumes an empty disk awaiting prep). The bootstrap script
+treats this status as informational-only at step 5 (a NOTE, never a
+fatal exit) — do not attempt to "fix" this by wiping or reprovisioning
+Track 1's drive.</li>
+<li><strong>Future tracks.</strong> Per the operator's "we will be
+enabling and adding more tracks in near future," additional tracks
+require either a new physical/mounted drive, or (per §11.4.179) a
+reflink/CoW clone with its OWN <code>.git</code> on the same drive as
+Track 1 — never a <code>git worktree</code> sharing Track 1's common
+<code>.git</code> dir (shared-common-dir worktrees are a
+corruption-isolation violation under §11.4.179). <code>nvme1n1</code>
+(the system drive) is permanently excluded as a track candidate. When a
+new track is added, extend <code>config/multitrack/nezha.yaml</code>'s
+<code>tracks:</code> list and re-run the bootstrap.</li>
+<li><strong>Standing composition.</strong> This adoption composes with —
+and does not weaken — every constitution multi-track anchor already
+binding on this project by inheritance (§6.AD pointer-block): §11.4.176
+(exactly-once claim registry + device-lock), §11.4.178 (track-qualified
+identity, no bare-basename collision), §11.4.182 (the
+<code>(T&lt;N&gt;/&lt;branch&gt; - &lt;alias&gt; - &lt;model&gt; - &lt;effort&gt;)</code>
+work-stream label — see §6.AJ), §11.4.187 (automatic ruler
+orchestration), §11.4.191 (work-to-track/branch binding enforcement),
+§11.4.192 (continuous auto-backfill of a freed track), §11.4.196
+(native-alias-first priority), §11.4.198 (default-always-on mechanisms).
+None of Lava's existing Anti-Bluff Pact, Local-Only CI/CD, §6.W 2-mirror
+policy, or Host-Machine-Stability directives are relaxed by this
+adoption — the multi-track engine operates <em>within</em> those bounds,
+never around them.</li>
+<li><strong>Inheritance.</strong> Applies recursively to every Lava
+submodule + <code>lava-api-go</code>. Per §6.AD.8, the pointer-block
+already binds them transitively; no separate per-submodule multi-track
+config is required unless a submodule independently adopts its own track
+topology.</li>
+</ol>
+<p><code>Classification:</code> project-specific (the specific drive
+serials, mount paths, and hostname config are Lava's own topology; the
+underlying multi-track engine + its inheritance mechanism are universal
+per HelixConstitution §11.4.187/§11.4.176 et al.).</p>
 <h2 id="commands">Commands</h2>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Android app</span></span>
@@ -4094,6 +4187,135 @@ Challenge in a different-SHA evidence). Until this closes, the operator
 CHANGELOG-claimed user-visible fix — and MUST NOT distribute on a
 C00-only (or any cold-start-only) evidence file when the cycle claims
 flow/UI fixes.</p>
+<h5
+id="6al--helixconstitution-114142114238-adoption-added-2026-08-12-lva-3">6.AL
+— HelixConstitution §11.4.142–§11.4.238 Adoption (added 2026-08-12,
+LVA-3)</h5>
+<p><strong>Forensic anchor:</strong> LVA-081 (2026-08-12, this same
+session) fetched the constitution submodule and bumped its pin from
+<code>6bf67ce4</code> to <code>3cc71cd8</code> (35 upstream commits)
+under an operator-authorized one-time override of the frozen-by-default
+pin policy. A <code>git diff</code> of <code>Constitution.md</code>
+across that exact range shows only 4 genuinely NEW
+<code>###</code>-level anchor headings landed in this specific bump:
+<strong>§11.4.235–§11.4.238</strong>. However,
+<code>constitution/CLAUDE.md</code>'s compact-anchor index reveals that
+clauses <strong>§11.4.142 through §11.4.234</strong> — roughly 90
+anchors spanning 2026-06-09 through 2026-08-08 — were ALREADY present in
+the constitution submodule and have <strong>never been reviewed or
+adopted</strong> by Lava in any prior
+<code>§6.AF</code>/<code>§6.AI</code>-style entry (the last such entry,
+§6.AI, covered only up to §11.4.141). This is a real, large backlog —
+not a bluff-hiding omission: per §11.4.6 no-guessing, this entry states
+plainly what was reviewed and what was not, rather than claiming
+exhaustive compliance it cannot back with evidence.</p>
+<p><strong>Scope of this cycle's review (honest, not
+exhaustive).</strong> Given competing session priorities (two
+operator-reported bugs actively being fixed in parallel), a full
+line-by-line audit of ~90 accumulated clauses was NOT performed.
+Instead:</p>
+<ol type="1">
+<li><p><strong>§11.4.235–§11.4.238 (the genuinely new anchors in this
+bump) — reviewed:</strong></p>
+<ul>
+<li><strong>§11.4.235</strong> (build-and-deploy the moment source is
+proven-correct; post-deploy version increment on every manual-QA deploy)
+— <strong>EQUIVALENCE-MAPPED.</strong> Lava's §6.Y post-distribution
+version-bump mandate already requires bumping the version code before
+the next code-touching commit after a distribute; §6.AA's two-stage
+debug→release cycle already treats each manual-QA-facing distribute as a
+cycle boundary. The "test-hardening is parallel, never a build gate"
+nuance is NOT currently formalized in Lava — recorded as OWED.</li>
+<li><strong>§11.4.236</strong> (QA-deploy-readiness gate: no manual-QA
+hand-off without a candidate-fingerprinted PASS verdict, bound to a seam
+not prose) — <strong>PARTIALLY SATISFIED.</strong> §6.Z's Phase 1 Gate 6
+(still §6.Z-debt, not yet mechanically wired per that section) is the
+closest existing mechanism; the fingerprint-match-at-run-time discipline
+is not yet implemented. OWED.</li>
+<li><strong>§11.4.237</strong> (independent context-and-spirit
+translation review) — <strong>NOT APPLICABLE currently.</strong> Lava
+ships English-only UI/docs today; no localization pipeline exists.
+Latent-binding per the §11.4.96 pattern — binds the moment Lava ships a
+translated artifact, not before.</li>
+<li><strong>§11.4.238</strong> (automated QA must be the DISCOVERER,
+manual QA finds nothing new) — <strong>OWED, in tension with current
+practice.</strong> Lava's actual track record this session (RuTracker
+Cloudflare-block finding, LVA-008's stale-ticket discovery, both
+onboarding video-analysis findings) shows discovery happening through
+operator manual testing and agent source-reading, not an automated
+regime — exactly the pattern this clause names as a QA-system failure
+needing a coverage-escape audit + a new automated check per escape. This
+is real, unclosed debt, not a bluff to paper over.</li>
+</ul></li>
+<li><p><strong>Two representative spot-checks from the §11.4.142–234
+backlog, chosen for plausible relevance — checked LIVE, not
+assumed:</strong></p>
+<ul>
+<li><strong>§11.4.184 (mandatory SonarQube CLI,
+PATH-discoverable)</strong> — <strong>CONFIRMED GAP.</strong>
+<code>which sonar-scanner</code> fails; the PATH references
+<code>/home/milosvasic/sonar-scanner/bin</code>, which does not exist on
+this host (a stale entry from a prior, apparently-abandoned install
+attempt). SonarQube CLI is genuinely NOT installed. OWED.</li>
+<li><strong>§11.4.224 (TDD-first for ALL work + ≥85% code-coverage
+floor, bash included)</strong> — <strong>CONFIRMED GAP.</strong> No
+coverage-floor script exists under <code>scripts/</code>. Lava's
+existing test discipline (Anti-Bluff Pact, Seventh Law, §6.T.1
+reproduction-before-fix) enforces TEST QUALITY (real-stack, falsifiable,
+anti-bluff) but does NOT enforce a numeric line-coverage floor, nor
+extend TDD-first discipline to bash scripts specifically. OWED — and
+non-trivial: Lava's test suite today is heavily real-device/real-stack
+(deliberately, per the Anti-Bluff Pact), and retrofitting an 85%
+LINE-coverage floor onto that suite is a multi-session effort, not a
+quick gate addition.</li>
+</ul></li>
+<li><p><strong>§11.4.142–234 minus the above 6 anchors — NOT
+individually reviewed this cycle.</strong> This includes substantial
+material: the multi-track ruler orchestration (§11.4.187), the
+design-token/OpenDesign methodology (§11.4.216–223), the anti-mess
+control plane (§11.4.232–233), the dedicated hook-validation script
+mandate (§11.4.234, which Lava's <code>.githooks/pre-push</code> +
+<code>scripts/ci.sh</code> may already substantially satisfy given
+Local-Only CI/CD, but was not explicitly checked against the clause's
+exact invariants), the reporting-directive action-prefix extensions
+(§11.4.202/.213), and more. None of these are claimed adopted,
+satisfied, or rejected — they are simply UNREVIEWED, recorded honestly
+as such rather than silently assumed compliant.</p></li>
+</ol>
+<p><strong>Why review is honestly incomplete rather than deferred
+entirely.</strong> Per §11.4.6 (no-guessing) and this project's own
+Anti-Bluff Pact, claiming "reviewed and compliant" for 90 anchors
+without actually reading and checking each against Lava's codebase would
+itself be the exact bluff class §6.J exists to prevent — a green-looking
+governance entry masking unverified reality. The honest choice, given
+genuine competing priorities in this session, is this scoped entry: real
+findings on the anchors actually checked, explicit non-claim on the
+rest.</p>
+<p><code>Classification:</code> mixed — the adoption-tracking mechanism
+itself is universal (reusable pattern); the specific gap findings
+(SonarQube absent, no coverage floor, English-only UI) are Lava-specific
+facts.</p>
+<h5
+id="6al-debt--full-114142234-review--the-6-identified-gaps-constitutional-debt-2026-08-12">6.AL-debt
+— full §11.4.142–234 review + the 6 identified gaps (constitutional
+debt, 2026-08-12)</h5>
+<p>OWED: (1) a dedicated future session/cycle to read §11.4.142–234 in
+full and produce per-anchor ADOPTED/EQUIVALENCE-MAPPED/OWED verdicts,
+the way §6.AF and §6.AI did for their respective ranges; (2) install
+SonarQube CLI + wire <code>constitution/scripts/sonarqube/</code>
+tooling per §11.4.184; (3) design + implement a coverage-floor mechanism
+per §11.4.224 — this requires an explicit operator decision per that
+clause's own §11.4.224(D)/(E) brownfield-adoption question (immediate
+hard floor vs. monotone-decrease ratchet vs. per-corpus phase-in vs.
+changed-code-only) before enforcement, since Lava's corpus is large and
+largely unmeasured for line coverage today; (4) a coverage-escape audit
+process per §11.4.238 the next time an operator or agent (not an
+automated check) discovers a defect — starting with this very session's
+RuTracker Cloudflare-block finding and LVA-008 stale-ticket discovery,
+both of which were human/agent-discovered, not automated-QA-discovered,
+and therefore qualify as escapes under §11.4.238(C). Until these close,
+§11.4.142–234 compliance is UNKNOWN, not ASSUMED — the distinction
+matters per §11.4.6.</p>
 <h5
 id="6l--anti-bluff-functional-reality-mandate-operators-standing-order-repeated-2026-05-04">6.L
 — Anti-Bluff Functional Reality Mandate (Operator's Standing Order,

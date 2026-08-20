@@ -178,6 +178,124 @@
 <body>
 <h1 id="changelog">Changelog</h1>
 <h2
+id="lava-android-1317-1085--2026-08-14-lva-098--p0-fixed-no-tracker-can-log-in-search-fails-for-every-provider">Lava-Android-1.3.17-1085
+— 2026-08-14 (LVA-098 — P0: fixed "no tracker can log in, search fails
+for every provider")</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.17-1084.</p>
+<ul>
+<li><strong>Root cause: <code>lava.auth.LavaAuthGenerated</code> was
+written to disk by the build-time codegen task every build, but never
+actually compiled into the APK.</strong>
+<code>app/build.gradle.kts</code>'s
+<code>afterEvaluate { android.sourceSets["debug"].kotlin.srcDir(...) }</code>
+pattern (wiring the generated auth-blob-provider source into the Kotlin
+compilation) ran too late on this project's AGP 8.6.1 + Kotlin 2.1.0
+combination for
+<code>compileDebugKotlin</code>/<code>compileReleaseKotlin</code> to
+pick it up. Confirmed via <code>dexdump -l xml</code> across all 20
+<code>classesN.dex</code> files in a built debug APK: zero
+<code>class_def_item</code> matches for the class — it existed only as a
+string-literal constant (the reflective <code>Class.forName(...)</code>
+call's argument).</li>
+<li><strong>User-visible effect on every real device, every prior
+build:</strong> <code>AuthInterceptorModule</code> silently fell back to
+an empty stub auth-blob provider, so <strong>every authenticated request
+left the device with no <code>Lava-Auth</code> header at all</strong> —
+this is exactly the reported "not a single tracker can log in through
+onboarding, and the ones which don't require login can't search either",
+since every tracker flow routes through <code>lava-api-go</code>'s auth
+middleware, which correctly 401s a headerless request regardless of
+tracker/credentials.</li>
+<li><strong>Fix:</strong> moved the source-directory registration to an
+eager, top-level statement (outside <code>afterEvaluate</code>), proven
+via a throwaway diagnostic task dumping
+<code>compileDebugKotlin</code>'s actual declared sources (0 matches
+before, 1 match after). An AGP Variant-API alternative was tried first
+and ruled out — it fires correctly at configuration time but this
+project's KGP version doesn't read from that model for this integration
+path.</li>
+<li><strong>Verified genuinely fixed, not just source-patched:</strong>
+real, non-instrumented device launch (containerized emulator,
+<code>adb shell am start</code> — not
+<code>connectedDebugAndroidTest</code>, ruling out an
+instrumentation-only classloader confound) now logs
+<code>LavaAuthGenerated FOUND</code> instead of
+<code>ClassNotFoundException</code>;
+<code>Challenge70AutonomousQaProviderMatrixTest</code> PASSED end-to-end
+against the real backend (512.7s); server-side <code>lava-api-go</code>
+logs independently confirm <code>hdr_present=true</code>,
+<code>MATCHED active client=android-1.3.17-1085</code>, and
+search/topic-browse/download all returning HTTP 200 during the passing
+run.</li>
+<li><strong>Also landed (§6.AC, permanent local telemetry, not temp
+diagnostics):</strong> logcat-visible logging in the client's
+auth-blob-provider resolution and the server's auth middleware + a
+global request logger — closing a real gap where a 401 was previously
+indistinguishable from "request never arrived" from server logs
+alone.</li>
+<li><strong>§6.Y:</strong> versionCode 1084→1085; versionName HELD at
+1.3.17 (internal/security fix + diagnostics, no new user-facing feature
+surface, per §6.Y clause 3 — though the USER-VISIBLE EFFECT of this fix
+is that search/login work again at all).</li>
+</ul>
+<p><strong>Coverage status (§6.AK / §6.Z):</strong> full evidence at
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.17-1085-test-evidence.md</code>,
+real-device attestation at
+<code>.lava-ci-evidence/lva-098-1085-device-gate/</code>.</p>
+<h2
+id="lava-android-1317-1084--2026-08-13-lva-085-x-lva-093-composition-race--closes-it-on-both-search-chip-bars">Lava-Android-1.3.17-1084
+— 2026-08-13 (LVA-085 x LVA-093 composition race — closes it on BOTH
+search chip bars)</h2>
+<p><strong>Previous published:</strong> Lava-Android-1.3.16-1083.</p>
+<ul>
+<li><strong>Root cause found after operator retest reported the 1083
+chip-label fix "still garbage."</strong> LVA-085 (raw provider ids in
+chips) and LVA-093 (cold-start provider-repopulation readiness gate)
+landed in 1083, each with a passing isolated unit test — but the two
+were never tested TOGETHER.
+<code>SearchResultViewModel.observeStreamMultiSearch</code> read the
+tracker registry for display names (LVA-085) BEFORE awaiting the
+cold-start readiness gate (LVA-093), so on a genuine cold start the
+display-name read could still see the stale/bundled registry and fall
+back to raw provider ids — silently reintroducing the exact bug LVA-085
+claimed to fix. Neither fix's own test caught it because each test's
+default fixture pre-marks the gate ready before exercising its own
+concern in isolation.</li>
+<li><strong>Fixed in <code>SearchResultViewModel</code> (search-results
+screen).</strong> Moved <code>providersReadyGate.awaitReady()</code> to
+run before the eager display-name resolution and the initial
+loading-state reduce, so the first frame the user sees reads the same
+already-settled registry the actual search uses. Commit
+<code>843f8107</code>.</li>
+<li><strong>Found + fixed a SECOND, independent instance on the
+search-input screen.</strong>
+<code>SearchInputViewModel.loadOnboardedChips()</code> (the chip bar
+shown when the user opens Search, before results) read the same tracker
+registry with <strong>no readiness-gate awareness at all</strong> — it
+never had the gate wired in. This screen is reached earlier than the
+results screen, so it was likely the more visible source of "still shows
+raw ids." Added the same <code>StartupProvidersGate</code> dependency
+and await, mirroring the results-screen fix. Commit
+<code>8634efd9</code>.</li>
+<li><strong>Both fixes are real-device verified, not just
+JVM-tested</strong>, per this project's own standard that JVM-level
+passes are necessary but never sufficient:
+<code>Challenge61ResultsChipsShowDisplayNamesTest</code> and
+<code>Challenge59SearchUsesOnboardedProvidersTest</code> both PASSED on
+a containerized KVM emulator (CZ_API34_Phone, §6.X-conformant
+<code>runner=containerized</code>) against this exact build.</li>
+<li><strong>Re-audited the other two 1083 claims (LVA-094 silent-failure
+retry/telemetry, RuTracker Cloudflare-classification).</strong>
+<code>LavaApplication.onCreate()</code>'s wiring of
+<code>RepopulateProvidersOnStartupUseCase</code> reviewed and confirmed
+structurally sound (try/finally gate release on every exit path). The 5
+RuTracker Cloudflare-classification Go tests (including a discrimination
+test that confirms it does NOT over-classify plain 403s) re-run and
+confirmed passing. No further issues found in either.</li>
+<li><strong>§6.Y:</strong> versionCode 1083→1084; versionName
+1.3.16→1.3.17 (real user-facing fix, patch bump per §6.Y clause 3).</li>
+</ul>
+<h2
 id="lava-android-1316-1083--2026-08-12-4-parallel-subagent-fixes-search-chip-labels-loading-state-cold-start-race">Lava-Android-1.3.16-1083
 — 2026-08-12 (4 parallel-subagent fixes: search chip labels, loading
 state, cold-start race)</h2>
@@ -207,19 +325,65 @@ timeout fallback) the search now awaits. A repopulation failure was also
 previously silent and never retried for the rest of the process
 lifetime; now retried once and recorded via non-fatal telemetry
 (§6.AC).</li>
+<li><strong>RuTracker login now correctly classified when blocked by a
+Cloudflare bot-mitigation challenge (backend correctness + telemetry,
+not a client UI change).</strong> Root-caused live against the actual
+running backend: this host's egress IP is presently subject to a
+Cloudflare hard JS-challenge on rutracker.org (confirmed via direct
+reproduction — HTTP 403 + <code>cf-mitigated: challenge</code>).
+Previously this fell into a generic "no data" (502) classification with
+no operator-visible signal of the real cause. Now detected and
+classified distinctly (503 + non-fatal telemetry), and every outbound
+RuTracker request carries realistic browser headers instead of Go's bare
+default User-Agent (a second real bug found in the same investigation).
+This is a detection/telemetry fix, not a bypass — a hard Cloudflare
+challenge cannot be defeated by headers alone; login will keep failing
+on a Cloudflare-blocked egress IP until that block lifts or a different
+network path is used, but the failure is now honestly surfaced instead
+of misleadingly generic. Android-side user-visible behavior is unchanged
+(the client already showed an honest "Service unavailable, try again
+later" for any non-2xx response, never a misleading "wrong
+credentials"). Commit <code>95bcdce5</code>.</li>
+<li><strong>Re-verified 3 previously-tracked items with fresh evidence
+this cycle (no code change needed — confirmed already-correct):</strong>
+LVA-079 (search-input vs results-filter chip disagreement +
+non-determinism — real device Challenge evidence already GREEN as of
+2026-08-11), LVA-087 (Welcome screen stale provider count — freshly
+device-verified today via
+<code>Challenge63WelcomeCountMatchesPickerTest</code> RED/GREEN),
+LVA-090 (onboarding "Select all" silently enabling auth-required
+providers — freshly device-verified today via
+<code>Challenge66SelectAllDoesNotEnableAuthProvidersTest</code>
+RED/GREEN, superseding the 48-day-stale 2026-06-26 evidence). LVA-008
+(nested-NavHost teardown crash) confirmed still Operator-blocked on a
+proven upstream <code>androidx-navigation</code> defect (8 app-level
+candidates exhausted and device-falsified) — filing package ready at
+<code>docs/lva008-upstream-repro/</code>.</li>
 <li><strong>§6.Y:</strong> versionCode 1082→1083; versionName
 1.3.15→1.3.16 (real user-facing fixes, patch bump per §6.Y clause
 3).</li>
 </ul>
-<p><strong>Coverage status (§6.AK / §6.Z):</strong> all 4 fixes carry
-real JVM-level test coverage (ViewModel/UseCase tests using real
-implementations per this project's Anti-Bluff Pact) with falsifiability
-rehearsals performed and recorded in the landing commits. Device-level
-(Compose UI Challenge) verification for these specific fixes is not yet
-part of this cycle's evidence — the existing device-gate Challenges
-(C58/C59/etc.) cover the broader search flow these fixes sit within, but
-no NEW dedicated Challenge was authored this cycle for
-LVA-085/086/093/094 individually.</p>
+<p><strong>Coverage status (§6.AK / §6.Z — HONEST):</strong>
+LVA-085/086/093/094 carry real JVM-level test coverage
+(ViewModel/UseCase tests using real implementations per this project's
+Anti-Bluff Pact) with falsifiability rehearsals performed and recorded
+in the landing commits; no NEW dedicated Compose UI Challenge was
+authored this cycle for these four individually (the existing
+device-gate Challenges C58/C59/etc. cover the broader search flow they
+sit within). The RuTracker Cloudflare-classification fix is a Go backend
+change with no Android-visible surface to Challenge-test — covered
+instead by 5 new Go unit tests (real falsifiability rehearsals, see
+commit <code>95bcdce5</code>) plus a live reproduction against the
+actual running backend (direct curl confirming the exact
+<code>cf-mitigated: challenge</code> response this fix detects).
+LVA-079/LVA-087/LVA-090 each have real, freshly-executed device
+Challenge RED/GREEN evidence this cycle
+(<code>Challenge60InputResultsChipsAgreeTest</code> GREEN 2026-08-11,
+<code>Challenge63WelcomeCountMatchesPickerTest</code> +
+<code>Challenge66SelectAllDoesNotEnableAuthProvidersTest</code>
+RED/GREEN 2026-08-12) — see <code>.lava-ci-evidence/bluff-hunt/</code>
+and
+<code>.lava-ci-evidence/genymotion/c66-2026-08-12-lva090-reverify/</code>.</p>
 <h2
 id="lava-android-1315-1082--2026-08-12-6z-device-verification-closure--same-feature-set-as-1081-first-real-device-proof">Lava-Android-1.3.15-1082
 — 2026-08-12 (§6.Z device-verification closure — same feature set as
@@ -643,6 +807,68 @@ Archive crawl topics that omit a comments section; the full fix for IA
 crawl topics that omit most fields is a tracked follow-up (a niche,
 non-crashing case).</li>
 </ul>
+<h2
+id="lava-api-app-0213-27--2026-08-14-embedded-engine-permanent-6ac-authrequest-telemetry--parity-bump-api-app-itself-unaffected-by-lva-098">Lava-API-App-0.2.13-27
+— 2026-08-14 (embedded engine: permanent §6.AC auth/request telemetry —
+parity bump, api-app itself unaffected by LVA-098)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.13-26.</p>
+<ul>
+<li><strong>Embedded lava-api-go engine (liblavaapi.so) rebuilt for all
+3 ABIs with the same-cycle LVA-098 fix's permanent §6.AC diagnostic
+logging.</strong> This is a genuine embed-source change (not a needless
+re-distribute): the auth middleware and global request router now log
+header-presence/hash and request/status outcomes locally, closing a gap
+where a 401 was indistinguishable from "request never arrived."
+<strong>api-app itself is NOT affected by the LVA-098 bug</strong> —
+that bug was specifically <code>lava.auth.LavaAuthGenerated</code> never
+compiling into <code>:app</code>'s (the client's) dex; api-app uses a
+completely different auth-key delivery path
+(<code>ApiKeyProvider</code>) and was never in the affected code path.
+This bump exists solely because api-app's embedded binary genuinely
+changed.</li>
+<li><strong>§6.Y:</strong> versionCode 26→27; versionName HELD at 0.2.13
+(diagnostics-only embed change, no functional/user-visible behavior
+change per §6.Y clause 3).</li>
+</ul>
+<p><strong>Coverage status (§6.AK / §6.Z):</strong> device gate executed
+against this exact build (versionCode 27) —
+<code>Challenge01ApiAppColdStartTest</code>,
+<code>Challenge02ApiAppBootAndServeTest</code>,
+<code>Challenge03StopRestartTest</code>,
+<code>Challenge04NotificationActionsTest</code> all PASSED on a
+containerized KVM emulator (370.3s). Evidence:
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.2.13-27-test-evidence.md</code>,
+raw run at
+<code>.lava-ci-evidence/api-app-0.2.13-27-device-gate/</code>.</p>
+<h2
+id="lava-api-app-0213-26--2026-08-13-embedded-engine-cloudflare-challenge-classification--realistic-outbound-headers">Lava-API-App-0.2.13-26
+— 2026-08-13 (embedded engine: Cloudflare-challenge classification +
+realistic outbound headers)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.12-25.</p>
+<ul>
+<li><strong>Embedded lava-api-go engine (liblavaapi.so) rebuilt for all
+3 ABIs (arm64-v8a, x86_64, armeabi-v7a) with the same-cycle RuTracker
+Cloudflare-classification fix.</strong> A Cloudflare bot-mitigation
+challenge on RuTracker login is now detected and classified as a
+distinct 503 (with non-fatal telemetry) instead of a misleading generic
+"no data" 502, and every outbound RuTracker request from the embedded
+engine now carries realistic browser headers instead of Go's bare
+default User-Agent. This is the same backend fix described in the
+client's 1.3.16-1083 entry — the api-app embeds the identical
+<code>lava-api-go</code> source via the cshared library, so it inherits
+the fix directly. Commit <code>95bcdce5</code>; embed rebuilt +
+API↔︎embed source-sync hash verified matching
+(<code>afe6121a...</code>).</li>
+<li><strong>§6.Y:</strong> versionCode 25→26; versionName 0.2.12→0.2.13
+(real correctness + telemetry improvement to this app's embedded API
+surface, patch bump per §6.Y clause 3).</li>
+</ul>
+<p><strong>Coverage status (§6.AK / §6.Z):</strong> covered by the same
+5 new Go unit tests + live-backend reproduction described in the client
+entry (the embedded engine IS the same lava-api-go source,
+source-hash-verified identical). §6.Z on-device gate for this exact
+api-app build (C01-C07) to be executed before distribute — see the
+distribute-time evidence file for this version.</p>
 <h2
 id="lava-api-app-0212-25--2026-08-12-version-parity-bump-no-functional-change--first-6z-gated-distribute-since-23">Lava-API-App-0.2.12-25
 — 2026-08-12 (version-parity bump, no functional change — first

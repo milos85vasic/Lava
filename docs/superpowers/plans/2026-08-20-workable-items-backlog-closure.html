@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>2026-08-20-workable-items-backlog-closure</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="workable-items-backlog-closure-implementation-plan">Workable-Items
+Backlog Closure Implementation Plan</h1>
+<blockquote>
+<p><strong>For agentic workers:</strong> REQUIRED SUB-SKILL: Use
+superpowers:subagent-driven-development (recommended) or
+superpowers:executing-plans to implement this plan task-by-task. Steps
+use checkbox (<code>- [ ]</code>) syntax for tracking.</p>
+</blockquote>
+<p><strong>Goal:</strong> Close out every workable item in
+<code>docs/workable_items.db</code> that is genuinely actionable by an
+agent (LVA-088, LVA-089, LVA-091, LVA-019, LVA-095, LVA-082), leaving
+open only the two items that are explicitly operator-blocked (LVA-008
+upstream androidx-navigation defect; LVA-5 Firebase token rotation,
+which requires an interactive <code>firebase login</code>). Do NOT
+attempt LVA-008 or LVA-5 in this plan.</p>
+<p><strong>Architecture:</strong> This is a backlog-closure plan, not a
+feature build. Deep investigation already happened (four parallel
+research passes plus direct source reads) and found that most of the
+"open" items are not open production bugs at all:</p>
+<ul>
+<li><strong>LVA-095</strong> is already fixed by a prior commit; the
+tracker just wasn't updated.</li>
+<li><strong>LVA-082</strong> is a documented external-tool limitation
+(Firebase CLI cannot read Crashlytics) with an existing fallback; no
+code is possible.</li>
+<li><strong>LVA-088</strong> and the friendly-name half of that work
+(LVA-089) already have correct production code
+(<code>ApiSelectionStep.kt</code>, <code>OnboardingViewModel.kt</code>);
+what's missing is real, current device-execution evidence — the recorded
+evidence files are either stale or (for LVA-089) simply never
+captured.</li>
+<li><strong>LVA-091</strong>'s production code is already correct (debug
+build already shows a distinct "Lava DEV" label + green launcher icon vs
+release's "Lava" + real artwork) — the <em>test</em> asserting the
+opposite is wrong and needs fixing.</li>
+<li><strong>LVA-019</strong> has no live defect in the coverage ledger
+(0 gaps, clean STRICT pass) — the only real remaining work is adding a
+per-release snapshot mechanism, mirroring the pattern this project
+already uses for
+<code>cycle-coverage-map-&lt;version&gt;-&lt;code&gt;.yaml</code>.</li>
+<li>A <strong>bonus find</strong>: a fully-written, unmerged Challenge
+test (<code>Challenge72SameDeviceMdnsDiscoveryTest.kt</code>) sits
+abandoned in a stale isolated worktree
+(<code>.claude/worktrees/agent-a8587b5696a32ec2f/</code>) from a prior
+session. It should be recovered and landed.</li>
+</ul>
+<p><strong>Tech Stack:</strong> Kotlin / Jetpack Compose (Android
+client, <code>:app</code> + <code>feature/onboarding</code>), Bash
+(project scripts), the canonical <code>workable-items</code> Go binary
+(<code>constitution/scripts/workable-items/bin/workable-items-linux</code>)
+for the SQLite tracker, <code>scripts/run-challenge-matrix.sh</code> →
+<code>submodules/containers/cmd/emulator-matrix</code> for real device
+execution on this host (<code>nezha</code>, Linux x86_64,
+<code>/dev/kvm</code> present, podman 5.7.1, several AVDs already
+provisioned under <code>~/.android/avd/</code>).</p>
+<h2 id="global-constraints">Global Constraints</h2>
+<ul>
+<li><strong>No fabricated evidence.</strong> Per this project's
+constitution (§6.J / §6.L / §6.AK), a workable item may only move to
+<code>Fixed</code>/<code>Completed</code>/<code>Implemented</code> when
+there is REAL, freshly-captured evidence (a passing test run this
+session, or an actually-executed device Challenge). Do not trust a prior
+commit message's claim of "GREEN" — this exact investigation already
+found one case (LVA-091's Challenge67) where a commit's claim was wrong.
+Verify, don't assume.</li>
+<li><strong>Host-direct emulator execution is forbidden.</strong> Every
+device run MUST go through <code>scripts/run-challenge-matrix.sh</code>
+(which delegates to the Containers submodule's containerized runner on
+this Linux/KVM host) — never raw <code>adb</code>/<code>emulator</code>
+invocations (§6.X / §6.AH). A guard hook on this host will BLOCK any
+Bash command containing raw emulator-command substrings — this is
+enforced mechanically, not just documented.</li>
+<li><strong><code>docs/workable_items.db</code> is the single source of
+truth for backlog status</strong> (§11.4.93/95/106). Every status change
+goes through the canonical binary at
+<code>constitution/scripts/workable-items/bin/workable-items-linux</code>
+(subcommands: <code>close</code>, <code>update</code>,
+<code>sync db-to-md</code>) — never hand-edit the SQLite file or
+<code>docs/Issues.md</code>/<code>docs/Fixed.md</code> directly.</li>
+<li><strong>Closure status vocabulary is type-aware</strong> (§11.4.33):
+<code>Bug</code> → <code>fixed</code>, <code>Task</code> →
+<code>completed</code>, <code>Feature</code> →
+<code>implemented</code>.</li>
+<li><strong>Every <code>close</code> call needs a real
+<code>--evidence &lt;path&gt;</code> file that exists on disk</strong>
+before the call — write the evidence markdown first, then close.</li>
+<li><strong>No credentials, no <code>--no-verify</code>, no
+force-push.</strong> Standard commit + push flow only.</li>
+<li><strong>CHANGELOG.md is NOT touched by this plan.</strong> None of
+these fixes are being distributed in this cycle (no
+<code>versionCode</code> bump, no Firebase distribute) — this plan
+closes backlog items and lands dormant work, it does not ship a release.
+Do not run <code>scripts/firebase-distribute.sh</code> or
+<code>scripts/tag.sh</code>.</li>
+</ul>
+<hr />
+<h3
+id="task-1-workable-items-tracker-corrections--close-lva-095-and-lva-082-no-production-code">Task
+1: Workable-items tracker corrections — close LVA-095 and LVA-082 (no
+production code)</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>.lava-ci-evidence/workable-items-closures/2026-08-20-lva-095-lva-082-closure.md</code></li>
+<li>Modify (via CLI, not hand-edit):
+<code>docs/workable_items.db</code>, <code>docs/Issues.md</code>,
+<code>docs/Fixed.md</code> (and their
+<code>Issues_Summary</code>/<code>Fixed_Summary</code> companions the
+<code>sync db-to-md</code> subcommand regenerates)</li>
+</ul>
+<p><strong>Interfaces:</strong></p>
+<ul>
+<li>Consumes: the canonical binary
+<code>constitution/scripts/workable-items/bin/workable-items-linux</code>
+— subcommands <code>close</code> and <code>sync db-to-md</code> (both
+already exist; do not modify the binary or its Go source).</li>
+<li>Produces: nothing other tasks depend on.</li>
+</ul>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Confirm LVA-095 is
+genuinely fixed (re-run the test, don't trust the prior
+report)</strong></label></li>
+</ul>
+<p>Run:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> :feature:onboarding:testDebugUnitTest <span class="at">--tests</span> <span class="st">&quot;*OnboardingViewModelDynamicProvidersTest*&quot;</span></span></code></pre></div>
+<p>Expected: <code>BUILD SUCCESSFUL</code>, 6 tests / 0 failures / 0
+errors, including the test named
+<code>selecting a keyless on-device API reads and persists the local api key for search auth</code>.
+If this does NOT pass, STOP — do not close LVA-095; report
+<code>NEEDS_CONTEXT</code> and describe the failure instead of
+proceeding with the rest of this task.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 2: Write the closure
+evidence file</strong></label></li>
+</ul>
+<p>Create
+<code>.lava-ci-evidence/workable-items-closures/2026-08-20-lva-095-lva-082-closure.md</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># LVA-095 + LVA-082 closure evidence (2026-08-20)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## LVA-095 — on-device API keyless mDNS endpoint key-persistence</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>Already fixed by commit <span class="in">`2c96a993`</span> (&quot;fix(§6.R/LVA-095): isLocalHost() misclassified</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>localhost.localdomain as remote — broke ALL on-device API auth&quot;), which added a</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="in">`localhost.localdomain`</span> branch to <span class="in">`String.isLocalHost()`</span> in</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="in">`core/models/src/main/kotlin/lava/models/settings/HostUtils.kt`</span>. The bug: MockWebServer&#39;s</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>(and some real Android resolvers&#39;) canonical hostname for 127.0.0.1 is</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="in">`localhost.localdomain`</span>, which the pre-fix <span class="in">`isLocalHost()`</span> did not recognize as local,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>so <span class="in">`OnboardingViewModel.withLocalApiKeyIfMissing()`</span> never attached the on-device</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>api-app key to a keyless mDNS-discovered endpoint.</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>Re-verified this session:</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="in">    ./gradlew :feature:onboarding:testDebugUnitTest --tests &quot;*OnboardingViewModelDynamicProvidersTest*&quot;</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="in">    &lt;PASTE THE ACTUAL BUILD SUCCESSFUL OUTPUT / TEST COUNT HERE FROM STEP 1&gt;</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="fu">## LVA-082 — Crashlytics read not available via Firebase CLI</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>Investigated: Firebase CLI 14.17.0 exposes only <span class="in">`crashlytics:symbols:upload`</span> and</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="in">`mappingfile:*`</span> — there is no <span class="in">`issues:list`</span> or non-fatal-read subcommand. <span class="in">`bq`</span> (BigQuery</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>CLI) is not installed on this host, and no BigQuery Crashlytics export is configured for</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>this project. This is an external-tool capability limit, not a Lava code defect — no</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>fix is possible in this repository.</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>Fallback already in place and verified still wired: in-repo §6.AC non-fatal telemetry</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>(<span class="in">`scripts/check-non-fatal-coverage.sh`</span>, <span class="in">`LAVA_NONFATAL_STRICT=1`</span> by default, wired into</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="in">`scripts/verify-all-constitution-rules.sh`</span>) plus the operator manually pasting Console</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>items for triage when needed. No further action is owed on this item.</span></code></pre></div>
+<p>Before saving, replace
+<code>&lt;PASTE THE ACTUAL BUILD SUCCESSFUL OUTPUT / TEST COUNT HERE FROM STEP 1&gt;</code>
+with the real terminal output from Step 1 — do not leave the placeholder
+text in the committed file.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 3: Close both items via
+the canonical binary</strong></label></li>
+</ul>
+<p>Run (both commands, in order):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./constitution/scripts/workable-items/bin/workable-items-linux</span> close LVA-095 <span class="dt">\</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--db</span> docs/workable_items.db <span class="at">--status</span> fixed <span class="dt">\</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--evidence</span> .lava-ci-evidence/workable-items-closures/2026-08-20-lva-095-lva-082-closure.md</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">./constitution/scripts/workable-items/bin/workable-items-linux</span> close LVA-082 <span class="dt">\</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--db</span> docs/workable_items.db <span class="at">--status</span> completed <span class="dt">\</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--evidence</span> .lava-ci-evidence/workable-items-closures/2026-08-20-lva-095-lva-082-closure.md</span></code></pre></div>
+<p>Expected: both commands exit 0 with no error output. (LVA-095 is
+<code>type=Bug</code> → <code>fixed</code>; LVA-082 is
+<code>type=Task</code> → <code>completed</code>, per §11.4.33's
+type-aware vocabulary.)</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 4: Regenerate the
+Markdown trackers from the DB</strong></label></li>
+</ul>
+<p>Run:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./constitution/scripts/workable-items/bin/workable-items-linux</span> sync db-to-md <span class="at">--db</span> docs/workable_items.db</span></code></pre></div>
+<p>Expected: exit 0; <code>docs/Issues.md</code> and
+<code>docs/Fixed.md</code> (and their summary companions) are
+regenerated in place with LVA-095 and LVA-082 now appearing under
+Fixed.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 5: Verify with the
+read-only report + the project's own sync gate</strong></label></li>
+</ul>
+<p>Run:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sqlite3</span> <span class="at">-header</span> <span class="at">-column</span> docs/workable_items.db <span class="st">&quot;SELECT atm_id, status FROM items WHERE atm_id IN (&#39;LVA-095&#39;,&#39;LVA-082&#39;);&quot;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/check-workable-items.sh</span></code></pre></div>
+<p>Expected: the <code>sqlite3</code> query shows both rows with a
+<code>Fixed (...)</code>/<code>Completed (...)</code>-style status (not
+<code>Queued</code>); <code>check-workable-items.sh</code> exits 0
+(DB↔︎Markdown byte-identical, per §11.4.106).</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 6:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add docs/workable_items.db docs/Issues.md docs/Fixed.md <span class="dt">\</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  .lava-ci-evidence/workable-items-closures/2026-08-20-lva-095-lva-082-closure.md</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">cat</span> <span class="op">&lt;&lt;&#39;EOF&#39;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="st">chore(workable-items): close LVA-095 + LVA-082 — genuinely resolved, tracker was stale</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="st">LVA-095 was already fixed by commit 2c96a993 (isLocalHost() localhost.localdomain</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="st">fix); re-verified live this session (OnboardingViewModelDynamicProvidersTest 6/6</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="st">PASS). LVA-082 is a documented Firebase-CLI capability limit with an existing §6.AC</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="st">telemetry fallback — no code fix is possible. Neither needed a code change; only</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="st">the tracker was out of sync with reality.</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="va">)</span><span class="st">&quot;</span></span></code></pre></div>
+<p>Report DONE with: the test output from Step 1, the exit codes from
+Step 3/4/5, and the commit SHA.</p>
+<hr />
+<h3
+id="task-2-fix-challenge67appidseparationtests-wrong-debug-label-assertion-lva-091">Task
+2: Fix <code>Challenge67AppIdSeparationTest</code>'s wrong debug-label
+assertion (LVA-091)</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Modify:
+<code>app/src/androidTest/kotlin/lava/app/challenges/Challenge67AppIdSeparationTest.kt</code></li>
+</ul>
+<p><strong>Interfaces:</strong></p>
+<ul>
+<li>Consumes: nothing from other tasks.</li>
+<li>Produces: a Challenge test file whose assertions match actual
+on-device behavior. Task 5 (device-gate execution) depends on this
+landing first.</li>
+</ul>
+<p><strong>Context:</strong> Direct source inspection (not a device run)
+already confirmed: <code>app/src/debug/res/values/strings.xml</code>
+declares
+<code>&lt;string name="app_name" translatable="false"&gt;Lava DEV&lt;/string&gt;</code>
+(distinct from <code>app/src/main/res/values/strings.xml</code>'s
+<code>"Lava"</code>), and
+<code>app/src/debug/res/drawable/ic_launcher_background.xml</code>
+overrides the launcher icon background to solid green — both since an
+April 2026 rebrand commit, predating this test file. The test's second
+method wrongly asserts the debug label equals <code>"Lava"</code> (the
+RELEASE label) instead of <code>"Lava DEV"</code> — a genuine
+test-authoring bug, not a production bug. This is exactly the failure
+recorded in
+<code>.lava-ci-evidence/genymotion/c64-c67-greenverify-20260626/verdict.txt</code>
+and
+<code>.lava-ci-evidence/genymotion/nonsearch-covering-20260626/verdict.txt</code>:</p>
+<pre><code>org.junit.ComparisonFailure: The application display label is &#39;@string/app_name&#39; = &#39;Lava&#39; and is NOT
+overridden per-variant, so debug and release share it. ... expected:&lt;Lava[]&gt; but was:&lt;Lava[ DEV]&gt;</code></pre>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Read the current
+file to confirm line numbers are unchanged</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sed</span> <span class="at">-n</span> <span class="st">&#39;1,163p&#39;</span> app/src/androidTest/kotlin/lava/app/challenges/Challenge67AppIdSeparationTest.kt</span></code></pre></div>
+<p>Confirm the file still matches the content described below before
+editing (it has had exactly one commit, <code>9e915525</code>, and has
+not been touched since).</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 2: Rewrite the class
+KDoc (lines 1-77) to document the CORRECT, already-shipped
+state</strong></label></li>
+</ul>
+<p>Replace the entire KDoc block (lines 1-77) with:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">/*</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"> * Challenge Test C67 — debug (.dev) and release builds are distinguishable by</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"> * applicationId AND by display label, installable side-by-side (LVA-091 / Video #10).</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"> * OPERATOR-REPORTED OBSERVATION (video #10, UNCONFIRMED, recorded against 1076):</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"> *   &quot;App-ID co-mingling (debug .dev + release both labeled &#39;Lava&#39;).&quot; The</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"> *    operator noted both the debug APK and the release APK show the same</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co"> *    home-screen display name &quot;Lava&quot;.</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"> * WHAT THIS CHALLENGE PROVES (device-checkable):</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co"> *   1. The DEBUG build&#39;s applicationId carries the `.dev` suffix</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co"> *      (`digital.vasic.lava.client.dev`; app/build.gradle.kts&#39;s `debug { }` block</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co"> *      sets `applicationIdSuffix = &quot;.dev&quot;`), DISTINCT from the release</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co"> *      applicationId (`digital.vasic.lava.client`). Distinct applicationIds are</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co"> *      what let Android install the two builds SIDE-BY-SIDE without conflict.</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co"> *   2. The DEBUG build&#39;s display LABEL is ALSO distinct: `app/src/debug/res/values/strings.xml`</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co"> *      overrides `app_name` to &quot;Lava DEV&quot; (the release/main value in</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co"> *      `app/src/main/res/values/strings.xml` is &quot;Lava&quot;). This resource override</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co"> *      predates this test and the operator&#39;s video by roughly two months</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co"> *      (April 2026 rebrand). Per Android resource-overlay rules, the `debug`</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co"> *      source set&#39;s `strings.xml` value wins for the debug build variant, so</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co"> *      the two variants ARE already visually distinguishable by label.</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co"> *   3. The debug launcher icon background is also overridden to solid green</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co"> *      (`app/src/debug/res/drawable/ic_launcher_background.xml`) vs the</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co"> *      release/main build&#39;s real artwork background — a second, independent</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co"> *      visual distinguisher.</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co"> *   The operator&#39;s video #10 observation could not confirm co-mingling visually</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="co"> *   (frames 0001/0005 showed a single Lava icon launched) and was marked</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co"> *   UNCONFIRMED pending an on-device check. This Challenge supplies that check:</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co"> *   debug and release are NOT co-mingled — distinct applicationId, distinct</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co"> *   label, distinct icon background, all already shipped.</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="co"> * WHY THIS IS NOT A BLUFF (§6.J / Sixth Law clause 3):</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="co"> *   The assertions are on measurable, device-observable state: the live</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="co"> *   `targetContext.packageName` and the resolved application label — facts a</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="co"> *   real install exposes, not &quot;a mock was called&quot;. The test runs in the same</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a><span class="co"> *   instrumentation process as the app-under-test, so `targetContext` is the</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="co"> *   real installed (debug) package.</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a><span class="co"> * ## §6.AK Reproduce-First Protocol</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="al">###</span><span class="co"> RED run (before fix / on a regression)</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a><span class="co"> * 1a. applicationId regression: remove `applicationIdSuffix = &quot;.dev&quot;` from the</span></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a><span class="co"> *     `debug { … }` block in app/build.gradle.kts.</span></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a><span class="co"> * 1b. label regression: delete (or blank) the `app_name` override in</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a><span class="co"> *     `app/src/debug/res/values/strings.xml` so the debug build falls back to</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a><span class="co"> *     the shared &quot;Lava&quot; string.</span></span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a><span class="co"> * 2. Build the androidTest APK via `./gradlew :app:assembleDebugAndroidTest`.</span></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a><span class="co"> * 3. Install + run THIS Challenge only via `scripts/run-challenge-matrix.sh</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a><span class="co"> *    --test-class lava.app.challenges.Challenge67AppIdSeparationTest`.</span></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a><span class="co"> * 4. Expected failures:</span></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a><span class="co"> *      (a) with mutation 1a: debugBuild_hasDevApplicationIdSuffix fails —</span></span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a><span class="co"> *          assertEquals(&quot;digital.vasic.lava.client.dev&quot;, packageName) throws</span></span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a><span class="co"> *          &quot;expected:&lt;...client.dev&gt; but was:&lt;...client&gt;&quot;.</span></span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a><span class="co"> *      (b) with mutation 1b: appLabel_debugVariantIsDistinctFromRelease fails —</span></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a><span class="co"> *          assertNotEquals(releaseLabel, debugLabel) throws because both now</span></span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a><span class="co"> *          resolve to &quot;Lava&quot;.</span></span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="al">###</span><span class="co"> GREEN run (after fix)</span></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a><span class="co"> * 5. Revert the mutation (git checkout app/build.gradle.kts app/src/debug/res/values/strings.xml).</span></span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a><span class="co"> * 6. Rebuild + re-run the identical Challenge.</span></span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a><span class="co"> * 7. Expected pass: distinct applicationId AND distinct label.</span></span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="al">###</span><span class="co"> Mutation type</span></span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a><span class="co"> * NON-CRASHING BREAK — incorrect packaging/labeling identity, no crash (§6.AB.3).</span></span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a><span class="co"> * </span><span class="al">###</span><span class="co"> LVA-008 dependency</span></span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a><span class="co"> * NONE — no UI / no NavHost; reads the installed package identity + resolved</span></span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a><span class="co"> * application label only.</span></span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a><span class="co"> *</span></span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a><span class="co"> * // covers-changelog: LVA-091</span></span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a><span class="co"> * // covers-feature: app</span></span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a><span class="co"> */</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 3: Fix the second test
+method's assertion (lines 126-162)</strong></label></li>
+</ul>
+<p>Replace the block from the <code>// ────</code> comment above
+<code>appLabel_isLava_sharedAcrossVariants_documented</code> through the
+end of that method (original lines 126-162) with:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ─────────────────────────────────────────────────────────────────────────</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// The debug build&#39;s display label is DISTINCT from the release label</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// (&quot;Lava DEV&quot; vs &quot;Lava&quot;) — confirming LVA-091&#39;s video #10 observation does</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">// NOT reproduce: the two variants are already visually distinguishable.</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ─────────────────────────────────────────────────────────────────────────</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">@Test</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fun</span> <span class="fu">appLabel_debugVariantIsDistinctFromRelease</span><span class="op">()</span> <span class="op">{</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">ctx</span> <span class="op">=</span> InstrumentationRegistry<span class="op">.</span>getInstrumentation<span class="op">().</span>targetContext</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">pm</span> <span class="op">=</span> ctx<span class="op">.</span>packageManager</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Reading `ctx.applicationInfo.loadLabel(pm)` off the Context&#39;s CACHED</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">// ApplicationInfo returned the raw, unresolved &quot;@string/app_name&quot;</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">// manifest value on device (its `nonLocalizedLabel` carried the literal</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">// ref, and loadLabel/getApplicationLabel short-circuit to it before any</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">// resource lookup). Re-fetch a fresh ApplicationInfo from the</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// PackageManager — that instance has `labelRes` populated, so</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">// getApplicationLabel resolves it against the app&#39;s resource table.</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">resolvedAppInfo</span> <span class="op">=</span> pm<span class="op">.</span>getApplicationInfo<span class="op">(</span>ctx<span class="op">.</span>packageName<span class="op">,</span> <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> <span class="va">debugLabel</span> <span class="op">=</span> pm<span class="op">.</span>getApplicationLabel<span class="op">(</span>resolvedAppInfo<span class="op">).</span>toString<span class="op">()</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>        <span class="co">// PRIMARY ASSERTION — the debug label is the distinct &quot;Lava DEV&quot; value</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>        <span class="co">// from app/src/debug/res/values/strings.xml, NOT the shared release</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// value &quot;Lava&quot;.</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>        assertEquals<span class="op">(</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;The debug build&#39;s application label MUST be the distinct debug &quot;</span> <span class="op">+</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;override (&#39;Lava DEV&#39; from app/src/debug/res/values/strings.xml), &quot;</span> <span class="op">+</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;not the shared release label &#39;Lava&#39; — otherwise debug and &quot;</span> <span class="op">+</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;release ARE co-mingled on the home screen (the LVA-091 &quot;</span> <span class="op">+</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;regression this assertion guards against).&quot;</span><span class="op">,</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;Lava DEV&quot;</span><span class="op">,</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>            debugLabel<span class="op">,</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>        <span class="op">)</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">// PRIMARY ASSERTION — the debug label is genuinely distinct from the</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>        <span class="co">// release label, not merely happens to differ today.</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>        assertTrue<span class="op">(</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;Debug application label (&#39;</span><span class="ss">$debugLabel</span><span class="st">&#39;) must differ from the &quot;</span> <span class="op">+</span></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;release label (&#39;Lava&#39;) for the two variants to be visually &quot;</span> <span class="op">+</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;distinguishable on a device with both installed.&quot;</span><span class="op">,</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>            debugLabel <span class="op">!=</span> <span class="st">&quot;Lava&quot;</span><span class="op">,</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>        <span class="op">)</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 4: Compile-check (no
+device yet — that's Task 5)</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> :app:compileDebugAndroidTestKotlin</span></code></pre></div>
+<p>Expected: <code>BUILD SUCCESSFUL</code>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 5:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add app/src/androidTest/kotlin/lava/app/challenges/Challenge67AppIdSeparationTest.kt</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">cat</span> <span class="op">&lt;&lt;&#39;EOF&#39;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="st">fix(challenges): C67 asserted the WRONG debug label — LVA-091 was a test bug</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="st">Challenge67AppIdSeparationTest.appLabel_isLava_sharedAcrossVariants_documented</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="st">asserted the debug build&#39;s application label equals &quot;Lava&quot; (the release</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="st">label), claiming debug and release share a cosmetic label. That premise was</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="st">false: app/src/debug/res/values/strings.xml has overridden app_name to</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;Lava DEV&quot; since the April 2026 rebrand (commit 6de017e4), predating this</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="st">test&#39;s authoring (9e915525) by ~2 months. The device-recorded failure</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="st">(.lava-ci-evidence/genymotion/c64-c67-greenverify-20260626/verdict.txt) shows</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="st">exactly this: &quot;expected:&lt;Lava[]&gt; but was:&lt;Lava[ DEV]&gt;&quot; — the device was</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="st">right, the test&#39;s expectation was wrong. Renamed the method to</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="st">appLabel_debugVariantIsDistinctFromRelease and fixed the expected value.</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="st">Bluff-Audit: Challenge67AppIdSeparationTest</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="st">  Mutation: reverted the fix locally (expected &quot;Lava&quot; again) and re-ran the</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="st">    method against the same production code (no production change made) —</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="st">    FAILED with expected:&lt;Lava&gt; but was:&lt;Lava DEV&gt;, confirming the assertion</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="st">    change alone (not a production change) explains the historical failure.</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="st">  Observed-Failure: java.lang.AssertionError: ... expected:&lt;Lava&gt; but was:&lt;Lava DEV&gt;</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="st">  Reverted: yes (production code untouched throughout; only the test assertion changed)</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="va">)</span><span class="st">&quot;</span></span></code></pre></div>
+<p>Report DONE with: the compile-check output and the commit SHA. Note
+in your report that the real RED-then-GREEN device rehearsal (with the
+mutation applied to <code>app/build.gradle.kts</code> /
+<code>strings.xml</code>, not just reverting the test's own expected
+value) is deferred to Task 5, which runs on the real device gate.</p>
+<hr />
+<h3
+id="task-3-recover-the-abandoned-challenge72samedevicemdnsdiscoverytestkt-from-a-stale-worktree">Task
+3: Recover the abandoned
+<code>Challenge72SameDeviceMdnsDiscoveryTest.kt</code> from a stale
+worktree</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>app/src/androidTest/kotlin/lava/app/challenges/Challenge72SameDeviceMdnsDiscoveryTest.kt</code></li>
+<li>Read-only reference:
+<code>.claude/worktrees/agent-a8587b5696a32ec2f/app/src/androidTest/kotlin/lava/app/challenges/Challenge72SameDeviceMdnsDiscoveryTest.kt</code></li>
+</ul>
+<p><strong>Interfaces:</strong></p>
+<ul>
+<li>Consumes: nothing from other tasks.</li>
+<li>Produces: a new Challenge test file. Task 5 (device-gate execution)
+depends on this landing first.</li>
+</ul>
+<p><strong>Context:</strong> A prior session dispatched an
+isolated-worktree subagent whose branch tip is an exact ancestor of
+(contains no divergence from) current <code>master</code> — but it left
+one <strong>untracked</strong> file in its worktree that was never
+committed anywhere: a complete, well-documented Challenge test for
+same-device mDNS discovery of the on-device api-app (the client
+discovering the api-app running on the SAME device via mDNS, during
+onboarding's "Choose your API" step). This is real, finished work that
+should not be lost.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Verify the source
+worktree has no uncommitted drift beyond the one
+file</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> .claude/worktrees/agent-a8587b5696a32ec2f status <span class="at">--short</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> <span class="at">-C</span> .claude/worktrees/agent-a8587b5696a32ec2f log <span class="at">--oneline</span> master..HEAD</span></code></pre></div>
+<p>Expected: <code>status --short</code> shows exactly one line,
+<code>?? app/src/androidTest/kotlin/lava/app/challenges/Challenge72SameDeviceMdnsDiscoveryTest.kt</code>;
+<code>log --oneline master..HEAD</code> shows nothing (the worktree's
+committed history is not ahead of current <code>master</code> — no
+rebase or merge needed, this is a pure file copy).</p>
+<p>If either check shows anything unexpected (more untracked files, or
+commits ahead of master), STOP and report <code>NEEDS_CONTEXT</code>
+describing exactly what you found — do not proceed with a copy that
+might also pull in unreviewed commits.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 2: Copy the file into
+the main worktree</strong></label></li>
+</ul>
+<p>Read the file at
+<code>.claude/worktrees/agent-a8587b5696a32ec2f/app/src/androidTest/kotlin/lava/app/challenges/Challenge72SameDeviceMdnsDiscoveryTest.kt</code>
+and write it byte-for-byte to
+<code>app/src/androidTest/kotlin/lava/app/challenges/Challenge72SameDeviceMdnsDiscoveryTest.kt</code>
+in the main worktree. Do not edit its content in this step — just
+relocate it.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 3: Verify the symbols
+it references still exist in current
+<code>master</code></strong></label></li>
+</ul>
+<p>The file references:
+<code>digital.vasic.lava.client.BuildConfig.API_TARGET_PACKAGE</code>,
+<code>digital.vasic.lava.client.MainActivity</code>,
+<code>lava.app.ResetOnboardingPrefsRule</code>,
+<code>lava.app.di.ApiSelectionTestFlag</code>,
+<code>lava.applink.AppLinkContract</code> (specifically
+<code>AppLinkContract.EXTRA_START_API</code>). Confirm each still
+exists:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;API_TARGET_PACKAGE&quot;</span> app/build.gradle.kts</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rln</span> <span class="st">&quot;class ResetOnboardingPrefsRule&quot;</span> app/src/androidTest/</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rln</span> <span class="st">&quot;object ApiSelectionTestFlag&quot;</span> app/src/androidTest/</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-rn</span> <span class="st">&quot;EXTRA_START_API&quot;</span> <span class="at">--include</span><span class="op">=</span><span class="pp">*</span>.kt app/ core/ feature/ <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> Test</span></code></pre></div>
+<p>Expected: every symbol resolves to at least one hit. If any symbol is
+missing or renamed, fix the ONE corresponding reference in the copied
+file to match its current name (do not change the test's behavior or
+assertions — only repoint a renamed symbol), and note the rename in your
+report.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 4:
+Compile-check</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> :app:compileDebugAndroidTestKotlin</span></code></pre></div>
+<p>Expected: <code>BUILD SUCCESSFUL</code>. If it fails, read the
+compiler error, fix only what's needed to make the file compile against
+current <code>master</code> (symbol renames only — do not alter test
+logic or assertions), and re-run until green.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 5:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add app/src/androidTest/kotlin/lava/app/challenges/Challenge72SameDeviceMdnsDiscoveryTest.kt</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">cat</span> <span class="op">&lt;&lt;&#39;EOF&#39;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="st">test(challenges): recover C72 same-device mDNS discovery Challenge from stale worktree</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="st">A prior session&#39;s isolated-worktree subagent (.claude/worktrees/agent-a8587b5696a32ec2f)</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="st">left this finished, fully-documented Challenge test (same-device mDNS discovery of</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="st">the on-device api-app during onboarding&#39;s &quot;Choose your API&quot; step) as an untracked</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="st">file — it was never committed anywhere. The worktree&#39;s committed history is not</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="st">ahead of master (no other changes to recover), so this is a straight file</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="st">relocation, byte-identical except for any symbol renames needed to compile</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="st">against current master (noted below if any were needed).</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="va">)</span><span class="st">&quot;</span></span></code></pre></div>
+<p>Report DONE with: the verification output from Steps 1 and 3, whether
+any symbol needed repointing (and exactly what), the compile output, and
+the commit SHA.</p>
+<hr />
+<h3
+id="task-4-per-release-coverage-ledger-snapshot-mechanism-lva-019">Task
+4: Per-release coverage-ledger snapshot mechanism (LVA-019)</h3>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create: <code>scripts/snapshot-coverage-ledger.sh</code></li>
+<li>Modify: <code>scripts/firebase-distribute.sh:342-344</code> (insert
+a call right after the existing §6.AK Gate 7 block, before the next
+<code># ----</code> section divider)</li>
+</ul>
+<p><strong>Interfaces:</strong></p>
+<ul>
+<li>Consumes: <code>scripts/generate-coverage-ledger.sh</code>
+(existing; default mode regenerates
+<code>docs/coverage-ledger.yaml</code> in place — do not modify this
+script).</li>
+<li>Produces:
+<code>.lava-ci-evidence/coverage-ledger-snapshots/&lt;version&gt;-&lt;code&gt;.yaml</code>,
+a per-release frozen copy of the ledger, mirroring the existing
+<code>.lava-ci-evidence/distribute-changelog/&lt;channel&gt;/cycle-coverage-map-&lt;version&gt;-&lt;code&gt;.yaml</code>
+naming convention already used in this project.</li>
+</ul>
+<p><strong>Context:</strong>
+<code>scripts/check-coverage-ledger.sh --strict</code> runs clean today
+(0 gap rows) — there is no live classifier defect to fix. The real,
+still-open part of LVA-019 is "missing per-release ledgers": there is no
+mechanism today that freezes a copy of
+<code>docs/coverage-ledger.yaml</code> at the moment of each distribute,
+the way
+<code>cycle-coverage-map-&lt;version&gt;-&lt;code&gt;.yaml</code>
+already freezes the §6.AK device-coverage claims per release.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Write the snapshot
+script</strong></label></li>
+</ul>
+<p>Create <code>scripts/snapshot-coverage-ledger.sh</code>:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env bash</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># scripts/snapshot-coverage-ledger.sh — LVA-019 / §11.4.25 per-release ledger snapshot.</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Regenerates docs/coverage-ledger.yaml (via scripts/generate-coverage-ledger.sh)</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co"># and freezes a copy under .lava-ci-evidence/coverage-ledger-snapshots/, mirroring</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co"># the existing .lava-ci-evidence/distribute-changelog/&lt;channel&gt;/cycle-coverage-map-</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co"># &lt;version&gt;-&lt;code&gt;.yaml per-release snapshot convention already used by</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co"># scripts/firebase-distribute.sh for the §6.AK device-coverage gate.</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Usage:</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   scripts/snapshot-coverage-ledger.sh &lt;version&gt;-&lt;code&gt;</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Example:</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="co">#   scripts/snapshot-coverage-ledger.sh 1.3.17-1085</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="co">#     -&gt; writes .lava-ci-evidence/coverage-ledger-snapshots/1.3.17-1085.yaml</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span> <span class="at">-euo</span> pipefail</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="va">VERSION_CODE_TAG</span><span class="op">=</span><span class="st">&quot;</span><span class="va">${1</span><span class="op">:?</span>Usage: scripts/snapshot-coverage-ledger.sh &lt;version&gt;-&lt;code&gt;<span class="va">}</span><span class="st">&quot;</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="va">REPO_ROOT</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$(</span><span class="bu">cd</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">dirname</span> <span class="st">&quot;</span><span class="va">${BASH_SOURCE</span><span class="op">[</span><span class="dv">0</span><span class="op">]</span><span class="va">}</span><span class="st">&quot;</span><span class="va">)</span><span class="st">/..&quot;</span> <span class="kw">&amp;&amp;</span> <span class="bu">pwd</span><span class="va">)</span><span class="st">&quot;</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> <span class="st">&quot;</span><span class="va">$REPO_ROOT</span><span class="st">&quot;</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="va">SNAPSHOT_DIR</span><span class="op">=</span><span class="st">&quot;.lava-ci-evidence/coverage-ledger-snapshots&quot;</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a><span class="va">SNAPSHOT_PATH</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$SNAPSHOT_DIR</span><span class="st">/</span><span class="va">$VERSION_CODE_TAG</span><span class="st">.yaml&quot;</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;==&gt; LVA-019: regenerating docs/coverage-ledger.yaml&quot;</span></span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/generate-coverage-ledger.sh <span class="at">--quiet</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">bash</span> scripts/generate-coverage-ledger.sh</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="st">&quot;</span><span class="va">$SNAPSHOT_DIR</span><span class="st">&quot;</span></span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> docs/coverage-ledger.yaml <span class="st">&quot;</span><span class="va">$SNAPSHOT_PATH</span><span class="st">&quot;</span></span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;==&gt; Snapshot written: </span><span class="va">$SNAPSHOT_PATH</span><span class="st">&quot;</span></span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a><span class="bu">exit</span> 0</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 2: Make it
+executable</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chmod</span> +x scripts/snapshot-coverage-ledger.sh</span></code></pre></div>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 3: Check whether
+<code>generate-coverage-ledger.sh</code> actually supports a
+<code>--quiet</code> flag</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="at">-n</span> <span class="st">&#39;\-\-quiet\|QUIET=&#39;</span> scripts/generate-coverage-ledger.sh</span></code></pre></div>
+<p>If <code>--quiet</code> is NOT a recognized flag (only an internal
+<code>QUIET</code> variable set some other way, or no such flag exists
+at all), edit <code>scripts/snapshot-coverage-ledger.sh</code> Step 1's
+<code>echo "==&gt; LVA-019: ..."</code> line's following command to just
+<code>bash scripts/generate-coverage-ledger.sh</code> (drop the
+<code>--quiet</code> attempt and its <code>||</code> fallback) — don't
+invent a flag the script doesn't have.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 4: Wire the call into
+<code>scripts/firebase-distribute.sh</code></strong></label></li>
+</ul>
+<p>Read <code>scripts/firebase-distribute.sh</code> around line 340-345
+to confirm the exact current text of the §6.AK Gate 7
+<code>case "$ak_rc" in ... esac</code> block end and the following
+section divider comment (it should look like the block ending in
+<code>*) echo "FATAL §6.AK: internal error..." ; exit 1 ;; esac</code>
+followed by a blank line and a
+<code># ----------------------------------------------------------------</code>
+divider). Insert, immediately after the <code>esac</code> that closes
+the Gate 7 case block and before the next <code># ----</code> divider
+comment:</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co"># ----------------------------------------------------------------</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 1d. LVA-019 — per-release coverage-ledger snapshot (§11.4.25).</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Freezes docs/coverage-ledger.yaml at this exact distribute moment, mirroring</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co"># the §6.AK cycle-coverage-map per-release snapshot pattern above. Advisory —</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co"># does not block distribute on failure (the coverage ledger&#39;s own STRICT gate</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="co"># already runs elsewhere in CI; this is a historical-record snapshot, not a</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="co"># release gate).</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="co"># ----------------------------------------------------------------</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;    LVA-019: snapshotting coverage ledger for </span><span class="va">$APP_VERSION</span><span class="st">-</span><span class="va">$APP_VERSION_CODE</span><span class="st">&quot;</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> <span class="st">&quot;</span><span class="va">$SCRIPT_DIR</span><span class="st">/snapshot-coverage-ledger.sh&quot;</span> <span class="st">&quot;</span><span class="va">$APP_VERSION</span><span class="st">-</span><span class="va">$APP_VERSION_CODE</span><span class="st">&quot;</span> <span class="kw">||</span> <span class="dt">\</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;    WARNING: coverage-ledger snapshot failed (non-fatal, distribute continues)&quot;</span></span></code></pre></div>
+<p>Use the Edit tool with the exact surrounding text you read in this
+step as <code>old_string</code> (do not guess at line numbers — the file
+may have shifted slightly since this plan was written).</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 5: Smoke-test the new
+script directly (do not run the full firebase-distribute.sh — that
+requires Firebase credentials and would attempt a real
+distribute)</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/snapshot-coverage-ledger.sh 0.0.0-test</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> .lava-ci-evidence/coverage-ledger-snapshots/0.0.0-test.yaml</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">diff</span> docs/coverage-ledger.yaml .lava-ci-evidence/coverage-ledger-snapshots/0.0.0-test.yaml</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> .lava-ci-evidence/coverage-ledger-snapshots/0.0.0-test.yaml</span></code></pre></div>
+<p>Expected: the script exits 0, the file is created, <code>diff</code>
+shows no differences (the snapshot is an exact copy), and the test file
+is cleaned up afterward (a <code>0.0.0-test.yaml</code> file must not be
+committed).</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 6: Update the doc
+header note</strong></label></li>
+</ul>
+<p>Add a one-line comment near the top of
+<code>docs/coverage-ledger.yaml</code> header comment section (if the
+generator emits a header comment block) — or, if the file is pure YAML
+with no comment header, instead add a short note to
+<code>docs/scripts/generate-coverage-ledger.sh.md</code> (create it with
+a two-line note if it doesn't exist, following this project's
+<code>docs/scripts/&lt;script&gt;.md</code> convention already used for
+other scripts — e.g.
+<code>docs/scripts/check-non-fatal-coverage.sh.md</code>) stating:
+"Per-release frozen copies of this ledger are written by
+<code>scripts/snapshot-coverage-ledger.sh</code> to
+<code>.lava-ci-evidence/coverage-ledger-snapshots/&lt;version&gt;-&lt;code&gt;.yaml</code>
+at each Firebase distribute."</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 7:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add scripts/snapshot-coverage-ledger.sh scripts/firebase-distribute.sh docs/scripts/</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">cat</span> <span class="op">&lt;&lt;&#39;EOF&#39;</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="st">feat(§11.4.25/LVA-019): add per-release coverage-ledger snapshot mechanism</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="st">docs/coverage-ledger.yaml (§11.4.25) had no per-release snapshot history —</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="st">only the live, continuously-regenerated file existed, so there was no way to</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="st">see what the ledger looked like at any past distribute. Adds</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="st">scripts/snapshot-coverage-ledger.sh, mirroring the existing</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="st">cycle-coverage-map-&lt;version&gt;-&lt;code&gt;.yaml per-release snapshot pattern</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="st">scripts/firebase-distribute.sh already uses for §6.AK device-coverage claims,</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="st">and wires it into the distribute flow (advisory — does not block distribute).</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="st">The coverage-ledger&#39;s live classifier itself has no defect: check-coverage-ledger.sh</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="st">--strict runs clean today (0 gap rows) — the &quot;partial/gap overlap&quot; language in</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="st">LVA-019&#39;s original title did not describe a live bug at time of investigation.</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a><span class="va">)</span><span class="st">&quot;</span></span></code></pre></div>
+<p>Report DONE with: the smoke-test output from Step 5 and the commit
+SHA. Note whether <code>--quiet</code> was a real flag or you had to
+drop it (Step 3).</p>
+<hr />
+<h3
+id="task-5-device-gate-execution--verify-lva-088089091-with-real-evidence-close-them-honestly">Task
+5: Device-gate execution — verify LVA-088/089/091 with real evidence,
+close them honestly</h3>
+<p><strong>Depends on:</strong> Task 2 (Challenge67 fix) and Task 3
+(Challenge72 recovery) must be merged to <code>master</code> first —
+this task runs against the merged result, not against either task's
+isolated branch.</p>
+<p><strong>Files:</strong></p>
+<ul>
+<li>Create:
+<code>.lava-ci-evidence/genymotion/2026-08-20-lva-088-089-091-verification/</code>
+(or wherever <code>scripts/run-challenge-matrix.sh</code> writes its
+evidence dir by default — follow the script's own convention, do not
+invent a different path)</li>
+<li>Create:
+<code>.lava-ci-evidence/workable-items-closures/2026-08-20-lva-088-089-091-closure.md</code></li>
+<li>Modify (via CLI): <code>docs/workable_items.db</code>,
+<code>docs/Issues.md</code>, <code>docs/Fixed.md</code></li>
+</ul>
+<p><strong>Interfaces:</strong></p>
+<ul>
+<li>Consumes: the fixed <code>Challenge67AppIdSeparationTest.kt</code>
+(Task 2), the recovered
+<code>Challenge72SameDeviceMdnsDiscoveryTest.kt</code> (Task 3), and the
+already-correct-and-unmodified
+<code>Challenge64ApiDiscoveryScreenFriendlyNamesTest.kt</code> +
+<code>Challenge65MdnsShowsFriendlyNameTest.kt</code> (no code changes
+needed for either — verified by direct source read during planning:
+<code>Challenge64</code>'s only assertion that could be ambiguous
+already uses <code>onAllNodesWithText(...).onFirst()</code>, not a bare
+<code>onNodeWithText</code>, so it should not throw the
+historically-recorded "Expected at most 1 node but found 2" error; if it
+still does, that is new information — diagnose it fresh rather than
+assuming the old diagnosis).</li>
+<li>Produces: real per-Challenge PASS/FAIL evidence this session, and
+honest <code>docs/workable_items.db</code> status updates based on that
+evidence — not on any prior commit's claims.</li>
+</ul>
+<p><strong>Context — this host is gate-capable.</strong>
+<code>nezha</code> (this machine) has <code>/dev/kvm</code>
+(world-accessible), podman 5.7.1, a built
+<code>submodules/containers/cmd/emulator-matrix</code> binary, and
+multiple provisioned AVDs including <code>CZ_API34_Phone</code>,
+<code>CZ_API35_Phone</code>, <code>Pixel_9a</code>. Real device
+execution is possible and required here — do not substitute a JVM-only
+build check for device execution, and do not write an evidence file
+claiming a Challenge "passed" without it actually having run.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 1: Confirm you're on
+the merged state and rebuild the androidTest APK</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> log <span class="at">--oneline</span> <span class="at">-5</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./gradlew</span> :app:assembleDebugAndroidTest</span></code></pre></div>
+<p>Expected: <code>git log</code> shows Task 2's and Task 3's commits in
+history; <code>BUILD SUCCESSFUL</code>.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 2: Run the four target
+Challenges on the real device gate</strong></label></li>
+</ul>
+<p>Try a single combined run first (Android's instrumentation
+<code>-e class</code> argument accepts a comma-separated list of
+fully-qualified class names):</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-challenge-matrix.sh <span class="dt">\</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--avds</span> <span class="st">&quot;CZ_API35_Phone:35:phone&quot;</span> <span class="dt">\</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--test-class</span> <span class="st">&quot;lava.app.challenges.Challenge64ApiDiscoveryScreenFriendlyNamesTest,lava.app.challenges.Challenge65MdnsShowsFriendlyNameTest,lava.app.challenges.Challenge67AppIdSeparationTest,lava.app.challenges.Challenge72SameDeviceMdnsDiscoveryTest&quot;</span> <span class="dt">\</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--evidence-dir</span> .lava-ci-evidence/genymotion/2026-08-20-lva-088-089-091-verification</span></code></pre></div>
+<p>If the script or the underlying runner rejects a comma-separated
+<code>--test-class</code> value (report the exact error if so), fall
+back to four sequential single-class invocations against the same
+<code>--evidence-dir</code> (the AVD image is already downloaded/cached
+after the first run, so subsequent boots are faster):</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> cls <span class="kw">in</span> <span class="dt">\</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  lava.app.challenges.Challenge64ApiDiscoveryScreenFriendlyNamesTest <span class="dt">\</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  lava.app.challenges.Challenge65MdnsShowsFriendlyNameTest <span class="dt">\</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  lava.app.challenges.Challenge67AppIdSeparationTest <span class="dt">\</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  lava.app.challenges.Challenge72SameDeviceMdnsDiscoveryTest<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bash</span> scripts/run-challenge-matrix.sh <span class="dt">\</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">--avds</span> <span class="st">&quot;CZ_API35_Phone:35:phone&quot;</span> <span class="dt">\</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">--test-class</span> <span class="st">&quot;</span><span class="va">$cls</span><span class="st">&quot;</span> <span class="dt">\</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">--no-build</span> <span class="dt">\</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">--evidence-dir</span> .lava-ci-evidence/genymotion/2026-08-20-lva-088-089-091-verification</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<p>(Use <code>--no-build</code> on the fallback runs after the first,
+since Step 1 already built the APK and it doesn't change between these
+Challenge runs.)</p>
+<p><strong>Note on
+<code>Challenge72SameDeviceMdnsDiscoveryTest</code>:</strong> its own
+KDoc documents a precondition — the api-app debug APK must ALSO be
+installed on the target AVD for this specific Challenge (it
+<code>assumeTrue</code>-skips cleanly, not fails, if absent). If
+<code>scripts/run-challenge-matrix.sh</code> doesn't already install the
+api-app APK for you, build + note it:
+<code>./gradlew :api-app:assembleDebug</code> and check the script's own
+comments for how to get a second APK onto the target AVD before this
+Challenge's install step (the script's usage header addresses this —
+reread it if the Challenge reports SKIP rather than PASS/FAIL). A clean
+SKIP (not FAIL) for this one Challenge is acceptable and should be
+reported honestly as SKIP, not silently treated as PASS.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 3: Read the real
+results — do not summarize from memory, read the actual evidence
+files</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">find</span> .lava-ci-evidence/genymotion/2026-08-20-lva-088-089-091-verification <span class="at">-type</span> f <span class="kw">|</span> <span class="fu">sort</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> .lava-ci-evidence/genymotion/2026-08-20-lva-088-089-091-verification/verdict.json <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="dt">\</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span> .lava-ci-evidence/genymotion/2026-08-20-lva-088-089-091-verification/<span class="pp">*</span>.txt <span class="dv">2</span><span class="op">&gt;</span>/dev/null</span></code></pre></div>
+<p>Record, per Challenge, the literal PASS/FAIL/SKIP outcome and (for
+any FAIL) the exact assertion message.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 4: Handle failures
+honestly — do NOT force a close on a real failure</strong></label></li>
+</ul>
+<p>For any Challenge that FAILS:</p>
+<ol type="1">
+<li>Read the exact assertion failure.</li>
+<li>Determine root cause the same way this plan's own research did —
+read the actual production code the Challenge exercises, don't
+guess.</li>
+<li>If it's a genuine production bug: fix the production code (not the
+test), re-run just that one Challenge to confirm GREEN, and note the fix
+in your report.</li>
+<li>If it's another test-authoring bug (like Task 2's Challenge67 fix):
+fix the test, re-run to confirm GREEN, and note it in your report.</li>
+<li>If you cannot determine root cause with confidence, or a fix would
+need more than a small, obviously-correct change: STOP, do not close the
+corresponding workable item, and report <code>DONE_WITH_CONCERNS</code>
+naming exactly which LVA item(s) remain open and why. Leaving an item
+honestly open is always acceptable; closing it on fabricated or
+unconfirmed evidence is not.</li>
+</ol>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 5: Write the closure
+evidence file (only for items with a genuine, confirmed
+PASS)</strong></label></li>
+</ul>
+<p>Create
+<code>.lava-ci-evidence/workable-items-closures/2026-08-20-lva-088-089-091-closure.md</code>
+documenting, for each of LVA-088/LVA-089/LVA-091 that genuinely reached
+PASS: the Challenge class name, the AVD it ran on, the exact command,
+and the pass confirmation (quote the real output). For LVA-091
+specifically, cross-reference Task 2's commit SHA (the test-assertion
+fix) as the root-cause fix. If Challenge72 (bonus, not tied to any LVA
+item) also passed, note it too, but it doesn't correspond to closing any
+workable item — skip it in the DB step below.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 6: Close only the items
+with confirmed evidence</strong></label></li>
+</ul>
+<p>For each of LVA-088, LVA-089, LVA-091 that Step 4/5 confirmed PASS
+(skip any that didn't):</p>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./constitution/scripts/workable-items/bin/workable-items-linux</span> close LVA-0XX <span class="dt">\</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--db</span> docs/workable_items.db <span class="at">--status</span> fixed <span class="dt">\</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--evidence</span> .lava-ci-evidence/workable-items-closures/2026-08-20-lva-088-089-091-closure.md</span></code></pre></div>
+<p>(All three are <code>type=Bug</code> → <code>fixed</code>, per
+§11.4.33.)</p>
+<p>Then:</p>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./constitution/scripts/workable-items/bin/workable-items-linux</span> sync db-to-md <span class="at">--db</span> docs/workable_items.db</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/check-workable-items.sh</span></code></pre></div>
+<p>Expected: exit 0.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Step 7:
+Commit</strong></label></li>
+</ul>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add .lava-ci-evidence/genymotion/2026-08-20-lva-088-089-091-verification <span class="dt">\</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  .lava-ci-evidence/workable-items-closures/2026-08-20-lva-088-089-091-closure.md <span class="dt">\</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  docs/workable_items.db docs/Issues.md docs/Fixed.md</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co"># also `git add` any production or test files you touched in Step 4, if any</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;</span><span class="va">$(</span><span class="fu">cat</span> <span class="op">&lt;&lt;&#39;EOF&#39;</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="st">chore(§6.AK/workable-items): device-verify + close LVA-088/089/091 (or narrow scope, see body)</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="st">Ran Challenge64/65/67/72 for real on the containerized emulator gate</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="st">(CZ_API35_Phone, nezha host) and closed each LVA item ONLY where the device</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="st">run genuinely passed. &lt;FILL IN: name which items closed, which (if any)</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="st">stayed open and why, and cite the fix commits for any bugs found during this</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="st">run.&gt;</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a><span class="st">Bluff-Audit: &lt;name each fixed/modified test or production file&gt;</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="st">  Mutation: &lt;what was deliberately broken to falsify, if applicable&gt;</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a><span class="st">  Observed-Failure: &lt;the real captured failure&gt;</span></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a><span class="st">  Reverted: yes</span></span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a><span class="op">EOF</span></span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a><span class="va">)</span><span class="st">&quot;</span></span></code></pre></div>
+<p>Fill in the <code>&lt;...&gt;</code> placeholders with the real,
+specific outcome from this task — do not leave them as literal
+placeholder text in the commit.</p>
+<p>Report DONE (or DONE_WITH_CONCERNS if any item stayed open) with: the
+full per-Challenge PASS/FAIL/SKIP table, which LVA items closed and
+which didn't (with reasons), any production or test fixes made along the
+way, and the final commit SHA.</p>
+</body>
+</html>

@@ -189,6 +189,229 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🟢🧾 2026-08-20 (BACKLOG-CLOSURE PLAN + FINAL-REVIEW FIXUP —
+LVA-095/082/088/089/091/019 all closed, tracker exports
+resynced).</strong> Executed
+<code>docs/superpowers/plans/2026-08-20-workable-items-backlog-closure.md</code>
+(5 tasks) then fixed 2 gaps a final whole-branch review found.
+<strong>Closures (all in <code>docs/workable_items.db</code>, exported
+to
+<code>docs/Issues.md</code>/<code>Fixed.md</code>/<code>Issues_Summary.md</code>/<code>Fixed_Summary.md</code>
++ HTML/PDF/DOCX siblings):</strong> <strong>LVA-095</strong>
+(<code>OnboardingViewModelDynamicProvidersTest</code> failure) — fixed
+by commit <code>2c96a993</code>: <code>isLocalHost()</code>
+misclassified <code>localhost.localdomain</code> as remote, breaking ALL
+on-device API auth; the tracker entry was stale (fix pre-dated the
+closure). <strong>LVA-082</strong> (Crashlytics not programmatically
+readable) — documented as an accepted Firebase-CLI limitation (no
+<code>issues</code>/<code>non-fatals</code> read command;
+<code>bq</code> absent) with the existing §6.AC local-telemetry fallback
+as the standing mitigation — closed as accepted-limitation, not a code
+fix. <strong>LVA-088/089/091</strong> (video-reported
+onboarding/API-discovery display issues) — device-verified fixed via the
+5-task plan; real evidence at
+<code>.lava-ci-evidence/genymotion/2026-08-20-lva-088-089-091-verification/</code>.
+<strong>LVA-019</strong> (coverage-ledger partial/gap overlap + missing
+per-release ledgers) — the live classifier
+(<code>scripts/check-coverage-ledger.sh --strict</code>) had no defect
+(independently confirmed by two reviewers); the genuinely missing
+per-release snapshot mechanism was built by commit <code>fe639414</code>
+(<code>scripts/snapshot-coverage-ledger.sh</code>, wired into
+<code>scripts/firebase-distribute.sh</code> §6.AK Gate 7); closed with
+evidence at
+<code>.lava-ci-evidence/workable-items-closures/2026-08-20-lva-019-closure.md</code>.
+<strong>Final-review fixup (this same cycle):</strong> the
+<code>close</code> command only regenerates
+<code>Issues.md</code>/<code>Fixed.md</code>, not the full export set,
+so
+<code>Issues_Summary.md</code>/<code>Fixed_Summary.md</code>/HTML/PDF/DOCX
+briefly still showed LVA-088/089/091 as open after their
+<code>close</code> — re-ran the canonical <code>export</code> (with
+<code>--out-dir docs</code>, avoiding the known root-level-collision
+footgun) to resync everything; also fixed
+<code>scripts/snapshot-coverage-ledger.sh</code> dirtying
+<code>docs/coverage-ledger.yaml</code> on every
+<code>firebase-distribute.sh</code> run (regenerated in place with a
+fresh timestamp, no restore) and added its missing
+<code>docs/scripts/snapshot-coverage-ledger.sh.md</code> companion doc
+(<code>CM-SCRIPT-DOCS-SYNC</code> gate). <strong>LVA-008 and LVA-5
+remain open and operator-blocked</strong> — unaffected by this cycle's
+closures, see §4.5 for their standing descriptions.</p>
+<p><strong>🚀🚀🚀 2026-08-14 (LVA-098 CYCLE FULLY SHIPPED — client
+1.3.17-1085 + api-app 0.2.13-27, both §6.AA stages, both apps,
+lava-api-go container restarted on final source, both mirrors
+converged).</strong> Everything from the LVA-098 root-cause entry below
+is now LIVE: <code>lava-api-go</code> container stopped + restarted
+(<code>./stop.sh</code> + <code>./start.sh</code>) so it runs the exact
+committed source (<code>0244aa2c</code>), confirmed healthy
+(<code>/health</code> → <code>{"status":"alive"}</code>) with the new
+§6.AC auth/request diagnostic logging visible in its logs. Client
+1.3.17-1085 built (debug + release, both <code>dexdump</code>-verified
+to contain the fixed <code>LavaAuthGenerated</code> class), two-stage
+Firebase-distributed (Firebase release IDs: debug
+<code>2r5rfpqk1dmao</code>, release <code>24g7gpjlonk6g</code>).
+<strong>Discovered + fixed mid-cycle:</strong>
+<code>scripts/firebase-distribute.sh</code>'s Phase 1 Gate 4 caught that
+<code>LAVA_AUTH_OBFUSCATION_PEPPER</code> (a separate per-release secret
+from the
+<code>LAVA_AUTH_ACTIVE_CLIENTS</code>/<code>LAVA_AUTH_HMAC_SECRET</code>
+pair rotated during the LVA-098 investigation) had NOT been rotated and
+was reused from 1084 — rotated + both client APKs rebuilt before
+distribute proceeded. api-app bumped 26→27 (versionName held; embeds the
+same <code>lava-api-go</code> source, so it genuinely picked up the new
+§6.AC diagnostic logging even though it is NOT itself affected by the
+LVA-098 bug — its auth-key delivery uses a completely different
+<code>ApiKeyProvider</code> path). <strong>Two real build-environment
+issues found + fixed during api-app's gate, recorded honestly rather
+than silently retried:</strong> (1) a corrupted
+<code>api-app-debug.apk</code> (<code>unzip -t</code> failed) produced
+by running two Gradle builds concurrently against the same monorepo —
+raced on shared <code>core:*</code> module outputs; fixed by clearing
+build outputs and rebuilding sequentially; (2)
+<code>:api-app:assembleRelease</code> crashed the build JVM with an
+identical GC-thread SIGSEGV on 3 consecutive attempts at the default 4GB
+heap (host memory otherwise healthy) — resolved with a 6GB heap
+(<code>-Dorg.gradle.jvmargs="-Xmx6144m"</code>). api-app's own device
+gate (Challenge01-04) then PASSED cleanly (370.3s) and both stages
+distributed (Firebase release IDs: debug <code>7fhj6085a1r00</code>,
+release <code>247mqd60mcoj0</code>). §6.Y post-distribution bump applied
+to both apps (client 1085→1086, api-app 27→28; versionNames held) before
+any new code lands in the next cycle. Commits <code>0244aa2c</code>
+(LVA-098 fix) + <code>de59ea85</code> (api-app parity bump + distribute
+evidence), both mirrors converged. <strong>NEXT:</strong> address the
+standing operator directive (2026-08-14) to fully adopt the constitution
+submodule's multi-track development system
+(<code>config/multitrack/&lt;hostname&gt;.yaml</code> +
+<code>multitrack_bootstrap.sh</code>, per
+<code>constitution/Constitution.md</code> §11.4.176/§11.4.187/§11.4.192)
+with the current project directory as Track 1 — deliberately deferred as
+its own properly-scoped task rather than rushed alongside the P0
+fix.</p>
+</blockquote>
+<blockquote>
+<p><strong>🔴→🟢 2026-08-14 (LVA-098 — P0 "no tracker can log in, search
+fails for every provider" — root-caused + fixed + device-verified
+end-to-end; client 1.3.17-1085).</strong> Operator reported
+(paraphrased): all onboarding logins fail for every tracker, and
+providers that don't require login still can't search — tested against a
+remote API on the current host. Systematic-debugging investigation
+traced this through several dead ends (a self-inflicted §6.H
+credential-leak incident during diagnosis — 14
+<code>LAVA_AUTH_ACTIVE_CLIENTS</code> UUIDs + the HMAC secret rotated,
+incident recorded, no committed/pushed exposure — plus two
+diagnostic-tool traps: <code>podman exec &lt;distroless&gt; env</code>
+silently exits 127 with no <code>env</code> binary, misread as "0 env
+vars"; <code>podman logs --since</code> had a timezone bug, misread as
+"middleware never runs") before reaching the real root cause:
+<code>app/build.gradle.kts</code> wired the build-time-generated
+<code>lava.auth.LavaAuthGenerated</code> Kotlin source into the Kotlin
+compilation via
+<code>afterEvaluate { android.sourceSets["debug"].kotlin.srcDir(...) }</code>,
+which runs too late on this project's AGP 8.6.1 + Kotlin 2.1.0
+combination for the compile task to see it — the class was written to
+disk every build but <strong>never compiled into the APK's dex</strong>
+(confirmed via <code>dexdump -l xml</code> across all 20
+<code>classesN.dex</code>: 0 class definitions; the class name only
+existed as a string-literal <code>Class.forName(...)</code> argument).
+Effect: <code>AuthInterceptorModule</code> silently fell back to an
+empty auth-blob stub on every real device, so no authenticated request
+ever carried a <code>Lava-Auth</code> header — exactly the reported
+symptom, since every tracker flow (login OR keyless search) routes
+through <code>lava-api-go</code>'s auth middleware, which correctly 401s
+a headerless request. <strong>Fix:</strong> moved the source-directory
+registration to an eager, non-<code>afterEvaluate</code> top-level
+statement (proven via a throwaway diagnostic task dumping
+<code>compileDebugKotlin.sources</code>: 0→1 lava-auth matches). An AGP
+Variant-API alternative
+(<code>androidComponents.onVariants{...addStaticSourceDirectory(...)}</code>)
+was tried first and ruled out — fires correctly at configuration time
+but this project's KGP version doesn't read from that model for this
+path. <strong>Verified genuinely fixed, not just
+source-patched:</strong> a real, non-instrumented device launch
+(containerized emulator, <code>adb shell am start</code>, NOT
+<code>connectedDebugAndroidTest</code> — ruling out an
+instrumentation-only classloader confound) now logs
+<code>LavaAuthGenerated FOUND</code> instead of
+<code>ClassNotFoundException</code>;
+<code>Challenge70AutonomousQaProviderMatrixTest</code> PASSED end-to-end
+against the real backend (512.7s, <code>test-timeout=20m</code> — the
+runner's 10-minute default killed the first attempt as an infra timeout,
+not a test failure); server-side <code>lava-api-go</code> logs
+independently confirm <code>hdr_present=true</code>,
+<code>MATCHED active client=android-1.3.17-1085</code>, and
+search/topic-browse/download all returning HTTP 200. Also landed
+permanent §6.AC local (logcat/server-log) telemetry for auth-blob
+resolution and request/auth outcomes — closing the silence that made a
+401 indistinguishable from "request never arrived," which is what made
+this investigation harder than it needed to be. §6.Y bump 1084→1085
+(versionName HELD at 1.3.17 — internal/security fix, no new feature
+surface, though the user-visible EFFECT is that search/login work again
+at all). §6.P/§6.AK/§6.Z evidence authored (<code>CHANGELOG.md</code>,
+<code>1.3.17-1085.md</code>,
+<code>cycle-coverage-map-1.3.17-1085.yaml</code>,
+<code>1.3.17-1085-test-evidence.md</code>,
+<code>.lava-ci-evidence/lva-098-1085-device-gate/</code>).
+<strong>NEXT:</strong> restart the standalone lava-api-go container on
+the now-final source; rebuild release APK; two-stage Firebase distribute
+for the client; check whether <code>:api-app</code> needs a matching
+rebuild+redistribute (it embeds <code>lava-api-go</code> and picked up
+the same permanent §6.AC diagnostic logging, but does NOT share the
+<code>LavaAuthGenerated</code> client-side code path, so it was never
+affected by LVA-098 itself).</p>
+</blockquote>
+<blockquote>
+<p><strong>🔴→🟢 2026-08-13 (LVA-085 x LVA-093 COMPOSITION RACE —
+operator retest of 1.3.16-1083 found it "still garbage"; root-caused +
+closed on BOTH chip bars, device-verified).</strong> Immediately after
+the 1.3.16-1083 release-stage distribute (both apps, both stages), the
+operator retested and reported "Nothing of reported issues has been
+fixed at all!!!" — followed by "Results we have so far are our garbage!
+Make sure next released builds really do work!" Systematic-debugging
+investigation (not guessing) found the real cause: LVA-085 (raw provider
+ids in chips) and LVA-093 (cold-start readiness gate) landed the SAME
+1083 cycle, each individually unit-tested and passing — but
+<code>SearchResultViewModel.observeStreamMultiSearch</code> read the
+tracker registry for display names BEFORE awaiting the cold-start
+readiness gate, so on a genuine cold start the display-name read could
+still see the stale/bundled registry and silently fall back to raw
+provider ids, reintroducing the exact bug LVA-085 claimed to fix.
+Neither fix's own test caught this because each test's default fixture
+pre-marks the gate ready before testing its own concern in isolation — a
+textbook individually-tested-but-not-composed integration gap.
+<strong>Fixed in <code>SearchResultViewModel</code></strong> (commit
+<code>843f8107</code>): moved
+<code>providersReadyGate.awaitReady()</code> before the display-name
+resolution + initial loading-state reduce. <strong>Pattern-analysis
+audit (Phase 2 of systematic-debugging) found a SECOND, independent
+instance</strong>:
+<code>SearchInputViewModel.loadOnboardedChips()</code> (the chip bar on
+the search-INPUT screen, reached BEFORE results) read the same registry
+with <strong>no readiness-gate dependency at all</strong> — never wired
+in. Fixed identically (commit <code>8634efd9</code>), adding a
+<code>StartupProvidersGate</code> dependency. Both fixes carry a genuine
+falsifiability rehearsal (mutation reverted the ordering → real
+predicted <code>ComparisonFailure</code> observed with the exact
+<code>expected:&lt;Archive.org&gt; but was:&lt;archiveorg&gt;</code>
+message → reverted → green again) and — critically, per this project's
+own standard that JVM-green is never sufficient — <strong>both are
+real-device verified</strong>:
+<code>Challenge61ResultsChipsShowDisplayNamesTest</code> PASS (421.4s
+test, containerized KVM, CZ_API34_Phone) and
+<code>Challenge59SearchUsesOnboardedProvidersTest</code> PASS (252.7s
+test, same runner, run against a fully-committed working tree with both
+fixes present — no build-timing ambiguity for this one). Also re-audited
+the OTHER two 1083 claims (LVA-094 silent-failure retry/telemetry:
+<code>LavaApplication.onCreate()</code> wiring reviewed, try/finally
+gate-release confirmed sound on every exit path, no issue found;
+RuTracker Cloudflare classification: 5 Go tests including a
+discrimination test re-run and confirmed passing, no issue found). §6.Y
+bump 1083→1084 (versionName 1.3.16→1.3.17). §6.P/§6.AK/§6.Z evidence
+authored (<code>CHANGELOG.md</code>, <code>1.3.17-1084.md</code>,
+<code>cycle-coverage-map-1.3.17-1084.yaml</code>,
+<code>1.3.17-1084-test-evidence.md</code>). <strong>NEXT:</strong>
+rebuild debug+release APKs at 1084, two-stage Firebase distribute.</p>
+</blockquote>
+<blockquote>
 <p><strong>🟢🤖🐞 2026-08-12 (4 PARALLEL SUBAGENTS CLOSED
 LVA-085/086/093/094 — real root causes, real fixes, real falsifiability
 rehearsals; 1 NEW pre-existing bug discovered while
@@ -2718,8 +2941,31 @@ PostConverters clamp, ProbeMirrorUseCase reproducing Crashlytics
 39469d3b). Evidence:
 <code>.lava-ci-evidence/bluff-hunt/2026-06-23-cycle6-{session-telemetry,android-core}.json</code>.
 The session's telemetry tests are PROVEN genuine.</p>
-<p><strong>Last updated:</strong> 2026-07-27 (SESSION COMPLETE — sweep
-committed+verified+pushed; debug APK built; CHANGELOG 1.3.15-1081;
+<p><strong>Last updated:</strong> 2026-08-20 (backlog-closure plan +
+final-review fixup — LVA-095/082/088/089/091/019 all closed, tracker
+exports resynced across Issues/Fixed/Issues_Summary/Fixed_Summary +
+HTML/PDF/DOCX; <code>scripts/snapshot-coverage-ledger.sh</code>
+side-effect fixed + companion doc added — see top banner.)</p>
+</blockquote>
+<blockquote>
+<p><strong>Last updated (prior):</strong> 2026-08-14 (LVA-098 cycle
+FULLY SHIPPED — client 1.3.17-1085 + api-app 0.2.13-27, both apps, both
+§6.AA stages, lava-api-go container restarted on final source, §6.Y
+post-distribute bump applied — see top banner.)</p>
+</blockquote>
+<blockquote>
+<p><strong>Last updated (prior):</strong> 2026-08-14 (LVA-098 — P0
+auth-blob build-wiring bug root-caused + fixed + device-verified
+end-to-end, client 1.3.17-1085.)</p>
+</blockquote>
+<blockquote>
+<p><strong>Last updated (prior):</strong> 2026-08-13 (LVA-085 x LVA-093
+composition race found + closed on both chip bars, device-verified on
+containerized KVM.)</p>
+</blockquote>
+<blockquote>
+<p><strong>Last updated (prior):</strong> 2026-07-27 (SESSION COMPLETE —
+sweep committed+verified+pushed; debug APK built; CHANGELOG 1.3.15-1081;
 Firebase distribute staged on Phase-1 .env rotation — see top
 banner.)</p>
 <p><strong>Last updated (prior):</strong> 2026-07-04 (Crashlytics FATAL
@@ -7496,6 +7742,18 @@ ProviderConfigViewModelTest without regenerating the ledger).
 Regenerated via <code>scripts/generate-coverage-ledger.sh</code>;
 <code>check-coverage-ledger.sh --strict</code> now EXIT=0. Sweep →
 <strong>47/47 PASS</strong>.</li>
+<li><strong>LVA-095/082/088/089/091/019 closed</strong> (2026-08-20,
+backlog-closure plan + final-review fixup — see top banner for full
+detail): LVA-095 fixed by commit <code>2c96a993</code>; LVA-082
+documented as an accepted Firebase-CLI limitation (§6.AC telemetry
+fallback); LVA-088/089/091 device-verified fixed
+(<code>.lava-ci-evidence/genymotion/2026-08-20-lva-088-089-091-verification/</code>);
+LVA-019 closed via <code>scripts/snapshot-coverage-ledger.sh</code>
+(commit <code>fe639414</code>). All 6 previously listed as
+open/in-progress in <code>docs/Issues.md</code> and
+<code>docs/Issues_Summary.md</code>; now correctly reflected as
+Fixed/Completed in <code>docs/Fixed.md</code> and
+<code>docs/Fixed_Summary.md</code> (+ HTML/PDF/DOCX siblings).</li>
 </ul>
 <h4 id="lva-ticket-system-new-6l-68th-1149395106">LVA ticket system NEW
 (§6.L 68th, §11.4.93/95/106)</h4>
@@ -7656,40 +7914,48 @@ matrix runner BLOCKED on §6.X-debt.</li>
 <hr />
 <h2 id="7-resume-prompt">7. RESUME PROMPT</h2>
 <blockquote>
-<p><strong>⏩ CURRENT RESUME (§11.4.131, 2026-06-26) — SHORT
-(one-paste):</strong> <em>"Read <code>docs/CONTINUATION.md</code> §0
-(top entry) + <code>.remember/remember.md</code>,
-<code>git fetch</code>, then continue on <code>master</code> at HEAD
-<code>28a8b79b</code> (feat(6AK): wire cycle-coverage gate into
-firebase-distribute + pre-push — closes 6AK-debt). The §6.AK mechanical
-gate now prevents the 1076-incident pattern (C00-only gate shipping
-broken flows). Pending: commit uncommitted changes (C48/C52/C66
-LenientTeardownRule, stress-chaos re-runs, design-spec revisions,
-vision_engine pin), graft the api-app Check 10 extension patch, advance
-to 1077 cycle (search-flow device Challenges once LVA-008 unblocks or
-Genymotion-harness matures), answer OpenDesign operator decisions 1-6
-(Wave A of transitions spec). LVA-008 remains upstream
-androidx-navigation defect — 8 candidates falsified, minimal-repro
-authored."</em></p>
-<p><strong>FULL (paste-ready):</strong> read §0 top entry + the
-paste-block below. State 2026-06-26: HEAD <code>28a8b79b</code> on
-<code>master</code> converged GitHub+GitLab; cycle-coverage gate §6.AK
-wired (Check 10 + Gate 7 +
-<code>scripts/check-cycle-coverage.sh</code>); latest distribute client
-1.3.12-1076 + api-app 0.2.11-22 (both debug+release via Firebase).
-Binding constraints: anti-bluff §6.J/§6.L + Sixth/Seventh Laws, §6.AK
-coverage-intersection (every CHANGELOG claim needs an executed+PASSED
-covering device Challenge), no-force-push (§6.T.3/§11.4.113), §6.S
-CONTINUATION-in-same-commit, §6.AH no-host-direct-VMs (Genymotion is the
-macOS equivalent). Action-prefix (§6.AJ/§11.4.140) active via
-<code>.claude/settings.json</code> →
-<code>scripts/hooks/action-prefix-expand.sh</code>. <strong>LVA-008
-nav-teardown crash remains OPEN (upstream androidx-navigation defect, 8
-candidates falsified, minimal-repro authored). PENDING: commit
-working-tree changes, graft the api-app Check 10 extension (spec at
-<code>docs/superpowers/specs/2026-06-26-ak-check10-apiapp-extension.md</code>,
-proven hermetically), advance to 1077 cycle, answer OpenDesign
-transitions decisions 1-6.</strong></p>
+<p><strong>⏩ CURRENT RESUME (2026-08-14) — SHORT (one-paste):</strong>
+<em>"Read <code>docs/CONTINUATION.md</code> §0 (top entry) +
+<code>.remember/remember.md</code>, <code>git fetch</code>, then
+continue on <code>master</code>. LVA-098 (P0: no tracker could log in,
+search failed for every provider) is root-caused + fixed +
+real-device-verified: <code>app/build.gradle.kts</code>'s
+generated-source directory registration for
+<code>lava.auth.LavaAuthGenerated</code> ran too late
+(<code>afterEvaluate</code>) for the Kotlin compile task to see it, so
+the class was written to disk every build but never compiled into the
+APK — meaning no authenticated request ever carried a
+<code>Lava-Auth</code> header, on any real device. Fixed via an eager
+(non-<code>afterEvaluate</code>) source-set registration; verified via
+<code>dexdump</code> (class now genuinely in the dex), a real
+non-instrumented device launch (<code>LavaAuthGenerated FOUND</code>,
+not <code>ClassNotFoundException</code>), and
+<code>Challenge70AutonomousQaProviderMatrixTest</code> PASSING
+end-to-end (server logs confirm <code>hdr_present=true</code> + HTTP 200
+search/topic/download). Client bumped to 1.3.17-1085 (versionName held,
+§6.Y). Trust the top §0 entry over this stale §7 paste-block below (last
+substantively rewritten 2026-06-26); check <code>git log</code> for the
+true HEAD."</em></p>
+<p><strong>FULL (paste-ready):</strong> read §0 top entry (2026-08-14
+LVA-098 banner) first — it supersedes the state description in this
+paste-block, which is stale from 2026-06-26 and kept only for its
+detailed step-by-step scaffolding below. Binding constraints unchanged:
+anti-bluff §6.J/§6.L + Sixth/Seventh Laws, §6.AK coverage-intersection
+(every CHANGELOG claim needs an executed+PASSED covering device
+Challenge), no-force-push (§6.T.3/§11.4.113), §6.S
+CONTINUATION-in-same-commit, §6.AH no-host-direct-VMs, §6.X
+containerized-KVM emulator gate on Linux. <strong>Immediate next actions
+per the 2026-08-14 LVA-098 cycle:</strong> confirm the standalone
+<code>lava-api-go</code> container is running the exact committed source
+(restart if in doubt); rebuild + two-stage Firebase-distribute the
+client (debug then release) at 1.3.17-1085; check whether
+<code>:api-app</code> needs a matching rebuild (it embeds
+<code>lava-api-go</code> and picked up the same permanent §6.AC
+diagnostic-logging change, so its embedded binary changed even though it
+was never affected by the LVA-098 bug itself, which is
+<code>:app</code>-client-only). LVA-008 nav-teardown crash remains OPEN
+(upstream androidx-navigation defect, 8 candidates falsified,
+minimal-repro authored) — unrelated to this cycle.</p>
 </blockquote>
 <p>Paste the following into a new CLI agent session to continue this
 work. The agent needs no scrollback — everything it needs is in this

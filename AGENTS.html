@@ -2158,6 +2158,34 @@ clause per operator instruction + §11.4.35 (consumer-side, NOT the
 shared <code>constitution/</code> submodule).
 <code>Classification:</code> project-specific.</p>
 <h2
+id="6am--multi-track-development-system-adoption-added-2026-08-14">§6.AM
+— Multi-Track Development System Adoption (added 2026-08-14)</h2>
+<p>See parent Lava <code>/CLAUDE.md</code> §6.AM for the full clause.
+Per operator directive (2026-08-14): "current project directory as Track
+1 (main track)... This MUST BE default and only way of working... from
+now on forevermore!" Lava adopts the HelixConstitution multi-track
+engine (<code>constitution/scripts/multitrack/</code>,
+§11.4.176/§11.4.178/§11.4.179/§11.4.187/§11.4.191/§11.4.192/§11.4.196/§11.4.198)
+as the default and only way of working. Per-host config:
+<code>config/multitrack/nezha.yaml</code> — Track 1 = this checkout
+(<code>/run/media/milosvasic/DATA4TB/Projects/lava</code>, drive serial
+<code>511240401212000405</code>, btrfs, branch <code>master</code>); the
+system drive (serial <code>S4EWNS0X108183F</code>) is
+<code>protected_drives</code>-listed and never a track target. Bootstrap
+via
+<code>constitution/scripts/multitrack/multitrack_bootstrap.sh "$(pwd)"</code>
+(idempotent, re-run on topology change). Track 1's
+<code>mt_plan()</code> status reads <code>NON-EMPTY</code>
+(informational only, not fatal) because it is an already-in-use checkout
+being registered, not a fresh drive being provisioned. Additional tracks
+(operator: "we will be enabling and adding more tracks in near future")
+require a new drive or a §11.4.179
+reflink-clone-with-own-<code>.git</code> — never a shared-common-dir
+<code>git worktree</code>. Does not relax any existing Anti-Bluff Pact /
+Local-Only CI/CD / §6.W / Host-Stability rule.
+<code>Classification:</code> project-specific (topology data); the
+engine itself is universal per HelixConstitution.</p>
+<h2
 id="6ac--comprehensive-non-fatal-telemetry-mandate-added-2026-05-14">§6.AC
 — Comprehensive Non-Fatal Telemetry Mandate (added 2026-05-14)</h2>
 <p>Every catch / error / fallback / unexpected-state path on every

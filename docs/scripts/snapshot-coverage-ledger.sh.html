@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>snapshot-coverage-ledger.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptssnapshot-coverage-ledgersh--user-guide"><code>scripts/snapshot-coverage-ledger.sh</code>
+— User Guide</h1>
+<p><strong>Last verified:</strong> 2026-08-20 (LVA-019 closure,
+<code>docs/superpowers/plans/2026-08-20-workable-items-backlog-closure.md</code>
+Task 4) <strong>Inheritance:</strong> HelixConstitution §11.4.25
+(Full-Automation-Coverage Mandate) + §11.4.18 (script docs)</p>
+<h2 id="overview">Overview</h2>
+<p>Freezes a per-release copy of <code>docs/coverage-ledger.yaml</code>
+under <code>.lava-ci-evidence/coverage-ledger-snapshots/</code>,
+mirroring the existing
+<code>.lava-ci-evidence/distribute-changelog/&lt;channel&gt;/cycle-coverage-map-&lt;version&gt;-&lt;code&gt;.yaml</code>
+per-release snapshot convention already used by
+<code>scripts/firebase-distribute.sh</code> for the §6.AK
+device-coverage gate. This closes the "missing per-release ledgers" half
+of LVA-019 — the live ledger classifier itself
+(<code>scripts/check-coverage-ledger.sh --strict</code>) already had no
+defect; what was missing was a historical record of the ledger's state
+at each release moment.</p>
+<h2 id="what-it-does">What it does</h2>
+<ol type="1">
+<li>Regenerates <code>docs/coverage-ledger.yaml</code> in place via
+<code>scripts/generate-coverage-ledger.sh --quiet</code>, so the
+snapshot reflects the current tree, not a stale committed copy.</li>
+<li>Copies the freshly regenerated ledger to
+<code>.lava-ci-evidence/coverage-ledger-snapshots/&lt;version&gt;-&lt;code&gt;.yaml</code>.</li>
+<li>Restores <code>docs/coverage-ledger.yaml</code> to its pre-run
+committed state (via <code>git checkout</code>) if the regeneration step
+is what dirtied it, so the script never leaves an unwanted tracked-file
+diff in the working tree as a side effect of taking a snapshot.</li>
+</ol>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/snapshot-coverage-ledger.sh</span> <span class="op">&lt;</span>version<span class="op">&gt;</span>-<span class="op">&lt;</span>code<span class="op">&gt;</span></span></code></pre></div>
+<p>Example:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/snapshot-coverage-ledger.sh</span> 1.3.17-1085</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># -&gt; writes .lava-ci-evidence/coverage-ledger-snapshots/1.3.17-1085.yaml</span></span></code></pre></div>
+<h2 id="where-its-invoked-from">Where it's invoked from</h2>
+<p><code>scripts/firebase-distribute.sh</code>, immediately after the
+§6.AK Gate 7 cycle-coverage block (step "1d. LVA-019 — per-release
+coverage-ledger snapshot"), once per distribute run:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> <span class="st">&quot;</span><span class="va">$SCRIPT_DIR</span><span class="st">/snapshot-coverage-ledger.sh&quot;</span> <span class="st">&quot;</span><span class="va">$APP_VERSION</span><span class="st">-</span><span class="va">$APP_VERSION_CODE</span><span class="st">&quot;</span> <span class="kw">||</span> <span class="dt">\</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">echo</span> <span class="st">&quot;    WARNING: coverage-ledger snapshot failed (non-fatal, distribute continues)&quot;</span></span></code></pre></div>
+<p>The call is <strong>advisory / non-blocking</strong> — a snapshot
+failure logs a warning but does not abort the distribute. The coverage
+ledger's own STRICT gate
+(<code>scripts/check-coverage-ledger.sh --strict</code>) already runs
+elsewhere in the pipeline as the actual release gate; this script is a
+historical-record snapshot, not a gate.</p>
+<h2 id="output">Output</h2>
+<ul>
+<li><code>.lava-ci-evidence/coverage-ledger-snapshots/&lt;version&gt;-&lt;code&gt;.yaml</code>
+— a byte-for-byte copy of <code>docs/coverage-ledger.yaml</code> at the
+moment of the run.</li>
+<li><code>docs/coverage-ledger.yaml</code> — left unchanged in the
+working tree (regenerated internally to produce fresh snapshot content,
+then restored if it was clean beforehand).</li>
+</ul>
+<h2 id="companion-files">Companion files</h2>
+<ul>
+<li><code>scripts/generate-coverage-ledger.sh</code> — the generator
+this script calls to produce fresh ledger content before
+snapshotting.</li>
+<li><code>scripts/check-coverage-ledger.sh</code> — the live
+STRICT/advisory verifier; see
+<code>docs/scripts/check-coverage-ledger.sh.md</code>.</li>
+<li><code>docs/coverage-ledger.yaml</code> — the committed canonical
+ledger this script snapshots.</li>
+<li><code>scripts/firebase-distribute.sh</code> — the sole caller.</li>
+</ul>
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li>HelixConstitution <code>Constitution.md</code> §11.4.25 (the
+mandate)</li>
+<li><code>docs/superpowers/plans/2026-08-20-workable-items-backlog-closure.md</code>
+Task 4</li>
+<li><code>.lava-ci-evidence/workable-items-closures/2026-08-20-lva-019-closure.md</code>
+(LVA-019 closure evidence)</li>
+<li>Lava <code>CLAUDE.md</code> §6.J/§6.L (anti-bluff posture: a
+snapshot mechanism that silently dirties tracked state on every run is
+itself the kind of side effect the Anti-Bluff Pact exists to catch)</li>
+</ul>
+<h2 id="inheritance--classification">Inheritance + classification</h2>
+<ul>
+<li>Inheritance: HelixConstitution §11.4.25 + §11.4.18 + §6.J/§6.L</li>
+<li>Classification: project-specific (the Lava distribute-pipeline
+wiring is project-specific; the §11.4.25 per-release snapshot discipline
+is universal per HelixConstitution)</li>
+</ul>
+</body>
+</html>
