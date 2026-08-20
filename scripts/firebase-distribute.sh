@@ -342,6 +342,18 @@ case "$ak_rc" in
 esac
 
 # ----------------------------------------------------------------
+# 1d. LVA-019 — per-release coverage-ledger snapshot (§11.4.25).
+# Freezes docs/coverage-ledger.yaml at this exact distribute moment, mirroring
+# the §6.AK cycle-coverage-map per-release snapshot pattern above. Advisory —
+# does not block distribute on failure (the coverage ledger's own STRICT gate
+# already runs elsewhere in CI; this is a historical-record snapshot, not a
+# release gate).
+# ----------------------------------------------------------------
+echo "    LVA-019: snapshotting coverage ledger for $APP_VERSION-$APP_VERSION_CODE"
+bash "$SCRIPT_DIR/snapshot-coverage-ledger.sh" "$APP_VERSION-$APP_VERSION_CODE" || \
+    echo "    WARNING: coverage-ledger snapshot failed (non-fatal, distribute continues)"
+
+# ----------------------------------------------------------------
 # 2. Resolve git SHA + branch for the release notes
 # ----------------------------------------------------------------
 GIT_SHA="$(git rev-parse --short HEAD)"

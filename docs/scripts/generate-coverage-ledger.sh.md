@@ -83,6 +83,7 @@ Same git tree → same generated row content. The only varying header field is `
 - `docs/coverage-ledger.waivers.yaml` — hand-edited per-row waiver overrides (committed)
 - `scripts/check-coverage-ledger.sh` — verifier (asserts presence + freshness + row coverage)
 - `tests/check-constitution/test_coverage_ledger.sh` — hermetic falsifiability rehearsals (6 fixtures)
+- `scripts/snapshot-coverage-ledger.sh` — LVA-019 per-release snapshot mechanism. Per-release frozen copies of this ledger are written by `scripts/snapshot-coverage-ledger.sh` to `.lava-ci-evidence/coverage-ledger-snapshots/<version>-<code>.yaml` at each Firebase distribute, mirroring the existing `cycle-coverage-map-<version>-<code>.yaml` per-release snapshot pattern used for the §6.AK device-coverage gate. Wired (advisory, non-blocking) into `scripts/firebase-distribute.sh` immediately after the §6.AK Phase-1 Gate 7 block.
 
 ## Cross-references
 

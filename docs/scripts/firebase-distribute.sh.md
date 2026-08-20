@@ -62,6 +62,33 @@ must write `<vname>-<code>-test-evidence.{md,json}` (with the `cycle-coverage:`
 header + per-Challenge `challenge:` rows) and `<vname>-<code>-cycle-coverage-map.yaml`
 under the channel dir for this gate to pass on a real distribute.
 
+## LVA-019 coverage-ledger snapshot — added 2026-08-20
+
+Closes the firebase-distribute portion of LVA-019 (§11.4.25 per-release coverage
+ledger). Immediately after the §6.AK cycle-coverage Gate 7 block, the script
+invokes `scripts/snapshot-coverage-ledger.sh "$APP_VERSION-$APP_VERSION_CODE"`,
+which regenerates `docs/coverage-ledger.yaml` (via
+`scripts/generate-coverage-ledger.sh --quiet`) and copies the freshly-generated
+file to `.lava-ci-evidence/coverage-ledger-snapshots/<version>-<code>.yaml` —
+a permanent, per-release historical record of coverage-ledger state at the
+exact moment that version was distributed. This mirrors the existing
+`<vname>-<code>-cycle-coverage-map.yaml` per-release snapshot pattern already
+used by the §6.AK gate above it.
+
+The step is **advisory, not a release gate** — a snapshot failure logs a
+`WARNING` and the distribute continues, because the coverage ledger's own
+STRICT gate (`scripts/check-coverage-ledger.sh --strict`, wired into
+`scripts/verify-all-constitution-rules.sh`) already enforces ledger health
+elsewhere in local CI; this step exists purely to freeze a historical copy,
+not to re-litigate ledger correctness at distribute time. Companion script:
+`scripts/snapshot-coverage-ledger.sh` (documented separately). Bluff-Audit
+rehearsal: the snapshot mechanism was smoke-tested during Task 4 of the
+2026-08-20 workable-items-backlog-closure plan — a `0.0.0-test` snapshot was
+generated, diffed byte-for-byte against the live `docs/coverage-ledger.yaml`,
+confirmed identical, then removed; this proves the snapshot step correctly
+captures ledger state as of the wiring commit rather than a stale or
+hand-authored copy.
+
 ## Maintenance
 
 When this script is modified, update this document in the same commit (CM-SCRIPT-DOCS-SYNC requires it). Per §11.4.18, the documentation MUST stay in sync with the codebase — no doc may be out of sync with its script.
