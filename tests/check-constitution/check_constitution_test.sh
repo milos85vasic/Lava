@@ -39,10 +39,38 @@ test_live_repo_passes() {
 # Helper: copy repo to fixture, install local copy of the script so that
 # check-constitution.sh's `cd "$(dirname "$0")/.."` resolves to the fixture
 # root rather than the live repo root.
+#
+# Excludes .git (11G+ of pack/loose objects the structural checks below
+# never read), per-module build/ output (~2G), .gradle/.kotlin build
+# caches (~270M), /releases/ (3.5G+ of built APK binaries, also never
+# read by the structural checks), and .claude/worktrees/ (9G+ of OTHER
+# git worktrees --
+# sibling branches' full checkouts physically nested under this repo's
+# working directory by the harness, irrelevant to what THIS fixture is
+# verifying -- the same root-cause class as the scripts/ci.sh forbidden-
+# files false-positive fixed the same session, see docs/scripts/ci.sh.md)
+# -- the tests only assert on tracked TEXT files (CLAUDE.md,
+# submodules/*/CLAUDE.md, scripts/*.sh), never on git history, build
+# artifacts, or sibling worktrees. A prior version used
+# `cp -r "$REPO_ROOT/."` verbatim, which copied ALL of the above on every
+# make_fixture call (4 calls per suite run) -- tens of GB per invocation,
+# repeatedly exhausting the host's /tmp tmpfs and killing unrelated
+# processes (including this project's own `git push` pre-push hook, which
+# runs this suite as part of the §11.4.32 verify-all sweep). rsync
+# --exclude keeps the fixture representative of what the constitution
+# checker actually reads while never writing the excluded bytes at all.
 make_fixture() {
   local fixture
   fixture=$(_safe_tmpdir)
-  cp -r "$REPO_ROOT/." "$fixture/" 2>/dev/null || true
+  rsync -a \
+    --exclude='.git/' \
+    --exclude='build/' \
+    --exclude='.gradle/' \
+    --exclude='.kotlin/' \
+    --exclude='node_modules/' \
+    --exclude='.claude/worktrees/' \
+    --exclude='/releases/' \
+    "$REPO_ROOT/." "$fixture/" 2>/dev/null || true
   mkdir -p "$fixture/scripts"
   cp "$SCRIPT" "$fixture/scripts/check-constitution.sh"
   echo "$fixture"
@@ -61,6 +89,7 @@ test_missing_6n_heading_fails() {
   else
     echo "PASS test_missing_6n_heading_fails"
   fi
+  cd "$REPO_ROOT"
   rm -rf "$fixture"
 }
 
@@ -89,6 +118,7 @@ test_missing_6n_from_submodule_fails() {
   else
     echo "SKIP test_missing_6n_from_submodule_fails: submodules/auth/CLAUDE.md not present"
   fi
+  cd "$REPO_ROOT"
   rm -rf "$fixture"
 }
 
@@ -104,6 +134,7 @@ test_missing_check4_marker_fails() {
   else
     echo "PASS test_missing_check4_marker_fails"
   fi
+  cd "$REPO_ROOT"
   rm -rf "$fixture"
 }
 
@@ -120,6 +151,7 @@ test_missing_check5_marker_fails() {
   else
     echo "PASS test_missing_check5_marker_fails"
   fi
+  cd "$REPO_ROOT"
   rm -rf "$fixture"
 }
 
