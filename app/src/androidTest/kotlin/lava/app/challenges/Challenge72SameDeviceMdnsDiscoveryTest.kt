@@ -65,6 +65,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.UiDevice
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import digital.vasic.lava.client.BuildConfig
@@ -138,10 +139,91 @@ class Challenge72SameDeviceMdnsDiscoveryTest {
         // advertiser.register()) with no client-observable completion signal
         // from this test process.
         Thread.sleep(ENGINE_STARTUP_WAIT_MS)
+
+        // Bring the CLIENT back to the foreground, mirroring the real user
+        // action of switching back to Lava after visiting the on-device API
+        // app (e.g. the back button or the recent-apps switcher). The
+        // engine + mDNS advertisement keep running in the background
+        // regardless — that is the whole point of the on-device design.
+        //
+        // Without this step, [composeRule]'s MainActivity — already
+        // launched by the rule BEFORE this @Before method runs — is left
+        // STOPPED once the `am start` above brought api-app's own UI to
+        // the foreground, and a stopped Activity's Compose hierarchy is
+        // detached from the semantics-owner registry. Every subsequent
+        // composeRule query then fails with "No compose hierarchies found
+        // in the app", regardless of whether mDNS discovery itself works —
+        // masking the feature this Challenge exists to verify.
+        //
+        // Uses UiDevice.pressBack() (a genuine system BACK key event
+        // injected at the input-dispatcher level, via uiautomator — NOT
+        // Espresso.pressBack(), NOT a fresh Intent-based re-launch). api-app
+        // above was started with FLAG_ACTIVITY_NEW_TASK, so it is the ROOT
+        // of its own brand-new task; BACK finishes that task's root activity
+        // and returns control to whatever task was previously in front —
+        // the client's task, per normal Android multitasking.
+        //
+        // Three alternatives were tried and rejected, each with device
+        // evidence:
+        //   - `adb shell am start` re-launch: EMPIRICALLY desynced
+        //     ActivityScenario's own stage-tracking (`ActivityScenario.close()`
+        //     hanging on waitForActivityToBecomeAnyOf([DESTROYED]) with "last
+        //     lifecycle transition = PAUSED", and once a "Current state was
+        //     null unexpectedly" NPE) even though the @Test body's own
+        //     assertions completed without failure every time.
+        //   - In-process Context.startActivity(FLAG_ACTIVITY_REORDER_TO_FRONT):
+        //     identical ActivityScenario desync — any fresh Intent delivered
+        //     to MainActivity mid-test confuses its bookkeeping on this suite,
+        //     regardless of how the Intent is sent.
+        //   - Espresso.pressBack(): throws NoActivityResumedException — it
+        //     requires an activity of the INSTRUMENTED app to already be in
+        //     RESUMED state, which is false here by design (api-app currently
+        //     holds the foreground; that is the whole point of this step).
+        //
+        // UiDevice.pressBack() sends the key event through the system input
+        // pipeline (like a hardware back-button press) with NO dependency on
+        // which app currently owns the foreground and NO Intent delivered to
+        // MainActivity — the scenario ActivityScenario is actually designed
+        // to observe (a real user's back-navigation, not a competing launch).
+        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).pressBack()
+
+        // Settle time for the window-manager transition to complete before
+        // the @Test body starts querying MainActivity's Compose semantics —
+        // mirrors the same real-device-timing rationale as
+        // ENGINE_STARTUP_WAIT_MS above (no client-observable completion
+        // signal for a window-focus transition from this test process).
+        Thread.sleep(FOREGROUND_SWITCH_SETTLE_MS)
     }
 
     @After
     fun stopOnDeviceApiApp() {
+        // Observed (2 runs): after this test brings the client back to the
+        // foreground mid-test (real-device app-switch simulation), the
+        // ComposeTestRule's own automatic teardown — ActivityScenario.close()
+        // finishing MainActivity and waiting for the DESTROYED transition —
+        // intermittently hangs ("Activity never becomes requested state
+        // [DESTROYED], last lifecycle transition = PAUSED") or NPEs
+        // ("Current state was null unexpectedly"). This is ActivityScenario's
+        // own stage-tracking, not a defect in the feature under test — the
+        // @Test method's own assertions complete with no failure in every
+        // observed run; only the rule-level teardown that runs AFTER the
+        // @Test body is affected. ActivityScenario was not designed with a
+        // competing foreground app mid-test as a primary scenario. Finishing
+        // the activity explicitly HERE — in this @After method, which per
+        // JUnit's rule-wrapping order runs BEFORE composeRule's own
+        // Rule-level after() — gives the system a normal finish()->onDestroy()
+        // window to complete before composeRule's automatic teardown makes
+        // its own attempt, so that attempt finds the activity already
+        // destroyed (a no-op) instead of racing a pending transition.
+        runCatching {
+            InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                if (!composeRule.activity.isFinishing && !composeRule.activity.isDestroyed) {
+                    composeRule.activity.finish()
+                }
+            }
+        }
+        Thread.sleep(ACTIVITY_FINISH_SETTLE_MS)
+
         // Best-effort cleanup so a re-run (or the next Challenge in the
         // matrix) does not inherit a live foreground service / mDNS
         // advertisement from this test.
@@ -221,5 +303,7 @@ class Challenge72SameDeviceMdnsDiscoveryTest {
 
         const val ENGINE_STARTUP_WAIT_MS = 8_000L
         const val DISCOVERY_TIMEOUT_MS = 40_000L
+        const val ACTIVITY_FINISH_SETTLE_MS = 2_000L
+        const val FOREGROUND_SWITCH_SETTLE_MS = 3_000L
     }
 }

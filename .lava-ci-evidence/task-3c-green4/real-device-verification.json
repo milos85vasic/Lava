@@ -1,0 +1,22 @@
+{
+  "all_passed": false,
+  "finished_at": "2026-08-20T15:17:49+02:00",
+  "gating": true,
+  "rows": [
+    {
+      "avd": "CZ_API34_Phone",
+      "api_level": 34,
+      "form_factor": "phone",
+      "boot_seconds": 93.814140937,
+      "test_class": "lava.app.challenges.Challenge72SameDeviceMdnsDiscoveryTest",
+      "test_passed": false,
+      "test_seconds": 336.710630034,
+      "test_error": "exit status 1",
+      "gradle_log_path": "CZ_API34_Phone/gradle.log",
+      "diag": {},
+      "failure_summaries": [],
+      "concurrent": 1
+    }
+  ],
+  "started_at": "2026-08-20T15:10:04+02:00"
+}
