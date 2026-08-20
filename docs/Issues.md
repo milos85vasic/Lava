@@ -17,15 +17,6 @@
 
 Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at activity-destroy: IllegalStateException 'State must be at least CREATED to be moved to DESTROYED' on the inner search/search_input entry. Root-caused (2026-06-08): the inner nested NavController's host is the outer addNestedNavigation NavBackStackEntry, driven to DESTROYED out from under the inner controller while search_input is still INITIALIZED. FALSIFIED on device: nav 2.9.1->2.9.8, LenientTeardownRule (uncatchable process death), atomic popUpTo replace. Feature WORKS (result row renders pre-teardown). Candidate fixes ranked in incident JSON (inner NavHost Activity-scoped LifecycleOwner; move search to outer NavHost; ON_STOP pop). Forensics: .lava-ci-evidence/sixth-law-incidents/2026-06-08-navbackstackentry-teardown-crash-2.9.1-incomplete.json
 
-## LVA-082 — Crashlytics read NOT available via Firebase CLI — only symbols/mappingfile upload; no issues:list; bq absent
-
-**Status:** Queued
-**Type:** Task
-**Severity:** P3
-**Created-By:** AI
-
-Operator asked to use Firebase CLI to pull Crashlytics. Verified Firebase CLI 14.17.0 exposes only crashlytics:symbols:upload + mappingfile:* (NO issue/non-fatal read). bq CLI absent. Crashlytics dashboard read requires console or a BigQuery export not configured. Fallback: in-repo §6.AC telemetry + known crash tickets; operator to paste console items for full triage. §11.4.6 honest record.
-
 ## LVA-088 — Video #7 — 'Choose your API' shows 'lava.app:7777' preset + mislabeled 'On this network'
 
 **Status:** In progress
@@ -61,13 +52,4 @@ QA video frames 0001/0005: single Lava icon launched; co-mingling NOT visually c
 **Type:** Task
 
 Task P1 process: coverage ledger has partial/gap overlap and lacks per-release ledger snapshots. Normalize the registry and add release-attestation ledgers.
-
-## LVA-095 — on-device API keyless mDNS endpoint does not read/persist local api-app key
-
-**Status:** Queued
-**Type:** Bug
-**Severity:** P1
-**Created-By:** AI
-
-OnboardingViewModelDynamicProvidersTest > 'selecting a keyless on-device API reads and persists the local api key for search auth' FAILS: AssertionError - the local api-app key MUST be read + persisted onto the keyless mDNS-selected endpoint (was GoApi(host=localhost.localdomain, port=42873, platform=null, storage=null, key=null)). Discovered 2026-08-12 while running the combined test suite after merging 4 parallel LVA-085/086/087/093/094 fixes - confirmed genuinely pre-existing and unrelated to any of those 4 changes (git log shows the test file's last touch was commit b3cb6de2, predating this session; none of the 4 merged branches touch onboarding/api-key/mDNS code per git diff --name-only). Not yet root-caused - source: real gradle test run, feature/onboarding/build/test-results/testDebugUnitTest/.
 

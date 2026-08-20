@@ -797,3 +797,23 @@ QA video frames 0020-0025. NEW UX, contributes to #1. CODE-FIX in 1076 (#9 selec
 
 QA video 2026-06-25 (frames 0040 vs 0060 vs 0125): input chip bar and results filter chips show different provider sets, and the results chip set CHANGES between two identical queries. 1076 fixed the INPUT chips (observeAll filtered+sorted) but the input-vs-RESULTS divergence + run-to-run instability is distinct and still open. Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md issue #3.
 
+## LVA-095 — on-device API keyless mDNS endpoint does not read/persist local api-app key
+
+**Status:** Fixed (→ Fixed.md)
+**Type:** Bug
+**Evidence:** .lava-ci-evidence/workable-items-closures/2026-08-20-lva-095-lva-082-closure.md
+**Severity:** P1
+**Created-By:** AI
+
+OnboardingViewModelDynamicProvidersTest > 'selecting a keyless on-device API reads and persists the local api key for search auth' FAILS: AssertionError - the local api-app key MUST be read + persisted onto the keyless mDNS-selected endpoint (was GoApi(host=localhost.localdomain, port=42873, platform=null, storage=null, key=null)). Discovered 2026-08-12 while running the combined test suite after merging 4 parallel LVA-085/086/087/093/094 fixes - confirmed genuinely pre-existing and unrelated to any of those 4 changes (git log shows the test file's last touch was commit b3cb6de2, predating this session; none of the 4 merged branches touch onboarding/api-key/mDNS code per git diff --name-only). Not yet root-caused - source: real gradle test run, feature/onboarding/build/test-results/testDebugUnitTest/.
+
+## LVA-082 — Crashlytics read NOT available via Firebase CLI — only symbols/mappingfile upload; no issues:list; bq absent
+
+**Status:** Completed (→ Fixed.md)
+**Type:** Task
+**Evidence:** .lava-ci-evidence/workable-items-closures/2026-08-20-lva-095-lva-082-closure.md
+**Severity:** P3
+**Created-By:** AI
+
+Operator asked to use Firebase CLI to pull Crashlytics. Verified Firebase CLI 14.17.0 exposes only crashlytics:symbols:upload + mappingfile:* (NO issue/non-fatal read). bq CLI absent. Crashlytics dashboard read requires console or a BigQuery export not configured. Fallback: in-repo §6.AC telemetry + known crash tickets; operator to paste console items for full triage. §11.4.6 honest record.
+
