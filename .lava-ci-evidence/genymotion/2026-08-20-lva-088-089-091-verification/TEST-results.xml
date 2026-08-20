@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="lava.app.challenges.Challenge64ApiDiscoveryScreenFriendlyNamesTest" tests="6" failures="0" errors="0" skipped="1" time="14.853" timestamp="2026-08-20T10:03:14" hostname="localhost">
+  <properties>
+    <property name="device" value="sdk_gphone64_x86_64 - 14" />
+    <property name="flavor" value="" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="discoveredApi_showsFriendlyName_notGenericLabel" classname="lava.app.challenges.Challenge64ApiDiscoveryScreenFriendlyNamesTest" time="5.216" />
+  <testcase name="cloudPresetLabeledHonestly_notOnThisNetwork" classname="lava.app.challenges.Challenge64ApiDiscoveryScreenFriendlyNamesTest" time="2.388" />
+  <testcase name="discoveredIpApi_rendersFriendlyName_notRawIp" classname="lava.app.challenges.Challenge65MdnsShowsFriendlyNameTest" time="2.388" />
+  <testcase name="appLabel_debugVariantIsDistinctFromRelease" classname="lava.app.challenges.Challenge67AppIdSeparationTest" time="0.006" />
+  <testcase name="debugBuild_hasDevApplicationIdSuffix" classname="lava.app.challenges.Challenge67AppIdSeparationTest" time="0.009" />
+  <testcase name="onboardingApiSelection_discoversOnDeviceApiAppViaMdns" classname="lava.app.challenges.Challenge72SameDeviceMdnsDiscoveryTest" time="3.134">
+    <skipped />
+  </testcase>
+</testsuite>

@@ -1,0 +1,28 @@
+==> --avds override active: default §6.AE.2 matrix REPLACED with operator list
+    (sub-minimum lists are development-iteration runs, not §6.AE.2-conformant gate matrices)
+==> §6.AE Challenge matrix runner
+    test class: lava.app.challenges.Challenge64ApiDiscoveryScreenFriendlyNamesTest,lava.app.challenges.Challenge65MdnsShowsFriendlyNameTest,lava.app.challenges.Challenge67AppIdSeparationTest,lava.app.challenges.Challenge72SameDeviceMdnsDiscoveryTest
+    evidence dir: .lava-ci-evidence/genymotion/2026-08-20-lva-088-089-091-verification
+    AVDs: CZ_API35_Phone:35:phone
+    include-helixqa: 0
+==> §6.X acceleration resolved: accel=kvm runner=containerized (platform=Linux)
+==> LVA-014 image preflight: 1 emulator image(s) required
+    [1/1] MISSING locally: ghcr.io/vasic-digital/lava-android-emulator:api35-x86_64 — pulling...
+Trying to pull ghcr.io/vasic-digital/lava-android-emulator:api35-x86_64...
+Error: unable to copy from source docker://ghcr.io/vasic-digital/lava-android-emulator:api35-x86_64: initializing source docker://ghcr.io/vasic-digital/lava-android-emulator:api35-x86_64: Requesting bearer token: received unexpected HTTP status: 403 Forbidden
+
+==> ERROR: required emulator image is unavailable: ghcr.io/vasic-digital/lava-android-emulator:api35-x86_64
+    The image is not present locally and 'podman pull' failed.
+    Pull error (last lines):
+      Trying to pull ghcr.io/vasic-digital/lava-android-emulator:api35-x86_64...
+      Error: unable to copy from source docker://ghcr.io/vasic-digital/lava-android-emulator:api35-x86_64: initializing source docker://ghcr.io/vasic-digital/lava-android-emulator:api35-x86_64: Requesting bearer token: received unexpected HTTP status: 403 Forbidden
+    Operator options:
+      1. Build the image locally from submodules/containers/pkg/emulator/Containerfile:
+           (cd submodules/containers && podman build \
+               --build-arg API_LEVEL=35 --build-arg ABI=x86_64 \
+               -f pkg/emulator/Containerfile -t ghcr.io/vasic-digital/lava-android-emulator:api35-x86_64 .)
+      2. Authenticate to the registry ('podman login ghcr.io') and re-run.
+      3. Reduce the matrix with --avds to api levels whose images exist locally
+         (development-iteration run, NOT a §6.AE.2-conformant gate matrix).
+    This is an honest preflight failure (LVA-014 fix #3), not a silent skip.
+EXIT_CODE=1
