@@ -32,19 +32,25 @@ mkdir -p "$EVIDENCE_DIR"
 
 # ---------------------------------------------------------------------
 # 1. Hosted-CI forbidden-files check (Local-Only CI/CD rule).
+#
+# Scoped to `git ls-files` -- i.e. files actually TRACKED on the
+# current branch -- not a raw filesystem `find .`. A raw find also
+# walks (a) OTHER worktrees checked out under .claude/worktrees/ (each
+# is a different branch's file tree, physically nested under this
+# repo's working directory by the harness, but irrelevant to what THIS
+# branch is about to push) and (b) vendored/nested third-party content
+# inside submodules-of-submodules (e.g. HelixQA's tools/opensource/*),
+# which legitimately ship upstream .github/workflows/ files that are
+# that nested repo's own concern, not this branch's. `git ls-files`
+# naturally excludes both: worktree paths aren't part of this branch's
+# tree, and submodules appear as gitlinks (not descended into) unless
+# --recurse-submodules is passed, which it deliberately is not here --
+# submodule-internal governance is scoped separately per §6.F.
 # ---------------------------------------------------------------------
 echo "==> Hosted-CI forbidden-files check"
-forbidden=$(find . \
-  \( -path './.git' -o -path './build' -o -path '*/build' -o -path './node_modules' -o -path './.gradle' \) -prune -o \
-  \( -path '*/.github/workflows/*' -o \
-     -name '.gitlab-ci.yml' -o \
-     -path '*/.circleci/*' -o \
-     -name 'azure-pipelines.yml' -o \
-     -name 'bitbucket-pipelines.yml' -o \
-     -name 'Jenkinsfile' -o \
-     -name 'appveyor.yml' -o \
-     -name '.travis.yml' \) \
-  -print 2>/dev/null || true)
+forbidden=$(git ls-files -z | tr '\0' '\n' | grep -E \
+  '(^|/)\.github/workflows/|(^|/)\.gitlab-ci\.yml$|(^|/)\.circleci/|(^|/)azure-pipelines\.yml$|(^|/)bitbucket-pipelines\.yml$|(^|/)Jenkinsfile$|(^|/)appveyor\.yml$|(^|/)\.travis\.yml$' \
+  || true)
 if [[ -n "$forbidden" ]]; then
   echo "FORBIDDEN HOSTED-CI FILES detected (Local-Only CI/CD rule):" >&2
   echo "$forbidden" >&2

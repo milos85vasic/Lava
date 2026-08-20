@@ -52,6 +52,38 @@ See the script's in-source comment block (above) for canonical usage examples.
 9. 5b. Hermetic bash test suites (under `tests/`)
 10. (Full-mode only) Parity, mutation, fixture-freshness, Compose UI Challenge Tests on connected device
 
+## Forbidden-files check scoped to `git ls-files` — added 2026-08-20
+
+Fixes a real false-positive in Pipeline step 1: the check previously used a raw
+`find .` over the working directory, which also walked (a) other worktrees
+checked out under `.claude/worktrees/agent-*/` — each is a DIFFERENT branch's
+file tree, physically nested under this repo's working directory by the
+harness but irrelevant to what the CURRENT branch is about to push — and (b)
+vendored third-party content inside nested submodules-of-submodules (e.g.
+HelixQA's `tools/opensource/*`, which legitimately ships upstream
+`.github/workflows/*` files as that nested repo's own concern). Both classes
+produced spurious `FORBIDDEN HOSTED-CI FILES` rejections on a push whose own
+tracked tree contained zero such files. Fixed by scoping the scan to
+`git ls-files` (this branch's actually-tracked files only) — submodules
+naturally excluded as gitlinks (not descended into without
+`--recurse-submodules`, which is deliberately not passed; submodule-internal
+governance is scoped separately per §6.F), other worktrees naturally excluded
+since their files aren't part of this branch's tree at all.
+
+Bluff-Audit: scripts/ci.sh Hosted-CI forbidden-files check
+  Mutation: `git add -f` a real `.github/workflows/mutation-test.yml` fixture
+    into the tracked tree, confirming the NEW `git ls-files`-scoped check
+    still correctly DETECTS a genuine violation (true-positive preserved).
+  Observed-Failure: N/A for this direction (positive detection confirmed);
+    the OLD `find .`-based check was separately confirmed to false-positive
+    on real, pre-existing, untracked content under `.claude/worktrees/` and
+    `submodules/helixqa/tools/opensource/*` during an actual `git push`
+    attempt against this exact commit range — that rejection is the
+    falsifiability evidence for the bug this fix closes.
+  Reverted: yes — the mutation fixture was `git reset` + `rm -rf`'d
+    immediately after the positive-detection check passed; confirmed via
+    `git status --short` showing a clean tree before this commit.
+
 ## §6.AE matrix gate (separate entry point)
 
 For §6.AE.2 gate-mode runs producing per-AVD attestation: `bash scripts/run-challenge-matrix.sh`. The runner correctly REFUSES to claim success on hosts lacking KVM (darwin/arm64) — exits 2 with a host-gap diagnostic. Real attestations require a Linux x86_64 + KVM gate-host.
