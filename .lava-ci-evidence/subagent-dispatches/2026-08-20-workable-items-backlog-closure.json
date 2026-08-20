@@ -74,6 +74,17 @@
     "LVA-008",
     "LVA-5"
   ],
+  "self_reference_commits": [
+    {
+      "_note": "The gate-fix commit below quoted bd807ed3's trigger phrase while explaining it, which itself matched the scanner's action-paired regex. This entry covers that self-reference, not a new dispatch.",
+      "dispatch_date": "2026-08-20",
+      "agent_type": "general-purpose",
+      "purpose": "Same gate-remediation work as the top-level record above (added the audit-trail entry for bd807ed3); the commit message quoting bd807ed3's own trigger text made this commit match the scanner too.",
+      "dispatched_for_commit": "a83f2286",
+      "outcome": "merged",
+      "isolation": "worktree"
+    }
+  ],
   "provenance": {
     "authored_by": "gate-remediation agent (isolated worktree agent-a509a5edc95e69241), fixing the CM-SUBAGENT-DELEGATION-AUDIT gate failure flagged against commit bd807ed3",
     "method": "git log -1 --format on each named commit + git for-each-ref refs/heads/ matched against each merge commit's second parent SHA, all run inside this worktree",
