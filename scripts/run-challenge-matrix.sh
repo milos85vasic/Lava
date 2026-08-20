@@ -34,6 +34,15 @@
 #                                                            # (LVA-014 fix #1); a REF without {api}
 #                                                            # is used verbatim for every AVD.
 #       [--container-runtime podman|docker]                # default: podman
+#       [--extra-apk PATH]                                   # additional APK to install on each AVD
+#                                                            # AFTER the client APK, before instrumentation
+#                                                            # runs. Repeatable: pass --extra-apk more than
+#                                                            # once to install several companion APKs. Forwarded
+#                                                            # verbatim to the Containers CLI's own repeatable
+#                                                            # --extra-apk flag (MatrixConfig.ExtraAPKPaths).
+#                                                            # Use for Challenges needing a second app on the
+#                                                            # SAME device (e.g. Challenge72's on-device api-app
+#                                                            # companion for same-device mDNS discovery).
 #       [--latest-api 36]                                    # override "latest stable" (default matrix only)
 #       [--add-tv]                                           # add TV-class AVD when feature touches TvActivity
 #       [--add-foldable]                                     # add foldable AVD
@@ -107,6 +116,7 @@ ADD_TV=0
 ADD_FOLDABLE=0
 INCLUDE_HELIXQA=0               # per HelixQA integration-design Option 1
 AVDS_OVERRIDE=""                # when non-empty, REPLACES the §6.AE.2 default matrix
+declare -a EXTRA_APKS=()        # additional APKs installed on each AVD after the client APK
 BOOT_TIMEOUT=""                 # forwarded to emulator-matrix --boot-timeout (default 5m).
                                 # Raise on a loaded host where an ARM/HVF cold-boot legitimately
                                 # exceeds 5m on contention (NOT a product defect). Empty = CLI default.
@@ -147,6 +157,7 @@ while [[ $# -gt 0 ]]; do
         --evidence-dir)  EVIDENCE_DIR="$2"; shift 2 ;;
         --no-build)      NO_BUILD=1; shift ;;
         --avds)          AVDS_OVERRIDE="$2"; shift 2 ;;
+        --extra-apk)     EXTRA_APKS+=("$2"); shift 2 ;;
         --boot-timeout)  BOOT_TIMEOUT="$2"; shift 2 ;;
         --container-image)   CONTAINER_IMAGE="$2"; shift 2 ;;
         --container-runtime) CONTAINER_RUNTIME="$2"; shift 2 ;;
@@ -428,6 +439,19 @@ if [[ -n "$TEST_CLASS" ]]; then
     TEST_CLASS_ARGS=(--test-class "$TEST_CLASS")
 fi
 
+# --extra-apk is repeatable on the Containers CLI side (MatrixConfig.
+# ExtraAPKPaths) — forward each operator-supplied path as its own
+# --extra-apk occurrence, in the order given.
+declare -a EXTRA_APK_ARGS=()
+for extra_apk_path in "${EXTRA_APKS[@]:-}"; do
+    if [[ -n "$extra_apk_path" ]]; then
+        EXTRA_APK_ARGS+=(--extra-apk "$extra_apk_path")
+    fi
+done
+if [[ "${#EXTRA_APK_ARGS[@]}" -gt 0 ]]; then
+    echo "==> extra APKs to install alongside the client APK: ${EXTRA_APKS[*]}"
+fi
+
 # §6.X: the pinned cmd/emulator-matrix CLI (>= 71d32562) REQUIRES
 # --container-image when the RESOLVED runner is containerized (Linux +
 # /dev/kvm path). Forward it (plus --container-runtime) only in that case;
@@ -448,6 +472,7 @@ echo "==> Delegating to Containers/cmd/emulator-matrix --runner=auto (resolves t
     --evidence-dir "$EVIDENCE_DIR" \
     --image-manifest tools/lava-containers/vm-images.json \
     "${CONTAINER_ARGS[@]}" \
+    "${EXTRA_APK_ARGS[@]}" \
     ${BOOT_TIMEOUT:+--boot-timeout "$BOOT_TIMEOUT"} \
     --cold-boot \
     "${TEST_CLASS_ARGS[@]}"
