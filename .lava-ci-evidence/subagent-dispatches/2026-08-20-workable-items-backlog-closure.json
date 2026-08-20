@@ -1,0 +1,82 @@
+{
+  "_comment": "Subagent delegation audit trail for the 2026-08-20 workable-items backlog-closure cycle (CM-SUBAGENT-DELEGATION-AUDIT, HelixConstitution §11.4.x + Lava §6.AD-debt). Anchors the plan-doc commit bd807ed3 ('docs(plans): add workable-items backlog closure implementation plan'), whose body states the LVA-088/089/091/019/095/082 closures were performed 'via subagent-driven-development' across 5 tasks. All fields below are read directly from git log (subject, parents, committer date) and from git for-each-ref (branch name -> tip SHA) in this worktree; no counts or details are invented beyond what the commit graph proves. agent_type is set to 'general-purpose' by repository convention (every prior entry under this directory uses the same value, matching the Agent tool's stated default subagent_type) -- the exact per-dispatch subagent_type is not independently recoverable from the commit objects alone.",
+  "cycle": "2026-08-20 workable-items backlog closure (docs/superpowers/plans/2026-08-20-workable-items-backlog-closure.md)",
+  "dispatch_date": "2026-08-20",
+  "agent_type": "general-purpose",
+  "purpose": "Plan-doc commit bd807ed3 documents subagent-driven-development closure of workable items LVA-088/089/091/019/095/082 (LVA-008 and LVA-5 explicitly out of scope, operator-blocked) via 5 dispatched tasks, each landed into master through a worktree-agent branch merge.",
+  "dispatched_for_commit": "bd807ed3",
+  "outcome": "merged",
+  "isolation": "worktree",
+  "findings_count": 5,
+  "dispatches": [
+    {
+      "task": "Task 1",
+      "purpose": "close LVA-095 + LVA-082 (backlog closure plan)",
+      "dispatch_date": "2026-08-20",
+      "agent_type": "general-purpose",
+      "dispatched_for_commit": "bd807ed3",
+      "merge_commit": "617cf5a1126f7beae34cf0b56efb4ba6d3bcc34a",
+      "merged_tip": "cfcd16012e50711dbdc060ce34f0d4b9db5138e3",
+      "worktree_branch": "worktree-agent-ad1551a34891135b1",
+      "outcome": "merged",
+      "isolation": "worktree"
+    },
+    {
+      "task": "Task 2",
+      "purpose": "fix Challenge67 wrong debug-label assertion (LVA-091)",
+      "dispatch_date": "2026-08-20",
+      "agent_type": "general-purpose",
+      "dispatched_for_commit": "bd807ed3",
+      "merge_commit": "b74161b804320b68a1f20f2e0acea6b99951c71a",
+      "merged_tip": "b540bb56e1eb0f70d94489564a5d91f4681dbe41",
+      "worktree_branch": "worktree-agent-a8f4afa2e718151bf",
+      "outcome": "merged",
+      "isolation": "worktree"
+    },
+    {
+      "task": "Task 3",
+      "purpose": "recover Challenge72SameDeviceMdnsDiscoveryTest.kt from stale worktree",
+      "dispatch_date": "2026-08-20",
+      "agent_type": "general-purpose",
+      "dispatched_for_commit": "bd807ed3",
+      "merge_commit": "1204864ba9dbe25ee7c6607dfbba10b416034a6b",
+      "merged_tip": "4b9141cee3ca8904c8d5a2a5ee03565950c7cc52",
+      "worktree_branch": "worktree-agent-ae4dea7742ba6f5dc",
+      "outcome": "merged",
+      "isolation": "worktree"
+    },
+    {
+      "task": "Task 4",
+      "purpose": "per-release coverage-ledger snapshot mechanism (LVA-019)",
+      "dispatch_date": "2026-08-20",
+      "agent_type": "general-purpose",
+      "dispatched_for_commit": "bd807ed3",
+      "merge_commit": "790e0e597c21d97e3ca151b29a235e89a60e378a",
+      "merged_tip": "fe639414654c89a04809030863cba26c758a87c3",
+      "worktree_branch": "worktree-agent-ae3b1805128e2e0c8",
+      "outcome": "merged",
+      "isolation": "worktree"
+    },
+    {
+      "task": "Task 5",
+      "purpose": "device-gate verification, close LVA-088/089/091 with real evidence",
+      "dispatch_date": "2026-08-20",
+      "agent_type": "general-purpose",
+      "dispatched_for_commit": "bd807ed3",
+      "merge_commit": "b0512c7f8ef414f692c1f687a0be39cb7e9ca56b",
+      "merged_tip": "ed1441584fa3670a2ce10a7f339268ece72a7692",
+      "worktree_branch": "worktree-agent-a19287e7c188bc28b",
+      "outcome": "merged",
+      "isolation": "worktree"
+    }
+  ],
+  "follow_ups": [
+    "LVA-008",
+    "LVA-5"
+  ],
+  "provenance": {
+    "authored_by": "gate-remediation agent (isolated worktree agent-a509a5edc95e69241), fixing the CM-SUBAGENT-DELEGATION-AUDIT gate failure flagged against commit bd807ed3",
+    "method": "git log -1 --format on each named commit + git for-each-ref refs/heads/ matched against each merge commit's second parent SHA, all run inside this worktree",
+    "no_fabricated_counts": true
+  }
+}
