@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lava.vasic.digital/schemas/pipeline/pipeline-run-report.schema.json",
+  "title": "Pipeline Run Report",
+  "description": "The single consolidated, machine-readable run report per invocation (FR-019/SC-008), aggregating every phase's outcome by reference.",
+  "type": "object",
+  "required": ["run_id", "commit_sha", "started_at", "completed_at", "outcome", "phases", "build_artifacts", "evidence_summary", "distributions", "submodule_advances"],
+  "additionalProperties": false,
+  "properties": {
+    "run_id": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}-\\d{2}-\\d{2}Z$" },
+    "commit_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "started_at": { "type": "string", "format": "date-time" },
+    "completed_at": { "type": "string", "format": "date-time" },
+    "outcome": { "type": "string", "enum": ["PASS", "FAIL", "BLOCKED"] },
+    "phases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "result", "duration_seconds", "evidence_dir"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": ["precondition", "build", "test", "install_boot", "live_verify", "changelog_entry", "distribute", "docs_refresh", "closure"]
+          },
+          "result": { "type": "string", "enum": ["PASS", "FAIL", "SKIPPED"] },
+          "duration_seconds": { "type": "number", "minimum": 0 },
+          "evidence_dir": { "type": "string" }
+        }
+      }
+    },
+    "build_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["artifact_id", "version_name", "version_code", "build_output_path", "built_from_commit"],
+        "additionalProperties": false,
+        "properties": {
+          "artifact_id": { "type": "string", "enum": ["app-debug", "app-release", "api-app-debug", "api-app-release", "lava-api-go"] },
+          "version_name": { "type": "string" },
+          "version_code": { "type": "integer" },
+          "build_output_path": { "type": "string" },
+          "built_from_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+        }
+      }
+    },
+    "evidence_summary": {
+      "type": "object",
+      "required": ["total", "passed", "failed", "skipped", "rejected_by_anti_bluff"],
+      "additionalProperties": false,
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "passed": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "skipped": { "type": "integer", "minimum": 0 },
+        "rejected_by_anti_bluff": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "distributions": {
+      "type": "array",
+      "items": { "$ref": "distribution-record.schema.json" }
+    },
+    "submodule_advances": {
+      "type": "array",
+      "items": { "$ref": "submodule-advance-record.schema.json" }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "outcome": { "const": "PASS" } } },
+      "then": {
+        "properties": {
+          "evidence_summary": { "properties": { "rejected_by_anti_bluff": { "const": 0 } } }
+        }
+      }
+    }
+  ]
+}

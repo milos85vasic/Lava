@@ -136,6 +136,24 @@ mapfile -t tracked_files < <(
   grep -vE '^\.env\.example$|^CHANGELOG\.md$|^\.lava-ci-evidence/|^scripts/check-constitution\.sh$|^docs/INCIDENT_|^CLAUDE\.md$|^AGENTS\.md$|^lava-api-go/AGENTS\.md$|^lava-api-go/CLAUDE\.md$|^lava-api-go/CONSTITUTION\.md$' || true
 )
 
+# §6.J anti-bluff corpus assertion (added 2026-08-22, §6.N.2 gate-shaping
+# bluff hunt). Without this, a `git ls-files` that yields nothing — broken
+# index, non-repo cwd, a stubbed/failed git — makes the loop below iterate
+# zero times, report `credential_violations=0`, and print "no clause-6.H
+# credential patterns in tracked files". That is "nothing was learned"
+# reported as "nothing failed": the exact shape §6.J forbids. The `|| true`
+# on the pipeline above (needed because grep -v exits 1 on an all-filtered
+# corpus) is what makes the failure silent. A healthy tree has thousands of
+# tracked files, so this guard can never fire on a real run — it fires only
+# when the gate is about to make an unbacked claim.
+if [[ ${#tracked_files[@]} -eq 0 ]]; then
+  echo "clause 6.H credential scan examined ZERO tracked files." >&2
+  echo "  → The scan corpus is empty, so a PASS here would assert nothing." >&2
+  echo "  → Check that 'git ls-files' works in $(pwd) (repo present, index" >&2
+  echo "    readable, git on PATH) and re-run." >&2
+  exit 1
+fi
+
 credential_violations=0
 for pat in "${forbidden_credential_patterns[@]}"; do
   for f in "${tracked_files[@]}"; do

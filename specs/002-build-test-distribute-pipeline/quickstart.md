@@ -1,0 +1,187 @@
+# Quickstart: Validating the Local Build-Test-Distribute Pipeline
+
+This is a validation guide, not an implementation guide — it documents runnable scenarios that prove the feature works end-to-end once built. See `contracts/cli-contract.md` for the full command surface and `data-model.md` / `contracts/*.schema.json` for the artifacts referenced below.
+
+> **Reconciled against the implementations on 2026-08-21**, alongside `contracts/cli-contract.md` and `data-model.md`. Every command and expected outcome below was checked against the script that actually runs it. **Where the code and this document disagreed, the code won**, and each correction is called out inline. Read this before running anything: **two scenarios below asserted an expected outcome the implementation deliberately does the opposite of** (Scenario 1's "no directory is created", Scenario 3's "later phases show as SKIPPED"), and **one scenario as written cannot run at all** (Scenario 4 — the script refuses without required environment). Corrected commands are given in each case.
+>
+> **Scope, stated once and plainly**: only five phases are wired — `precondition`, `build`, `test`, `install_boot`, `live_verify`. The distribute, docs-refresh and closure phases are not, being blocked behind unapproved constitutional amendments. So the concluding claim that these five scenarios demonstrate *every* functional requirement is not true today; see the corrected note at the end.
+
+## Prerequisites
+
+- A `master` checkout with a clean `git status` (FR-000's own precondition — if this isn't true, the first scenario below IS the test).
+- `.env` populated per this project's existing convention (Firebase token, tracker credentials for real-stack tests, `EnvironmentFile` values for the systemd unit).
+- The Containers submodule's emulator/VM path available on this host (§6.AH) — required for the Challenge-category tests in Scenario 2.
+- No **`lava-api.service`** already active under the current user's systemd session (or, if one is, Scenario 2 is exactly what proves the pipeline cleans it up). **CORRECTED 2026-08-21:** this used to name `lava-api-go.service`, a unit that does not exist. The real unit is `systemd/user/lava-api.service.template` → `~/.config/systemd/user/lava-api.service` — R-012 recorded this correction against R-006's draft, but this line and `data-model.md`'s table kept the wrong name. Check with `systemctl --user is-active lava-api.service`, which is the same query `phase-03-install-boot.sh` itself makes.
+- **`jq` on `PATH`.** `phase-02-test.sh` and the anti-bluff validator both hard-require it and exit rather than degrade. Not previously listed here.
+
+## Scenario 1 — Precondition refusal (User Story 4's safety boundary, validated first because it's the cheapest and highest-value check)
+
+```bash
+git checkout -b scratch/quickstart-check
+touch .quickstart-scratch-file   # dirty the tree
+bash scripts/pipeline-build-test-distribute.sh
+echo "exit code: $?"             # expect 2
+rm -f .quickstart-scratch-file
+git checkout master
+git branch -D scratch/quickstart-check
+```
+
+**Expected outcome**: exit code `2`, and a message naming the specific violated precondition. **CORRECTED 2026-08-21 on two points.**
+
+1. *"a message naming the specific violated precondition (wrong branch AND dirty tree)"* — `phase-00-precondition.sh` checks the branch **first and returns immediately** on failure, so from a scratch branch you get only `FR-000: precondition failed — branch is not master (currently on 'scratch/quickstart-check')`. The dirty-tree message is never reached in this scenario. To see the dirty-tree refusal, dirty the tree while *on* `master` instead.
+2. *"`.lava-ci-evidence/pipeline-runs/` gains no new directory — a refused run must not fabricate a run report for a run that never started"* — **the implementation deliberately does the opposite.** The orchestrator calls `init_run_report` **before** running phase-00, because a refusal to start is itself a run outcome worth recording. So a refused run **does** create `.lava-ci-evidence/pipeline-runs/<run_id>/report.json`, and it is finalized, not left half-written: the orchestrator appends a `precondition`/`FAIL` phase entry on phase-00's behalf and closes the report on the way out, giving `outcome: "FAIL"`. That is not a fabricated report for a run that never started — it is an honest report that the run was refused, which is strictly more auditable than leaving no trace. Assert on that instead:
+
+```bash
+RUN_ID=$(ls -t .lava-ci-evidence/pipeline-runs | head -1)
+python3 -c "
+import json, sys
+r = json.load(open(f'.lava-ci-evidence/pipeline-runs/$RUN_ID/report.json'))
+assert r['outcome'] == 'FAIL', r['outcome']
+assert [p for p in r['phases'] if p['name'] == 'precondition' and p['result'] == 'FAIL'], r['phases']
+assert r['distributions'] == [] and r['build_artifacts'] == []
+print('Scenario 1: PASS — refusal recorded honestly, nothing built, nothing distributed')
+"
+```
+
+This ordering is also why `.gitignore` must ignore `.lava-ci-evidence/pipeline-runs/` (task T003). Without that entry the pipeline dirties the very tree it is about to test and can then never satisfy FR-000 — a failure mode whose symptom ("working tree is not clean") gives no hint that the pipeline itself is the cause. The orchestrator detects that specific case and prints an explicit `DIAGNOSIS` naming the offending paths.
+
+## Scenario 2 — Full run of the wired phases, from a clean `master`
+
+```bash
+git checkout master && git status   # confirm clean
+bash scripts/pipeline-build-test-distribute.sh
+```
+
+**CORRECTED 2026-08-21: this scenario was titled "Full run" and is not one.** A bare invocation defaults to `--until live_verify`, the furthest wired phase, and runs `precondition → build → test → install_boot → live_verify`. It does **not** distribute, refresh documentation, or close out any repository, because those phases are not wired — `phase-05-distribute.sh` and `phase-07-closure.sh` do not exist, and `phase-05a-changelog-entry.sh` / `phase-06-docs.sh` exist but are not in the orchestrator's phase registry. Asking for one of them is a usage error, never a silent no-op:
+
+```bash
+bash scripts/pipeline-build-test-distribute.sh --until distribute
+echo "exit code: $?"   # expect 2, with a message naming the wired phases
+```
+
+Two slices of this scenario are separately runnable, and they are what make the per-user-story claims testable: `--until test` is the US1 slice (build + test only), `--until live_verify` is US1 + US2.
+
+**Expected outcome** (per SC-002; SC-001 is **not** demonstrable today — see above): the command eventually exits `0` (no fixed time budget — this may legitimately take a long time, per the spec's own Clarification). A new `.lava-ci-evidence/pipeline-runs/<run_id>/` directory exists with `report.json` validating against `contracts/pipeline-run-report.schema.json`, `outcome: "PASS"`, every `phases[].result == "PASS"`, and `evidence_summary.rejected_by_anti_bluff == 0`.
+
+Note that `phases[]` will contain **six** entries for five phases: `live_verify` owns two scripts (the running `lava-api-go` service and the `:api-app` build on a containerized emulator), each of which appends its own entry. The report schema permits repeated phase names, and it is the honest shape — both must pass for the phase to have proven what its name claims.
+
+Two assertions in the snippet below are load-bearing and were not obvious before this reconciliation. `outcome` is authoritative over the individual phase results: a run can have every phase `PASS` and still be `FAIL`, because an Evidence Record was `REJECTED` by anti-bluff validation. And `evidence_summary` must be non-zero — a report whose counts are all zero means either that nothing ran or that the summary was never recomputed, and for a period the latter was a real defect that made the `rejected_by_anti_bluff` check a no-op.
+
+```bash
+RUN_ID=$(ls -t .lava-ci-evidence/pipeline-runs | head -1)
+python3 -c "
+import json, jsonschema
+report = json.load(open(f'.lava-ci-evidence/pipeline-runs/$RUN_ID/report.json'))
+schema = json.load(open('specs/002-build-test-distribute-pipeline/contracts/pipeline-run-report.schema.json'))
+jsonschema.validate(report, schema)
+assert report['outcome'] == 'PASS'
+assert report['evidence_summary']['rejected_by_anti_bluff'] == 0
+# ADDED 2026-08-21 — both of these catch real defects this feature had:
+assert report['phases'], 'empty phases[] must never be a pass'
+assert all(p['result'] == 'PASS' for p in report['phases']), report['phases']
+assert report['evidence_summary']['total'] > 0, 'a run that scanned zero Evidence Records proved nothing'
+print('Scenario 2: PASS')
+"
+```
+
+## Scenario 3 — Falsifiability: a genuinely broken test blocks distribution (SC-003)
+
+```bash
+# Deliberately break a real, already-covered code path — pick any test this
+# pipeline's phase-02 already runs and introduce a one-line regression in the
+# production code it covers (per this project's own Bluff-Audit discipline —
+# see any existing commit's "Mutation:" stamp for the pattern to follow).
+git checkout master
+# <apply the deliberate mutation here>
+bash scripts/pipeline-build-test-distribute.sh
+echo "exit code: $?"   # expect 1
+git checkout -- .       # revert the mutation
+```
+
+**Expected outcome**: exit `1`, `report.json`'s `outcome: "FAIL"`, and the specific broken test's Evidence Record showing `result: "FAIL"` with a real `assertion_summary` (not a generic message).
+
+**CORRECTED 2026-08-21 on two points.**
+
+1. *"`phases[]` shows `test` as `FAIL` and every phase after it (`install_boot` onward) as `SKIPPED`"* — the orchestrator **halts at the first failing phase and never appends anything for the phases after it**. Those phases are **absent** from `phases[]`, not present with `result: "SKIPPED"`. The token `SKIPPED` is never written by the orchestrator at all: `append_phase_result` accepts it as a valid phase result, and nothing uses it. (`SKIPPED` *is* a real, frequently-used value one level down, on individual Evidence Records — a different thing, easy to conflate.) Assert absence:
+
+   ```bash
+   python3 -c "
+   import json
+   r = json.load(open('.lava-ci-evidence/pipeline-runs/$RUN_ID/report.json'))
+   names = [p['name'] for p in r['phases']]
+   assert r['outcome'] == 'FAIL'
+   assert [p for p in r['phases'] if p['name'] == 'test' and p['result'] == 'FAIL']
+   assert 'install_boot' not in names and 'live_verify' not in names, names
+   print('Scenario 3: PASS — halted at test, nothing downstream ran')
+   "
+   ```
+
+2. *"**zero** Distribution Records and **zero** Submodule Advance Records exist in the report, proving FR-009's refusal-to-proceed actually held"* — both arrays are **empty on every run today**, passing or failing, because no distribute or closure phase is wired to populate them. As written this assertion cannot fail and therefore proves nothing about FR-009; it is a vacuous check of exactly the kind this feature's own anti-bluff rules exist to reject, and it should not be counted as evidence until those phases exist. What genuinely does hold today is the assertion in point 1: the run stopped at `test` and no later phase ran.
+
+**A stronger variant of this scenario, available now.** Scenario 3 as written proves the pipeline stops on a genuinely failing test. The distinct and more valuable property — that a test which *reports* `PASS` but whose evidence is a bluff also blocks the run — is exercised by mutating an Evidence Record's `assertion_summary` to a forbidden generic phrase, or its `raw_output_ref` to a path that is not a regular file, and confirming the run finalizes `FAIL` with `evidence_summary.rejected_by_anti_bluff > 0` even though every phase exited 0. That is the case `outcome` exists to catch, and it is covered hermetically by `tests/pipeline/test_run_report_evidence_summary.sh` CASE 3 and `tests/pipeline/test_anti_bluff_missing_evidence_fields.sh`.
+
+## Scenario 4 — Submodule pin advancement (FR-015, the highest-risk new script)
+
+Run this against a disposable clone, never against the real `master` on first use (per the plan's Human Checkpoint #2). **As of 2026-08-21 this checkpoint has not been cleared and the script has never been run against a real submodule upstream** — only against the disposable git fixtures in `tests/pipeline/test_advance_all_submodules.sh`.
+
+**CORRECTED 2026-08-21: the command as written cannot run.** `scripts/advance-all-submodules.sh` **refuses** (exit 2, nothing attempted) unless `LAVA_PIPELINE_RUN_ID` is set, or both `LAVA_ADVANCE_RECORD_DIR` and `LAVA_ADVANCE_VERIFY_CMD` are supplied. That refusal is the point, not an inconvenience: without a run id it cannot reach the R-005 step-5 rebuild-and-test (both `phase-01-build.sh` and `phase-02-test.sh` require a run id with an existing `report.json`), and it will not advance a pin it cannot honestly claim to have re-verified. The corrected invocation:
+
+```bash
+git clone --recurse-submodules <this-repo> <disposable-clone-path>
+cd <disposable-clone-path>
+
+# The script writes into an existing run's directory, so create one first.
+RUN_ID=$(date -u +%Y-%m-%dT%H-%M-%SZ)
+python3 - "$RUN_ID" "$(git rev-parse HEAD)" <<'PY'
+import json, os, sys
+run_id, sha = sys.argv[1], sys.argv[2]
+d = f".lava-ci-evidence/pipeline-runs/{run_id}"
+os.makedirs(d, exist_ok=True)
+json.dump({"run_id": run_id, "commit_sha": sha, "started_at": "1970-01-01T00:00:00Z",
+           "completed_at": "1970-01-01T00:00:00Z", "outcome": "BLOCKED", "phases": [],
+           "build_artifacts": [], "evidence_summary": {"total": 0, "passed": 0, "failed": 0,
+           "skipped": 0, "rejected_by_anti_bluff": 0}, "distributions": [],
+           "submodule_advances": []}, open(f"{d}/report.json", "w"), indent=2)
+PY
+
+LAVA_PIPELINE_RUN_ID="$RUN_ID" bash scripts/advance-all-submodules.sh
+echo "exit code: $?"                # 0 = all ADVANCED or NO_NEWER_COMMIT; 1 = at least one REJECTED
+git status --porcelain              # expect STAGED submodule pin changes, NOT a clean tree
+git -C submodules/auth log -1       # expect this to match submodules/auth's own upstream HEAD at run time
+```
+
+On a real repository the default verify command runs a full build and test pass per advanced submodule, so this is a long operation. Set `LAVA_ADVANCE_SUBMODULES` to an allow-list of one submodule path to keep a first trial bounded.
+
+**Expected outcome**, corrected: every submodule with a newer upstream commit is advanced, re-verified by a real rebuild-and-test, and staged; a submodule whose advance breaks that verification is **discarded** (restored to its prior pin) and recorded `REJECTED_BREAKING_CHANGE`, and one whose push cannot fast-forward is recorded `REJECTED_PUSH_CONFLICT` — a rejection is the correct outcome, never something to work around. Each `submodule-advances/*.json` validates against `contracts/submodule-advance-record.schema.json`; note the filename is the **sanitized** submodule path (`submodules/auth` → `submodules_auth.json`), while the `submodule_name` field inside keeps the real slashed path.
+
+**The original "expect clean `git status`" was wrong and would have looked like a failure.** The script stages the parent's pin with `git add` and **never commits in the parent repository** — deliberately, so a human review gate sits between "pins staged" and "pins pushed". Committing and pushing the parent belongs to the closure phase, which does not exist. So the parent tree after a successful run has staged changes; a clean parent tree would mean nothing was advanced.
+
+## Scenario 5 — Restart-from-scratch on interruption (FR-018)
+
+```bash
+bash scripts/pipeline-build-test-distribute.sh &
+PID=$!
+sleep 30   # let it get partway into the build phase
+kill -TERM "$PID"
+bash scripts/pipeline-build-test-distribute.sh
+```
+
+**Expected outcome**: the second invocation creates a brand-new `run_id` directory, does not reference the interrupted run's directory anywhere in its own `report.json`, and re-runs the build/test phases from the beginning rather than skipping them. There is no resume flag and none may be added.
+
+**CORRECTED 2026-08-21 — three implementation facts change what to expect here.**
+
+1. **`sleep 30` will not reach the build phase on a cold checkout.** The build phase runs a real Gradle assemble of four Android variants plus a Go build. Wait until the console prints `phase 'build'` and has been in it a while, rather than trusting a fixed sleep.
+2. **The killed run's report is `FAIL`, not left `BLOCKED`.** The orchestrator traps `INT` and `TERM` and closes the report on the way out, so `kill -TERM` produces a finalized report. `BLOCKED` at rest means finalize never ran at all — a `SIGKILL`, or a host crash. Use `kill -KILL` if the intent is to observe a genuinely unfinalized run.
+3. **Re-invoking within the same second fails.** `run_id` is `date -u +%Y-%m-%dT%H-%M-%SZ`, one-second resolution, and `init_run_report` refuses to overwrite an existing `report.json`. Allow at least a second between invocations. This refusal is correct — silently overwriting an earlier run's report would destroy evidence — but it is not what this scenario is trying to demonstrate.
+
+One thing that does hold as written, and is worth asserting explicitly: the second invocation still satisfies FR-000's clean-tree precondition, because everything the first run produced is gitignored (`releases/`, and `.lava-ci-evidence/pipeline-runs/`). A pipeline whose own output blocked its next run would fail SC-007 by construction.
+
+## Success signal for this quickstart as a whole
+
+**CORRECTED 2026-08-21 — this claim is not true today, and stating it as though it were would be exactly the false-completeness signal this feature exists to prevent.**
+
+All 5 scenarios passing demonstrates FR-000 through FR-009 and FR-018/FR-019 — the precondition boundary, build, test, evidence, anti-bluff validation, install/boot, live verification, restart-from-scratch, and the consolidated run report. That is a genuine feature-level Integration Challenge for the wired half of the pipeline.
+
+It does **not** demonstrate FR-010 through FR-017. Those requirements — distribute debug, distribute release, version monotonicity at distribute time, documentation refresh, commit-and-push the main repository, submodule pin advance, push-conflict refusal, and the clean-tree-everywhere closure guarantee — have **no wired phase to exercise**. The distribute and closure phases are blocked behind unapproved constitutional amendments (tasks T040/T041 and T048/T049), and Scenario 4's script has never been run against a real submodule upstream. Scenario 4 exercises FR-015/FR-016 against disposable fixtures only, which is real coverage but not the same claim.
+
+Two scenarios also carry caveats worth repeating here: Scenario 3's "zero Distribution Records" assertion is vacuous today (see its own note), and Scenario 2 is a run of the wired phases, not a full run.

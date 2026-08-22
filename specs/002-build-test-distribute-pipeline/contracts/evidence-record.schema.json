@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lava.vasic.digital/schemas/pipeline/evidence-record.schema.json",
+  "title": "Evidence Record",
+  "description": "One machine-readable outcome for one executed test, per spec.md FR-003/FR-004 and data-model.md.",
+  "type": "object",
+  "required": ["test_id", "category", "command", "result", "assertion_summary", "raw_output_ref", "anti_bluff_status"],
+  "additionalProperties": false,
+  "properties": {
+    "test_id": { "type": "string", "minLength": 1 },
+    "category": {
+      "type": "string",
+      "enum": [
+        "kotlin-unit",
+        "go-unit-integration",
+        "real-binary-contract",
+        "real-device-challenge",
+        "hermetic-script",
+        "stress-chaos",
+        "release-canary",
+        "constitutional-gate-sweep"
+      ]
+    },
+    "command": { "type": "string", "minLength": 1, "description": "Exact command for independent re-run (FR-003)." },
+    "result": { "type": "string", "enum": ["PASS", "FAIL", "SKIPPED"] },
+    "assertion_summary": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The real, specific checked outcome. MUST NOT be one of the forbidden generic strings — see anti-bluff-validate.sh rule (a) in research.md R-009."
+    },
+    "raw_output_ref": { "type": "string", "minLength": 1, "description": "Relative path to captured stdout/stderr. MUST exist and be non-empty (R-009 rule c)." },
+    "anti_bluff_status": {
+      "type": "string",
+      "pattern": "^(validated|REJECTED: .+)$",
+      "description": "Written only by anti-bluff-validate.sh, never by the test itself."
+    }
+  }
+}

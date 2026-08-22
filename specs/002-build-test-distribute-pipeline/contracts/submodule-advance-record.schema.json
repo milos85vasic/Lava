@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lava.vasic.digital/schemas/pipeline/submodule-advance-record.schema.json",
+  "title": "Submodule Advance Record",
+  "description": "One completed advance (or rejection) of a submodule to its own upstream latest, per spec.md FR-015/FR-016 and data-model.md.",
+  "type": "object",
+  "required": [
+    "submodule_name",
+    "old_commit",
+    "new_commit",
+    "local_modifications_pushed",
+    "parent_pin_updated",
+    "outcome"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "submodule_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "old_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{7,40}$"
+    },
+    "new_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{7,40}$"
+    },
+    "local_modifications_pushed": {
+      "type": "boolean"
+    },
+    "parent_pin_updated": {
+      "type": "boolean",
+      "description": "MUST be false when outcome is REJECTED_BREAKING_CHANGE or REJECTED_PUSH_CONFLICT (research.md R-005 step 5)."
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "ADVANCED",
+        "NO_NEWER_COMMIT",
+        "REJECTED_BREAKING_CHANGE",
+        "REJECTED_PUSH_CONFLICT",
+        "REFUSED_GOVERNANCE_DENY"
+      ],
+      "description": "REFUSED_GOVERNANCE_DENY (added 2026-08-21) means the submodule is on the governance deny-list and was never even examined for a newer commit: its pin is governed by a separate, human-driven process, not by this pipeline. It is recorded rather than skipped, because a governance refusal that leaves no evidence is invisible at rest."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "enum": [
+              "REJECTED_BREAKING_CHANGE",
+              "REJECTED_PUSH_CONFLICT"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "parent_pin_updated": {
+            "const": false
+          }
+        }
+      }
+    }
+  ]
+}

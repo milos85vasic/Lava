@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lava.vasic.digital/schemas/pipeline/distribution-record.schema.json",
+  "title": "Distribution Record",
+  "description": "One completed distribution of a specific Build Artifact variant to a specific channel, per spec.md's Distribution Record entity.",
+  "type": "object",
+  "required": ["artifact_id", "channel", "version_code", "evidence_ref", "distributed_at"],
+  "additionalProperties": false,
+  "properties": {
+    "artifact_id": { "type": "string", "enum": ["app-debug", "app-release", "api-app-debug", "api-app-release"] },
+    "channel": { "type": "string", "enum": ["firebase-app-distribution", "firebase-app-distribution-api-app"] },
+    "version_code": { "type": "integer", "minimum": 1 },
+    "evidence_ref": { "type": "string", "minLength": 1, "description": "Path to this run's Pipeline Run Report — replaces a human attestation reference per research.md R-001." },
+    "distributed_at": { "type": "string", "format": "date-time" }
+  }
+}

@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>pipeline-build-test-distribute.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptspipeline-build-test-distributesh--user-guide"><code>scripts/pipeline-build-test-distribute.sh</code>
+— User Guide</h1>
+<p><strong>Last verified:</strong> 2026-08-21 (phase wiring landed —
+T038; verified by real runs against disposable fixture repositories, see
+"Verification record" below) <strong>Inheritance:</strong>
+HelixConstitution §11.4.18 (script documentation mandate) + Lava's
+Anti-Bluff Pact (Sixth/Seventh Laws) + §6.T.2 (Resource Limits)</p>
+<h2 id="overview">Overview</h2>
+<p>The top-level orchestrator for this project's local
+build-test-distribute pipeline
+(<code>specs/002-build-test-distribute-pipeline/</code>). It sequences
+the pipeline's phase scripts against one shared run identifier, and
+consolidates their results into a single Pipeline Run Report per
+invocation.</p>
+<h2 id="what-is-wired-today--and-what-deliberately-is-not">What is wired
+today — and what deliberately is not</h2>
+<p>This section is the authoritative statement of what this script can
+currently do. It is deliberately explicit, because a pipeline that
+quietly does less than its name implies is the exact failure this
+feature exists to prevent.</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Script</th>
+<th>Wired?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>precondition</code></td>
+<td><code>scripts/pipeline/phase-00-precondition.sh</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>build</code></td>
+<td><code>scripts/pipeline/phase-01-build.sh</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>test</code></td>
+<td><code>scripts/pipeline/phase-02-test.sh</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>install_boot</code></td>
+<td><code>scripts/pipeline/phase-03-install-boot.sh</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>live_verify</code></td>
+<td><code>phase-04-live-verify-api.sh</code> <strong>and</strong>
+<code>phase-04-live-verify-api-app.sh</code></td>
+<td>✅ both halves</td>
+</tr>
+<tr>
+<td>changelog / distribute</td>
+<td><code>phase-05a-*</code> / <code>phase-05-*</code></td>
+<td>❌ blocked on T040/T041</td>
+</tr>
+<tr>
+<td>docs refresh</td>
+<td><code>phase-06-*</code></td>
+<td>❌ blocked on the same reviewed change</td>
+</tr>
+<tr>
+<td>closure</td>
+<td><code>phase-07-*</code></td>
+<td>❌ blocked on T048/T049 + T054</td>
+</tr>
+</tbody>
+</table>
+<p>The distribute, docs and closure phases are <strong>not</strong>
+unimplemented-by-accident. They are gated behind constitutional
+amendment tasks that have not been reviewed or merged: T040/T041 (an
+alternate path under <code>CLAUDE.md</code> §6.AA's Two-Stage Distribute
+Mandate and the Seventh Law's clause 3) and T048/T049 (a carve-out in
+the Decoupled Reusable Architecture rule's "submodule fetch/pull is an
+EXPLICIT operator action, never automatic"). Until those land, this
+script <strong>cannot</strong> distribute or push anything, by
+construction.</p>
+<p><strong><code>live_verify</code> covers both surfaces</strong> (since
+T037 landed, 2026-08-21): the running <code>lava-api-go</code> service,
+and the <code>:api-app</code> debug APK installed onto a
+Containers-submodule emulator per §6.AH driving its real boot-and-serve
+Challenge. A phase may own more than one script; they run in listed
+order and the phase halts at the first failure, so a later script can
+never append a PASS entry for a phase whose earlier half already failed.
+Both append their own <code>live_verify</code> entry to
+<code>phases[]</code> — the report schema permits that
+(<code>phases[]</code> declares no <code>uniqueItems</code>), and it is
+the honest shape, since <code>finalize_run_report</code> requires
+<em>every</em> entry to be PASS.</p>
+<p>The api-app half establishes §6.AH compliance as a <strong>checked
+fact</strong>, not a logged claim: a poller samples
+<code>podman ps --filter name=lava-emu</code> throughout the run, and
+its provenance record is FAIL if no running emulator container was ever
+observed. It also requires Gradle's own JUnit XML and the Containers
+attestation row to agree, treating disagreement as a failure in
+itself.</p>
+<p><strong>Remaining honest caveat:</strong> the api-app half runs one
+AVD (API 34 phone) — the only emulator image cached on this host. That
+is live-verification, not the §6.AE.2 release-gate matrix.</p>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/pipeline-build-test-distribute.sh</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span> <span class="pp">[</span><span class="ss">repo</span><span class="pp">-</span><span class="ss">path</span><span class="pp">]</span></span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--until &lt;phase&gt;</code></td>
+<td>Stop after <code>&lt;phase&gt;</code> completes successfully.
+Default <code>live_verify</code> (the furthest wired phase). This is
+what makes <code>quickstart.md</code>'s per-user-story slices runnable:
+<code>--until test</code> is the US1 slice,
+<code>--until live_verify</code> is US1+US2.</td>
+</tr>
+<tr>
+<td><code>--skip &lt;phase&gt;[,&lt;phase&gt;…]</code></td>
+<td>Do not run the named phase(s). <code>precondition</code> may
+<strong>not</strong> be skipped.</td>
+</tr>
+<tr>
+<td><code>-h</code>, <code>--help</code></td>
+<td>Print the usage block and exit <code>0</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Naming a phase that is not wired (e.g.
+<code>--until distribute</code>) is a <strong>usage error (exit
+2)</strong>, not a silent no-op.</p>
+<p><code>precondition</code> cannot be skipped because it is the FR-000
+safety boundary — a pipeline that can be talked out of checking its own
+preconditions has no safety boundary at all.</p>
+<p>The optional positional <code>repo-path</code> is forwarded to every
+phase script as its own <code>[repo-path]</code> argument. It controls
+which repository the phases <em>inspect</em>; it does
+<strong>not</strong> relocate the Pipeline Run Report, which is always
+written relative to the current working directory (per
+<code>scripts/pipeline/lib/run-report.sh</code>'s documented contract).
+Run this script from the repo root, as with <code>scripts/ci.sh</code>
+and <code>scripts/tag.sh</code>.</p>
+<h2 id="preconditions-fr-000">Preconditions (FR-000)</h2>
+<p>Refuses to proceed (exit <code>2</code>) unless the working tree is
+on the <code>master</code> branch with a completely clean
+<code>git status</code>. This is the pipeline's sole safety boundary
+against an accidental unattended run from unreviewed or uncommitted
+work.</p>
+<p><strong>Required <code>.gitignore</code> entry.</strong>
+<code>.lava-ci-evidence/pipeline-runs/</code> MUST be gitignored (it is
+— <code>.gitignore</code> line 59, task T003). The run report is
+initialized <em>before</em> the precondition check, so that a refusal to
+start is itself recorded as a run outcome. That means the run's own
+evidence directory exists on disk by the time FR-000's clean-tree rule
+is evaluated. Without the ignore rule the pipeline dirties the very tree
+it is about to test and can then never start. This script detects that
+specific situation and prints an explicit <code>DIAGNOSIS</code> naming
+the offending paths rather than leaving you to hunt for it.</p>
+<h2 id="evidence-and-the-run-report">Evidence and the run report</h2>
+<p>Every invocation creates a fresh, timestamped directory at
+<code>.lava-ci-evidence/pipeline-runs/&lt;UTC-run-id&gt;/</code>
+containing a <code>report.json</code> (schema:
+<code>specs/002-build-test-distribute-pipeline/contracts/pipeline-run-report.schema.json</code>),
+one <code>phase-NN/</code> subdirectory per phase, and the phase's own
+Evidence Records. Per <code>research.md</code> R-010, a later invocation
+never reads a prior run's directory as input — every run restarts fully
+from scratch (FR-018).</p>
+<p>On <strong>every</strong> exit path once the report exists — success,
+phase failure, or interrupt — this script runs
+<code>recompute_evidence_summary</code> and then
+<code>finalize_run_report</code>.</p>
+<p>The recompute step is not bookkeeping; it is load-bearing.
+<code>data-model.md</code>'s Validation rule makes
+<code>outcome: "PASS"</code> conditional on
+<code>evidence_summary.rejected_by_anti_bluff == 0</code>, and
+<code>finalize_run_report</code> implements that rule literally — but
+the counter it reads is seeded to <code>0</code> by
+<code>init_run_report</code> and is only ever populated by
+<code>recompute_evidence_summary</code> scanning the real Evidence
+Records on disk. Skipping the recompute silently turns the anti-bluff
+half of the outcome rule into a no-op. Regression coverage:
+<code>tests/pipeline/test_run_report_evidence_summary.sh</code> CASE
+3.</p>
+<p>Consequently, a run whose phases all exited <code>0</code> but whose
+finalized <code>outcome</code> is <code>FAIL</code> (because an Evidence
+Record was REJECTED by anti-bluff validation) <strong>exits
+non-zero</strong>. The finalized outcome is authoritative over the
+individual phase exit codes.</p>
+<h2 id="exit-codes">Exit codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>Every phase that ran reported PASS, and the finalized
+<code>outcome</code> is <code>PASS</code>.</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>A phase genuinely failed, <strong>or</strong> the finalized
+<code>outcome</code> is <code>FAIL</code> (including the
+all-phases-passed-but-evidence-rejected case).</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>Usage error, or the FR-000 precondition check failed (propagated
+verbatim from <code>phase-00-precondition.sh</code>, never
+hardcoded).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="individual-phase-scripts">Individual phase scripts</h2>
+<p>Per FR-005, every phase is independently invocable outside this
+orchestrator. All phase scripts except <code>phase-00</code> share the
+signature <code>&lt;run_id&gt; [repo-path]</code> and append their own
+<code>phases[]</code> entry to the shared <code>report.json</code>;
+<code>phase-00-precondition.sh</code> takes only
+<code>[repo-path]</code> and this orchestrator appends on its behalf.
+See
+<code>specs/002-build-test-distribute-pipeline/contracts/cli-contract.md</code>.</p>
+<h2 id="verification-record">Verification record</h2>
+<p>The phase wiring was verified by real execution against disposable
+fixture git repositories (never against real <code>master</code>):</p>
+<ul>
+<li>Clean <code>master</code> fixture, <code>--until precondition</code>
+→ exit <code>0</code>, <code>outcome: PASS</code>, exactly one
+<code>phases[]</code> entry.</li>
+<li>Fixture dirtied with a real tracked-file change → exit
+<code>2</code>, <code>outcome: FAIL</code>, halted at
+<code>precondition</code>, no false-positive diagnosis.</li>
+<li>Fixture with the <code>.gitignore</code> rule removed → exit
+<code>2</code> <strong>plus</strong> the <code>DIAGNOSIS</code> block
+naming the untracked run-directory paths.</li>
+<li>All five usage guards (<code>--help</code>, unknown
+<code>--until</code>, not-yet-wired <code>--until distribute</code>,
+<code>--skip precondition</code>, unknown option) → exit as
+specified.</li>
+</ul>
+<p>The full end-to-end run across all five wired phases is task
+<strong>T062</strong>, a review gate that must first be executed on a
+disposable branch — it has deliberately <strong>not</strong> been run
+against real <code>master</code>.</p>
+<h2 id="falsifiability">Falsifiability</h2>
+<p><code>scripts/pipeline/lib/anti-bluff-validate.sh</code>,
+<code>scripts/pipeline/lib/run-report.sh</code>'s evidence aggregator,
+and <code>scripts/pipeline/phase-00-precondition.sh</code> each carry a
+hermetic suite under <code>tests/pipeline/</code>, each built
+RED-then-GREEN. The evidence aggregator additionally carries a recorded
+mutation rehearsal: disabling its <code>REJECTED</code> detection makes
+CASE 3 fail with <code>outcome is 'PASS', expected FAIL</code>, and
+reverting restores the pass.</p>
+<h2 id="maintenance">Maintenance</h2>
+<p>When this script is modified, update this document in the same commit
+(<code>CM-SCRIPT-DOCS-SYNC</code> requires it). Per §11.4.18, the
+documentation MUST stay in sync with the codebase.</p>
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li><code>specs/002-build-test-distribute-pipeline/spec.md</code>,
+<code>plan.md</code>, <code>research.md</code>,
+<code>data-model.md</code>, <code>contracts/</code>,
+<code>tasks.md</code> — the full design and task breakdown this script
+implements.</li>
+<li><code>docs/helix-constitution-gates.md</code> — gate inventory.</li>
+<li>HelixConstitution <code>Constitution.md</code> §11.4.18 (the
+mandate).</li>
+</ul>
+</body>
+</html>

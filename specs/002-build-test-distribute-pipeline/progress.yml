@@ -1,0 +1,832 @@
+# Execution state for feature 002 (Local Build-Test-Distribute Pipeline).
+# Maintained by /speckit-superspec-execute. The authoritative per-task state
+# is tasks.md's checkboxes; this file is the rolled-up view plus the
+# execution-session bookkeeping tasks.md has no place for.
+schema_version: 1
+feature_directory: specs/002-build-test-distribute-pipeline
+branch: 002-build-test-distribute-pipeline
+executor: superpowers
+updated_at: "2026-08-22T02:00:00Z"
+
+totals:
+  tasks_total: 63
+  tasks_done: 48
+  tasks_open: 15
+
+phases:
+  - id: 1
+    name: Setup
+    tasks: T001-T003
+    state: COMPLETE
+  - id: 2
+    name: Foundational
+    tasks: T004-T014
+    state: COMPLETE
+    note: >-
+      Three TDD cycles landed (precondition guard, evidence writer/run report,
+      anti-bluff validator). A fourth, unplanned RED-GREEN cycle was added
+      during T038 to close a real defect in this phase's own output — see
+      defects_found_and_fixed below.
+  - id: 3
+    name: "US1 build + test + evidence"
+    tasks: T015-T031
+    state: IN_PROGRESS
+    open: [T031]
+    note: >-
+      T024 CLOSED by real execution: a genuinely containerized (accel=kvm,
+      runner=containerized) emulator run on this host produced 3 schema-valid,
+      anti-bluff-validated Evidence Records, cross-checked against Gradle's own
+      JUnit XML and the Containers attestation. What ran is a development
+      subset (one class per module, API 34 phone), NOT a conformant §6.AE.2 gate
+      matrix - the other AVD images are not cached locally and ghcr.io denies
+      anonymous pulls. T028 still under active verification by a subagent.
+  - id: 4
+    name: "US2 install/boot + live-verify"
+    tasks: T032-T039
+    state: IN_PROGRESS
+    open: []
+    note: >-
+      T038 (orchestrator wiring) closed this session. T037 (the :api-app
+      emulator half of live-verify) remains genuinely unimplemented, so a green
+      live_verify phase currently proves the Go API only.
+  - id: 5
+    name: "US3 distribute + docs"
+    tasks: T040-T047
+    state: PARTIAL
+    blocked_by: [T040, T041]
+    open: [T040, T041, T043, T046, T047]
+    note: >-
+      T040/T041 are CONSTITUTIONAL AMENDMENTS (CLAUDE.md §6.AA Two-Stage
+      Distribute Mandate + Seventh Law clause 3, and the matching
+      .specify/memory/constitution.md MAJOR bump). They are human review gates
+      and MUST NOT be treated as routine code review. The non-gated parts
+      (T042/T044/T045 - changelog authoring and docs refresh, no distribution)
+      are COMPLETE. T042 was proven against firebase-distribute.sh's OWN extracted
+      gate code (exit 0 for both apps) with two falsifiability rehearsals, and
+      carries a runtime drift-detector that fails loudly if that gate's literals
+      change. T044/T045 are implemented as idempotent script logic; CLAUDE.md and
+      docs/ARCHITECTURE.md remain byte-identical to baseline. Review-ready DRAFTS
+      of the T040/T041/T048/T049 amendments are being authored as a proposal
+      document for human approval - they are NOT being applied.
+  - id: 6
+    name: "US4 repository closure"
+    tasks: T048-T056
+    state: BLOCKED
+    blocked_by: [T048, T049, T054]
+    note: >-
+      T048/T049 are constitutional amendments (the Decoupled Reusable
+      Architecture rule's "submodule fetch/pull is an EXPLICIT operator action,
+      never automatic"). T054 is a separate mandatory review gate before
+      advance-all-submodules.sh may touch any real submodule upstream. The
+      T050-T053 TDD cycle against DISPOSABLE FIXTURE repos is COMPLETE (36/36
+      assertions green, independently re-run by the orchestrating session; real
+      submodules confirmed untouched). advance-all-submodules.sh has NEVER been
+      run against a real submodule or upstream.
+  - id: 7
+    name: "Polish & cross-cutting"
+    tasks: T057-T063
+    state: NOT_STARTED
+    note: >-
+      T057 is partially satisfied by T038 (phases 00-04 wired); the remaining
+      three phases it names are blocked behind the same amendments.
+
+human_review_gates:
+  - id: T040
+    kind: constitutional-amendment
+    status: PENDING
+    what: "CLAUDE.md §6.AA + Seventh Law clause 3 — alternate path where a Pipeline Run Report substitutes for human debug-then-release confirmation"
+  - id: T041
+    kind: constitutional-amendment
+    status: PENDING
+    what: ".specify/memory/constitution.md MAJOR bump 1.1.0 -> 2.0.0 matching T040"
+  - id: T048
+    kind: constitutional-amendment
+    status: PENDING
+    what: "Decoupled Reusable Architecture carve-out for automated submodule-pin advancement"
+  - id: T049
+    kind: constitutional-amendment
+    status: PENDING
+    what: ".specify/memory/constitution.md update matching T048"
+  - id: T054
+    kind: code-review
+    status: PENDING
+    what: "Mandatory review of advance-all-submodules.sh before ANY invocation against a real submodule upstream — highest blast radius in this feature"
+  - id: T062
+    kind: code-review
+    status: PENDING
+    what: "Full end-to-end run on a disposable branch before this pipeline is trusted against real master"
+
+defects_found_and_fixed:
+  - id: evidence-summary-never-populated
+    found_during: T038
+    severity: high
+    what: >-
+      report.json's evidence_summary was seeded to all-zeros by init_run_report
+      and never updated by anything. finalize_run_report gates outcome:"PASS" on
+      evidence_summary.rejected_by_anti_bluff == 0, so that counter being
+      permanently 0 made the anti-bluff half of data-model.md's Validation rule a
+      silent no-op — a run containing REJECTED Evidence Records could finalize to
+      PASS.
+    red_evidence: >-
+      "FAIL: outcome is 'PASS', expected FAIL - a run containing a REJECTED
+      Evidence Record reported success."
+    fix: >-
+      New recompute_evidence_summary() in scripts/pipeline/lib/run-report.sh
+      deriving every count from the physical Evidence Records on disk; called by
+      the orchestrator before finalize on every exit path. New hermetic suite
+      tests/pipeline/test_run_report_evidence_summary.sh (5 cases, 12 checks).
+    bluff_audit: >-
+      Mutating the aggregator's REJECTED* match to a never-matching literal
+      reproduced the original bluff exactly; reverting restored all-green. Zero
+      regressions across the three pre-existing pipeline suites.
+  - id: untracked-dir-collapse-in-self-diagnosis
+    found_during: T038
+    severity: low
+    what: >-
+      git status --porcelain collapses a fully-untracked directory to a single
+      "?? .lava-ci-evidence/" entry, so the orchestrator's first-cut diagnosis for
+      the "pipeline dirtied its own tree" footgun matched nothing.
+    fix: "Use --untracked-files=all; re-verified against a fixture with the T003 ignore rule removed."
+
+not_yet_run:
+  - what: "Full end-to-end orchestrator run across all five wired phases"
+    why: >-
+      Invokes Gradle, systemd and an Android emulator. Deliberately not run this
+      session: it is task T062, a review gate that must first execute on a
+      disposable branch, and running it now would contend with parallel agents
+      already using those toolchains. Not claimed as done.
+
+defects_found_and_fixed_addendum:
+  - id: pipeline-docs-in-wrong-directory
+    found_during: T042/T044/T045
+    severity: medium
+    what: >-
+      A companion doc at docs/scripts/<name>.sh.md for a script under
+      scripts/pipeline/ BREAKS the CM-SCRIPT-DOCS-SYNC gate instead of satisfying
+      it. The gate matches find scripts -maxdepth 1 against find docs/scripts
+      -maxdepth 1, so such a doc is an ORPHAN with no depth-1 script counterpart.
+      Proven mechanically (exit 1, "Docs WITHOUT matching scripts/<name>").
+    fix: >-
+      Pipeline phase-script companions go in docs/scripts/pipeline/, following the
+      existing docs/scripts/{hooks,lava-api-go,autonomous-qa}/ precedent, outside
+      the gate's maxdepth-1 scan. Gate confirmed clean afterwards (68 <-> 68).
+  - id: test-suite-could-start-a-real-build-on-guard-regression
+    found_during: T038
+    severity: medium
+    what: >-
+      While rehearsing a mutation of the orchestrator's "--skip precondition"
+      refusal, that guard stopped refusing, so the run fell through to the DEFAULT
+      --until live_verify and began a REAL Gradle build against the REAL
+      repository, which had to be killed at a 2-minute timeout. A guard-regression
+      test that can start a real build on the developer's actual checkout when the
+      guard regresses is itself a hazard.
+    fix: >-
+      Every Group A guard invocation in tests/pipeline/test_pipeline_orchestrator.sh
+      is now aimed at a throwaway fixture repo and executed from inside it, so the
+      same regression fails fast and harmlessly instead.
+
+defects_found_and_fixed_wave2:
+  - id: gate-sweep-wrapper-was-dead-code
+    found_during: T028
+    severity: high
+    what: >-
+      scripts/pipeline/phase-02-test-constitutional-gate-sweep.sh was fully
+      implemented and functional but had NO _dispatch line in phase-02-test.sh.
+      The constitutional-gate-sweep category was silently absent from every run
+      - not skipped-with-a-reason, just missing - while the run summary read as
+      complete. The tolerate-absence path documented in that file's header did
+      NOT cover it: that path protects a category whose _dispatch line exists but
+      whose script file does not.
+    fix: >-
+      Added GATE_SWEEP_WRAPPER plus its _dispatch call to the first (non-Gradle)
+      parallel group. Proven to fire by an isolated run through the file's own
+      PHASE02_GATE_SWEEP_WRAPPER override against a marker-writing stub, which
+      confirmed the documented argument order reaches the wrapper.
+  - id: jq-slash-slash-erases-boolean-false
+    found_during: T028
+    severity: medium
+    what: >-
+      jq -r '.all_passed // "unknown"' falls back not only on null/missing but
+      also on boolean false, so an attestation saying "all_passed": false was
+      recorded in every Evidence Record as "unknown" - erasing the
+      did-not-all-pass signal on exactly the runs where it matters.
+    fix: >-
+      Explicit has(...) and != null form that still distinguishes genuinely-absent
+      from present-and-false. Unit-verified false/true/null/{} mappings. Sibling
+      count fields unaffected (jq treats 0 as truthy - verified, not assumed).
+  - id: phase-02-passes-on-zero-evidence
+    found_during: T028 follow-up
+    severity: high
+    what: >-
+      phase-02-test.sh's PASS policy had three conditions, all of which are
+      satisfied VACUOUSLY when every dispatched wrapper exits 0 without writing
+      anything. Such a run reported "PASSED - all 1 dispatched wrapper(s) exited
+      0, 0 Evidence Records scanned". The file's own header states the governing
+      principle ("an empty test phase proves nothing") but enforced it only for
+      the zero-WRAPPERS case, not the zero-EVIDENCE case that actually reaches
+      the aggregator.
+    red_evidence: >-
+      "FAIL: zero Evidence Records -> exit 0. A test phase that scanned no
+      evidence at all reported success."
+    fix: >-
+      Fourth PASS condition requiring at least one Evidence Record scanned, plus
+      an explanatory failure message. New hermetic suite
+      tests/pipeline/test_phase_02_aggregation.sh (3 cases) driving the real
+      aggregator through its own override hooks. Cases 1 and 3 stayed green
+      throughout, so the fix is not a blanket fail-everything.
+
+blocking_findings_for_operator:
+  - id: firebase-distribute-combined-mode-ships-release-on-debug-evidence
+    severity: high
+    pre_existing: true
+    introduced_by_this_feature: false
+    what: >-
+      Verified verbatim in scripts/firebase-distribute.sh: --debug-and-release
+      sets MODE="both" (line 56); the §6.AA staging gate is guarded on MODE ==
+      "release" (line ~204) so it never evaluates; and AK_CHANNEL resolves to
+      "debug" for any mode other than exactly "release" (line ~322). A combined
+      distribute therefore ships the R8-minified RELEASE APK while the only
+      device-evidence gate that runs checks DEBUG-channel evidence. This is
+      mechanically the same setup as the 1.2.19-1039 incident (the §6.Z forensic
+      anchor).
+    impact_on_this_feature: >-
+      T043 was specified to invoke exactly --debug-and-release and would have
+      inherited the hole. Its design must either drive the two stages separately
+      (--debug-only then --release-only, which does evaluate both gates on the
+      correct channels) or land alongside a fix to the channel resolution.
+    action: OPERATOR DECISION REQUIRED. Not patched autonomously - changing a live
+      distribution gate's semantics is outside what this session should decide.
+    reproduction_harness: tests/firebase/repro_mode_both_channel_gap.sh
+    reproduction_method: >-
+      scripts/firebase-distribute.sh is NEVER executed (that would attempt a real
+      Firebase upload). The harness greps the script's four real decision lines
+      verbatim, evaluates that extracted logic per MODE, and fails loudly (exit 2)
+      if those lines ever stop existing, rather than silently testing a stale copy.
+    reproduced_output: |
+      MODE       | release APK sent | §6.AK channel | §6.AA staging gate
+      -----------+------------------+---------------+-------------------
+      debug      | no               | debug         | no
+      release    | yes              | release       | yes
+      both       | yes              | debug         | no
+    control_case: >-
+      The `release` row is the control that proves this is not a false alarm:
+      --release-only DOES evaluate both gates on the correct channel. The gap is
+      specific to the combined mode - which is precisely the mode an unattended
+      pipeline would use.
+    real_line_numbers: >-
+      firebase-distribute.sh:56 (MODE="both"), :204 (§6.AA guard tests MODE ==
+      "release"), :322-323 (AK_CHANNEL case, default "debug"), :435/:444/:513
+      (release APK asserted, resolved and uploaded when MODE is release OR both).
+    harness_exit_semantics: >-
+      Inverted on purpose and documented in its header - 0 means the gap was
+      REPRODUCED (expected today), 1 means it is GONE and the harness should be
+      converted into a proper regression test, 2 means extraction failed and it
+      can say nothing truthful. Exit 2 is never read as "fixed".
+
+defects_found_and_fixed_wave6:
+  items:
+  - id: repro-harness-would-have-been-counted-as-passing-coverage
+    severity: medium
+    found_during: >-
+      Adding the reproduction harness above - by checking, before trusting, which
+      suites enumerate tests/.
+    what: >-
+      tests/firebase/run_all.sh globs test_*.sh, so a repro_* file is outside its
+      reach. But scripts/pipeline/phase-02-test-hermetic.sh enumerates ALL *.sh at
+      depth 2 (`find tests -mindepth 2 -maxdepth 2 -name '*.sh'`), so it WOULD have
+      run the reproduction harness as a hermetic suite. Because that harness exits
+      0 when it successfully reproduces a defect, the pipeline would have minted a
+      PASS Evidence Record whose real meaning is "a known bug is still broken".
+    why_it_matters: >-
+      Strictly worse than the redundant-aggregator case that wrapper's own header
+      already guards against: that one over-counts real coverage, this one would
+      manufacture coverage out of a known failure.
+    fix: >-
+      Exclusion rule 3 in the hermetic wrapper - `-not -name 'repro_*.sh'` - with
+      the reasoning documented alongside the two existing rules. Proven by
+      enumeration count going 1 -> 0 for repro files; the wrapper still enumerates
+      69 real suites, its own hermetic test passes, and tests/firebase/run_all.sh
+      remains 8/8.
+
+
+defects_found_and_fixed_wave3:
+  note: >-
+    Found by a SYSTEMATIC hunt for one defect class - the "vacuous pass", a gate
+    whose success conditions are all satisfied by the ABSENCE of the thing it is
+    supposed to check. The hunt was commissioned only after the same shape had
+    appeared four separate times by accident. It found three more, including the
+    single deepest defect in the feature.
+  items:
+  - id: anti-bluff-validator-was-itself-bluffable
+    severity: critical
+    found_during: systematic vacuous-PASS audit
+    what: >-
+      Every one of anti-bluff-validate.sh's four rules was satisfied by a record
+      carrying NO evidence. An empty assertion_summary contains none of rule 1's
+      bluff phrases. An empty raw_output_ref resolves to the record's OWN
+      DIRECTORY, and both [[ -e dir ]] and [[ -s dir ]] are TRUE for a directory
+      (its inode has non-zero size), so rules 2 and 3 passed on nothing. An empty
+      category is not "real-device-challenge", so rule 4 was skipped. And
+      jq -r '.x // empty' exits 0 for an ABSENT field, so rule 0's guard never
+      fired despite its header claiming to reject records missing required
+      fields. Reachable through the PRODUCTION writer, not only hand-edited JSON:
+      any wrapper passing its raw directory instead of a captured-output file.
+    why_it_matters: >-
+      This component is the one FR-004 relies on to catch a test lying about
+      itself. A bluffable anti-bluff validator makes every downstream "validated"
+      stamp in the pipeline unfalsifiable.
+    fix: >-
+      Rule 0c (every schema-required field present AND non-empty, checked BEFORE
+      any rule an empty value would satisfy), rule 0d (category must be one of
+      the 8 enum values), rule 2 tightened from -e to -f with a distinct message
+      for the directory case. New suite test_anti_bluff_missing_evidence_fields.sh
+      (8 checks incl. 3 over-correction guards). Independently re-verified by the
+      orchestrating session; the ORIGINAL validator suite still passes.
+  - id: phase-01-records-artifacts-not-on-disk
+    severity: high
+    what: >-
+      cp -f ran with its exit status unchecked, then ARTIFACT <label>: <dst> was
+      printed unconditionally and return 0. phase-01-build.sh believed the line,
+      recorded the path and incremented its counter without checking the record
+      call's own result. Proven with a read-only destination: "cp: cannot create
+      regular file ...: Permission denied" immediately followed by "ARTIFACT
+      app-debug: ...", then "all 5 Build Artifacts produced and recorded",
+      PHASE EXIT=0 - while the recorded path did not exist. phase-02-test.sh
+      resolves the release-canary APK out of exactly that array.
+    second_defect_same_run: >-
+      Build Artifact metadata (version, commit) was read from REPO_ROOT while the
+      sub-builders built from the [repo-path] override, so an artifact built from
+      a fixture at 9.9.9 was recorded as 1.3.17/1086.
+    fix: >-
+      cp status checked plus post-copy -f/-s verification; each declared path
+      verified real and non-empty before recording; only successful records
+      counted, unverified ones folded into the verdict; metadata read from the
+      same path the build used. New suite test_phase_01_artifact_verification.sh.
+  - id: phase-04-passes-on-empty-response-body
+    severity: high
+    what: >-
+      The script's own header says it exists to prove the service answers with
+      REAL, meaningful response bodies rather than merely being "Up" (§6.B). The
+      per-request verdict used curl's exit code and a 2xx match only; the body was
+      read, truncated, interpolated into assertion_summary, and never asserted on.
+      Doubly vacuous - anti-bluff rule 3 ("raw_output_ref non-empty") was satisfied
+      by scaffolding lines the script itself writes into the raw file. Proven
+      against a real TLS server returning 200 with a zero-byte body: 3 records all
+      "validated", phase PASS, exit 0, summary ending "response body: " with
+      nothing after the colon.
+    fix: >-
+      Whitespace-stripped empty body now fails the request with a specific reason.
+      Over-correction guarded by pinning the three endpoints' real bodies, read
+      from internal/observability/health.go and internal/router/router.go. New
+      suite test_phase_04_live_verify_response_body.sh.
+
+undemonstrated_hypotheses:
+  note: Reported as hypotheses, NOT findings, because they were not reproduced.
+  items:
+  - phase-01-build.sh counts ARTIFACT lines rather than distinct labels, so five
+    duplicates would satisfy ">= 5". Not reachable through the real sub-scripts,
+    each of which prints a given label at most once.
+  - recompute_evidence_summary's `find ... 2>/dev/null` would report zero records
+    for an unreadable phase directory. No realistic producing scenario constructed.
+  - phase-04's compose-file port parse is a no-op on an unquoted LAVA_API_LISTEN.
+    The real docker-compose.yml quotes the value, and a wrong port fails closed
+    at curl.
+
+defects_found_and_fixed_wave4:
+  note: >-
+    Audit of the five phase-02 test wrappers (T021-T027) for swallowed failures.
+    11 confirmed, all fixed RED-then-GREEN. No real suite was run: each wrapper
+    was driven through its own documented seam against synthetic fixtures, with
+    the Go fixtures captured verbatim from this host's real go1.26.2 toolchain.
+    The recurring shape is an exit code captured into a variable and never
+    compared, and a parse whose no-match case was read as "nothing failed"
+    rather than "nothing was learned".
+  items:
+  - id: G-1-go-exit-code-never-compared
+    what: A package whose tests all PASS but which fails as a package (TestMain
+      teardown after m.Run() - how lava-api-go integration suites are written)
+      reported PASS with wrapper exit 0.
+  - id: G-2-go-zero-parsed-events-passes
+    what: Zero parseable per-test events reported PASS with zero records. The
+      header promised exit 3; the guard only tested whether the file was empty.
+  - id: K-1-gradle-exit-code-never-compared
+    what: With --continue, Gradle exits non-zero for failures producing no JUnit
+      XML - a test-source compile error being the everyday case - and the wrapper
+      reported PASS.
+  - id: K-2-unparseable-reports-silently-dropped
+    what: A truncated JUnit XML containing a real <failure> was warned about and
+      then ignored. A JUnit XML is truncated precisely when the JVM died.
+  - id: K-3-zero-testcases-parsed-exits-zero
+    what: Reports present, zero <testcase> parsed, exit 0 with zero records.
+  - id: H-1-empty-enumeration-passes
+    what: Suite enumeration matching nothing runnable reported exit 0 with zero
+      records.
+  - id: H-2-skips-left-no-evidence-record
+    what: The header claimed skips are never silently omitted; the only reporting
+      was a console line that never reaches the run report.
+  - id: S-A-S-B-empty-or-unreadable-dimensions-pass
+    what: Empty or unreadable dimensions[] reported PASSED even when the truncated
+      JSON's own readable content said "verdict":"FAIL".
+  - id: S-C-harness-exit-code-never-compared
+    what: All-PASS dimensions plus harness exit 1 reported PASSED, though the
+      header says exit 0 additionally asserts no goroutine/FD leak.
+  - id: S-D-ran-flag-string-compare-matches-null
+    what: '.ran read as a string and compared to "true" also matches a MISSING
+      key (null), so an unrecognized dimension shape was downgraded to a
+      non-blocking skip. Same defect class as the gate-sweep jq // bug.'
+  - id: R-A-undocumented-exit-codes-laundered-into-SKIPPED
+    severity: high
+    what: run-release-canary.sh documents exits 0/1/2 and runs under set -e, so a
+      missing tool yields 127 and a kill yields 137. Both were reported as
+      "genuinely did not execute ... real host/config precondition gap" with
+      result SKIPPED and wrapper exit 0. SKIPPED does not block the phase, so a
+      dead canary harness silently disabled the §6.Z cold-start gate.
+
+defect_class_closed_mechanically:
+  suite: tests/pipeline/test_no_vacuous_pass_patterns.sh
+  rationale: >-
+    Twenty-three defects were found and fixed during this feature's
+    implementation and the overwhelming majority were the same family. Fixing
+    twenty-three bugs is not the same as closing a defect class, so the recurring
+    shapes were turned into a standing static guard over scripts/pipeline/** and
+    the orchestrator. (This paragraph read "nineteen" until 2026-08-22: the prose
+    count went stale as later waves landed while the enumerated entries below
+    kept growing. Corrected after the workable-items filing pass counted the
+    actual entries and reported the discrepancy rather than filing against the
+    prose. The enumerated items, not this sentence, are authoritative.)
+  checks:
+  - id: A
+    what: An exit code captured into a variable and then never compared.
+    seen_in_production: >-
+      phase-02-test-go.sh (the real go test rc), phase-02-test-kotlin.sh
+      (GRADLE_EXIT_CODE), phase-02-test-stress-chaos.sh (RUN_RC) - each reported
+      PASS while the underlying tool had genuinely failed.
+  - id: B
+    what: A jq // fallback applied to a field whose meaningful value can be falsy.
+    seen_in_production: >-
+      phase-02-test-constitutional-gate-sweep.sh turned a real "all_passed": false
+      into "unknown"; phase-02-test-stress-chaos.sh compared .ran as a string to
+      "true", which also matched a missing key.
+  - id: C
+    what: -e / -s standing in for -f on a value that must be a regular file.
+    seen_in_production: >-
+      anti-bluff-validate.sh - both tests are TRUE for a directory (its inode has
+      non-zero size), so an empty raw_output_ref resolving to the record's own
+      directory satisfied the "captured output exists and is non-empty" rules.
+  escape_hatch: >-
+    An inline "# vacuous-pass-ok: <reason>" comment on the same line. Deliberately
+    requires the reasoning to be written down rather than allowing a silent
+    exemption. Six legitimate cases were annotated this way rather than being
+    silenced - most importantly phase-03's HEALTH_RC, where NOT trusting the rc
+    is itself the load-bearing anti-bluff decision (§6.B: the status binary exits
+    0 while reporting "Healthy: false", proven for real during T035).
+  scanner_own_defect_found_and_fixed: >-
+    On its first real run, Check B flagged the explanatory COMMENT in the
+    gate-sweep wrapper that quotes the very bug it fixed. A scanner that reports
+    the documentation of a fixed bug as the bug is a false-positive generator;
+    it now skips comment lines.
+  falsifiability_proven: >-
+    All three checks were rehearsed by re-introducing a real historical defect
+    and confirming detection: the jq // bug (Check B), a bare -s on a raw file
+    ref (Check C), and a stripped vacuous-pass-ok annotation on HEALTH_RC
+    (Check A). Each reverted byte-identically and the scanner returned to green.
+  honest_limits: >-
+    A heuristic lint, not a proof. It cannot catch every vacuous pass - the
+    phase-01 "recorded an artifact that is not on disk" defect is invisible to
+    it - and it is a cheap net for three shapes that have each already reached
+    production here, not a substitute for the behavioural suites alongside it.
+
+defects_found_and_fixed_wave5:
+  items:
+  - id: advance-all-submodules-would-auto-advance-the-constitution-submodule
+    severity: critical
+    found_during: >-
+      Verifying a claim (F-5) made in the T048/T049 constitutional-amendment
+      drafts, rather than relaying it. Found BEFORE the script had ever been run
+      against a real submodule.
+    what: >-
+      scripts/advance-all-submodules.sh defaulted to "every submodule" (its own
+      LAVA_ADVANCE_SUBMODULES documentation says so) and contained ZERO mention
+      of `constitution`. Root CLAUDE.md line 299 states: "The ./constitution/
+      submodule itself remains pinned + advanced only per CONST-049's 7-step
+      pipeline." An unattended closure phase would therefore have auto-advanced
+      the project's own governance submodule - the document set that defines what
+      this pipeline is permitted to do at all.
+    red_evidence: >-
+      Against a fixture whose submodule is named `constitution` with a newer
+      upstream commit available, the pre-fix run recorded outcome=ADVANCED,
+      parent_pin_updated=true, and the pin genuinely moved.
+    fix: >-
+      A GOVERNANCE_DENY default-deny list checked FIRST in the loop - before
+      fetch, before comparing commits. Deliberately NOT overridable via
+      LAVA_ADVANCE_SUBMODULES, because an allow-list is a convenience for
+      narrowing a run and a convenience switch must not be able to turn off a
+      governance boundary. Matches on the path's final component, so both
+      `constitution` and `submodules/constitution` are covered - verified against
+      this repo's real `git submodule status` output.
+    recorded_not_skipped: >-
+      A denied submodule still gets a Submodule Advance Record, with a new
+      REFUSED_GOVERNANCE_DENY outcome added to the contract schema. A governance
+      refusal that leaves no evidence is invisible at rest - the same
+      silently-absent failure mode as a test category with no dispatch line.
+      old_commit and new_commit are both the current pin, because no candidate
+      commit was ever looked up and claiming otherwise would invent a fact the
+      script did not establish.
+    second_bug_surfaced_by_the_fix: >-
+      The script carried its own internal outcome whitelist separate from the
+      schema, which rejected the new value with "internal error - invalid
+      outcome". Extending the JSON schema alone was not enough; both had to move.
+
+design_doc_reconciliation:
+  scope: data-model.md, quickstart.md, research.md, spec.md, plan.md, checklists/requirements.md
+  corrections: 51
+  method: >-
+    Every claim checked against the real script with a line reference. Where code
+    and doc disagreed the code won, and each correction quotes the superseded text
+    before replacing it - nothing silently rewritten. research.md and spec.md got
+    dated notes rather than rewrites, since they are historical design rationale.
+  most_consequential_findings:
+  - >-
+    data-model.md's description of the BLOCKED outcome was exactly backwards: it
+    claimed a precondition refusal produces no report.json at all, when the
+    orchestrator deliberately initializes the report FIRST so a refusal is itself
+    recorded. The library header carried the same wrong claim; both corrected.
+  - >-
+    data-model.md required raw_output_ref to "exist and be non-empty" - a rule
+    that was literally unenforceable as written, because a directory satisfies
+    both tests.
+  - >-
+    The Report Validation rule as documented omitted the non-empty phases[]
+    clause the implementation has, so as written a zero-phase run passed
+    vacuously.
+  - >-
+    quickstart.md Scenario 3 claimed later phases show SKIPPED; the orchestrator
+    breaks, so they are ABSENT. Its "zero Distribution Records proves FR-009
+    held" check is vacuous, since that array is empty on every run.
+  - >-
+    plan.md claimed five artifact builds run as five parallel processes; there
+    are two, because four Android variants share one Gradle invocation. It also
+    claimed the Challenge tests run independently of the Kotlin stream; they are
+    deliberately serialized, since both invoke Gradle on one checkout.
+
+workable_items_filed:
+  when: "2026-08-22"
+  mandate: §11.4.202 / §11.4.93 / §11.4.95 / §11.4.197 (a started requirement never evaporates)
+  keys: LVA-096 .. LVA-129
+  count: 34
+  db_item_count: 94 -> 128
+  breakdown:
+    fixed_defects: 23
+    completed_task: 1          # the vacuous-pass static guard
+    operator_blocked: 7        # LVA-120 + the 6 human review gates
+    queued_hypotheses: 3       # explicitly titled "HYPOTHESIS (not reproduced)"
+  open_blocker: >-
+    LVA-120 (Bug, Operator-blocked) - firebase-distribute.sh --debug-and-release
+    ships the RELEASE APK on DEBUG-channel evidence. Every line reference was
+    re-confirmed against the real script by the filing pass rather than copied
+    from this file.
+  verification:
+    validate: 67 violations, identical to baseline, ZERO attributable to a new item
+    diff: DB and Markdown in sync; MD -> DB -> MD proven a byte-identical fixed point
+    gate: scripts/check-workable-items.sh exit 0; its hermetic falsifiability test passes
+    no_existing_item_touched: >-
+      Machine-checked against a pre-run DB backup: 0 existing keys removed, 0
+      modified, pre-existing history rows byte-identical.
+    export_side_effect: >-
+      The canonical export CLEARED two pre-existing markdown-export problems
+      (docs/Issues.html/.pdf staleness). Export-sync went 4 -> 2 problems; the
+      remaining 2 are the pre-existing CLAUDE.* staleness, untouched.
+  defect_found_in_the_filing_pass_itself: >-
+    The first draft of the six review-gate items would have introduced 6 NEW
+    validate violations (§11.4.148 D3: an Operator-blocked unblock_condition must
+    enumerate unblock CHOICES). It was caught because the pass rehearsed against a
+    scratchpad COPY of the DB before touching the real one - had it written
+    directly, the gate would have gone red. Rewritten into enumerated [A]/[B]/[C]
+    choices matching the LVA-5 / LVA-008 house style, re-rehearsed from a clean
+    copy, then run for real.
+
+defects_found_and_fixed_wave7:
+  note: >-
+    Audit of the four scripts that had never been audited - each had only ever
+    been verified by executing it and observing success, which says nothing about
+    what happens when something goes wrong. 7 confirmed, all fixed RED-then-GREEN.
+  items:
+  - id: F3-phase-04-api-app-announced-two-source-cross-check-with-one-source-absent
+    severity: high
+    what: >-
+      Its header promises PASS only when BOTH Gradle's JUnit XML AND the Containers
+      attestation row agree. DISAGREEMENT was caught; total ABSENCE fell through to
+      PASS. Worse, with no attestation row at all, test_passed=true was a literal in
+      the format string rather than a value read from any row - so the record
+      asserted that a source agreed when that source had produced nothing.
+    fix: FAIL when either source is absent, naming which; test_passed read from the row.
+  - id: F4-F5-phase-06-no-op-guard-claim-was-false
+    severity: high
+    what: >-
+      The claim that phase-06 "already guards the exporter-exits-0-but-does-nothing
+      case" did not hold. A stubbed exporter exiting 0 and writing nothing produced
+      PASS, exit 0, zero .html/.pdf on disk, and a record asserting the siblings were
+      verified. Its --check-only exit code was never captured at all, so an upstream
+      rename (exit 2 + usage line, grep matching nothing) also passed. On
+      --skip-exports the record read, in one sentence, "skipped (--skip-exports);
+      every changed .md was re-checked".
+    fix: First-hand on-disk sibling check, --check-only exit-code guard, and the
+      export claim built from what actually happened.
+  - id: F7-challenge-wrapper-laundered-a-successful-exit-into-a-blocked-SKIPPED
+    severity: high
+    what: >-
+      A matrix script exiting 0 with no attestation was classified SKIPPED claiming
+      "BLOCKED (real, specific precondition gap)" - a cause the tool's own success
+      code contradicts - and SKIPPED does not block the phase. Same laundering shape
+      as the release-canary R-A defect.
+    fix: rc-aware classification (documented blocked codes -> SKIPPED; 0 or
+      undocumented -> FAIL, quoting the code and asserting no cause).
+  - id: F1-F2-F6-remaining
+    what: >-
+      F1 zero-selected challenge run -> PASS; F2 three .kt files on disk reported as
+      "discovered 1"; F6 phase-05a asserted a byte count of text it had not written
+      (and ${#VAR} counted CHARACTERS, so it was wrong by 7 even on the happy path).
+    fix: Refuse zero-selection/zero-record runs; name undiscoverable files; byte count
+      from wc -c on disk; refuse a 0-byte snapshot.
+
+defects_found_and_fixed_wave8:
+  note: >-
+    Two bugs in the static guard itself - the component whose entire purpose is to
+    stop this defect family from recurring. Both found within minutes of each other,
+    the second introduced by the fix for the first.
+  items:
+  - id: scanner-CHECK-A-false-negative
+    severity: high
+    found_by: the four-script audit, which hit the exact case the guard was blind to
+    what: >-
+      CHECK A's "is this variable ever compared?" test searched the whole file
+      including its echo/printf lines, and accepted a bare `[` as evidence of a test
+      context. A reporting line like `echo "wrapper [${label}] exited ${rc}"`
+      therefore satisfied it - the `[` of the label matched - so a variable that had
+      only ever been PRINTED counted as compared. That is precisely the defect the
+      check exists to find, so the guard was blind to its own target. Real instance:
+      phase-02-test-challenge.sh captured `local rc=$?`, echoed it three times, never
+      compared it, and the scanner reported the file clean.
+    fix: Strip echo/printf lines from the haystack before looking for a test context.
+    falsifiability_proven: >-
+      Injected the exact shape (captured, echoed with a bracketed label, never
+      compared) into phase-00-precondition.sh; CHECK A flagged it
+      ("$PROBE_RC captured, never compared"); reverted byte-identically; green again.
+  - id: scanner-SIGPIPE-false-positive-introduced-by-that-fix
+    severity: medium
+    what: >-
+      The first version of the fix piped `grep -v … | grep -q …`. grep -q exits the
+      moment it matches, closing the pipe; the upstream grep -v still has output to
+      write, takes SIGPIPE and exits 141. Under set -o pipefail the pipeline's status
+      IS that 141, so a SUCCESSFUL match was reported as failure. Two genuinely
+      compared variables were flagged as never-compared - MATRIX_RC at
+      phase-04-live-verify-api-app.sh:506 and rc at phase-06-docs.sh:198, both plainly
+      inside `if [[ … -eq … ]]`. Measured directly: both branches returned 141.
+    diagnostic_note: >-
+      The first hypothesis for this was tested and found WRONG (an early-matching
+      probe returned 0 because its output fit the pipe buffer). Only instrumenting
+      each branch and reading the actual 141 identified the cause. The wrong
+      hypothesis was discarded on evidence rather than acted on.
+    irony_worth_recording: >-
+      A check for "an exit code was captured and never examined" was defeated by an
+      exit code it did not examine closely enough.
+    fix: No pipelines - the filtered haystack is precomputed once per file into a
+      variable, so there is no upstream process left to signal.
+
+evidence_audit:
+  scope: 36 runs, 27 reports, 4339 Evidence Records, all produced by real toolchains
+  method: >-
+    Independent field-by-field checker driven by reading the contract schemas (no
+    JSON-Schema library available on this host), proven falsifiable first against 14
+    deliberately-invalid variants including a directory-as-raw-ref. Explicitly a
+    manual equivalent, not library validation. Originals never mutated - verified
+    afterwards against a pre-audit sha256 manifest of all 4599 JSON files.
+  record_level_verdict: TRUSTWORTHY
+  record_level_evidence: >-
+    4250 of 4339 claims machine-checked against their own raw output file: ZERO
+    disagreements. Zero PASS records contradicted by their raw output. Zero shared
+    raw_output_ref values anywhere. 288 duplicate-summary groups, every one with
+    fully distinct test_ids AND distinct raw refs (the same test name across
+    different packages, not shared evidence). Full agreement with three independent
+    sources: verify-all attestations 216/216 per-gate, Gradle JUnit XML 2409/2416,
+    and a decisive three-way match on the one run whose artifacts survive
+    (testcase 33.581s, boot_seconds 169.255462696, APK sha256 a1309ef5…).
+  report_level_verdict: NOT TRUSTWORTHY
+  report_level_finding: >-
+    Every report.json on disk carries evidence_summary.total = 0, and in 12 runs the
+    run's own directory contradicts that (e.g. 19-43-22Z reports 0 while holding 54
+    records, 6 of them FAIL). All 12 are unfinalized BLOCKED runs driven by phase
+    scripts directly rather than through the orchestrator, so recompute never ran -
+    consistent with the design, but the consequence stood: recompute_evidence_summary
+    had NEVER demonstrably run against real data, only against hermetic fixtures.
+  gap_closed: >-
+    Closed 2026-08-22 with real data. recompute_evidence_summary was run against a
+    COPY of run 2026-08-21T19-43-22Z, whose 54 records came from a real 54-gate
+    constitution sweep. Before {total:0,...}; after {total:54, passed:48, failed:6,
+    skipped:0, rejected_by_anti_bluff:0} - matching the records physically present
+    exactly. The on-disk original was re-read afterwards and still reads total:0,
+    confirming the historical evidence was not mutated.
+  hardened_validator_replay: >-
+    The CURRENT hardened validator was re-run over all 4339 records on a full copy:
+    4327 accepted, 12 rejected, BYTE-IDENTICAL to the stored verdicts. Zero newly
+    rejected. No record had been rubber-stamped by the older, weaker validator.
+  skipped_divergence_resolved: >-
+    The audit found 7 records marking a runner-<skipped/> testcase as FAIL, which
+    contradicts data-model.md. Investigated rather than fixed: those records were
+    written 2026-08-21 17:24, and the kotlin wrapper gained its <skipped/> -> SKIPPED
+    branch (line 406) by 22:21. HISTORICAL ARTIFACTS of the pre-fix wrapper, not a
+    live defect. No change made.
+
+gate_state_snapshot:
+  when: "2026-08-22T01:30Z"
+  note: >-
+    Captured while four agents were mid-flight, so the pipeline-suite count is a
+    floor rather than a final number.
+  hermetic_pipeline_suites: 20 (all exit 0)
+  tests_firebase: 8/8 (the repro harness is correctly NOT picked up - run_all.sh
+    globs test_*.sh, and phase-02-test-hermetic.sh now excludes repro_*.sh)
+  CM_SCRIPT_DOCS_SYNC: clean, 68 scripts <-> 68 docs (1:1)
+  CM_WORKABLE_ITEMS_SYNC: exit 0 - DB validated, DB <-> Markdown in sync, DB tracked
+  CM_UNIVERSAL_MARKDOWN_EXPORT_SYNC: >-
+    0 problems across 280 in-scope .md files - FULLY CLEAN for the first time this
+    session. It carried 4-8 problems throughout: CLAUDE.* went stale when this
+    session updated its Commands section, and docs/Issues.* went stale when the
+    canonical workable-items export regenerated Issues.md after its siblings. Both
+    regenerated through the existing scripts/sync-markdown-exports.sh convention
+    rather than by hand; renders confirmed real (CLAUDE.pdf is 432487 bytes, "PDF
+    document, version 1.7"), not empty files satisfying a timestamp check.
+  section_6R_scanners: ipv4 / hostport / uuid all exit 0
+
+defects_found_and_fixed_wave9:
+  note: >-
+    Found by extending the static guard with three new checks (D: a success literal
+    presented as a read value; E: ${#VAR} where BYTES are claimed; F: grep -q on the
+    right-hand side of a pipe under pipefail). Three further candidate shapes were
+    REJECTED as not reliably detectable, on measurement rather than opinion - see
+    rejected_shapes below. CHECK F alone found 5 real sites.
+  items:
+  - id: anti-bluff-validator-rule-4-decided-by-FILE-SIZE-not-by-the-marker
+    severity: high
+    file: scripts/pipeline/lib/anti-bluff-validate.sh:344
+    what: >-
+      Rule 4 (a real-device-challenge record must carry a FALSIFIABILITY REHEARSAL
+      marker) ran `printf '%s' "$combined" | grep -qE …`. grep -q exits the instant it
+      matches, closing the pipe; printf then takes SIGPIPE and exits 141; under
+      set -o pipefail that 141 IS the pipeline's status, and `if !` inverts it into
+      "marker not found". $combined is the record's ENTIRE raw_output_ref, and
+      real-device-challenge logcats in this repo run 1.4 MB - 5 MB. The rule was
+      therefore decided by FILE SIZE rather than by the marker.
+    direction: >-
+      FAILS CLOSED, not open - it REJECTED records that genuinely carried their
+      marker. No bluff slipped through because of it. But it would have rejected
+      legitimate real-device evidence at gate time, which is its own kind of broken.
+    physical_evidence: >-
+      The identical marker at line 1 of a 25-byte file was FOUND; of a 2 MB file, NOT
+      FOUND. Measured independently of the reporting agent, in a throwaway shell
+      running the same construct under the same shell options.
+    fix_evidence: >-
+      After switching to a herestring: a real Evidence Record with a 2,016,748-byte
+      raw log carrying the marker validates (exit 0, anti_bluff_status "validated");
+      the SAME record with the marker removed from the same-size log is still
+      REJECTED (exit 1) - so the fix is not an over-correction.
+  - id: phase-06-docs-export-verification-same-shape-dangerous-direction
+    severity: medium
+    file: scripts/pipeline/phase-06-docs.sh:497,500
+    what: >-
+      Same SIGPIPE shape, but the DANGEROUS direction: a 141 makes the `if` false, the
+      _fail is skipped, and the phase claims the export was regenerated while
+      --check-only still reports it stale. Latent today only because CHECK_OUTPUT is
+      small (measured at 66 bytes) - the shape is the defect, not the current size.
+  - id: two-further-piped-grep-q-sites
+    severity: low
+    files: scripts/pipeline/phase-02-test-challenge.sh:414, phase-04-live-verify-api-app.sh:383
+    what: Same shape on env-var override lists; practically bounded, latent. Fixed anyway.
+  rejected_shapes:
+    shape_2_cause_contradicted_by_exit_code: >-
+      Rejected: the discriminating signal is control flow, not syntax. Two LEGITIMATE
+      justification patterns are syntactically identical to the illegitimate one -
+      release-canary justifies its SKIPPED from `[[ $exit_code -eq 2 ]]`, while
+      stress-chaos correctly justifies its SKIPPED from the harness's own ran/status
+      fields and never looks at an exit code at all.
+    shape_4_zero_iteration_loop: >-
+      Rejected on measurement: 17 of 42 array loops in scope have no ${#ARR[@]} test
+      and nearly all are correct - FAILURE_REASONS and rejected_records are SUPPOSED
+      to be empty on a good run.
+    shape_5_or_true: >-
+      Rejected on measurement: narrowed to git/cp/mv/mkdir it matches exactly 2 sites,
+      both best-effort provenance copies where the original stays authoritative. Zero
+      true positives, so the check would ship as pure noise.
+  guard_left_red_deliberately_then_fixed_properly: >-
+    The agent that added CHECK F ended with the guard RED at exit 1 on its 5 findings,
+    and said so plainly rather than reaching for a green light. Its reasoning is worth
+    preserving: the only ways to make it green were to delete the check that had just
+    proven a live bug, or to annotate away findings it was explicitly forbidden to
+    annotate - and a green light bought by deleting the check that found the bug is
+    precisely the vacuous pass the file exists to prevent. It introduced ZERO false
+    positives. The conductor then fixed all 5 underlying sites, and the guard is green
+    legitimately: 21 suites, all exit 0.
+  bug_the_agent_found_in_its_own_check: >-
+    CHECK F's first draft matched `cmd || grep -q` - a logical OR with no upstream
+    writer - and flagged CHECK A's own herestring lines. Corrected to require a real
+    pipe, which also fixed a false NEGATIVE on `|& grep -q`. Found in self-review,
+    before shipping.

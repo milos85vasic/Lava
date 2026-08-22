@@ -65,6 +65,9 @@ declare -a GATE_RESULTS=()
 declare -a GATE_DURATIONS=()
 declare -a GATE_REFERENCES=()
 
+# NOTE: $cmd is run via `eval` in THIS shell, not a subshell. A command
+# string ending in `exit N` therefore terminates the whole sweep instead of
+# failing one gate. Use `false` (or an external command) to signal failure.
 run_gate() {
     local gate_name=$1
     local rule_ref=$2
@@ -207,23 +210,42 @@ run_gate "workable-items-sync" "CM-WORKABLE-ITEMS-SYNC / HelixConstitution §11.
 # missing/stale sibling. §6.AF-debt §11.4.65 item closed 2026-05-31; backfill
 # landed 126 in-scope docs, 0 problems at landing.
 
-# Hermetic test suites (each suite's own paired-mutation contracts)
+# Hermetic test suites (each suite's own paired-mutation contracts).
+#
+# §6.J anti-bluff (2026-08-22, §6.N.2 gate-shaping bluff hunt): a suite whose
+# run_all.sh is deleted, renamed, or merely loses its exec bit used to be
+# SKIPPED SILENTLY — the gate vanished from the registry and the sweep still
+# reported a clean "N PASS / 0 FAIL" with no signal that N had shrunk. Losing a
+# test suite is exactly the drift this sweep exists to catch, so the missing
+# suite is now registered as a FAIL row instead of disappearing.
 for suite in tests/firebase tests/ci-sh tests/compose-layout tests/tag-helper \
              tests/vm-images tests/vm-signing tests/vm-distro; do
     if [[ -x "$suite/run_all.sh" ]]; then
         run_gate "hermetic-suite-$(basename $suite)" "§11.4 anti-bluff hermetic test suite" \
             "bash $suite/run_all.sh"
+    else
+        run_gate "hermetic-suite-$(basename $suite)" "§11.4 anti-bluff hermetic test suite" \
+            "echo 'MISSING or non-executable: $suite/run_all.sh' >&2; false"
     fi
 done
 
-# Flat-layout hermetic suites
+# Flat-layout hermetic suites. Same §6.J reasoning as above: a glob that matches
+# nothing used to register nothing, so an emptied tests/pre-push/ read as
+# "no pre-push tests failed" instead of "no pre-push tests ran".
+prepush_registered=0
 for t in tests/pre-push/check*_test.sh; do
     [[ -f "$t" ]] || continue
     bn=$(basename "$t" .sh)
     run_gate "hermetic-pre-push-$bn" "§11.4 anti-bluff hermetic pre-push test" \
         "bash $t"
+    prepush_registered=$((prepush_registered + 1))
 done
+if [[ "$prepush_registered" -eq 0 ]]; then
+    run_gate "hermetic-pre-push-suite-present" "§11.4 anti-bluff hermetic pre-push test" \
+        "echo 'NO tests/pre-push/check*_test.sh matched — the pre-push hermetic suite is empty' >&2; false"
+fi
 
+cc_registered=0
 for t in tests/check-constitution/test_*.sh tests/check-constitution/check_constitution_test.sh; do
     [[ -f "$t" ]] || continue
     # SKIP test_verify_all_rules.sh inside the sweep — it calls the sweep
@@ -234,13 +256,38 @@ for t in tests/check-constitution/test_*.sh tests/check-constitution/check_const
     bn=$(basename "$t" .sh)
     run_gate "hermetic-check-constitution-$bn" "§11.4 anti-bluff hermetic constitution test" \
         "bash $t"
+    cc_registered=$((cc_registered + 1))
 done
+if [[ "$cc_registered" -eq 0 ]]; then
+    run_gate "hermetic-check-constitution-suite-present" "§11.4 anti-bluff hermetic constitution test" \
+        "echo 'NO tests/check-constitution/ test files matched — the suite is empty' >&2; false"
+fi
 
 # -----------------------------------------------------------------------------
 # Aggregate + emit attestation JSON.
 # -----------------------------------------------------------------------------
 
 total_gates=${#GATE_NAMES[@]}
+
+# §6.J anti-bluff floor (added 2026-08-22, §6.N.2 gate-shaping bluff hunt).
+# Every gate above is registered conditionally: the hermetic-suite loops skip
+# a suite whose run_all.sh is absent or has lost its exec bit, and the two
+# flat-layout `for t in <glob>` loops register nothing when the glob matches
+# no file. If enough of those conditions go false at once the sweep reaches
+# this point with an EMPTY gate array and then reports
+# `0 PASS / 0 FAIL (of 0 total)`, writes `"all_passed": true`, and exits 0 in
+# STRICT mode — a clean verdict from a sweep that examined nothing. §11.4.32
+# calls exactly that out: "A sweep that exits PASS without running every
+# implementable gate is a §11.4.32 violation." A healthy tree registers 50+
+# gates, so this floor cannot fire on a real run.
+if [[ "$total_gates" -eq 0 ]]; then
+    echo "§11.4.32 VIOLATION: the sweep registered ZERO gates." >&2
+    echo "  → A PASS verdict from an empty gate set asserts nothing." >&2
+    echo "  → Check that the hermetic suites under tests/ are present and" >&2
+    echo "    that their run_all.sh files are still executable." >&2
+    exit 2
+fi
+
 pass_count=0
 fail_count=0
 for r in "${GATE_RESULTS[@]}"; do

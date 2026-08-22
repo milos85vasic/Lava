@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>phase-05a-changelog-entry.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptspipelinephase-05a-changelog-entrysh--user-guide"><code>scripts/pipeline/phase-05a-changelog-entry.sh</code>
+— User Guide</h1>
+<p><strong>Last verified:</strong> 2026-08-21 (feature
+<code>002-build-test-distribute-pipeline</code>, task T042)
+<strong>Inheritance:</strong> HelixConstitution §11.4.18 (script
+documentation mandate); Lava §6.P (Distribution Versioning + Changelog
+Mandate), §6.J (Anti-Bluff)</p>
+<h2 id="overview">Overview</h2>
+<p>Authors the two documentation artifacts that
+<code>scripts/firebase-distribute.sh</code> requires to <strong>already
+exist</strong> before it will distribute anything:</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Gate it satisfies</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>an entry in root <code>CHANGELOG.md</code> for
+<code>&lt;version&gt; (&lt;code&gt;)</code></td>
+<td><code>firebase-distribute.sh</code> <strong>Gate 2</strong>
+(<code>grep -qE "$CHANGELOG_PATTERN" CHANGELOG.md</code>)</td>
+</tr>
+<tr>
+<td><code>.lava-ci-evidence/distribute-changelog/&lt;channel&gt;/&lt;version&gt;-&lt;code&gt;.md</code></td>
+<td><code>firebase-distribute.sh</code> <strong>Gate 3</strong>
+(<code>[[ -f "$SNAPSHOT_FILE" ]]</code>) — this file is also what gets
+shipped as the App Distribution release notes</td>
+</tr>
+</tbody>
+</table>
+<p>Per <code>specs/002-build-test-distribute-pipeline/research.md</code>
+<strong>R-004</strong>, the dependency direction here is inverted from a
+naive reading of the spec's User Story 3: distribution <em>needs the
+CHANGELOG entry to already exist</em>, not the reverse. So this phase
+runs <strong>before</strong> <code>phase-05-distribute.sh</code>, while
+the broader documentation refresh (<code>phase-06-docs.sh</code>) runs
+<strong>after</strong> it.</p>
+<h2 id="what-it-does-not-do-honest-scope">What it does NOT do (honest
+scope)</h2>
+<p>It satisfies <strong>Gates 2 and 3 only</strong>. It deliberately
+does not produce anything that would make these pass:</p>
+<ul>
+<li><strong>Gate 1</strong> (§6.P monotonic <code>versionCode</code>) —
+that is the §6.Y version-bump commit's job, not a documentation
+job.</li>
+<li><strong>Gates 4 + 5</strong> (§6.R/§6.H pepper rotation).</li>
+<li><strong>Gate 6</strong> (APK-manifest <code>versionCode</code>
+cross-check).</li>
+<li><strong>Gate 7</strong> (§6.AK cycle-coverage) — that gate reads the
+separate <code>cycle-coverage-map-&lt;version&gt;.yaml</code> plus
+<code>&lt;version&gt;-test-evidence.{md,json}</code> artifacts,
+<em>not</em> this script's output.</li>
+</ul>
+<p>Having a documentation-authoring script quietly manufacture artifacts
+that make an independent safety gate pass would be exactly the §6.J
+bluff class this project forbids.</p>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/pipeline/phase-05a-changelog-entry.sh</span> <span class="op">&lt;</span>run_id<span class="op">&gt;</span> <span class="pp">[</span><span class="ss">repo</span><span class="pp">-</span><span class="ss">path</span><span class="pp">]</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span></span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--app client|api-app|both</code></td>
+<td>which artifact(s) to author for (default <code>both</code>)</td>
+</tr>
+<tr>
+<td><code>--notes-file &lt;app&gt;=&lt;path&gt;</code></td>
+<td>use <code>&lt;path&gt;</code>'s contents verbatim as the entry body
+for <code>&lt;app&gt;</code> instead of auto-deriving from git history
+(repeatable)</td>
+</tr>
+<tr>
+<td><code>--title &lt;app&gt;=&lt;text&gt;</code></td>
+<td>headline suffix for <code>&lt;app&gt;</code>'s entry
+(repeatable)</td>
+</tr>
+<tr>
+<td><code>--dry-run</code></td>
+<td>print exactly what <em>would</em> be written to both files, change
+nothing on disk</td>
+</tr>
+<tr>
+<td><code>--force</code></td>
+<td>overwrite an existing snapshot file. Never duplicates an existing
+<code>CHANGELOG.md</code> entry</td>
+</tr>
+</tbody>
+</table>
+<p><code>&lt;run_id&gt;</code> must already have a
+<code>report.json</code> (created by <code>lib/run-report.sh</code>'s
+<code>init_run_report</code>). This script appends one
+<code>changelog_entry</code> phase entry to that report; it never
+creates a new run.</p>
+<p>Examples:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Review before letting the pipeline write anything</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/pipeline/phase-05a-changelog-entry.sh</span> 2026-08-21T19-32-42Z <span class="at">--dry-run</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Author for the client only, with operator-written release notes</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/pipeline/phase-05a-changelog-entry.sh</span> 2026-08-21T19-32-42Z <span class="dt">\</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--app</span> client <span class="at">--notes-file</span> client=/tmp/notes.md <span class="at">--title</span> client=<span class="st">&quot;P0 auth fix&quot;</span></span></code></pre></div>
+<h2 id="entry-body-where-the-bullets-come-from">Entry body: where the
+bullets come from</h2>
+<p>With no <code>--notes-file</code>, the body is generated from the
+<strong>real commit range</strong> since the previous published
+version's snapshot last changed
+(<code>git log &lt;anchor&gt;..HEAD</code>, where
+<code>&lt;anchor&gt;</code> is the commit that last touched
+<code>.lava-ci-evidence/distribute-changelog/&lt;channel&gt;/&lt;prev-version&gt;-&lt;prev-code&gt;.md</code>).
+If no previous snapshot exists to anchor a range, it falls back to
+<code>git log -n 20</code> and <strong>says so explicitly in the
+entry</strong> rather than implying a real since-last-release range.</p>
+<p>Those bullets are a factual commit listing, not a curated list of
+verified user-visible fixes — the generated text says this in-line. Any
+user-visible fix <strong>claim</strong> that needs §6.AK coverage
+belongs in the cycle-coverage-map, authored separately.</p>
+<h2 id="anti-bluff-properties">Anti-bluff properties</h2>
+<ol type="1">
+<li><strong>Drift detection.</strong> The per-app channel names, gradle
+version files, and Gate-2 regex <em>templates</em> are copies of
+<code>scripts/firebase-distribute.sh</code>'s own
+<code>case "$SELECTED_APP"</code> block. At runtime this script greps
+that file for every literal it copied and <strong>fails loudly</strong>
+if any is no longer present, instead of silently emitting an entry the
+real gate would not match.</li>
+<li><strong>Post-write self-verification.</strong> After writing, it
+re-runs the gate's own two checks — the same
+<code>grep -qE "$CHANGELOG_PATTERN"</code> against the real
+<code>CHANGELOG.md</code>, and the same
+<code>[[ -f "$SNAPSHOT_FILE" ]]</code>. A failure there is reported as
+this script's own bug (<code>FAIL</code>), never as success.</li>
+<li><strong>Idempotent.</strong> An already-present entry for the same
+version is detected with the gate's own regex and left untouched (no
+duplicate). An existing snapshot is left alone unless
+<code>--force</code>.</li>
+</ol>
+<h2 id="exit-codes">Exit codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>for every selected app, the CHANGELOG entry and per-version snapshot
+are present and were re-verified with
+<code>firebase-distribute.sh</code>'s own Gate 2 + Gate 3 checks;
+Evidence Record written and anti-bluff-validated (or, under
+<code>--dry-run</code>, the full would-be output was printed and nothing
+written)</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>a real failure — drift against <code>firebase-distribute.sh</code>,
+unparseable version, failed write, failed post-write self-verification,
+or an Evidence Record rejected by <code>anti-bluff-validate.sh</code>.
+Recorded as <code>FAIL</code> in <code>report.json</code>, never
+fabricated as success</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>usage/precondition error — missing <code>run_id</code>, absent
+<code>report.json</code>, bad <code>--app</code> value, unreadable
+<code>--notes-file</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="per-app-raw-evidence-2026-08-22">Per-app raw evidence
+(2026-08-22)</h2>
+<p>A run with <code>--app both</code> writes one Evidence Record per
+app. Each record cites its <strong>own</strong> raw output file:</p>
+<pre><code>.lava-ci-evidence/pipeline-runs/&lt;run-id&gt;/phase-05a/hermetic-script/raw/
+  changelog-entry-client.log      &lt;- raw_output_ref of the client record
+  changelog-entry-api-app.log     &lt;- raw_output_ref of the api-app record
+  changelog-entry-combined.log    &lt;- the whole run&#39;s narrative, cited by neither</code></pre>
+<p>Before this change both records carried the same
+<code>raw_output_ref</code>
+(<code>raw/changelog-entry-combined.log</code>), which made neither
+claim independently falsifiable: if one app's CHANGELOG entry were
+wrong, the file its record points at also holds the other app's
+successful output, and no line in it is attributable to one record
+rather than the other — a FAILED app and a PASSED app would have cited
+byte-identical evidence.</p>
+<p>Each per-app file is real captured output (every
+<code>_log</code>/<code>_fail</code> line for that app is tee'd into it
+as it is produced, not re-derived afterwards) and opens with a
+provenance header naming the app, the repo, the run id, and the combined
+log. <code>tests/pipeline/test_phase_05a_per_app_raw_evidence.sh</code>
+asserts the two refs differ, that each resolves to a non-empty file,
+that each file contains its own app's release label, and that neither
+contains the other's.</p>
+<h2 id="maintenance">Maintenance</h2>
+<p>When this script is modified, update this document in the same commit
+(§11.4.18 / <code>CM-SCRIPT-DOCS-SYNC</code> convention). If
+<code>scripts/firebase-distribute.sh</code>'s per-app <code>case</code>
+block changes its channel names or Gate-2 pattern templates, this
+script's <code>_resolve_app_config</code> <strong>must</strong> be
+re-synced — its own drift check will fail the pipeline until you do.</p>
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li><code>scripts/pipeline/phase-05a-changelog-entry.sh</code> — the
+script itself</li>
+<li><code>scripts/firebase-distribute.sh</code> — the consumer whose
+Gates 2+3 this satisfies</li>
+<li><code>scripts/pipeline/phase-06-docs.sh</code> — the
+<em>post</em>-distribution documentation phase</li>
+<li><code>specs/002-build-test-distribute-pipeline/research.md</code> —
+R-004 (ordering rationale)</li>
+<li><code>specs/002-build-test-distribute-pipeline/contracts/cli-contract.md</code>
+— phase-script contract table</li>
+<li>Lava <code>CLAUDE.md</code> §6.P (Distribution Versioning +
+Changelog Mandate), §6.AK (cycle coverage)</li>
+</ul>
+</body>
+</html>

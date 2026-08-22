@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>constitutional-amendments-proposal</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="constitutional-amendments-proposal--local-build-test-distribute-pipeline">Constitutional
+Amendments Proposal — Local Build-Test-Distribute Pipeline</h1>
+<p><strong>Status: DRAFT — PROPOSED, NOT APPLIED. Requires operator
+approval before any governing document is touched.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Feature</td>
+<td><code>002-build-test-distribute-pipeline</code></td>
+</tr>
+<tr>
+<td>Covers tasks</td>
+<td>T040, T041, T048, T049 (all four are <code>[REVIEW]</code> human
+gates)</td>
+</tr>
+<tr>
+<td>Source analysis</td>
+<td><code>specs/002-build-test-distribute-pipeline/research.md</code>
+R-001, R-003, R-005; <code>plan.md</code> Constitution Check +
+Complexity Tracking; <code>spec.md</code> Constitutional Impact
+note</td>
+</tr>
+<tr>
+<td>Documents this proposal would amend, if approved</td>
+<td><code>CLAUDE.md</code>,
+<code>.specify/memory/constitution.md</code></td>
+</tr>
+<tr>
+<td>Documents changed by this proposal itself</td>
+<td><strong>None.</strong> This file is the entire output.</td>
+</tr>
+<tr>
+<td>Drafted</td>
+<td>2026-08-21</td>
+</tr>
+<tr>
+<td>Reviewer decision required</td>
+<td>Yes — see §7 "Reviewer decision checklist"</td>
+</tr>
+</tbody>
+</table>
+<h2 id="0-what-this-document-is-and-what-it-is-not">0. What this
+document is, and what it is not</h2>
+<p>This is a <strong>proposal</strong>. No governing document has been
+modified. <code>CLAUDE.md</code>,
+<code>.specify/memory/constitution.md</code>, every
+<code>AGENTS.md</code> / <code>QWEN.md</code> /
+<code>CONSTITUTION.md</code>, and everything under
+<code>constitution/</code> and <code>submodules/</code> are untouched by
+the work that produced this file.</p>
+<p>Two of these four amendments (<strong>T040/T041</strong>)
+<strong>relax a rule that exists because this project shipped a build
+that crashed on every cold launch</strong> (Lava-Android-1.2.19-1039 —
+the §6.Z forensic anchor). The drafts below are written to be reviewed
+on that basis, not rubber-stamped. §6 states plainly what protection is
+surrendered and whether the compensating controls are sufficient. On one
+point — T040 as scoped by <code>research.md</code> R-001 alone — the
+honest verdict is <strong>NOT ACCEPTABLE without the additional controls
+drafted here</strong>. That finding is stated up front in §6.1 rather
+than buried.</p>
+<p>Per <code>.specify/memory/constitution.md</code> → Governance →
+Amendment procedure (lines 202–211), each draft carries: the section
+modified, a <strong>forensic anchor</strong>, a <strong>migration
+plan</strong>, a <strong>version-bump rationale</strong>, and — per
+<code>CLAUDE.md</code> §6.AD.5 (line 990) — an explicit
+<strong><code>Classification:</code></strong> line.</p>
+<hr />
+<h2 id="1-findings-that-shape-these-drafts">1. Findings that shape these
+drafts</h2>
+<p>Five facts were established by reading the actual code and files, not
+by trusting prose. Each changes what an honest amendment must say. Three
+of the five are not recorded in <code>research.md</code>.</p>
+<h3
+id="f-1----debug-and-release-structurally-skips-the-only-mechanical-6aa-gate">F-1
+— <code>--debug-and-release</code> structurally skips the only
+mechanical §6.AA gate</h3>
+<p><code>scripts/firebase-distribute.sh:204</code> opens the §6.AA
+staging check with a condition requiring
+<code>"$MODE" == "release"</code>. <code>T043</code> invokes
+<code>--debug-and-release</code>, which sets <code>MODE="both"</code>
+(<code>scripts/firebase-distribute.sh:56</code>). <code>both</code> is
+not <code>release</code>, so that gate never evaluates.</p>
+<p><code>research.md</code> R-003 records accurately that no script
+change is needed. The governance consequence — that the pipeline's
+chosen invocation path is the one path with no staging check at all — is
+not drawn there. It is drawn here.</p>
+<h3
+id="f-2--in-modeboth-the-6ak-cycle-coverage-gate-checks-the-debug-channel-only">F-2
+— In <code>MODE=both</code>, the §6.AK cycle-coverage gate checks the
+DEBUG channel only</h3>
+<p><code>scripts/firebase-distribute.sh:322-324</code>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="st">&quot;</span><span class="va">$MODE</span><span class="st">&quot;</span> <span class="kw">in</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="ss">release</span><span class="kw">)</span> <span class="va">AK_CHANNEL</span><span class="op">=</span><span class="st">&quot;release&quot;</span> <span class="cf">;;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="pp">*</span><span class="kw">)</span>       <span class="va">AK_CHANNEL</span><span class="op">=</span><span class="st">&quot;debug&quot;</span>   <span class="cf">;;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="cf">esac</span></span></code></pre></div>
+<p><code>both</code> falls through to the <code>*</code> branch. Phase-1
+Gate 7 (lines 309–341) therefore validates
+<strong>debug-channel</strong> evidence, and the script then proceeds to
+distribute the <strong>release</strong> APK as well. The release variant
+is R8-minified and resource-shrunk; the 1.2.19-1039 crash was a
+release-variant-only failure of exactly that class.</p>
+<p><strong>Consequence: absent a compensating control, a combined
+distribute ships the release APK with zero release-channel device
+evidence checked by any gate.</strong> This fact is the reason §6.1's
+verdict is conditional rather than a simple approve.</p>
+<h3
+id="f-3--the-pipeline-creates-no-release-tag-so-seventh-law-clause-3-is-never-reached-by-it">F-3
+— The pipeline creates no release tag, so Seventh Law clause 3 is never
+reached by it</h3>
+<p><code>contracts/cli-contract.md:14</code> enumerates the pipeline's
+side effects: evidence-directory creation, systemd user-unit management,
+git pushes, "may create Firebase App Distribution releases". No tag
+creation. No task in <code>tasks.md</code> invokes
+<code>scripts/tag.sh</code>.</p>
+<p>Seventh Law clause 3 (<code>CLAUDE.md:238</code>) gates
+<strong>release tags</strong>, not distributions. <code>spec.md</code>'s
+Constitutional Impact item 2 and <code>plan.md</code>'s Constitution
+Check both describe clause 3 as "exactly what FR-011 replaces";
+mechanically, FR-011 does not reach it.</p>
+<p><strong>Consequence: relaxing clause 3 would be a governance leak —
+broader than the pipeline needs.</strong> T040 is drafted accordingly;
+the broader variant is recorded as REJECTED, with reasoning, in
+§2.4.</p>
+<h3
+id="f-4--specifymemoryconstitutionmd-does-not-contain-the-6aa-rule-that-t040-amends">F-4
+— <code>.specify/memory/constitution.md</code> does not contain the
+§6.AA rule that T040 amends</h3>
+<p>That file has no two-stage-distribute rule, no §6.AA, no §6.Z, no
+§6.AK. Its nearest clauses — Principle II clause 5 (line 68), Principle
+III clause 3 (line 88), and "Release tagging" (lines 182–188) — are all
+<strong>tag-time</strong>.</p>
+<p><strong>Consequence: T041 cannot be a mirror-edit of the same
+sentence.</strong> It must add a distribution-path subsection, handled
+under Amendment procedure item 5
+(<code>.specify/memory/constitution.md:211</code>). See §3.</p>
+<h3
+id="f-5--scriptsadvance-all-submodulessh-has-no-exclusion-for-the-constitution-submodule">F-5
+— <code>scripts/advance-all-submodules.sh</code> has no exclusion for
+the <code>constitution/</code> submodule</h3>
+<p>Its header (<code>scripts/advance-all-submodules.sh:59-61</code>)
+documents an optional allow-list environment variable
+<code>LAVA_ADVANCE_SUBMODULES</code> whose "Default: every submodule."
+Searching that script for <code>constitution</code> returns no match —
+there is no default deny-list.</p>
+<p><code>CLAUDE.md:299</code> states: <em>"The
+<code>./constitution/</code> submodule itself remains pinned + advanced
+only per CONST-049's 7-step pipeline."</em></p>
+<p><strong>Consequence: as implemented, an unattended run would
+auto-advance the project's own governance submodule, contradicting that
+rule.</strong> T048 writes the exclusion into the amendment text; §4.5
+records the matching implementation defect.</p>
+<h3
+id="supporting-facts-positive-and-load-bearing-for-the-compensating-controls">Supporting
+facts (positive, and load-bearing for the compensating controls)</h3>
+<ul>
+<li><strong>The §6.Z / §6.AK gate is real code today, not
+paper.</strong> <code>scripts/check-cycle-coverage.sh</code> exists, is
+executable, and is wired as Phase-1 Gate 7. Per the header comment at
+<code>scripts/firebase-distribute.sh:317-319</code>, it "also subsumes
+the §6.Z-debt runtime checks (evidence presence + commit-SHA match +
+≤24h freshness → exit 2 / exit 1)". <code>tests/cycle-coverage/</code>
+exists.</li>
+<li><strong>Device evidence produced on this host can be genuine device
+evidence.</strong> <code>nezha</code> (Linux x86_64) exposes
+<code>/dev/kvm</code>. The §6.AH container/VM emulator gate is
+physically runnable here; the §6.AH-debt macOS blocker does not apply.
+<code>tasks.md</code> T024 records a real containerized run
+(<code>accel=kvm runner=containerized</code>, zero live ADB
+devices).</li>
+<li><strong>One scope limit is still open at the time of
+writing.</strong> <code>tasks.md</code> T038 records that the
+<code>live_verify</code> phase wires the <code>lava-api-go</code> half
+only; the <code>:api-app</code> emulator half (T037) is unimplemented. A
+green <code>live_verify</code> today does <strong>not</strong> mean both
+live surfaces are proven. Condition (E) of the T040 draft is written so
+that today's partial live-verification does not qualify.</li>
+</ul>
+<hr />
+<h2 id="2-amendment-t040--claudemd-6aa-and-seventh-law-clause-3">2.
+Amendment T040 — <code>CLAUDE.md</code> §6.AA and Seventh Law clause
+3</h2>
+<h3 id="21-amendment-metadata">2.1 Amendment metadata</h3>
+<p><strong>Section modified:</strong> <code>CLAUDE.md</code> §6.AA
+(Two-Stage Distribute Mandate) clauses 2 and 3, plus a new clause 8.
+<code>CLAUDE.md</code> Seventh Law clause 3 — clarifying scope only,
+<strong>no relaxation</strong> (see §2.4).</p>
+<p><strong>Forensic anchor.</strong> Two real events, in tension, both
+cited:</p>
+<ol type="1">
+<li><em>The event that created the rule.</em> Lava-Android-1.2.19-1039
+was distributed to debug and release in a single sweep. The release APK
+crashed on every cold launch at
+<code>androidx.compose.ui.res.PainterResources_androidKt.loadVectorResource (PainterResources_android.kt:97)</code>
+because <code>R.drawable.ic_lava_logo</code> was a
+<code>&lt;layer-list&gt;</code> XML, which
+<code>painterResource()</code> does not support (Crashlytics
+<code>40a62f97a5c65abb56142b4ca2c37eeb</code>, FATAL, 5 events / 2
+users, Samsung Galaxy S23 Ultra / Android 16). §6.AA exists to force
+debug-first staging so that this failure class surfaces at the smaller
+blast radius. <strong>This amendment removes the human step in that
+staging, and must therefore be read as operating directly against this
+incident.</strong></li>
+<li><em>The event that motivates the amendment.</em> The operator's
+resolved clarification in <code>spec.md:12</code>: <em>"Fully unattended
+— the pipeline distributes debug AND release back-to-back with no pause,
+every run."</em> <code>plan.md</code>'s Complexity Tracking records that
+the lower-risk alternative (stop at debug, keep the human gate) was
+presented as the recommended option during <code>/speckit-specify</code>
+and was explicitly not chosen. This is a deliberate, informed operator
+choice, and the correct response is a reviewed amendment rather than a
+silent code-level bypass.</li>
+</ol>
+<p><strong><code>Classification:</code> project-specific.</strong> The
+<em>pattern</em> (machine evidence substituting for a human staging
+confirmation under enumerated conditions) is reusable; the specific
+artifacts, gate scripts, channels, and evidence paths named below are
+Lava's own. No propagation to other HelixConstitution-consuming projects
+is implied.</p>
+<h3 id="22-a-exact-current-text-being-changed--quoted-verbatim">2.2 (a)
+Exact current text being changed — quoted verbatim</h3>
+<p><strong><code>CLAUDE.md</code> line 900 (§6.AA clause
+2):</strong></p>
+<blockquote>
+<ol start="2" type="1">
+<li><strong>Stage 2 — Release variant only.</strong> ONLY AFTER the
+operator confirms in writing that the <strong>Firebase-distributed debug
+variant</strong> works correctly on the failure-surface device class,
+<code>scripts/firebase-distribute.sh --release-only</code> distributes
+the release APK. The §6.Z evidence file is APPENDED with a
+<code>release-stage</code> section recording the release-APK test
+execution + operator real-device verification on the release variant.
+Same SHA as stage 1 (no code change between stages); ≤24h since stage 1
+OR re-bump the version per §6.Y if more time has elapsed.</li>
+</ol>
+</blockquote>
+<p><strong><code>CLAUDE.md</code> line 902 (§6.AA clause
+3):</strong></p>
+<blockquote>
+<ol start="3" type="1">
+<li><strong>No combined distribute permitted by default.</strong>
+Running <code>scripts/firebase-distribute.sh</code> with no flags MUST
+default to <code>--debug-only</code> mode. The combined
+<code>--debug-and-release</code> flag (or any equivalent) MUST require
+explicit per-cycle operator authorization recorded in the §6.Z evidence
+file's <code>combined-distribute-authorization:</code> field. Pre-push
+hooks + the script itself reject release-only invocations not preceded
+by a documented debug-stage evidence entry.</li>
+</ol>
+</blockquote>
+<p><strong><code>CLAUDE.md</code> line 238 (Seventh Law clause 3) —
+quoted for scope, PROPOSED UNCHANGED in substance:</strong></p>
+<blockquote>
+<ol start="3" type="1">
+<li><strong>Pre-Tag Real-Device Attestation.</strong> Before any release
+tag is cut, the operator MUST execute the user-visible flows (login,
+search, browse, view topic, download <code>.torrent</code>) on a real
+Android device against the real backend services and record a JSON
+attestation file at
+<code>.lava-ci-evidence/&lt;tag-name&gt;/real-device-attestation.json</code>.
+The attestation MUST include: device model, Android version, app
+version, timestamp, command-by-command checklist of executed user
+actions, and at least 3 screenshots OR a video recording referenced by
+hash. <code>scripts/tag.sh</code> MUST refuse to operate on a commit
+lacking the matching attestation. There is no exception. "Operator was
+busy" is not an exception. "Test environment was unstable" is not an
+exception. Untested-on-device commits do not get tags.</li>
+</ol>
+</blockquote>
+<h3 id="23-b-exact-proposed-replacement-text">2.3 (b) Exact proposed
+replacement text</h3>
+<h4
+id="replacement-for-clause-2-line-900--appended-sentence-only-existing-text-preserved-verbatim">Replacement
+for clause 2 (line 900) — appended sentence only, existing text
+preserved verbatim</h4>
+<blockquote>
+<ol start="2" type="1">
+<li><strong>Stage 2 — Release variant only.</strong> ONLY AFTER the
+operator confirms in writing that the <strong>Firebase-distributed debug
+variant</strong> works correctly on the failure-surface device class,
+<code>scripts/firebase-distribute.sh --release-only</code> distributes
+the release APK. The §6.Z evidence file is APPENDED with a
+<code>release-stage</code> section recording the release-APK test
+execution + operator real-device verification on the release variant.
+Same SHA as stage 1 (no code change between stages); ≤24h since stage 1
+OR re-bump the version per §6.Y if more time has elapsed. <strong>The
+written operator confirmation required by this clause has exactly ONE
+alternate satisfier: a qualifying Pipeline Run Report under clause 8. No
+other substitution exists — an agent's assertion, a green CI line, a
+compiled-but-unexecuted test, or a prior cycle's confirmation does NOT
+satisfy this clause.</strong></li>
+</ol>
+</blockquote>
+<h4
+id="replacement-for-clause-3-line-902--appended-sentences-only-existing-text-preserved-verbatim">Replacement
+for clause 3 (line 902) — appended sentences only, existing text
+preserved verbatim</h4>
+<blockquote>
+<ol start="3" type="1">
+<li><strong>No combined distribute permitted by default.</strong>
+Running <code>scripts/firebase-distribute.sh</code> with no flags MUST
+default to <code>--debug-only</code> mode. The combined
+<code>--debug-and-release</code> flag (or any equivalent) MUST require
+explicit per-cycle operator authorization recorded in the §6.Z evidence
+file's <code>combined-distribute-authorization:</code> field. Pre-push
+hooks + the script itself reject release-only invocations not preceded
+by a documented debug-stage evidence entry. <strong>A qualifying
+Pipeline Run Report under clause 8 constitutes a STANDING per-cycle
+authorization for the combined invocation, and its <code>run_id</code>
+MUST be written verbatim into the
+<code>combined-distribute-authorization:</code> field so the audit trail
+names the exact run that authorized it. This standing authorization is
+available ONLY to <code>scripts/pipeline/phase-05-distribute.sh</code>;
+a human invoking <code>--debug-and-release</code> by hand still requires
+the per-cycle written authorization this clause has always
+required.</strong></li>
+</ol>
+</blockquote>
+<h4
+id="new-clause-8-inserted-after-line-910s-clause-7-renumbering-the-existing-7-inheritance-to-9">New
+clause 8 (inserted after line 910's clause 7, renumbering the existing
+"7. Inheritance" to 9)</h4>
+<blockquote>
+<ol start="8" type="1">
+<li><p><strong>Pipeline Distribution Path (added 2026-08-21, feature
+<code>002-build-test-distribute-pipeline</code>).</strong> A
+distribution performed by
+<code>scripts/pipeline/phase-05-distribute.sh</code> within a single run
+of <code>scripts/pipeline-build-test-distribute.sh</code> MAY proceed
+from debug to release without an operator pause, and MAY use the
+combined <code>--debug-and-release</code> invocation, IF AND ONLY IF
+<strong>every</strong> condition below holds. Failure of any single
+condition returns the distribution to the clause 1–3 human path in full.
+There is no partial qualification.</p>
+<p><strong>(A) Run Report identity.</strong> A Pipeline Run Report
+exists at
+<code>.lava-ci-evidence/pipeline-runs/&lt;run_id&gt;/report.json</code>,
+validates against
+<code>specs/002-build-test-distribute-pipeline/contracts/pipeline-run-report.schema.json</code>,
+and its <code>commit_sha</code> equals <code>git rev-parse HEAD</code>
+at the moment of the distribute invocation. Every Distribution Record's
+<code>version_code</code> equals the <code>versionCode</code> compiled
+into the artifact actually being uploaded. A report whose
+<code>commit_sha</code> does not match is not stale evidence to be
+tolerated — it is a REFUSAL condition.</p>
+<p><strong>(B) Unqualified pass.</strong> The report's
+<code>outcome</code> is <code>PASS</code>; every entry in
+<code>phases[]</code> is <code>PASS</code>; zero Evidence Records carry
+<code>result: FAIL</code>; and zero Evidence Records carry an
+<code>anti_bluff_status</code> other than validated. A
+<code>SKIPPED</code> Evidence Record in any category named in condition
+(C) or (E) disqualifies the run.</p>
+<p><strong>(C) Device evidence for BOTH variants.</strong> At least one
+Evidence Record of <code>category: real-device-challenge</code>, with
+<code>result: PASS</code>, exists for <strong>each</strong> Android
+artifact variant being distributed — <code>app-debug</code>,
+<code>app-release</code>, <code>api-app-debug</code>,
+<code>api-app-release</code> — executed on a §6.AH-conformant
+container-or-VM emulator (never host-direct, never a live ADB device,
+per §6.AG), against the exact artifact being uploaded.
+<strong>Release-variant device evidence is mandatory and is NOT
+inferable from debug-variant evidence.</strong> The R8-minified release
+artifact is a different artifact; the §6.Z forensic anchor was a
+release-variant-only failure. Cold-start survival (§6.Z clause 4) is the
+minimum per variant, and does not by itself satisfy §6.AK.</p>
+<p><strong>(D) Cycle-coverage on BOTH channels.</strong> The §6.AK
+Phase-1 Gate 7 cycle-coverage check has been executed and PASSED for the
+<code>debug</code> channel <strong>and</strong> for the
+<code>release</code> channel. This condition exists because
+<code>scripts/firebase-distribute.sh</code> resolves
+<code>AK_CHANNEL</code> to <code>debug</code> whenever <code>MODE</code>
+is not exactly <code>release</code> (lines 322–324), so a
+<code>--debug-and-release</code> invocation validates the debug channel
+only. Under this clause the pipeline MUST invoke
+<code>scripts/check-cycle-coverage.sh --channel=release</code>
+explicitly and record its PASS in the run report before the combined
+distribute is permitted. §6.AK is NOT relaxed by this amendment; this
+condition closes the channel gap that would otherwise let a combined
+invocation bypass it.</p>
+<p><strong>(E) Live verification of every distributed live
+surface.</strong> The run's live-verification phase has exercised,
+against actually-running services over their real interfaces, every live
+surface represented in the run's Distribution Records — the
+<code>lava-api-go</code> service <strong>and</strong> the on-device
+<code>:api-app</code>. A run whose live-verification covers only one of
+the two does NOT qualify, irrespective of that half's result.</p>
+<p><strong>(F) Unmodified distribute path.</strong> The distribution was
+performed by invoking <code>scripts/firebase-distribute.sh</code>
+unmodified, with all of its own Phase-1 gates active. §6.Z clause 6 is
+unchanged and remains absolute: no bypass flag exists, none may be
+added, and invoking <code>firebase appdistribution:distribute</code>
+outside this script remains a §6.Z violation whether a pipeline is
+running or not.</p>
+<p><strong>(G) Scope.</strong> This clause applies ONLY to distributions
+produced by this pipeline, on <code>master</code>, with the FR-000
+precondition guard (clean tree, correct branch) satisfied at invocation.
+Every other distribution — an operator running
+<code>firebase-distribute.sh</code> by hand, a hotfix, a re-upload, any
+future channel not driven by this pipeline — remains bound by clauses
+1–3 in full. This clause grants no general permission to skip
+staging.</p>
+<p><strong>(H) Disclosed residual gap (honest, and NOT closed by this
+amendment).</strong> The clause 1 human path verifies the debug APK
+<strong>as installed from the Firebase invite</strong>, not the
+locally-built APK. The pipeline's machine evidence exercises
+locally-built artifacts and therefore does NOT cover the Firebase upload
+→ download → install path on a physical device. This gap is real and is
+not closed here. It is recorded as <strong>§6.AA-pipeline-debt</strong>:
+a post-distribute verification that downloads the just-distributed
+artifact from its Firebase channel and cold-starts it is OWED. Until
+that debt closes, every run report authorized under this clause MUST
+carry the field
+<code>residual-gap: firebase-install-path-unverified</code> so the gap
+is visible in the artifact rather than only in this rule.</p>
+<p><strong>(I) Automatic suspension trigger.</strong> If any
+distribution authorized under this clause produces a Crashlytics FATAL
+on first user-visible interaction, or an operator-reported cold-start
+failure, this clause is <strong>SUSPENDED automatically</strong> — every
+subsequent distribution reverts to the clause 1–3 human path — until (i)
+a §6.Z-class incident record is written under
+<code>.lava-ci-evidence/sixth-law-incidents/</code>, (ii) a covering
+device Challenge that reproduces the failure RED-then-GREEN lands per
+§6.AK clause 2, and (iii) the operator re-authorizes this clause in
+writing. Suspension is the default state on failure; re-authorization is
+an explicit act, never an inference from time passing.</p>
+<p><strong>Standing note.</strong> This clause substitutes a
+<em>mechanism</em>, not a <em>standard</em>. The safety property §6.AA
+protects — no release-variant distribution without real, executed,
+artifact-specific proof it works — is preserved in full by conditions
+(C) and (D). Any future reading of this clause that treats a green run
+report as sufficient WITHOUT conditions (C) and (D) having genuinely
+executed is the §6.J bluff class this project has recorded three times
+(§6.Z, §6.AB, §6.AK), and is a violation of this clause, not a use of
+it.</p></li>
+</ol>
+</blockquote>
+<h4
+id="seventh-law-clause-3-line-238--proposed-addition-non-relaxing">Seventh
+Law clause 3 (line 238) — proposed addition, NON-RELAXING</h4>
+<p>Append one sentence. The clause's existing text, including "There is
+no exception", is preserved verbatim and unchanged:</p>
+<blockquote>
+<p><strong>Scope note (added 2026-08-21).</strong> This clause gates
+<strong>release tags</strong> via <code>scripts/tag.sh</code>. The
+automated pipeline of feature
+<code>002-build-test-distribute-pipeline</code> distributes artifacts
+but cuts no tag, and its §6.AA clause 8 Pipeline Distribution Path
+therefore does NOT reach, satisfy, or relax this clause. A Pipeline Run
+Report is NOT a real-device attestation and MUST NOT be presented as
+one. Cutting a release tag continues to require the operator-executed,
+operator-recorded attestation described above, without exception.</p>
+</blockquote>
+<h3 id="24-the-broader-variant-considered-and-rejected">2.4 The broader
+variant, considered and REJECTED</h3>
+<p><code>spec.md</code>'s Constitutional Impact item 2 and
+<code>plan.md</code>'s Constitution Check both direct that Seventh Law
+clause 3 be amended so that pipeline evidence "satisfies (or formally
+replaces)" the human attestation. This draft does <strong>not</strong>
+do that, for a reason of fact rather than caution:</p>
+<p>Per <strong>F-3</strong>, the pipeline creates no tag. Clause 3 is a
+tag-time gate reached only through <code>scripts/tag.sh</code>, which
+the pipeline never invokes. Relaxing it would surrender a protection the
+pipeline does not need in order to function, on every future tag,
+forever — including tags cut by hand months from now with no pipeline
+involved. That is the definition of a governance leak.</p>
+<p>The scope note in §2.3 is therefore drafted as a
+<strong>clarification that preserves clause 3 intact</strong>. If the
+operator's intent is in fact to automate tagging as well, that is a
+separate amendment with its own forensic anchor and its own review — and
+this proposal recommends it be raised as such rather than folded in
+here.</p>
+<p><strong>Reviewer decision required:</strong> accept the narrow scope
+note (recommended), or direct that clause 3 be genuinely relaxed. See
+§7.</p>
+<h3 id="25-c-migration-plan">2.5 (c) Migration plan</h3>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+<th>Owner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Land the §6.AA clause 2/3 edits, new clause 8, and the Seventh Law
+scope note in <code>CLAUDE.md</code> in a single reviewed commit,
+together with T041's <code>.specify/memory/constitution.md</code> change
+(Amendment procedure item 1 requires the PR touch only governance
+files).</td>
+<td>Operator + reviewer</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Add <code>scripts/check-cycle-coverage.sh --channel=release</code>
+as an explicit call in <code>phase-05-distribute.sh</code>
+<strong>before</strong> the combined <code>firebase-distribute.sh</code>
+invocation, satisfying condition (D). Without this, condition (D) cannot
+be met and clause 8 never qualifies. This is new code owed by T043, not
+optional.</td>
+<td>T043</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Extend <code>phase-02-test.sh</code> so that
+<code>real-device-challenge</code> Evidence Records are produced per
+<strong>variant</strong> (<code>app-release</code> and
+<code>api-app-release</code> included), satisfying condition (C).
+Debug-only device evidence disqualifies the run under this draft.</td>
+<td>T024 follow-up</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Complete T037 (<code>:api-app</code> live-verification half) so
+condition (E) can be met. Until T037 lands, <strong>no run qualifies
+under clause 8</strong> and the pipeline's distribute phase remains
+blocked — which is the intended, honest behavior, not a defect.</td>
+<td>T037</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Add <code>residual-gap</code> and
+<code>combined-distribute-authorization</code> fields to the run report
+emitted by <code>run-report.sh</code>, and extend
+<code>pipeline-run-report.schema.json</code> accordingly (conditions (H)
+and clause 3).</td>
+<td>T039 follow-up</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Add a hermetic test under <code>tests/pipeline/</code> asserting
+that <code>phase-05-distribute.sh</code> REFUSES when any one of
+conditions (A)–(F) is unmet — one failing case per condition,
+falsifiability-rehearsed per §6.N. A clause-8 gate with no failing-first
+test is itself a bluff.</td>
+<td>T043</td>
+</tr>
+<tr>
+<td>7</td>
+<td>No existing test, evidence file, or distribution record requires
+migration. Distributions already performed under the human path remain
+valid; this clause is additive and forward-only.</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h3 id="26-d-version-bump-rationale">2.6 (d) Version-bump rationale</h3>
+<p><code>CLAUDE.md</code> carries no version number; its amendments are
+recorded by clause and date, which this draft follows (§6.AA clause 8
+"added 2026-08-21, feature
+<code>002-build-test-distribute-pipeline</code>").</p>
+<p>The paired bump lands in <code>.specify/memory/constitution.md</code>
+and is <strong>MAJOR (1.1.0 → 2.0.0)</strong> — see §3.4 for the full
+rationale. In brief: the Versioning policy
+(<code>.specify/memory/constitution.md:214</code>) makes MAJOR the
+correct level for "relaxation of any existing principle", and §6.AA
+clause 2's human confirmation requirement is genuinely relaxed for a
+defined class of distributions. That the relaxation is narrow does not
+make it MINOR; narrowness is a property of scope, not of kind.</p>
+<h3 id="27-e-risk-analysis--what-protection-is-given-up">2.7 (e) Risk
+analysis — what protection is given up</h3>
+<p><strong>Protection surrendered #1 — a human looking at the running
+debug build before the release build ships.</strong> This is the core of
+it. §6.AA clause 1 requires verification of the debug APK <em>as
+installed from the Firebase invite</em>, on the failure-surface device
+class, by a person. That check catches a category no automated suite
+reliably covers: the artifact was uploaded, downloaded, installed, and
+launched on real consumer hardware. Condition (H) discloses that this is
+<strong>not</strong> replaced — it is a genuine, open loss, mitigated
+only by the promise of §6.AA-pipeline-debt.</p>
+<p><em>Compensating control:</em> conditions (C) and (D) — per-variant
+executed device Challenges plus release-channel cycle-coverage — cover
+the <em>artifact correctness</em> half of what the human was checking.
+The <em>distribution-channel integrity</em> half is uncovered and
+disclosed rather than papered over.</p>
+<p><strong>Protection surrendered #2 — the staging delay
+itself.</strong> Debug-first staging bounds blast radius in time as well
+as in audience. A failure caught at debug reaches testers; a failure
+caught at release reaches users. Back-to-back distribution removes that
+time buffer entirely: both audiences receive a broken artifact within
+the same minute.</p>
+<p><em>Compensating control:</em> condition (I)'s automatic suspension.
+It does not prevent the first bad release, but it prevents the
+<em>second</em> — which is precisely the pattern the §6.AK forensic
+anchor describes ("Same issues are present over and over again!"). This
+is honestly a weaker control than prevention.</p>
+<p><strong>Protection surrendered #3 — a human's judgment about whether
+the tests that ran were the right tests.</strong> §6.AK exists because a
+gate ran exactly one test (C00, cold-start) while the CHANGELOG claimed
+fixes to search, provider selection, onboarding, and display. A machine
+gate cannot form the judgment "these tests do not cover what this cycle
+claims to have fixed."</p>
+<p><em>Compensating control:</em> this one is genuinely strong, and it
+is the reason this amendment is recommendable at all.
+<code>scripts/check-cycle-coverage.sh</code> mechanizes exactly that
+judgment — it parses CHANGELOG claims into a claim-set and refuses
+unless every claim maps to an executed, passed, same-SHA device
+Challenge. It exists, is wired at
+<code>scripts/firebase-distribute.sh:309-341</code>, is proven by
+<code>tests/cycle-coverage/</code>, and subsumes the §6.Z-debt runtime
+checks. Condition (D) extends it to the release channel, which is where
+F-2 shows it currently does not reach.</p>
+<p><strong>Risk NOT mitigated — F-2 as it stands today.</strong> If
+clause 8 were adopted without condition (D), the pipeline would ship the
+R8-minified release APK with the gate having examined debug-channel
+evidence only. That is a mechanically identical setup to the failure
+that produced §6.AA. Condition (D) is therefore not a nicety; it is the
+load-bearing member of this amendment.</p>
+<hr />
+<h2
+id="3-amendment-t041--specifymemoryconstitutionmd-major-bump-110--200">3.
+Amendment T041 — <code>.specify/memory/constitution.md</code> (MAJOR
+bump 1.1.0 → 2.0.0)</h2>
+<h3 id="31-amendment-metadata">3.1 Amendment metadata</h3>
+<p><strong>Section modified:</strong> Principle III (Anti-Bluff
+Enforcement / Seventh Law) — one new subsection added after clause 7.
+Principle II clause 5 — one scope-clarifying sentence. Sync Impact
+Report header — rewritten. Version footer — rewritten.</p>
+<p><strong>Forensic anchor.</strong> Identical to T040 (§2.1); this file
+is the derived distillation of the same change, per its own Canonical
+Precedence section
+(<code>.specify/memory/constitution.md:194-200</code>).</p>
+<p><strong><code>Classification:</code> project-specific</strong> (same
+reasoning as §2.1).</p>
+<h3 id="32-a-exact-current-text-being-changed--quoted-verbatim">3.2 (a)
+Exact current text being changed — quoted verbatim</h3>
+<p><strong><code>.specify/memory/constitution.md</code> lines 1–42 (Sync
+Impact Report header), current opening:</strong></p>
+<blockquote>
+<pre><code>  Version change:    1.0.0 → 1.1.0</code></pre>
+</blockquote>
+<p><strong><code>.specify/memory/constitution.md</code> line 68
+(Principle II clause 5):</strong></p>
+<blockquote>
+<ol start="5" type="1">
+<li><strong>CI green is necessary, not sufficient.</strong> Before any
+release tag is cut, a human MUST have used the feature on a real device
+and observed the user-visible outcome.</li>
+</ol>
+</blockquote>
+<p><strong><code>.specify/memory/constitution.md</code> line 88
+(Principle III clause 3) — quoted for scope, PROPOSED
+UNCHANGED:</strong></p>
+<blockquote>
+<ol start="3" type="1">
+<li><strong>Pre-Tag Real-Device Attestation.</strong> Every release tag
+requires
+<code>.lava-ci-evidence/&lt;tag-name&gt;/real-device-attestation.json</code>
+with device model, Android version, app version, command-by-command
+checklist, ≥3 screenshots or video. <code>scripts/tag.sh</code> refuses
+without it. No exceptions.</li>
+</ol>
+</blockquote>
+<p><strong><code>.specify/memory/constitution.md</code> line 225
+(version footer):</strong></p>
+<blockquote>
+<p><strong>Version</strong>: 1.1.0 | <strong>Ratified</strong>:
+2026-05-02 | <strong>Last Amended</strong>: 2026-08-21</p>
+</blockquote>
+<h3 id="33-b-exact-proposed-replacement-text">3.3 (b) Exact proposed
+replacement text</h3>
+<h4 id="new-sync-impact-report-header-replaces-lines-142-in-full">New
+Sync Impact Report header (replaces lines 1–42 in full)</h4>
+<pre><code>&lt;!--
+  ═══════════════════════════════════════════════════════════════════════════════
+  SYNC IMPACT REPORT
+  ═══════════════════════════════════════════════════════════════════════════════
+  Version change:    1.1.0 → 2.0.0   (MAJOR — relaxation of an existing principle)
+  Modified principles:
+    - II. Real User Verification — clause 5 gains a scope note distinguishing
+      tag-time human verification (unchanged, still mandatory) from the
+      distribution-time machine-evidence path newly permitted under Principle
+      III&#39;s &quot;Automated Pipeline Distribution Path&quot;. No tag-time requirement is
+      relaxed.
+    - III. Anti-Bluff Enforcement (Seventh Law) — new subsection &quot;Automated
+      Pipeline Distribution Path&quot; records the narrowly-scoped relaxation
+      enacted in root CLAUDE.md §6.AA clause 8: within a single run of
+      scripts/pipeline-build-test-distribute.sh, a qualifying Pipeline Run
+      Report substitutes for the human debug-then-release confirmation that
+      CLAUDE.md §6.AA clauses 2-3 have required since 2026-05-14. Clause 3
+      (Pre-Tag Real-Device Attestation) is EXPLICITLY NOT relaxed — the
+      pipeline cuts no tag and does not reach that gate.
+    - V. Decoupled Reusable Architecture — the &quot;Submodule fetch/pull is an
+      EXPLICIT operator action, never automatic&quot; bullet gains a bounded
+      carve-out for this pipeline&#39;s advance-and-verify step, mirroring the
+      root CLAUDE.md amendment. The constitution/ submodule is excluded from
+      the carve-out and remains governed by CONST-049&#39;s 7-step pipeline.
+      (This entry belongs to amendment T048/T049, landed in the same change.)
+  Added sections:
+    - Principle III &gt; Automated Pipeline Distribution Path
+    - Principle V &gt; Automated Pipeline Pin-Advance Path
+  Removed sections:   N/A
+  Forensic anchor (per Amendment procedure item 2):
+    - Lava-Android-1.2.19-1039: distributed debug+release in a single sweep;
+      release APK crashed every cold launch (Crashlytics
+      40a62f97a5c65abb56142b4ca2c37eeb, FATAL, painterResource() rejecting a
+      &lt;layer-list&gt; drawable). This incident CREATED the rule now being
+      relaxed; the relaxation is therefore gated on per-variant executed
+      device evidence (CLAUDE.md §6.AA clause 8 conditions C and D) rather
+      than on aggregate green.
+    - Operator clarification recorded in spec.md:12 and spec.md:13
+      (feature 002-build-test-distribute-pipeline): fully unattended
+      distribution and automatic submodule pin-advance, both chosen over
+      the lower-risk alternatives that were presented as recommended.
+  Amendment procedure item 5 classification:
+    - (a) introducing new Lava-wide governance into this file for the first
+      time. The §6.AA two-stage distribute rule has never been represented in
+      this file; root CLAUDE.md IS amended in the same change (task T040/T048),
+      as item 5(a) requires.
+  Migration plan: see
+    specs/002-build-test-distribute-pipeline/constitutional-amendments-proposal.md
+    §2.5 and §4.4. No existing test, evidence file, or distribution record
+    requires migration; both carve-outs are additive and forward-only.
+  Templates checked, no changes required:
+    - .specify/templates/plan-template.md       ✅ (Constitution Check gate is
+      generic — no hardcoded principle list to update)
+    - .specify/templates/spec-template.md       ✅ (no constitution refs)
+    - .specify/templates/tasks-template.md      ✅ (no constitution refs)
+    - .specify/templates/checklist-template.md  ✅ (no constitution refs)
+    - README.md                                 ✅ (no constitution refs)
+  Deferred items still open:
+    - TODO(RATIFICATION_DATE): original v1.0.0 ratification date (2026-05-02)
+      remains provisional; not re-litigated by this amendment.
+  Follow-up TODOs introduced by this amendment:
+    - §6.AA-pipeline-debt (root CLAUDE.md §6.AA clause 8 condition H): the
+      Firebase invite → download → install path on a physical device is NOT
+      covered by the machine path. A post-distribute download-and-cold-start
+      verification is OWED.
+  ═══════════════════════════════════════════════════════════════════════════════
+--&gt;</code></pre>
+<h4
+id="replacement-for-principle-ii-clause-5-line-68--appended-sentence-existing-text-preserved-verbatim">Replacement
+for Principle II clause 5 (line 68) — appended sentence, existing text
+preserved verbatim</h4>
+<blockquote>
+<ol start="5" type="1">
+<li><strong>CI green is necessary, not sufficient.</strong> Before any
+release tag is cut, a human MUST have used the feature on a real device
+and observed the user-visible outcome. <strong>This tag-time requirement
+is unchanged and unrelaxed. It is distinct from the distribution-time
+path described in Principle III's "Automated Pipeline Distribution
+Path", which governs Firebase distributions only and cuts no
+tag.</strong></li>
+</ol>
+</blockquote>
+<h4
+id="new-subsection-under-principle-iii-inserted-after-clause-7-line-92-and-before-that-principles-rationale-line">New
+subsection under Principle III, inserted after clause 7 (line 92) and
+before that principle's <code>*Rationale:*</code> line</h4>
+<blockquote>
+<h4 id="automated-pipeline-distribution-path-added-200">Automated
+Pipeline Distribution Path (added 2.0.0)</h4>
+<p>Root <code>CLAUDE.md</code> §6.AA (Two-Stage Distribute Mandate)
+requires an operator's written confirmation that the
+Firebase-distributed <strong>debug</strong> artifact works on the
+failure-surface device class before the <strong>release</strong>
+artifact may be distributed. Within a single run of
+<code>scripts/pipeline-build-test-distribute.sh</code>, that written
+confirmation MAY be satisfied instead by a qualifying Pipeline Run
+Report, under the conditions enumerated in <code>CLAUDE.md</code> §6.AA
+clause 8, which is authoritative for the exact condition set per this
+file's Canonical Precedence section.</p>
+<p>The conditions are summarized here so that this file's Constitution
+Check gate is not misread as permitting the relaxation on weaker terms
+than <code>CLAUDE.md</code> grants:</p>
+<ul>
+<li>The run report must be schema-valid, must match
+<code>git rev-parse HEAD</code> exactly, and must report
+<code>PASS</code> with zero failed and zero non-validated evidence
+records.</li>
+<li><strong>Executed device-Challenge evidence is required per artifact
+variant — release as well as debug.</strong> Release-variant evidence is
+never inferable from debug-variant evidence; the R8-minified artifact is
+a different artifact, and the incident that created this rule was a
+release-variant-only failure.</li>
+<li><strong>The §6.AK cycle-coverage gate must pass for the release
+channel as well as the debug channel.</strong>
+<code>scripts/firebase-distribute.sh</code> resolves its cycle-coverage
+channel to <code>debug</code> for any mode other than exactly
+<code>release</code>, so a combined invocation must invoke the
+release-channel check explicitly.</li>
+<li>Live verification must cover every live surface the run
+distributes.</li>
+<li>The distribution must go through
+<code>scripts/firebase-distribute.sh</code> unmodified, with all its own
+gates active. No bypass flag exists or may be added.</li>
+<li>The path applies ONLY to this pipeline's own runs, on
+<code>master</code>, with the precondition guard satisfied. Every manual
+or ad-hoc distribution remains bound by the human two-stage path in
+full.</li>
+<li>The path SUSPENDS automatically on any resulting cold-start FATAL or
+operator-reported first-interaction failure, and resumes only after an
+incident record, a reproduce-first covering Challenge, and explicit
+written re-authorization.</li>
+</ul>
+<p><strong>Clause 3 above (Pre-Tag Real-Device Attestation) is NOT
+relaxed by this subsection.</strong> The pipeline cuts no release tag
+and does not reach <code>scripts/tag.sh</code>. A Pipeline Run Report is
+not a real-device attestation and MUST NOT be offered as one.</p>
+<p><strong>Disclosed residual gap.</strong> The human path verifies the
+artifact as installed from the Firebase invite. The machine path
+exercises locally-built artifacts and does not cover the upload →
+download → install path on physical hardware. This gap is open, is
+tracked as §6.AA-pipeline-debt, and MUST be recorded in each qualifying
+run report rather than left implicit.</p>
+</blockquote>
+<h4 id="replacement-for-the-version-footer-line-225">Replacement for the
+version footer (line 225)</h4>
+<blockquote>
+<p><strong>Version</strong>: 2.0.0 | <strong>Ratified</strong>:
+2026-05-02 | <strong>Last Amended</strong>: 2026-08-21</p>
+</blockquote>
+<h3 id="34-c-migration-plan">3.4 (c) Migration plan</h3>
+<p>Identical to §2.5, with two additions specific to this file:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M-1</td>
+<td>This file and <code>CLAUDE.md</code> MUST land in the <strong>same
+commit</strong>. Amendment procedure item 5(a) requires root
+<code>CLAUDE.md</code> to be amended in the same PR when new Lava-wide
+governance enters this file for the first time; per
+<strong>F-4</strong>, the §6.AA rule has never been represented here, so
+item 5(a) applies.</td>
+</tr>
+<tr>
+<td>M-2</td>
+<td><code>plan.md</code>'s Constitution Check table lists Principles II
+and III as "<strong>VIOLATION</strong> (justified)". Once this amendment
+lands, those rows change status from violation-pending-amendment to
+conditionally-compliant-under-clause-8. Updating that table is
+documentation follow-up, not a governance act, and does not require its
+own review gate.</td>
+</tr>
+</tbody>
+</table>
+<p>No script requires updating for T041 specifically. Amendment
+procedure item 4 ("If an amendment changes a forbidden pattern, a
+pre-push hook, or a tag-gate condition, the matching script MUST be
+updated in the same PR") is triggered by T040's condition (D) — the
+explicit release-channel <code>check-cycle-coverage.sh</code> invocation
+— which is listed as migration step 2 in §2.5 and belongs to T043.</p>
+<h3 id="35-d-version-bump-rationale">3.5 (d) Version-bump rationale</h3>
+<p><strong>MAJOR, 1.1.0 → 2.0.0.</strong> The Versioning policy
+(<code>.specify/memory/constitution.md:213-216</code>) defines MAJOR as
+<em>"Backward-incompatible governance removal or redefinition;
+relaxation of any existing principle."</em></p>
+<p>Three points, stated honestly including the one that cuts the other
+way:</p>
+<ol type="1">
+<li><strong>A relaxation is genuinely occurring.</strong> The
+requirement that a human confirm the debug build before the release
+build ships is being replaced by machine evidence for a defined class of
+distributions. That is a relaxation of an existing principle in the
+governance chain this file distills, and the policy's MAJOR trigger is
+unqualified — "relaxation of <strong>any</strong> existing
+principle".</li>
+<li><strong>Narrow scope does not reduce the level.</strong> MINOR is
+defined as "New principle or section added; materially expanded
+guidance." A carve-out that removes a human gate is not expanded
+guidance, regardless of how tightly it is bounded.</li>
+<li><strong>The counter-argument, stated rather than
+suppressed.</strong> Per <strong>F-4</strong>, the specific clause being
+relaxed (§6.AA) is not textually present in <em>this</em> file, and per
+§2.4 this draft leaves Principle III clause 3 and Principle II clause 5
+substantively intact. A reading exists under which this file gains only
+a new subsection — MINOR. This proposal <strong>rejects that
+reading</strong> and recommends MAJOR, because the Versioning policy
+speaks to principles, not to sentences in one derived file, and because
+the tasks and spec both specify MAJOR (<code>tasks.md:127</code>,
+<code>spec.md:26</code>). Recording the counter-argument is required by
+the no-guessing discipline; suppressing it to make the bump look
+inevitable would be its own small bluff.</li>
+</ol>
+<h3 id="36-e-risk-analysis">3.6 (e) Risk analysis</h3>
+<p>The risk of this amendment is not the text — it is
+<strong>drift</strong>. This file is the gate Spec Kit's Constitution
+Check reads. If it records the relaxation in weaker terms than
+<code>CLAUDE.md</code> grants, a future feature's Constitution Check
+passes on the weaker text while <code>CLAUDE.md</code> still forbids the
+behavior — the inverse of the Canonical Precedence section's intent.</p>
+<p><em>Compensating control:</em> the new subsection restates conditions
+(C), (D), (E), (G), and (I) explicitly rather than only pointing at
+<code>CLAUDE.md</code>, and names <code>CLAUDE.md</code> §6.AA clause 8
+as authoritative for the exact condition set. A reader of this file
+alone cannot conclude that aggregate green is sufficient.</p>
+<p><em>Residual risk:</em> two documents now describe one rule, and they
+can diverge under future edits. No mechanical drift check between
+<code>CLAUDE.md</code> §6.AA clause 8 and this subsection is proposed
+here. <strong>UNCONFIRMED:</strong> whether an existing gate under
+<code>scripts/verify-all-constitution-rules.sh</code> would detect such
+divergence — this was not verified while drafting, and a reviewer should
+not assume it would.</p>
+<hr />
+<h2
+id="4-amendment-t048--claudemd-decoupled-reusable-architecture-rule">4.
+Amendment T048 — <code>CLAUDE.md</code> Decoupled Reusable Architecture
+rule</h2>
+<h3 id="41-amendment-metadata">4.1 Amendment metadata</h3>
+<p><strong>Section modified:</strong> <code>CLAUDE.md</code> →
+"Decoupled Reusable Architecture (Constitutional Constraint)" →
+"Mandatory consequences" → the "Submodule fetch/pull is an EXPLICIT
+operator action" bullet (line 1249), plus a new subsection after line
+1250.</p>
+<p><strong>Forensic anchor.</strong> Prospective-with-precedent, stated
+honestly as such:</p>
+<ul>
+<li><em>Motivating requirement:</em> the operator's resolved
+clarification at <code>spec.md:13</code>: <em>"Also advance every
+submodule pin — the pipeline fetches each submodule's own upstream
+latest, advances it, and updates the main repository's recorded pin to
+match, before pushing everything."</em> <code>plan.md</code>'s
+Complexity Tracking records that the lower-risk alternative (push only
+local modifications at the current pin) was presented as recommended and
+explicitly not chosen. FR-017 and SC-004 ("full repository closure") are
+unreachable without an automatic advance.</li>
+<li><em>Precedent within this project:</em> <code>CLAUDE.md:299</code>
+already carries an operator-authorized always-track-upstream waiver for
+<code>submodules/helixqa/</code> (Phase 4-C-1 decision Q9, 2026-05-16).
+Automatic pin advancement is therefore not unprecedented here; it is
+currently authorized for exactly one submodule and is being extended to
+the remaining own-org submodules under mechanical conditions.</li>
+<li><em>No incident anchor exists.</em> This is preventive/enabling, not
+remedial. No bug motivated it. Stating that plainly is required by
+Amendment procedure item 2, which permits "prospective" as an anchor but
+not a fabricated one.</li>
+</ul>
+<p><strong><code>Classification:</code> project-specific.</strong> The
+submodule set, the CONST-049 exclusion, and the §6.W two-mirror scope
+are Lava's own. The general pattern (advance-verify-or-revert) is
+reusable but is not asserted as universal here.</p>
+<h3 id="42-a-exact-current-text-being-changed--quoted-verbatim">4.2 (a)
+Exact current text being changed — quoted verbatim</h3>
+<p><strong><code>CLAUDE.md</code> line 1249:</strong></p>
+<blockquote>
+<ul>
+<li><strong>Submodule fetch/pull is an EXPLICIT operator action, never
+automatic.</strong> No git hooks that silently update pins, no
+<code>git submodule update --remote</code> in any release script. The
+pin is the contract; changing the contract is a code review event.</li>
+</ul>
+</blockquote>
+<p><strong>Related text quoted for context, PROPOSED UNCHANGED —
+<code>CLAUDE.md</code> line 1245:</strong></p>
+<blockquote>
+<ul>
+<li><strong>Submodule pins are explicit and frozen by default.</strong>
+A pinned submodule does NOT auto-fetch latest; we are not obligated to
+track upstream movement. Frozen forever is acceptable. Updating the pin
+is a deliberate PR.</li>
+</ul>
+</blockquote>
+<p><strong>Related standing rule quoted for context, PROPOSED UNCHANGED
+— <code>CLAUDE.md</code> line 299 (excerpt):</strong></p>
+<blockquote>
+<p>The <code>./constitution/</code> submodule itself remains pinned +
+advanced only per CONST-049's 7-step pipeline.</p>
+</blockquote>
+<h3 id="43-b-exact-proposed-replacement-text">4.3 (b) Exact proposed
+replacement text</h3>
+<h4
+id="replacement-for-line-1249--appended-sentence-only-existing-text-preserved-verbatim">Replacement
+for line 1249 — appended sentence only, existing text preserved
+verbatim</h4>
+<blockquote>
+<ul>
+<li><strong>Submodule fetch/pull is an EXPLICIT operator action, never
+automatic.</strong> No git hooks that silently update pins, no
+<code>git submodule update --remote</code> in any release script. The
+pin is the contract; changing the contract is a code review event.
+<strong>ONE bounded exception exists: the Automated Pipeline Pin-Advance
+Path defined immediately below. No other automation may advance a pin,
+and no git hook may do so under any circumstances.</strong></li>
+</ul>
+</blockquote>
+<h4
+id="new-subsection-inserted-after-line-1250-after-the-mirror-policy-applies-recursively-bullet-before--what-this-rule-does-not-forbid">New
+subsection inserted after line 1250 (after the "Mirror policy applies
+recursively" bullet, before "### What this rule does NOT forbid")</h4>
+<blockquote>
+<h4
+id="automated-pipeline-pin-advance-path-added-2026-08-21-feature-002-build-test-distribute-pipeline">Automated
+Pipeline Pin-Advance Path (added 2026-08-21, feature
+<code>002-build-test-distribute-pipeline</code>)</h4>
+<p><code>scripts/advance-all-submodules.sh</code>, invoked by
+<code>scripts/pipeline/phase-07-closure.sh</code> within a single run of
+<code>scripts/pipeline-build-test-distribute.sh</code>, MAY advance
+submodule pins without a per-submodule operator action, IF AND ONLY IF
+every condition below holds. This is the sole exception to the bullet
+above.</p>
+<p><strong>(A) Advance-verify-or-revert is mandatory, per submodule,
+before the pin is recorded.</strong> For each submodule, in this order:
+fetch its own configured upstream(s); compare the current pin to the
+remote default-branch HEAD; if identical, no-op; if different, check the
+remote HEAD into the submodule's working tree, then <strong>rebuild and
+re-run the affected test categories against the advanced state</strong>.
+If that rebuild-and-test fails, the advance is DISCARDED (the prior pin
+is restored) and the specific incompatibility is reported. Only a
+submodule that builds and tests green at the advanced commit may have
+its pin recorded in the parent. A pin that broke the build is never
+committed — it is refused.</p>
+<p><strong>(B) The <code>constitution/</code> submodule is EXCLUDED,
+without exception.</strong> <code>submodules/</code>-adjacent governance
+is not ordinary code: advancing <code>./constitution/</code>
+automatically would let an unattended process rewrite the rules the same
+process is bound by. Per the standing rule recorded earlier in this
+document, the <code>./constitution/</code> submodule remains pinned and
+advanced <strong>only</strong> per CONST-049's 7-step pipeline.
+<code>scripts/advance-all-submodules.sh</code> MUST exclude it by
+default — not by an operator remembering to pass an allow-list, but by a
+default deny that requires code change to override.</p>
+<p><strong>(C) Own-org upstreams only, §6.W scope unchanged.</strong>
+The path advances only submodules whose configured upstreams are
+<code>vasic-digital/*</code> or <code>HelixDevelopment/*</code> on
+GitHub or GitLab. §6.W is not relaxed: no new remote, no other provider,
+no externally-maintained upstream is advanced automatically.</p>
+<p><strong>(D) No forced push, no history rewrite, no divergence
+overwrite.</strong> If any submodule cannot be pushed without
+overwriting diverged remote history, the pipeline STOPS and reports that
+specific conflict. It does not force, and it does not silently skip.
+§6.T.3 is unchanged and absolute: force push, history rewrite, and hook
+bypass continue to require explicit, in-conversation, per-operation
+operator approval, which an unattended pipeline cannot obtain and
+therefore may never assume.</p>
+<p><strong>(E) Per-submodule record.</strong> Every submodule processed
+produces a Submodule Advance Record conforming to
+<code>specs/002-build-test-distribute-pipeline/contracts/submodule-advance-record.schema.json</code>,
+naming the old commit, the new commit, and the outcome
+(<code>NO_NEWER_COMMIT</code>, <code>ADVANCED</code>,
+<code>REJECTED_BREAKING_CHANGE</code>,
+<code>REJECTED_PUSH_CONFLICT</code>). "All submodules advanced" without
+per-submodule records is not evidence, per the same reasoning §6.I
+applies to per-AVD attestation rows.</p>
+<p><strong>(F) Scope.</strong> Applies ONLY within this pipeline's own
+runs. A human advancing a pin outside the pipeline continues to do so as
+a deliberate, reviewed act per the bullet above. Nothing here authorizes
+a git hook, a <code>git submodule update --remote</code> in any other
+script, or a background job to move a pin.</p>
+<p><strong>Standing note.</strong> The bullet above exists because the
+pin is the contract and drift between projects is the highest-bandwidth
+bluff vector. This exception does not deny that; it substitutes a
+<em>mechanical</em> review (build-and-test at the advanced commit,
+revert on failure) for a <em>human</em> review, for own-org submodules
+only, and preserves refusal — not force — as the response to every
+conflict.</p>
+</blockquote>
+<h3 id="44-c-migration-plan">4.4 (c) Migration plan</h3>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+<th>Owner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Land the line-1249 edit and the new subsection in
+<code>CLAUDE.md</code>, together with T049's
+<code>.specify/memory/constitution.md</code> change, in one reviewed
+commit. May share the commit with T040/T041 per
+<code>tasks.md:153</code>.</td>
+<td>Operator + reviewer</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Fix the defect recorded in F-5</strong>: add a default
+deny-list to <code>scripts/advance-all-submodules.sh</code> excluding
+<code>constitution/</code>, so that condition (B) holds by construction.
+As written today, that script's default is "every submodule". This is
+not optional cleanup — condition (B) cannot be satisfied without
+it.</td>
+<td>T052 follow-up</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Add a hermetic test case to
+<code>tests/pipeline/test_advance_all_submodules.sh</code> asserting
+that a fixture submodule at the <code>constitution/</code> path is
+<strong>never</strong> advanced even when a newer upstream commit
+exists, and that this holds without any allow-list being passed.
+Falsifiability-rehearse it per §6.N.</td>
+<td>T052 follow-up</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Confirm T050–T052's existing cases already cover conditions (A),
+(D), and (E) — <code>tasks.md:150</code> records cases for
+no-newer-commit, clean advance, <code>REJECTED_BREAKING_CHANGE</code>,
+and <code>REJECTED_PUSH_CONFLICT</code>, matching those conditions. No
+new work identified for these three.</td>
+<td>T054 review</td>
+</tr>
+<tr>
+<td>5</td>
+<td>The <code>submodules/helixqa/</code> Q9 waiver
+(<code>CLAUDE.md:299</code>) is <strong>subsumed but not
+superseded</strong> — HelixQA continues to track upstream, now under the
+same mechanical advance-verify-or-revert conditions as the rest. No edit
+to the Q9 waiver text is proposed.</td>
+<td>—</td>
+</tr>
+<tr>
+<td>6</td>
+<td>No existing pin requires migration. Current pins remain valid; the
+path is forward-only and takes effect at the next pipeline run.</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h3 id="45-d-version-bump-rationale">4.5 (d) Version-bump rationale</h3>
+<p><code>CLAUDE.md</code> is versioned by clause and date, followed
+here. The paired <code>.specify/memory/constitution.md</code> bump is
+<strong>MAJOR</strong> and is shared with T041 — a single 1.1.0 → 2.0.0
+covering both amendments, per <code>tasks.md:154</code>'s "same MAJOR
+version bump as T041". If T048/T049 land separately from T040/T041, T049
+becomes 2.0.0 → 3.0.0 by the same Versioning-policy reasoning
+(relaxation of Principle V), and this proposal recommends landing all
+four together to avoid two consecutive MAJOR bumps for one feature.</p>
+<h3 id="46-e-risk-analysis--what-protection-is-given-up">4.6 (e) Risk
+analysis — what protection is given up</h3>
+<p><strong>Protection surrendered #1 — a human reading the diff before
+foreign code enters the build.</strong> "The pin is the contract;
+changing the contract is a code review event." Automatic advance means
+commits authored elsewhere enter Lava's build without anyone reading
+them. All 17 submodules are own-org (<code>vasic-digital/*</code> plus
+HelixDevelopment's HelixQA), which bounds this considerably, but
+"own-org" is not "reviewed" — an own-org submodule advanced
+automatically can carry a behavior change nobody in this repository has
+looked at.</p>
+<p><em>Compensating control:</em> condition (A)'s
+rebuild-and-test-before-recording, which makes a build-breaking advance
+mechanically impossible to commit. Per <code>plan.md</code>'s
+post-design re-evaluation, "the automation this feature adds cannot
+itself introduce a broken pin, only a refused one."</p>
+<p><em>Residual risk, stated plainly:</em> an advance that
+<strong>passes</strong> the build and tests but changes runtime behavior
+in a way the suite does not cover. That is the §6.J gap in its purest
+form, and condition (A) does not close it — it closes only the
+compile-and-test-visible subset. The honest bound on this amendment's
+safety is exactly the coverage of the test suite that runs during the
+advance.</p>
+<p><strong>Protection surrendered #2 — deliberateness as a rate
+limiter.</strong> "Frozen forever is acceptable" (line 1245, unchanged)
+encodes that not tracking upstream is a legitimate default. Advancing
+every pin on every run replaces a deliberate act with a scheduled one,
+so upstream churn now enters Lava at the pipeline's cadence rather than
+the operator's.</p>
+<p><em>Compensating control:</em> condition (E)'s per-submodule records
+make each advance auditable after the fact, and condition (A) makes each
+one independently gated. There is no control that restores
+deliberateness itself; that is what the operator chose to trade.</p>
+<p><strong>Protection surrendered #3 — none, in three areas frequently
+assumed at risk.</strong> Stated explicitly so the reviewer need not
+verify them separately: §6.W's two-mirror scope is unchanged (condition
+C); §6.T.3's no-force-push rule is unchanged and reaffirmed (condition
+D); and the <code>constitution/</code> submodule's CONST-049 governance
+is unchanged and now mechanically enforced (condition B) where today it
+is enforced only by prose that the implementing script does not honor
+(F-5).</p>
+<p><strong>Risk NOT mitigated as currently implemented — F-5.</strong>
+<code>scripts/advance-all-submodules.sh</code> today defaults to every
+submodule, including <code>constitution/</code>. Until migration step 2
+lands, an unattended run would advance the project's own governance
+submodule. Condition (B) is written to make that a constitutional
+violation, but the code change is required for the condition to be true
+in practice.</p>
+<hr />
+<h2 id="5-amendment-t049--specifymemoryconstitutionmd-principle-v">5.
+Amendment T049 — <code>.specify/memory/constitution.md</code> (Principle
+V)</h2>
+<h3 id="51-amendment-metadata">5.1 Amendment metadata</h3>
+<p><strong>Section modified:</strong> Principle V (Decoupled Reusable
+Architecture) — the "Submodule fetch/pull is an EXPLICIT operator
+action" bullet (line 119), plus a new subsection. Sync Impact Report
+header and version footer — covered by the combined header and footer
+already drafted in §3.3.</p>
+<p><strong>Forensic anchor.</strong> Identical to T048 (§4.1).</p>
+<p><strong><code>Classification:</code> project-specific</strong> (same
+reasoning as §4.1).</p>
+<h3 id="52-a-exact-current-text-being-changed--quoted-verbatim">5.2 (a)
+Exact current text being changed — quoted verbatim</h3>
+<p><strong><code>.specify/memory/constitution.md</code> line
+119:</strong></p>
+<blockquote>
+<ul>
+<li><strong>Submodule fetch/pull is an EXPLICIT operator action, never
+automatic.</strong> No git hooks that silently update pins, no
+<code>git submodule update --remote</code> in any release script.</li>
+</ul>
+</blockquote>
+<p><strong>Related text quoted for context, PROPOSED UNCHANGED — line
+115:</strong></p>
+<blockquote>
+<ul>
+<li><strong>Submodule pins are explicit and frozen by default.</strong>
+A pinned submodule does NOT auto-fetch latest. Updating the pin is a
+deliberate PR.</li>
+</ul>
+</blockquote>
+<h3 id="53-b-exact-proposed-replacement-text">5.3 (b) Exact proposed
+replacement text</h3>
+<h4
+id="replacement-for-line-119--appended-sentence-only-existing-text-preserved-verbatim">Replacement
+for line 119 — appended sentence only, existing text preserved
+verbatim</h4>
+<blockquote>
+<ul>
+<li><strong>Submodule fetch/pull is an EXPLICIT operator action, never
+automatic.</strong> No git hooks that silently update pins, no
+<code>git submodule update --remote</code> in any release script.
+<strong>One bounded exception exists — the Automated Pipeline
+Pin-Advance Path below. Git hooks remain categorically excluded from
+that exception.</strong></li>
+</ul>
+</blockquote>
+<h4
+id="new-subsection-appended-to-principle-v-after-line-121s-inheritance-bullet-and-before-that-principles-rationale-line">New
+subsection appended to Principle V, after line 121's Inheritance bullet
+and before that principle's <code>*Rationale:*</code> line</h4>
+<blockquote>
+<h4 id="automated-pipeline-pin-advance-path-added-200">Automated
+Pipeline Pin-Advance Path (added 2.0.0)</h4>
+<p>Within a single run of
+<code>scripts/pipeline-build-test-distribute.sh</code>,
+<code>scripts/advance-all-submodules.sh</code> MAY advance submodule
+pins without a per-submodule operator action. Root
+<code>CLAUDE.md</code>'s Decoupled Reusable Architecture rule is
+authoritative for the exact condition set; the conditions are summarized
+here so this file's Constitution Check gate is not misread as permitting
+the exception on weaker terms:</p>
+<ul>
+<li><strong>Advance-verify-or-revert per submodule.</strong> Fetch,
+compare, and — when a newer commit exists — check it out and
+<strong>rebuild plus re-run the affected tests against the advanced
+state</strong>. On failure, discard the advance, restore the prior pin,
+and report the incompatibility. A pin that broke the build is never
+recorded.</li>
+<li><strong>The <code>constitution/</code> submodule is excluded by
+default.</strong> It remains governed solely by CONST-049's 7-step
+pipeline. An unattended process may not advance the governance it is
+bound by.</li>
+<li><strong>Own-org upstreams only.</strong> GitHub and GitLab,
+<code>vasic-digital/*</code> and <code>HelixDevelopment/*</code>.
+Principle V's mirror-policy bullet is unchanged.</li>
+<li><strong>No forced push, no history rewrite, no divergence
+overwrite.</strong> A push that would overwrite diverged remote history
+STOPS the run and is reported, never forced and never skipped.</li>
+<li><strong>Per-submodule Submodule Advance Records</strong> are
+produced for every submodule processed. An aggregate "all advanced"
+claim without per-submodule records is not evidence.</li>
+<li><strong>Scope:</strong> this pipeline's own runs only. Git hooks,
+background jobs, and every other script remain categorically forbidden
+from moving a pin.</li>
+</ul>
+<p><strong>Disclosed residual risk.</strong> Rebuild-and-test gates only
+the compile-and-test-visible subset of an upstream change. A submodule
+advance that passes the suite while changing runtime behavior the suite
+does not cover is NOT prevented by this path. The safety of this
+exception is bounded by the coverage of the tests that run during the
+advance, and that bound is stated here rather than left implicit.</p>
+</blockquote>
+<h3 id="54-c-migration-plan">5.4 (c) Migration plan</h3>
+<p>Identical to §4.4. Two file-specific notes:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M-1</td>
+<td>Must land in the same commit as T048's <code>CLAUDE.md</code>
+change, per Amendment procedure item 5. Principle V's bullet exists in
+<strong>both</strong> files (unlike §6.AA per F-4), so this is a true
+mirror-edit and item 5(b) — "catching this file up to a decision already
+enacted in root <code>CLAUDE.md</code>" — applies only if T048 lands
+first. If both land together, item 5(a) governs and root
+<code>CLAUDE.md</code> is amended in the same PR as required.</td>
+</tr>
+<tr>
+<td>M-2</td>
+<td><code>plan.md</code>'s Constitution Check row for Principle V
+changes from "<strong>VIOLATION</strong> (justified)" to
+conditionally-compliant. Documentation follow-up, not a governance
+act.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="55-d-version-bump-rationale">5.5 (d) Version-bump rationale</h3>
+<p>Shared MAJOR bump with T041 — a single 1.1.0 → 2.0.0 covering both
+amendments. Principle V's "never automatic" rule is genuinely relaxed
+for a bounded class of pin advances, which is the Versioning policy's
+MAJOR trigger. Landing T048/T049 separately from T040/T041 would require
+a second MAJOR (2.0.0 → 3.0.0); <code>tasks.md:154</code> anticipates
+both options, and this proposal recommends the combined landing.</p>
+<h3 id="56-e-risk-analysis">5.6 (e) Risk analysis</h3>
+<p>Same substantive risks as §4.6. The file-specific risk is the same
+drift risk as §3.6: this file is what Spec Kit's Constitution Check
+reads, so it must not state the exception in looser terms than
+<code>CLAUDE.md</code> grants.</p>
+<p><em>Compensating control:</em> the summary restates the
+<code>constitution/</code> exclusion, the rebuild-and-test requirement,
+the no-force-push requirement, and the hooks-still-forbidden carve-out
+explicitly, and names <code>CLAUDE.md</code> as authoritative. A reader
+of this file alone cannot conclude that a bare
+<code>git submodule update --remote</code> is now permitted.</p>
+<hr />
+<h2 id="6-consolidated-risk-verdict">6. Consolidated risk verdict</h2>
+<h3
+id="61-t040--t041--the-pair-that-trades-away-a-human-confirmation">6.1
+T040 / T041 — the pair that trades away a human confirmation</h3>
+<p><strong>Verdict: CONDITIONALLY ACCEPTABLE — acceptable as drafted
+here; NOT acceptable as scoped by <code>research.md</code> R-001
+alone.</strong></p>
+<p>R-001 frames the substitution as: the pipeline's aggregated evidence
+— build success, FR-002's test categories passing with anti-bluff
+validation, and a live-verification pass — stands in for the human
+check. Judged against the incident this rule exists for, <strong>that
+framing is insufficient</strong>, for one concrete reason:</p>
+<p>Per <strong>F-2</strong>, the <code>--debug-and-release</code>
+invocation that R-003 selects causes
+<code>scripts/firebase-distribute.sh</code> to run its §6.AK
+cycle-coverage gate against the <strong>debug</strong> channel only, and
+per <strong>F-1</strong> the script's §6.AA staging check does not
+evaluate at all in that mode. A distribution authorized purely on
+"aggregate green" would therefore push the R8-minified
+<strong>release</strong> APK with no gate having examined
+release-channel evidence. That is not an abstract concern — it is
+mechanically the same setup as Lava-Android-1.2.19-1039, whose crash was
+release-variant-only and R8-mediated.</p>
+<p>The drafted clause 8 is acceptable <strong>because</strong>
+conditions (C) and (D) close exactly that hole: per-variant executed
+device evidence, and an explicit release-channel cycle-coverage pass.
+Remove either condition and the recommendation inverts to reject.</p>
+<p><strong>What is genuinely given up, restated without
+softening:</strong> a person installing the debug build from the
+Firebase invite onto real hardware and looking at it before the release
+build reaches users. Condition (H) discloses that this is not replaced.
+The staging <em>time buffer</em> is also gone — both audiences now
+receive a broken artifact within the same minute, and condition (I)'s
+automatic suspension prevents the second bad release, not the first.</p>
+<p><strong>Why it is nevertheless recommendable:</strong> the strongest
+thing this project has built since the incident is
+<code>scripts/check-cycle-coverage.sh</code> — it mechanizes the one
+judgment (do the executed tests intersect the claimed fixes?) whose
+absence produced both the §6.Z and §6.AK anchors, it is wired at
+<code>scripts/firebase-distribute.sh:309-341</code>, and it is proven by
+<code>tests/cycle-coverage/</code>. A machine gate that enforces
+claim-coverage on every run is, on the specific failure mode this
+project has actually suffered twice, more reliable than a human
+confirmation that the §6.AK anchor records as having been skipped in
+practice.</p>
+<p><strong>Blocking preconditions before clause 8 can qualify a single
+run</strong> — all three are open today:</p>
+<ol type="1">
+<li>Release-channel <code>check-cycle-coverage.sh</code> invocation in
+<code>phase-05-distribute.sh</code> (condition D) — not yet
+written.</li>
+<li>Per-variant <code>real-device-challenge</code> evidence including
+release variants (condition C) — <code>tasks.md</code> T024 records a
+development-iteration subset (one class, one AVD, API 34 phone),
+explicitly not a §6.AE.2 conformant matrix.</li>
+<li>T037's <code>:api-app</code> live-verification half (condition E) —
+unimplemented per <code>tasks.md</code> T038.</li>
+</ol>
+<p>Until all three land, <strong>no run qualifies and the distribute
+phase stays blocked.</strong> That is the intended behavior of this
+draft, and the reviewer should expect it rather than treat it as a
+regression.</p>
+<h3 id="62-t048--t049">6.2 T048 / T049</h3>
+<p><strong>Verdict: ACCEPTABLE as drafted, conditional on the F-5 code
+fix landing in the same change.</strong></p>
+<p>The protection given up — a human reading the diff before foreign
+code enters the build — is materially compensated by condition (A)'s
+rebuild-and-test-or-revert, which makes a build-breaking pin
+mechanically uncommittable. The residual gap (an advance that passes
+tests but changes uncovered runtime behavior) is real, is bounded by
+suite coverage, and is disclosed in both drafts rather than assumed
+away.</p>
+<p>The blocking item is <strong>F-5</strong>: the implementing script
+has no <code>constitution/</code> exclusion and defaults to every
+submodule. Condition (B) makes auto-advancing the governance submodule a
+constitutional violation, but the default-deny code change must land
+with the amendment, not after it.</p>
+<h3 id="63-a-note-on-what-these-four-amendments-do-not-do">6.3 A note on
+what these four amendments do NOT do</h3>
+<p>Stated so no future reading over-extends them: §6.Z is not relaxed
+(the pre-distribute test-execution mandate stands in full, and clause 8
+condition (F) reaffirms that no bypass flag exists). §6.AK is not
+relaxed (clause 8 condition (D) strengthens its reach). §6.AH / §6.AG
+are not relaxed (condition (C) requires container-or-VM emulators and
+forbids live ADB devices). §6.T.3 is not relaxed (T048 condition (D)
+reaffirms it). §6.W is not relaxed (T048 condition (C)). Seventh Law
+clause 3 is not relaxed (§2.4, by deliberate choice against the spec's
+broader framing). Only two things change: the human debug-then-release
+confirmation for this pipeline's own distributions, and the human
+per-pin action for this pipeline's own submodule advances.</p>
+<hr />
+<h2 id="7-reviewer-decision-checklist">7. Reviewer decision
+checklist</h2>
+<p>Nothing below has been decided. Each item requires an explicit
+operator answer before any governing file is edited.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+<th>Options</th>
+<th>This proposal recommends</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D-1</td>
+<td>Adopt §6.AA clause 8 <strong>with</strong> conditions (C) and
+(D)?</td>
+<td>Adopt as drafted / adopt without (C) or (D) / reject</td>
+<td><strong>Adopt as drafted.</strong> Without (C) or (D), §6.1's
+verdict inverts to reject.</td>
+</tr>
+<tr>
+<td>D-2</td>
+<td>Seventh Law clause 3 — narrow scope note, or genuine
+relaxation?</td>
+<td>Narrow scope note (preserves clause 3) / genuine relaxation per
+<code>spec.md</code> item 2</td>
+<td><strong>Narrow scope note.</strong> Per F-3 the pipeline cuts no
+tag; relaxing clause 3 surrenders protection on every future tag for no
+functional gain.</td>
+</tr>
+<tr>
+<td>D-3</td>
+<td>Version bump level for
+<code>.specify/memory/constitution.md</code>.</td>
+<td>MAJOR 2.0.0 / MINOR 1.2.0</td>
+<td><strong>MAJOR 2.0.0</strong>, with the counter-argument recorded in
+§3.5(3).</td>
+</tr>
+<tr>
+<td>D-4</td>
+<td>Land all four amendments in one commit, or split T040/T041 from
+T048/T049?</td>
+<td>Combined (one MAJOR) / split (two MAJORs)</td>
+<td><strong>Combined</strong>, per <code>tasks.md:153</code>.</td>
+</tr>
+<tr>
+<td>D-5</td>
+<td>Condition (I)'s automatic-suspension trigger — accept as
+drafted?</td>
+<td>Accept / weaken / strengthen</td>
+<td><strong>Accept.</strong> It is the only control that bounds repeat
+failures, and it is deliberately default-on-failure.</td>
+</tr>
+<tr>
+<td>D-6</td>
+<td>F-5 fix (default-deny <code>constitution/</code> in
+<code>advance-all-submodules.sh</code>) lands in the same change as
+T048?</td>
+<td>Same change / follow-up</td>
+<td><strong>Same change.</strong> Condition (B) is otherwise untrue in
+practice.</td>
+</tr>
+<tr>
+<td>D-7</td>
+<td>Accept that the distribute phase stays <strong>blocked</strong>
+until §6.1's three preconditions land?</td>
+<td>Accept / relax a precondition</td>
+<td><strong>Accept.</strong> A qualifying-by-default clause 8 would
+reproduce the §6.AK anchor.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>On approval</strong>, the amendments in §2–§5 may be applied
+to <code>CLAUDE.md</code> and
+<code>.specify/memory/constitution.md</code>, and
+<code>tasks.md</code>'s T040/T041/T048/T049 checkboxes marked complete
+with the reviewing operator named. <strong>Until then, all four remain
+open review gates and no governing document may be edited.</strong></p>
+</body>
+</html>

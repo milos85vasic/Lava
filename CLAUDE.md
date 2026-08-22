@@ -101,6 +101,16 @@ The Tracker SDK lives in `core/tracker/*` (api + per-tracker plugin modules + th
                                       #   versionCode ≤ last published or CHANGELOG.md
                                       #   lacks an entry for current versionName(versionCode)
 
+# Local build-test-distribute pipeline orchestrator (specs/002-build-test-distribute-pipeline)
+./scripts/pipeline-build-test-distribute.sh   # 5 wired phases: precondition (refuses unless
+                                              #   branch=master + clean tree), build, test,
+                                              #   install-boot, live-verify (Go API + :api-app).
+                                              #   --until <phase> stops after that phase;
+                                              #   --skip <phase>[,…] omits phases — never
+                                              #   precondition. distribute/docs/closure NOT
+                                              #   wired: blocked on the T040/T041 + T048/T049
+                                              #   constitutional amendments — see tasks.md
+
 # Release tagging — refuses without local CI evidence + real-device attestation
 ./scripts/tag.sh <tag>
 

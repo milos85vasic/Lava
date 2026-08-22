@@ -481,20 +481,30 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 <span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>                                      <span class="co">#   versionCode ≤ last published or CHANGELOG.md</span></span>
 <span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>                                      <span class="co">#   lacks an entry for current versionName(versionCode)</span></span>
 <span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="co"># Release tagging — refuses without local CI evidence + real-device attestation</span></span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/tag.sh</span> <span class="op">&lt;</span>tag<span class="op">&gt;</span></span>
-<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="co"># Mirror sync (2 upstreams: GitHub, GitLab — per §6.W)</span></span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="ex">./Upstreams/GitHub.sh</span></span>
-<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="ex">./Upstreams/GitLab.sh</span></span>
-<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/sync-tracker-sdk-mirrors.sh</span></span>
-<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="co"># Code intelligence — codegraph (semantic code graph over MCP; see docs/CODEGRAPH.md)</span></span>
-<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> index                       <span class="co"># rebuild the .codegraph/ semantic knowledge graph</span></span>
-<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> sync                        <span class="co"># incremental index update after edits</span></span>
-<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> status                      <span class="co"># index statistics (files / nodes / edges)</span></span>
-<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/verify-codegraph.sh</span>           <span class="co"># anti-bluff verification suite — 6 layers, all 5 agents</span></span>
-<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/verify-codegraph.sh</span> <span class="at">--quick</span>   <span class="co"># deterministic layers only (skip the slow LLM layer 05)</span></span></code></pre></div>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="co"># Local build-test-distribute pipeline orchestrator (specs/002-build-test-distribute-pipeline)</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/pipeline-build-test-distribute.sh</span>   <span class="co"># 5 wired phases: precondition (refuses unless</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>                                              <span class="co">#   branch=master + clean tree), build, test,</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>                                              <span class="co">#   install-boot, live-verify (Go API + :api-app).</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>                                              <span class="co">#   --until &lt;phase&gt; stops after that phase;</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>                                              <span class="co">#   --skip &lt;phase&gt;[,…] omits phases — never</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>                                              <span class="co">#   precondition. distribute/docs/closure NOT</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>                                              <span class="co">#   wired: blocked on the T040/T041 + T048/T049</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>                                              <span class="co">#   constitutional amendments — see tasks.md</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="co"># Release tagging — refuses without local CI evidence + real-device attestation</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/tag.sh</span> <span class="op">&lt;</span>tag<span class="op">&gt;</span></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="co"># Mirror sync (2 upstreams: GitHub, GitLab — per §6.W)</span></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="ex">./Upstreams/GitHub.sh</span></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a><span class="ex">./Upstreams/GitLab.sh</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/sync-tracker-sdk-mirrors.sh</span></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a><span class="co"># Code intelligence — codegraph (semantic code graph over MCP; see docs/CODEGRAPH.md)</span></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> index                       <span class="co"># rebuild the .codegraph/ semantic knowledge graph</span></span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> sync                        <span class="co"># incremental index update after edits</span></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a><span class="ex">codegraph</span> status                      <span class="co"># index statistics (files / nodes / edges)</span></span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/verify-codegraph.sh</span>           <span class="co"># anti-bluff verification suite — 6 layers, all 5 agents</span></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/verify-codegraph.sh</span> <span class="at">--quick</span>   <span class="co"># deterministic layers only (skip the slow LLM layer 05)</span></span></code></pre></div>
 <p><code>./start.sh</code> delegates to the Lava-domain CLI at
 <code>tools/lava-containers/</code>, which auto-detects Podman or
 Docker, builds the proxy fat JAR + image, and runs it via

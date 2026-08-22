@@ -244,8 +244,9 @@
 <h1
 id="scriptsverify-all-constitution-rulessh--user-guide"><code>scripts/verify-all-constitution-rules.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-05-15 (constitution-compliance
-plan Phase 1) <strong>Inheritance:</strong> HelixConstitution §11.4.32
+<p><strong>Last verified:</strong> 2026-08-25 (gate-execution isolation;
+§6.N.2 gate-shaping bluff hunt of 2026-08-23)
+<strong>Inheritance:</strong> HelixConstitution §11.4.32
 (Post-Constitution-Pull Validation Mandate) + §11.4.18 (script
 documentation)</p>
 <h2 id="overview">Overview</h2>
@@ -316,8 +317,19 @@ class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 <h2 id="gates-registry-current">Gates registry (current)</h2>
-<p>The sweep currently invokes 37 gates across 4 categories (count last
-revised in Phase 7 — §11.4.25 coverage-ledger added):</p>
+<p>The registry is <strong>part static, part discovered at run
+time</strong>, so the total is not a constant in the source: a fixed
+list of scanner rows is followed by loops that walk
+<code>tests/pre-push/check*_test.sh</code> and
+<code>tests/check-constitution/test_*.sh</code> and register one gate
+per file found. Adding a hermetic test file to either directory
+therefore adds a gate with no edit to this script.</p>
+<p>The most recent measured total is <strong>57 gates</strong>, recorded
+in <code>.lava-ci-evidence/verify-all/2026-08-23T09-47-52Z.json</code>
+(<code>total_gates: 57</code>). Treat any number written here as a
+snapshot with a date attached, never as an invariant — read
+<code>total_gates</code> out of the newest attestation for the current
+figure. The four categories:</p>
 <ol type="1">
 <li><strong>Constitution doc parser</strong> (1 gate) —
 <code>scripts/check-constitution.sh</code> covering §6.A-§6.AE
@@ -365,9 +377,119 @@ downstream features + Challenges). The verifier hard-asserts
 row-coverage + freshness + schema integrity in STRICT mode;
 ledger-staleness conditions are the gate's primary failure mode
 (legitimate gap counts don't trigger the verifier).</p>
-<p>The list grows as new constitution gates land. Adding a new gate to
-the registry requires updating both the sweep + the hermetic meta-test
-(<code>tests/check-constitution/test_verify_all_rules.sh</code>).</p>
+<p>The list grows as new constitution gates land. Adding a
+<em>scanner</em> gate requires editing both the sweep and the hermetic
+meta-test
+(<code>tests/check-constitution/test_verify_all_rules.sh</code>); adding
+a <em>hermetic test file</em> under <code>tests/pre-push/</code> or
+<code>tests/check-constitution/</code> requires neither, because the
+discovery loops pick it up by filename.</p>
+<h2
+id="gate-execution-isolation--each-gate-runs-in-a-subshell">Gate-execution
+isolation — each gate runs in a subshell</h2>
+<p><code>run_gate</code> evaluates a gate's command string
+<strong>inside a subshell</strong>: <code>if ( eval "$cmd" )</code>, not
+<code>if eval "$cmd"</code>. The parentheses are the whole mechanism,
+and they are load-bearing in two distinct ways.</p>
+<h3 id="the-defect-this-fixed">The defect this fixed</h3>
+<p>Found by the §6.N.2 gate-shaping bluff hunt of 2026-08-23. Every
+gate's command string used to be evaluated in <strong>the sweep's own
+shell</strong>. A command string that reached <code>exit</code>
+therefore did not fail one gate — it terminated the entire sweep process
+from inside the gate. The consequences compound:</p>
+<ul>
+<li>every gate registered <em>after</em> the exiting one never ran, and
+nothing said so;</li>
+<li>the <code>GATE_RESULTS</code> rows already recorded —
+<strong>including FAIL rows</strong> — were discarded unread, because
+the arrays live in the shell that just died;</li>
+<li>no attestation JSON was written at all, since the writer runs at the
+end of the sweep;</li>
+<li>and when the gate's command ended in <code>exit 0</code>, the sweep
+process itself exited <strong>0</strong>.</li>
+</ul>
+<p>That last combination is the anti-bluff failure: a sweep that stopped
+part-way through its registry, dropped recorded failures on the floor,
+produced no evidence at rest, and still handed its caller a green exit
+status. §11.4.32 names this shape directly — <em>"A sweep that exits
+PASS without running every implementable gate is a §11.4.32
+violation."</em> The sweep is the enforcement engine for every other
+gate, so a green-on-truncation sweep silently disarms all of them at
+once.</p>
+<p>The pre-fix source carried a comment acknowledging the hazard and
+asking gate authors to work around it (<em>"Use <code>false</code> (or
+an external command) to signal failure"</em>). That put the invariant in
+the hands of every future gate author, on every future row, forever — a
+convention, not a mechanism. The subshell makes it structural:
+<code>exit</code> inside a gate now ends the subshell,
+<code>run_gate</code> reads its status like any other non-zero exit, and
+the row is recorded as FAIL.</p>
+<p>This is not a theoretical hazard for this particular script. The
+registry deliberately contains <strong>guard rows whose entire purpose
+is to fail</strong> — the
+<code>MISSING or non-executable: &lt;suite&gt;/run_all.sh</code> row,
+the <code>NO tests/pre-push/check*_test.sh matched</code> row, and the
+<code>NO tests/check-constitution/ test files matched</code> row, all
+added by the preceding 2026-08-22 bluff hunt so that a vanished test
+suite registers as a FAIL instead of silently shrinking the registry.
+Each is written today as <code>…; false</code>. Written the more natural
+way — <code>…; exit 1</code> — any one of them would have truncated the
+sweep at the exact moment it was reporting that a test suite had gone
+missing.</p>
+<h3 id="the-second-property-a-gate-cannot-rewrite-the-verdict">The
+second property: a gate cannot rewrite the verdict</h3>
+<p>Because the command runs in a child shell, an assignment it performs
+cannot reach the parent. A gate command containing
+<code>GATE_RESULTS=(PASS)</code> mutated the sweep's own bookkeeping
+under the old form and could erase an earlier FAIL from the final
+verdict. Under the subshell it changes only the child's copy, which is
+discarded.</p>
+<h3 id="regression-coverage">Regression coverage</h3>
+<p><code>tests/check-constitution/test_verify_all_gate_isolation.sh</code>
+— three cases, all asserting on the <strong>real</strong>
+<code>run_gate</code>, which the test extracts verbatim out of this
+script at run time (via <code>awk</code>, anchored from
+<code>declare -a GATE_NAMES=</code> to the next column-0 <code>}</code>)
+rather than re-implementing it. A copy-paste re-implementation would
+keep passing after the shipped function regressed; extraction
+cannot.</p>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Registry driven</th>
+<th>Asserted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>test_exiting_gate_does_not_abort_sweep</code></td>
+<td><code>false</code> → <code>exit 0</code> → <code>true</code></td>
+<td>all three rows registered (<code>REGISTERED=3</code>) and
+<code>RESULTS=FAIL PASS PASS</code> — the <code>exit 0</code> gate is
+one PASS row, not the end of the sweep</td>
+</tr>
+<tr>
+<td><code>test_nonzero_exiting_gate_records_fail</code></td>
+<td><code>echo boom &gt;&amp;2; exit 1</code> → <code>true</code></td>
+<td><code>REGISTERED=2</code>, <code>RESULTS=FAIL PASS</code> — the
+shape the guard rows above would have had with <code>exit 1</code></td>
+</tr>
+<tr>
+<td><code>test_gate_cannot_mutate_sweep_state</code></td>
+<td><code>false</code> → <code>GATE_RESULTS=(PASS); true</code></td>
+<td><code>RESULTS=FAIL PASS</code> — the earlier FAIL survives a gate
+that tried to clobber the array</td>
+</tr>
+</tbody>
+</table>
+<p>Each case fails loudly against the pre-fix form: the harness produces
+no output at all, because the shell it was running in is gone. The test
+reports that explicitly rather than comparing against an empty string —
+<code>got: &lt;no output — shell terminated&gt;</code>.</p>
+<p>The file is picked up automatically by the
+<code>tests/check-constitution/test_*.sh</code> discovery loop, so it is
+a registered gate of the sweep it protects.</p>
 <h2
 id="falsifiability-rehearsal-mandated-by-11432-itself">Falsifiability
 rehearsal (mandated by §11.4.32 itself)</h2>
@@ -408,7 +530,44 @@ mandate)</li>
 <code>CM-VERIFY-ALL-CONSTITUTION-RULES</code> row</li>
 <li><code>tests/check-constitution/test_verify_all_rules.sh</code> (the
 hermetic meta-test)</li>
+<li><code>tests/check-constitution/test_verify_all_gate_isolation.sh</code>
+(gate-execution isolation)</li>
+<li><code>.lava-ci-evidence/bluff-hunt/2026-08-23-cycle-gate-shaping-scripts.json</code>
+(the §6.N.2 hunt that found the truncation defect)</li>
 <li>All individual scanners + hermetic suites the sweep wraps</li>
 </ul>
+<h2
+id="two-anti-bluff-properties-of-the-sweep-itself-added-2026-08-22">Two
+anti-bluff properties of the sweep itself (added 2026-08-22)</h2>
+<h3 id="a-missing-test-suite-is-a-fail-row-not-a-silent-skip">A missing
+test suite is a FAIL row, not a silent skip</h3>
+<p>Each hermetic suite is registered as a gate by locating its
+<code>run_all.sh</code>. Previously a suite whose
+<code>run_all.sh</code> was deleted, renamed, or had merely lost its
+executable bit was <strong>skipped silently</strong> — the gate vanished
+from the registry and the sweep still reported a clean
+<code>N PASS / 0 FAIL</code>, with no signal that <code>N</code> had
+shrunk.</p>
+<p>Losing a test suite is precisely the drift this sweep exists to
+catch, so a missing or non-executable <code>run_all.sh</code> now
+registers as a FAIL row naming the path:</p>
+<pre><code>MISSING or non-executable: &lt;suite&gt;/run_all.sh</code></pre>
+<p>The same reasoning applies to the flat-layout suites: a glob that
+matches nothing used to register nothing, so an emptied
+<code>tests/pre-push/</code> read as <em>"no pre-push tests failed"</em>
+rather than <em>"no pre-push tests ran"</em>. A
+<code>prepush_registered</code> counter now makes the difference
+visible.</p>
+<h3
+id="cmd-runs-via-eval-in-this-shell-not-a-subshell"><code>$cmd</code>
+runs via <code>eval</code> in THIS shell, not a subshell</h3>
+<p>Gate command strings are evaluated in the sweep's own shell. A
+command string ending in <code>exit N</code> therefore terminates the
+<strong>whole sweep</strong> rather than failing one gate — the
+remaining gates never run, and the sweep's summary reflects only what
+executed before it.</p>
+<p>When authoring a gate command that must signal failure, use
+<code>false</code> (or an external command that exits non-zero), never a
+bare <code>exit</code>.</p>
 </body>
 </html>

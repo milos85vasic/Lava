@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>advance-all-submodules.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptsadvance-all-submodulessh--user-guide"><code>scripts/advance-all-submodules.sh</code>
+— User Guide</h1>
+<p><strong>Last verified:</strong> 2026-08-21 (feature 002
+build-test-distribute-pipeline, tasks T050–T053 TDD cycle)
+<strong>Inheritance:</strong> HelixConstitution §11.4.18 (script
+documentation mandate) + Lava §6.T.3 (no force push) + §6.W (2-mirror
+scope) + the Decoupled Reusable Architecture rule's submodule-pin policy
+(as amended by T048 for this pipeline)</p>
+<h2 id="overview">Overview</h2>
+<p>Advances every submodule of a repository to its own upstream's latest
+commit, one submodule at a time, and writes a <strong>Submodule Advance
+Record</strong> per submodule describing exactly what happened.</p>
+<p>It implements
+<code>specs/002-build-test-distribute-pipeline/research.md</code>
+<strong>R-005</strong>'s 7-step ordering verbatim:</p>
+<ol type="1">
+<li><code>git fetch --all</code> in the submodule</li>
+<li>compare the currently-pinned commit to the remote default branch's
+HEAD</li>
+<li>identical → <strong>no-op</strong> (spec Edge Case: "no newer commit
+available")</li>
+<li>different → check the remote HEAD out into the submodule's working
+tree</li>
+<li>rebuild + re-run the affected test categories against the advanced
+state; <strong>on failure the advance is discarded</strong> (the prior
+pin is checked back out) rather than recording a pin bump that broke the
+build</li>
+<li>if the submodule carries local, uncommitted modifications, commit
+and push them to its own upstream(s)</li>
+<li><code>git add &lt;submodule-path&gt;</code> in the
+<strong>parent</strong> repository to record the new pin</li>
+</ol>
+<p>The rebuild-and-test-<em>before</em>-recording-the-pin ordering is
+the whole point: it makes the "advance breaks the build" edge case
+mechanically enforced instead of a documentation-only promise.</p>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Real use: whole repository, inside a pipeline run</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_PIPELINE_RUN_ID</span><span class="op">=</span>2026-08-21T14-30-00Z <span class="ex">scripts/advance-all-submodules.sh</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Explicit repository path (also how the hermetic test points it at fixtures)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/advance-all-submodules.sh</span> /path/to/repo</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># One submodule only, with a custom verification step</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_PIPELINE_RUN_ID</span><span class="op">=</span>2026-08-21T14-30-00Z <span class="dt">\</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_ADVANCE_SUBMODULES</span><span class="op">=</span><span class="st">&quot;submodules/auth&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_ADVANCE_VERIFY_CMD</span><span class="op">=</span><span class="st">&#39;scripts/ci.sh --changed-only&#39;</span> <span class="dt">\</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="ex">scripts/advance-all-submodules.sh</span></span></code></pre></div>
+<h2 id="inputs">Inputs</h2>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Required</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>$1</code> (positional)</td>
+<td>no</td>
+<td>Parent repository path. Default:
+<code>git rev-parse --show-toplevel</code>.</td>
+</tr>
+<tr>
+<td><code>LAVA_PIPELINE_RUN_ID</code></td>
+<td>conditionally</td>
+<td>The pipeline run this advance belongs to. Required unless
+<strong>both</strong> <code>LAVA_ADVANCE_RECORD_DIR</code> and
+<code>LAVA_ADVANCE_VERIFY_CMD</code> are supplied — without a run id the
+script cannot honestly claim to have rebuilt-and-tested anything, since
+<code>phase-01-build.sh</code>/<code>phase-02-test.sh</code> both
+require a run id with an existing <code>report.json</code>.</td>
+</tr>
+<tr>
+<td><code>LAVA_ADVANCE_RECORD_DIR</code></td>
+<td>no</td>
+<td>Where Submodule Advance Records are written. Default:
+<code>.lava-ci-evidence/pipeline-runs/&lt;run_id&gt;/submodule-advances</code>
+(per <code>data-model.md</code>).</td>
+</tr>
+<tr>
+<td><code>LAVA_ADVANCE_VERIFY_CMD</code></td>
+<td>no</td>
+<td>The R-005 step-5 rebuild-and-test command, run once per advanced
+submodule via <code>bash -c</code>, with <code>$1</code> = the
+submodule's absolute path and <code>$2</code> = the parent repository
+root. Zero exit ⇒ the advanced state still builds and passes. Default:
+<code>phase-01-build.sh &lt;run_id&gt; &lt;repo&gt; &amp;&amp; phase-02-test.sh &lt;run_id&gt; &lt;repo&gt;</code>.</td>
+</tr>
+<tr>
+<td><code>LAVA_ADVANCE_SUBMODULES</code></td>
+<td>no</td>
+<td>Whitespace-separated allow-list of submodule paths (as they appear
+in <code>git submodule status</code>). Default: every submodule.</td>
+</tr>
+</tbody>
+</table>
+<p>Nothing is hardcoded (§6.R): the repository path, submodule set,
+remote name, and default branch name are all resolved at runtime from
+git itself — the default branch in particular comes from the remote's
+own <code>HEAD</code> symref (<code>git ls-remote --symref</code>),
+because this project's submodules do not all share one default branch
+name.</p>
+<h2 id="outputs">Outputs</h2>
+<p>One JSON file per submodule at
+<code>&lt;record-dir&gt;/&lt;sanitized-submodule-path&gt;.json</code>,
+conforming to
+<code>specs/002-build-test-distribute-pipeline/contracts/submodule-advance-record.schema.json</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;submodule_name&quot;</span><span class="fu">:</span> <span class="st">&quot;submodules/auth&quot;</span><span class="fu">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;old_commit&quot;</span><span class="fu">:</span> <span class="st">&quot;32a80e0a…&quot;</span><span class="fu">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;new_commit&quot;</span><span class="fu">:</span> <span class="st">&quot;9f1c2b47…&quot;</span><span class="fu">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;local_modifications_pushed&quot;</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;parent_pin_updated&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;outcome&quot;</span><span class="fu">:</span> <span class="st">&quot;ADVANCED&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><code>outcome</code> is one of:</p>
+<table>
+<thead>
+<tr>
+<th>Outcome</th>
+<th>Meaning</th>
+<th><code>parent_pin_updated</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NO_NEWER_COMMIT</code></td>
+<td>Pin already equals the upstream default branch HEAD; nothing was
+done (step 3). <code>old_commit == new_commit</code>.</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>ADVANCED</code></td>
+<td>Fetched, checked out, verified, (optionally) pushed local
+modifications, and staged the new pin.</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>REJECTED_BREAKING_CHANGE</code></td>
+<td>The advanced state failed the step-5 rebuild-and-test (or could not
+be checked out). Advance discarded; prior pin restored.</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>REJECTED_PUSH_CONFLICT</code></td>
+<td>The submodule's own local modifications could not be pushed as a
+fast-forward. Refused rather than overwritten (FR-016). Advance
+discarded; prior pin restored.</td>
+<td><code>false</code></td>
+</tr>
+</tbody>
+</table>
+<p>The record's own writer enforces the schema's
+<code>allOf/if-then</code> invariant — a <code>REJECTED_*</code> outcome
+can never be emitted alongside
+<code>parent_pin_updated: true</code>.</p>
+<p>Aggregating these records into the run's <code>report.json</code>
+(<code>submodule_advances[]</code>) is
+<code>phase-07-closure.sh</code>'s job (T055), not this script's.</p>
+<h2 id="exit-codes">Exit codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>Every submodule ended <code>ADVANCED</code> or
+<code>NO_NEWER_COMMIT</code>.</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>At least one submodule was rejected or could not be processed.</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>Usage/configuration error (bad repo path, missing run id with no
+overrides, unwritable record directory). Nothing was attempted.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="side-effects">Side effects</h2>
+<ul>
+<li><strong>In each submodule</strong>: <code>git fetch</code>, a
+detached-HEAD checkout, and — only when local modifications exist — a
+commit plus a fast-forward push to every configured remote (§6.W: GitHub
++ GitLab).</li>
+<li><strong>In the parent repository</strong>:
+<code>git add &lt;submodule-path&gt;</code> only. It <strong>never
+commits and never pushes the parent</strong> — that is
+<code>phase-07-closure.sh</code>'s job, deliberately separated so a
+review gate sits between "pins staged" and "pins pushed".</li>
+</ul>
+<h2 id="safety-properties">Safety properties</h2>
+<ul>
+<li><strong>Never force-pushes, never rewrites history, never bypasses
+hooks or signing</strong> (§6.T.3). A push that cannot fast-forward is a
+<code>REJECTED_PUSH_CONFLICT</code> — the refusal <em>is</em> the
+correct outcome.</li>
+<li><strong>A rejected advance is discarded entirely, never partially
+applied.</strong> Both rejection paths check the submodule back out to
+its prior pinned commit, so the parent repository is left exactly as it
+was found.</li>
+<li><strong>Never destroys local work.</strong> When local modifications
+had to be committed before a push that then failed, the resulting commit
+is preserved under <code>refs/lava-advance-rescue/&lt;id&gt;</code>
+inside the submodule <em>before</em> HEAD is moved back — reachable, not
+reflog-only. Restoration uses a plain checkout, never a discarding
+one.</li>
+<li><strong>No privilege escalation</strong> — plain git as the calling
+user (§6.U).</li>
+</ul>
+<h2 id="hermetic-test">Hermetic test</h2>
+<p><code>tests/pipeline/test_advance_all_submodules.sh</code> exercises
+all four R-005 branches against <strong>disposable git fixtures</strong>
+built under <code>mktemp -d</code> — a throwaway parent repo, a
+throwaway submodule, and a local bare repo standing in for that
+submodule's upstream. It never touches this repository's real
+<code>submodules/</code> tree and never reaches any network host.</p>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Fixture setup</th>
+<th>Asserted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Pin already at upstream HEAD</td>
+<td><code>NO_NEWER_COMMIT</code>, <code>old_commit == new_commit</code>,
+pin untouched, exit 0</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Upstream one commit ahead, verify passes</td>
+<td><code>ADVANCED</code>, submodule HEAD <strong>and</strong> parent
+index gitlink both moved to upstream HEAD, exit 0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Upstream one commit ahead, verify fails</td>
+<td><code>REJECTED_BREAKING_CHANGE</code>, submodule HEAD restored,
+parent pin unchanged, exit 1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Local modification present; the verify hook lands a concurrent
+commit on the fixture upstream, making the subsequent push a
+<strong>genuine non-fast-forward</strong></td>
+<td><code>REJECTED_PUSH_CONFLICT</code>, pin unchanged,
+<code>local_modifications_pushed: false</code>, rescue ref present and
+still containing the local edit, fixture upstream tip un-overwritten,
+exit 1</td>
+</tr>
+</tbody>
+</table>
+<p>Every assertion is on <strong>real git state</strong>
+(<code>git ls-files -s</code>, <code>git rev-parse HEAD</code>,
+<code>git show &lt;ref&gt;:&lt;file&gt;</code>), not merely on what the
+JSON record claims — so a record that lies about what it did is caught
+by the test rather than believed.</p>
+<p><strong>Falsifiability rehearsal (2026-08-21, T052 GREEN
+step):</strong> the step-5 failure branch was mutated to stage the
+parent pin (<code>git add</code>) instead of calling
+<code>restore_pin</code>, while still writing
+<code>parent_pin_updated: false</code> into the record — i.e. a record
+that lies. Case 3 failed with:</p>
+<pre><code>FAIL: case3(breaking-change): submodule HEAD restored to the prior pin expected &#39;2244ef88…&#39;, got &#39;20b78dcc…&#39;
+FAIL: case3(breaking-change): parent pin NOT updated expected &#39;2244ef88…&#39;, got &#39;20b78dcc…&#39;</code></pre>
+<p>Cases 1, 2 and 4 stayed green, so the failure was localized to
+exactly the mutated path. The mutation was reverted and the suite
+returned to 36/36 PASS.</p>
+<h2
+id="2026-08-22-pre-t054-audit-hardening--open-review-items">2026-08-22
+pre-T054 audit: hardening + open review items</h2>
+<p>This script is gated behind Human Checkpoint #2 (task T054) because
+of its blast radius. Ahead of that review it was audited against
+disposable git fixtures (bare local repos standing in for upstreams; no
+network, no real submodule touched). Twelve failure modes were
+demonstrated and fixed; every one has a case in
+<code>tests/pipeline/test_advance_all_submodules_hardening.sh</code>.</p>
+<h3 id="what-was-fixed">What was fixed</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Failure mode</th>
+<th>What it did</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Uninitialized submodule → the script operated on the PARENT
+repo</strong></td>
+<td><code>git -C &lt;empty-dir&gt; rev-parse --git-dir</code> succeeds
+by walking UP, so the guard never fired. The parent repository was
+detached from its branch and its tree replaced with its own
+<code>origin/HEAD</code>; the run reported <code>ADVANCED</code> /
+<code>parent_pin_updated: true</code> / exit 0. Now guarded by
+<code>is_own_repo_root</code>, which requires the directory to be the
+root of its own work tree.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>A failing <code>git submodule status</code> read as "nothing
+to do"</strong></td>
+<td>Its stderr was discarded and zero parsed rows produced
+<code>no submodules found — nothing to do</code> + <strong>exit
+0</strong>. Its exit status is now checked before its output is parsed;
+a failure is exit 2 with git's own diagnostic.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>The allow-list widened runs instead of narrowing
+them</strong></td>
+<td><code>grep -qw</code> treats the path as a word-boundary regex, so
+<code>LAVA_ADVANCE_SUBMODULES=submodules/auth-extra</code> also selected
+<code>submodules/auth</code>. Now an exact whole-token comparison.</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>A pin move that is not a fast-forward was recorded as
+<code>ADVANCED</code></strong></td>
+<td>"Remote HEAD differs from the pin" is not "remote HEAD is newer".
+This project pins submodules to side branches on purpose (root
+<code>CLAUDE.md</code> records Containers pinned on
+<code>lava-pin/2026-05-07-pkg-vm</code>), and moving such a pin to
+<code>origin/HEAD</code> drops the pinned commit. Now refused via
+<code>merge-base --is-ancestor</code>, before anything is checked
+out.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong><code>local_modifications_pushed: true</code> when nothing
+was committed or pushed</strong></td>
+<td><code>pushed</code> was set from having <em>entered</em> step 6. The
+step-4 checkout can legitimately leave <code>git add -A</code> with
+nothing to stage (e.g. the new upstream commit adds a
+<code>.gitignore</code> rule covering the operator's untracked file).
+Now derived from a commit actually being created.</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong><code>local_modifications_pushed: false</code> when one
+mirror already had the work</strong></td>
+<td>On a multi-mirror push where mirror 1 accepted and mirror 2 refused,
+the record stated the opposite of the upstream's observable state — and
+force-push is forbidden, so it cannot be taken back. Now reports
+<code>true</code> and prints an explicit MIRROR DIVERGENCE warning.</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Pushed one remote's default branch name at every
+remote</strong></td>
+<td>The branch was resolved once, from the preferred remote. A mirror
+whose default is <code>main</code> got a stray <code>master</code>
+branch while its real default received nothing. Now resolved per
+remote.</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong><code>(cannot fast-forward)</code> asserted for every push
+failure</strong></td>
+<td>Branch protection, a server-side hook, an auth failure and an
+unreachable host all reported as a non-fast-forward while git's real
+message was discarded. git's own message is now quoted verbatim.</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Parent-staging failure after a successful push lost the
+commit locally</strong></td>
+<td>HEAD was moved back off a commit that was already published, with no
+rescue ref — reflog-only. A rescue ref is now created on that path
+too.</td>
+</tr>
+<tr>
+<td>10</td>
+<td>**A governance-deny record-write failure was swallowed by `</td>
+<td></td>
+</tr>
+<tr>
+<td>11</td>
+<td><strong>A KILLED verify command was indistinguishable from a
+breaking change</strong></td>
+<td>An OOM kill or <code>timeout</code> produced a byte-identical record
+to a genuine test failure. The exit status (and the signal, for ≥128) is
+now stated in the run log.</td>
+</tr>
+<tr>
+<td>12</td>
+<td><strong>A failed restore-to-prior-pin was a lone stderr
+line</strong></td>
+<td>The submodule is then left on the <em>rejected</em> commit and the
+parent tree is dirty; in a 25-submodule run that line scrolls away. Now
+counted and named in the run summary
+(<code>N not restored to the prior pin</code>).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="open-items-for-the-t054-reviewer--not-fixed-here">Open items for
+the T054 reviewer — NOT fixed here</h3>
+<ol type="1">
+<li><p><strong>The record schema's <code>outcome</code> enum cannot
+express several real refusals.</strong>
+<code>submodule-advance-record.schema.json</code> offers five values. A
+pin move that is not a fast-forward, an uninitialized submodule, an
+unreachable upstream, a remote whose default branch cannot be resolved,
+and a parent index that cannot be staged match none of them. Rather than
+assert a cause that did not occur, those refusals are reported on
+stderr, counted, and reflected in the exit code, but leave <strong>no
+Submodule Advance Record</strong> — the same "invisible at rest" problem
+the <code>REFUSED_GOVERNANCE_DENY</code> value was added to solve.
+Closing it needs new enum values (e.g.
+<code>REFUSED_NOT_FAST_FORWARD</code>, <code>NOT_EVALUATED</code>),
+which is a <code>specs/</code> change and therefore a reviewer decision.
+The step-7 staging-failure path still records
+<code>REJECTED_BREAKING_CHANGE</code>, which is the closest available
+value and not the real cause; the run log says so explicitly.</p></li>
+<li><p><strong>The governance deny-list holds only
+<code>constitution</code>, but root <code>CLAUDE.md</code> declares far
+more than one submodule off-limits to an unattended run.</strong> The
+Decoupled Reusable Architecture rule states that submodule pins are
+<em>"explicit and frozen by default"</em>, that <em>"updating the pin is
+a deliberate PR"</em>, and — verbatim — that <em>"submodule fetch/pull
+is an EXPLICIT operator action, never automatic. No git hooks that
+silently update pins, no <code>git submodule update --remote</code> in
+any release script."</em> The §6.AC HelixQA waiver names exactly one
+exception (<code>submodules/helixqa</code>, always-track-upstream per
+operator decision Q9) and states that the other sixteen <em>"remain
+pins-frozen by default; their bumps still require deliberate
+per-submodule operator authorization."</em> This repository currently
+has <strong>25</strong> submodules. As written, a default run advances
+24 of them. The reviewer must decide whether the deny-list should
+instead be an <strong>allow</strong>-list — the default-deny posture the
+constitution describes — with <code>submodules/helixqa</code> as its
+only standing member.</p></li>
+<li><p><strong>Step 6 commits with <code>git add -A</code> and pushes to
+a real upstream.</strong> <code>has_local_mods</code> comes from
+<code>git status --porcelain</code>, which reports untracked files. Any
+untracked, non-ignored file in a submodule — a build output, a scratch
+note, a file a <code>.gitignore</code> does not yet cover — is therefore
+committed and published to that submodule's own upstream under the
+message
+<code>chore: local modifications carried forward by advance-all-submodules</code>.
+This is R-005 step 6 as specified, but its interaction with §6.H
+(credential inviolability) deserves an explicit reviewer decision: an
+allow-list of paths, <code>git add -u</code> (tracked files only), or an
+operator confirmation gate.</p></li>
+<li><p><strong>Never yet run against a real submodule upstream.</strong>
+Every finding above came from disposable local fixtures. The fixtures
+cannot reproduce real-upstream behaviour such as authentication prompts,
+server-side hooks on GitHub/GitLab, or <code>ls-remote</code> against a
+host that redirects.</p></li>
+</ol>
+<h2 id="maintenance">Maintenance</h2>
+<p>When this script is modified, update this document in the same commit
+(<code>CM-SCRIPT-DOCS-SYNC</code> requires it). Per §11.4.18 the
+documentation MUST stay in sync with the codebase.</p>
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li><code>scripts/advance-all-submodules.sh</code> — the script
+itself</li>
+<li><code>tests/pipeline/test_advance_all_submodules.sh</code> — its
+hermetic test suite (R-005 branches + governance deny)</li>
+<li><code>tests/pipeline/test_advance_all_submodules_hardening.sh</code>
+— the 2026-08-22 audit's failure-mode suite</li>
+<li><code>specs/002-build-test-distribute-pipeline/research.md</code> —
+R-005 (the 7-step ordering this implements)</li>
+<li><code>specs/002-build-test-distribute-pipeline/data-model.md</code>
+— the Submodule Advance Record entity</li>
+<li><code>specs/002-build-test-distribute-pipeline/contracts/submodule-advance-record.schema.json</code>
+— the record schema</li>
+<li><code>scripts/pipeline/lib/evidence.sh</code> — supplies the
+record-filename sanitizer this script reuses</li>
+<li><code>scripts/pipeline/phase-07-closure.sh</code> — the caller
+(T055); owns parent-repo commit/push and <code>report.json</code>
+aggregation</li>
+<li>Lava <code>CLAUDE.md</code> §6.T.3 (no force push), §6.W (2-mirror
+scope), §6.U (no privilege escalation)</li>
+</ul>
+</body>
+</html>

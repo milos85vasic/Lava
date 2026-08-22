@@ -179,7 +179,7 @@
 <h1 id="issues_summary">Issues_Summary</h1>
 <p>Open workable items (current_location = Issues), regenerated from the
 SQLite single-source-of-truth (§11.4.12).</p>
-<h2 id="counts-by-type--status">Counts by Type × Status</h2>
+<h2 id="counts-by-type-status">Counts by Type × Status</h2>
 <table>
 <thead>
 <tr>
@@ -192,17 +192,34 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <tr>
 <td>Bug</td>
 <td>Operator-blocked</td>
-<td>2</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Task</td>
+<td>Operator-blocked</td>
+<td>6</td>
+</tr>
+<tr>
+<td>Task</td>
+<td>Queued</td>
+<td>3</td>
 </tr>
 <tr>
 <td><strong>TOTAL</strong></td>
 <td></td>
-<td><strong>2</strong></td>
+<td><strong>12</strong></td>
 </tr>
 </tbody>
 </table>
 <h2 id="items">Items</h2>
 <table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
 <thead>
 <tr>
 <th>ATM ID</th>
@@ -219,9 +236,9 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <td>Operator-blocked</td>
 <td>P1</td>
 <td>Challenge11ArchiveOrgAnonymousSearchTest crashes the app PROCESS at
-activity-destroy: IllegalStateException 'State must be at least CREATED
-to be moved to DESTROYED' on the inner search/search_input entry.
-Root-caused (2026-06-08): the inner nested NavController's host is the
+activity-destroy: IllegalStateException ‘State must be at least CREATED
+to be moved to DESTROYED’ on the inner search/search_input entry.
+Root-caused (2026-06-08): the inner nested NavController’s host is the
 outer addNestedNavigation NavBackStackEntry, driven to DESTROYED out
 from under the inner controller while search_input is still INITIALIZED.
 FALSIFIED on device: nav 2.9.1-&gt;2.9.8, LenientTeardownRule
@@ -230,6 +247,242 @@ FALSIFIED on device: nav 2.9.1-&gt;2.9.8, LenientTeardownRule
 JSON (inner NavHost Activity-scoped LifecycleOwner; move search to outer
 NavHost; ON_STOP pop). Forensics:
 .lava-ci-evidence/sixth-law-incidents/2026-06-08-navbackstackentry-teardown-crash-2.9.1-incomplete.json</td>
+</tr>
+<tr>
+<td>LVA-120</td>
+<td>Bug</td>
+<td>Operator-blocked</td>
+<td>P0</td>
+<td>WHAT (verified verbatim in the real script this session, line by
+line, not inferred): scripts/firebase-distribute.sh line 56 -
+“–debug-and-release|–both) MODE="both"; shift”. Line 204 - the
+constitution 6.AA staging gate is guarded on [[ “<span
+class="math inline">$MODE" == "release" &amp;&amp; -f
+"$</span>LAST_VERSION_DEBUG_FILE” ]], so in combined mode it NEVER
+EVALUATES. Lines 322-323 - “case "$MODE" in release)
+AK_CHANNEL="release" ;; *) AK_CHANNEL="debug" ;; esac”, so the
+constitution 6.AK cycle-coverage gate (which also subsumes the 6.Z
+evidence presence, commit-SHA match and 24h freshness checks) is pointed
+at the DEBUG channel. Lines 435, 444 and 513 - the RELEASE APK is
+version-asserted, resolved and uploaded whenever MODE is release OR
+both. NET EFFECT: a combined distribute ships the R8-minified RELEASE
+APK while the only device-evidence gate that runs checks DEBUG-channel
+evidence. That is mechanically the same setup as the 1.2.19-1039
+incident (the constitution 6.Z forensic anchor), in which a release APK
+crashed on every cold launch because release-variant behaviour was never
+gated. PRE-EXISTING: this is a property of
+scripts/firebase-distribute.sh and is NOT introduced by feature 002.
+REPRODUCTION: tests/firebase/repro_mode_both_channel_gap.sh. It NEVER
+executes firebase-distribute.sh (that would attempt a real Firebase
+upload); it greps the four real decision lines verbatim, evaluates that
+extracted logic per MODE, and exits 2 if those lines ever stop existing
+rather than silently testing a stale copy. Its exit semantics are
+inverted on purpose and documented in its header: 0 means the gap was
+REPRODUCED (expected today), 1 means it is GONE and the harness should
+be converted into a proper regression test, 2 means extraction failed
+and it can say nothing truthful - exit 2 is never read as “fixed”.
+REPRODUCED OUTPUT: mode debug - release APK sent no, 6.AK channel debug,
+6.AA staging gate no; mode release - release APK sent yes, 6.AK channel
+release, 6.AA staging gate yes; mode both - release APK sent YES, 6.AK
+channel DEBUG, 6.AA staging gate NO. The release row is the control that
+proves this is not a false alarm: –release-only DOES evaluate both gates
+on the correct channel. The gap is specific to the combined mode -
+precisely the mode an unattended pipeline would use. IMPACT ON FEATURE
+002: task T043 was specified to invoke exactly –debug-and-release and
+would have inherited the hole; any amendment authorizing an unattended
+combined distribute would authorize exactly this. Source of truth:
+specs/002-build-test-distribute-pipeline/progress.yml and
+specs/002-build-test-distribute-pipeline/tasks.md.</td>
+</tr>
+<tr>
+<td>LVA-121</td>
+<td>Task</td>
+<td>Queued</td>
+<td>P3</td>
+<td>UNCONFIRMED: this is a HYPOTHESIS, not a demonstrated defect. It was
+NOT reproduced during feature 002 and no failing case was constructed.
+Filed so it is not lost; it must be either reproduced (then re-filed as
+a Bug with RED evidence) or explicitly ruled out. CLAIM:
+scripts/pipeline/phase-01-build.sh counts ARTIFACT lines rather than
+distinct labels, so five duplicate labels would satisfy the &gt;= 5 PASS
+condition. WHY IT WAS NOT PROMOTED TO A FINDING: not reachable through
+the real sub-scripts, each of which prints a given label at most once.
+To close, either construct a real producing path or record the argument
+that none exists. Source of truth:
+specs/002-build-test-distribute-pipeline/progress.yml and
+specs/002-build-test-distribute-pipeline/tasks.md.</td>
+</tr>
+<tr>
+<td>LVA-122</td>
+<td>Task</td>
+<td>Queued</td>
+<td>P3</td>
+<td>UNCONFIRMED: this is a HYPOTHESIS, not a demonstrated defect. It was
+NOT reproduced during feature 002 and no failing case was constructed.
+Filed so it is not lost; it must be either reproduced (then re-filed as
+a Bug with RED evidence) or explicitly ruled out. CLAIM: the find …
+2&gt;/dev/null inside recompute_evidence_summary in
+scripts/pipeline/lib/run-report.sh would report zero Evidence Records
+for an unreadable phase directory, which finalize_run_report would then
+treat as zero rejections. WHY IT WAS NOT PROMOTED TO A FINDING: no
+realistic producing scenario was constructed. To close, either construct
+one or record why the phase directory cannot become unreadable mid-run.
+Source of truth: specs/002-build-test-distribute-pipeline/progress.yml
+and specs/002-build-test-distribute-pipeline/tasks.md.</td>
+</tr>
+<tr>
+<td>LVA-123</td>
+<td>Task</td>
+<td>Queued</td>
+<td>P3</td>
+<td>UNCONFIRMED: this is a HYPOTHESIS, not a demonstrated defect. It was
+NOT reproduced during feature 002 and no failing case was constructed.
+Filed so it is not lost; it must be either reproduced (then re-filed as
+a Bug with RED evidence) or explicitly ruled out. CLAIM: the
+compose-file port parse in scripts/pipeline/phase-04-live-verify-api.sh
+is a no-op when the LAVA_API_LISTEN value in docker-compose.yml is
+unquoted. WHY IT WAS NOT PROMOTED TO A FINDING: the real
+docker-compose.yml quotes the value, and a wrong port fails closed at
+curl rather than passing vacuously. To close, either construct a
+producing case or make the parse fail loudly on an unrecognized shape.
+Source of truth: specs/002-build-test-distribute-pipeline/progress.yml
+and specs/002-build-test-distribute-pipeline/tasks.md.</td>
+</tr>
+<tr>
+<td>LVA-124</td>
+<td>Task</td>
+<td>Operator-blocked</td>
+<td>P1</td>
+<td>WHAT: feature 002 task T040 is a CONSTITUTIONAL AMENDMENT, not
+routine code review. It would amend root CLAUDE.md 6.AA (Two-Stage
+Distribute Mandate) and the Seventh Law clause 3 (Pre-Tag Real-Device
+Attestation) per research.md R-001, adding an alternate-path clause
+under which a Pipeline Run Report for the exact commit SHA and
+versionCode substitutes for human debug-then-release confirmation,
+scoped narrowly to distributions this pipeline itself produces. It must
+include a forensic anchor, a migration plan and a version-bump rationale
+per the constitution own Amendment procedure. BLAST RADIUS: this is a
+RELAXATION of an existing anti-bluff principle whose forensic anchor is
+the 1.2.19-1039 cold-start-crash incident. It also interacts directly
+with the open firebase-distribute combined-mode finding filed alongside
+this item: authorizing an unattended combined distribute would authorize
+exactly the debug-evidence-gates-a-release-APK gap. Review-ready DRAFT
+text for this amendment is at
+specs/002-build-test-distribute-pipeline/constitutional-amendments-proposal.md
+(with .html and .pdf siblings). The draft is NOT applied: CLAUDE.md and
+.specify/memory/constitution.md are byte-identical to their pre-feature
+baselines. BLOCKS: feature 002 phase 5 (US3 distribute), specifically
+task T043. Source of truth:
+specs/002-build-test-distribute-pipeline/progress.yml and
+specs/002-build-test-distribute-pipeline/tasks.md.</td>
+</tr>
+<tr>
+<td>LVA-125</td>
+<td>Task</td>
+<td>Operator-blocked</td>
+<td>P1</td>
+<td>WHAT: feature 002 task T041 updates .specify/memory/constitution.md
+to match the T040 amendment with a MAJOR version bump 1.1.0 to 2.0.0,
+per that file own Versioning policy - MAJOR because this is a RELAXATION
+of an existing principle, not an addition - and updates the Sync Impact
+Report header accordingly. Paired with T040: neither lands alone.
+Review-ready DRAFT text for this amendment is at
+specs/002-build-test-distribute-pipeline/constitutional-amendments-proposal.md
+(with .html and .pdf siblings). The draft is NOT applied: CLAUDE.md and
+.specify/memory/constitution.md are byte-identical to their pre-feature
+baselines. BLOCKS: feature 002 phase 5 (US3 distribute), specifically
+task T043. Source of truth:
+specs/002-build-test-distribute-pipeline/progress.yml and
+specs/002-build-test-distribute-pipeline/tasks.md.</td>
+</tr>
+<tr>
+<td>LVA-126</td>
+<td>Task</td>
+<td>Operator-blocked</td>
+<td>P1</td>
+<td>WHAT: feature 002 task T048 is a CONSTITUTIONAL AMENDMENT to the
+Decoupled Reusable Architecture rule in root CLAUDE.md, carving out this
+pipeline automated submodule-pin-advance step as an explicit, documented
+exception to “Submodule fetch/pull is an EXPLICIT operator action, never
+automatic”. BLAST RADIUS: 16-plus submodule upstreams with automatic pin
+advancement. The wave-5 defect filed alongside this item is the concrete
+demonstration of why this amendment needs careful scoping: the
+implementing script defaulted to every submodule and would have
+auto-advanced the constitution governance submodule itself until a
+default-deny list was added. Review-ready DRAFT text for this amendment
+is at
+specs/002-build-test-distribute-pipeline/constitutional-amendments-proposal.md
+(with .html and .pdf siblings). The draft is NOT applied: CLAUDE.md and
+.specify/memory/constitution.md are byte-identical to their pre-feature
+baselines. BLOCKS: feature 002 phase 6 (US4 repository closure),
+specifically task T055. Source of truth:
+specs/002-build-test-distribute-pipeline/progress.yml and
+specs/002-build-test-distribute-pipeline/tasks.md.</td>
+</tr>
+<tr>
+<td>LVA-127</td>
+<td>Task</td>
+<td>Operator-blocked</td>
+<td>P1</td>
+<td>WHAT: feature 002 task T049 updates .specify/memory/constitution.md
+to match the T048 carve-out - the same MAJOR version bump as T041 if
+landed together, or a follow-up MAJOR if landed separately. Review-ready
+DRAFT text for this amendment is at
+specs/002-build-test-distribute-pipeline/constitutional-amendments-proposal.md
+(with .html and .pdf siblings). The draft is NOT applied: CLAUDE.md and
+.specify/memory/constitution.md are byte-identical to their pre-feature
+baselines. BLOCKS: feature 002 phase 6 (US4 repository closure),
+specifically task T055. Source of truth:
+specs/002-build-test-distribute-pipeline/progress.yml and
+specs/002-build-test-distribute-pipeline/tasks.md.</td>
+</tr>
+<tr>
+<td>LVA-128</td>
+<td>Task</td>
+<td>Operator-blocked</td>
+<td>P0</td>
+<td>WHAT: feature 002 task T054 is a MANDATORY code review of
+scripts/advance-all-submodules.sh before any invocation against a real
+submodule upstream, per plan.md Human Checkpoint #2. This is the
+highest-blast-radius new component in the feature: 16-plus submodule
+upstreams with automatic pin advancement, plus commit-and-push of each
+submodule own local modifications. CURRENT STATE, stated honestly: the
+T050-T053 TDD cycle against DISPOSABLE FIXTURE repos is COMPLETE - 36/36
+assertions green, independently re-run by the orchestrating session -
+and real submodules were confirmed untouched (git status –porcelain over
+submodules/ and constitution/ empty, git diff –cached empty).
+scripts/advance-all-submodules.sh has NEVER been run against a real
+submodule or a real upstream. REVIEW MUST COVER at minimum: the
+GOVERNANCE_DENY default-deny list added by the wave-5 fix and the fact
+it is deliberately not overridable via LAVA_ADVANCE_SUBMODULES; the
+7-step ordering from research.md R-005 (fetch, compare, no-op or
+checkout-advance, rebuild-and-test, discard-and-report on failure,
+commit/push the submodule own local modifications, update the parent
+pin); and the refusal paths REJECTED_BREAKING_CHANGE,
+REJECTED_PUSH_CONFLICT and REFUSED_GOVERNANCE_DENY. Source of truth:
+specs/002-build-test-distribute-pipeline/progress.yml and
+specs/002-build-test-distribute-pipeline/tasks.md.</td>
+</tr>
+<tr>
+<td>LVA-129</td>
+<td>Task</td>
+<td>Operator-blocked</td>
+<td>P1</td>
+<td>WHAT: feature 002 task T062 requires a full end-to-end run of
+quickstart.md Scenario 2 (all phases, no shortcuts) on a DISPOSABLE
+branch, per plan.md Human Checkpoint #3, before
+scripts/pipeline-build-test-distribute.sh is trusted to run against real
+master. CURRENT STATE, stated honestly: the full end-to-end orchestrator
+run across all five wired phases has NOT been performed. It invokes
+Gradle, systemd and an Android emulator, and was deliberately not run
+because it is this review gate and because it would have contended with
+parallel agents already using those toolchains. It is not claimed as
+done anywhere. SCOPE NOTE: only phases precondition, build, test,
+install_boot and live_verify are wired; distribute, docs and closure are
+deliberately not wired pending T040/T041 and T048/T049, and asking for
+them via –until is a usage error rather than a silent no-op. Source of
+truth: specs/002-build-test-distribute-pipeline/progress.yml and
+specs/002-build-test-distribute-pipeline/tasks.md.</td>
 </tr>
 <tr>
 <td>LVA-5</td>

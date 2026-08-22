@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>phase-04-live-verify-api-app.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptspipelinephase-04-live-verify-api-appsh"><code>scripts/pipeline/phase-04-live-verify-api-app.sh</code></h1>
+<p>External user guide (HelixConstitution §11.4.18 companion doc) for
+the <code>:api-app</code> half of the local build-test-distribute
+pipeline's FR-008 live-verification phase
+(<code>specs/002-build-test-distribute-pipeline</code>, task T037).</p>
+<p><code>Classification:</code> project-specific (Lava's
+<code>:api-app</code> module, its Challenge suite, and this pipeline's
+evidence layout; the delegate-to-Containers emulator orchestration it
+reuses is universal per §6.X).</p>
+<h2 id="what-it-does">What it does</h2>
+<p>Takes the real <code>:api-app</code> <strong>debug APK</strong> that
+phase-01 produced, has the Containers submodule put it onto a real
+<strong>cold-booted Android emulator running inside a
+container</strong>, and drives the real Compose UI
+<strong>boot-and-serve Challenge</strong> against it — the Challenge
+that starts the on-device API embed and then, as a genuine HTTPS peer,
+asserts the embed actually answers (<code>/health</code> → 200 + real
+JSON body; an auth-gated route → 401 without the key; the same route →
+not-401 with the key the UI displayed).</p>
+<p>It is the sibling of
+<code>scripts/pipeline/phase-04-live-verify-api.sh</code>, which proves
+the standalone <code>lava-api-go</code> <strong>service</strong> is
+live. Before this script existed, a green <code>live_verify</code> phase
+meant only "the Go API is live" and said nothing about
+<code>:api-app</code>.</p>
+<h2 id="why-it-is-not-the-same-as-phase-02s-challenge-pass">Why it is
+not the same as phase-02's Challenge pass</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>phase-02-test-challenge.sh</code></th>
+<th>this script</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Scope</td>
+<td>the whole discovered Challenge suite, both modules</td>
+<td>the boot-and-serve Challenge only</td>
+</tr>
+<tr>
+<td>Claim</td>
+<td>"the test suite is green"</td>
+<td>"the shipped artifact, installed on a device, boots and serves"</td>
+</tr>
+<tr>
+<td>Evidence dir</td>
+<td><code>&lt;run&gt;/phase-02/…</code></td>
+<td><code>&lt;run&gt;/phase-04/…</code></td>
+</tr>
+<tr>
+<td><code>report.json</code> phase</td>
+<td><code>test</code></td>
+<td><code>live_verify</code></td>
+</tr>
+<tr>
+<td>Runs</td>
+<td>before install/boot</td>
+<td>after phase-03's install/boot</td>
+</tr>
+</tbody>
+</table>
+<p>§6.Z's forensic anchor — a distribute green-lit by a test pass that
+never exercised the shipped behaviour — is exactly why the two must not
+be conflated.</p>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/pipeline/phase-04-live-verify-api-app.sh</span> <span class="op">&lt;</span>run_id<span class="op">&gt;</span> <span class="pp">[</span><span class="ss">repo</span><span class="pp">-</span><span class="ss">path</span><span class="pp">]</span></span></code></pre></div>
+<p><code>&lt;run_id&gt;</code> must already have a
+<code>report.json</code> (created by <code>lib/run-report.sh</code>'s
+<code>init_run_report</code>). The script appends one entry to that
+report under the phase name <code>live_verify</code> — the same name its
+<code>lava-api-go</code> sibling uses. Both entries legitimately coexist
+in <code>phases[]</code>; they are the two halves of FR-008 and are told
+apart by their <code>evidence_dir</code>.</p>
+<h3 id="environment-overrides">Environment overrides</h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LAVA_PIPELINE_LIVE_VERIFY_API_APP_TEST_CLASSES</code></td>
+<td>the discovered boot-and-serve Challenge</td>
+<td>Comma-separated FQCN list, <strong>intersected</strong> with what is
+really on disk — a class named here with no matching file is never
+invented.</td>
+</tr>
+<tr>
+<td><code>LAVA_PIPELINE_LIVE_VERIFY_API_APP_CONTAINER_RUNTIME</code></td>
+<td><code>podman</code></td>
+<td><code>podman</code> or <code>docker</code>.</td>
+</tr>
+<tr>
+<td><code>LAVA_PIPELINE_LIVE_VERIFY_API_APP_TIMEOUT_SECONDS</code></td>
+<td><code>2700</code> (45m)</td>
+<td>Hard outer bound on the whole matrix invocation. On expiry the run
+is killed, surviving containers are reaped, and the
+<strong>real</strong> timeout is recorded — never a fabricated
+pass.</td>
+</tr>
+<tr>
+<td><code>LAVA_PIPELINE_LIVE_VERIFY_API_APP_BOOT_TIMEOUT</code></td>
+<td><code>10m</code></td>
+<td>Forwarded to the matrix script's <code>--boot-timeout</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="exit-codes">Exit codes</h3>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>Every Evidence Record is PASS (or an honest SKIPPED)
+<strong>and</strong> every record was anti-bluff-validated.</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>A real failure: the run genuinely failed, the two independent
+sources disagreed, the §6.AH container proof was absent, the artifact
+was missing, or a record was REJECTED. Recorded as <code>FAIL</code> in
+<code>report.json</code> either way.</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>Usage/precondition error (missing <code>run_id</code>, absent
+<code>report.json</code>, missing tool or matrix script, zero
+discoverable Challenge classes).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="constitutional-posture">Constitutional posture</h2>
+<ul>
+<li><strong>§6.AH / §6.AG / §6.X.</strong> The emulator comes from
+<code>scripts/run-api-app-challenge-matrix.sh</code> → the Containers
+submodule's <code>cmd/emulator-matrix</code> CLI, which boots the
+emulator process <em>inside</em> a podman/docker container. No
+host-direct emulator, no physical device, no fallback. <strong>The
+script does not merely trust that</strong>: while the run is in flight,
+its own background poller samples
+<code>&lt;runtime&gt; ps --filter name=lava-emu</code> and the device
+list every 10s into
+<code>hermetic-script/raw/live-target-proof.log</code>. If no running
+emulator container was ever observed, the provenance record is
+<strong>FAIL</strong> — §6.AH-compliance is a checked fact here, not a
+claim.</li>
+<li><strong>Decoupled Reusable Architecture.</strong> No emulator
+orchestration is reimplemented; the script is thin glue over the
+existing matrix script.</li>
+<li><strong>§6.R.</strong> No IPv4, host:port, or UUID literal. The
+image reference is built from the API level chosen at runtime; the
+Challenge class is <em>discovered</em> from the real source files (their
+own <code>package</code> line + filename), never hardcoded as an FQCN
+that could drift.</li>
+<li><strong>§6.U.</strong> No <code>sudo</code>/<code>su</code>.</li>
+</ul>
+<h2 id="which-artifact-is-verified">Which artifact is verified</h2>
+<p><code>api-app/build/outputs/apk/debug/api-app-debug.apk</code> — the
+exact path the matrix script passes to the Containers CLI's
+<code>--apk</code> flag and the exact path
+<code>phase-01-build-android.sh</code> publishes as its
+<code>api-app-debug</code> artifact.</p>
+<blockquote>
+<p><strong>Note on the task wording.</strong> <code>tasks.md</code> T037
+says "the T018 debug APK", but T018 is phase-01's <code>:api-app</code>
+<strong>release</strong> step and T017 is the <strong>debug</strong>
+step. The debug APK is what is meant and what is actually installable,
+because androidTest instrumentation APKs are built and signed against
+the debug variant — <code>connectedDebugAndroidTest</code> cannot drive
+a release APK.</p>
+</blockquote>
+<p>The script passes <code>--no-build</code>, so the matrix script
+rebuilds nothing; Gradle's own <code>connectedDebugAndroidTest</code>
+still brings the debug + androidTest APKs up to date with the current
+source before instrumenting. The recorded <code>sha256</code> is
+computed <strong>after</strong> the run, so it is the hash of the APK
+that was really on the device.</p>
+<h2 id="avd-scope-on-a-host-with-partial-image-availability">AVD scope
+on a host with partial image availability</h2>
+<p>The §6.AE.2 gate matrix is API 28/30/34/latest × phone/tablet. The
+Containers CLI's image preflight aborts the whole run if
+<strong>any</strong> requested AVD's image is missing, so this script
+picks the first candidate API level whose image is genuinely present
+locally (checked with a real <code>&lt;runtime&gt; image inspect</code>)
+and scopes <code>--avds</code> to that one phone AVD. When none are
+cached it still attempts the lowest candidate for real, so the genuine
+pull failure becomes the run's diagnostic instead of a guess.</p>
+<p><strong>This phase is a live-verification of the shipped artifact,
+not the §6.AE.2 release gate.</strong> That full-matrix obligation is
+unchanged and still owed at tag time.</p>
+<h2 id="evidence-records-written">Evidence Records written</h2>
+<p>Both land under <code>&lt;run&gt;/phase-04/</code>.</p>
+<ol type="1">
+<li><p><strong><code>hermetic-script</code> /
+<code>api-app-live-verify-install-and-runner-provenance</code></strong>
+— the §6.AH/§6.AG proof: the real <code>sha256</code> + byte size of the
+APK, the AVD / API level / diagnostics the Containers attestation
+recorded, the real container name + image <strong>observed
+running</strong> by the script's own poller, and confirmation that no
+physical device was a target. FAILs when the container proof is absent
+or the attestation reports an install failure.</p></li>
+<li><p><strong><code>real-device-challenge</code> /
+<code>&lt;FQCN&gt;</code></strong> (one per verified Challenge class) —
+PASS only when <strong>both</strong> independent sources agree:</p>
+<ul>
+<li><strong>Source A</strong>: Gradle's own host-side JUnit XML under
+<code>api-app/build/outputs/androidTest-results/connected/**/TEST-*.xml</code>,
+freshness-filtered to this run, with no
+<code>&lt;failure&gt;</code>/<code>&lt;error&gt;</code>.</li>
+<li><strong>Source B</strong>: the Containers attestation row reporting
+<code>test_passed=true</code>.</li>
+</ul>
+<p>Disagreement between them is itself a <strong>FAIL</strong> — a
+matrix runner claiming green while Gradle's own report showed a failure
+is precisely the bluff FR-004 exists to catch. The
+<code>raw_output_ref</code> file embeds the class's own
+<code>FALSIFIABILITY REHEARSAL</code> KDoc block <strong>verbatim from
+its <code>.kt</code> source</strong>, which is also what satisfies
+<code>anti-bluff-validate.sh</code> Rule 4 for this category.</p></li>
+</ol>
+<h3 id="directory-depth-constraint">Directory-depth constraint</h3>
+<p><code>finalize_run_report</code>'s aggregator selects records with
+<code>find &lt;phase_dir&gt; -mindepth 2 -maxdepth 2 -name '*.json'</code>.
+Any stray <code>.json</code> at exactly depth 2 under
+<code>phase-04</code> would be miscounted as an Evidence Record. All raw
+output — including the matrix runner's own
+<code>real-device-verification.json</code> /
+<code>host-preflight.json</code> — is therefore kept at depth 3 or
+deeper, under <code>&lt;category&gt;/raw/</code>.</p>
+<h2 id="cleanup">Cleanup</h2>
+<p>After the run the script lists and force-removes any surviving
+<code>lava-emu-*</code> container (recorded in
+<code>hermetic-script/raw/cleanup.log</code>), so an interrupted or
+partially-torn-down run never leaks an orphaned emulator.</p>
+<h2 id="anti-bluff-posture">Anti-bluff posture</h2>
+<p>A blocked run reports <strong>BLOCKED/FAIL with the real
+error</strong>; it never fabricates or assumes a pass. Specifically:</p>
+<ul>
+<li>Artifact missing → FAIL, naming the path.</li>
+<li>Outer timeout hit → FAIL, quoting the real matrix log tail.</li>
+<li>No container observed → FAIL, quoting the real preflight and log
+tail.</li>
+<li>Neither source recorded the class → FAIL, quoting what <em>was</em>
+present.</li>
+<li>Sources disagree → FAIL, quoting both verdicts.</li>
+</ul>
+<h2 id="related">Related</h2>
+<ul>
+<li><code>scripts/pipeline/phase-04-live-verify-api.sh</code> — the
+<code>lava-api-go</code> half.</li>
+<li><code>scripts/pipeline/phase-02-test-challenge.sh</code> — the
+build-time Challenge pass.</li>
+<li><code>scripts/run-api-app-challenge-matrix.sh</code> — the delegated
+matrix entry point.</li>
+<li><code>scripts/pipeline/lib/evidence.sh</code>,
+<code>lib/anti-bluff-validate.sh</code>, <code>lib/run-report.sh</code>
+— the shared pipeline libraries.</li>
+</ul>
+</body>
+</html>

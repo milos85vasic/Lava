@@ -179,10 +179,10 @@
 <h1
 id="scriptscheck-constitutionsh--user-guide"><code>scripts/check-constitution.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-07-02 (§6.N/O/P/Q
-propagation-check snake_case-glob + pointer-block fix)
-<strong>Inheritance:</strong> HelixConstitution §11.4.18 (script
-documentation mandate)</p>
+<p><strong>Last verified:</strong> 2026-08-25 (§6.N/O/P/Q
+propagation-target floor, from the §6.N.2 bluff hunt of 2026-08-23; §6.H
+tracker exemption, LVA-134) <strong>Inheritance:</strong>
+HelixConstitution §11.4.18 (script documentation mandate)</p>
 <h2 id="overview">Overview</h2>
 <p>Stub doc generated from the script's in-source header comment. See
 <code>scripts/check-constitution.sh</code> for canonical behavior. This
@@ -327,5 +327,345 @@ submodule would be redundant churn, not real coverage.</p>
 pointer-block from <code>submodules/auth/CLAUDE.md</code>, so it
 faithfully exercises the block-9 rejection path (a submodule with NO
 §6.N inheritance mechanism).</p>
+<h2
+id="2026-08-23-update--6nopq-propagation-target-floor-finding-f3">2026-08-23
+update — §6.N/O/P/Q propagation-target FLOOR (finding F3)</h2>
+<p>Added by the §6.N.2 gate-shaping bluff hunt. The change is small —
+one counter, one <code>if</code>, and the loop body rewritten from an
+<code>&amp;&amp;</code> list to <code>|| continue</code> — and it closes
+the second of two routes into the same no-op.</p>
+<p><strong>The defect.</strong> Block 9 seeds
+<code>propagation_targets</code> with 5 root docs
+(<code>CLAUDE.md</code>, <code>AGENTS.md</code>,
+<code>lava-api-go/CLAUDE.md</code>, <code>lava-api-go/AGENTS.md</code>,
+<code>lava-api-go/CONSTITUTION.md</code>) and then extends it from a
+glob over <code>submodules/*/CLAUDE.md</code>. <code>nullglob</code> is
+not set in this script, so when that glob matches nothing bash leaves
+the <strong>literal string</strong> <code>submodules/*/CLAUDE.md</code>
+as the loop's single value. <code>[[ -f ... ]]</code> is false for it,
+and nothing is appended.</p>
+<p>The old body was
+<code>[[ -f "$sub" ]] &amp;&amp; propagation_targets+=("$sub")</code>. A
+failing <code>[[ ... ]]</code> there is the <em>non-final</em> command
+of an <code>&amp;&amp;</code> list, a position <code>set -e</code>
+explicitly exempts — so the script did not abort. It continued, blocks 9
+/ 9b / 9d / 9e examined only the 5 root docs, and the gate reported
+<strong>PASS</strong>.</p>
+<p>The consequence is that one repository state produced two opposite
+verdicts, decided by something unrelated to the property under test:</p>
+<table>
+<thead>
+<tr>
+<th>Checkout</th>
+<th>What block 9 examined</th>
+<th>Verdict on identical drift</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Submodules initialised</td>
+<td>5 root docs + 17+ submodule docs</td>
+<td>drift caught, exit 1</td>
+</tr>
+<tr>
+<td>Submodules uninitialised</td>
+<td>5 root docs only</td>
+<td><strong>PASS</strong>, exit 0</td>
+</tr>
+</tbody>
+</table>
+<p>A gate reporting <em>"nothing failed"</em> when it means <em>"nothing
+was learned"</em> is the shape §6.J forbids. This same file already
+guards against exactly that shape one block earlier: the §6.H credential
+scan refuses to pass on an empty corpus
+(<code>"clause 6.H credential scan examined ZERO tracked files."</code>
+… <code>"a PASS here would assert nothing."</code>, lines 150–151). The
+propagation gate simply had no equivalent.</p>
+<p><strong>Not hypothetical.</strong> The block's own comment records
+the identical no-op having already happened once: the §11.4.29
+snake_case migration renamed every submodule directory to lowercase, the
+hard-coded CamelCase paths stopped resolving, and the guard
+<em>"silently skipped EVERY submodule … hiding real propagation
+drift"</em> until 2026-07-02. That fix replaced the CamelCase literals
+with the glob — it closed the rename route and left the
+uninitialised-checkout route into the same no-op open. A fresh
+<code>git clone</code> without <code>--recursive</code> is the ordinary
+way to arrive there.</p>
+<p><strong>The fix.</strong> The submodule contribution is counted, and
+a count of zero is a hard failure with an actionable remedy rather than
+a pass:</p>
+<pre><code>propagation gate examined ZERO submodule CLAUDE.md files.
+  → submodules/*/CLAUDE.md matched nothing, so the §6.N/§6.O/§6.P/§6.Q
+    propagation blocks would check only the 5 root docs.
+  → A PASS here would assert nothing about submodule propagation.
+  → Initialise the submodules and re-run:
+      git submodule update --init --recursive
+    (scripts/setup-clone.sh reports the same remedy at its step 4.)</code></pre>
+<p>Exit status is <strong>1</strong>. The floor can only fire when the
+gate was about to make an unbacked claim: a real checkout carries 17+
+own-org submodules, so a correctly initialised tree never reaches it.
+Operators who hit it have an uninitialised clone, and the message names
+the one command that fixes it.</p>
+<p><strong>Regression coverage.</strong>
+<code>tests/check-constitution/test_propagation_target_floor.sh</code>.
+Like the other gate-shaping tests from this hunt it <strong>extracts the
+block under test verbatim</strong> from the live script (two
+marker-anchored ranges: the <code>doc_inherits_clause()</code> helper,
+and <code>declare -a propagation_targets=(</code> through the second
+<code>done</code>), so it tracks the shipped code instead of a copy that
+could keep passing after the real one regressed. A
+<code>verify_extraction</code> guard fails loudly if those anchors move,
+because assertions against an empty harness would be vacuous — a bluff
+by construction.</p>
+<p>Four cases, deliberately paired so that a blanket fail-everything
+change cannot satisfy the suite:</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Kind</th>
+<th>Fixture</th>
+<th>Asserted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>regression</td>
+<td>5 compliant root docs, <code>submodules/</code> empty</td>
+<td>non-zero exit — the gate must not pass having examined zero
+submodules</td>
+</tr>
+<tr>
+<td>2</td>
+<td>regression</td>
+<td>same</td>
+<td>the failure names <code>git submodule update --init</code> as the
+remedy (a fresh clone is how operators arrive here; an opaque failure
+would not be actionable)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>control</td>
+<td>3 compliant submodules present</td>
+<td>exit 0 — the floor does not break the legitimate initialised
+workflow</td>
+</tr>
+<tr>
+<td>4</td>
+<td>control</td>
+<td>3 submodules, <code>submodules/cache/CLAUDE.md</code> drifted</td>
+<td>non-zero exit naming
+<code>propagation REGRESSED: submodules/cache/CLAUDE.md</code> — the
+floor did not replace or mask the real propagation check</td>
+</tr>
+</tbody>
+</table>
+<p>Cases 1 and 2 fail against the pre-fix code and pass against the fix;
+cases 3 and 4 pass against both, which is what makes them controls. The
+file is picked up by
+<code>scripts/verify-all-constitution-rules.sh</code>'s
+<code>tests/check-constitution/test_*.sh</code> discovery loop, so it is
+a registered gate of the sweep.</p>
+<h2
+id="2026-08-25-update--6h-credential-scan-exemption-for-the-generated-trackers-lva-134">2026-08-25
+update — §6.H credential-scan exemption for the generated trackers
+(LVA-134)</h2>
+<p>Landed alongside the propagation floor above, from a separate work
+stream. The change is one alternation added to the corpus-exclusion
+regex plus the rationale recorded in the source:</p>
+<pre><code>…|^(docs/)?(Issues|Fixed)(_Summary)?\.(md|html|pdf|docx)$</code></pre>
+<p><strong>Why.</strong> Every exemption already in that list is the
+same category — a surface whose purpose is to <strong>describe</strong>
+the forbidden pattern rather than to use a credential:
+<code>.env.example</code> (a template), <code>CHANGELOG.md</code>
+(historical incidents), <code>.lava-ci-evidence/</code> (forensic leak
+records), <code>docs/INCIDENT_*</code>, the governance docs, and this
+scanner's own source. The generated issue tracker was the one such prose
+surface missing from the list, and it is the surface <em>most</em>
+likely to describe a credential-pattern defect. LVA-134 — the ticket
+filed about this very false positive — quotes the pattern verbatim in
+its body, so regenerating the trackers from
+<code>docs/workable_items.db</code> reproduced the violation in four
+more tracked files. Filing the bug re-created the bug.</p>
+<p><strong>Scope corrected 2026-08-26.</strong> The anchor named
+<code>docs/</code> only, but this repo tracks the SAME generated
+renderings at the repository <strong>root</strong> as well — 16 paths in
+each location, and the two copies are byte-identical (verified with
+<code>cmp</code> on all four <code>.md</code> and all four
+<code>.html</code> members). The root copies were therefore still
+scanned, and the next tracker regeneration reproduced the LVA-134 body's
+verbatim pattern in <code>Fixed.md</code>, <code>Fixed.html</code>,
+<code>Fixed_Summary.md</code> and <code>Fixed_Summary.html</code> at the
+root. Measured: <code>git show HEAD:Fixed.md | grep -c</code> = 0,
+working tree = 1 — the hit was NEW generator output, not inherited
+content. The <code>(docs/)?</code> is not a loosening: it finishes
+covering the surface the exemption was written for. Exempt total goes
+from 16 files to 32 (0.58 % of 5510 tracked), and the root half is the
+same bytes as the already-exempt <code>docs/</code> half, so no
+additional information is withheld from the scan.</p>
+<p><strong>Why all four names, not just the two that were red.</strong>
+The trackers are generated: an OPEN item renders into
+<code>Issues*</code>, and closing it MOVES the same body into
+<code>Fixed*</code>. Exempting only <code>Issues*</code> would re-break
+this gate at the moment LVA-134 is marked closed. The scope follows from
+that mechanic, not from which files happened to be failing on the
+day.</p>
+<p><strong>Coverage cost, stated plainly</strong> (§6.J — an exemption
+is surface no longer scanned). Independently measured against this
+checkout:</p>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Measured</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tracked files newly exempted</td>
+<td>16</td>
+</tr>
+<tr>
+<td>Tracked files in the repository</td>
+<td>5510</td>
+</tr>
+<tr>
+<td>Share of corpus removed</td>
+<td>0.29%</td>
+</tr>
+</tbody>
+</table>
+<p>All 16 are generated from <code>docs/workable_items.db</code>; none
+is handwritten source. The <code>.pdf</code> / <code>.docx</code>
+members were already effectively unscanned because <code>grep -I</code>
+skips binaries, so the <strong>real</strong> new loss is 8 files:
+<code>{Issues,Fixed}{,_Summary}.{md,html}</code>. Residual risk: a real
+credential pasted into a ticket body would no longer be caught in its
+markdown or HTML rendering. That is accepted because the rendering is a
+copy — the authoritative store, <code>docs/workable_items.db</code>, is
+binary and was never scanned by this block.</p>
+<p><strong>What was deliberately NOT exempted:
+<code>tests/**</code>.</strong> The hermetic fixture in
+<code>tests/check-constitution/test_credential_scan_corpus.sh</code>
+that used to trip this scan now <strong>assembles its leak string at
+runtime</strong>
+(<code>printf '%s object CredsBridge {\n}\n' 'private'</code>, line 117)
+— the same self-safe idiom
+<code>scripts/scan-no-hardcoded-ipv4.sh</code> uses on itself. All 102
+tracked files under <code>tests/</code> therefore remain fully inside
+the scan corpus.</p>
+<p>That choice is the load-bearing one. The two sibling §6.R scanners
+(<code>scan-no-hardcoded-ipv4.sh</code>,
+<code>scan-no-hardcoded-hostport.sh</code>) blanket-exempt
+<code>^tests/</code>; copying that here would have cost <strong>102
+files</strong> of coverage to fix <strong>one</strong> file's false
+positive. Runtime assembly costs nothing and is self-verifying: if the
+assembly ever drifts so the written file no longer carries the pattern,
+the fixture stops reproducing the leak and the test fails rather than
+passing vacuously.</p>
+<h3
+id="anti-bluff-verification-of-the-exemption-executed-not-asserted">Anti-bluff
+verification of the exemption (executed, not asserted)</h3>
+<p>An exemption is coverage removed, so the exemption itself is gated by
+a new fourth case in
+<code>tests/check-constitution/test_credential_scan_corpus.sh</code>:</p>
+<ul>
+<li><strong><code>test_exemption_does_not_overreach</code></strong>
+plants a leak in <code>docs/Issues_Notes_*.md</code> — a path that
+<em>begins</em> with <code>docs/Issues</code> and <em>ends</em> in
+<code>.md</code>, so an unanchored or merely sloppier exemption regex
+would swallow it — and asserts the scanner still reports a clause-6.H
+violation. The anchoring of
+<code>^(docs/)?(Issues|Fixed)(_Summary)?\.(md|html|pdf|docx)$</code> is
+what makes that file scanned rather than exempt.</li>
+<li><strong><code>test_root_exemption_does_not_overreach</code></strong>
+(2026-08-26) is the same probe at the repository ROOT, and
+<strong><code>test_root_tracker_rendering_is_exempt</code></strong>
+proves the root renderings really are covered — so the newly-optional
+<code>docs/</code> component cannot silently become a prefix sweep in
+either direction.</li>
+</ul>
+<p>Three mutations were rehearsed against the landed change. Each
+produced a failure, and each was reverted with the file restored
+byte-identically (sha256-verified):</p>
+<table>
+<thead>
+<tr>
+<th>Mutation</th>
+<th>Effect on the system</th>
+<th>Observed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A — assembled keyword <code>private</code> → <code>public</code> at
+both call sites</td>
+<td>the fixture writes a file that no longer carries the pattern</td>
+<td><code>FAIL test_real_violation_still_caught</code></td>
+</tr>
+<tr>
+<td>B — exemption widened from the anchored form to a blanket
+<code>^docs/</code></td>
+<td>test 4's fixture is swallowed, emptying the corpus</td>
+<td><code>FAIL test_exemption_does_not_overreach</code> (the
+empty-corpus guard fired)</td>
+</tr>
+<tr>
+<td>C — the Bridge pattern deleted from
+<code>forbidden_credential_patterns</code></td>
+<td>the scanner is blinded to the C2 shape entirely</td>
+<td><code>FAIL test_real_violation_still_caught</code></td>
+</tr>
+</tbody>
+</table>
+<p>Mutation C is the load-bearing one: it confirms the fix did not blind
+the scanner, because removing real detection still fails the suite.</p>
+<p>Independently of the hermetic suite, genuine credential-shaped
+literals were planted in two clean tracked files that are
+<strong>not</strong> exempt — <code>README.md</code> (the
+<code>private object …Bridge {</code> shape) and
+<code>scripts/ci.sh</code> (a literal <code>RUTRACKER_PASSWORD</code>
+assignment to a quoted string constant) — and the scanner caught
+<strong>both</strong> after the fix, reporting 2 clause-6.H violations.
+Both files were then restored and verified byte-identical to their
+pre-plant sha256, leaving no working-tree trace.</p>
+<h3 id="ordering-consequence-worth-keeping-in-mind">Ordering consequence
+worth keeping in mind</h3>
+<p>Block 6 sits ahead of the §6.N/§6.O/§6.P/§6.Q propagation blocks and
+of every gate after them. Any <code>exit 1</code> there is not a local
+failure — it truncates the run. Measured on this checkout: the failing
+run emitted <strong>0</strong> <code>✓</code> markers; the fixed run
+reaches <code>✓ clause 6.K</code> and continues. When adding future
+patterns to this block, weigh that a false positive here silently costs
+the rest of the gate, not just its own check.</p>
+<h2 id="6h-credential-scan-corpus-floor-added-2026-08-22">§6.H
+credential-scan corpus floor (added 2026-08-22)</h2>
+<p>The clause-6.H credential scan builds <code>tracked_files</code> from
+<code>git ls-files</code> and then greps each entry for credential
+patterns. Before this floor existed, a <code>git ls-files</code> that
+yielded <strong>nothing</strong> — a broken index, a non-repo working
+directory, a stubbed or failed <code>git</code> — made the scan loop
+iterate zero times, report <code>credential_violations=0</code>, and
+print "no clause-6.H credential patterns in tracked files".</p>
+<p>That is <em>"nothing was learned"</em> reported as <em>"nothing
+failed"</em>: the exact shape §6.J forbids. The <code>|| true</code> on
+the collecting pipeline — needed because <code>grep -v</code> exits 1 on
+an all-filtered corpus — is what made the failure silent rather than
+loud.</p>
+<p>The gate now refuses outright when the corpus is empty:</p>
+<pre><code>clause 6.H credential scan examined ZERO tracked files.
+  → The scan corpus is empty, so a PASS here would assert nothing.
+  → Check that &#39;git ls-files&#39; works in &lt;cwd&gt; (repo present, index readable,
+    git on PATH) and re-run.</code></pre>
+<p>A healthy checkout has thousands of tracked files, so this guard
+<strong>cannot fire on a real run</strong> — it fires only when the gate
+is about to make an unbacked claim. That property is what makes it safe
+to add to a gate that runs on every push.</p>
+<p>Related: the same empty-corpus shape was found at 20 further sites
+during the 2026-08-26 §6.N.2 sweep and closed with this idiom. See also
+the propagation-target floor below, which additionally distinguishes an
+<em>uninitialised</em> submodule corpus from genuine propagation drift,
+because the two call for opposite remedies.</p>
 </body>
 </html>
