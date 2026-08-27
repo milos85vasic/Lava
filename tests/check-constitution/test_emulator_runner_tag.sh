@@ -166,6 +166,64 @@ test_real_tree_passes() {
   fi
 }
 
+# Test 8 (added 2026-08-26): a §6.N bluff-hunt record that merely MENTIONS a
+# marker in a prose field is NOT an emulator attestation and MUST NOT be
+# flagged. The marker here sits in an "unconfirmed" string whose own text says
+# Gradle was not run — the shape that actually broke the live-tree case on
+# 2026-08-26, where the gate reported a written record of NOT running an
+# emulator as an unattested emulator run.
+test_prose_mention_not_flagged() {
+  local f; f=$(mktemp)
+  cat > "$f" <<'EOF'
+{
+  "hunt_date": "2026-08-26",
+  "trigger": "operator anti-bluff mandate",
+  "findings": [
+    { "target": "scripts/pipeline/phase-02-test-challenge.sh",
+      "unconfirmed": "Whether :app:connectedDebugAndroidTest can exit 0 without writing a fresh XML. Gradle was not run (resource constraint)." }
+  ]
+}
+EOF
+  local rc; rc=$(run_on "$f")
+  if [[ "$rc" -eq 0 ]]; then
+    echo "PASS test_prose_mention_not_flagged (prose mention → not flagged, exit=$rc)"
+  else
+    echo "FAIL test_prose_mention_not_flagged: expected exit 0, got $rc"
+    fail_count=$((fail_count + 1))
+  fi
+  rm -f "$f"
+}
+
+# Test 9 (added 2026-08-26): the narrowing in test 8 must be keyed on what the
+# file IS, never on where it lives. A REAL untagged attestation written into
+# .lava-ci-evidence/bluff-hunt/ — the very directory whose records test 8
+# excuses — MUST still be flagged. If this ever passes, the fix has degenerated
+# into a path exemption and a genuine attestation can hide by choosing its
+# directory.
+test_attestation_in_bluff_hunt_dir_still_flagged() {
+  local dir="$REPO_ROOT/.lava-ci-evidence/bluff-hunt"
+  local f="$dir/.tmp-runner-tag-probe-$$.json"
+  mkdir -p "$dir"
+  cat > "$f" <<'EOF'
+{
+  "rows": [
+    { "avd": "Pixel_8", "api_level": 35, "boot_seconds": 12.3,
+      "test_class": "lava.app.challenges.Challenge00CrashSurvivalTest",
+      "test_passed": true,
+      "diag": { "adb_devices_state": "emulator-5556 device" } }
+  ]
+}
+EOF
+  local rc; rc=$(run_on "$f")
+  rm -f "$f"
+  if [[ "$rc" -eq 1 ]]; then
+    echo "PASS test_attestation_in_bluff_hunt_dir_still_flagged (attestation flagged regardless of directory, exit=$rc)"
+  else
+    echo "FAIL test_attestation_in_bluff_hunt_dir_still_flagged: expected exit 1, got $rc"
+    fail_count=$((fail_count + 1))
+  fi
+}
+
 echo "=== check-emulator-runner-tag.sh hermetic test ==="
 test_no_runner_tag_fails
 test_host_direct_runner_fails
@@ -173,6 +231,8 @@ test_containers_runner_passes
 test_equals_form_passes
 test_non_emulator_file_passes
 test_advisory_mode_passes
+test_prose_mention_not_flagged
+test_attestation_in_bluff_hunt_dir_still_flagged
 test_real_tree_passes
 
 if [[ "$fail_count" -gt 0 ]]; then

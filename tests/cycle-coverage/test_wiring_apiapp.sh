@@ -150,15 +150,10 @@ AK_VERSION="$VERSION"      # vname-newval, from snapshot/build.gradle at the com
 AK_EVIDENCE_DIR="$2"
 # --- >>> BEGIN §6.AK pre-push Check 10 api-app extension block >>>
 if [[ "\$ADVANCE" == "true" ]]; then
-  case "\$AK_PTR" in
-    last-version-debug)   ak_channel="debug" ;;
-    last-version-release) ak_channel="release" ;;
-    *)                    ak_channel="debug" ;;
-  esac
+  # LVA-149: the ak_channel derivation that fed --channel is gone with the flag.
   ak_rc=0
   "\$ROOT/scripts/check-cycle-coverage.sh" \\
       --version="\$AK_VERSION" \\
-      --channel="\$ak_channel" \\
       --evidence-dir="\$AK_EVIDENCE_DIR" \\
       --head="\$sha" \\
       --strict >/dev/null 2>&1 || ak_rc=\$?

@@ -177,7 +177,7 @@
 </head>
 <body>
 <h2
-id="lva-1-deflake-credentialsviewmodeltest-select-provider-updates-selectedprovider">LVA-1
+id="lva-1--deflake-credentialsviewmodeltest--select-provider-updates-selectedprovider">LVA-1
 — Deflake CredentialsViewModelTest &gt; select provider updates
 selectedProvider</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -189,7 +189,7 @@ feature/credentials/src/test/kotlin/lava/feature/credentials/CredentialsViewMode
 (Commit 1) via bounded await-until-selectedProvider loop;
 falsifiability-rehearsed. <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/sixth-law-incidents/2026-05-20-flaky-credentialsviewmodeltest.json</p>
-<h2 id="lva-2-6.x-debt-darwinarm64-emulator-acceleration-sub-debt">LVA-2
+<h2 id="lva-2--6x-debt-darwinarm64-emulator-acceleration-sub-debt">LVA-2
 — §6.X-debt darwin/arm64 emulator-acceleration sub-debt</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong>
@@ -201,7 +201,7 @@ gate runner is host-direct+HVF. PROVEN by C00 cold-start canary + full
 0 fail). RESOLVED 2026-05-20. <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json</p>
 <h2
-id="lva-009-helixqa-vm-qa-launch-dispatch-exit-127-vision-works-action-dispatch-command-not-found">LVA-009
+id="lva-009--helixqa-vm-qa-launch-dispatch-exit-127-vision-works-action-dispatch-command-not-found">LVA-009
 — HelixQA VM QA launch-dispatch exit 127 (vision works, action-dispatch
 command-not-found)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -213,19 +213,19 @@ app, exit-127 gone) <strong>Severity:</strong> P2
 <p>After the 3-layer claude vision bridge fix (helixqa aef46e5d), the
 HelixQA autonomous vision QA GENUINELY drives the Lava app on the
 Genymotion VM: it analyzes screenshots and decides actions
-(vision-screen-changed PASS; rationale ‘Current screen is the Android
-home launcher … launching the Lava client app’). Remaining blocker: the
-‘launch’ action dispatch returns ‘exit status 127’ (command not found) —
-visionnav step 2 dispatch ‘launch digital.vasic.lava.client.dev’. The
-derived launch action is ‘shell monkey -p digital.vasic.lava.client.dev
-1’; the ADB actor appears to run it without the ‘adb -s <serial>’ prefix
-(treating ‘shell’ as a command) OR adb is not on the dispatch subprocess
+(vision-screen-changed PASS; rationale 'Current screen is the Android
+home launcher … launching the Lava client app'). Remaining blocker: the
+'launch' action dispatch returns 'exit status 127' (command not found) —
+visionnav step 2 dispatch 'launch digital.vasic.lava.client.dev'. The
+derived launch action is 'shell monkey -p digital.vasic.lava.client.dev
+1'; the ADB actor appears to run it without the 'adb -s <serial>' prefix
+(treating 'shell' as a command) OR adb is not on the dispatch subprocess
 PATH. Fix in helixqa pkg actor/bridge ADB dispatch. Evidence:
 .lava-ci-evidence/helixqa/vm-qa-vision2-20260608T182251Z/ (4/4 reached
 vision+navigation, 1 ERROR + 3 FAILED on the launch-dispatch 127, NOT
 bridge errors anymore).</p>
 <h2
-id="lva-010-lava-api-go-router-mounts-v1provider-group-without-provider-middleware-handlers-panic500">LVA-010
+id="lva-010--lava-api-go-router-mounts-v1provider-group-without-provider-middleware-handlers-panic500">LVA-010
 — lava-api-go router mounts /v1/{provider} group WITHOUT provider
 middleware (handlers panic→500)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -242,7 +242,7 @@ dispatch. Confirm whether production wires the middleware elsewhere
 (real server bootstrap) or this is a real gap. Evidence: router_test.go
 note + internal/router/router.go.</p>
 <h2
-id="lva-011-testendpointsrepository.add-third-law-divergence-stores-rutracker-real-impl-no-ops-it">LVA-011
+id="lva-011--testendpointsrepositoryadd-third-law-divergence-stores-rutracker-real-impl-no-ops-it">LVA-011
 — TestEndpointsRepository.add Third-Law divergence (stores Rutracker;
 real impl no-ops it)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -253,12 +253,12 @@ core/testing TestEndpointsRepository Rutracker no-op + equivalence test
 Endpoint.Rutracker and can raise a duplicate-conflict for it, but the
 real EndpointsRepositoryImpl.add() early-returns for Rutracker (if
 (endpoint is Endpoint.Rutracker) return) and never stores it. A future
-test asserting ‘adding Rutracker is a no-op’ would pass against the fake
+test asserting 'adding Rutracker is a no-op' would pass against the fake
 while exercising different behavior than production — a latent
 §Third-Law bluff-fake. Fix: add the Rutracker no-op branch + doc to the
 fake. Flagged by the W6 core/domain UseCase agent (2026-06-09).</p>
 <h2
-id="lva-012-coretesting-testvisitedfavoritesbookmarks-repositories-are-todo-throw-stub-bluff-fakes">LVA-012
+id="lva-012--coretesting-testvisitedfavoritesbookmarks-repositories-are-todo-throw-stub-bluff-fakes">LVA-012
 — core/testing TestVisited/Favorites/Bookmarks repositories are
 TODO-throw stub bluff-fakes</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -268,7 +268,7 @@ equivalence tests <strong>Severity:</strong> P2
 <strong>Created-By:</strong> AI</p>
 <p>core/testing TestVisitedRepository, TestFavoritesRepository,
 TestBookmarksRepository have observe/contains/add/etc methods that are
-TODO(‘Not yet implemented’) (throw). They are unusable for behavioral
+TODO('Not yet implemented') (throw). They are unusable for behavioral
 wiring — feature ViewModel tests (account, visited, rating) work around
 them with local in-memory fakes. Per the Third Law these shared fakes
 should be behaviorally-equivalent to the real repos so tests can use
@@ -276,7 +276,7 @@ them directly. Flagged by the rating+visited VM-test agent (2026-06-09).
 Fix: implement the stubs as real in-memory fakes matching the real repo
 contracts + add equivalence tests.</p>
 <h2
-id="lva-014-testsuggestsrepository-was-a-todo-throw-stub-lva-012-bluff-class">LVA-014
+id="lva-014--testsuggestsrepository-was-a-todo-throw-stub-lva-012-bluff-class">LVA-014
 — TestSuggestsRepository was a TODO-throw stub (LVA-012 bluff
 class)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -284,15 +284,15 @@ class)</h2>
 TestSuggestsRepository implemented (in-memory, case-insensitive UPSERT
 id=lowercase().hashCode(), newest-first, clear) +
 TestSuggestsRepositoryTest (4 tests); Bluff-Audit: drop dedup filterNot
-→ ‘case-insensitive UPSERT MUST keep one row expected:&lt;1&gt; but
-was:&lt;2&gt;’, reverted; core:testing 31/0, feature:menu 17/0
+→ 'case-insensitive UPSERT MUST keep one row expected:&lt;1&gt; but
+was:&lt;2&gt;', reverted; core:testing 31/0, feature:menu 17/0
 <strong>Created-By:</strong> AI</p>
 <p>core/testing TestSuggestsRepository.observeSuggests/addSuggest threw
 TODO(); clear() no-op. Real SuggestsRepositoryImpl emits newest-first
 (timestamp DESC) + case-insensitive UPSERT (id=lowercase().hashCode(),
 REPLACE) + clear deletes all. Unusable stub = Third-Law bluff fake.</p>
 <h2
-id="lva-015-testsearchhistoryrepository-positional-id-no-upsert-wrong-ordering-third-law-divergence-bluff-test">LVA-015
+id="lva-015--testsearchhistoryrepository-positional-id--no-upsert--wrong-ordering-third-law-divergence--bluff-test">LVA-015
 — TestSearchHistoryRepository positional-id + no-UPSERT + wrong ordering
 (Third-Law divergence + bluff test)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -300,19 +300,18 @@ id="lva-015-testsearchhistoryrepository-positional-id-no-upsert-wrong-ordering-t
 TestSearchHistoryRepository content-derived id (replicates Filter.id())
 + UPSERT + newest-first; TestSearchHistoryRepositoryTest rewritten to
 real contract (6 tests); Bluff-Audit: revert to positional-append →
-‘upserts the same logical search’ + ‘dedups searches that differ only by
-sort’ FAILED expected:&lt;1&gt; but was:&lt;2&gt;, reverted;
+'upserts the same logical search' + 'dedups searches that differ only by
+sort' FAILED expected:&lt;1&gt; but was:&lt;2&gt;, reverted;
 core:testing 31/0, feature:menu 17/0, feature:search 9/0
 <strong>Created-By:</strong> AI</p>
 <p>core/testing TestSearchHistoryRepository.add used positional id
 (it.size) + always appended (no dedup) + insertion order, while real
-SearchHistoryRepositoryImpl uses content-derived Filter.id() + <span
-class="citation" data-cites="Insert">@Insert</span> REPLACE UPSERT +
-ORDER BY timestamp DESC. The existing TestSearchHistoryRepositoryTest
-asserted the fake-shaped behavior (ids [0,2], oldest-first) — a bluff
-test.</p>
+SearchHistoryRepositoryImpl uses content-derived Filter.id() + @Insert
+REPLACE UPSERT + ORDER BY timestamp DESC. The existing
+TestSearchHistoryRepositoryTest asserted the fake-shaped behavior (ids
+[0,2], oldest-first) — a bluff test.</p>
 <h2
-id="lva-016-ratingviewmodeltest-realobserveratingrequestusecase-drops-the-engagement-gate-active-bluff">LVA-016
+id="lva-016--ratingviewmodeltest-realobserveratingrequestusecase-drops-the-engagement-gate-active-bluff">LVA-016
 — RatingViewModelTest RealObserveRatingRequestUseCase drops the
 engagement gate (ACTIVE bluff)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -321,15 +320,15 @@ ObserveRatingRequestUseCaseImpl made public (Fifth Law); feature/rating
 RatingViewModelTest now wires the REAL use case over LVA-012/015-fixed
 shared fakes, seeds real engagement (3 bookmarks&gt;2) in the 4
 Show-path tests. Bluff-Audit: neutralize seedEngagement → 4 Show-path
-tests FAIL ‘TurbineAssertionError: No value produced in 3s’ (real
+tests FAIL 'TurbineAssertionError: No value produced in 3s' (real
 engagement gate the old fake dropped), 2 Hide tests pass; reverted.
 GREEN feature:rating 6/0, core:domain 57/0 <strong>Created-By:</strong>
 AI</p>
-<p>feature/rating RatingViewModelTest’s local
+<p>feature/rating RatingViewModelTest's local
 RealObserveRatingRequestUseCase re-implements
 ObserveRatingRequestUseCaseImpl but OMITS the 3rd condition (engagement:
 pinned&gt;1 OR other&gt;3 OR visited&gt;5 OR bookmarks&gt;2). The test
-‘Show rating request is rendered when conditions are met’ seeds ZERO
+'Show rating request is rendered when conditions are met' seeds ZERO
 engagement + asserts Show, but the REAL use case would emit Hide for
 that user state. Second-Law/§6.J bluff: re-implements internal business
 logic + asserts an outcome production would not produce. Fix: wire the
@@ -338,25 +337,24 @@ ObserveSearchHistory/Visited[-&gt;EnrichTopics]/Bookmarks use cases over
 shared in-memory fakes, now usable post LVA-012/015) + seed engagement
 in the Show test. Source: parallel fake-audit 2026-06-09.</p>
 <h2
-id="lva-017-feature-favoritestopic-local-fakes-add-lacks-replace-dedup-latent">LVA-017
+id="lva-017--feature-favoritestopic-local-fakes-add-lacks-replace-dedup-latent">LVA-017
 — feature favorites/topic local fakes: add() lacks REPLACE dedup
 (LATENT)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong> feature/favorites
 InMemoryFavoritesRepository.add + feature/topic
 FakeFavoritesRepository.add now dedup-by-id (REPLACE) + 2 falsifiability
-tests. Bluff-Audit: revert to append → ‘expected:&lt;[7]&gt; but
-was:&lt;[7, 7]&gt;’, reverted; feature:favorites 6/0, feature:topic 4/0
+tests. Bluff-Audit: revert to append → 'expected:&lt;[7]&gt; but
+was:&lt;[7, 7]&gt;', reverted; feature:favorites 6/0, feature:topic 4/0
 <strong>Created-By:</strong> AI</p>
 <p>feature/favorites InMemoryFavoritesRepository.add + feature/topic
 FakeFavoritesRepository.add append without dedup, while
-FavoritesRepositoryImpl/FavoriteTopicDao are <span class="citation"
-data-cites="Insert">@Insert</span> REPLACE (id PK). LATENT: no test
-re-adds a duplicate id, so unexercised. Tighten add() to replace-by-id
-for consistency with LVA-011..015. Source: parallel fake-audit
-2026-06-09.</p>
+FavoritesRepositoryImpl/FavoriteTopicDao are @Insert REPLACE (id PK).
+LATENT: no test re-adds a duplicate id, so unexercised. Tighten add() to
+replace-by-id for consistency with LVA-011..015. Source: parallel
+fake-audit 2026-06-09.</p>
 <h2
-id="lva-018-corepreferences-dead-getters-gethistorysyncperiodgetcredentialssyncperiod-zero-call-sites">LVA-018
+id="lva-018--corepreferences-dead-getters-gethistorysyncperiodgetcredentialssyncperiod-zero-call-sites">LVA-018
 — core/preferences dead getters
 getHistorySyncPeriod/getCredentialsSyncPeriod (zero call sites)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -371,15 +369,15 @@ are surfaced via getSettings() instead. Orphaned per-field-getter
 leftover (no Favorites/Bookmarks counterpart). Remove decl + override.
 Source: parallel dead-code audit 2026-06-09 (codebase otherwise clean: 0
 shipped TODO(), 0 if(false), 0 silent-no-op effect methods).</p>
-<h2 id="lva-7-11.4.85-stress-chaos-test-scaffold">LVA-7 — §11.4.85
+<h2 id="lva-7--11485-stress--chaos-test-scaffold">LVA-7 — §11.4.85
 stress + chaos test scaffold</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong>
 lava-api-go/internal/handlers/v1/search_thundering_herd_test.go — 512
 concurrent identical-key reqs through REAL read-through cache; asserts
 all-200 + post-burst upstream loads=0 (convergence) + no goroutine-leak
-+ -race clean. Bluff-Audit: delete cache.Set in search.go → ‘convergence
-FAILED: post-burst loads=1 (want 0)’, reverted. First runnable §11.4.85
++ -race clean. Bluff-Audit: delete cache.Set in search.go → 'convergence
+FAILED: post-burst loads=1 (want 0)', reverted. First runnable §11.4.85
 chaos dim beyond phase-1; evidence JSON committed.
 <strong>Severity:</strong> P2</p>
 <p>§11.4.85 (new universal anchor) mandates a stress + chaos test class.
@@ -387,14 +385,14 @@ Lava has no chaos/stress suite today. Assess + scaffold when pin is
 bumped. <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</p>
 <h2
-id="lva-020-archiveorg-array-valued-creatortitleyeardate-fails-the-whole-searchbrowsetopic-response">LVA-020
+id="lva-020--archiveorg-array-valued-creatortitleyeardate-fails-the-whole-searchbrowsetopic-response">LVA-020
 — archiveorg array-valued creator/title/year/date fails the WHOLE
 search/browse/topic response</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> flexString type
 (string|number|array→joined) in internal/archiveorg/flexstring.go;
 structs+map sites in search/browse/topic.go converted;
-flexstring_test.go. Bluff-Audit: route ‘[’ away from array case →
+flexstring_test.go. Bluff-Audit: route '[' away from array case →
 TestSearchResponse_ArrayValuedFields + TestMetadataResponse +
 TestFlexString FAIL, reverted; go test GREEN, api-source.hash
 regenerated, sourcehash contract GREEN <strong>Created-By:</strong>
@@ -405,23 +403,22 @@ JSON arrays for multi-author/date items → json.Unmarshal fails the
 ENTIRE response (every result), not one row. Found by parallel Go
 bug-hunt.</p>
 <h2
-id="lva-021-observability-error_class-collapses-to-literal-error-for-all-real-typed-errors-telemetry-blindness">LVA-021
-— observability error_class collapses to literal “error” for all real
+id="lva-021--observability-error_class-collapses-to-literal-error-for-all-real-typed-errors-telemetry-blindness">LVA-021
+— observability error_class collapses to literal "error" for all real
 typed errors (telemetry blindness)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> underlyingTypeName fallback →
 fmt.Sprintf(%T, err); nonfatal_typed_errorclass_test.go (unnamed typed +
-*fs.PathError chain + context sentinels). Bluff-Audit: revert to “error”
-→ TestClassOf_UnnamedTypedError + _StdlibTypedError FAIL ‘collapsed to
-error’, reverted; GREEN <strong>Created-By:</strong> AI</p>
+*fs.PathError chain + context sentinels). Bluff-Audit: revert to "error"
+→ TestClassOf_UnnamedTypedError + _StdlibTypedError FAIL 'collapsed to
+error', reverted; GREEN <strong>Created-By:</strong> AI</p>
 <p>internal/observability/nonfatal.go underlyingTypeName returned
-“error” for any error without Name() or the 2 context sentinels —
-i.e. virtually every real
-<em>fs.PathError/</em>net.OpError/*url.Error/pgx error → §6.AC per-type
-triage defeated. Existing nonfatal_errorclass_test was a bluff (only
-tested Name()-implementers).</p>
+"error" for any error without Name() or the 2 context sentinels — i.e.
+virtually every real *fs.PathError/*net.OpError/*url.Error/pgx error →
+§6.AC per-type triage defeated. Existing nonfatal_errorclass_test was a
+bluff (only tested Name()-implementers).</p>
 <h2
-id="lva-022-gutenberg-bestformatname-returns-blank-label-for-charset-suffixed-gutendex-mime-keys">LVA-022
+id="lva-022--gutenberg-bestformatname-returns-blank-label-for-charset-suffixed-gutendex-mime-keys">LVA-022
 — gutenberg bestFormatName returns blank label for charset-suffixed
 Gutendex MIME keys</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -436,7 +433,7 @@ exact-matched bare MIME keys (text/plain) but Gutendex always suffixes
 charset (text/plain; charset=utf-8) → blank Format label + skipped
 preferred ordering for text-only books.</p>
 <h2
-id="lva-023-v1-login-returns-user.id-profile-data-uid-as-authtoken-instead-of-user.token-session-cookie">LVA-023
+id="lva-023--v1-login-returns-userid-profile-data-uid-as-authtoken-instead-of-usertoken-session-cookie">LVA-023
 — v1 login returns User.Id (profile data-uid) as AuthToken instead of
 User.Token (session cookie)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -444,36 +441,36 @@ Bug <strong>Evidence:</strong> provider.go AuthToken:
 success.User.Token; provider_adapter_e2e_test.go
 TestAdapter_Login_ReturnsSessionCookieNotDataUID_E2E (real POST
 /login.php→/index.php→/profile.php flow). Bluff-Audit: revert to User.Id
-→ test FAILS ‘AuthToken = the data-uid 99999’, reverted; GREEN
+→ test FAILS 'AuthToken = the data-uid 99999', reverted; GREEN
 <strong>Created-By:</strong> AI</p>
 <p>internal/rutracker/provider.go ProviderAdapter.Login returned
 success.User.Id (numeric data-uid) as AuthToken; the real session cookie
-is User.Token. Login ‘succeeds’ but every authenticated v1 call
+is User.Token. Login 'succeeds' but every authenticated v1 call
 (favorites/add-comment/download) sends a non-cookie value → 401. No e2e
 login test existed (why it shipped).</p>
 <h2
-id="lva-024-v1-gettopic-fabricates-a-bogus-topicfilenamesize-from-the-torrent-size-string">LVA-024
-— v1 GetTopic fabricates a bogus TopicFile{Name:“Size”} from the torrent
+id="lva-024--v1-gettopic-fabricates-a-bogus-topicfilenamesize-from-the-torrent-size-string">LVA-024
+— v1 GetTopic fabricates a bogus TopicFile{Name:"Size"} from the torrent
 size string</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> provider.go drops the synthetic Files
 entry; provider_mapping_test.go TestFromTopicPage rewritten to assert
 len(Files)==0. Bluff-Audit: restore the Size-file line →
-TestFromTopicPage FAILS ‘want 0 entries’, reverted; GREEN
+TestFromTopicPage FAILS 'want 0 entries', reverted; GREEN
 <strong>Created-By:</strong> AI</p>
 <p>internal/rutracker/provider.go fromTopicPage wedged the size string
 into a synthetic file entry → topic detail screen shows one nonsense
-‘Size’ file instead of the real list. The existing TestFromTopicPage
+'Size' file instead of the real list. The existing TestFromTopicPage
 asserted the bogus file (bluff).</p>
 <h2
-id="lva-027-kinozal-search-sizebytes-hardcoded-null-every-result-drops-its-size">LVA-027
+id="lva-027--kinozal-search-sizebytes-hardcoded-null--every-result-drops-its-size">LVA-027
 — Kinozal search sizeBytes hardcoded null — every result drops its
 size</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong> KinozalSizeParser (binary mult,
 comma/dot, Latin+Cyrillic units) + KinozalSearchParser sizeBytes wired;
 KinozalSizeParserTest 5 tests incl end-to-end. Bluff-Audit: revert
-sizeBytes→null → ‘search row carries sizeBytes end to end FAILED’,
+sizeBytes→null → 'search row carries sizeBytes end to end FAILED',
 reverted; :core:tracker:kinozal:test GREEN <strong>Created-By:</strong>
 AI</p>
 <p>KinozalSearchParser parsed the size string into a local var then
@@ -481,7 +478,7 @@ emitted sizeBytes=null, so every Kinozal row dropped size (size
 sort/filter + cross-tracker ranking blind). Found by parallel Kotlin
 tracker bug-hunt.</p>
 <h2
-id="lva-025-v1-captcha-login-sends-the-answer-under-the-wrong-form-field-name-captcha-login-can-never-succeed">LVA-025
+id="lva-025--v1-captcha-login-sends-the-answer-under-the-wrong-form-field-name-captcha-login-can-never-succeed">LVA-025
 — v1 captcha login sends the answer under the wrong form-field name
 (captcha login can never succeed)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -495,33 +492,33 @@ answer (self-acknowledged TODO provider.go:221). Needs LoginOpts +
 OpenAPI model change (CaptchaValue field) — deferred. Found by parallel
 Go bug-hunt.</p>
 <h2
-id="lva-026-v1-captcha-response-hardcodes-imagepng-discards-upstream-content-type">LVA-026
+id="lva-026--v1-captcha-response-hardcodes-imagepng-discards-upstream-content-type">LVA-026
 — v1 captcha response hardcodes image/png, discards upstream
 Content-Type</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong>
 .lava-ci-evidence/workable-items/LVA-025-026-evidence.md
 <strong>Created-By:</strong> AI</p>
-<p>internal/handlers/v1/captcha.go serves c.Data(200, image/png, …) but
-rutracker.FetchCaptcha captures the real Content-Type, dropped by the
-adapter (no ContentType field on provider.CaptchaImage). Minor (most
+<p>internal/handlers/v1/captcha.go serves c.Data(200, image/png, ...)
+but rutracker.FetchCaptcha captures the real Content-Type, dropped by
+the adapter (no ContentType field on provider.CaptchaImage). Minor (most
 decoders sniff). Found by parallel Go bug-hunt.</p>
 <h2
-id="lva-028-nnmclub-search-publishdate-dropped-date-column-present-parseable">LVA-028
+id="lva-028--nnmclub-search-publishdate-dropped-date-column-present--parseable">LVA-028
 — Nnmclub search publishDate dropped (date column present +
 parseable)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
 .lava-ci-evidence/workable-items/LVA-028-evidence.md
 <strong>Created-By:</strong> AI</p>
-<p>NnmclubSearchParser reads row.select(‘td’) but never maps cells[4]
+<p>NnmclubSearchParser reads row.select('td') but never maps cells[4]
 (ISO yyyy-MM-dd date) into TorrentItem.publishDate → Nnmclub results
 have no date. Found by parallel Kotlin tracker bug-hunt. (Also
 UNCONFIRMED: nnmclub/kinozal parseSize Latin-only regex may miss
 Cyrillic units in real HTML — kinozal already handles both as of
 LVA-027.)</p>
 <h2
-id="lva-029-islocalhost-fcfd-false-positive-misclassifies-public-hosts-as-ipv6-unique-local">LVA-029
+id="lva-029--islocalhost-fcfd-false-positive-misclassifies-public-hosts-as-ipv6-unique-local">LVA-029
 — isLocalHost() fc/fd false-positive misclassifies public hosts as IPv6
 unique-local</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -533,10 +530,10 @@ check (startsWith fc/fd + take(4) hex in 0xfc00..0xfdff) on ANY host
 string without requiring an IPv6 literal, so a DNS host like
 fcba.example.com / fdcdn.net is routed as LAN (http://host:8080) instead
 of https://host/forum/ → no green dot, every request fails. Fix: gate on
-contains(‘:’) before the hex parse. Found by parallel core/network
+contains(':') before the hex parse. Found by parallel core/network
 bug-hunt.</p>
 <h2
-id="lva-6-11.4.79-reconcile-codegraph-index-policy-own-org-submodules-in-index">LVA-6
+id="lva-6--11479-reconcile-codegraph-index-policy-own-org-submodules-in-index">LVA-6
 — §11.4.79 reconcile codegraph index policy (own-org submodules IN
 index)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -549,7 +546,7 @@ policy. Reconcile .codegraph config + docs when pin is bumped.
 <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</p>
 <h2
-id="lva-031-genymotion-vmnav-uuids-in-tracked-evidence-trip-6.r-scanner">LVA-031
+id="lva-031--genymotion-vmnav-uuids-in-tracked-evidence-trip-6r-scanner">LVA-031
 — Genymotion VM+nav UUIDs in tracked evidence trip §6.R scanner</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
@@ -559,7 +556,7 @@ Bug <strong>Evidence:</strong>
 14 tracked genymotion evidence files → check-constitution exit 1.
 Redacted per e767b701 precedent.</p>
 <h2
-id="lva-032-rutracker-browsefavorites-blind-cast-topictorrent-type-confusion">LVA-032
+id="lva-032--rutracker-browsefavorites-blind-cast-topictorrent-type-confusion">LVA-032
 — rutracker browse/favorites blind-cast Topic→Torrent type
 confusion</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -569,7 +566,7 @@ Bug <strong>Evidence:</strong>
 <p>fromCategoryPage/fromFavoritesDto called AsForumTopicDtoTorrent
 ignoring the union discriminator → Topic variants render as empty
 fake-torrent rows. Fixed via AsForumTopicDtoTorrentChecked.</p>
-<h2 id="lva-033-rutor-topic-page-drops-добавлен-publishdate">LVA-033 —
+<h2 id="lva-033--rutor-topic-page-drops-добавлен-publishdate">LVA-033 —
 rutor topic page drops Добавлен publishDate</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
@@ -578,7 +575,7 @@ Bug <strong>Evidence:</strong>
 <p>RuTorTopicParser dropped the Добавлен date despite the fixture
 carrying it. Added dotted DD-MM-YYYY shape to RuTorDateParser.</p>
 <h2
-id="lva-034-room-endpoint-list-converter-drops-goapi-platformstoragekey-on-round-trip">LVA-034
+id="lva-034--room-endpoint-list-converter-drops-goapi-platformstoragekey-on-round-trip">LVA-034
 — Room endpoint-list converter drops GoApi platform/storage/key on
 round-trip</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -589,7 +586,7 @@ Bug <strong>Evidence:</strong>
 on-device Lava-API endpoint 401s (withKeyOverride dead). Fixed via
 #-sentinel encoded packing.</p>
 <h2
-id="lva-035-pagingdataloader-pagination-state-machine-had-zero-tests">LVA-035
+id="lva-035--pagingdataloader-pagination-state-machine-had-zero-tests">LVA-035
 — PagingDataLoader pagination state-machine had zero tests</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong>
@@ -598,7 +595,7 @@ id="lva-035-pagingdataloader-pagination-state-machine-had-zero-tests">LVA-035
 <p>Added PagingDataLoaderTest (append-terminal off-by-one +
 refresh-error regression), production byte-identical.</p>
 <h2
-id="lva-030-6-recently-added-submodules-missing-6.r-inheritance-pointer-pre-existing-6.ad-debt">LVA-030
+id="lva-030--6-recently-added-submodules-missing-6r-inheritance-pointer-pre-existing-6ad-debt">LVA-030
 — 6 recently-added submodules missing §6.R inheritance pointer
 (pre-existing §6.AD-debt)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -613,7 +610,7 @@ constitution bump. Each needs a submodule commit + push + parent pin
 bump (helixqa is always-track-upstream per Q9). Surfaced by full
 check-constitution during the constitution-bump cycle.</p>
 <h2
-id="lva-037-6.r-hostport-scanner-flags-its-own-tests-hermetic-fixture-missing-tests-exemption">LVA-037
+id="lva-037--6r-hostport-scanner-flags-its-own-tests-hermetic-fixture-missing-tests-exemption">LVA-037
 — §6.R hostport scanner flags its own tests/ hermetic fixture (missing
 tests/ exemption)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -625,7 +622,7 @@ tests/ → flagged tests/check-constitution/test_no_hardcoded_hostport.sh
 → check-constitution exit 1 → pre-push blocked. Added ^tests/
 exemption.</p>
 <h2
-id="lva-038-brotli-middleware-emitted-content-encoding-br-on-bodyless-204304-statusallowsbody-dead-code">LVA-038
+id="lva-038--brotli-middleware-emitted-content-encoding-br-on-bodyless-204304-statusallowsbody-dead-code">LVA-038
 — brotli middleware emitted Content-Encoding br on bodyless 204/304
 (statusAllowsBody dead code)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -635,7 +632,7 @@ Bug <strong>Evidence:</strong>
 <p>Wave-3 parallel-fleet find; fixed in f3b2d269; falsifiability-proven;
 main-stream re-verified.</p>
 <h2
-id="lva-039-providerloginviewmodel.onreloadcaptchaclick-leaves-stale-serviceunavailable-banner">LVA-039
+id="lva-039--providerloginviewmodelonreloadcaptchaclick-leaves-stale-serviceunavailable-banner">LVA-039
 — ProviderLoginViewModel.onReloadCaptchaClick leaves stale
 serviceUnavailable banner</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -645,7 +642,7 @@ Bug <strong>Evidence:</strong>
 <p>Wave-3 parallel-fleet find; fixed in 9f895502; falsifiability-proven;
 main-stream re-verified.</p>
 <h2
-id="lva-040-onboarding-anonymous-mode-choice-never-persisted-to-provider_configs">LVA-040
+id="lva-040--onboarding-anonymous-mode-choice-never-persisted-to-provider_configs">LVA-040
 — onboarding anonymous-mode choice never persisted to
 provider_configs</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -655,7 +652,7 @@ Bug <strong>Evidence:</strong>
 <p>Wave-3 parallel-fleet find; fixed in 8e0720ab; falsifiability-proven;
 main-stream re-verified.</p>
 <h2
-id="lva-041-syncperiod.day-background-sync-flex-interval-6.days-should-be-6.hours-workmanager-clamp">LVA-041
+id="lva-041--syncperiodday-background-sync-flex-interval-6days-should-be-6hours-workmanager-clamp">LVA-041
 — SyncPeriod.DAY background-sync flex interval 6.days should be 6.hours
 (WorkManager clamp)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -665,7 +662,7 @@ Bug <strong>Evidence:</strong>
 <p>Wave-3 parallel-fleet find; fixed in 0cecbe4e; falsifiability-proven;
 main-stream re-verified.</p>
 <h2
-id="lva-042-syncoutbox-fifo-third-law-fake-divergence-createdat-regression-coverage">LVA-042
+id="lva-042--syncoutbox-fifo-third-law-fake-divergence--createdat-regression-coverage">LVA-042
 — SyncOutbox FIFO Third-Law fake divergence + createdAt regression
 coverage</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -675,7 +672,7 @@ coverage</h2>
 <p>Wave-3 parallel-fleet find; fixed in a11aee32; falsifiability-proven;
 main-stream re-verified.</p>
 <h2
-id="lva-043-6.e-reverse-gate-phantom-capability-honesty-assertion">LVA-043
+id="lva-043--6e-reverse-gate-phantom-capability-honesty-assertion">LVA-043
 — §6.E reverse-gate phantom-capability honesty assertion</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong>
@@ -684,7 +681,7 @@ id="lva-043-6.e-reverse-gate-phantom-capability-honesty-assertion">LVA-043
 <p>Wave-3 parallel-fleet find; fixed in c117caeb; falsifiability-proven;
 main-stream re-verified.</p>
 <h2
-id="lva-045-6.ai-debt-cm-covenant-114--11.4.128-141-propagation-gate-slash-command-docs">LVA-045
+id="lva-045--6ai-debt-cm-covenant-114--114128-141-propagation-gate--slash-command-docs">LVA-045
 — §6.AI-debt CM-COVENANT-114-* §11.4.128-141 propagation gate +
 slash-command docs</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -694,7 +691,7 @@ slash-command docs</h2>
 <p>Wave-3 parallel-fleet find; fixed in c37995a7; falsifiability-proven;
 main-stream re-verified.</p>
 <h2
-id="lva-046-rutracker-login-reported-fake-success-on-wrong-credentials-blind-authresponsedto-union-accessor-ignored-discriminator">LVA-046
+id="lva-046--rutracker-login-reported-fake-success-on-wrong-credentials-blind-authresponsedto-union-accessor-ignored-discriminator">LVA-046
 — rutracker Login reported fake success on wrong credentials (blind
 AuthResponseDto union accessor ignored discriminator)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -703,10 +700,10 @@ Bug <strong>Evidence:</strong>
 <strong>Severity:</strong> P2</p>
 <p>AsAuthResponseDtoSuccess() blind-decodes a WrongCredits union into
 non-pointer UserDto with no error → Login returns Success:true
-AuthToken:’’ for wrong creds → every authed call 401s. LVA-032 class.
+AuthToken:'' for wrong creds → every authed call 401s. LVA-032 class.
 Fixed via AsAuthResponseDtoSuccessChecked.</p>
 <h2
-id="lva-047-magnetlinkvalidator-rejects-case-insensitive-urnbtih-prefix-rfc-8141">LVA-047
+id="lva-047--magnetlinkvalidator-rejects-case-insensitive-urnbtih-prefix-rfc-8141">LVA-047
 — MagnetLinkValidator rejects case-insensitive urn:btih prefix (RFC
 8141)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -716,7 +713,7 @@ Bug <strong>Evidence:</strong>
 <p>case-sensitive startsWith rejected magnet:?xt=urn:BTIH:<hash>; fixed
 to regionMatches ignoreCase.</p>
 <h2
-id="lva-044-add-http_download-trackercapability-so-archiveorggutenberg-can-surface-their-working-http-file-download">LVA-044
+id="lva-044--add-http_download-trackercapability-so-archiveorggutenberg-can-surface-their-working-http-file-download">LVA-044
 — Add HTTP_DOWNLOAD TrackerCapability so archiveorg/gutenberg can
 surface their working HTTP file download</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
@@ -728,7 +725,7 @@ deliberately not exposed (no capability) → user-unreachable. Not a bluff
 (§6.E honest), a functionality gap. Needs a new capability + feature
 interface.</p>
 <h2
-id="lva-051-11.4.128-always-on-device-recorder-skeleton-deterministic-path-test-device-capture-owed">LVA-051
+id="lva-051--114128-always-on-device-recorder-skeleton--deterministic-path-test-device-capture-owed">LVA-051
 — §11.4.128 always-on device-recorder skeleton + deterministic-path test
 (device capture OWED)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -738,7 +735,7 @@ id="lva-051-11.4.128-always-on-device-recorder-skeleton-deterministic-path-test-
 <p>scripts/record-device-session.sh + hermetic path test landed;
 device-bound capture UNCONFIRMED without a live device.</p>
 <h2
-id="lva-048-featuresearch_input-writes-author-name-under-authoridkey-wrong-nav-key">LVA-048
+id="lva-048--featuresearch_input-writes-author-name-under-authoridkey-wrong-nav-key">LVA-048
 — feature/search_input writes author NAME under AuthorIdKey (wrong nav
 key)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -749,7 +746,7 @@ Bug <strong>Evidence:</strong>
 under AuthorIdKey instead of AuthorNameKey. Flagged by wave-4 §6.Q agent
 (out of its scope). Needs fix + roundtrip test.</p>
 <h2
-id="lva-049-navigation-route-values-not-url-encoded-reserved-chars-in-search-query-corrupt-route">LVA-049
+id="lva-049--navigation-route-values-not-url-encoded-reserved-chars-in-search-query-corrupt-route">LVA-049
 — navigation route values not URL-encoded (reserved chars in search
 query corrupt route)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -759,7 +756,7 @@ Task <strong>Evidence:</strong>
 <p>appendOptionalParams passes raw query; a query with &amp;/? corrupts
 the route. Add Uri.encode at call sites + roundtrip test.</p>
 <h2
-id="lva-050-a11ycontentdescriptiontest-teardown-runtimeexception-robolectric-robomonitoringinstrumentation-reds-coredesignsystemtest-despite-assertions-passing">LVA-050
+id="lva-050--a11ycontentdescriptiontest-teardown-runtimeexception-robolectric-robomonitoringinstrumentation-reds-coredesignsystemtest-despite-assertions-passing">LVA-050
 — A11yContentDescriptionTest teardown RuntimeException (Robolectric
 RoboMonitoringInstrumentation) reds :core:designsystem:test despite
 assertions passing</h2>
@@ -771,7 +768,7 @@ Task <strong>Evidence:</strong>
 RuntimeException makes Gradle report FAILED. Quarantine/fix the
 teardown.</p>
 <h2
-id="lva-053-postconverters.removelast-crashes-topic-screen-on-android-api-35-nosuchmethoderror">LVA-053
+id="lva-053--postconvertersremovelast-crashes-topic-screen-on-android-api-35-nosuchmethoderror">LVA-053
 — PostConverters.removeLast() crashes topic screen on Android &lt;API 35
 (NoSuchMethodError)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -783,7 +780,7 @@ SequencedCollection) absent on Android &lt;35 → a PostBr followed by Hr
 crashes the topic screen. Fixed to removeAt(lastIndex) + 28 converter
 tests.</p>
 <h2
-id="lva-056-6.r-ipv4-scanner-flags-device-recorder-tests-hermetic-fixture-missing-tests-exemption">LVA-056
+id="lva-056--6r-ipv4-scanner-flags-device-recorder-tests-hermetic-fixture-missing-tests-exemption">LVA-056
 — §6.R IPv4 scanner flags device-recorder tests/ hermetic fixture
 (missing tests/ exemption)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -794,7 +791,7 @@ Bug <strong>Evidence:</strong>
 tests/device-recording synthetic 127.0.0.1:6555 → check-constitution
 exit 1 (LVA-037 class). Added ^tests/.</p>
 <h2
-id="lva-052-wire-http_download-into-the-topicdownload-ui-consume-httpdownloadabletracker-write-artifact-to-disk">LVA-052
+id="lva-052--wire-http_download-into-the-topicdownload-ui-consume-httpdownloadabletracker-write-artifact-to-disk">LVA-052
 — Wire HTTP_DOWNLOAD into the topic/download UI (consume
 HttpDownloadableTracker, write artifact to disk)</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
@@ -803,13 +800,13 @@ HttpDownloadableTracker, write artifact to disk)</h2>
 <strong>Severity:</strong> P3</p>
 <p>HTTP_DOWNLOAD UI wiring. A full impl exists on branch
 worktree-agent-ad695086c8735d60a (commit c8951eee) but it re-derived
-LVA-044 substrate → conflicts with master’s landed LVA-044; needs a
+LVA-044 substrate → conflicts with master's landed LVA-044; needs a
 clean re-apply of the LVA-052 net-new files
 (HttpDownloadSource/DownloadHttpFileUseCase/DownloadService.downloadHttpFile/SDK.downloadHttpFile)
 on top of master. Topic-screen Compose routing (provider id through nav)
 still OWED.</p>
 <h2
-id="lva-054-audit-codebase-for-removelastremovefirstgetfirstgetlast-sequencedcollection-calls-that-crash-on-android-api35">LVA-054
+id="lva-054--audit-codebase-for-removelastremovefirstgetfirstgetlast-sequencedcollection-calls-that-crash-on-android-api35">LVA-054
 — Audit codebase for removeLast/removeFirst/getFirst/getLast
 SequencedCollection calls that crash on Android &lt;API35</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -819,7 +816,7 @@ SequencedCollection calls that crash on Android &lt;API35</h2>
 <p>LVA-053 class: Kotlin stdlib these desugar to java.util.* methods
 absent below API35. Sweep all modules + add a lint/detekt guard.</p>
 <h2
-id="lva-055-run-test-pg.sh-integration-list-omits-.internalstorage-postgres-legs-skipped-by-canonical-harness">LVA-055
+id="lva-055--run-test-pgsh-integration-list-omits-internalstorage-postgres-legs-skipped-by-canonical-harness">LVA-055
 — run-test-pg.sh integration list omits ./internal/storage (Postgres
 legs skipped by canonical harness)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -830,7 +827,7 @@ legs skipped by canonical harness)</h2>
 ./tests/integration; add ./internal/storage so its Postgres legs run in
 the canonical harness.</p>
 <h2
-id="lva-057-multi-search-sse-silently-drops-unknown-requested-providers">LVA-057
+id="lva-057--multi-search-sse-silently-drops-unknown-requested-providers">LVA-057
 — multi-search SSE silently drops unknown requested providers</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
@@ -838,10 +835,10 @@ Bug <strong>Evidence:</strong>
 <strong>Severity:</strong> P2</p>
 <p>GetMultiSearch continued past an unknown ?providers= id with no
 provider_error event and no failed counter, while total_providers still
-counted it — the user’s requested provider vanished with zero client
+counted it — the user's requested provider vanished with zero client
 signal. Now emits provider_error + counts failed.</p>
 <h2
-id="lva-058-6.r-scanners-flag-binary-workable_items.db-ssot-lva-037056-class">LVA-058
+id="lva-058--6r-scanners-flag-binary-workable_itemsdb-ssot-lva-037056-class">LVA-058
 — §6.R scanners flag binary workable_items.db SSoT (LVA-037/056
 class)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -853,7 +850,7 @@ binary SQLite SSoT docs/workable_items.db, which stores ticket text
 quoting IP/host/UUID literals, producing a Binary file matches
 violation. Added .db exemption to all three.</p>
 <h2
-id="lva-060-favoritevisited-torrent-reconstruction-drops-magnetlink-and-date">LVA-060
+id="lva-060--favoritevisited-torrent-reconstruction-drops-magnetlink-and-date">LVA-060
 — favorite/visited Torrent reconstruction drops magnetLink and date</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
@@ -865,7 +862,7 @@ favorited or visited torrent was read back as BaseTopic and became
 un-downloadable, and getTorrents() filtered it out entirely. Added both
 fields to the discriminator.</p>
 <h2
-id="lva-059-sort-providerregistry.ids-consumers-for-deterministic-multi-search-sse-provider-ordering">LVA-059
+id="lva-059--sort-providerregistryids-consumers-for-deterministic-multi-search-sse-provider-ordering">LVA-059
 — sort ProviderRegistry.IDs() consumers for deterministic multi-search
 SSE provider ordering</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -875,7 +872,7 @@ Task <strong>Evidence:</strong>
 <p>multi-search auto-discovery emits providers in non-deterministic map
 order (cosmetic).</p>
 <h2
-id="lva-061-mobiletls.go-regenerate-embed-cert-when-persisted-ip-sans-no-longer-cover-device-lan-ip">LVA-061
+id="lva-061--mobiletlsgo-regenerate-embed-cert-when-persisted-ip-sans-no-longer-cover-device-lan-ip">LVA-061
 — mobile/tls.go regenerate embed cert when persisted IP-SANs no longer
 cover device LAN IP</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -885,7 +882,7 @@ Task <strong>Evidence:</strong>
 <p>self-signed cert reused across restarts without re-checking IP-SAN;
 LAN IP change → host-mismatch.</p>
 <h2
-id="lva-062-audit-gate-shaping-scripts-for-uncovered-clauses-each-gate-clause-needs-a-branch-covering-falsifiability-sub-test">LVA-062
+id="lva-062--audit-gate-shaping-scripts-for-uncovered-clauses-each-gate-clause-needs-a-branch-covering-falsifiability-sub-test">LVA-062
 — audit gate-shaping scripts for uncovered clauses (each gate clause
 needs a branch-covering falsifiability sub-test)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -895,7 +892,7 @@ needs a branch-covering falsifiability sub-test)</h2>
 <p>wave-6 §6.N.2 found CM-WORKABLE-ITEMS-SYNC clause-3 was uncovered;
 sweep other gates.</p>
 <h2
-id="lva-063-cover-credentialsviewmodel-credentialsmanager-vault-lifecycle-branches">LVA-063
+id="lva-063--cover-credentialsviewmodel--credentialsmanager-vault-lifecycle-branches">LVA-063
 — cover CredentialsViewModel + CredentialsManager vault lifecycle
 branches</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -906,7 +903,7 @@ branches</h2>
 flows, §6.G verified filter, and the credentials_manager
 FirstTimeSetup/AddNew/Edit/DismissEdit lifecycle.</p>
 <h2
-id="lva-066-validate-new-jackett-release-against-the-lava-torznab-sidecar-integration">LVA-066
+id="lva-066--validate-new-jackett-release-against-the-lava-torznab-sidecar-integration">LVA-066
 — validate new Jackett release against the Lava Torznab sidecar
 integration</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -919,7 +916,7 @@ topology: api_key bootstrap + Torznab /caps endpoint served valid XML at
 the exact path IPTorrentsJackettApi uses; JVM parser tests green; pinned
 the validated digest in .env.example.</p>
 <h2
-id="lva-064-loadorcreatetls-does-not-detect-expired-persisted-cert-notafter-passed">LVA-064
+id="lva-064--loadorcreatetls-does-not-detect-expired-persisted-cert-notafter-passed">LVA-064
 — loadOrCreateTLS does not detect expired persisted cert (NotAfter
 passed)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -930,7 +927,7 @@ Task <strong>Evidence:</strong>
 so a persisted cert past its NotAfter is silently reused; add an expiry
 check to the reuse gate with a test.</p>
 <h2
-id="lva-065-audit-featuresearch-searchviewmodel-for-untested-errorpaging-branches">LVA-065
+id="lva-065--audit-featuresearch-searchviewmodel-for-untested-errorpaging-branches">LVA-065
 — audit feature/search SearchViewModel for untested error/paging
 branches</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -941,7 +938,7 @@ branches</h2>
 and paging-state branches and add falsifiable coverage where real gaps
 exist.</p>
 <h2
-id="lva-068-proactively-re-mint-embed-tls-leaf-mid-process-when-it-crosses-the-expiry-margin">LVA-068
+id="lva-068--proactively-re-mint-embed-tls-leaf-mid-process-when-it-crosses-the-expiry-margin">LVA-068
 — proactively re-mint embed TLS leaf mid-process when it crosses the
 expiry margin</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -952,7 +949,7 @@ Task <strong>Evidence:</strong>
 embed could serve a leaf that expires without a restart. Add a periodic
 re-mint check.</p>
 <h2
-id="lva-069-cover-searchresultviewmodel-sse-raw-json-parsing-onretryclick-re-dispatch">LVA-069
+id="lva-069--cover-searchresultviewmodel-sse-raw-json-parsing--onretryclick-re-dispatch">LVA-069
 — cover SearchResultViewModel SSE raw-JSON parsing + onRetryClick
 re-dispatch</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -963,7 +960,7 @@ re-dispatch</h2>
 (provider_start/results/provider_done/provider_error) and onRetryClick
 Error-state re-dispatch are untested production branches.</p>
 <h2
-id="lva-073-6.ac-telemetry-instrumentation-for-the-accepted-lva-008-nav-teardown-crash">LVA-073
+id="lva-073--6ac-telemetry-instrumentation-for-the-accepted-lva-008-nav-teardown-crash">LVA-073
 — §6.AC telemetry instrumentation for the accepted LVA-008 nav-teardown
 crash</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -976,7 +973,7 @@ ISE with attributable §6.AC Crashlytics context before the process dies,
 so it surfaces as a known/triageable defect; 6 falsifiable JVM tests;
 wired into LavaApplication.</p>
 <h2
-id="lva-072-6.ac-telemetry-on-mid-process-embed-tls-cert-rotation-lva-068-swap-is-silent">LVA-072
+id="lva-072--6ac-telemetry-on-mid-process-embed-tls-cert-rotation-lva-068-swap-is-silent">LVA-072
 — §6.AC telemetry on mid-process embed TLS cert rotation (LVA-068 swap
 is silent)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -990,7 +987,7 @@ discarded because its falsifiability rehearsal was inconclusive and the
 SourceHash contract failed; redo with a test that fails when the actual
 rotation-path RecordWarning call is removed.</p>
 <h2
-id="lva-074-genymotion-runner-must-wakestay-on-the-vm-screen-before-connecteddebugandroidtest">LVA-074
+id="lva-074--genymotion-runner-must-wakestay-on-the-vm-screen-before-connecteddebugandroidtest">LVA-074
 — Genymotion runner must wake+stay-on the VM screen before
 connectedDebugAndroidTest</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1002,7 +999,7 @@ commit timeouts and spurious No-compose-hierarchies Challenge failures;
 the runner now wakes and keeps the screen on, proven by C00/C01/C07/C08
 going green after the wake.</p>
 <h2
-id="lva-070-thread-source-providerid-through-favoritevisited-writeread-path-to-complete-http_download-routing">LVA-070
+id="lva-070--thread-source-providerid-through-favoritevisited-writeread-path-to-complete-http_download-routing">LVA-070
 — thread source providerId through favorite/visited write+read path to
 complete HTTP_DOWNLOAD routing</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -1016,7 +1013,7 @@ Topic/TopicPage models (write) and TopicModel + favorites/visited
 side-effects to openTopic(id,providerId) (read), mirroring
 search_result.</p>
 <h2
-id="lva-071-inject-sseclient-base-url-into-searchresultviewmodel.observessesearch-for-hermetic-mockwebserver-testing">LVA-071
+id="lva-071--inject-sseclient--base-url-into-searchresultviewmodelobservessesearch-for-hermetic-mockwebserver-testing">LVA-071
 — inject SseClient + base-URL into
 SearchResultViewModel.observeSseSearch for hermetic MockWebServer
 testing</h2>
@@ -1028,7 +1025,7 @@ testing</h2>
 https base; inject it so the full SSE error to Error to retry path is
 hermetically testable against a MockWebServer.</p>
 <h2
-id="lva-067-persist-per-row-providerid-on-favoritevisited-rows-so-their-topics-can-route-to-http_download">LVA-067
+id="lva-067--persist-per-row-providerid-on-favoritevisited-rows-so-their-topics-can-route-to-http_download">LVA-067
 — persist per-row providerId on favorite/visited rows so their topics
 can route to HTTP_DOWNLOAD</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -1040,7 +1037,7 @@ active-tracker default because the favorite/visited Room rows store no
 provider id; add a providerId column + migration so an
 archiveorg/gutenberg favorite routes to HTTP_DOWNLOAD.</p>
 <h2
-id="lva-4-lva-workable-items-ticket-system-sqlite-db-go-cli-mdhtmlpdfdocx-export">LVA-4
+id="lva-4--lva-workable-items-ticket-system-sqlite-db--go-cli--mdhtmlpdfdocx-export">LVA-4
 — LVA workable-items ticket system (SQLite DB + Go CLI +
 md/HTML/PDF/DOCX export)</h2>
 <p><strong>Status:</strong> Implemented (→ Fixed.md)
@@ -1055,7 +1052,7 @@ to the canonical constitution binary
 (docs/tickets/MIGRATION-TO-CANONICAL.md). <strong>Source:</strong>
 operator-report — docs/tickets/DESIGN.md</p>
 <h2
-id="lva-076-apiengine-processjavares-buildcshared-task-dependency-gradle-heap">LVA-076
+id="lva-076--apiengine-processjavares-buildcshared-task-dependency--gradle-heap">LVA-076
 — apiengine processJavaRes buildCshared task dependency + Gradle
 heap</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -1065,7 +1062,7 @@ docs/CONTINUATION.md <strong>Severity:</strong> medium</p>
 consumed buildCshared output without a declared edge; D8 OOM on 2g heap.
 Declared dependency plus bumped heap to 4g.</p>
 <h2
-id="lva-077-release-cold-start-canary-script-for-the-r8-release-artifact">LVA-077
+id="lva-077--release-cold-start-canary-script-for-the-r8-release-artifact">LVA-077
 — release cold-start canary script for the R8 release artifact</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong>
@@ -1074,7 +1071,7 @@ docs/CONTINUATION.md <strong>Severity:</strong> medium</p>
 debug; added scripts run-release-canary.sh to validate the exact R8
 release APK cold-start on the Genymotion VM per clause 6.Z.</p>
 <h2
-id="lva-078-restore-lava-api-go-container-image-build-broken-containerignore">LVA-078
+id="lva-078--restore-lava-api-go-container-image-build-broken-containerignore">LVA-078
 — restore lava-api-go container image build broken containerignore</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Bug <strong>Evidence:</strong>
@@ -1083,7 +1080,7 @@ docs/CONTINUATION.md <strong>Severity:</strong> medium</p>
 parent submodules X; in-container go build failed on missing replacement
 dirs. Excluded only nested git and build, kept source.</p>
 <h2
-id="lva-092-video-11-negative-finding-no-crashanrwhite-icon-observed-in-this-recording-recorded-for-completeness">LVA-092
+id="lva-092--video-11--negative-finding-no-crashanrwhite-icon-observed-in-this-recording-recorded-for-completeness">LVA-092
 — Video #11 — Negative finding: NO crash/ANR/white-icon observed in this
 recording (recorded for completeness)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -1097,7 +1094,7 @@ Informational record. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #11.</p>
 <h2
-id="lva-080-distribute-10761.3.12-api-app-22-build_and_release---6.z-c00-gate-on-thinker---6.aa-two-stage-firebase-distribute">LVA-080
+id="lva-080--distribute-10761312--api-app-22-build_and_release---6z-c00-gate-on-thinker---6aa-two-stage-firebase-distribute">LVA-080
 — Distribute 1076/1.3.12 (+ api-app 22): build_and_release -&gt; §6.Z
 C00 gate on thinker -&gt; §6.AA two-stage Firebase distribute</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -1110,7 +1107,7 @@ directive: rebuild, gate, distribute all 4 variants. Infra confirmed UP
 this session: thinker+nezha reachable, T7 writable,
 JDK17/Gradle8.9/podman5.8.2 present.</p>
 <h2
-id="lva-036-llm_orchestrator-githubgitlab-pre-existing-mirror-fork-non-ff-blocks-6.w-convergence">LVA-036
+id="lva-036--llm_orchestrator-githubgitlab-pre-existing-mirror-fork-non-ff-blocks-6w-convergence">LVA-036
 — llm_orchestrator github↔︎gitlab pre-existing mirror fork (non-FF)
 blocks §6.W convergence</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1121,8 +1118,8 @@ non-doc go.mod content each; LVA-030 commit landed gitlab+working-tree
 but github refused non-FF. Needs a content-merge decision
 (operator-gated, NO force-push per §6.T.3).</p>
 <h2
-id="lva-083-video-1-search-returns-zero-results-then-something-went-wrong-error-primary-function-unusable">LVA-083
-— Video #1 — Search returns ZERO results then ‘Something went wrong’
+id="lva-083--video-1--search-returns-zero-results-then-something-went-wrong-error-primary-function-unusable">LVA-083
+— Video #1 — Search returns ZERO results then 'Something went wrong'
 Error (primary function unusable)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
@@ -1131,13 +1128,13 @@ Bug <strong>Evidence:</strong>
 2026-08-12) <strong>Severity:</strong> P0 <strong>Created-By:</strong>
 AI <strong>Assigned-To:</strong> AI</p>
 <p>QA video 2026-06-25 frames 0060-0140: every search fails (blank ~25s
-then Error/Retry; ‘prince’ stays blank). KNOWN-class
+then Error/Retry; 'prince' stays blank). KNOWN-class
 (anonymous/provider-mismatch). CODE-FIX landed in 1076
 (SearchInputViewModel observeAll filtered+sorted + loading/empty state)
 but 1076 NOT yet distributed/device-verified. Pending §6.Z gate. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #1.</p>
 <h2
-id="lva-084-video-2-onboarded-provider-yts-is-not-the-provider-set-used-by-search-unconfigured-providers-active-as-filters">LVA-084
+id="lva-084--video-2--onboarded-provider-yts-is-not-the-provider-set-used-by-search-unconfigured-providers-active-as-filters">LVA-084
 — Video #2 — Onboarded provider (YTS) is NOT the provider set used by
 Search; unconfigured providers active as filters</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1153,7 +1150,7 @@ searchEnabled&amp;&amp;isEnabled). Pending §6.Z device verification.
 Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #2.</p>
 <h2
-id="lva-013-missing-6.z-device-evidence-for-client-1080-and-api-app-24">LVA-013
+id="lva-013--missing-6z-device-evidence-for-client-1080-and-api-app-24">LVA-013
 — Missing 6.Z device evidence for client 1080 and api-app 24</h2>
 <p><strong>Status:</strong> Obsolete (→ Fixed.md) <strong>Type:</strong>
 Task <strong>Evidence:</strong> Superseded: 1080/api-app-24 were never
@@ -1170,9 +1167,9 @@ distributed without per-AVD containerized emulator evidence. Need to
 execute the covering Challenge matrix, generate real-device-verification
 rows, and backfill the evidence files.</p>
 <h2
-id="lva-085-video-4-provider-id-labels-shown-rawlowercased-torrentdownloadsarchiveorgkinozalyts-in-results-filter-chips">LVA-085
+id="lva-085--video-4--provider-id-labels-shown-rawlowercased-torrentdownloadsarchiveorgkinozalyts-in-results-filter-chips">LVA-085
 — Video #4 — Provider id labels shown raw/lowercased
-(‘torrentdownloads’,‘archiveorg’,‘kinozal’,‘yts’) in results filter
+('torrentdownloads','archiveorg','kinozal','yts') in results filter
 chips</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
@@ -1191,7 +1188,7 @@ CODE-FIX in 1076 (friendly chip names). Pending §6.Z verification.
 Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #4.</p>
 <h2
-id="lva-086-video-5-no-empty-state-and-no-loading-indicator-on-search-results-perceived-hang">LVA-086
+id="lva-086--video-5--no-empty-state-and-no-loading-indicator-on-search-results-perceived-hang">LVA-086
 — Video #5 — No empty-state and no loading indicator on search results
 (perceived hang)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1205,12 +1202,12 @@ SearchPageState.streamingFilteredItems + showsStreamingLoadingIndicator
 as named, tested properties. Commit ffc0fb25. <strong>Severity:</strong>
 P1 <strong>Created-By:</strong> AI <strong>Assigned-To:</strong> AI</p>
 <p>QA video frames 0060-0110: pure blank ~25s, no
-spinner/skeleton/no-results; ‘prince’ stays blank with no error. NEW.
+spinner/skeleton/no-results; 'prince' stays blank with no error. NEW.
 CODE-FIX in 1076 (loading/empty state branches). Pending §6.Z
 verification. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #5.</p>
 <h2
-id="lva-093-cold-start-race-search-can-hit-bundleddirect-client-before-dynamic-provider-repopulation-completes">LVA-093
+id="lva-093--cold-start-race-search-can-hit-bundleddirect-client-before-dynamic-provider-repopulation-completes">LVA-093
 — Cold-start race: search can hit bundled/direct client before dynamic
 provider repopulation completes</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1225,7 +1222,7 @@ is resolved. Commit 9d85c5cf. <strong>Severity:</strong> P2
 <strong>Created-By:</strong> AI</p>
 <p>app/src/main/kotlin/digital/vasic/lava/client/LavaApplication.kt:95-105
 launches RepopulateProvidersOnStartupUseCase.repopulateProviders()
-fire-and-forget on Dispatchers.Default inside Application.onCreate() –
+fire-and-forget on Dispatchers.Default inside Application.onCreate() --
 it is not awaited.
 app/src/main/kotlin/digital/vasic/lava/client/MainActivity.kt:105-135
 gates the splash screen ONLY on local prefs (theme/showOnboarding)
@@ -1235,11 +1232,11 @@ screen while the network round-trip inside
 core/domain/src/main/kotlin/lava/domain/usecase/RepopulateProvidersOnStartupUseCase.kt:80-112
 is still in flight. If the user searches during that window, any
 provider id the catalogue vends that overlaps a BUNDLED compiled-in
-provider id (rutracker/rutor/nnmclub/kinozal/archiveorg/gutenberg – see
+provider id (rutracker/rutor/nnmclub/kinozal/archiveorg/gutenberg -- see
 core/tracker/client/src/main/kotlin/lava/tracker/client/di/TrackerClientModule.kt:297-303)
 resolves to the direct-to-site bundled client for that one search
-instead of the user’s configured API endpoint. Once the fetch completes,
-all later searches in that session are correctly dynamic – this is a
+instead of the user's configured API endpoint. Once the fetch completes,
+all later searches in that session are correctly dynamic -- this is a
 real, narrow-window, self-healing defect, not a permanent break. No
 existing test covers this exact race: the closest test,
 RepopulateProvidersOnStartupUseCaseTest, exercises the use case in
@@ -1249,7 +1246,7 @@ CONFIRMED by static source-reading this session (2026-08-10/11), part of
 the LVA-083/084 root-cause investigation that also found the
 OnboardingBypassRule-skips-populateFrom test bug in
 Challenge58/59/60/61/62/71. Real-world frequency and user-visible impact
-are UNCONFIRMED without device instrumentation – no build or test was
+are UNCONFIRMED without device instrumentation -- no build or test was
 executed for this specific finding, only source reading. Closure needs
 either (a) a device-level Challenge Test that measures or deliberately
 forces this race and asserts correct provider resolution once
@@ -1257,7 +1254,7 @@ repopulation completes, or (b) a product decision to gate the splash
 screen / first search on repopulation completion (with a timeout +
 fallback) instead of racing it.</p>
 <h2
-id="lva-094-cold-start-provider-repopulation-failure-is-silent-and-never-retried-for-the-rest-of-the-process-lifetime">LVA-094
+id="lva-094--cold-start-provider-repopulation-failure-is-silent-and-never-retried-for-the-rest-of-the-process-lifetime">LVA-094
 — Cold-start provider repopulation failure is silent and never retried
 for the rest of the process lifetime</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1269,17 +1266,17 @@ RepopulateProvidersOnStartupUseCaseTest coverage, falsifiability
 rehearsal performed (reverted to single-attempt/no-telemetry, both
 retry-rescue and telemetry tests failed for real). Commit 9d85c5cf.
 <strong>Severity:</strong> P2 <strong>Created-By:</strong> AI</p>
-<p>RepopulateProvidersOnStartupUseCase’s single cold-start
+<p>RepopulateProvidersOnStartupUseCase's single cold-start
 provider-catalogue fetch attempt fails silently on failure:
 RepopulateProvidersOnStartupUseCase.kt:110 returns false with no
-user-visible notice (unlike onboarding’s own fetch-failure path, which
+user-visible notice (unlike onboarding's own fetch-failure path, which
 surfaces a PROVIDER_CATALOG_FALLBACK_NOTICE), no retry, and no other
 production code path re-invokes populateFrom() for the rest of that
-process’s lifetime. Confirmed: the only two production call sites for
+process's lifetime. Confirmed: the only two production call sites for
 populateFrom are OnboardingViewModel.kt:950-998 (onboarding flow) and
-this startup use case (app cold start) – there is no periodic worker and
-no connectivity-change listener that re-triggers it. A transient failure
-at exact boot time (network not yet associated, VPN/Wi-Fi still
+this startup use case (app cold start) -- there is no periodic worker
+and no connectivity-change listener that re-triggers it. A transient
+failure at exact boot time (network not yet associated, VPN/Wi-Fi still
 connecting, momentarily unreachable LAN lava-api-go/api-app endpoint)
 means a user who configured a non-bundled API endpoint during onboarding
 silently falls back to bundled/direct-to-site tracker clients for the
@@ -1287,16 +1284,16 @@ ENTIRE app session, with zero indication anything degraded, until the
 process restarts (a fresh attempt) or the user re-runs onboarding. Fix
 direction, documented as the finding only and not yet implemented:
 either add a retry affordance / silent background retry with backoff, or
-at minimum record a non-fatal telemetry event per this project’s own
+at minimum record a non-fatal telemetry event per this project's own
 section 6.AC Comprehensive Non-Fatal Telemetry Mandate so the failure is
 visible in Crashlytics instead of invisible. CONFIRMED by static
 source-reading this session (2026-08-10/11), same investigation as the
 sibling cold-start race finding LVA-093. Real-world frequency and
-user-visible impact are UNCONFIRMED without device instrumentation – no
+user-visible impact are UNCONFIRMED without device instrumentation -- no
 build or test was executed for this specific finding, only source
 reading.</p>
 <h2
-id="lva-081-fetchpullmerge-latest-from-all-submodules-build-verify-operator-directive-2026-06-26">LVA-081
+id="lva-081--fetchpullmerge-latest-from-all-submodules--build-verify-operator-directive-2026-06-26">LVA-081
 — Fetch/pull/merge latest from all submodules + build-verify (operator
 directive 2026-06-26)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -1309,7 +1306,7 @@ submodules. Frozen-by-default overridden for this cycle. Must
 build-verify after each bump; revert+report any submodule whose bump
 breaks the build.</p>
 <h2
-id="lva-3-adopt-helixconstitution-11.4.79106-pin-53-commits-behind">LVA-3
+id="lva-3--adopt-helixconstitution-11479106-pin-53-commits-behind">LVA-3
 — Adopt HelixConstitution §11.4.79–106 (pin 53 commits behind)</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
 <strong>Type:</strong> Task <strong>Evidence:</strong>
@@ -1323,8 +1320,8 @@ operator-gated; decision owed on §6.AD.3 Path B vs SQLite DB.
 <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</p>
 <h2
-id="lva-087-video-6-welcome-claims-4-providers-available-but-picker-lists-12">LVA-087
-— Video #6 — Welcome claims ‘4 providers available’ but picker lists
+id="lva-087--video-6--welcome-claims-4-providers-available-but-picker-lists-12">LVA-087
+— Video #6 — Welcome claims '4 providers available' but picker lists
 ~12</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
@@ -1336,8 +1333,8 @@ Bug <strong>Evidence:</strong>
 Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #6.</p>
 <h2
-id="lva-090-video-9-onboarding-select-all-silently-enables-auth-requiring-captchaform-login-providers">LVA-090
-— Video #9 — Onboarding ‘Select all’ silently enables auth-requiring
+id="lva-090--video-9--onboarding-select-all-silently-enables-auth-requiring-captchaform-login-providers">LVA-090
+— Video #9 — Onboarding 'Select all' silently enables auth-requiring
 (Captcha/Form Login) providers</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
@@ -1349,17 +1346,17 @@ Bug <strong>Evidence:</strong>
 OnboardingViewModel.onToggleAllProviders() + requiresNoCredentials()
 correctly gate select-all to no-auth-only providers, cited to Issue #9
 in-source. UNIT-LEVEL RE-VERIFIED 2026-08-12 (this cycle):
-OnboardingViewModelVideoFixesTest ‘select all enables only no-credential
-providers’ PASS, fresh execution (timestamp 2026-08-12T21:07, not
+OnboardingViewModelVideoFixesTest 'select all enables only no-credential
+providers' PASS, fresh execution (timestamp 2026-08-12T21:07, not
 cached). Existing DEVICE-LEVEL evidence at
 .lava-ci-evidence/genymotion/c66-redesign-{RED,GREEN}-20260626/ (proper
 RED-then-GREEN falsifiability pair,
 Challenge66SelectAllDoesNotEnableAuthProvidersTest) is 48 days / ~7
-versions stale per SS6.AK – device gate was occupied by a parallel
+versions stale per SS6.AK -- device gate was occupied by a parallel
 LVA-087 verification agent this cycle, could not re-run. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #9.</p>
 <h2
-id="lva-079-video-3-search-input-chips-vs-results-filter-chips-disagree-results-chip-set-non-deterministic-run-to-run">LVA-079
+id="lva-079--video-3--search-input-chips-vs-results-filter-chips-disagree--results-chip-set-non-deterministic-run-to-run">LVA-079
 — Video #3 — search-input chips vs results-filter chips disagree +
 results chip set non-deterministic run-to-run</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1375,28 +1372,28 @@ run-to-run instability is distinct and still open. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md issue
 #3.</p>
 <h2
-id="lva-095-on-device-api-keyless-mdns-endpoint-does-not-readpersist-local-api-app-key">LVA-095
+id="lva-095--on-device-api-keyless-mdns-endpoint-does-not-readpersist-local-api-app-key">LVA-095
 — on-device API keyless mDNS endpoint does not read/persist local
 api-app key</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
 .lava-ci-evidence/workable-items-closures/2026-08-20-lva-095-lva-082-closure.md
 <strong>Severity:</strong> P1 <strong>Created-By:</strong> AI</p>
-<p>OnboardingViewModelDynamicProvidersTest &gt; ‘selecting a keyless
-on-device API reads and persists the local api key for search auth’
+<p>OnboardingViewModelDynamicProvidersTest &gt; 'selecting a keyless
+on-device API reads and persists the local api key for search auth'
 FAILS: AssertionError - the local api-app key MUST be read + persisted
 onto the keyless mDNS-selected endpoint (was
 GoApi(host=localhost.localdomain, port=42873, platform=null,
 storage=null, key=null)). Discovered 2026-08-12 while running the
 combined test suite after merging 4 parallel LVA-085/086/087/093/094
 fixes - confirmed genuinely pre-existing and unrelated to any of those 4
-changes (git log shows the test file’s last touch was commit b3cb6de2,
+changes (git log shows the test file's last touch was commit b3cb6de2,
 predating this session; none of the 4 merged branches touch
-onboarding/api-key/mDNS code per git diff –name-only). Not yet
+onboarding/api-key/mDNS code per git diff --name-only). Not yet
 root-caused - source: real gradle test run,
 feature/onboarding/build/test-results/testDebugUnitTest/.</p>
 <h2
-id="lva-082-crashlytics-read-not-available-via-firebase-cli-only-symbolsmappingfile-upload-no-issueslist-bq-absent">LVA-082
+id="lva-082--crashlytics-read-not-available-via-firebase-cli--only-symbolsmappingfile-upload-no-issueslist-bq-absent">LVA-082
 — Crashlytics read NOT available via Firebase CLI — only
 symbols/mappingfile upload; no issues:list; bq absent</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -1404,27 +1401,28 @@ symbols/mappingfile upload; no issues:list; bq absent</h2>
 .lava-ci-evidence/workable-items-closures/2026-08-20-lva-095-lva-082-closure.md
 <strong>Severity:</strong> P3 <strong>Created-By:</strong> AI</p>
 <p>Operator asked to use Firebase CLI to pull Crashlytics. Verified
-Firebase CLI 14.17.0 exposes only crashlytics:symbols:upload +
-mappingfile:* (NO issue/non-fatal read). bq CLI absent. Crashlytics
-dashboard read requires console or a BigQuery export not configured.
-Fallback: in-repo §6.AC telemetry + known crash tickets; operator to
-paste console items for full triage. §11.4.6 honest record.</p>
+Firebase CLI 14.17.0 exposes only crashlytics<span class="emoji"
+data-emoji="symbols">🔣</span>upload + mappingfile:* (NO issue/non-fatal
+read). bq CLI absent. Crashlytics dashboard read requires console or a
+BigQuery export not configured. Fallback: in-repo §6.AC telemetry +
+known crash tickets; operator to paste console items for full triage.
+§11.4.6 honest record.</p>
 <h2
-id="lva-088-video-7-choose-your-api-shows-lava.app7777-preset-mislabeled-on-this-network">LVA-088
-— Video #7 — ‘Choose your API’ shows ‘lava.app:7777’ preset + mislabeled
-‘On this network’</h2>
+id="lva-088--video-7--choose-your-api-shows-lavaapp7777-preset--mislabeled-on-this-network">LVA-088
+— Video #7 — 'Choose your API' shows 'lava.app:7777' preset + mislabeled
+'On this network'</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
 .lava-ci-evidence/workable-items-closures/2026-08-20-lva-088-089-091-closure.md
 <strong>Severity:</strong> P2 <strong>Created-By:</strong> AI
 <strong>Assigned-To:</strong> AI</p>
 <p>QA video frames 0012/0015. 1076 investigation: NOT a §6.R hardcoding
-violation (config-driven preset). ‘On this network’ label for a
+violation (config-driven preset). 'On this network' label for a
 cloud/remote preset still worth confirming. Pending §6.Z verification.
 Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #7.</p>
 <h2
-id="lva-089-video-8-mdns-discovered-api-shows-raw-ip-192.168.0.1078443-with-no-friendly-name">LVA-089
+id="lva-089--video-8--mdns-discovered-api-shows-raw-ip-19216801078443-with-no-friendly-name">LVA-089
 — Video #8 — mDNS-discovered API shows raw IP 192.168.0.107:8443 with no
 friendly name</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1436,9 +1434,9 @@ Bug <strong>Evidence:</strong>
 friendly name). Pending §6.Z verification. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md #8.</p>
 <h2
-id="lva-091-video-10-app-id-co-mingling-debug-.dev-release-both-labeled-lava-unconfirmed-in-video">LVA-091
+id="lva-091--video-10--app-id-co-mingling-debug-dev--release-both-labeled-lava--unconfirmed-in-video">LVA-091
 — Video #10 — App-ID co-mingling (debug .dev + release both labeled
-‘Lava’) — UNCONFIRMED in video</h2>
+'Lava') — UNCONFIRMED in video</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
 .lava-ci-evidence/workable-items-closures/2026-08-20-lva-088-089-091-closure.md
@@ -1449,7 +1447,7 @@ visually confirmed. Needs on-device package check (applicationIdSuffix
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #10.</p>
 <h2
-id="lva-019-coverage-ledger-partialgap-overlap-and-missing-per-release-ledgers">LVA-019
+id="lva-019--coverage-ledger-partialgap-overlap-and-missing-per-release-ledgers">LVA-019
 — Coverage ledger partial/gap overlap and missing per-release
 ledgers</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -1459,7 +1457,7 @@ ledgers</h2>
 per-release ledger snapshots. Normalize the registry and add
 release-attestation ledgers.</p>
 <h2
-id="lva-096-pipeline-002-report.json-evidence_summary-never-populated-making-the-anti-bluff-pass-gate-a-no-op">LVA-096
+id="lva-096--pipeline-002--reportjson-evidence_summary-never-populated-making-the-anti-bluff-pass-gate-a-no-op">LVA-096
 — Pipeline 002 — report.json evidence_summary never populated, making
 the anti-bluff PASS gate a no-op</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1473,9 +1471,9 @@ to the console only. finalize_run_report gates outcome PASS on
 evidence_summary.rejected_by_anti_bluff == 0, so a counter permanently
 stuck at 0 turned the anti-bluff half of the data-model.md Validation
 rule into a silent no-op: a run whose Evidence Records had been REJECTED
-could still finalize to PASS. DEMONSTRATED (verbatim RED): “FAIL:
-outcome is ‘PASS’, expected FAIL - a run containing a REJECTED Evidence
-Record reported success.” FIX: new recompute_evidence_summary() in
+could still finalize to PASS. DEMONSTRATED (verbatim RED): "FAIL:
+outcome is 'PASS', expected FAIL - a run containing a REJECTED Evidence
+Record reported success." FIX: new recompute_evidence_summary() in
 scripts/pipeline/lib/run-report.sh derives every count from the physical
 Evidence Records on disk instead of a counter a phase must remember to
 increment; the orchestrator calls it before finalize on every exit path
@@ -1486,25 +1484,25 @@ pre-existing pipeline suites. Found during T038. Severity high. Source
 of truth: specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-097-pipeline-002-orchestrator-self-diagnosis-missed-its-own-dirtied-tree-porcelain-collapses-untracked-dirs">LVA-097
+id="lva-097--pipeline-002--orchestrator-self-diagnosis-missed-its-own-dirtied-tree-porcelain-collapses-untracked-dirs">LVA-097
 — Pipeline 002 — orchestrator self-diagnosis missed its own dirtied tree
 (porcelain collapses untracked dirs)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
 tests/pipeline/test_pipeline_orchestrator.sh <strong>Severity:</strong>
 P3 <strong>Created-By:</strong> AI</p>
-<p>WHAT: git status –porcelain collapses a fully-untracked directory to
+<p>WHAT: git status --porcelain collapses a fully-untracked directory to
 a single entry, so the orchestrator first-cut diagnosis for the
-“pipeline dirtied its own tree” footgun matched nothing at all when the
+"pipeline dirtied its own tree" footgun matched nothing at all when the
 offending paths were inside one untracked directory. FIX: use
-–untracked-files=all. Re-verified against a fixture repo with the T003
+--untracked-files=all. Re-verified against a fixture repo with the T003
 gitignore rule removed, which then correctly exits 2 AND prints the
 DIAGNOSIS block naming both offending paths. Found during T038. Severity
 low. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-098-pipeline-002-companion-doc-under-docsscripts-for-a-scriptspipeline-script-breaks-cm-script-docs-sync">LVA-098
+id="lva-098--pipeline-002--companion-doc-under-docsscripts-for-a-scriptspipeline-script-breaks-cm-script-docs-sync">LVA-098
 — Pipeline 002 — companion doc under docs/scripts for a scripts/pipeline
 script BREAKS CM-SCRIPT-DOCS-SYNC</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1513,10 +1511,10 @@ Bug <strong>Evidence:</strong> docs/scripts/pipeline/phase-06-docs.sh.md
 <p>WHAT: a companion doc placed at docs/scripts/<name>.sh.md for a
 script living under scripts/pipeline/ breaks the CM-SCRIPT-DOCS-SYNC
 gate rather than satisfying it. The gate matches find scripts -maxdepth
-1 -name ‘<em>.sh’ against find docs/scripts -maxdepth 1 -name
-’</em>.sh.md’, so such a doc is an ORPHAN with no depth-1 script
-counterpart. DEMONSTRATED mechanically: exit 1 with “Docs WITHOUT
-matching scripts/<name>: docs/scripts/phase-05a-changelog-entry.sh.md”.
+1 -name '<em>.sh' against find docs/scripts -maxdepth 1 -name
+'</em>.sh.md', so such a doc is an ORPHAN with no depth-1 script
+counterpart. DEMONSTRATED mechanically: exit 1 with "Docs WITHOUT
+matching scripts/<name>: docs/scripts/phase-05a-changelog-entry.sh.md".
 FIX: pipeline phase-script companions go in docs/scripts/pipeline/,
 following the existing docs/scripts/{hooks,lava-api-go,autonomous-qa}/
 precedent, which sits outside the maxdepth-1 scan. Gate confirmed clean
@@ -1525,16 +1523,16 @@ Severity medium. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-099-pipeline-002-guard-regression-test-could-start-a-real-gradle-build-on-the-developer-checkout">LVA-099
+id="lva-099--pipeline-002--guard-regression-test-could-start-a-real-gradle-build-on-the-developer-checkout">LVA-099
 — Pipeline 002 — guard-regression test could start a REAL Gradle build
 on the developer checkout</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
 tests/pipeline/test_pipeline_orchestrator.sh <strong>Severity:</strong>
 P2 <strong>Created-By:</strong> AI</p>
-<p>WHAT: while rehearsing a mutation of the orchestrator “–skip
-precondition” refusal, the guard stopped refusing, so the run fell
-through to the DEFAULT –until live_verify and began a REAL Gradle build
+<p>WHAT: while rehearsing a mutation of the orchestrator "--skip
+precondition" refusal, the guard stopped refusing, so the run fell
+through to the DEFAULT --until live_verify and began a REAL Gradle build
 against the REAL repository, which had to be killed at a 2-minute
 timeout. A guard-regression test that can start a real build on the
 actual checkout when the guard regresses is itself a hazard. FIX: every
@@ -1545,7 +1543,7 @@ Severity medium. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-100-pipeline-002-constitutional-gate-sweep-wrapper-was-dead-code-no-_dispatch-line-in-phase-02-test.sh">LVA-100
+id="lva-100--pipeline-002--constitutional-gate-sweep-wrapper-was-dead-code--no-_dispatch-line-in-phase-02-testsh">LVA-100
 — Pipeline 002 — constitutional-gate-sweep wrapper was dead code — no
 _dispatch line in phase-02-test.sh</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1569,18 +1567,18 @@ high. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-101-pipeline-002-jq-fallback-erased-boolean-false-turning-all_passedfalse-into-unknown">LVA-101
+id="lva-101--pipeline-002--jq--fallback-erased-boolean-false-turning-all_passedfalse-into-unknown">LVA-101
 — Pipeline 002 — jq // fallback erased boolean false, turning
-all_passed:false into “unknown”</h2>
+all_passed:false into "unknown"</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
 scripts/pipeline/phase-02-test-constitutional-gate-sweep.sh
 <strong>Severity:</strong> P2 <strong>Created-By:</strong> AI</p>
-<p>WHAT: jq -r ‘.all_passed // “unknown”’ falls back not only on
+<p>WHAT: jq -r '.all_passed // "unknown"' falls back not only on
 null/missing but also on boolean false, so a real Containers attestation
-saying “all_passed”: false was recorded in every Evidence Record as
-“unknown” - erasing the did-not-all-pass signal on exactly the runs
-where it matters. FIX: explicit has(…) and != null form that still
+saying "all_passed": false was recorded in every Evidence Record as
+"unknown" - erasing the did-not-all-pass signal on exactly the runs
+where it matters. FIX: explicit has(...) and != null form that still
 distinguishes genuinely-absent from present-and-false; unit-verified
 mappings false to false, true to true, null to unknown, {} to unknown.
 The sibling // uses on the count fields are unaffected (jq treats 0 as
@@ -1590,7 +1588,7 @@ and is Check B of the standing static guard. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-102-pipeline-002-phase-02-test.sh-reported-pass-on-zero-evidence-records-vacuous-pass">LVA-102
+id="lva-102--pipeline-002--phase-02-testsh-reported-pass-on-zero-evidence-records-vacuous-pass">LVA-102
 — Pipeline 002 — phase-02-test.sh reported PASS on ZERO Evidence Records
 (vacuous pass)</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1601,14 +1599,14 @@ P1 <strong>Created-By:</strong> AI</p>
 wrapper exited non-zero, no record said FAIL, no record was REJECTED)
 and every one is satisfied VACUOUSLY by a run in which the dispatched
 wrappers all exit 0 without writing anything. Such a run genuinely
-reported “PASSED - all 1 dispatched wrapper(s) exited 0, 0 Evidence
-Records scanned, 0 FAIL, 0 REJECTED” and the run report carried it
+reported "PASSED - all 1 dispatched wrapper(s) exited 0, 0 Evidence
+Records scanned, 0 FAIL, 0 REJECTED" and the run report carried it
 forward as a passing phase. That file own header already states the
-governing principle (“an empty test phase proves nothing”) but enforced
+governing principle ("an empty test phase proves nothing") but enforced
 it only for the zero-WRAPPERS case, not the zero-EVIDENCE case that
-actually reaches the aggregator. DEMONSTRATED (verbatim RED): “FAIL:
+actually reaches the aggregator. DEMONSTRATED (verbatim RED): "FAIL:
 zero Evidence Records -&gt; exit 0. A test phase that scanned no
-evidence at all reported success.” FIX: a fourth PASS condition
+evidence at all reported success." FIX: a fourth PASS condition
 requiring at least one Evidence Record scanned, plus an explanatory
 failure message. New hermetic suite
 tests/pipeline/test_phase_02_aggregation.sh (3 cases) drives the real
@@ -1620,7 +1618,7 @@ Severity high. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-103-pipeline-002-hermetic-wrapper-would-have-minted-a-pass-record-from-a-reproduce-a-known-bug-harness">LVA-103
+id="lva-103--pipeline-002--hermetic-wrapper-would-have-minted-a-pass-record-from-a-reproduce-a-known-bug-harness">LVA-103
 — Pipeline 002 — hermetic wrapper would have minted a PASS record from a
 reproduce-a-known-bug harness</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1629,26 +1627,27 @@ scripts/pipeline/phase-02-test-hermetic.sh <strong>Severity:</strong> P2
 <strong>Created-By:</strong> AI</p>
 <p>WHAT: tests/firebase/run_all.sh globs test_<em>.sh, so a repro_</em>
 file is outside its reach. But
-scripts/pipeline/phase-02-test-hermetic.sh enumerates ALL *.sh at depth
-2 via find tests -mindepth 2 -maxdepth 2 -name ‘<em>.sh’, so it WOULD
-have run tests/firebase/repro_mode_both_channel_gap.sh as a hermetic
-suite. Because that harness exits 0 when it SUCCESSFULLY REPRODUCES a
-defect, the pipeline would have minted a PASS Evidence Record whose real
-meaning is “a known bug is still broken”. That is strictly worse than
-the redundant-aggregator case the wrapper header already guards against:
-that one over-counts real coverage, this one would manufacture coverage
-out of a known failure. FIX: exclusion rule 3 in the hermetic wrapper,
--not -name ’repro_</em>.sh’ (scripts/pipeline/phase-02-test-hermetic.sh
-line 242), with the reasoning documented alongside the two existing
-rules. Proven by the enumeration count going 1 to 0 for repro files
-while the wrapper still enumerates 69 real suites; its own hermetic test
-passes and tests/firebase/run_all.sh remains 8/8. Found while adding the
+scripts/pipeline/phase-02-test-hermetic.sh enumerates ALL <em>.sh at
+depth 2 via find tests -mindepth 2 -maxdepth 2 -name '</em>.sh', so it
+WOULD have run tests/firebase/repro_mode_both_channel_gap.sh as a
+hermetic suite. Because that harness exits 0 when it SUCCESSFULLY
+REPRODUCES a defect, the pipeline would have minted a PASS Evidence
+Record whose real meaning is "a known bug is still broken". That is
+strictly worse than the redundant-aggregator case the wrapper header
+already guards against: that one over-counts real coverage, this one
+would manufacture coverage out of a known failure. FIX: exclusion rule 3
+in the hermetic wrapper, -not -name 'repro_*.sh'
+(scripts/pipeline/phase-02-test-hermetic.sh line 242), with the
+reasoning documented alongside the two existing rules. Proven by the
+enumeration count going 1 to 0 for repro files while the wrapper still
+enumerates 69 real suites; its own hermetic test passes and
+tests/firebase/run_all.sh remains 8/8. Found while adding the
 reproduction harness for the firebase-distribute combined-mode finding.
 Severity medium. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-104-pipeline-002-the-anti-bluff-validator-was-itself-bluffable-every-rule-passed-on-an-empty-record">LVA-104
+id="lva-104--pipeline-002--the-anti-bluff-validator-was-itself-bluffable--every-rule-passed-on-an-empty-record">LVA-104
 — Pipeline 002 — the anti-bluff validator was ITSELF bluffable — every
 rule passed on an empty record</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1662,51 +1661,51 @@ the rule-1 bluff phrases. An empty raw_output_ref resolves to
 ${record_dir}/ - the record OWN DIRECTORY - and both [[ -e dir ]] and [[
 -s dir ]] are TRUE for a directory (its inode has non-zero size), so
 rules 2 and 3 passed on nothing. An empty category is not
-“real-device-challenge”, so rule 4 was skipped. On top of that, jq -r
-‘.x // empty’ exits 0 for an ABSENT field, so the rule-0 guard never
+"real-device-challenge", so rule 4 was skipped. On top of that, jq -r
+'.x // empty' exits 0 for an ABSENT field, so the rule-0 guard never
 fired despite its header claiming to reject records missing required
 fields. A sibling of the same shape: rule 4 is selected by exact string
-match, so a category typo “real-device-challenges” skipped the mandatory
+match, so a category typo "real-device-challenges" skipped the mandatory
 falsifiability-marker check entirely. REACHABLE THROUGH THE PRODUCTION
 WRITER, not only via hand-edited JSON: any wrapper passing its raw
 DIRECTORY instead of a captured-output file produced validated / exit=0
 on empty evidence. WHY IT MATTERS: this component is the one FR-004
 relies on to catch a test lying about itself, so a bluffable anti-bluff
-validator makes every downstream “validated” stamp in the pipeline
+validator makes every downstream "validated" stamp in the pipeline
 unfalsifiable. FIX: rule 0c (every schema-required field present AND
 non-empty, checked BEFORE any rule an empty value would satisfy), rule
 0d (category must be one of the 8 enum values), and rule 2 tightened
 from -e to -f with a distinct message for the directory case. New suite
 tests/pipeline/test_anti_bluff_missing_evidence_fields.sh (8 checks
 including 3 over-correction guards). Independently re-verified: a
-directory-valued raw_output_ref now yields “REJECTED: raw_output_ref
-‘raw’ is a directory, not a captured-output file”, an absent field
-yields “REJECTED: required field(s) missing or empty: assertion_summary
-(a record that asserts nothing and points at nothing is not evidence)”,
+directory-valued raw_output_ref now yields "REJECTED: raw_output_ref
+'raw' is a directory, not a captured-output file", an absent field
+yields "REJECTED: required field(s) missing or empty: assertion_summary
+(a record that asserts nothing and points at nothing is not evidence)",
 and the ORIGINAL validator suite still passes. Found by the systematic
 vacuous-PASS audit; task T012. Severity critical. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-105-pipeline-002-phase-01-build.sh-recorded-and-counted-build-artifacts-that-were-not-on-disk">LVA-105
+id="lva-105--pipeline-002--phase-01-buildsh-recorded-and-counted-build-artifacts-that-were-not-on-disk">LVA-105
 — Pipeline 002 — phase-01-build.sh recorded and counted Build Artifacts
 that were NOT on disk</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
 tests/pipeline/test_phase_01_artifact_verification.sh
 <strong>Severity:</strong> P1 <strong>Created-By:</strong> AI</p>
-<p>WHAT: _phase01_build_android_report_one ran cp -f “<span
-class="math inline">$src" "$</span>dst” with its exit status UNCHECKED,
+<p>WHAT: _phase01_build_android_report_one ran cp -f "<span
+class="math inline">$src" "$</span>dst" with its exit status UNCHECKED,
 then unconditionally printed ARTIFACT <label>: <dst> and returned 0.
 scripts/pipeline/phase-01-build.sh believed that line, recorded the path
 into build_artifacts[] and incremented its counter, also without
 checking the _record_build_artifact result. The PASS condition
 (android_rc==0 &amp;&amp; go_rc==0 &amp;&amp; artifacts&gt;=5) was
 satisfied entirely by the ABSENCE of the check that would have caught
-it. DEMONSTRATED with a real run against a read-only destination: “cp:
-cannot create regular file …: Permission denied” immediately followed by
-“ARTIFACT app-debug: …”, then “5 of 5 expected Build Artifacts
-recorded”, “all 5 Build Artifacts produced and recorded”, PHASE EXIT=0 -
+it. DEMONSTRATED with a real run against a read-only destination: "cp:
+cannot create regular file ...: Permission denied" immediately followed
+by "ARTIFACT app-debug: ...", then "5 of 5 expected Build Artifacts
+recorded", "all 5 Build Artifacts produced and recorded", PHASE EXIT=0 -
 while the recorded path DOES NOT EXIST. This matters downstream:
 scripts/pipeline/phase-02-test.sh resolves the release-canary APK out of
 exactly that array. SECOND, DIFFERENT-CLASS DEFECT in the same run:
@@ -1724,7 +1723,7 @@ build still failing). Task T020. Severity high. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-106-pipeline-002-phase-04-live-verify-passed-on-an-empty-http-response-body">LVA-106
+id="lva-106--pipeline-002--phase-04-live-verify-passed-on-an-empty-http-response-body">LVA-106
 — Pipeline 002 — phase-04 live-verify PASSED on an EMPTY HTTP response
 body</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1743,8 +1742,8 @@ the scaffolding lines THIS SCRIPT ITSELF writes into the raw file,
 present whether or not the server said anything. DEMONSTRATED against a
 real TLS server returning 200 with a zero-byte body on every path: 3
 requests attempted, all 3 records anti_bluff_status=validated, phase
-result PASS, PHASE EXIT=0, with the summary ending “…returned HTTP 200
-with response body:” - nothing after the colon. FIX: a
+result PASS, PHASE EXIT=0, with the summary ending "...returned HTTP 200
+with response body: " - nothing after the colon. FIX: a
 whitespace-stripped empty body now fails the request with a specific
 reason. Over-correction guarded by pinning the three endpoint real
 bodies, read from lava-api-go internal/observability/health.go and
@@ -1754,7 +1753,7 @@ Task T036. Severity high. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-107-pipeline-002-wave4-g-1-go-test-exit-code-captured-and-never-compared">LVA-107
+id="lva-107--pipeline-002--wave4-g-1-go-test-exit-code-captured-and-never-compared">LVA-107
 — Pipeline 002 — wave4 G-1: go test exit code captured and never
 compared</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1765,8 +1764,8 @@ tests/pipeline/test_phase_02_go_wrapper.sh <strong>Severity:</strong> P1
 exit code into a variable and never compared it. A package whose tests
 all PASS but which fails AS A PACKAGE - a TestMain teardown after
 m.Run(), which is exactly how the lava-api-go integration suites are
-written - reported “go test exited 1 … PASS: 1 FAIL: 0 … PASSED” with
-wrapper exit 0. FIX: the wrapper now writes a synthetic FAIL record
+written - reported "go test exited 1 ... PASS: 1 FAIL: 0 ... PASSED"
+with wrapper exit 0. FIX: the wrapper now writes a synthetic FAIL record
 quoting the real package-level output. Part of the T021-T027
 post-implementation wrapper audit: 11 confirmed swallowed-failure
 defects, all fixed RED-then-GREEN. No real suite was run - each wrapper
@@ -1779,7 +1778,7 @@ cases so a blanket fail-everything fix would not pass. Severity high.
 Source of truth: specs/002-build-test-distribute-pipeline/progress.yml
 and specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-108-pipeline-002-wave4-g-2-zero-parseable-go-test-events-reported-pass-with-zero-evidence-records">LVA-108
+id="lva-108--pipeline-002--wave4-g-2-zero-parseable-go-test-events-reported-pass-with-zero-evidence-records">LVA-108
 — Pipeline 002 — wave4 G-2: zero parseable go test events reported PASS
 with zero Evidence Records</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1790,7 +1789,7 @@ tests/pipeline/test_phase_02_go_wrapper.sh <strong>Severity:</strong> P2
 Evidence Records when zero per-test events were parseable. The header
 promised exit 3 for this case; the implemented guard only tested whether
 the JSONL file was empty, so a stray build tag excluding every _test.go
-sailed through as “[no test files]”, exit 0. FIX: the wrapper now
+sailed through as "[no test files]", exit 0. FIX: the wrapper now
 genuinely exits 3. Part of the T021-T027 post-implementation wrapper
 audit: 11 confirmed swallowed-failure defects, all fixed RED-then-GREEN.
 No real suite was run - each wrapper was driven through its own
@@ -1803,7 +1802,7 @@ fail-everything fix would not pass. Severity medium. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-109-pipeline-002-wave4-k-1-gradle_exit_code-captured-and-never-compared">LVA-109
+id="lva-109--pipeline-002--wave4-k-1-gradle_exit_code-captured-and-never-compared">LVA-109
 — Pipeline 002 — wave4 K-1: GRADLE_EXIT_CODE captured and never
 compared</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1812,9 +1811,9 @@ tests/pipeline/test_phase_02_kotlin_wrapper.sh
 <strong>Severity:</strong> P1 <strong>Created-By:</strong> AI</p>
 <p>WHAT: scripts/pipeline/phase-02-test-kotlin.sh captured
 GRADLE_EXIT_CODE and never compared it. Because the wrapper correctly
-passes –continue, Gradle exits non-zero for failures that produce NO
+passes --continue, Gradle exits non-zero for failures that produce NO
 JUnit XML at all - a test-source compile error being the everyday case.
-An “Unresolved reference” compile failure reported “PASS: 1 / FAIL: 0”,
+An "Unresolved reference" compile failure reported "PASS: 1 / FAIL: 0",
 exit 0. FIX: the captured Gradle exit code is now compared and drives
 the verdict. Part of the T021-T027 post-implementation wrapper audit: 11
 confirmed swallowed-failure defects, all fixed RED-then-GREEN. No real
@@ -1828,7 +1827,7 @@ pass. Severity high. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-110-pipeline-002-wave4-k-2-unparseable-junit-xml-reports-silently-dropped">LVA-110
+id="lva-110--pipeline-002--wave4-k-2-unparseable-junit-xml-reports-silently-dropped">LVA-110
 — Pipeline 002 — wave4 K-2: unparseable JUnit XML reports silently
 dropped</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1837,8 +1836,8 @@ tests/pipeline/test_phase_02_kotlin_wrapper.sh
 <strong>Severity:</strong> P2 <strong>Created-By:</strong> AI</p>
 <p>WHAT: scripts/pipeline/phase-02-test-kotlin.sh silently dropped
 unparseable report files. A truncated JUnit XML whose readable content
-contained a real <failure> produced “WARN: failed to parse … unclosed
-token” and then “PASS: 1 / FAIL: 0”, exit 0. A JUnit XML is truncated
+contained a real <failure> produced "WARN: failed to parse ... unclosed
+token" and then "PASS: 1 / FAIL: 0", exit 0. A JUnit XML is truncated
 precisely when the JVM writing it died, so this is the highest-signal
 case being discarded. FIX: one FAIL record per unreadable report,
 quoting the parse error and the file real first bytes. Part of the
@@ -1854,7 +1853,7 @@ pass. Severity medium. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-111-pipeline-002-wave4-k-3-reports-present-but-zero-parsed-exited-0-with-zero-records">LVA-111
+id="lva-111--pipeline-002--wave4-k-3-reports-present-but-zero--parsed-exited-0-with-zero-records">LVA-111
 — Pipeline 002 — wave4 K-3: reports present but zero <testcase> parsed
 exited 0 with zero records</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1877,7 +1876,7 @@ pass. Severity medium. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-112-pipeline-002-wave4-h-1-empty-suite-enumeration-reported-exit-0-with-zero-records">LVA-112
+id="lva-112--pipeline-002--wave4-h-1-empty-suite-enumeration-reported-exit-0-with-zero-records">LVA-112
 — Pipeline 002 — wave4 H-1: empty suite enumeration reported exit 0 with
 zero records</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1886,7 +1885,7 @@ tests/pipeline/test_phase_02_hermetic_wrapper.sh
 <strong>Severity:</strong> P2 <strong>Created-By:</strong> AI</p>
 <p>WHAT: when suite enumeration in
 scripts/pipeline/phase-02-test-hermetic.sh matched nothing runnable, the
-wrapper printed “0 suite(s) to run … WRAPPER EXIT CODE = 0” and wrote
+wrapper printed "0 suite(s) to run ... WRAPPER EXIT CODE = 0" and wrote
 zero Evidence Records. (The real repo enumerates 76 candidates / 11
 excluded / 65 run, so the guard cannot misfire in production.) FIX: an
 empty enumeration is now a failure. Part of the T021-T027
@@ -1901,7 +1900,7 @@ cases so a blanket fail-everything fix would not pass. Severity medium.
 Source of truth: specs/002-build-test-distribute-pipeline/progress.yml
 and specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-113-pipeline-002-wave4-h-2-skipped-suites-left-no-evidence-record-at-all">LVA-113
+id="lva-113--pipeline-002--wave4-h-2-skipped-suites-left-no-evidence-record-at-all">LVA-113
 — Pipeline 002 — wave4 H-2: skipped suites left no Evidence Record at
 all</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1909,7 +1908,7 @@ Bug <strong>Evidence:</strong>
 tests/pipeline/test_phase_02_hermetic_wrapper.sh
 <strong>Severity:</strong> P2 <strong>Created-By:</strong> AI</p>
 <p>WHAT: the scripts/pipeline/phase-02-test-hermetic.sh header claimed
-skips are “never silently omitted”, but the only reporting was a console
+skips are "never silently omitted", but the only reporting was a console
 line that never reaches the run report, so a skipped suite was invisible
 at rest. FIX: one SKIPPED Evidence Record per excluded suite, quoting
 the wrapper own real exclusion reason. Part of the T021-T027
@@ -1924,7 +1923,7 @@ cases so a blanket fail-everything fix would not pass. Severity medium.
 Source of truth: specs/002-build-test-distribute-pipeline/progress.yml
 and specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-114-pipeline-002-wave4-s-as-b-empty-or-unreadable-dimensions-reported-passed">LVA-114
+id="lva-114--pipeline-002--wave4-s-as-b-empty-or-unreadable-dimensions-reported-passed">LVA-114
 — Pipeline 002 — wave4 S-A/S-B: empty or unreadable dimensions[]
 reported PASSED</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1933,7 +1932,7 @@ tests/pipeline/test_phase_02_stress_chaos_wrapper.sh
 <strong>Severity:</strong> P2 <strong>Created-By:</strong> AI</p>
 <p>WHAT: scripts/pipeline/phase-02-test-stress-chaos.sh reported PASSED
 with exit 0 on an empty or unreadable dimensions[] array - even when the
-truncated JSON own readable content said “verdict”:“FAIL”. FIX: an empty
+truncated JSON own readable content said "verdict":"FAIL". FIX: an empty
 or unreadable dimensions array is now a failure rather than a pass. Part
 of the T021-T027 post-implementation wrapper audit: 11 confirmed
 swallowed-failure defects, all fixed RED-then-GREEN. No real suite was
@@ -1947,7 +1946,7 @@ pass. Severity medium. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-115-pipeline-002-wave4-s-c-run_rc-captured-and-never-compared">LVA-115
+id="lva-115--pipeline-002--wave4-s-c-run_rc-captured-and-never-compared">LVA-115
 — Pipeline 002 — wave4 S-C: RUN_RC captured and never compared</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
@@ -1970,7 +1969,7 @@ pass. Severity medium. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-116-pipeline-002-wave4-s-d-.ran-read-as-a-string-so-a-missing-key-matched-the-same-branch">LVA-116
+id="lva-116--pipeline-002--wave4-s-d-ran-read-as-a-string-so-a-missing-key-matched-the-same-branch">LVA-116
 — Pipeline 002 — wave4 S-D: .ran read as a string, so a MISSING key
 matched the same branch</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -1978,11 +1977,11 @@ Bug <strong>Evidence:</strong>
 tests/pipeline/test_phase_02_stress_chaos_wrapper.sh
 <strong>Severity:</strong> P2 <strong>Created-By:</strong> AI</p>
 <p>WHAT: scripts/pipeline/phase-02-test-stress-chaos.sh read .ran as a
-string and compared it to “true”, which also matches a MISSING key
+string and compared it to "true", which also matches a MISSING key
 (null), so an unrecognized dimension shape was downgraded to a
-non-blocking operator-gated skip: a FAILing dimension printed “S1
-sustained: null” and the wrapper reported PASSED. This is precisely the
-.all_passed // “unknown” defect class found in the gate-sweep wrapper,
+non-blocking operator-gated skip: a FAILing dimension printed "S1
+sustained: null" and the wrapper reported PASSED. This is precisely the
+.all_passed // "unknown" defect class found in the gate-sweep wrapper,
 wearing a different disguise, and is Check B of the standing static
 guard. FIX: the flag is now read and compared in a form that
 distinguishes absent from present-and-false. Part of the T021-T027
@@ -1997,7 +1996,7 @@ cases so a blanket fail-everything fix would not pass. Severity medium.
 Source of truth: specs/002-build-test-distribute-pipeline/progress.yml
 and specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-117-pipeline-002-wave4-r-a-undocumented-exit-codes-laundered-into-skipped-silently-disabling-the-cold-start-gate">LVA-117
+id="lva-117--pipeline-002--wave4-r-a-undocumented-exit-codes-laundered-into-skipped-silently-disabling-the-cold-start-gate">LVA-117
 — Pipeline 002 — wave4 R-A: undocumented exit codes laundered into
 SKIPPED, silently disabling the cold-start gate</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
@@ -2007,8 +2006,8 @@ tests/pipeline/test_phase_02_release_canary_wrapper.sh
 <p>WHAT: scripts/run-release-canary.sh documents exits 0/1/2 and runs
 under set -euo pipefail, so a missing tool yields 127 and a kill yields
 137. scripts/pipeline/phase-02-test-release-canary.sh reported BOTH as
-“Genuinely did not execute: … (real host/config precondition gap, not a
-feature defect)” with result SKIPPED and wrapper exit 0 - asserting a
+"Genuinely did not execute: ... (real host/config precondition gap, not
+a feature defect)" with result SKIPPED and wrapper exit 0 - asserting a
 cause it cannot know. Since SKIPPED does not block the phase, a dead
 canary harness silently disabled the constitution 6.Z cold-start gate.
 FIX: only the documented exit 2 maps to SKIPPED; any other non-zero is a
@@ -2024,18 +2023,18 @@ pass. Severity high. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-118-pipeline-002-advance-all-submodules.sh-would-have-auto-advanced-the-constitution-governance-submodule">LVA-118
+id="lva-118--pipeline-002--advance-all-submodulessh-would-have-auto-advanced-the-constitution-governance-submodule">LVA-118
 — Pipeline 002 — advance-all-submodules.sh would have auto-advanced the
 constitution governance submodule</h2>
 <p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
 Bug <strong>Evidence:</strong>
 tests/pipeline/test_advance_all_submodules.sh <strong>Severity:</strong>
 P0 <strong>Created-By:</strong> AI</p>
-<p>WHAT: scripts/advance-all-submodules.sh defaulted to “every
-submodule” (its own LAVA_ADVANCE_SUBMODULES documentation says so) and
+<p>WHAT: scripts/advance-all-submodules.sh defaulted to "every
+submodule" (its own LAVA_ADVANCE_SUBMODULES documentation says so) and
 contained ZERO mention of the constitution submodule. Root CLAUDE.md
-states: “The ./constitution/ submodule itself remains pinned + advanced
-only per CONST-049 7-step pipeline.” An unattended closure phase would
+states: "The ./constitution/ submodule itself remains pinned + advanced
+only per CONST-049 7-step pipeline." An unattended closure phase would
 therefore have auto-advanced the project own governance submodule - the
 document set that defines what this pipeline is permitted to do at all.
 Found by VERIFYING a claim (F-5) made in the T048/T049
@@ -2058,12 +2057,12 @@ governance refusal that leaves no evidence is invisible at rest;
 old_commit and new_commit are both the current pin, since no candidate
 commit was ever looked up. SECOND BUG SURFACED BY THE FIX: the script
 carried its own internal outcome whitelist separate from the schema,
-which rejected the new value with “internal error - invalid outcome”, so
+which rejected the new value with "internal error - invalid outcome", so
 both had to move. Severity critical. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
 <h2
-id="lva-119-pipeline-002-close-the-vacuous-pass-defect-class-mechanically-with-a-standing-static-guard">LVA-119
+id="lva-119--pipeline-002--close-the-vacuous-pass-defect-class-mechanically-with-a-standing-static-guard">LVA-119
 — Pipeline 002 — close the vacuous-pass defect CLASS mechanically with a
 standing static guard</h2>
 <p><strong>Status:</strong> Completed (→ Fixed.md)
@@ -2071,7 +2070,7 @@ standing static guard</h2>
 tests/pipeline/test_no_vacuous_pass_patterns.sh
 <strong>Severity:</strong> P2 <strong>Created-By:</strong> AI</p>
 <p>WHAT: nineteen-plus defects found during feature 002 were
-overwhelmingly the same family - the “vacuous pass”, a gate whose
+overwhelmingly the same family - the "vacuous pass", a gate whose
 success conditions are all satisfied by the ABSENCE of the thing it is
 supposed to check. Fixing the individual bugs is not the same as closing
 the class, so the recurring shapes were turned into a standing static
@@ -2084,13 +2083,13 @@ to a field whose meaningful value can be falsy (seen in
 phase-02-test-constitutional-gate-sweep.sh and
 phase-02-test-stress-chaos.sh). CHECK C: -e or -s standing in for -f on
 a value that must be a regular file (seen in anti-bluff-validate.sh).
-ESCAPE HATCH: an inline “# vacuous-pass-ok: <reason>” comment on the
+ESCAPE HATCH: an inline "# vacuous-pass-ok: <reason>" comment on the
 same line, which requires the reasoning to be written down rather than
 allowing a silent exemption. Six legitimate cases were annotated this
 way rather than silenced, most importantly the phase-03 HEALTH_RC, where
 NOT trusting the return code is itself the load-bearing anti-bluff
 decision (constitution 6.B: the status binary exits 0 while reporting
-“Healthy: false”, proven for real during T035). FALSIFIABILITY PROVEN:
+"Healthy: false", proven for real during T035). FALSIFIABILITY PROVEN:
 all three checks were rehearsed by re-introducing a real historical
 defect and confirming detection - the jq // bug (Check B), a bare -s on
 a raw file ref (Check C), and a stripped vacuous-pass-ok annotation on
@@ -2101,11 +2100,651 @@ that quotes the very bug it fixed; a scanner that reports the
 documentation of a fixed bug as the bug is a false-positive generator,
 so it now skips comment lines. HONEST LIMITS, recorded rather than
 glossed: this is a heuristic lint, not a proof. It cannot catch every
-vacuous pass - the phase-01 “recorded an artifact that is not on disk”
+vacuous pass - the phase-01 "recorded an artifact that is not on disk"
 defect is invisible to it - and it is a cheap net for three shapes that
 have each already reached production here, not a substitute for the
 behavioural suites alongside it. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</p>
+<h2
+id="lva-139--pipeline-002--the-orchestrator-trusted-a-phase-to-record-its-own-failure-so-reportjson-printed-outcome-pass-for-a-run-that-halted-at-test">LVA-139
+— Pipeline 002 — the orchestrator trusted a phase to record its own
+failure, so report.json printed outcome PASS for a run that halted at
+test</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+tests/pipeline/test_phase_failure_always_recorded.sh
+<strong>Severity:</strong> P0</p>
+<p>WHAT: The phase registry in scripts/pipeline-build-test-distribute.sh
+marks each phase with a self-appends-result flag and the orchestrator
+TRUSTED that flag. A phase script that exits non-zero BEFORE reaching
+its own append_phase_result call appends nothing; the in-flight marker
+was correctly cleared, because the script RETURNED and so the run was
+not interrupted; and finalize_run_report's all-PASS rule was then
+satisfied vacuously by the phases that did report. EVIDENCE: outcome
+PASS and "halted at: test" printed in the SAME summary box for a run
+that failed at the test phase. The multi-script variant is worse:
+live_verify's first script appends a PASS, the second dies before
+appending, and phases[] comes out FULL-LENGTH and all-PASS,
+indistinguishable from a complete success. RELATIONSHIP TO LVA-130,
+stated so this is not read as a duplicate: LVA-130 is the INTERRUPTED
+case, which the in-flight marker closes. This defect sits one level
+above it and the marker cannot cover it, because the marker's whole
+semantic is "a script is executing right now" and a script that returns
+is by definition not interrupted. The gap was never interruption; it was
+trusting a script to have recorded its own failure. FIX, verified by
+direct inspection of the working tree: a new phase_nonpass_count
+function at scripts/pipeline/lib/run-report.sh line 687 reports how many
+non-PASS entries a named phase actually recorded, and the orchestrator
+consults it at lines 557 and 588 and appends a FAIL itself when the
+count is zero. Deliberately NOT done there: no unconditional append,
+which would duplicate a phase that did report its own FAIL, and no
+default folded into the query, which would make "the report could not be
+read" and "the phase reported no failure" the same answer. An unreadable
+count is treated as zero on purpose, which appends, so the check fails
+closed. Regression coverage:
+tests/pipeline/test_phase_failure_always_recorded.sh.</p>
+<h2
+id="lva-140--pipeline-002--six-of-seven-unusable-in-flight-marker-shapes-read-as-not-interrupted-so-an-interrupted-run-finalized-pass">LVA-140
+— Pipeline 002 — six of seven unusable in-flight marker shapes read as
+not-interrupted, so an interrupted run finalized PASS</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+tests/pipeline/test_run_report_library_robustness.sh
+<strong>Severity:</strong> P1</p>
+<p>WHAT: append_interrupted_phase_if_any in
+scripts/pipeline/lib/run-report.sh treated the in-flight marker's
+CONTENTS as the interruption signal when only its EXISTENCE is. Any
+marker the function could not interpret took a return-zero path that
+every caller reads as "this run was not interrupted", and the run then
+finalized PASS on a truncated all-PASS phases[]. MEASURED: six of the
+seven unusable marker shapes exercised took that path, namely an empty
+marker, a whitespace-only marker, an unreadable marker, a marker naming
+a phase the schema enum rejects, a marker naming two phases, and a
+directory in the marker's place. That is the vacuous-pass shape the
+entire in-flight-marker block exists to close, reached through the
+block's own error handling. FIX, verified by direct inspection of the
+working tree: the marker's existence is now the signal and its contents
+only NAME the phase. The function returns 2 when a marker exists but
+neither it nor the caller-supplied fallback names a known phase, and it
+leaves the marker in place so the interruption is not lost; its
+documented contract now states that a non-zero return is never "nothing
+happened" and that callers MUST compare it. The fallback can only NAME
+an interruption the marker's existence already proves, never manufacture
+one, so with no marker present a fallback changes nothing. Separately,
+mark_phase_in_flight now writes through a temporary file, reads it back,
+and moves it into place atomically, so a failed or partial write no
+longer leaves an EMPTY marker behind: the marker either says which
+phase, or it is not there at all. Regression coverage:
+tests/pipeline/test_run_report_library_robustness.sh.</p>
+<h2
+id="lva-141--pipeline-002--the-orchestrator-close-path-discarded-the-interrupted-phase-librarys-failure-signal-making-could-not-record-indistinguishable-from-completed">LVA-141
+— Pipeline 002 — the orchestrator close path discarded the
+interrupted-phase library's failure signal, making could-not-record
+indistinguishable from completed</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> scripts/pipeline-build-test-distribute.sh
+<strong>Severity:</strong> P1</p>
+<p>WHAT: the _close_report function in
+scripts/pipeline-build-test-distribute.sh invoked
+append_interrupted_phase_if_any with a trailing or-true, which discarded
+the library's return code. That made "a phase was in flight and its
+interruption could NOT be recorded" indistinguishable from "this run
+completed" at the point where the distinction matters most, and it
+defeated the library's return-code contract from the caller side. It is
+the same failed-measurement-reads-as-clean shape the library function
+itself was fixed for, one caller away. EVIDENCE: demonstrated with a
+fixture in which the library signalled failure and the orchestrator
+threw the signal away. FIX, verified by direct inspection of the working
+tree at scripts/pipeline-build-test-distribute.sh lines 411 to 419: the
+return code is captured into a local variable and COMPARED; a non-zero
+return sets an untrustworthy-report flag and prints an explicit
+operator-visible warning that a phase was IN FLIGHT, that its
+interruption could not be recorded, that the run did not finish, and
+that report.json must not be read as a pass. The successful case still
+prints which phase was interrupted and that it was recorded as FAIL.</p>
+<h2
+id="lva-142--pipeline-002--recompute_evidence_summary-aborted-on-the-first-uninterpretable-evidence-record-under-set--e-leaving-the-anti-bluff-counter-at-zero">LVA-142
+— Pipeline 002 — recompute_evidence_summary aborted on the first
+uninterpretable Evidence Record under set -e, leaving the anti-bluff
+counter at zero</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+tests/pipeline/test_run_report_evidence_summary.sh
+<strong>Severity:</strong> P1</p>
+<p>WHAT: recompute_evidence_summary in
+scripts/pipeline/lib/run-report.sh assigned each record field with a
+bare command substitution. A bare assignment carries the command's exit
+status, and this library's own header instructs callers to run under set
+-e with -u and pipefail, so the first malformed Evidence Record aborted
+the function mid-scan, evidence_summary was never written back, and it
+stayed at the all-zeros value init_run_report had left. A zero
+rejected-by-anti-bluff counter is exactly the condition
+finalize_run_report reads to allow PASS, so a run whose Evidence Records
+had been REJECTED could still finalize to PASS. SECOND HALF OF THE
+DEFECT, and the more damaging half: the function's own doc-comment
+stated that a record whose result cannot be interpreted "counts as
+FAILED, never silently ignored". That documented rule was FALSE. It held
+only for callers who happened to invoke the function on the left-hand
+side of an or-list, where set -e is suppressed. A documented protection
+that does not hold is worse than an absent one, because a reader stops
+looking. FIX, verified by direct inspection of the working tree: every
+field substitution now carries an explicit or-true, annotated in place
+as load-bearing rather than decorative, so the scan completes over every
+record and the documented counts-as-FAILED rule actually holds.
+Regression coverage:
+tests/pipeline/test_run_report_evidence_summary.sh.</p>
+<h2
+id="lva-143--pipeline-002--the-evidence-summary-record-selector-counted-a-wrapper-raw-output-companion-as-a-real-evidence-record">LVA-143
+— Pipeline 002 — the evidence-summary record selector counted a wrapper
+raw-output companion as a real Evidence Record</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> scripts/pipeline/lib/run-report.sh
+<strong>Severity:</strong> P2</p>
+<p>WHAT: recompute_evidence_summary in
+scripts/pipeline/lib/run-report.sh selected Evidence Records with a
+per-phase-directory depth-two find for json files. Its doc-comment
+justified that depth by asserting that a wrapper's raw-output companions
+"always live one level deeper, under the category's raw directory, and
+are not json". BOTH HALVES OF THAT CLAIM WERE FALSE.
+phase-02-test-constitutional-gate-sweep.sh writes its per-gate
+companions AS json files, where the depth filter happened to save the
+count; and nothing stopped a wrapper writing a companion into a raw
+directory placed directly under the phase directory, which IS at depth
+two and was therefore counted as a real Evidence Record, inflating both
+the total and the failed counters with a file that is not a record at
+all. IMPACT: an inflated failed counter is a false alarm rather than a
+false pass, so this is the milder direction, but the counters feed the
+run's outcome rule and a summary that miscounts in either direction is
+not evidence. It also means the outcome rule and the console SUMMARY
+could disagree without either being obviously wrong. FIX, verified by
+direct inspection of the working tree: the selector now carries an
+explicit exclusion of any path under a raw directory, so a raw-output
+companion is excluded because of WHERE it is rather than because of an
+assumption about its file extension, and the false doc claim is replaced
+by a dated correction in the same comment block that states plainly
+which half of the old claim was wrong.</p>
+<h2
+id="lva-144--pipeline-002--the-vacuous-pass-static-guard-missed-five-capture-forms-in-check-a-and-three-grep-forms-in-check-f">LVA-144
+— Pipeline 002 — the vacuous-pass static guard missed five capture forms
+in CHECK A and three grep forms in CHECK F</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+tests/pipeline/test_vacuous_pass_guard_discrimination.sh
+<strong>Severity:</strong> P2</p>
+<p>WHAT: tests/pipeline/test_no_vacuous_pass_patterns.sh is the static
+guard that flags vacuous-pass shapes across the pipeline scripts, and
+two of its checks were narrower than their own stated purpose. CHECK A
+flags an exit code captured into a variable and never compared; its
+matcher recognised only the bare unquoted capture with an echo-shaped
+consumer, so five real forms escaped it: a QUOTED capture, a non-echo
+log helper standing in for echo as the consumer, a PIPESTATUS index
+other than zero, and the declare-with-integer-flag and
+local-with-readonly-flag declarator prefixes, with readonly and export
+in the same family. CHECK F flags a quiet grep on the right-hand side of
+a pipe under pipefail; it missed three forms: the long spelling of the
+quiet flag, a pipe at end-of-line where the consumer sits on the next
+physical line, and a digit-bearing intervening flag such as a max-count
+flag placed before the quiet flag. NET EFFECT: the guard reported a
+clean sweep over code that contained the very patterns it names, so the
+guard itself was the vacuous pass, and the earlier echo-only narrowing
+of CHECK A was an incomplete fix rather than a complete one. FIX,
+verified by direct inspection of the working tree: CHECK A's extractor
+and its candidate matcher both accept the optional declarator prefix,
+the quoted form and any PIPESTATUS index; CHECK F joins continued lines
+before matching and accepts the long quiet spelling and digit-bearing
+intervening flags. TWO ESCAPES ARE LEFT OPEN DELIBERATELY, with measured
+reasons recorded in the guard's own known-uncovered section rather than
+silently: CHECK C on a variable not named with a reference-style suffix,
+for which zero true positives are available today, and CHECK B across a
+multi-line jq filter, where correct line joining needs quote tracking
+and CHECK F's cheap join has no safe analogue. One reported false
+positive was withdrawn before it was acted on, because the flagged line
+does consume its status by handing it to an embedded parser; the check
+was taught to tell a standalone argument from a variable embedded in
+prose rather than annotating a file outside the guard's surface.
+Regression coverage:
+tests/pipeline/test_vacuous_pass_guard_discrimination.sh.</p>
+<h2
+id="lva-145--pipeline-002--case-3-of-the-interrupted-run-test-examined-zero-items-and-stayed-green-against-a-live-cross-run-marker-leak">LVA-145
+— Pipeline 002 — CASE 3 of the interrupted-run test examined zero items
+and stayed green against a live cross-run marker leak</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+tests/pipeline/test_interrupted_run_never_passes.sh
+<strong>Severity:</strong> P1</p>
+<p>WHAT: CASE 3 of tests/pipeline/test_interrupted_run_never_passes.sh
+asserts that the in-flight marker is per-run and never leaks between
+runs. It leaned on the premise that an earlier run in the same file had
+been left interrupted, and that premise was not true: CASE 1's call to
+append_interrupted_phase_if_any CONSUMED that run's marker, because
+removing the marker is how the operation is made idempotent, and CASE 2
+cleared its own. By the time CASE 3 ran there was no marker anywhere on
+disk, so the assertion had nothing to discriminate against and examined
+ZERO items. MEASURED, not inferred: with the marker-path helper
+deliberately changed to a single RUN-SHARED path, which is a real
+cross-run leak, this case still reported PASS and the whole suite still
+exited 0. A check that passes having examined zero items is precisely
+the vacuous-pass shape this file exists to close, so the file contained
+an instance of its own subject. FIX, verified by direct inspection of
+the working tree: a fourth run identifier now stands in for a DIFFERENT
+run that is still in flight, its marker is deliberately left un-consumed
+across the closing run's close path, and the case asserts the foreign
+marker is genuinely present on disk before proceeding, failing loudly
+with an explicit harness-assumption-broken message if it is not. The
+case also uses the marker path that mark_phase_in_flight prints rather
+than reconstructing it, so a change to WHERE the marker lives is caught
+here too.</p>
+<h2
+id="lva-146--constitutional-test--the-covenant-propagation-tests-claudemd-restore-did-not-survive-a-kill-and-its-first-fix-introduced-an-unbound-variable-abort">LVA-146
+— Constitutional test — the covenant-propagation test's CLAUDE.md
+restore did not survive a kill, and its first fix introduced an
+unbound-variable abort</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+tests/check-constitution/test_covenant_114_propagation.sh
+<strong>Severity:</strong> P1</p>
+<p>WHAT: tests/check-constitution/test_covenant_114_propagation.sh
+proves its own falsifiability by removing one covenant anchor literal
+from the REAL root CLAUDE.md, running the real gate, asserting the gate
+fires, and restoring the file from a backup through a RETURN trap. A
+RETURN trap fires when the FUNCTION returns; it does not fire when the
+process is killed. The test was run under a 120-second timeout, exceeded
+that budget, was terminated mid-probe, and left the covenant anchor for
+section 11.4.134 replaced by a placeholder string inside the tracked
+CLAUDE.md. CONSEQUENCE: the next full scripts/check-constitution.sh run
+reported a covenant-propagation violation, so the test broke the very
+gate it exercises; the damage was initially MISATTRIBUTED to a stray
+agent edit before the real cause was found, and a separate
+documentation-sync stream independently reported the same symptom from
+the other direction. A test that damages the tree it audits, and whose
+damage is then blamed on something else, costs more than the coverage it
+buys. FIX, in two steps, both verified by direct inspection of the
+working tree. First the trap was widened from RETURN alone to RETURN
+together with EXIT, INT and TERM. That first attempt introduced a SECOND
+defect: the handler referenced the function-local backup variable, which
+is out of scope when an EXIT trap fires late, so the handler aborted
+with an unbound-variable error under set -u. Corrected by moving the
+handler to a file-scope restore function at line 78 that reads a
+file-scope backup variable through a default-value expansion, making it
+idempotent and safe to run before the backup exists and safe to run
+twice. RE-VERIFIED at the time of filing: the tracked CLAUDE.md carries
+the 11.4.134 anchor and zero placeholder occurrences, and
+scripts/check-constitution.sh runs to completion with exit 0.</p>
+<h2
+id="lva-134--constitutional-gate--the-6h-credential-scan-flags-its-own-hermetic-test-fixture-so-cish---changed-only-exits-1-on-this-branch">LVA-134
+— Constitutional gate — the §6.H credential scan flags its own hermetic
+test fixture, so ci.sh --changed-only exits 1 on this branch</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+tests/check-constitution/test_credential_scan_corpus.sh
+<strong>Severity:</strong> P2</p>
+<p>WHAT: scripts/check-constitution.sh's clause-6.H credential scan
+(block 6) matches the pattern
+<code>private[[:space:]]+object[[:space:]]+[A-Za-z_]*Bridge[[:space:]]*\{</code>
+against every tracked file except a fixed exclusion list (.env.example,
+CHANGELOG.md, .lava-ci-evidence/, the scanner itself, docs/INCIDENT_,
+and the root and lava-api-go governance docs).
+tests/check-constitution/test_credential_scan_corpus.sh is TRACKED and
+is NOT in that exclusion list, and its line 95 contains the fixture
+literal
+<code>printf 'private object CredsBridge {\n}\n' &gt; "$REPO_ROOT/$leak"</code>
+— the very string the test plants in order to prove the scanner still
+catches a real violation. The scanner therefore flags the test that
+verifies the scanner. EVIDENCE, measured directly: sweeping the pattern
+across the whole tracked corpus minus the exclusion list yields exactly
+ONE hit, and it is
+tests/check-constitution/test_credential_scan_corpus.sh line 95. IMPACT:
+this is the sole blocking violation making
+<code>scripts/ci.sh --changed-only</code> exit 1 on branch
+002-build-test-distribute-pipeline. It is NOT caused by feature 002 —
+the feature's own 45 files produce zero hits for this pattern. CLOSURE
+CRITERIA: the fixture is constructed so the literal is assembled at
+runtime rather than stored verbatim, or the hermetic-fixture path is
+added to the scanner's exclusion list with a comment naming why, and a
+test asserts a genuine violation elsewhere is still caught.</p>
+<h2
+id="lva-124--pipeline-002--t040-human-review-gate--amend-claudemd-6aa--seventh-law-clause-3-for-pipeline-run-report-path">LVA-124
+— Pipeline 002 — T040 human review gate — amend CLAUDE.md 6.AA + Seventh
+Law clause 3 for pipeline-run-report path</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong> CLAUDE.md
+<strong>Severity:</strong> P1 <strong>Created-By:</strong> AI</p>
+<p>WHAT: feature 002 task T040 is a CONSTITUTIONAL AMENDMENT, not
+routine code review. It would amend root CLAUDE.md 6.AA (Two-Stage
+Distribute Mandate) and the Seventh Law clause 3 (Pre-Tag Real-Device
+Attestation) per research.md R-001, adding an alternate-path clause
+under which a Pipeline Run Report for the exact commit SHA and
+versionCode substitutes for human debug-then-release confirmation,
+scoped narrowly to distributions this pipeline itself produces. It must
+include a forensic anchor, a migration plan and a version-bump rationale
+per the constitution own Amendment procedure. BLAST RADIUS: this is a
+RELAXATION of an existing anti-bluff principle whose forensic anchor is
+the 1.2.19-1039 cold-start-crash incident. It also interacts directly
+with the open firebase-distribute combined-mode finding filed alongside
+this item: authorizing an unattended combined distribute would authorize
+exactly the debug-evidence-gates-a-release-APK gap. Review-ready DRAFT
+text for this amendment is at
+specs/002-build-test-distribute-pipeline/constitutional-amendments-proposal.md
+(with .html and .pdf siblings). The draft is NOT applied: CLAUDE.md and
+.specify/memory/constitution.md are byte-identical to their pre-feature
+baselines. BLOCKS: feature 002 phase 5 (US3 distribute), specifically
+task T043. Source of truth:
+specs/002-build-test-distribute-pipeline/progress.yml and
+specs/002-build-test-distribute-pipeline/tasks.md.</p>
+<h2
+id="lva-125--pipeline-002--t041-human-review-gate--specifymemoryconstitutionmd-major-bump-110-to-200-matching-t040">LVA-125
+— Pipeline 002 — T041 human review gate —
+.specify/memory/constitution.md MAJOR bump 1.1.0 to 2.0.0 matching
+T040</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+.specify/memory/constitution.md <strong>Severity:</strong> P1
+<strong>Created-By:</strong> AI</p>
+<p>WHAT: feature 002 task T041 updates .specify/memory/constitution.md
+to match the T040 amendment with a MAJOR version bump 1.1.0 to 2.0.0,
+per that file own Versioning policy - MAJOR because this is a RELAXATION
+of an existing principle, not an addition - and updates the Sync Impact
+Report header accordingly. Paired with T040: neither lands alone.
+Review-ready DRAFT text for this amendment is at
+specs/002-build-test-distribute-pipeline/constitutional-amendments-proposal.md
+(with .html and .pdf siblings). The draft is NOT applied: CLAUDE.md and
+.specify/memory/constitution.md are byte-identical to their pre-feature
+baselines. BLOCKS: feature 002 phase 5 (US3 distribute), specifically
+task T043. Source of truth:
+specs/002-build-test-distribute-pipeline/progress.yml and
+specs/002-build-test-distribute-pipeline/tasks.md.</p>
+<h2
+id="lva-126--pipeline-002--t048-human-review-gate--decoupled-reusable-architecture-carve-out-for-automatic-pin-advancement">LVA-126
+— Pipeline 002 — T048 human review gate — Decoupled Reusable
+Architecture carve-out for automatic pin advancement</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong> CLAUDE.md
+<strong>Severity:</strong> P1 <strong>Created-By:</strong> AI</p>
+<p>WHAT: feature 002 task T048 is a CONSTITUTIONAL AMENDMENT to the
+Decoupled Reusable Architecture rule in root CLAUDE.md, carving out this
+pipeline automated submodule-pin-advance step as an explicit, documented
+exception to "Submodule fetch/pull is an EXPLICIT operator action, never
+automatic". BLAST RADIUS: 16-plus submodule upstreams with automatic pin
+advancement. The wave-5 defect filed alongside this item is the concrete
+demonstration of why this amendment needs careful scoping: the
+implementing script defaulted to every submodule and would have
+auto-advanced the constitution governance submodule itself until a
+default-deny list was added. Review-ready DRAFT text for this amendment
+is at
+specs/002-build-test-distribute-pipeline/constitutional-amendments-proposal.md
+(with .html and .pdf siblings). The draft is NOT applied: CLAUDE.md and
+.specify/memory/constitution.md are byte-identical to their pre-feature
+baselines. BLOCKS: feature 002 phase 6 (US4 repository closure),
+specifically task T055. Source of truth:
+specs/002-build-test-distribute-pipeline/progress.yml and
+specs/002-build-test-distribute-pipeline/tasks.md.</p>
+<h2
+id="lva-127--pipeline-002--t049-human-review-gate--specifymemoryconstitutionmd-update-matching-t048">LVA-127
+— Pipeline 002 — T049 human review gate —
+.specify/memory/constitution.md update matching T048</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+.specify/memory/constitution.md <strong>Severity:</strong> P1
+<strong>Created-By:</strong> AI</p>
+<p>WHAT: feature 002 task T049 updates .specify/memory/constitution.md
+to match the T048 carve-out - the same MAJOR version bump as T041 if
+landed together, or a follow-up MAJOR if landed separately. Review-ready
+DRAFT text for this amendment is at
+specs/002-build-test-distribute-pipeline/constitutional-amendments-proposal.md
+(with .html and .pdf siblings). The draft is NOT applied: CLAUDE.md and
+.specify/memory/constitution.md are byte-identical to their pre-feature
+baselines. BLOCKS: feature 002 phase 6 (US4 repository closure),
+specifically task T055. Source of truth:
+specs/002-build-test-distribute-pipeline/progress.yml and
+specs/002-build-test-distribute-pipeline/tasks.md.</p>
+<h2
+id="lva-138--advance-all-submodulessh--the-governance-deny-list-covers-1-of-25-submodules-while-claudemd-requires-per-submodule-authorization-for-16-and-7-are-named-by-no-decision-at-all">LVA-138
+— advance-all-submodules.sh — the governance deny-list covers 1 of 25
+submodules while CLAUDE.md requires per-submodule authorization for 16,
+and 7 are named by no decision at all</h2>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+tests/pipeline/test_advance_all_submodules.sh <strong>Severity:</strong>
+P1</p>
+<p>WHAT: scripts/advance-all-submodules.sh declares
+<code>GOVERNANCE_DENY=("constitution")</code> at line 256 — a single
+entry. The repository declares 25 submodules in .gitmodules. CLAUDE.md's
+Decoupled-Reusable-Architecture pin policy (the pins-frozen paragraph,
+at line 301 of the current working-tree file) names 16 of them — auth,
+cache, challenges, concurrency, config, containers, database, discovery,
+http3, mdns, middleware, observability, ratelimiter, recovery, security,
+tracker_sdk — as pins-frozen by default whose bumps require deliberate
+per-submodule operator authorization. The same paragraph carries the
+standing Q9 waiver for helixqa (always-track-upstream) and routes
+constitution through the CONST-049 pipeline. EVIDENCE, computed directly
+from .gitmodules against that paragraph: 25 submodules total; 16 require
+per-submodule authorization; 18 are named by SOME operator decision; and
+7 are named by NO operator decision at all — doc_processor,
+llm_orchestrator, llm_provider, llms_verifier, panoptic, superspec,
+vision_engine. IMPACT: the script's mechanical policy and the governance
+document's written policy do not agree about 16 submodules, and neither
+of them says anything about the remaining 7, so an advance run's blast
+radius is not bounded by anything an operator has actually authorized.
+CLOSURE CRITERIA: the deny-list (or an equivalent per-submodule policy
+table) enumerates every one of the 25 with an explicit stance, the 7
+unnamed submodules gain a recorded operator decision, and a test asserts
+the script's policy table and the governance document agree entry for
+entry.</p>
+<h2
+id="lva-135--pre-push-hook--sigpipe-under-pipefail-turns-a-match-into-a-no-match-silently-skipping-four-constitutional-gates-on-large-commits">LVA-135
+— Pre-push hook — SIGPIPE under pipefail turns a MATCH into a NO-MATCH,
+silently skipping four constitutional gates on large commits</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+tests/pre-push/test_large_commit_gate_sigpipe.sh
+<strong>Severity:</strong> P0</p>
+<p>WHAT: .githooks/pre-push declares <code>set -euo pipefail</code>
+(line 34) and then evaluates four gate conditions in the shape
+<code>git diff-tree --no-commit-id --name-only -r "$sha" | grep -q…</code>.
+<code>grep -q</code> exits at its first match; the still-writing
+producer is then killed by SIGPIPE and reports 141; pipefail promotes
+141 to the pipeline status; the enclosing <code>if</code> therefore
+evaluates FALSE on exactly the commits the gate exists to reject.
+EVIDENCE, measured directly on real commit
+f1a2c3627e443dd4d2c16da59e7fe3a3bd71b9d7 (1530 paths / 97783 bytes of
+--name-only output): the if-condition status is 141 with PIPESTATUS=(141
+0), while the identical pipeline without pipefail returns 0; across 20
+trials the gate saw the match 0 times and missed it 20 times. A
+threshold scan puts the flip at the 65536-byte pipe buffer: at or above
+it the producer cannot finish writing before grep exits, so the gate is
+blind on every trial. AFFECTED SITES AND GATES: line 63 (Check 1,
+Local-Only CI/CD hosted-CI config introduction), line 135 and line 137
+(Check 6, §6.Y bump-first ordering), line 167 (Check 7, §6.Z distribute
+test-evidence companion), line 210 (Check 10, §6.AK cycle-coverage — the
+<code>|| continue</code> form, where the SIGPIPE status makes the gate
+skip the commit entirely). WHY EXISTING TESTS MISS IT: the hermetic
+fixtures under tests/pre-push/ build small synthetic commits whose path
+listing stays far below the pipe buffer, so the SIGPIPE path is never
+entered. Full record:
+.lava-ci-evidence/bluff-hunt/2026-08-23-cycle-gate-shaping-scripts.json
+finding F1.</p>
+<h2
+id="lva-120--pipeline-002--firebase-distributesh---debug-and-release-ships-the-release-apk-on-debug-channel-evidence">LVA-120
+— Pipeline 002 — firebase-distribute.sh --debug-and-release ships the
+RELEASE APK on DEBUG-channel evidence</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+tests/firebase/test_combined_mode_retired.sh <strong>Severity:</strong>
+P0 <strong>Created-By:</strong> AI</p>
+<p>WHAT (verified verbatim in the real script this session, line by
+line, not inferred): scripts/firebase-distribute.sh line 56 -
+"--debug-and-release|--both) MODE="both"; shift". Line 204 - the
+constitution 6.AA staging gate is guarded on [[ "<span
+class="math inline">$MODE" == "release" &amp;&amp; -f
+"$</span>LAST_VERSION_DEBUG_FILE" ]], so in combined mode it NEVER
+EVALUATES. Lines 322-323 - "case "$MODE" in release)
+AK_CHANNEL="release" ;; *) AK_CHANNEL="debug" ;; esac", so the
+constitution 6.AK cycle-coverage gate (which also subsumes the 6.Z
+evidence presence, commit-SHA match and 24h freshness checks) is pointed
+at the DEBUG channel. Lines 435, 444 and 513 - the RELEASE APK is
+version-asserted, resolved and uploaded whenever MODE is release OR
+both. NET EFFECT: a combined distribute ships the R8-minified RELEASE
+APK while the only device-evidence gate that runs checks DEBUG-channel
+evidence. That is mechanically the same setup as the 1.2.19-1039
+incident (the constitution 6.Z forensic anchor), in which a release APK
+crashed on every cold launch because release-variant behaviour was never
+gated. PRE-EXISTING: this is a property of
+scripts/firebase-distribute.sh and is NOT introduced by feature 002.
+REPRODUCTION: tests/firebase/repro_mode_both_channel_gap.sh. It NEVER
+executes firebase-distribute.sh (that would attempt a real Firebase
+upload); it greps the four real decision lines verbatim, evaluates that
+extracted logic per MODE, and exits 2 if those lines ever stop existing
+rather than silently testing a stale copy. Its exit semantics are
+inverted on purpose and documented in its header: 0 means the gap was
+REPRODUCED (expected today), 1 means it is GONE and the harness should
+be converted into a proper regression test, 2 means extraction failed
+and it can say nothing truthful - exit 2 is never read as "fixed".
+REPRODUCED OUTPUT: mode debug - release APK sent no, 6.AK channel debug,
+6.AA staging gate no; mode release - release APK sent yes, 6.AK channel
+release, 6.AA staging gate yes; mode both - release APK sent YES, 6.AK
+channel DEBUG, 6.AA staging gate NO. The release row is the control that
+proves this is not a false alarm: --release-only DOES evaluate both
+gates on the correct channel. The gap is specific to the combined mode -
+precisely the mode an unattended pipeline would use. IMPACT ON FEATURE
+002: task T043 was specified to invoke exactly --debug-and-release and
+would have inherited the hole; any amendment authorizing an unattended
+combined distribute would authorize exactly this. Source of truth:
+specs/002-build-test-distribute-pipeline/progress.yml and
+specs/002-build-test-distribute-pipeline/tasks.md.</p>
+<h2
+id="lva-136--constitutional-gate--the-propagation-check-has-no-floor-on-its-submodule-corpus-so-its-verdict-depends-on-checkout-state">LVA-136
+— Constitutional gate — the propagation check has no floor on its
+submodule corpus, so its verdict depends on checkout state</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+tests/check-constitution/test_propagation_target_floor.sh
+<strong>Severity:</strong> P2</p>
+<p>WHAT: scripts/check-constitution.sh builds
+<code>propagation_targets</code> (lines 241-254) from 5 FIXED entries
+(CLAUDE.md, AGENTS.md, and the three lava-api-go governance docs) and
+then extends it by looping over <code>submodules/*/CLAUDE.md</code>
+guarded by <code>[[ -f "$sub" ]]</code>. When the submodules are
+uninitialised that guard drops every submodule doc, and the §6.N / §6.O
+/ §6.R / §6.S / §6.X propagation loops that consume the array PASS on a
+corpus of 5 — while the identical propagation drift FAILS when the
+submodules ARE initialised. The gate's verdict is a function of checkout
+state rather than of the tree's compliance. EVIDENCE, measured directly:
+22 submodule CLAUDE.md files are present in this checkout against 5
+hardcoded targets, so an uninitialised tree silently drops 22 of 27
+targets (81 percent) with nothing to detect it. THE OMISSION IS LOCAL,
+NOT A PROJECT-WIDE CONVENTION: the same script already carries the
+zero-floor pattern for a sibling gate at lines 149-152, refusing a §6.H
+credential scan that examined zero tracked files, and
+scripts/verify-all-constitution-rules.sh carries the same floor for the
+sweep's gate count at lines 287-290. The propagation block is the one
+that lacks it. Full record:
+.lava-ci-evidence/bluff-hunt/2026-08-23-cycle-gate-shaping-scripts.json
+finding F3.</p>
+<h2
+id="lva-130--pipeline-002--an-interrupted-run-finalizes-as-outcome-pass-on-a-truncated-phase-prefix">LVA-130
+— Pipeline 002 — an interrupted run finalizes as outcome PASS on a
+truncated phase prefix</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong>
+tests/pipeline/test_interrupted_run_never_passes.sh
+<strong>Severity:</strong> P0</p>
+<p>WHAT: finalize_run_report() in scripts/pipeline/lib/run-report.sh
+decides the run outcome with
+<code>(.phases | length) &gt; 0 and (.phases | all(.result == "PASS"))</code>
+(jq branch) and the identical
+<code>len(phases) &gt; 0 and all(p.get("result") == "PASS" ...)</code>
+in the python3 fallback branch. That predicate closes the EMPTY-phases
+case but NOT the TRUNCATED-PREFIX case: a run killed after an early
+phase has a non-empty phases array in which every recorded entry is
+PASS, so it satisfies the predicate and finalizes PASS. EVIDENCE,
+measured directly:
+.lava-ci-evidence/pipeline-runs/2026-08-23T10-15-30Z/report.json carries
+<code>outcome: "PASS"</code> with exactly ONE phase (precondition/PASS),
+an empty build_artifacts array, and an all-zero evidence_summary (total
+0, passed 0, failed 0, skipped 0, rejected_by_anti_bluff 0). A run that
+built nothing and tested nothing reports the same outcome token as a
+complete green run, which is the §6.J shape: nothing was learned,
+reported as nothing failed. STATUS: under active fix by the conductor in
+this session; tests/pipeline/test_interrupted_run_never_passes.sh is
+present in the working tree as the accompanying regression coverage.
+CLOSURE CRITERIA: outcome resolves to FAIL (or a distinct INTERRUPTED
+token) whenever the recorded phase sequence is a proper prefix of the
+phase set the invocation requested, with the regression test asserting
+it against a real truncated report rather than a synthetic one.</p>
+<h2
+id="lva-147--section-6aa-clause-8--conditions-a-and-h-deadlock-the-run-report-schema-forbids-exactly-the-field-h-mandates">LVA-147
+— Section 6.AA clause 8 — conditions (A) and (H) deadlock: the
+run-report schema forbids exactly the field (H) mandates</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> CLAUDE.md <strong>Severity:</strong>
+P2</p>
+<p>RESOLVED 2026-08-26 by rewording, NOT by amending the schema
+(operator decision). The deadlock was real: clause 8 condition (A)
+required the run report to validate against
+pipeline-run-report.schema.json, which sets additionalProperties false
+and defines no residual-gap property, while condition (H) mandated
+exactly that field — so no run could qualify. Measured at the time: the
+generator emitted the field 0 times and 0 of 48 on-disk reports carried
+it, so (H) failed for the simpler reason and the net effect failed SAFE.
+RESOLUTION: the §6.AA amendment of 2026-08-26 withdrew former condition
+(D) and re-lettered (E)-(I) to (D)-(H); the residual-gap condition is
+now (G) and records the gap through build_artifacts[].build_output_path
+— a property the schema already defines AND lists as required
+(pipeline-run-report.schema.json,
+build_artifacts.items.properties.build_output_path). No residual-gap
+field is emitted and no property outside the schema is written, so the
+report continues to validate under condition (A). The alternative
+candidate distributions[].evidence_ref was rejected on evidence:
+distributions[] is empty at gate-evaluation time because the gate runs
+before any upload, so a condition anchored there would be unevaluable at
+the only moment clause 8 is evaluated. VERIFIED against the applied
+tree: phase-05-distribute.sh CONDITION_IDS=(A B C D E F G H) with no
+(I); tests/pipeline/test_phase_05_distribute_gate.sh and
+test_phase_05_distribute_gate_vacuity.sh both ALL CHECKS PASSED exit 0
+(41 assertions).</p>
+<h2
+id="lva-150--check-workable-itemssh--the-cm-workable-items-sync-gate-diffs-only-issuesmd-and-fixedmd-so-both-summary-documents-can-be-stale-while-the-gate-reports-ok">LVA-150
+— check-workable-items.sh — the CM-WORKABLE-ITEMS-SYNC gate diffs only
+Issues.md and Fixed.md, so both Summary documents can be stale while the
+gate reports OK</h2>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> scripts/check-workable-items.sh
+<strong>Severity:</strong> P1 <strong>Created-By:</strong> AI</p>
+<p>WHAT: scripts/check-workable-items.sh -- the CM-WORKABLE-ITEMS-SYNC
+gate -- verifies DB-to-Markdown sync by invoking the canonical binary's
+diff subcommand with exactly two document arguments, --issues "<span
+class="math inline">$ISSUES" and --fixed "$</span>FIXED". The four
+generated tracker surfaces are Issues.md, Fixed.md, Issues_Summary.md
+and Fixed_Summary.md. The gate therefore covers two of four. The two
+Summary documents -- the section 11.4.12 open-only Type-by-Status tally
+and the section 11.4.53 closed-only tally -- are regenerated by the
+binary's export subcommand and are NEVER compared by the gate.
+CONSEQUENCE: after any DB mutation performed without a subsequent
+export, Issues_Summary.md and Fixed_Summary.md retain the PREVIOUS
+generation's item text and the PREVIOUS generation's tallies, while the
+gate reports exit 0 and prints its OK line naming the DB as validated
+and in sync. The gate's PASS is truthful about the two documents it
+examines and silent about the two it does not, and a reader of the PASS
+line has no way to tell those apart. DISCOVERED BY INSPECTION during the
+LVA-008 correction earlier this session: the item's status and
+description had been changed in the DB, Issues.md reflected the change,
+and Issues_Summary.md continued to present LVA-008 as Operator-blocked
+carrying the superseded description -- with the gate green throughout.
+IMPACT: the Summary documents are the surfaces a human opens for a
+tally, so a stale Summary is precisely the surface a human reads for a
+number and does not re-derive. A gate that passes while an artifact it
+is understood to guard is stale is the section 6.J class: the green
+signal reports safety that was never measured. NOTE ON THE
+OPERATOR-FACING EXPORT PATH: the binary's export defaults its output
+directory to the REPOSITORY ROOT, and this repository tracks BOTH a
+root-level and a docs/ copy of all four tracker documents, so a
+regeneration that targets only one location leaves the other pair stale
+in the same silent way. CLOSURE CRITERIA: the gate compares all four
+generated surfaces (or regenerates them into a temporary directory and
+asserts byte-equality against the tracked copies at BOTH tracked
+locations), with a hermetic fixture that mutates the DB, regenerates
+only Issues.md and Fixed.md, and asserts the gate FAILS -- which it does
+not do today.</p>
 </body>
 </html>

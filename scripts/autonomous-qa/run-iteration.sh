@@ -40,7 +40,7 @@ if [[ ! -f "$APK" ]]; then
   # verdict.json with a FAIL so the matrix caller can NEVER read a prior-run PASS
   # (the missing-APK/stale-verdict PASS bluff — sixth-law-incidents 2026-07-03).
   mkdir -p "$EVID"
-  printf '{"backend":"%s","providers":"%s","query":"%s","serial":"%s","gradle_rc":-1,"tests":0,"failures":0,"errors":1,"skipped":0,"marker_download_ok":false,"teardown_known_lva008":false,"other_failure_signal":true,"verdict":"FAIL","note":"client APK missing at %s — build the debug APK before the iteration; NO test executed","junit_xml":"","raw_dir":"%s/raw"}\n' \
+  printf '{"backend":"%s","providers":"%s","query":"%s","serial":"%s","gradle_rc":-1,"tests":0,"failures":0,"errors":1,"skipped":0,"marker_download_ok":false,"other_failure_signal":true,"verdict":"FAIL","note":"client APK missing at %s — build the debug APK before the iteration; NO test executed","junit_xml":"","raw_dir":"%s/raw"}\n' \
     "$BACKEND" "$PROVIDERS" "$QUERY" "$SERIAL" "$APK" "$EVID" > "$EVID/verdict.json"
   exit 2
 fi
@@ -99,6 +99,12 @@ fi
 
 # 3) Run the parameterized Challenge (instrumentation args, one -P per key).
 GRADLE_LOG="$RAW/gradle-connected.log"
+# §6.J (LVA vacuous-pass sweep B14): a mtime reference stamped IMMEDIATELY
+# before gradle starts. Step 4 accepts a JUnit XML only if it is newer than
+# this marker, which is what makes "this run wrote it" an assertion rather than
+# an assumption — androidTest-results/connected is never cleared between runs.
+RUN_STARTED_AT="$RAW/.run-started-at"
+: > "$RUN_STARTED_AT"
 set +e
 ( cd "$REPO_ROOT" && ANDROID_SERIAL="$SERIAL" nice -n 10 ./gradlew \
     :app:connectedDebugAndroidTest --max-workers=2 --console=plain \
@@ -125,7 +131,45 @@ trap - EXIT
 
 # 4) Parse JUnit verdict.
 RESULTS_DIR="$REPO_ROOT/app/build/outputs/androidTest-results/connected"
-XML="$(find "$RESULTS_DIR" -name '*.xml' -type f 2>/dev/null | head -1 || true)"
+# §6.J evidence-freshness floor (added 2026-08-26, LVA vacuous-pass sweep B14).
+#
+# `find ... | head -1` selected a JUnit XML by TRAVERSAL ORDER with no freshness
+# or identity assertion, and app/build/outputs/androidTest-results/connected is
+# never cleared. A leftover from a previous run was therefore parsed as this
+# run's result:
+#
+#   XML picked = .../TEST-emulator-5554.xml   mtime 2026-08-20 (6 days old)
+#   parsed: tests=1 failures=0 errors=0       VERDICT = PASS
+#
+# Two changes: newest-first selection instead of traversal order, and a hard
+# floor on the chosen file being NEWER than this run's start. RUN_STARTED_AT is
+# stamped before gradle is invoked, so "newer than it" means "written by this
+# invocation" — an identity assertion the verdict.json schema itself cannot make
+# (run-iteration.sh:217-232 carries no timestamp and no commit SHA).
+XML="$(find "$RESULTS_DIR" -name '*.xml' -type f -newer "$RUN_STARTED_AT" -printf '%T@ %p\n' 2>/dev/null \
+        | sort -rn | head -1 | cut -d' ' -f2- || true)"
+if [[ -z "$XML" ]]; then
+  _stale_xml="$(find "$RESULTS_DIR" -name '*.xml' -type f -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2- || true)"
+  if [[ -n "$_stale_xml" ]]; then
+    echo "run-iteration: REFUSING to parse a JUnit XML older than this run." >&2
+    echo "  → Examined: 0 fresh XML file(s) under $RESULTS_DIR" >&2
+    echo "  → Newest present: $_stale_xml (written $(date -u -r "$_stale_xml" +%Y-%m-%dT%H:%M:%SZ))" >&2
+    echo "  → This run started:  $(date -u -r "$RUN_STARTED_AT" +%Y-%m-%dT%H:%M:%SZ)" >&2
+    echo "  → Cause distinguished: this is NOT a failing test. Gradle wrote no new" >&2
+    echo "    results — the task was UP-TO-DATE, the install failed, or the emulator" >&2
+    echo "    never ran the suite. That directory is never cleared, so the leftover" >&2
+    echo "    would otherwise be parsed as this run's verdict." >&2
+    echo "  → Do: rm -rf '$RESULTS_DIR' and re-run, and check the gradle log." >&2
+  else
+    echo "run-iteration: no JUnit XML produced under $RESULTS_DIR — the suite did not run." >&2
+    echo "  → Examined: 0 XML file(s); expected at least 1 from this invocation." >&2
+    echo "  → Do: check the gradle log and the emulator's adb state." >&2
+  fi
+  # Fall through with tests=0 so the decision table below records the honest
+  # "no tests executed" FAIL rather than inventing a verdict here.
+  XML=""
+fi
+# END-OF-BLOCK §6.J evidence-freshness floor (regression-harness sentinel)
 tests=0; failures=0; errors=0; skipped=0
 if [[ -n "$XML" && -f "$XML" ]]; then
   tests="$(grep -oE 'tests="[0-9]+"' "$XML" | head -1 | grep -oE '[0-9]+' || echo 0)"
@@ -134,20 +178,31 @@ if [[ -n "$XML" && -f "$XML" ]]; then
   skipped="$(grep -oE 'skipped="[0-9]+"' "$XML" | head -1 | grep -oE '[0-9]+' || echo 0)"
 fi
 # ---------------------------------------------------------------------------
-# 5) VERDICT ROBUSTNESS (anti-bluff decision table).
+# 5) VERDICT (anti-bluff decision table).
 #
-# Challenge70 logs `C70-RESULT ... DOWNLOAD-OK` ONLY after the user-visible
-# download/magnet affordance is confirmed on screen — so that marker is hard
-# evidence the real user flow reached the download. Separately, the test uses
-# createAndroidComposeRule<MainActivity> which, at TEARDOWN, can crash with the
-# known-open upstream defect LVA-008 (a process-FATAL
-# IllegalStateException: "State must be at least 'CREATED' to be moved to
-# 'DESTROYED'" / "Unable to destroy activity ... MainActivity"). That teardown
-# crash marks the JUnit run failed even though the user already reached the
-# download — it is NOT a product defect.
+# The verdict is decided by the gradle/JUnit outcome ALONE. A crash is a
+# failure. There is no signature, marker, or "known defect" that converts a
+# failed run into a PASS.
 #
-# We grep the raw logcat (and the JUnit XML) for both the success marker and
-# the LVA-008 teardown signature, and record every signal transparently.
+# HISTORY — DO NOT RE-INTRODUCE. A PASS-override used to fire whenever the raw
+# stream carried BOTH LVA-008 teardown phrases ("State must be at least
+# 'CREATED'" + "Unable to destroy activity"), on the premise that the crash was
+# an unfixable-upstream AndroidX defect. That premise was DISPROVEN. LVA-008
+# was a Lava threading bug: under createAndroidComposeRule the Orbit
+# collectSideEffect continuation resumed off the main thread, so
+# navHostController.navigate(...) ran off-main; navigation-runtime inserts the
+# new back-stack entry BEFORE promoting its lifecycle, and LifecycleRegistry
+# .setCurrentState throws off-main — leaving the entry permanently INITIALIZED
+# and producing an illegal INITIALIZED -> DESTROYED transition at Activity
+# destroy. It was FIXED on 2026-06-30 by commit ccdd84c1, which wraps the
+# navigate call in runOnMainThread (core/navigation/.../NavigationController.kt).
+# With the cause fixed, the override was a live mechanism for reporting a
+# genuine crash as green — the canonical §6.J bluff. It is removed. If that
+# signature appears again it is a REGRESSION and MUST fail the iteration.
+#
+# marker_download_ok / other_failure_signal below are recorded as DIAGNOSTIC
+# evidence only: they describe what happened during the run. They MUST NOT gate
+# the verdict, and no future change may make a FAIL depend on them being false.
 LOGCAT="$RAW/logcat.txt"
 
 # Haystacks for signal greps: logcat stream + JUnit XML (either may carry it).
@@ -161,28 +216,19 @@ if [[ -f "$LOGCAT" ]] && grep -qE 'C70-RESULT.*DOWNLOAD-OK' "$LOGCAT" 2>/dev/nul
   marker_download_ok=true
 fi
 
-# teardown_known_lva008: logcat OR junit contains BOTH LVA-008 phrases.
-teardown_known_lva008=false
-if [[ ${#_hay[@]} -gt 0 ]] \
-   && grep -qF "State must be at least 'CREATED'" "${_hay[@]}" 2>/dev/null \
-   && grep -qF "Unable to destroy activity" "${_hay[@]}" 2>/dev/null; then
-  teardown_known_lva008=true
-fi
-
-# other_failure_signal: ANY product-defect failure unrelated to LVA-008 teardown.
-# This is the anti-bluff guard. A PASS-via-marker is permitted ONLY when this is
-# false. Triggers:
+# other_failure_signal (DIAGNOSTIC ONLY — never converts a FAIL into a PASS).
+# Records whether the raw stream carried an explicit product-defect signal:
 #   (a) an explicit C70 download-step failure marker, OR
-#   (b) any AssertionError line that is NOT the LVA-008 IllegalStateException.
-# (The LVA-008 defect is an ISE, never an AssertionError, so any AssertionError
-#  not carrying the "State must be at least 'CREATED'" phrase is a real defect.)
+#   (b) any AssertionError line.
+# No phrase is whitelisted. The "State must be at least 'CREATED'" exclusion
+# that used to live here belonged to the removed LVA-008 override and is gone
+# with it — that ISE is now an ordinary failure signal like any other.
 other_failure_signal=false
 if [[ ${#_hay[@]} -gt 0 ]]; then
   if grep -qE 'C70 .*FAILED in searchTopicDownload' "${_hay[@]}" 2>/dev/null; then
     other_failure_signal=true
   fi
-  if grep -hE 'AssertionError' "${_hay[@]}" 2>/dev/null \
-       | grep -vF "State must be at least 'CREATED'" | grep -q .; then
+  if grep -qE 'AssertionError' "${_hay[@]}" 2>/dev/null; then
     other_failure_signal=true
   fi
 fi
@@ -202,20 +248,11 @@ if [[ "$GRADLE_RC" -eq 0 && "$failures" -eq 0 && "$errors" -eq 0 ]]; then
   else
     verdict="PASS"; note="clean"
   fi
-elif [[ "$marker_download_ok" == "true" \
-        && "$teardown_known_lva008" == "true" \
-        && "$other_failure_signal" == "false" ]]; then
-  # ANTI-BLUFF PASS-via-marker. Permitted ONLY when ALL THREE hold:
-  #   1. marker_download_ok      -> the user reached the on-screen download,
-  #   2. teardown_known_lva008   -> the JUnit failure IS the LVA-008 teardown,
-  #   3. other_failure_signal==false -> there is NO other failure signal.
-  # If any one is false we DO NOT land here; we fall through to FAIL. A real
-  # assertion failure or a missing marker can therefore NEVER be reported PASS.
-  verdict="PASS"
-  note="flow reached download (C70-RESULT marker); JUnit failed only on known upstream LVA-008 activity-destroy teardown — not a product defect"
 else
+  # Any non-clean gradle/JUnit outcome is a FAIL. A crash — including the
+  # LVA-008 activity-destroy signature — lands here like any other failure.
   verdict="FAIL"
-  note="JUnit failed; anti-bluff override not applicable (marker_download_ok=$marker_download_ok teardown_known_lva008=$teardown_known_lva008 other_failure_signal=$other_failure_signal)"
+  note="JUnit failed (gradle_rc=$GRADLE_RC failures=$failures errors=$errors); diagnostics: marker_download_ok=$marker_download_ok other_failure_signal=$other_failure_signal"
 fi
 
 # Copy the JUnit XML into the curated evidence dir (small, tracked).
@@ -230,7 +267,6 @@ cat > "$EVID/verdict.json" <<JSON
   "gradle_rc": $GRADLE_RC,
   "tests": $tests, "failures": $failures, "errors": $errors, "skipped": $skipped,
   "marker_download_ok": $marker_download_ok,
-  "teardown_known_lva008": $teardown_known_lva008,
   "other_failure_signal": $other_failure_signal,
   "verdict": "$verdict",
   "note": "$note",

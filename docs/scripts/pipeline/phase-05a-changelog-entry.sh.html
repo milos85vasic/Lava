@@ -369,23 +369,60 @@ user-visible fix <strong>claim</strong> that needs §6.AK coverage
 belongs in the cycle-coverage-map, authored separately.</p>
 <h2 id="anti-bluff-properties">Anti-bluff properties</h2>
 <ol type="1">
-<li><strong>Drift detection.</strong> The per-app channel names, gradle
-version files, and Gate-2 regex <em>templates</em> are copies of
+<li><p><strong>Drift detection.</strong> The per-app channel names,
+gradle version files, and Gate-2 regex <em>templates</em> are copies of
 <code>scripts/firebase-distribute.sh</code>'s own
 <code>case "$SELECTED_APP"</code> block. At runtime this script greps
 that file for every literal it copied and <strong>fails loudly</strong>
 if any is no longer present, instead of silently emitting an entry the
-real gate would not match.</li>
-<li><strong>Post-write self-verification.</strong> After writing, it
+real gate would not match.</p>
+<p>Each literal is matched <strong>in its assignment context</strong> —
+<code>GRADLE_VERSION_FILE="…"</code>,
+<code>CHANGELOG_CHANNEL="…"</code>,
+<code>CHANGELOG_PATTERN_TMPL='…'</code> — never as a bare value. That is
+load-bearing, because the two apps' values are substrings of one
+another: <code>firebase-app-distribution</code> is a <em>prefix</em> of
+<code>firebase-app-distribution-api-app</code>, and
+<code>app/build.gradle.kts</code> is a <em>substring</em> of
+<code>api-app/build.gradle.kts</code> (both paths also appear in
+ordinary comment prose in that file). A bare substring grep for the
+client channel was satisfied by the <strong>api-app</strong> channel's
+line, so renaming the client channel upstream left the drift check
+green, this phase wrote the snapshot into the stale channel directory
+and reported <code>PASS</code>, and <code>firebase-distribute.sh</code>
+Gate 3 then refused the distribute for a snapshot it could not find.
+Including the variable name and the closing quote rules out both the
+longer sibling value and prose. Covered by
+<code>tests/pipeline/test_phase_05a_drift_detection.sh</code>.</p></li>
+<li><p><strong>The version parse is validated, not just
+non-empty.</strong> The parse expressions are byte-identical to
+<code>firebase-distribute.sh</code>'s (lines 113-116) and must stay that
+way — the two have to agree or Gates 2+3 refuse the distribute. But
+<code>sed</code> prints its input <strong>unchanged</strong> on a
+no-match, and the greps are looser than the seds that follow them
+(<code>versionCode\s*=</code> versus a literal <code>"= "</code>). So a
+valid Kotlin <code>versionCode=1086</code> written without spaces passed
+the grep, failed the sed, and yielded the whole line — non-empty, so the
+<code>-z</code> guard was satisfied and a <strong>no-match parse read as
+success</strong>: the phase reported <code>PASS</code> while writing
+<code>…/firebase-app-distribution/9.9.1-        versionCode=9001.md</code>
+and a matching CHANGELOG heading. The fix keeps the shared expression
+and validates its <strong>output</strong>: <code>versionCode</code> must
+be a plain integer (the gate compares it arithmetically), and
+<code>versionName</code> must carry no whitespace or quotes. Real values
+(<code>1.3.17</code>, <code>0.2.13</code>, <code>9.9.2-rc1</code>) all
+pass. Covered by
+<code>tests/pipeline/test_phase_05a_version_parse_sanity.sh</code>.</p></li>
+<li><p><strong>Post-write self-verification.</strong> After writing, it
 re-runs the gate's own two checks — the same
 <code>grep -qE "$CHANGELOG_PATTERN"</code> against the real
 <code>CHANGELOG.md</code>, and the same
 <code>[[ -f "$SNAPSHOT_FILE" ]]</code>. A failure there is reported as
-this script's own bug (<code>FAIL</code>), never as success.</li>
-<li><strong>Idempotent.</strong> An already-present entry for the same
-version is detected with the gate's own regex and left untouched (no
-duplicate). An existing snapshot is left alone unless
-<code>--force</code>.</li>
+this script's own bug (<code>FAIL</code>), never as success.</p></li>
+<li><p><strong>Idempotent.</strong> An already-present entry for the
+same version is detected with the gate's own regex and left untouched
+(no duplicate). An existing snapshot is left alone unless
+<code>--force</code>.</p></li>
 </ol>
 <h2 id="exit-codes">Exit codes</h2>
 <table>

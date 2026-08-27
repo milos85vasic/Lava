@@ -47,16 +47,65 @@ cd "$REPO_ROOT"
 
 range="${1:-${LAVA_COMMIT_RANGE:-HEAD~0..HEAD}}"
 
-# Normalize: HEAD~0..HEAD → just HEAD (single commit)
+# ---------------------------------------------------------------------------
+# §6.J anti-bluff corpus floor (added 2026-08-26, LVA vacuous-pass sweep F13).
+#
+# Before this floor the gate collapsed three very different conditions into one
+# "no commits in range — skipping / exit 0":
+#
+#   range HEAD~5..HEAD in a 1-commit repo  -> "no commits in range" exit 0
+#   range 'HEAD~5..HEAKD' (a typo)         -> "no commits in range" exit 0
+#   the same repo, range HEAD              -> VIOLATION: 2 orphan refs, exit 1
+#
+# Only the third examined anything. The first two report a clean gate having
+# read zero commit messages — and `verify-all-constitution-rules.sh` invokes
+# this gate with a HARDCODED HEAD~5..HEAD, so any checkout with fewer than six
+# commits (a fresh clone with --depth, a worktree cut from a new branch, a
+# CI-side shallow fetch) passes it silently forever.
+#
+# The distinction that matters to the reader is resolve-failure vs genuinely-
+# empty: they have different remedies, and a diagnosis that misstates its cause
+# sends the reader to the wrong one. `git rev-list`'s EXIT STATUS separates
+# them — 128 for an unresolvable ref, 0 with no output for a real empty range —
+# and 2>/dev/null was throwing exactly that signal away.
+rev_list_rc=0
 if [[ "$range" == "HEAD~0..HEAD" ]] || [[ "$range" == "HEAD" ]]; then
+    rev_parse_err="$(git rev-parse HEAD 2>&1 >/dev/null)" || rev_list_rc=$?
     commits=("$(git rev-parse HEAD 2>/dev/null)")
+    rev_list_err="$rev_parse_err"
 else
+    rev_list_err="$(git rev-list "$range" 2>&1 >/dev/null)" || rev_list_rc=$?
     mapfile -t commits < <(git rev-list "$range" 2>/dev/null)
 fi
 
+if [[ "$rev_list_rc" -ne 0 ]]; then
+    echo "CM-COMMIT-DOCS-EXISTS VIOLATION: the commit range '$range' FAILED TO RESOLVE." >&2
+    echo "  → Examined: 0 commit message(s)" >&2
+    echo "  → Expected: every commit named by '$range'" >&2
+    echo "  → git reported (exit ${rev_list_rc}): ${rev_list_err:-<no stderr>}" >&2
+    echo "  → Cause distinguished: this is NOT an empty range. The range names a ref" >&2
+    echo "    git cannot resolve — a typo, or a history too shallow for the offset" >&2
+    echo "    (e.g. HEAD~5 in a repository with fewer than six commits)." >&2
+    echo "  → Do one of:" >&2
+    echo "      - fix the range spelling, or" >&2
+    echo "      - pass a range this history can satisfy, e.g. LAVA_COMMIT_RANGE=HEAD, or" >&2
+    echo "      - deepen a shallow clone: git fetch --unshallow" >&2
+    echo "  → Skipping with exit 0 here would report a clean gate having read no commit" >&2
+    echo "    message at all (§6.J)." >&2
+    exit 2
+fi
+
 if [[ ${#commits[@]} -eq 0 ]] || [[ -z "${commits[0]}" ]]; then
-    echo "CM-COMMIT-DOCS-EXISTS: no commits in range '$range' — skipping"
-    exit 0
+    echo "CM-COMMIT-DOCS-EXISTS VIOLATION: the commit range '$range' resolved but selects ZERO commits." >&2
+    echo "  → Examined: 0 commit message(s)" >&2
+    echo "  → Expected: at least 1 — a gate that reads no commit message asserts nothing" >&2
+    echo "    about whether commit bodies cite paths that exist." >&2
+    echo "  → Cause distinguished: the range is VALID (git resolved it without error);" >&2
+    echo "    it simply names an empty set — an A..B where B is an ancestor of A, or a" >&2
+    echo "    self-range such as HEAD..HEAD." >&2
+    echo "  → Do: pass a range that selects the commits you intend to audit," >&2
+    echo "    e.g. LAVA_COMMIT_RANGE=HEAD for the tip commit alone." >&2
+    exit 1
 fi
 
 # Extension whitelist — paths must end with one of these to be considered

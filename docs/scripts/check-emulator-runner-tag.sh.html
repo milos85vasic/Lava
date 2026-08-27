@@ -323,5 +323,46 @@ equals-form, non-emulator no-false-positive, advisory-mode, and
 real-tree cases. Run:</p>
 <div class="sourceCode" id="cb2"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> tests/check-constitution/test_emulator_runner_tag.sh</span></code></pre></div>
+<h2 id="two-required-conditions-not-one-tightened-2026-08-26">Two
+required conditions, not one (tightened 2026-08-26)</h2>
+<p>A file "records emulator execution" only when <strong>both</strong>
+hold:</p>
+<ol type="1">
+<li><strong>MARKER</strong> — the file contains at least one
+emulator-run marker.</li>
+<li><strong>ATTESTATION SHAPE</strong> — the file <em>records</em> a run
+rather than <em>discussing</em> one, via either:
+<ul>
+<li><strong>(2a)</strong> an attestation FIELD in key position — one of
+the §6.I.4 per-row field names (<code>"avd":</code>, <code>avd=</code>,
+<code>| avd |</code> and siblings) in JSON-key, key=value or
+markdown-table-cell form; or</li>
+<li><strong>(2b)</strong> a marker sharing a line with an INVOCATION or
+OUTCOME token — <code>gradlew</code>,
+<code>BUILD SUCCESSFUL</code>/<code>FAILED</code>,
+<code>am instrument</code>, <code>--tests</code>,
+<code>adb -s</code>/<code>adb shell</code>, <code>avdmanager</code>,
+<code>emulator-matrix -&lt;flag&gt;</code> — which is what a plaintext
+run log looks like.</li>
+</ul></li>
+</ol>
+<h3 id="why-the-mention-test-was-not-enough">Why the mention test was
+not enough</h3>
+<p>The previous version matched condition (1) alone, and asserted
+<strong>in its own comment</strong> that bluff-hunt logs "that merely
+quote a marker in prose" would stay clear because they are "unlikely to
+be NEW evidence files added in the same change".</p>
+<p>That assumption was stated and never tested, and it was wrong. A §6.N
+bluff-hunt record was flagged whose only marker sits inside an
+<code>"unconfirmed"</code> prose field whose own text reads <em>"Gradle
+was not run (resource constraint)"</em> — so the gate was calling a
+written record of <strong>not</strong> running an emulator an unattested
+emulator run.</p>
+<p>The tightening narrows by <strong>what the file is</strong>, never by
+where it lives: no path exemption was added, and a test writes a genuine
+untagged attestation <em>into</em>
+<code>.lava-ci-evidence/bluff-hunt/</code> and asserts it is still
+flagged. Measured across all 117 tracked marker-bearing files, exactly 4
+reclassify as prose; each was read and confirmed.</p>
 </body>
 </html>

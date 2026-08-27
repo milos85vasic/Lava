@@ -1,6 +1,6 @@
 # `scripts/check-no-guessing-vocabulary.sh` — User Guide
 
-**Last verified:** 2026-05-17 (1.2.30-1050 tooling cycle)
+**Last verified:** 2026-08-26 (§6.J corpus floor — an unresolved or empty scan-path set now refuses instead of reporting "gate clean"; LVA vacuous-pass sweep F14)
 **Inheritance:** HelixConstitution §11.4.6 (no-guessing-vocabulary mandate) + Lava §6.AD.6 (extracted gate)
 
 ## Overview
@@ -54,8 +54,68 @@ LAVA_REPO_ROOT="/path/to/synthetic/repo" bash scripts/check-no-guessing-vocabula
 
 | Code | Meaning |
 |------|---------|
-| 0 | Gate clean (no forbidden vocabulary found) |
-| 1 | At least one violation (paths printed to stderr) |
+| 0 | Gate clean — no forbidden vocabulary found, **and** at least one file was actually read. The verdict line now names the corpus: `§11.4.6 no-guessing vocabulary gate clean: <N> file(s) scanned across <M> director(ies).` |
+| 1 | At least one violation (paths printed to stderr), **or** the scan corpus was empty / partial (added 2026-08-26 — see below) |
+
+## 2026-08-26 update — §6.J corpus floor: "gate clean" now requires having read something
+
+### The defect
+
+The scan loop opened with `[[ -d "$p" ]] || continue`, which skipped a missing scan
+path **in silence**. A configuration in which no path resolved therefore produced:
+
+```
+LAVA_NO_GUESSING_SCAN_PATHS=<nonexistent>  ->  "§11.4.6 no-guessing vocabulary gate clean."  exit 0
+```
+
+and so did a path that resolved but held no `*.md` / `*.json`. Both are "nothing was
+learned" reported as "nothing failed" — the shape §6.J forbids, and the same shape
+`scripts/check-constitution.sh`'s clause-6.H credential floor already guards against.
+
+The silent-skip also made the gate's verdict a function of **checkout state**: a tree
+where `.lava-ci-evidence/crashlytics-resolved/` happened not to exist yet scanned one
+directory instead of two and said nothing about the difference.
+
+### What the gate now refuses
+
+The loop counts what it resolves and what it reads, and three floors run **before**
+any clean verdict can be printed. All exit **1**:
+
+| Condition | Message |
+|---|---|
+| No configured scan path resolved to a directory | `VIOLATION: NO scan path resolved to a directory.` — every configured path is listed with `(MISSING)` |
+| Paths resolved but zero `*.md` / `*.json` files were read | `VIOLATION: the scan read ZERO files.` — resolved directories are listed as `(present, 0 matching files)`, unresolved ones separately |
+| Some paths resolved and some did not | `VIOLATION: the scan examined a PARTIAL corpus.` — the missing paths are named |
+
+The first floor distinguishes its cause from the environment: if the paths came from
+`LAVA_NO_GUESSING_SCAN_PATHS` this is a **configuration error**, and the remedy is to
+correct that variable (colon-separated, relative to the repo root) or unset it to fall
+back to the built-in defaults; if they are the **built-in defaults**, then either this
+is not a Lava checkout or `LAVA_REPO_ROOT` points elsewhere — and the message prints
+the resolved root so the reader can see which.
+
+The partial-corpus floor exists because a floor that fires only at exactly zero is a
+floor with one stair. Its remedy line offers both honest options: restore the missing
+path, **or** narrow `LAVA_NO_GUESSING_SCAN_PATHS` to exactly the set you intend to
+audit — so the gate's claim matches the corpus it actually read.
+
+### Effect on the hermetic test
+
+`tests/check-constitution/test_no_guessing_vocabulary.sh` drives this gate through
+`LAVA_NO_GUESSING_SCAN_PATHS` against fixture directories. Fixtures must now point at
+directories that exist and contain at least one `*.md` or `*.json` — a fixture path
+that was quietly skipped before will now fail the gate, which is the point.
+
+### §6.J falsifiability rehearsal of the floor itself
+
+1. `LAVA_NO_GUESSING_SCAN_PATHS=/nonexistent/a:/nonexistent/b bash
+   scripts/check-no-guessing-vocabulary.sh` → expect **exit 1**, `NO scan path
+   resolved`, both paths listed `(MISSING)`, and the configuration-error branch of the
+   diagnosis. Before this change: exit 0, `gate clean`.
+2. `mkdir -p /tmp/empty-scan && LAVA_NO_GUESSING_SCAN_PATHS=/tmp/empty-scan ...` →
+   expect **exit 1**, `the scan read ZERO files`.
+3. Run with no override in the Lava tree → expect exit 0 and a verdict line naming the
+   file and directory counts actually scanned.
 
 ## Integration
 

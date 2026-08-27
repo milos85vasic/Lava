@@ -244,12 +244,14 @@
 <h1
 id="scriptsadvance-all-submodulessh--user-guide"><code>scripts/advance-all-submodules.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-08-21 (feature 002
-build-test-distribute-pipeline, tasks T050–T053 TDD cycle)
-<strong>Inheritance:</strong> HelixConstitution §11.4.18 (script
-documentation mandate) + Lava §6.T.3 (no force push) + §6.W (2-mirror
-scope) + the Decoupled Reusable Architecture rule's submodule-pin policy
-(as amended by T048 for this pipeline)</p>
+<p><strong>Last verified:</strong> 2026-08-26 (re-verified line-by-line
+against the current script after the T054 round-5 review;
+<code>CM-SCRIPT-DOCS-SYNC</code>) <strong>Inheritance:</strong>
+HelixConstitution §11.4.18 (script documentation mandate) + Lava §6.T.3
+(no force push) + §6.W (2-mirror scope) + the Decoupled Reusable
+Architecture rule's submodule-pin policy and its <strong>Automated
+Pipeline Pin-Advance Path</strong> conditions (A)–(F), as amended by
+T048 for this pipeline</p>
 <h2 id="overview">Overview</h2>
 <p>Advances every submodule of a repository to its own upstream's latest
 commit, one submodule at a time, and writes a <strong>Submodule Advance
@@ -285,11 +287,20 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Explicit repository path (also how the hermetic test points it at fixtures)</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/advance-all-submodules.sh</span> /path/to/repo</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># One submodule only, with a custom verification step</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_PIPELINE_RUN_ID</span><span class="op">=</span>2026-08-21T14-30-00Z <span class="dt">\</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_ADVANCE_SUBMODULES</span><span class="op">=</span><span class="st">&quot;submodules/auth&quot;</span> <span class="dt">\</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_ADVANCE_VERIFY_CMD</span><span class="op">=</span><span class="st">&#39;scripts/ci.sh --changed-only&#39;</span> <span class="dt">\</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="ex">scripts/advance-all-submodules.sh</span></span></code></pre></div>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># There is NO way to carry a submodule&#39;s uncommitted work forward. R-005</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># step 6 and the --publish-local-modifications flag that gated it were REMOVED</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># on 2026-08-26; passing the flag is exit 2 naming the removal. An unclean</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># submodule working tree is refused, full stop. Commit, stash or remove the</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># work yourself — with a human reading the diff — and re-run.</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Only for disposable fixtures: permit a remote that is a filesystem path.</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/advance-all-submodules.sh</span> <span class="at">--allow-local-path-remotes</span> /tmp/fixture-repo</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"># One submodule only, with a custom verification step</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_PIPELINE_RUN_ID</span><span class="op">=</span>2026-08-21T14-30-00Z <span class="dt">\</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_ADVANCE_SUBMODULES</span><span class="op">=</span><span class="st">&quot;submodules/auth&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="va">LAVA_ADVANCE_VERIFY_CMD</span><span class="op">=</span><span class="st">&#39;scripts/ci.sh --changed-only&#39;</span> <span class="dt">\</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="ex">scripts/advance-all-submodules.sh</span></span></code></pre></div>
 <h2 id="inputs">Inputs</h2>
 <table>
 <thead>
@@ -307,39 +318,76 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 <code>git rev-parse --show-toplevel</code>.</td>
 </tr>
 <tr>
-<td><code>LAVA_PIPELINE_RUN_ID</code></td>
-<td>conditionally</td>
-<td>The pipeline run this advance belongs to. Required unless
+<td><code>--allow-local-path-remotes</code></td>
+<td>no</td>
+<td>Permit a submodule remote that is a plain filesystem path. Without
+it such a remote is refused (<code>REFUSED_FOREIGN_UPSTREAM</code>) like
+any other out-of-scope upstream. Exists so the hermetic suites can reach
+the fetch path at all — a filesystem path can be another real repository
+on this machine, or an NFS/SMB/sshfs mount that reaches another machine
+while naming no host, and the script FETCHES from every configured
+remote, so it is an object-injection surface.</td>
+</tr>
+<tr>
+<td><code>--publish-local-modifications</code></td>
+<td>—</td>
+<td><strong>REMOVED 2026-08-26.</strong> Accepted by the parser only so
+that passing it is a loud <code>exit 2</code> naming the removal, never
+a silently-ignored argument and never a fall-through to a different
+mode. See "R-005 step 6 was removed" below.</td>
+</tr>
+</tbody>
+</table>
+<p>The remaining switch is a <strong>command-line flag and deliberately
+not an environment variable.</strong> It relaxes a safety boundary, so
+the question that decides its shape is whether an unattended pipeline
+run could pick it up without anybody having asked for it in that run. An
+environment variable can — it is inherited wholesale from whatever the
+invoking shell exported, potentially hours earlier in an unrelated test
+session, and it survives every <code>bash script.sh</code> layer in
+between. <code>argv</code> cannot: a phase script invokes with a fixed
+argument list, so a flag has to be typed at the invocation site, in the
+run that uses it. Root <code>CLAUDE.md</code>'s Automated Pipeline
+Pin-Advance Path condition (D) draws the same line for force-pushing —
+an approval "an unattended pipeline cannot obtain and therefore may
+never assume". The environment is a channel through which it could
+assume one. | <code>LAVA_PIPELINE_RUN_ID</code> | conditionally | The
+pipeline run this advance belongs to. Required unless
 <strong>both</strong> <code>LAVA_ADVANCE_RECORD_DIR</code> and
 <code>LAVA_ADVANCE_VERIFY_CMD</code> are supplied — without a run id the
 script cannot honestly claim to have rebuilt-and-tested anything, since
 <code>phase-01-build.sh</code>/<code>phase-02-test.sh</code> both
-require a run id with an existing <code>report.json</code>.</td>
-</tr>
-<tr>
-<td><code>LAVA_ADVANCE_RECORD_DIR</code></td>
-<td>no</td>
-<td>Where Submodule Advance Records are written. Default:
+require a run id with an existing <code>report.json</code>.
+<strong>Validated against <code>^[A-Za-z0-9._:-]+$</code>, and
+separately rejected when it is <code>.</code>, <code>..</code> or any
+run of dots</strong>; anything else is exit 2 with nothing attempted.
+(The character class alone still admitted the only two path-navigation
+tokens it could. No <code>/</code> can appear so <code>..</code> cannot
+walk out of <code>.lava-ci-evidence</code>, but it does silently
+relocate a run's records out of its own run directory into the shared
+<code>pipeline-runs/</code> parent, where the next run's records land on
+top of them.) It is a path component of the record directory and it is
+handed to the verify step, so an unvalidated value was both a traversal
+vector and a command-injection vector — see the 2026-08-26 section. | |
+<code>LAVA_ADVANCE_RECORD_DIR</code> | no | Where Submodule Advance
+Records are written. Default:
 <code>.lava-ci-evidence/pipeline-runs/&lt;run_id&gt;/submodule-advances</code>
-(per <code>data-model.md</code>).</td>
-</tr>
-<tr>
-<td><code>LAVA_ADVANCE_VERIFY_CMD</code></td>
-<td>no</td>
-<td>The R-005 step-5 rebuild-and-test command, run once per advanced
-submodule via <code>bash -c</code>, with <code>$1</code> = the
-submodule's absolute path and <code>$2</code> = the parent repository
-root. Zero exit ⇒ the advanced state still builds and passes. Default:
-<code>phase-01-build.sh &lt;run_id&gt; &lt;repo&gt; &amp;&amp; phase-02-test.sh &lt;run_id&gt; &lt;repo&gt;</code>.</td>
-</tr>
-<tr>
-<td><code>LAVA_ADVANCE_SUBMODULES</code></td>
-<td>no</td>
-<td>Whitespace-separated allow-list of submodule paths (as they appear
-in <code>git submodule status</code>). Default: every submodule.</td>
-</tr>
-</tbody>
-</table>
+(per <code>data-model.md</code>). | |
+<code>LAVA_ADVANCE_VERIFY_CMD</code> | no | The R-005 step-5
+rebuild-and-test command, run once per advanced submodule via
+<code>bash -c</code>, with <code>$1</code> = the submodule's absolute
+path, <code>$2</code> = the parent repository root and
+<strong><code>$3</code> = the run id</strong>. Zero exit ⇒ the advanced
+state still builds and passes. Default:
+<code>phase-01-build.sh "$3" "$2" &amp;&amp; phase-02-test.sh "$3" "$2"</code>.
+The run id is passed <strong>positionally</strong>, never interpolated
+into the command text. | | <code>LAVA_ADVANCE_SUBMODULES</code> | no |
+Whitespace-separated allow-list of submodule paths (as they appear in
+<code>git submodule status</code>). Default: every submodule.
+<strong>Every token must name a submodule this repository actually
+has</strong> — a token that matches nothing is exit 2, not an
+empty-but-successful run. It can only ever NARROW a run, and it can
+never widen the governance allow-list. |</p>
 <p>Nothing is hardcoded (§6.R): the repository path, submodule set,
 remote name, and default branch name are all resolved at runtime from
 git itself — the default branch in particular comes from the remote's
@@ -378,29 +426,137 @@ done (step 3). <code>old_commit == new_commit</code>.</td>
 </tr>
 <tr>
 <td><code>ADVANCED</code></td>
-<td>Fetched, checked out, verified, (optionally) pushed local
-modifications, and staged the new pin.</td>
+<td>Fetched, checked out, verified, and staged the new pin <strong>in
+the parent index</strong>. Nothing was committed and nothing was pushed
+— this script does neither, on any path.</td>
 <td><code>true</code></td>
 </tr>
 <tr>
 <td><code>REJECTED_BREAKING_CHANGE</code></td>
-<td>The advanced state failed the step-5 rebuild-and-test (or could not
-be checked out). Advance discarded; prior pin restored.</td>
+<td>The advanced state failed the step-5 rebuild-and-test, or could not
+be checked out. Advance discarded; prior pin restored.</td>
 <td><code>false</code></td>
 </tr>
 <tr>
 <td><code>REJECTED_PUSH_CONFLICT</code></td>
-<td>The submodule's own local modifications could not be pushed as a
-fast-forward. Refused rather than overwritten (FR-016). Advance
-discarded; prior pin restored.</td>
+<td><strong>RETAINED in the schema but currently UNEMITTABLE.</strong>
+No code path in this script issues a <code>git push</code>; the only
+pushing code it ever had was R-005 step 6, removed 2026-08-26. The value
+stays in the enum because root <code>CLAUDE.md</code>'s Automated
+Pipeline Pin-Advance Path condition (E) names it explicitly as one of
+four outcomes, and a schema that cannot express a value the governing
+document names is a worse disagreement than a value nothing currently
+emits. Removing it needs an operator amendment to condition (E).</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>REFUSED_GOVERNANCE_DENY</code></td>
+<td>The submodule carries no standing operator authorization, so
+<strong>its upstream was never contacted</strong> — nothing was fetched,
+checked out, verified, committed or pushed for it. (The console line
+used to say "NOT examined" while the summary counted the same submodule
+among the "N submodule(s) examined"; both senses were defensible and the
+two lines contradicted each other, which is worse than either.)
+<code>old_commit == new_commit == the current pin</code>.</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>FAILED_PRECONDITION</code></td>
+<td>A precondition for examining or advancing it could not be
+established: uninitialized submodule, working tree not sitting on the
+pinned commit, <strong>an UNCLEAN working tree</strong> (there is no
+flag that overrides this), <code>git status</code> failure, no remote
+configured, failed fetch, unresolvable remote default branch, or the
+fetched object absent after a successful fetch. Nothing was advanced,
+and for the unclean-tree case the upstream was never contacted at
+all.</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>REFUSED_NOT_FAST_FORWARD</code></td>
+<td>The remote default branch HEAD does not contain the pinned commit,
+so moving the pin would DROP pinned work. Nothing was checked out.</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>REFUSED_FOREIGN_UPSTREAM</code></td>
+<td>A configured remote falls outside the own-org GitHub/GitLab scope
+condition (C) permits. Nothing was fetched or advanced. The script
+FETCHES from every configured remote, so an out-of-scope one is an
+object-injection surface whose objects would end up under the pin staged
+for every clone.</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>REJECTED_PARENT_STAGING_FAILED</code></td>
+<td>The advance completed but the parent index could not be staged, or
+it staged something other than the commit this run measured.</td>
 <td><code>false</code></td>
 </tr>
 </tbody>
 </table>
+<p><strong>Four outcome values were REMOVED on 2026-08-26</strong>,
+together with R-005 step 6, because each named a cause that could arise
+ONLY while committing or pushing a submodule's local work, and no code
+path can now produce any of them:
+<code>REJECTED_VERIFY_MUTATED_LOCAL_WORK</code>,
+<code>REJECTED_SUBMODULE_STAGING_FAILED</code>,
+<code>REJECTED_SUBMODULE_COMMIT_FAILED</code>,
+<code>REJECTED_COMMIT_SCOPE_EXCEEDED</code>. A contract value nothing
+can emit describes a writer that does not exist, which is the same
+defect as a missing value in the other direction. <strong>Zero Submodule
+Advance Records existed at rest at the time of removal — measured, not
+assumed: no <code>submodule-advances</code> directory exists anywhere
+under <code>.lava-ci-evidence</code></strong> — so no record at rest
+carries a value the enum no longer admits. The writer's whitelist and
+the schema enum are the same nine values, and the schema's
+<code>allOf</code> list is exactly that enum minus
+<code>ADVANCED</code>.</p>
+<p><code>local_modifications_pushed</code> is now
+<code>"const": false</code> in the schema and is emitted as the literal
+<code>false</code> by the writer, which no longer accepts it as a
+parameter. The field is retained rather than dropped because
+<code>data-model.md</code> and condition (E) both name it, and a
+consumer must not have to branch on its presence.</p>
 <p>The record's own writer enforces the schema's
-<code>allOf/if-then</code> invariant — a <code>REJECTED_*</code> outcome
-can never be emitted alongside
-<code>parent_pin_updated: true</code>.</p>
+<code>allOf/if-then</code> invariant, stated as the general rule:
+<strong><code>ADVANCED</code> is the only outcome that may claim the
+parent pin moved, and it must claim it.</strong> Both directions are
+checked, so neither a refusal claiming an advance nor an advance
+claiming no pin move can be emitted.</p>
+<p><strong>Every submodule the script processes leaves a record</strong>
+— root <code>CLAUDE.md</code>'s Automated Pipeline Pin-Advance Path
+condition (E). Exactly one condition still cannot be recorded, and it is
+honest rather than an omission: a parent index whose gitlink for the
+submodule is unreadable. The schema requires a commit sha and none was
+ever established, so there is nothing to write that would not be
+invented; it is reported on stderr, counted, and reflected in the exit
+code.</p>
+<p><strong>One further file, written only when the repository genuinely
+has no submodules</strong>:
+<code>&lt;record-dir&gt;/_corpus.json</code>, with
+<code>"outcome": "CORPUS_EMPTY_CONFIRMED"</code> and the three
+independent readings that establish it (<code>.gitmodules</code>
+declares 0, <code>git submodule status</code> enumerated 0, the parent
+index holds 0 gitlinks). It is deliberately <strong>not</strong> a
+Submodule Advance Record and does not conform to that schema — it names
+no submodule, because there is none to name. Its leading underscore
+cannot collide with a record filename:
+<code>_advance_sanitize_name</code> strips leading underscores, so no
+submodule path can ever sanitize to <code>_corpus</code>. It exists
+because <code>exit 0</code> + <code>0 advanced</code> on a console is
+indistinguishable, to <code>phase-07-closure.sh</code>, from "everything
+was already current" — an empty corpus has to be evidence at rest, not a
+line that vanishes with the terminal.</p>
+<p>The run's summary now also accounts for governance refusals in their
+own bucket
+(<code>N refused for want of a standing operator authorization</code>).
+They previously fell into none of <code>advanced</code> /
+<code>already current</code> / <code>rejected/failed</code>, so the
+outcome line of a run in which a submodule had been refused read exactly
+like the outcome line of a run in which everything was already current.
+The script asserts before exiting that the buckets account for every
+submodule it says it examined.</p>
 <p>Aggregating these records into the run's <code>report.json</code>
 (<code>submodule_advances[]</code>) is
 <code>phase-07-closure.sh</code>'s job (T055), not this script's.</p>
@@ -415,20 +571,77 @@ can never be emitted alongside
 <tbody>
 <tr>
 <td><code>0</code></td>
-<td>Every submodule ended <code>ADVANCED</code> or
-<code>NO_NEWER_COMMIT</code>.</td>
+<td>Every submodule ended <code>ADVANCED</code>,
+<code>NO_NEWER_COMMIT</code>, or was refused for want of a standing
+operator authorization <strong>on its own path</strong>
+(<code>REFUSED_GOVERNANCE_DENY</code> via the allow-list). The last of
+those is exit 0 <strong>deliberately</strong>, and it is not an
+oversight — see "A path-level governance refusal is exit 0, on purpose"
+below.</td>
 </tr>
 <tr>
 <td><code>1</code></td>
-<td>At least one submodule was rejected or could not be processed.</td>
+<td>At least one submodule was rejected or refused for a reason that
+means something is wrong: a breaking change, an <strong>unclean working
+tree</strong> (there is no flag that overrides this), an out-of-scope
+upstream, an authorized PATH whose upstream names a repository nobody
+authorized, an upstream identity that could not be read at all, a
+governance certification that examined zero identities, a parent index
+that could not be staged, or a precondition that could not be
+established. <strong>A caller MUST treat exit 1 as
+stop-and-page-a-human, never as retry</strong> — see "Exit 1 is sticky"
+below.</td>
 </tr>
 <tr>
 <td><code>2</code></td>
-<td>Usage/configuration error (bad repo path, missing run id with no
-overrides, unwritable record directory). Nothing was attempted.</td>
+<td>Usage/configuration error: bad repo path; missing run id with no
+overrides; a run id outside <code>^[A-Za-z0-9._:-]+$</code> or equal to
+<code>.</code>/<code>..</code>; an unknown option or a second positional
+path; a record directory that cannot be created <strong>or that exists
+and cannot be written to</strong>; a scratch working directory
+<code>mktemp -d</code> refused to create; an
+<code>LAVA_ADVANCE_SUBMODULES</code> token naming no submodule this
+repository has; a run that somehow examined zero submodules; <strong>a
+corpus <code>.gitmodules</code> declares that the enumeration did not
+cover</strong> (whether it enumerated none of them or only some — see
+the 2026-08-26 round-5 section); a run whose outcome buckets account for
+fewer submodules than it says it examined; <strong>an ambient git
+environment variable that could not be removed</strong>; <strong>a
+safety switch, the governance allow-list, or the identity boundary that
+does not reflect what this file declares</strong> (something in the
+invoking environment is holding the name — <code>BASH_ENV</code> is the
+known channel and it IS set on the operator's host); or <strong>a
+hardened object reader that could not prove it ignores
+<code>refs/replace/*</code></strong>. Nothing was attempted.</td>
 </tr>
 </tbody>
 </table>
+<h3 id="exit-1-is-sticky--a-caller-must-page-a-human-never-retry">Exit 1
+is sticky — a caller must page a human, never retry</h3>
+<p>A refusal that happens <strong>after</strong> the step-4 checkout can
+leave the submodule on that rejected commit: <code>restore_pin</code>
+uses a plain <code>git checkout --detach</code>, which git refuses when
+untracked working-tree files would be removed, and forcing is the flag
+family this script declines on principle (§6.T.3). Nothing is published,
+the parent pin is untouched, and the run says so loudly
+(<code>THESE SUBMODULES ARE LEFT ON A REJECTED COMMIT</code>). Since the
+2026-08-26 removal of R-005 step 6 there is no rescue ref, because there
+is no commit of this script's making for one to hold — and a submodule
+carrying the operator's own uncommitted work never reaches the checkout
+at all.</p>
+<p>The consequence a caller must plan for: <strong>every subsequent run
+for that submodule fails closed</strong> with
+<code>FAILED_PRECONDITION</code> ("working tree is at X but the parent
+pins Y ... REFUSING"), and prints the exact restore command. That is the
+correct direction — the leftover is never mistaken for a clean starting
+point — but it is a <strong>human-intervention requirement</strong>, not
+a transient error.</p>
+<p><code>scripts/pipeline/phase-07-closure.sh</code> (T055) MUST
+therefore treat exit 1 from this script as <strong>stop and page a
+human</strong>. Retrying it re-runs a refusal that cannot clear itself,
+and an unattended pipeline is <strong>blocked, not degraded</strong>
+until an operator runs the printed
+<code>git -C '&lt;submodule&gt;' checkout --detach &lt;pin&gt;</code>.</p>
 <h2 id="side-effects">Side effects</h2>
 <ul>
 <li><strong>In each submodule</strong>: <code>git fetch</code>, a
@@ -442,23 +655,249 @@ commits and never pushes the parent</strong> — that is
 review gate sits between "pins staged" and "pins pushed".</li>
 </ul>
 <h2 id="safety-properties">Safety properties</h2>
+<h3
+id="the-safe-operating-precondition--a-clean-submodule-working-tree">The
+safe-operating precondition — a clean submodule working tree</h3>
+<p><strong>Every irreversible thing this script can do sits behind one
+condition.</strong> With a <strong>clean</strong> submodule tree it
+fetches, checks out, verifies and stages a pin in the parent index: all
+local, all undoable, nothing leaving the machine. With an
+<strong>unclean</strong> tree the same run becomes a <em>publisher</em>
+— it commits what <code>git status -uall</code> reported and pushes it
+to that submodule's own upstream default branch, which §6.T.3 forbids
+undoing by force-push.</p>
+<p>Until the 2026-08-26 re-review that condition was neither checked nor
+stated; the reviewer approved a run "today" only on the measured fact
+that <code>submodules/helixqa</code> happens to be clean, and said
+plainly that the safety "rests on a precondition the script neither
+checks nor states". It is now <strong>both</strong>:</p>
 <ul>
-<li><strong>Never force-pushes, never rewrites history, never bypasses
-hooks or signing</strong> (§6.T.3). A push that cannot fast-forward is a
-<code>REJECTED_PUSH_CONFLICT</code> — the refusal <em>is</em> the
-correct outcome.</li>
-<li><strong>A rejected advance is discarded entirely, never partially
+<li>a clean tree is announced per submodule, naming what it rules
+out;</li>
+<li>an unclean tree is <strong>refused</strong>
+(<code>FAILED_PRECONDITION</code>), listing the exact paths,
+<strong>with no opt-in of any kind</strong> — the flag that used to
+authorise them was removed on 2026-08-26.</li>
+</ul>
+<p>The refusal is the deliberate default, not the timid one. A single
+stray editor swapfile left in a submodule was demonstrably committed and
+published to another repository's default branch, unattended, exit 0,
+outcome <code>ADVANCED</code> — the <code>-uall</code> capture is total,
+so <em>any</em> untracked byte armed step 6, and step 6 published. The
+refusal happens <strong>before the fetch</strong>, so an unclean
+submodule's upstream is never even contacted and the operator's bytes
+are never touched: the verify command does not run, and there is nothing
+to rescue because nothing was moved.</p>
+<h2 id="r-005-step-6-was-removed-2026-08-26">R-005 step 6 was removed
+(2026-08-26)</h2>
+<p><strong>What was removed:</strong> 607 lines implementing R-005 step
+6 — staging the operator's captured paths, fingerprint and tree
+comparison, submodule index and <code>HEAD</code> checks, commit
+construction, five publish guards (PARENTAGE, TREE, OBJECTS, HISTORY,
+MESSAGE), push-time destination re-certification, the per-mirror push
+loop, mirror-divergence reporting and rescue-ref preservation — together
+with the <code>--publish-local-modifications</code> flag that was its
+only entry, five now-dead helper functions
+(<code>save_rescue_ref</code>, <code>remote_default_branch</code>,
+<code>_path_fingerprint</code>, <code>_captured_tree</code>,
+<code>_push_destinations_in_scope</code>) and four outcome values.</p>
+<p><strong>Why.</strong> Five review rounds found
+<strong>twelve</strong> distinct, fixture-proven ways for content no
+guard had read to reach another repository's default branch through step
+6. The count rose at every round — 3 → 5 → 7 → 9 → 10 → 11 → 12 — and
+every round confirmed the previous round's fixes while finding more.
+Round 3 stopped enumerating <em>routes</em> and began guarding the
+<em>artefact</em>; rounds 4 and 5 then enumerated <em>projections</em>
+of the artefact, and the eleventh was a projection nobody had listed:
+4000 bytes of payload carried in the commit object's own author-name
+header, which reached both mirrors with all five guards green.</p>
+<p>The convergent instrument was tried and <strong>failed</strong>:
+<code>git commit-tree</code> inherits <code>i18n.commitEncoding</code>,
+so the expected commit is built in the same adversary-controlled config
+context as the real one and the poison cancels out on both sides — byte
+equality PASSED while attacker bytes were published. Guarding had
+provably stopped converging.</p>
+<p><strong>What it cost, measured rather than assumed.</strong> Step 6
+had no caller (<code>scripts/pipeline/phase-07-closure.sh</code> did not
+exist, and T055's design states the closure phase never passes the
+flag); FR-000 already makes the pipeline refuse to start on a dirty
+tree, using <code>--ignore-submodules=none</code> precisely so submodule
+dirt is visible, so in a pipeline run a dirty submodule is a
+precondition failure rather than an input; and all 61 recursive
+submodules were clean at the time of removal. The operator's own
+<code>git commit</code> handles the case better, with a human reading
+the diff.</p>
+<p><strong>The property this buys.</strong> This script now issues
+<strong>no <code>git push</code> at all</strong> — not to a submodule's
+upstream, not to the parent's mirrors, not on any path, with or without
+any flag — and creates <strong>no commit</strong>, in a submodule or in
+the parent. §6.T.3's prohibition on history-overwriting pushes is
+satisfied by construction rather than by careful flag selection. All
+twelve escapes are unreachable because the code they lived in does not
+exist.</p>
+<p><strong>What this does NOT close, stated plainly rather than papered
+over.</strong> The step-5 verify command is an operator-supplied command
+line executed by <code>bash -c</code> on the DEFAULT, FLAGLESS path,
+against a working tree checked out from an upstream moments earlier, and
+it inherits this host's live push credentials. Measured on this host:
+<code>SSH_AUTH_SOCK</code> live with two loaded keys,
+<code>~/.ssh/id_ed25519</code> readable with an empty passphrase,
+<code>gh</code> and <code>glab</code> configs readable, 25 own-org
+submodule upstreams plus the parent's two mirrors in reach, with no
+timeout and no resource bound. Scrubbing the environment does not close
+it: OpenSSH resolves <code>~</code> from the passwd entry, not from
+<code>$HOME</code>, so a push succeeded from a fully empty environment
+with <code>HOME</code> redirected to an empty directory. Closing it
+requires running the verify invocation inside a credential-masked
+sandbox (<code>bwrap</code> is present on this host and needs no
+privilege escalation, §6.U). <strong>That work is owed and is not done
+here.</strong> The script's header previously claimed "nothing leaving
+this machine" for the clean-tree path; that sentence was false and has
+been corrected.</p>
+<h2 id="a-path-level-governance-refusal-is-exit-0-on-purpose">A
+path-level governance refusal is exit 0, on purpose</h2>
+<p><code>REFUSED_GOVERNANCE_DENY</code> reaches the summary through two
+different paths, and they exit differently. That asymmetry is deliberate
+and is the reason exit 0 is correct for the first of them:</p>
+<table>
+<thead>
+<tr>
+<th>Shape</th>
+<th>Counter</th>
+<th>Exit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The submodule's <strong>path</strong> carries no standing
+authorization (it is absent from <code>GOVERNANCE_ALLOW</code>) —
+nothing is attempted, its upstream is never contacted</td>
+<td><code>GOVERNANCE_REFUSED</code></td>
+<td><strong>0</strong></td>
+</tr>
+<tr>
+<td>An <strong>authorized path</strong> whose upstream names a
+repository nobody authorized; an upstream identity that cannot be read;
+a certification that examined <strong>zero</strong> identities</td>
+<td><code>FAILURES</code></td>
+<td><strong>1</strong></td>
+</tr>
+</tbody>
+</table>
+<p>With <code>GOVERNANCE_ALLOW</code> naming one submodule out of
+twenty-five, a path-level refusal is the designed steady state of
+<strong>every single run</strong>. An exit code that reports failure on
+every run is an exit code its operator learns to ignore — which is
+precisely the "route around the guard" defect this file polices
+elsewhere. Nothing is attempted for such a submodule, nothing is left
+inconsistent, and a record naming the refusal exists at rest. The
+<em>dangerous</em> half of governance — an authorization spent on a
+repository nobody ruled on — is <strong>not</strong> exit 0.</p>
+<p>The residual concern is real and is not solved by changing this code:
+a repository in which <em>every</em> submodule is governance-refused
+reports exit 0 having advanced nothing. That is indistinguishable
+<strong>by exit code alone</strong> from "everything was already
+current". It is distinguishable from the summary (the governance bucket
+is reported separately and the run asserts its buckets account for every
+submodule it examined) and from the records at rest. Merging the two
+governance shapes into exit 1 would lose information rather than add it,
+and <code>tests/pipeline/test_advance_all_submodules.sh:423</code> pins
+the exit-0 contract that a sibling suite depends on. <strong>Assessed
+2026-08-26: exit 0 is correct here; the documentation of it was wrong
+and has been fixed.</strong></p>
+<ul>
+<li><p><strong>Issues no <code>git push</code> at all</strong>, to any
+remote, on any path, with or without any flag — and creates <strong>no
+commit</strong>, in a submodule or in the parent. This used to read
+"never force-pushes, never rewrites history, never bypasses hooks or
+signing (§6.T.3)"; the stronger statement is now true because the only
+pushing and committing code in the file was R-005 step 6, and it is
+gone.</p></li>
+<li><p><strong>A rejected advance is discarded entirely, never partially
 applied.</strong> Both rejection paths check the submodule back out to
 its prior pinned commit, so the parent repository is left exactly as it
-was found.</li>
-<li><strong>Never destroys local work.</strong> When local modifications
-had to be committed before a push that then failed, the resulting commit
-is preserved under <code>refs/lava-advance-rescue/&lt;id&gt;</code>
-inside the submodule <em>before</em> HEAD is moved back — reachable, not
-reflog-only. Restoration uses a plain checkout, never a discarding
-one.</li>
-<li><strong>No privilege escalation</strong> — plain git as the calling
-user (§6.U).</li>
+was found.</p></li>
+<li><p><strong>Never destroys local work</strong>, and no longer needs a
+rescue-ref mechanism to say so: a submodule carrying uncommitted work is
+refused <em>before anything is fetched or checked out</em>, so its work
+is never moved, never committed and never at risk. The refusal names
+every path it found. Restoration on the other rejection paths uses a
+plain checkout, never a discarding one.</p></li>
+<li><p><strong>The pin it compares against is the parent's index
+gitlink</strong>, never the submodule's working-tree HEAD. If the two
+differ (<code>git submodule status</code> shows a leading
+<code>+</code>) the submodule is REFUSED rather than advanced from a
+commit nobody chose. This is what makes the non-fast-forward guard
+meaningful and what stops a previous run's unrestored leftovers from
+reading as a clean starting point.</p></li>
+<li><p><strong>Own-org upstreams only</strong> (condition (C)). Every
+configured remote is classified BEFORE the fetch, over
+<strong>four</strong> URL forms, because no one of them is where git
+actually goes:</p>
+<ul>
+<li><code>git remote get-url</code> — the fetch URL after
+<code>url.&lt;base&gt;.insteadOf</code>;</li>
+<li><code>remote.&lt;n&gt;.url</code> — the same, as literally
+configured, before that rewrite;</li>
+<li><code>git remote get-url --push --all</code> —
+<strong>every</strong> destination a push would reach, after
+<code>remote.&lt;n&gt;.pushurl</code> and
+<code>url.&lt;base&gt;.pushInsteadOf</code> (<code>--all</code>, not
+bare <code>--push</code>: <code>pushurl</code> is multi-valued and git
+pushes to every value, while bare <code>--push</code> prints only the
+first);</li>
+<li><code>remote.&lt;n&gt;.pushurl</code> — the push destinations as
+literally configured.</li>
+</ul>
+<p>A remote on a host other than GitHub/GitLab, or under an org other
+than <code>vasic-digital</code>/<code>HelixDevelopment</code>, is
+refused on <strong>any</strong> of those forms, not skipped: a silently
+skipped mirror is a §6.C divergence. The push forms were absent until
+the round-3 review, and their absence was not theoretical —
+<code>constitution/origin</code> in this repository fetches from
+<code>github.com/HelixDevelopment</code> and <strong>pushes to
+<code>gitflic.ru</code></strong>, a provider §6.W names explicitly
+forbidden. (That submodule is governance-denied, so it never reached
+this check; the configuration <em>shape</em> is what matters.)</p>
+<p>The push-time re-certification that used to accompany this scan is
+gone with the push it guarded. The <strong>pre-fetch</strong> scan is
+now the whole of condition (C), and it is still load-bearing: it gates
+the FETCH, which is the remaining way an out-of-scope repository's
+objects could end up under the pin this run stages for every
+clone.</p></li>
+<li><p><strong>Nothing reaches an upstream at all.</strong> This bullet
+used to describe how the operator's pre-verify content was protected
+from being replaced by the build before being published. Nothing is
+published, so the question does not arise. The paths carrying the
+submodule's own local work are still captured — but only so the refusal
+can <strong>name</strong> them for the operator.</p></li>
+<li><p><strong>A refusal offers no consolation it cannot
+deliver.</strong> It used to write the operator's pre-verify bytes into
+the submodule's object database so the printed sha was a real recovery
+handle, because the build had already overwritten the file on disk. The
+build no longer runs on that path, so the bytes are not merely
+recoverable, they are untouched — and the refusal correspondingly claims
+no rescue, no preservation and no reconciliation, because none was
+needed.</p></li>
+<li><p><strong>A gate may not pass having examined nothing.</strong> The
+condition-(C) scan asserts it read at least one remote before it is
+allowed to certify one; <code>git remote</code> exiting 0 with empty
+output is "the upstream set was not learned", never "no out-of-scope
+upstreams found".</p></li>
+<li><p><strong>Authorization is checked against the upstream, not the
+directory name.</strong> <code>GOVERNANCE_ALLOW</code> names a
+<em>repository</em>. Matching only the submodule path's final component
+let an authorization travel with a directory label, so a submodule at an
+allowed-looking path pointing at a different repository was advanced.
+The path name is still necessary; every own-org remote's repository name
+must now also be allowed.</p></li>
+<li><p><strong>A gate that reads zero items has certified
+nothing.</strong> The zero-iteration floor that the push loop carried
+now lives only where it still applies: the condition-(C) scan and the
+governance identity check both refuse rather than certify a set they
+never read.</p></li>
+<li><p><strong>No privilege escalation</strong> — plain git as the
+calling user (§6.U).</p></li>
 </ul>
 <h2 id="hermetic-test">Hermetic test</h2>
 <p><code>tests/pipeline/test_advance_all_submodules.sh</code> exercises
@@ -496,13 +935,23 @@ parent pin unchanged, exit 1</td>
 </tr>
 <tr>
 <td>4</td>
-<td>Local modification present; the verify hook lands a concurrent
-commit on the fixture upstream, making the subsequent push a
-<strong>genuine non-fast-forward</strong></td>
-<td><code>REJECTED_PUSH_CONFLICT</code>, pin unchanged,
-<code>local_modifications_pushed: false</code>, rescue ref present and
-still containing the local edit, fixture upstream tip un-overwritten,
-exit 1</td>
+<td>Clean submodule; the verify hook lands a concurrent commit on the
+fixture upstream <strong>during</strong> the rebuild-and-test
+window</td>
+<td><code>ADVANCED</code> at the commit <strong>step 2
+measured</strong>, not the concurrent one; upstream tip is still the
+concurrent developer's commit; upstream gained no branch;
+<strong>no</strong> rescue ref exists; exit 0</td>
+</tr>
+<tr>
+<td>4b</td>
+<td>Submodule carries uncommitted work</td>
+<td><code>FAILED_PRECONDITION</code>, pin unchanged, submodule
+<code>origin/master</code> unmoved (proving no fetch ran), upstream
+unchanged, operator's bytes untouched on disk, exit 1 —
+<strong>and</strong> <code>--publish-local-modifications</code> is exit
+2 naming the removal, writes zero records, and is not mistaken for a
+repository path</td>
 </tr>
 </tbody>
 </table>
@@ -653,58 +1102,1243 @@ counted and named in the run summary
 <h3 id="open-items-for-the-t054-reviewer--not-fixed-here">Open items for
 the T054 reviewer — NOT fixed here</h3>
 <ol type="1">
-<li><p><strong>The record schema's <code>outcome</code> enum cannot
-express several real refusals.</strong>
-<code>submodule-advance-record.schema.json</code> offers five values. A
-pin move that is not a fast-forward, an uninitialized submodule, an
-unreachable upstream, a remote whose default branch cannot be resolved,
-and a parent index that cannot be staged match none of them. Rather than
-assert a cause that did not occur, those refusals are reported on
-stderr, counted, and reflected in the exit code, but leave <strong>no
-Submodule Advance Record</strong> — the same "invisible at rest" problem
-the <code>REFUSED_GOVERNANCE_DENY</code> value was added to solve.
-Closing it needs new enum values (e.g.
-<code>REFUSED_NOT_FAST_FORWARD</code>, <code>NOT_EVALUATED</code>),
-which is a <code>specs/</code> change and therefore a reviewer decision.
-The step-7 staging-failure path still records
-<code>REJECTED_BREAKING_CHANGE</code>, which is the closest available
-value and not the real cause; the run log says so explicitly.</p></li>
-<li><p><strong>The governance deny-list holds only
-<code>constitution</code>, but root <code>CLAUDE.md</code> declares far
-more than one submodule off-limits to an unattended run.</strong> The
-Decoupled Reusable Architecture rule states that submodule pins are
-<em>"explicit and frozen by default"</em>, that <em>"updating the pin is
-a deliberate PR"</em>, and — verbatim — that <em>"submodule fetch/pull
-is an EXPLICIT operator action, never automatic. No git hooks that
-silently update pins, no <code>git submodule update --remote</code> in
-any release script."</em> The §6.AC HelixQA waiver names exactly one
-exception (<code>submodules/helixqa</code>, always-track-upstream per
-operator decision Q9) and states that the other sixteen <em>"remain
-pins-frozen by default; their bumps still require deliberate
-per-submodule operator authorization."</em> This repository currently
-has <strong>25</strong> submodules. As written, a default run advances
-24 of them. The reviewer must decide whether the deny-list should
-instead be an <strong>allow</strong>-list — the default-deny posture the
-constitution describes — with <code>submodules/helixqa</code> as its
-only standing member.</p></li>
-<li><p><strong>Step 6 commits with <code>git add -A</code> and pushes to
-a real upstream.</strong> <code>has_local_mods</code> comes from
-<code>git status --porcelain</code>, which reports untracked files. Any
-untracked, non-ignored file in a submodule — a build output, a scratch
-note, a file a <code>.gitignore</code> does not yet cover — is therefore
+<li><p><del><strong>The record schema's <code>outcome</code> enum cannot
+express several real refusals.</strong></del> <strong>CLOSED 2026-08-26
+(T054).</strong> The reviewer decision was taken: the enum grew rather
+than the truth shrinking.
+<code>submodule-advance-record.schema.json</code> gained
+<code>FAILED_PRECONDITION</code>, <code>REFUSED_NOT_FAST_FORWARD</code>,
+<code>REFUSED_FOREIGN_UPSTREAM</code>,
+<code>REJECTED_VERIFY_MUTATED_LOCAL_WORK</code> and
+<code>REJECTED_PARENT_STAGING_FAILED</code>, and every one of the eight
+previously record-less terminal paths now writes one — root
+<code>CLAUDE.md</code> condition (E). The step-7 staging-failure path no
+longer records <code>REJECTED_BREAKING_CHANGE</code> with a printed
+apology; it records its own cause. The enum widening is backward
+compatible: every record written before this change still validates. One
+case remains unrecordable and is documented as such above (an unreadable
+parent gitlink leaves no sha to record).</p></li>
+<li><p><del><strong>The governance deny-list holds only
+<code>constitution</code>.</strong></del> <strong>CLOSED 2026-08-26
+(LVA-138, operator decision).</strong> The reviewer decision recorded
+here was taken in the direction this item recommended: the deny-list was
+inverted into a <strong>default-DENY allow-list</strong>,
+<code>GOVERNANCE_ALLOW</code>, whose sole member is
+<code>helixqa</code>. That is the one submodule carrying a standing
+authorization to track upstream unattended (root
+<code>CLAUDE.md</code>'s operator-authorized pin-policy waiver, Phase
+4-C-1 decision Q9). Everything else — <code>constitution</code>, the
+sixteen pins-frozen-by-default submodules, and the seven named by no
+operator decision at all (<code>panoptic</code>, <code>superspec</code>,
+<code>doc_processor</code>, <code>llm_orchestrator</code>,
+<code>llm_provider</code>, <code>llms_verifier</code>,
+<code>vision_engine</code>) — is refused without being examined, however
+green its rebuild-and-test would have been.</p>
+<p>A default-deny list can only ever be as correct as it is complete,
+and the old one was 1/25 complete; a default-DENY posture is correct by
+construction instead, because a submodule nobody has ruled on fails
+closed rather than open. The boundary is not widenable by
+<code>LAVA_ADVANCE_SUBMODULES</code> (that variable can only narrow a
+run), it is a plain array assignment so an exported environment variable
+of the same name is overwritten, and there is no test-only override —
+the suites exercise the allowed path by naming their fixture submodule
+<code>helixqa</code>. The T054 review attempted three bypasses (exported
+<code>GOVERNANCE_ALLOW</code>, a widening
+<code>LAVA_ADVANCE_SUBMODULES</code>, and a <code>BASH_ENV</code> file
+redefining <code>_is_governance_denied</code>); all three were
+refused.</p>
+<p>Adding an entry to <code>GOVERNANCE_ALLOW</code> is a
+<strong>governance act</strong>: it asserts that an operator has
+authorized unattended advancement of that submodule, and it MUST NOT be
+done to make a test or a pipeline run go green.</p></li>
+<li><p><strong>Step 6 still publishes the operator's pre-existing
+untracked files to a real upstream.</strong> <code>has_local_mods</code>
+comes from <code>git status --porcelain</code>, which reports untracked
+files. Any untracked, non-ignored file a submodule already carried — a
+scratch note, a file a <code>.gitignore</code> does not yet cover — is
 committed and published to that submodule's own upstream under the
 message
 <code>chore: local modifications carried forward by advance-all-submodules</code>.
 This is R-005 step 6 as specified, but its interaction with §6.H
 (credential inviolability) deserves an explicit reviewer decision: an
 allow-list of paths, <code>git add -u</code> (tracked files only), or an
-operator confirmation gate.</p></li>
+operator confirmation gate.</p>
+<p><strong>Narrowed on 2026-08-23, not closed.</strong> What step 6
+publishes is now bounded by the paths the submodule carried
+<em>before</em> the advance; it no longer also sweeps in whatever the
+step-5 rebuild wrote. See finding B2 below. The residual risk is the
+operator's own pre-existing untracked files, which is the reviewer
+decision above.</p></li>
 <li><p><strong>Never yet run against a real submodule upstream.</strong>
 Every finding above came from disposable local fixtures. The fixtures
 cannot reproduce real-upstream behaviour such as authentication prompts,
 server-side hooks on GitHub/GitLab, or <code>ls-remote</code> against a
 host that redirects.</p></li>
+<li><p><del><strong>A record-write failure on one path is still
+swallowed by <code>|| true</code>.</strong></del> <strong>CLOSED
+2026-08-26 (T054).</strong> The <code>cat-file -e</code> branch (the
+fetched object is absent after a successful fetch) now routes through
+the shared <code>refuse_and_record</code> helper, so a failed write
+calls <code>note_record_failure</code> like every other site, and its
+outcome is <code>FAILED_PRECONDITION</code> rather than a
+<code>REJECTED_BREAKING_CHANGE</code> asserting a breaking change nobody
+observed. The branch remains defensive-only — still no fixture reaches
+it — but it is no longer the one site that could fail silently.</p></li>
 </ol>
+<h2 id="2026-08-23-pre-t054-blast-radius-audit">2026-08-23 pre-T054
+blast-radius audit</h2>
+<p>A second fixture-only audit, focused on the questions a T054 reviewer
+has to answer about blast radius. Three failure modes were demonstrated
+and fixed; each has a case in
+<code>tests/pipeline/test_advance_all_submodules_blast_radius.sh</code>,
+and each case is paired with a positive case so a blanket
+fail-everything change cannot satisfy the suite.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Failure mode</th>
+<th>What it did</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B1</td>
+<td><strong>An existing-but-unwritable record directory was not a
+configuration error</strong></td>
+<td><code>mkdir -p</code> returns 0 for a directory that already exists
+whatever its mode, so its success stood in for "records can be written
+here". The exit-code table has always promised exit 2 and <em>"Nothing
+was attempted"</em> for an unwritable record directory; in fact the run
+fetched, checked out, verified, published the submodule's local work and
+staged the pin, then wrote <strong>zero records</strong> and reported
+<code>1 advanced</code> with exit 1. The directory is now probed for
+real before anything is attempted.</td>
+</tr>
+<tr>
+<td>B2</td>
+<td><strong>Step 6 published files the step-5 verify build had just
+created</strong></td>
+<td><code>has_local_mods</code> is sampled before the advance (correct),
+but <code>git add -A</code> ran <em>after</em> the verify command, so
+one pre-existing stray file armed step 6 and every artefact the rebuild
+wrote rode along into the commit pushed to the submodule's own upstream
+default branch. Demonstrated: a fixture whose only real local change was
+<code>NOTES.txt</code> published <code>build/outputs/app.apk</code> and
+<code>build/local.properties</code> alongside it. The default verify
+command is a whole-repository build, so that set is unbounded, and
+history-overwriting pushes are forbidden (§6.T.3) so it cannot be taken
+back. Step 6 now stages exactly the paths captured before the
+advance.</td>
+</tr>
+<tr>
+<td>B3</td>
+<td><strong>A failed step-6 stage was reported as <code>ADVANCED</code>
+with exit 0</strong></td>
+<td>A failed <code>git add</code> printed a note and fell through; the
+following <code>git diff --cached --quiet</code> then found an empty
+index, the run said <em>"nothing left to commit"</em>, advanced the pin,
+staged it and exited 0. <em>"Step 6 had nothing to do"</em> and
+<em>"step 6 could not run"</em> produced a byte-identical record and an
+identical green exit, while the operator's uncommitted work was left
+stranded in a submodule whose pin had moved. A staging failure is now
+<code>REJECTED_PUSH_CONFLICT</code> with the advance discarded and the
+pin left alone.</td>
+</tr>
+</tbody>
+</table>
+<p>Two supporting changes came with B2: <code>git status</code> is now
+read with <code>-z -uall</code> (a path may contain a newline; an
+untracked <em>directory</em> must be expanded to the files it held at
+that moment, or anything the build later wrote into it would be
+re-admitted), and its <strong>exit status is checked</strong> — an
+unreadable index must not read as "this submodule carries no local
+work". Paths the new upstream commit has since gitignored are filtered
+out before staging, because <code>git add -- &lt;ignored&gt;</code>
+exits non-zero while still staging its other arguments, which would
+otherwise turn the legitimate "nothing left to commit" case (hardening
+finding #5) into a false failure. Case B2i guards that.</p>
+<h3 id="checked-and-found-clean-in-the-same-audit">Checked and found
+clean in the same audit</h3>
+<ul>
+<li><strong>No history-overwriting or hook-bypassing flag
+anywhere.</strong> All ten mutating git calls were enumerated; the push
+refspec is <code>HEAD:refs/heads/&lt;branch&gt;</code> with no leading
+<code>+</code>. Exactly one write touches the parent repository,
+<code>git add -- &lt;sub-path&gt;</code>; there is no commit, push,
+checkout, reset, clean, stash or tag in it (§6.T.3).</li>
+<li><strong>A fetch failure is distinguishable from "no newer
+commit".</strong> An unreachable upstream and a submodule with no remote
+are both counted failures with git's own diagnostic, no record, exit 1,
+and the pin untouched.</li>
+<li><strong>A killed verify leaves the pin put.</strong>
+<code>kill -KILL</code> and a genuine non-zero verify both restore the
+prior pin and exit 1; the run log distinguishes them
+(<code>exit status 137 — KILLED by signal 9</code>), the record at rest
+does not — that is open item 1.</li>
+<li><strong>A symlinked submodule directory is refused.</strong>
+<code>git submodule status</code> itself exits 128 (<em>"expected
+submodule path … not to be a symbolic link"</em>), which the hardening
+fix #2 turns into exit 2 with nothing attempted, even when the symlink
+points at the parent repository.</li>
+<li><strong>No record-filename collisions</strong> across the
+twenty-five real submodule paths under the sanitizer.</li>
+</ul>
+<h2 id="2026-08-26-t054-human-checkpoint-2-review">2026-08-26 T054 Human
+Checkpoint #2 review</h2>
+<p>The review verdict was <strong>APPROVE WITH FIXES — not safe to point
+at a real submodule upstream until BLOCKER-1/2/3 are closed</strong>.
+All three are closed here, along with four of the six should-fix items
+and one nit; each was reproduced against a disposable fixture
+<em>before</em> the fix, and each has a red-before-green case in
+<code>tests/pipeline/test_advance_all_submodules_t054.sh</code>.</p>
+<h3 id="blockers">Blockers</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Failure mode</th>
+<th>What it did, and what changed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B1</td>
+<td><strong>The pin was read from the submodule's HEAD, not the parent's
+index</strong></td>
+<td><code>old_commit</code> came from
+<code>git -C &lt;sub&gt; rev-parse HEAD</code>. The pin is the parent
+index gitlink; the two differ whenever <code>git submodule status</code>
+shows a leading <code>+</code>. Every downstream decision — the
+fast-forward guard, the record's <code>old_commit</code>,
+<code>restore_pin</code>'s target — was therefore evaluated against the
+wrong reference. Demonstrated: with the parent deliberately pinning
+side-branch commit <code>S</code> and the tree left at its ancestor
+<code>A</code>, <code>merge-base --is-ancestor A B</code> passed, the
+pin moved to <code>B</code>, and <code>S</code> became unreachable from
+the staged pin — exactly the <code>lava-pin/2026-05-07-pkg-vm</code>
+case the guard's own comment says it exists to prevent. The record named
+<code>A</code> as <code>old_commit</code>, so the evidence at rest
+misstated what was advanced FROM. The pin is now read once from
+<code>git ls-files -s</code> (the idiom the governance branch already
+used, for the reason its comment already gave), and a working tree that
+is not sitting on the pin is refused outright.</td>
+</tr>
+<tr>
+<td>B1b</td>
+<td><strong>An unrestored run's leftovers read as a clean
+run</strong></td>
+<td>Same root cause. When the step-5 rebuild dirties a tracked file that
+differs between the two commits, the non-discarding restore checkout is
+legitimately refused and the submodule is left parked on the REJECTED
+commit. The next run read that commit as the pin and reported
+<code>NO_NEWER_COMMIT</code>, <strong>exit 0</strong>, and a green
+record — for a submodule whose pin had never moved. Reading the pin from
+the index closes it, and the HEAD-vs-pin guard turns the leftover state
+into an explicit refusal naming the restore command.</td>
+</tr>
+<tr>
+<td>B2</td>
+<td><strong>The staged path SET was frozen; its CONTENT was
+not</strong></td>
+<td>The 2026-08-23 fix (B2 above) captured the local-modification path
+list <em>before</em> the advance, but <code>git add</code> still runs
+<em>after</em> the step-5 verify command. So for any path the operator
+had <strong>already</strong> modified and the build
+<strong>also</strong> touches, the build's bytes were committed and
+pushed to the submodule's own upstream default branch. Both directions
+were demonstrated: an operator's hand-written file
+<strong>overwritten</strong> by build output and published, and a
+tracked file that existed on <code>origin/main</code>
+<strong>deleted</strong> from it by a build's clean task. Force-push is
+forbidden (§6.T.3), so neither can be taken back. Those paths are now
+content-fingerprinted before the advance and re-checked before
+staging.</td>
+</tr>
+<tr>
+<td>B3</td>
+<td><strong><code>LAVA_PIPELINE_RUN_ID</code> was interpolated into a
+string fed to <code>bash -c</code></strong></td>
+<td>The default verify command was built by splicing the run id between
+single quotes. A <code>'</code> in the value closed the quoting and the
+remainder was parsed as shell. Demonstrated with
+<code>LAVA_PIPELINE_RUN_ID="run'; echo … &gt; MARK; exit 0; '"</code>:
+arbitrary commands ran, <strong>and</strong> the injected
+<code>exit 0</code> made the step-5 gate pass unconditionally — the pin
+advanced with <strong>zero verification</strong> and was recorded
+<code>ADVANCED</code>, while the build script it claimed to have run did
+not even exist. A control run with a benign run id correctly rejected.
+This is a security defect and an anti-bluff defect at once: the gate
+reported a verification it never performed, defeating research.md
+R-005's implementation note 1. The run id is now validated as a plain
+token and passed to the verify command <strong>positionally as
+<code>$3</code></strong>; it never becomes syntax. The same validation
+closes the <code>RECORD_DIR</code> path-traversal nit.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why B2 refuses rather than reverts.</strong> A silent revert
+would discard whichever side is not chosen — real work either way, the
+operator's or the build's — without anyone being told, which is the same
+class of quiet data loss the rest of this script exists to avoid.
+Refusing names the exact paths, leaves both versions on disk, discards
+the advance and restores the pin, so a human decides. Isolating the
+verify step instead (running it against a throwaway copy) was considered
+and rejected: the default verify command is a whole-repository build
+that must run against the advanced tree in place, so a copy would not be
+verifying the thing being advanced.</p>
+<p><strong>Whole-file injection audit.</strong> Every
+<code>bash -c</code>, <code>sh -c</code>, <code>eval</code> and
+string-built command in the script was enumerated: <strong>one</strong>
+<code>bash -c</code> site (the step-5 verify invocation) and
+<strong>one</strong> command string built from an untrusted value (the
+default <code>VERIFY_CMD</code>, which embedded <code>RUN_ID</code>).
+<strong>Zero</strong> <code>eval</code>, <strong>zero</strong>
+<code>sh -c</code>, <strong>zero</strong> <code>xargs</code>. Both sites
+are fixed. The record writer was already safe by construction —
+<code>jq -n --arg/--argjson</code>, or a
+<code>&lt;&lt;'PYEOF'</code>-quoted python heredoc taking values through
+<code>argv</code>.</p>
+<h3 id="should-fix-items">Should-fix items</h3>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>What changed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Condition (C) was entirely absent</strong></td>
+<td>Root <code>CLAUDE.md</code>'s Automated Pipeline Pin-Advance Path
+requires the path to advance only submodules whose configured upstreams
+are <code>vasic-digital/*</code> or <code>HelixDevelopment/*</code> on
+GitHub or GitLab. Nothing anywhere read a remote URL. Demonstrated: a
+submodule carrying a second, unauthorised remote had the operator's work
+<strong>pushed to it</strong>, and every foreign remote was
+<strong>fetched from</strong> before anything else happened. Now every
+configured remote is classified before the fetch and an out-of-scope one
+is refused with a <code>REFUSED_FOREIGN_UPSTREAM</code> record.</td>
+</tr>
+<tr>
+<td><strong>Eight refusal paths wrote no record</strong> (condition
+(E))</td>
+<td>See open item 1 above — closed by widening the enum and routing
+every terminal path through <code>refuse_and_record</code>.</td>
+</tr>
+<tr>
+<td><strong>A zero-iteration push loop read as success</strong></td>
+<td><code>while … done &lt; &lt;(git remote)</code> hides the producer's
+exit status. With <code>git remote</code> failing transiently
+(fault-injected at the git boundary by a PATH shim; the script itself
+was not modified), the loop body never ran, no failure was recorded, and
+the parent pin was staged at a commit <strong>no remote had</strong> —
+every other clone would then get
+<code>fatal: reference is not a tree</code> from
+<code>git submodule update</code>. The remote list is now captured into
+an array through a file with its exit status checked, and a created
+commit that no remote accepted is a <code>REJECTED_PUSH_CONFLICT</code>
+with the work preserved under a rescue ref.</td>
+</tr>
+<tr>
+<td><strong>An <code>LAVA_ADVANCE_SUBMODULES</code> typo examined
+nothing and exited 0</strong></td>
+<td>A token naming no submodule selected NOTHING; the run reported
+<code>0 advanced, 0 already current, 0 rejected/failed</code>, wrote
+zero records, and exited 0 — indistinguishable from a clean run. That is
+the vacuous-pass family this repository has around fifty recorded
+instances of. Unmatched tokens are now exit 2 with the present submodule
+set printed. The summary also gained a separate
+<code>N submodule(s) examined</code> line, and a run that examined zero
+submodules is refused outright. The token list is additionally split
+with <code>read -ra</code> so it can no longer glob-expand against the
+caller's working directory.</td>
+</tr>
+<tr>
+<td><strong>The governance refusal's default reason made a specific
+claim</strong></td>
+<td>It asserted a fact about the absence of operator decisions
+<em>anywhere on record</em> — a claim that goes false the moment an
+operator authorizes a submodule without that table being updated, which
+is precisely the confidently-wrong drift its own comment says the
+default exists to avoid. It was already at its edge: of the seven
+submodules that arm fires for, <code>panoptic</code> does appear once in
+root <code>CLAUDE.md</code>, inside a §6.L historical narrative rather
+than a pin-policy decision. It now states only what is true by
+construction — the submodule is absent from
+<code>GOVERNANCE_ALLOW</code> — while still pointing at where an
+authorization would have to be recorded. The other two arms were
+verified byte-accurate against root <code>CLAUDE.md</code> and are
+unchanged.</td>
+</tr>
+<tr>
+<td><strong><code>ADVANCED_COUNT</code> counted a submodule whose record
+failed to write</strong> (nit)</td>
+<td>A single submodule was reported as both <code>1 advanced</code> and
+<code>1 rejected/failed</code>. The counter now moves only when the
+record really landed.</td>
+</tr>
+<tr>
+<td><strong><code>git submodule status 2&gt;&amp;1</code> merged stderr
+into the parsed stream</strong> (nit)</td>
+<td>A diagnostic emitted on a <em>successful</em> run could be parsed as
+a submodule path. The two streams are now captured separately.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="disclosed-residual-gaps--real-and-not-closed-here">Disclosed
+residual gaps — real, and NOT closed here</h3>
+<ol type="1">
+<li><p><strong>Condition (C) does not classify filesystem-path
+remotes.</strong> A remote URL that names no network host
+(<code>/path/to/repo.git</code>, <code>./relative</code>,
+<code>file://…</code>) is classified <code>LOCAL_PATH</code> and
+permitted. The reasoning: there is no third party to receive an
+unattended publish, and it is the only remote shape a hermetic fixture
+can have — a suite that cannot reach the push path cannot prove the push
+path is safe. <code>insteadOf</code> URL masking was tried as a way to
+give fixtures own-org-shaped URLs and make the check strict; it does not
+work, because <code>git remote get-url</code> returns the
+<strong>rewritten</strong> URL. So a local scratch mirror configured
+inside a submodule clone would still be pushed to. No real Lava
+submodule has such a remote today, and the condition-(C) check would
+catch any network-hosted one.</p></li>
+<li><p><strong>Never yet run against a real submodule upstream.</strong>
+Unchanged from the 2026-08-22 audit. Every finding in this document came
+from disposable local fixtures, which cannot reproduce authentication
+prompts, server-side hooks on GitHub/GitLab, or <code>ls-remote</code>
+against a host that redirects.</p></li>
+<li><p><strong>Step 6 still publishes the operator's pre-existing
+untracked files.</strong> See open item 3 above — narrowed twice (path
+set, then content) but the underlying reviewer decision about untracked
+files and §6.H is still open.</p></li>
+</ol>
+<h3
+id="condition-c-measured-against-this-repository-read-only-2026-08-26">Condition
+(C) measured against this repository (read-only, 2026-08-26)</h3>
+<p>Classifying every configured remote of all 25 registered submodules
+with the script's own <code>_remote_url_class</code>, without contacting
+anything:</p>
+<ul>
+<li><strong>23 of 25 submodules are entirely
+<code>OWN_ORG</code></strong>, including <code>submodules/helixqa</code>
+— the only submodule <code>GOVERNANCE_ALLOW</code> permits — so the new
+scope check does not block the one advance this pipeline may actually
+perform today.</li>
+<li><strong><code>superspec</code>'s <code>origin</code> classifies
+FOREIGN</strong>: it is on GitHub but under an org that is neither
+<code>vasic-digital</code> nor <code>HelixDevelopment</code>.</li>
+<li><strong><code>constitution</code> carries four FOREIGN
+remotes</strong>: two on GitFlic, one on GitVerse, and a GitLab remote
+under a foreign org. Three of those are the §6.AD.1 carve-out —
+HelixConstitution is HelixDevelopment-owned and ships its own 4-upstream
+<code>install_upstreams.sh</code>, which §6.W scopes to <em>within</em>
+that submodule's git-dir rather than to the parent.</li>
+</ul>
+<p>Neither submodule ever reaches the condition-(C) check: both are
+refused by the governance allow-list first, which runs before the fetch,
+before the scope check, and before anything else. Condition (B) —
+<code>constitution</code> excluded by a default deny that requires a
+code change to override — is satisfied by construction.</p>
+<p>Also confirmed read-only: all 25 submodules currently show a leading
+space in <code>git submodule status</code>, i.e. HEAD equals the parent
+index gitlink for every one. The new HEAD-vs-pin refusal therefore fires
+on none of them today. That is what made BLOCKER-1 <em>latent</em>
+rather than active: a single <code>git checkout</code> inside any
+submodule, or one unrestored run, arms it.</p>
+<h3 id="falsifiability-rehearsals-6j-2026-08-26">Falsifiability
+rehearsals (§6.J, 2026-08-26)</h3>
+<p>Each fix was reverted <strong>alone</strong>, the suite re-run, the
+verbatim failure captured, the fix restored, and the script proven
+byte-identical to its pre-mutation state by sha256. Every rehearsal
+ended with the suite back at 0 failures.</p>
+<table>
+<thead>
+<tr>
+<th>Fix reverted</th>
+<th>First failure, verbatim</th>
+<th>Failing assertions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B1 — pin from the parent index</td>
+<td><code>FAIL: T1: exit code (0 would certify a dropped pin) expected to differ from '0' but was identical</code></td>
+<td>10</td>
+</tr>
+<tr>
+<td>B2 — verify-step content check</td>
+<td><code>FAIL: T2a: exit code (0 would certify a publish of the build's bytes) expected to differ from '0' but was identical</code></td>
+<td>10</td>
+</tr>
+<tr>
+<td>B3 — run-id validation + positional</td>
+<td><code>FAIL: T3a: exit code (2 = configuration error, nothing attempted) expected '2', got '0'</code></td>
+<td>8</td>
+</tr>
+<tr>
+<td>Condition (C) scope check</td>
+<td><code>FAIL: T4(foreign-host): outcome names its own cause expected 'REFUSED_FOREIGN_UPSTREAM', got 'FAILED_PRECONDITION'</code></td>
+<td>3</td>
+</tr>
+<tr>
+<td>Zero-iteration push loop</td>
+<td><code>FAIL: T5: exit code (0 would certify an unpublished pin) expected to differ from '0' but was identical</code></td>
+<td>5</td>
+</tr>
+<tr>
+<td>Allow-list token validation</td>
+<td><code>FAIL: T6: run output does not contain 'no submodule for'</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td>Governance refusal default arm</td>
+<td><code>FAIL: case6(panoptic): refusal did not state the reason for its class.</code></td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>Two of these deserve a note rather than a bare number. Reverting the
+allow-list token validation produced only <strong>one</strong> failing
+assertion because the run then falls through to the independent
+<code>EXAMINED_COUNT == 0</code> guard, which also exits 2 — the two
+guards are genuine defence in depth, and the message assertion is what
+discriminates between them. Reverting the condition-(C) check produced
+three, all on the outcome value, because the fetch to the unreachable
+foreign remote then fails anyway; the exit code and the untouched pin
+are the <em>same</em> either way, so only the recorded cause tells the
+two apart.</p>
+<h2 id="2026-08-26-t054-re-review--the-second-round">2026-08-26 T054
+re-review — the second round</h2>
+<p>The re-review re-proved all three blockers closed from its own
+fixtures and returned <strong>APPROVE WITH FIXES</strong>, with five
+further items. All five are closed here, each reproduced against a
+disposable fixture first and each covered by a regression case in
+<code>tests/pipeline/test_advance_all_submodules_t054.sh</code> (cases
+T8–T16) that goes red when its fix alone is reverted.</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Was</th>
+<th>Now</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The safe-operating precondition</td>
+<td>Unchecked and unstated. A stray <code>.notes.swp</code> was
+committed and published to another repository's default branch, exit 0,
+<code>ADVANCED</code>.</td>
+<td>Checked and stated. Unclean tree ⇒ <code>FAILED_PRECONDITION</code>
+unless <code>--publish-local-modifications</code>.</td>
+</tr>
+<tr>
+<td>Mode-only change by the build</td>
+<td><code>chmod 755</code> on an operator's untracked file published
+<code>100755</code> upstream, exit 0, <code>ADVANCED</code>.</td>
+<td>Refused. The comparison is a <code>write-tree</code> over what
+<code>git add</code> would record, and the per-path description carries
+the mode.</td>
+</tr>
+<tr>
+<td>Nested submodule gitlink</td>
+<td>Any directory answered <code>directory</code>, so a build moving a
+nested submodule's HEAD published the build's gitlink.
+<code>submodules/helixqa</code> declares <strong>27</strong> nested
+submodules.</td>
+<td>Refused. A directory that is its own work-tree root is described by
+that tree's HEAD, and the <code>write-tree</code> comparison covers
+gitlinks by construction.</td>
+</tr>
+<tr>
+<td>Condition-(C) scope gate</td>
+<td>Passed having examined <strong>zero</strong> remotes (proven with a
+<code>PATH</code> shim); the run then fetched, advanced and staged.</td>
+<td>Asserts at least one remote was read, mirroring the guard the push
+loop already had.</td>
+</tr>
+<tr>
+<td>Refusal honesty</td>
+<td>Claimed "both versions are left on disk" and printed a
+<code>blob:&lt;sha&gt;</code> that named an object stored nowhere.</td>
+<td>The blob is written at capture time, so the sha resolves; the
+message distinguishes what is recoverable from what is not.</td>
+</tr>
+<tr>
+<td><code>LOCAL_PATH</code> remotes</td>
+<td>Permitted in production. An unauthorised same-filesystem repository
+received the operator's work, exit 0, <code>ADVANCED</code>.</td>
+<td>Refused unless <code>--allow-local-path-remotes</code>. Measured:
+<strong>zero</strong> <code>LOCAL_PATH</code> remotes exist across all
+25 submodules, so closing it costs production nothing.</td>
+</tr>
+<tr>
+<td>Run id <code>.</code> / <code>..</code></td>
+<td>Accepted; relocated the run's records out of its run directory.</td>
+<td>Exit 2, nothing attempted.</td>
+</tr>
+<tr>
+<td>Submodule staging failure</td>
+<td>Recorded <code>REJECTED_PUSH_CONFLICT</code> — a push that is never
+attempted on that path.</td>
+<td>Records <code>REJECTED_SUBMODULE_STAGING_FAILED</code> (new enum
+value).</td>
+</tr>
+<tr>
+<td>Allow-list keyed on path basename</td>
+<td><code>vendor/x/helixqa</code> pointing anywhere was advanced.</td>
+<td>Path basename <strong>and</strong> every own-org upstream's
+repository name must be allowed — conjunctive, not a replacement.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="two-honest-residuals">Two honest residuals</h3>
+<ol type="1">
+<li><strong>The recovery handle has two providers.</strong> Reverting
+the <code>hash-object -w</code> alone leaves the suite green, because
+<code>_captured_tree</code>'s own <code>git add</code> writes the same
+blob into the same object database as a side effect (measured: a blob
+absent from the object DB before a run is present after a bare
+<code>_captured_tree</code> call). The <code>-w</code> stays because it
+is the <em>explicit</em> provider — a guarantee that depends on another
+function's side effect is a coincidence that has not broken yet, not a
+guarantee. The <em>message</em> half of the fix is singly discriminated
+and does go red on its own.</li>
+<li><strong>The content guard is deliberately redundant.</strong> Either
+the extended per-path description <em>or</em> the
+<code>write-tree</code> comparison catches the mode and gitlink cases
+alone; both had to be reverted together to turn T9/T10 red. That is
+defence in depth rather than a gap, and it is recorded here so a future
+reader does not mistake the surviving single-mutation for a missing
+test.</li>
+</ol>
+<h2 id="2026-08-26-t054-round-3-review--the-third-round">2026-08-26 T054
+round-3 review — the third round</h2>
+<p>The round-3 review re-proved all six round-2 fixes from its own
+fixtures and returned <strong>APPROVE WITH FIXES</strong>, with six more
+items. All six are closed here, plus <strong>four further escapes of the
+same class</strong> that the hunt for a fourth turned up. Every one was
+reproduced against a disposable <code>mktemp -d</code> fixture BEFORE
+its fix, and every one has a regression case in
+<code>tests/pipeline/test_advance_all_submodules_t054.sh</code>
+(T17–T26) that goes red when its fix alone is reverted.</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Was</th>
+<th>Now</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R3-F2 — condition (C) classified the FETCH url</td>
+<td><code>remote.origin.pushurl</code> sent the operator's work to a
+repository the scope check never examined, exit 0,
+<code>ADVANCED</code>; and a <code>pushInsteadOf</code> rewrite made the
+run genuinely attempt to contact a host the classifier calls
+FOREIGN.</td>
+<td>Four URL forms classified, push destinations included, and the
+certification re-taken immediately before each push.</td>
+</tr>
+<tr>
+<td>R3-F1 — the commit was not scoped (3rd escape)</td>
+<td>A verify command that ran <code>git add build-leak.txt</code>
+published it: <code>git commit</code> takes the whole index, not the
+staged paths.</td>
+<td>The index must equal <code>HEAD</code> before staging, the commit is
+<code>--only -- &lt;audited paths&gt;</code>, and the finished commit is
+compared against the fetched upstream commit.</td>
+</tr>
+<tr>
+<td><strong>ESC-4 — <code>HEAD</code> moved by the build (4th
+escape)</strong></td>
+<td>A verify command that COMMITTED its own output published that commit
+as the carry-forward commit's parent. Scoping the commit does not help —
+the content is in the parent, hence in the tree.</td>
+<td><code>HEAD</code> must still equal the fetched commit before
+anything is staged.</td>
+</tr>
+<tr>
+<td><strong>ESC-5 — a remote added AFTER the scan (5th
+escape)</strong></td>
+<td><code>git remote add rogue &lt;repo&gt;</code> inside the verify
+command; the never-examined repository received the work, exit 0,
+<code>ADVANCED</code>.</td>
+<td>Push destinations are re-classified at push time, with a
+zero-destination floor.</td>
+</tr>
+<tr>
+<td><strong>ESC-6 — a pre-commit hook inside the submodule (6th
+escape)</strong></td>
+<td>Measured: under <code>git commit --only</code> git hands the hook a
+temporary index, and a hook running <code>git add</code> has its file
+land in the commit git builds.</td>
+<td>The finished commit's diff against the fetched upstream commit must
+lie entirely inside the audited path set.</td>
+</tr>
+<tr>
+<td><strong>ESC-7 — <code>push.followTags</code> (7th
+escape)</strong></td>
+<td>A build-created annotated tag reached the upstream, exit 0,
+<code>ADVANCED</code>. A tag is a ref another repository now carries,
+and §6.T.3 forbids taking it back.</td>
+<td><code>--no-follow-tags --recurse-submodules=no</code> on every
+push.</td>
+</tr>
+<tr>
+<td>R3-F3 — the argv-only property was asserted, not checked</td>
+<td><code>BASH_ENV</code> carrying
+<code>declare -r PUBLISH_LOCAL_MODS=true</code> made the script's own
+reset fail silently under <code>set +e</code>; the run published, exited
+0, and <strong>printed "--publish-local-modifications was given" when
+argv gave no such flag</strong>.</td>
+<td>The reset's exit status is checked and the final values are compared
+against argv. Either disagreeing is exit 2, nothing attempted.</td>
+</tr>
+<tr>
+<td>R3-F4 — the identity gate had no zero-item floor</td>
+<td>Zero iterations read as "every upstream names an authorized
+repository"; an unparseable own-org name was skipped rather than
+refused.</td>
+<td>Floored, with <code>LOCAL_PATH</code> remotes counted explicitly so
+a nameless certification is <strong>stated</strong> rather than silent;
+an unreadable name refuses.</td>
+</tr>
+<tr>
+<td>R3-F5 — the scan's comment overclaimed</td>
+<td>It called the effective fetch URL "what git will actually contact",
+which the <code>pushurl</code> proof contradicts.</td>
+<td>The comment now enumerates all four forms and says what each one
+is.</td>
+</tr>
+<tr>
+<td>R3-F6 — attribute divergence reads as a mutation</td>
+<td>An upstream commit introducing <code>text=auto</code> changes the
+staged tree id for byte-identical content, producing a
+<code>REJECTED_VERIFY_MUTATED_LOCAL_WORK</code> refusal with nothing to
+say the cause might not be a mutation.</td>
+<td>The refusal is kept (it is the safe direction) and now names
+attribute divergence as a candidate <strong>only when the two commits
+genuinely differ in an attribute file</strong>, so it cannot become a
+routine excuse.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-round-2-residual-closed">The round-2 residual, closed</h3>
+<p>The round-2 report disclosed that reverting
+<code>hash-object -w</code> alone left the suite green, because
+<code>_captured_tree</code>'s own <code>git add</code> writes the same
+blob as a side effect. The round-3 review confirmed that diagnosis holds
+<strong>but does not generalize</strong>: under a text attribute the two
+providers write <em>different</em> objects — <code>--no-filters</code>
+stores the raw bytes, <code>git add</code> the normalized ones — and the
+sha the refusal prints is the raw one, so <code>-w</code> is then the
+sole provider. T12's fixture now carries
+<code>*.txt text=auto eol=lf</code> and a CRLF file, and asserts the two
+blob ids differ before asserting the handle resolves. Reverting
+<code>-w</code> alone now fails with
+<code>the printed sha IS a recovery handle for the operator's bytes expected 'OPERATOR SECRET NOTE', got '&lt;NOT IN THE OBJECT DATABASE&gt;'</code>.</p>
+<h3 id="honest-residuals-from-this-round">Honest residuals from this
+round</h3>
+<ol type="1">
+<li><strong>A refusal after the commit can leave the submodule
+unrestored.</strong> When a pre-commit hook has staged a file,
+<code>restore_pin</code>'s <code>git checkout --detach</code> is refused
+(<code>untracked working tree files would be removed</code>), so the
+submodule stays on the rejected commit. Nothing is published and the run
+says so loudly —
+<code>THESE SUBMODULES ARE LEFT ON A REJECTED COMMIT</code> — and the
+discarded commit is preserved under
+<code>refs/lava-advance-rescue/</code>. It is not forced:
+<code>checkout -f</code> is the flag family this script refuses on
+principle.</li>
+<li><strong><code>git commit --only</code> is not sufficient by itself,
+and is not claimed to be.</strong> Measured on a fixture, a pre-commit
+hook's <code>git add</code> lands in the commit git builds under
+<code>--only</code>. What closes that is the comparison of the finished
+commit against the fetched upstream commit — a guard written against the
+published artefact rather than against an enumeration of the ways in,
+which is deliberate after three consecutive reviews each found one more
+way in.</li>
+<li><strong><code>&lt;own-org&gt;/&lt;anything&gt;/&lt;allowed-name&gt;</code>
+still matches the identity check</strong>, which compares the URL's last
+path segment. Unchanged from round 2, where it was recorded as needing a
+reviewed <code>.gitmodules</code> edit to exploit.</li>
+</ol>
+<h2
+id="2026-08-26-t054-round-4-review--the-fourth-round-and-the-end-of-the-enumeration-game">2026-08-26
+T054 round-4 review — the fourth round, and the end of the enumeration
+game</h2>
+<p>The round-4 review re-derived every round-3 conclusion from its own
+fixtures, verified all eleven round-3 fix items, and returned
+<strong>APPROVE WITH FIXES</strong> with ten more — including an
+<strong>eighth</strong> and a <strong>ninth</strong> publish escape.
+Fixing those turned up a <strong>tenth</strong>. All are closed here,
+each reproduced against a disposable <code>mktemp -d</code> fixture
+BEFORE its fix, each with a regression case (T27–T39) that goes red when
+its fix alone is reverted.</p>
+<h3 id="the-structural-finding-and-what-changed-because-of-it">The
+structural finding, and what changed because of it</h3>
+<p>The reviewer's diagnosis is the most useful sentence in four rounds
+of review:</p>
+<blockquote>
+<p>the post-commit invariant is a TREE diff, read through the repository
+the adversary controls, while <code>git push</code> transmits HISTORY
+from the true objects.</p>
+</blockquote>
+<p>Round 3 had already tried to stop enumerating routes by measuring the
+published artefact. It was still defeated twice, because the
+<em>measurement</em> was the weak part, not the <em>strategy</em>. What
+is measured now is what a transfer actually carries, read through a view
+the submodule cannot rewrite:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>question</th>
+<th>instrument</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PARENTAGE</strong></td>
+<td>is this one commit on the fetched upstream commit?</td>
+<td><code>rev-list --parents -n1</code> must equal
+<code>&lt;final&gt; &lt;new&gt;</code></td>
+</tr>
+<tr>
+<td><strong>HISTORY</strong></td>
+<td>which COMMITS would the transfer carry?</td>
+<td><code>rev-list &lt;final&gt; --not &lt;new&gt;</code> must be
+exactly <code>&lt;final&gt;</code></td>
+</tr>
+<tr>
+<td><strong>OBJECTS</strong></td>
+<td>which OBJECTS would the transfer carry?</td>
+<td><code>rev-list --objects &lt;final&gt; --not &lt;new&gt;</code>;
+every path-bearing entry must be an audited path, something under one,
+or a directory on the way to one</td>
+</tr>
+<tr>
+<td><strong>TREE</strong></td>
+<td>which PATHS differ?</td>
+<td><code>diff --name-only</code> — kept because object enumeration has
+its own blind spot: a blob whose content already exists upstream is not
+transferred, so a new path with duplicate content, and a
+<strong>mode-only</strong> change, are named by the tree and not by the
+object list</td>
+</tr>
+<tr>
+<td><strong>MESSAGE</strong></td>
+<td>is the published message the one this run wrote?</td>
+<td><code>log -1 --format=%B</code> compared against a repeated
+literal</td>
+</tr>
+</tbody>
+</table>
+<p>Every one of those reads goes through
+<strong><code>gith</code></strong> —
+<code>git --no-replace-objects -c core.commitGraph=false</code> — which
+removes the two mappings the submodule's own repository can rewrite
+underneath a guard: <code>refs/replace/*</code> (substitutes objects on
+READ while the transfer sends the real ones) and the commit-graph cache
+(a hand-authorable cache of the DAG that git trusts without verifying).
+And because "the reader ignores replace refs" is itself a claim, the
+script <strong>proves it</strong> on a throwaway repository before
+touching any submodule, and exits 2 if it cannot.</p>
+<p>The push refspec's source is now the <strong>immutable object
+id</strong>, never <code>HEAD</code>.</p>
+<h3 id="the-ten-escapes-and-the-four-items-that-are-not-escapes">The ten
+escapes, and the four items that are not escapes</h3>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Was</th>
+<th>Now</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>R4-F1 — 8th escape: a fabricated MERGE</strong></td>
+<td>A <code>post-commit</code> hook re-points HEAD at a
+<code>commit-tree</code> merge whose tree is
+<strong>byte-identical</strong> to the honest commit's. The tree diff
+saw <code>operator.txt</code>; the transfer carried a fabricated root
+commit and a credential-dump blob onto the upstream's default branch.
+<code>EXIT=0</code>, <code>ADVANCED</code>.</td>
+<td>PARENTAGE + HISTORY: the finished commit must have exactly one
+parent, it must be the fetched upstream commit, and the transfer must
+carry exactly one commit.</td>
+</tr>
+<tr>
+<td><strong>R4-F2 — 9th escape: <code>refs/replace/</code></strong></td>
+<td>A <code>post-commit</code> hook publishes
+<code>refs/replace/&lt;final&gt;</code> pointing at a benign commit.
+Every guard read the benign object; the push sent the real one, and
+<code>leak.txt</code> (a credential dump) landed <strong>in the upstream
+default branch's TREE</strong>. <code>EXIT=0</code>,
+<code>ADVANCED</code>.</td>
+<td>Every gating read goes through <code>gith</code>, whose behaviour is
+self-tested before use.</td>
+</tr>
+<tr>
+<td><strong>TENTH escape: <code>HEAD</code> in the push
+refspec</strong></td>
+<td>The refspec was <code>HEAD:refs/heads/&lt;branch&gt;</code>.
+<code>HEAD</code> is a <strong>mutable reference</strong> git resolves
+at transfer time, after every guard finished. A <code>pre-push</code>
+hook fires inside the FIRST mirror's push and moves it; the second
+mirror received a different commit. §6.W mandates two mirrors, so this
+is the production shape. Observed: <code>EXIT=0</code>,
+<code>ADVANCED</code>, <code>PREPUSH-LEAK.txt</code> on one mirror, the
+honest commit on the other (a §6.C divergence reported as success), and
+the <strong>parent pin staged at a commit the record does not
+name</strong>.</td>
+<td>The refspec source is <code>$final_commit</code>. The submodule's
+HEAD must still equal it before the parent pin is staged, and the staged
+gitlink is <strong>read back</strong> and compared afterwards.</td>
+</tr>
+<tr>
+<td>R4-F3 — a replace ref inverts the fast-forward guard</td>
+<td><code>merge-base --is-ancestor</code> answers from the object graph,
+so a graft-style replace ref made an unrelated root report as an
+ancestor — dropping deliberately-pinned side-branch work, the one thing
+that guard exists to prevent.</td>
+<td>Read through <code>gith</code>.</td>
+</tr>
+<tr>
+<td>R4-F4 — the push-time re-check re-took half a certification</td>
+<td>It called <code>_remote_url_class</code> and nothing else, so an
+own-org repository nobody authorized passed it and the run
+<strong>genuinely attempted the push</strong>; only the fixture's
+blocked transport stopped it.</td>
+<td>The push-time re-check now re-takes IDENTITY as well as SCOPE.</td>
+</tr>
+<tr>
+<td>R4-F5 — the commit MESSAGE was published unexamined</td>
+<td>A <code>commit-msg</code> hook rewrote it and
+<code>chore: carried forward | LEAKED-VIA-COMMIT-MESSAGE</code> reached
+another repository's default branch. The invariant is
+<code>--name-only</code>.</td>
+<td>The finished commit's <code>%B</code> must equal the literal this
+run passed.</td>
+</tr>
+<tr>
+<td>R4-F6 — <code>GOVERNANCE_ALLOW</code> was the unchecked
+assignment</td>
+<td>R3-F3 hardened the two safety switches on an honesty argument and
+left the <strong>stronger</strong> boundary unhardened.
+<code>BASH_ENV</code> widening it <strong>advanced
+<code>constitution</code></strong> — exit 0, no diagnostic.
+<code>BASH_ENV</code> is set on the operator's host, and
+<code>constitution/origin</code> carries six push URLs, two on
+§6.W-forbidden providers.</td>
+<td>The assignment's status is checked and its value compared to the
+literal; so are the three identity functions, on known inputs, because
+<code>readonly -f</code> is the same channel.</td>
+</tr>
+<tr>
+<td>R4-F7 — a record naming a cause nobody observed</td>
+<td><code>git commit</code> refusing (reachable via a
+<code>.git/MERGE_HEAD</code> the build writes) was recorded
+<code>REJECTED_PUSH_CONFLICT</code> with <strong>zero pushes
+attempted</strong>.</td>
+<td>New enum value <code>REJECTED_SUBMODULE_COMMIT_FAILED</code>.</td>
+</tr>
+<tr>
+<td>R4-F8 — a permanent FALSE refusal</td>
+<td><code>git status --porcelain -uall</code> names an untracked nested
+git repository <code>nested/</code>; <code>git diff</code> names it
+<code>nested</code>. The audit compared the two unequal forms, so that
+shape could never be carried forward.</td>
+<td>Both sides have any trailing slash trimmed.</td>
+</tr>
+<tr>
+<td>R4-F9 — one destination reported twice</td>
+<td><code>_push_destinations_in_scope</code> lacked the de-duplication
+the pre-fetch scan has, so a refusal overstated how many destinations
+were out of scope.</td>
+<td>De-duplicated.</td>
+</tr>
+<tr>
+<td>R4-F10 — the anti-vacuity floor was itself vacuous</td>
+<td><code>R3_ESCAPES_EXAMINED</code> and <code>CASES_RUN</code> counted
+case <strong>entry</strong>. The reviewer gutted all six of T18's
+assertions and the suite still reported <em>"examined 6 routes / 48
+cases / ALL CASES PASSED"</em>, exit 0.</td>
+<td>Every assertion is counted where it executes; each escape case must
+assert a real minimum inside its own window; and the suite carries a
+total-assertions floor. The same mutation now fails on three
+counts.</td>
+</tr>
+<tr>
+<td>Residual 3 — identity on a substring</td>
+<td><code>_remote_repo_name</code> took the URL's last path segment, so
+<code>vasic-digital/sub/helixqa</code> passed the identity gate.
+Measured: all 25 own-org URLs in this repository are flat
+<code>&lt;org&gt;/&lt;repo&gt;</code>.</td>
+<td>Exactly two components, or the name is unreadable — and unreadable
+refuses.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="hunted-and-found-closed-in-the-same-pass">Hunted and found
+closed, in the same pass</h3>
+<p>Four further transmission routes were probed on disposable fixtures
+and none opened: <code>refs/notes</code> created by the build with a
+matching <code>remote.&lt;n&gt;.push</code> refspec (the explicit
+refspec wins; no note ref reached the upstream);
+<code>remote.&lt;n&gt;.mirror = true</code> (the push is refused
+outright — an unrelated branch and tag on the upstream survived
+untouched); an <code>objects/info/alternates</code> donor repository
+(nothing of the donor's reached the upstream, and the honest path still
+advanced); and a benign <code>commit-graph</code> (does not break the
+honest path, and is ignored where it would gate a decision).</p>
+<h3 id="honest-residuals-from-this-round-1">Honest residuals from this
+round</h3>
+<ol type="1">
+<li><strong>Exit 1 is sticky.</strong> Assessed by the reviewer as
+<em>acceptable</em> — nothing is published, the pin is untouched, a
+rescue ref preserves the discarded work, the summary is loud, and the
+next run refuses rather than mistaking the leftover for a clean start.
+It is recorded under <strong>Exit codes</strong> above because the
+consequence belongs to the caller: T055 must page a human, never
+retry.</li>
+<li><strong>A refusal after a successful publish is still a
+refusal.</strong> When the carry-forward commit was audited and pushed,
+and only the <em>pin</em> check then fails (the tenth escape's shape),
+the commit is legitimately on the mirrors and the run reports
+<code>REJECTED_PARENT_STAGING_FAILED</code>. That is correct — the
+published content passed every guard; what failed was recording it — but
+the operator sees a failed run whose upstreams did move.</li>
+<li><strong>The blind spots of each measurement are covered by another,
+not by one complete instrument.</strong> Object enumeration cannot see a
+duplicate-content blob at a new path or a mode-only change; the tree
+diff cannot see history. Both run; neither is claimed to be sufficient
+alone.</li>
+</ol>
+<h2
+id="2026-08-26-t054-round-5-review--the-two-findings-outside-the-flag-boundary">2026-08-26
+T054 round-5 review — the two findings outside the flag boundary</h2>
+<p>Rounds 1–4 all ended inside
+<code>--publish-local-modifications</code>. <strong>Round 5 is the first
+whose findings fire on the DEFAULT, flagless invocation</strong>, and
+neither of them publishes anything: one <em>writes into a repository
+nobody named</em>, the other <em>reaches a verdict having examined
+nothing</em>. Both were reproduced on disposable <code>mktemp -d</code>
+fixtures before being fixed, and each fix was reverted afterwards to
+confirm the new tests fail without it.</p>
+<p>The review's third finding — the eleventh publish escape, the commit
+object's own header bytes — is <strong>deliberately NOT addressed
+here</strong>, because the operator is separately deciding whether to
+remove <code>--publish-local-modifications</code> altogether, which
+would moot it along with the whole publish path.</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>what it was</th>
+<th>now</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>R5-F2</strong></td>
+<td><strong>The round-4 reader self-test wrote into whatever
+<code>GIT_DIR</code> named.</strong>
+<code>git init --template=&lt;empty&gt; "$_selftest_dir"</code> was
+isolated from <code>init.templateDir</code> and
+<code>core.hooksPath</code> — and not from git's own environment, which
+decides <em>which repository it initialises at all</em>. With
+<code>GIT_DIR</code> inherited and <strong>no flags given</strong>:
+<code>EXIT=0</code>, two commits created in a repository the caller
+never mentioned, its branch tip moved off the operator's work, its index
+left dirty with a <code>decoy.txt</code> absent from its worktree, and
+<strong>a <code>refs/replace/*</code> ref installed and left
+behind</strong> — the ninth escape's own instrument, planted by the
+guard written to close the ninth escape. Measured:
+<code>git submodule foreach</code> exports <code>GIT_DIR</code>; every
+commit-time hook exports <code>GIT_INDEX_FILE</code>.</td>
+<td>The ambient git environment is <strong>removed at the top of the
+script and the removal is PROVEN</strong> — <code>unset</code> is an
+assignment, and a <code>declare -r</code> in <code>BASH_ENV</code>
+defeats an assignment silently under <code>set +e</code>, exactly as the
+switch-reset check already knows. A surviving name is exit 2 before any
+git command runs. The self-test additionally runs inside <strong>one
+subshell</strong> that removes them again (<code>git init</code>
+included, since that is the call <code>GIT_DIR</code> redirected) and
+asserts <code>git rev-parse --show-toplevel</code> really is its own
+throwaway directory.</td>
+</tr>
+<tr>
+<td><strong>R5-F3</strong></td>
+<td><strong><code>"has no submodules — nothing to do"</code> exited 0
+with zero records</strong> without ever consulting
+<code>.gitmodules</code>. The enumeration comes from
+<code>git submodule status</code>, which reads the INDEX.</td>
+<td><code>.gitmodules</code> is now read <strong>as a file, with
+<code>sed</code>, never through git</strong> — a second, independent
+authority, because reading it through the same git would make the
+cross-check agree with itself by construction. Every declared path must
+appear in the enumeration or the run is exit 2 with nothing
+attempted.</td>
+</tr>
+<tr>
+<td><strong>R5-F3′</strong> (found while fixing R5-F3)</td>
+<td><strong>The zero case is the loudest projection of the defect, not
+the defect.</strong> A floor that fires at exactly zero is a floor with
+one stair. With one gitlink of two dropped from the index — no
+environment variable at all, just <code>git rm --cached</code> — the run
+reported <code>EXIT=0</code>, <code>1 submodule(s) examined</code>,
+<code>0 rejected/failed</code>: a clean verdict over a corpus that lost
+half its members, never naming the one it did not look at.</td>
+<td>The floor is stated over the <strong>SET</strong>, not over its
+size.</td>
+</tr>
+<tr>
+<td><strong>R5-F3″</strong> (found by attacking the fix above)</td>
+<td><strong>The new floor fired correctly on a submodule path containing
+a space, and then misstated why.</strong>
+<code>git submodule status</code> prints
+<code>&lt;sha&gt; &lt;path&gt; (&lt;describe&gt;)</code> and the
+enumeration splits on whitespace, so <code>submodules/helix qa</code>
+truncates to <code>submodules/helix</code> — a <em>different</em> path
+every later step would have operated on. The refusal blamed a missing
+gitlink for a gitlink that was present. Safe, and wrong; by this file's
+own standard a refusal that misstates its own cause is a small
+bluff.</td>
+<td>The three causes that reach this state are now distinguished and the
+truncation one is named for what it is.</td>
+</tr>
+<tr>
+<td><strong>R5-F2′</strong> (found by rehearsing the R5-F2 fix)</td>
+<td><strong>A pre-existing false refusal on a third axis nobody had
+checked.</strong> The self-test states its ident with two
+<code>git config user.*</code> calls, and <code>GIT_AUTHOR_*</code> /
+<code>GIT_COMMITTER_*</code> silently override config. Against the
+pristine round-4 script: <code>GIT_AUTHOR_DATE=not-a-date</code> →
+<code>EXIT=2</code>; <code>GIT_COMMITTER_NAME=</code> →
+<code>EXIT=2</code>, both with <em>"the hardened object reader could not
+be PROVEN to ignore <code>refs/replace/*</code>"</em>. git rejects both
+outright, so the self-test's <code>git commit</code> failed and the run
+refused — the pipeline blocked on a guard that was working perfectly.
+Same defect class as the one the <code>--template=</code> isolation was
+added to avoid, in the same direction.</td>
+<td>Those six names are removed <strong>inside the self-test's subshell
+only</strong>. They are deliberately left alone at the top of the
+script: they decide the ident bytes of the commit R-005 step 6
+publishes, which is publish-path behaviour and the subject of the open
+decision above. Changing it there would be making that decision
+silently.</td>
+</tr>
+<tr>
+<td><strong>R5-F4</strong> (the twelfth, found by looking for one)</td>
+<td><strong>The summary did not account for every submodule it said it
+examined.</strong> A governance-refused submodule landed in no bucket,
+so <code>0 advanced, 0 already current, 0 rejected/failed</code> was the
+summary of a run in which a submodule had been <em>refused</em> — the
+same text as a run in which everything was already current. And the
+per-submodule line said <em>"NOT advancing, and NOT examined"</em> while
+the summary counted that same submodule among the <em>"N submodule(s)
+examined"</em>: two lines flatly contradicting each other.</td>
+<td>Governance refusals are their own reported bucket, the per-submodule
+line says what did and did not happen, and the script asserts before
+exiting that the buckets account for every submodule it examined.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="what-was-deliberately-not-changed-and-why">What was deliberately
+NOT changed, and why</h3>
+<ul>
+<li><strong>The eleventh publish escape (commit-object header
+bytes)</strong> — <strong>RESOLVED 2026-08-26 by removal, not by a
+guard.</strong> <code>--publish-local-modifications</code> and R-005
+step 6 were deleted; the escape lived in the commit this script no
+longer makes. See "R-005 step 6 was removed" above.</li>
+<li><strong><code>GIT_AUTHOR_*</code> / <code>GIT_COMMITTER_*</code> at
+the top of the script</strong> — they used to decide the ident bytes of
+the step-6 commit. With no commit anywhere they decide nothing this
+script writes, and they are STILL left alone for a different and now the
+only reason: they are part of the environment the operator-supplied
+step-5 verify command inherits, and silently changing what a build sees
+is not a decision to take as a side effect. They remain neutralised
+inside the reader self-test's subshell, where that neutralisation is
+independently load-bearing (a malformed <code>GIT_AUTHOR_DATE</code>
+makes git reject the ident outright and used to turn the self-test into
+a false exit-2 refusal).</li>
+<li><strong><code>GIT_CONFIG_GLOBAL</code> /
+<code>GIT_CONFIG_SYSTEM</code> /
+<code>GIT_CONFIG_NOSYSTEM</code></strong> — these <em>narrow</em> which
+config git reads; a caller sets them to isolate a run from
+<code>~/.gitconfig</code>. Removing them would re-admit that config: a
+weakening dressed as hardening.</li>
+<li><strong><code>GIT_CEILING_DIRECTORIES</code> /
+<code>GIT_DISCOVERY_ACROSS_FILESYSTEM</code></strong> — these only stop
+repository discovery walking upwards. Removing them <em>widens</em> the
+walk, so a no-argument invocation could resolve an outer repository the
+operator meant to fence off. Constraining is not redirecting.</li>
+<li><strong><code>GIT_SSH_COMMAND</code> /
+<code>GIT_TERMINAL_PROMPT</code></strong> — safety controls the hermetic
+suites rely on to guarantee no fixture can open a connection.</li>
+<li><strong>The exit code for a governance refusal.</strong> It is
+<code>0</code> today and stays <code>0</code>;
+<code>tests/pipeline/test_advance_all_submodules.sh:423</code> asserts
+that explicitly. <strong>Assessed 2026-08-26 and deliberately
+kept</strong> — see "A path-level governance refusal is exit 0, on
+purpose" above for the asymmetry that makes it correct (the
+<em>dangerous</em> half of governance already exits 1) and for the
+residual that remains open. What WAS wrong was the script's own
+exit-code table, which claimed exit 0 meant "every submodule ended
+<code>ADVANCED</code> or <code>NO_NEWER_COMMIT</code>" — false on every
+run in which a path-level governance refusal occurs, which is every run.
+That statement is fixed; the behaviour and the sibling suite's assertion
+are untouched.</li>
+<li><strong>A third reading that has never been observed to
+fire.</strong> The empty-corpus claim consults the parent index's
+gitlinks as well. On git 2.50.1 that state does not reach the check:
+<code>git submodule status</code> refuses it first with
+<code>fatal: no submodule mapping found in .gitmodules for path '&lt;path&gt;'</code>
+and exit 128, which the enumeration's existing exit-status guard turns
+into exit 2. The reading stays as a backstop for an enumeration that
+answers 0 instead of 128, and is described as one — an unreachable guard
+advertised as a live one is itself a small bluff.</li>
+</ul>
+<h3 id="falsifiability-rehearsals">Falsifiability rehearsals</h3>
+<p>Each fix was reverted <strong>alone</strong>, the suite re-run, and
+the script restored and verified byte-identical by sha256:</p>
+<table>
+<thead>
+<tr>
+<th>mutation</th>
+<th>verbatim first failure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>top-level environment removal neutered</td>
+<td><code>FAIL: T40/GIT_DIR: the run still examined the submodule it was given does not contain '1 submodule(s) examined'</code></td>
+</tr>
+<tr>
+<td>the self-test's own removal neutered</td>
+<td><code>FAIL: T47/GIT_AUTHOR_DATE=not-a-date: exit code (a false refusal blocks the pipeline) expected '0', got '2'</code></td>
+</tr>
+<tr>
+<td>the <code>.gitmodules</code> corpus floor neutered</td>
+<td><code>FAIL: T42: exit code (a green verdict over an unexamined corpus) expected '2', got '0'</code></td>
+</tr>
+<tr>
+<td>the truncation diagnostic neutered</td>
+<td><code>FAIL: T48: the refusal names the cause that actually occurred does not contain 'declared WITH WHITESPACE'</code></td>
+</tr>
+<tr>
+<td>the governance bucket counter neutered</td>
+<td><code>FAIL: T45: exit code must not be the corpus refusal (2) expected to differ from '2' but was identical</code></td>
+</tr>
+</tbody>
+</table>
 <h2 id="maintenance">Maintenance</h2>
 <p>When this script is modified, update this document in the same commit
 (<code>CM-SCRIPT-DOCS-SYNC</code> requires it). Per §11.4.18 the
@@ -717,6 +2351,27 @@ itself</li>
 hermetic test suite (R-005 branches + governance deny)</li>
 <li><code>tests/pipeline/test_advance_all_submodules_hardening.sh</code>
 — the 2026-08-22 audit's failure-mode suite</li>
+<li><code>tests/pipeline/test_advance_all_submodules_blast_radius.sh</code>
+— the 2026-08-23 blast-radius audit's suite</li>
+<li><code>tests/pipeline/test_advance_all_submodules_t054.sh</code> —
+the 2026-08-26 T054 review's suite (74 cases: the three blockers,
+condition (C), condition (E), the vacuous passes, the re-review's five
+items and three nits, the round-3 review's six items and four escapes
+(T17–T26), the round-4 review's ten items plus the tenth escape
+(T27–T39), and the round-5 review's two flagless findings plus the four
+defects found while fixing them (T40–T49). <strong>After the 2026-08-26
+removal of R-005 step 6, every case that exercised the publish path was
+RETARGETED rather than deleted</strong> — each now asserts the route is
+unreachable (the upstream is byte-identical in refs <em>and</em> object
+count; the removed flag exits 2; an unclean tree refuses with no
+opt-in), and three gained a second half running the same adversarial
+payload against a CLEAN submodule where it genuinely executes and still
+cannot reach the upstream. It counts <strong>assertions
+executed</strong>, not cases entered; each guarded case must assert a
+real minimum inside its own window; and the suite-wide assertion floor
+is raised whenever cases are added — it went <strong>355 → 405</strong>
+across the removal, because a removal that only ever lowers the floor is
+a removal nobody is checking)</li>
 <li><code>specs/002-build-test-distribute-pipeline/research.md</code> —
 R-005 (the 7-step ordering this implements)</li>
 <li><code>specs/002-build-test-distribute-pipeline/data-model.md</code>

@@ -60,3 +60,29 @@ The call is **advisory / non-blocking** — a snapshot failure logs a warning bu
 
 - Inheritance: HelixConstitution §11.4.25 + §11.4.18 + §6.J/§6.L
 - Classification: project-specific (the Lava distribute-pipeline wiring is project-specific; the §11.4.25 per-release snapshot discipline is universal per HelixConstitution)
+
+## Snapshot name format guard (added 2026-08-27)
+
+The first positional argument is now validated against a `<version>-<code>`
+shape before it is used as a filename.
+
+### Why
+
+The script previously used only `${1:?...}`, which checks that the argument is
+non-empty and nothing more — so **any** string became a filename. A stray
+invocation carrying a flag produced a tracked file literally named
+`.lava-ci-evidence/coverage-ledger-snapshots/--check.yaml`, which was then
+committed. It was a verbatim copy of the ledger whose only difference was the
+inflated submodule count described in the generator's companion doc, it was
+referenced by no tracked file, and it was the *only* file in that directory —
+no legitimate snapshot had ever been taken there.
+
+The guard rejects `--check` (exit 2), an empty argument (exit 1) and traversal
+forms such as `../evil`; it accepts real identities like `1.3.17-1085`,
+`0.2.11-22` and `1.2.3-1023`. A rejected invocation writes no file at all.
+
+**Known residual, deliberately not changed here:** this script regenerates the
+tracked `docs/coverage-ledger.yaml` as a side effect and restores it only when
+it was clean beforehand. If the ledger is dirty mid-edit, in-progress work is
+silently overwritten. Changing that is a design decision, not a bug fix, so it
+is recorded rather than acted on.

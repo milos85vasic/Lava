@@ -17,7 +17,19 @@
 #   Case 1  no-newer-commit          -> NO_NEWER_COMMIT,           old == new, pin NOT updated
 #   Case 2  clean advance            -> ADVANCED,                  pin updated to upstream HEAD
 #   Case 3  breaking change detected -> REJECTED_BREAKING_CHANGE,  pin NOT updated, prior state restored
-#   Case 4  push conflict            -> REJECTED_PUSH_CONFLICT,    pin NOT updated, work not destroyed
+#   Case 4  concurrent upstream commit during the verify window
+#                                    -> ADVANCED at the MEASURED commit, upstream untouched
+#   Case 4b an UNCLEAN submodule working tree
+#                                    -> FAILED_PRECONDITION, no opt-in exists, and passing
+#                                       the removed --publish-local-modifications is exit 2
+#
+# Case 4 used to be "push conflict -> REJECTED_PUSH_CONFLICT". R-005 step 6
+# and --publish-local-modifications were REMOVED on 2026-08-26 after five
+# review rounds found twelve fixture-proven ways for unaudited content to
+# reach another repository's default branch through them, so this script now
+# issues no push and REJECTED_PUSH_CONFLICT is unemittable. Case 4 keeps the
+# concurrency fixture and asserts the new correct answer; case 4b asserts the
+# capability is gone.
 #
 # Exit 0 if every case passes; non-zero otherwise.
 
@@ -47,7 +59,7 @@ trap cleanup EXIT
 # The submodule's path inside the fixture parent repo. Deliberately NOT
 # "submodules/<x>" so that an implementation that hardcoded this project's
 # own real submodule directory name would fail this suite.
-SUB_PATH="subs/dep"
+SUB_PATH="subs/helixqa"
 
 # git_quiet_config <repo-dir> -- fixture identity, so commits work in any
 # environment (including one with no global git identity configured).
@@ -190,6 +202,25 @@ expect_ne() {
 # run_script <parent-repo> <record-dir> <verify-cmd> -- invokes the real
 # production script against a fixture. Echoes its exit code; its combined
 # output is captured into the global LAST_OUTPUT.
+# Both flags below are REQUIRED by every fixture in this file, and each says
+# something true about the fixture rather than about the production default:
+#
+#   --allow-local-path-remotes      every "upstream" here is a bare repo under
+#       mktemp -d, i.e. a filesystem path. Production refuses that shape
+#       (a local path can be another real repository, or a network mount that
+#       reaches another machine while naming no host); a hermetic fixture can
+#       have no other shape, and a suite that cannot reach the fetch path
+#       cannot prove the fetch path is safe.
+#
+# `--publish-local-modifications` was REMOVED on 2026-08-26 and is no longer
+# passed by anything here except case 4b, which asserts that passing it is a
+# loud refusal.
+#
+# It is a command-line flag rather than an environment variable precisely so
+# that this suite's need for it cannot leak into an unattended pipeline run
+# through an inherited environment.
+ADV_FLAGS=(--allow-local-path-remotes)
+
 LAST_OUTPUT=""
 run_script() {
   local parent="$1" record_dir="$2" verify_cmd="$3"
@@ -197,7 +228,7 @@ run_script() {
   LAST_OUTPUT="$(
     LAVA_ADVANCE_RECORD_DIR="$record_dir" \
     LAVA_ADVANCE_VERIFY_CMD="$verify_cmd" \
-    "$SCRIPT_UNDER_TEST" "$parent" 2>&1
+    "$SCRIPT_UNDER_TEST" "${ADV_FLAGS[@]}" "$parent" 2>&1
   )" || exit_code=$?
   echo "$exit_code"
 }
@@ -287,24 +318,40 @@ expect_eq "case3(breaking-change)" "submodule HEAD restored to the prior pin" "$
 expect_eq "case3(breaking-change)" "parent pin NOT updated"                   "$c3_pin_before" "$(parent_pin "${c3_root}/parent")"
 
 # =========================================================================
-# Case 4: local modifications exist, upstream diverges mid-verify ->
-#         push is a genuine non-fast-forward -> REJECTED_PUSH_CONFLICT
+# Case 4 (RETARGETED 2026-08-26): another developer lands a commit on the
+#        submodule's upstream DURING the rebuild-and-test window.
+#
+# It used to test REJECTED_PUSH_CONFLICT: the submodule carried uncommitted
+# work, step 6 committed it, the concurrent upstream commit made the push a
+# genuine non-fast-forward, and FR-016 required that be refused rather than
+# forced. R-005 step 6 and --publish-local-modifications were REMOVED on
+# 2026-08-26, so REJECTED_PUSH_CONFLICT is no longer emittable by any code
+# path -- this script issues no push at all.
+#
+# The fixture keeps its full shape, because the concurrency it creates is
+# still real and still worth pinning. What changed is the correct answer:
+#
+#   * the run must ADVANCE, because a concurrent upstream commit is no longer
+#     a conflict for anything this script does;
+#   * the pin it stages must be EXACTLY the commit it measured at step 2 --
+#     not the concurrent developer's newer one, which no guard in this run
+#     examined and no rebuild-and-test step verified;
+#   * the upstream must still hold the concurrent developer's commit as its
+#     tip, untouched, and must have received nothing;
+#   * no rescue ref may exist, because nothing was committed to rescue.
+#
+# The last two are the assertions that would have caught the removed
+# capability coming back.
 # =========================================================================
-c4_root="$(make_fixture "push-conflict" 1)"
+c4_root="$(make_fixture "concurrent-upstream" 1)"
 FIXTURE_DIRS+=("$c4_root")
 c4_records="${c4_root}/records"
 c4_pin_before="$(parent_pin "${c4_root}/parent")"
-
-# The submodule carries an uncommitted local modification (R-005 step 6's
-# input condition). It touches a file the upstream commits never touch, so
-# it survives the step-4 checkout the way a real local edit would.
-echo "local uncommitted work" >> "${c4_root}/parent/${SUB_PATH}/seed.txt"
+c4_measured="$(upstream_head "${c4_root}/upstream.git")"
 
 # The verify hook stands in for the rebuild-and-test window (R-005 step 5).
-# It succeeds -- and, while it is "running", another developer lands a
-# commit on the submodule's upstream master. That makes the script's
-# subsequent step-6 push a REAL non-fast-forward rejection, which FR-016
-# requires be refused rather than forced.
+# It succeeds -- and, while it is "running", another developer lands a commit
+# on the submodule's upstream master.
 cat > "${c4_root}/verify.sh" <<VERIFYEOF
 #!/usr/bin/env bash
 set -euo pipefail
@@ -325,47 +372,109 @@ chmod +x "${c4_root}/verify.sh"
 
 c4_exit="$(run_script "${c4_root}/parent" "$c4_records" "bash ${c4_root}/verify.sh")"
 
-expect_eq "case4(push-conflict)" "exit code" "1" "$c4_exit"
+expect_eq "case4(concurrent-upstream)" "exit code" "0" "$c4_exit"
 if c4_rec="$(find_record "$c4_records")"; then
-  echo "PASS: case4(push-conflict): a Submodule Advance Record was written for ${SUB_PATH}"
-  expect_eq "case4(push-conflict)" "outcome"                    "REJECTED_PUSH_CONFLICT" "$(jq -r '.outcome' "$c4_rec")"
-  expect_eq "case4(push-conflict)" "old_commit"                  "$c4_pin_before"         "$(jq -r '.old_commit' "$c4_rec")"
-  expect_eq "case4(push-conflict)" "parent_pin_updated"          "false"                  "$(jq -r '.parent_pin_updated' "$c4_rec")"
-  expect_eq "case4(push-conflict)" "local_modifications_pushed"  "false"                  "$(jq -r '.local_modifications_pushed' "$c4_rec")"
+  echo "PASS: case4(concurrent-upstream): a Submodule Advance Record was written for ${SUB_PATH}"
+  expect_eq "case4(concurrent-upstream)" "outcome"                    "ADVANCED"       "$(jq -r '.outcome' "$c4_rec")"
+  expect_eq "case4(concurrent-upstream)" "old_commit"                  "$c4_pin_before" "$(jq -r '.old_commit' "$c4_rec")"
+  expect_eq "case4(concurrent-upstream)" "parent_pin_updated"          "true"           "$(jq -r '.parent_pin_updated' "$c4_rec")"
+  expect_eq "case4(concurrent-upstream)" "local_modifications_pushed"  "false"          "$(jq -r '.local_modifications_pushed' "$c4_rec")"
+  expect_eq "case4(concurrent-upstream)" "new_commit is the commit STEP 2 measured, not the concurrent one" "$c4_measured" "$(jq -r '.new_commit' "$c4_rec")"
 else
-  echo "FAIL: case4(push-conflict): no Submodule Advance Record found under ${c4_records}; script output: ${LAST_OUTPUT}"
-  FAILURES=$((FAILURES + 4))
+  echo "FAIL: case4(concurrent-upstream): no Submodule Advance Record found under ${c4_records}; script output: ${LAST_OUTPUT}"
+  FAILURES=$((FAILURES + 5))
 fi
-expect_eq "case4(push-conflict)" "parent pin NOT updated" "$c4_pin_before" "$(parent_pin "${c4_root}/parent")"
-expect_eq "case4(push-conflict)" "submodule HEAD restored to the prior pin" "$c4_pin_before" "$(sub_head "${c4_root}/parent")"
+expect_eq "case4(concurrent-upstream)" "parent pin staged at the MEASURED commit" "$c4_measured" "$(parent_pin "${c4_root}/parent")"
+expect_eq "case4(concurrent-upstream)" "submodule HEAD sits on the MEASURED commit" "$c4_measured" "$(sub_head "${c4_root}/parent")"
 
-# Refusing to push must never mean silently destroying the operator's local
-# work. The discarded commit MUST remain reachable through a rescue ref, and
-# that ref's tree MUST still contain the local modification.
+# No commit was created anywhere, so there is nothing for a rescue ref to
+# hold. A rescue ref appearing here could only mean this script had committed.
 c4_rescue_ref="$(git -C "${c4_root}/parent/${SUB_PATH}" for-each-ref --format='%(refname)' 'refs/lava-advance-rescue/**' | head -n1)"
-if [[ -n "$c4_rescue_ref" ]]; then
-  echo "PASS: case4(push-conflict): local work preserved under rescue ref '${c4_rescue_ref}'"
-  c4_rescued_seed="$(git -C "${c4_root}/parent/${SUB_PATH}" show "${c4_rescue_ref}:seed.txt" 2>/dev/null || echo "<unreadable>")"
-  if [[ "$c4_rescued_seed" == *"local uncommitted work"* ]]; then
-    echo "PASS: case4(push-conflict): the rescue ref's seed.txt still contains the local modification"
-  else
-    echo "FAIL: case4(push-conflict): the rescue ref exists but its seed.txt lost the local modification; got: ${c4_rescued_seed}"
-    FAILURES=$((FAILURES + 1))
-  fi
+if [[ -z "$c4_rescue_ref" ]]; then
+  echo "PASS: case4(concurrent-upstream): no refs/lava-advance-rescue/* ref exists -- this script creates no commit for one to hold"
 else
-  echo "FAIL: case4(push-conflict): no refs/lava-advance-rescue/* ref found — the rejected local-modification commit was left unreferenced"
-  FAILURES=$((FAILURES + 2))
+  echo "FAIL: case4(concurrent-upstream): a rescue ref '${c4_rescue_ref}' exists, which can only mean a commit was created"
+  FAILURES=$((FAILURES + 1))
 fi
 
-# Nothing in any case may have been force-pushed onto the fixture upstream:
-# case 4's upstream master MUST still be exactly the concurrent developer's
-# commit, with our local-work commit absent from it.
+# The upstream must be exactly where the concurrent developer left it: its tip
+# is that developer's commit, and nothing this run produced is reachable from
+# it. This is the assertion that fails the moment a publish path returns.
 c4_final_upstream="$(upstream_head "${c4_root}/upstream.git")"
 if git -C "${c4_root}/upstream.git" log --format='%s' -n1 "$c4_final_upstream" | grep -q "concurrent upstream commit"; then
-  echo "PASS: case4(push-conflict): fixture upstream master still holds the concurrent developer's commit (nothing was force-pushed over it)"
+  echo "PASS: case4(concurrent-upstream): fixture upstream master tip is still the concurrent developer's commit"
 else
-  echo "FAIL: case4(push-conflict): fixture upstream master tip is not the concurrent developer's commit — something overwrote it"
+  echo "FAIL: case4(concurrent-upstream): fixture upstream master tip is not the concurrent developer's commit -- something wrote to it"
   FAILURES=$((FAILURES + 1))
+fi
+expect_eq "case4(concurrent-upstream)" "upstream branch count (no stray branch was created)" "1" \
+  "$(git -C "${c4_root}/upstream.git" for-each-ref --format='%(refname)' refs/heads | wc -l | tr -d ' ')"
+
+echo "---"
+# =========================================================================
+# Case 4b (NEW 2026-08-26): an UNCLEAN submodule working tree is refused, and
+#          there is no flag that overrides the refusal.
+#
+# This is the replacement for what case 4 used to establish. Case 4 proved the
+# publish path behaved correctly under conflict; 4b proves the publish path is
+# gone: the same uncommitted work that used to ARM it is now the reason the
+# submodule is not touched at all.
+# =========================================================================
+c4b_root="$(make_fixture "unclean-refusal" 1)"
+FIXTURE_DIRS+=("$c4b_root")
+c4b_records="${c4b_root}/records"
+c4b_pin_before="$(parent_pin "${c4b_root}/parent")"
+c4b_up_before="$(upstream_head "${c4b_root}/upstream.git")"
+echo "local uncommitted work" >> "${c4b_root}/parent/${SUB_PATH}/seed.txt"
+c4b_sub_ref_before="$(git -C "${c4b_root}/parent/${SUB_PATH}" rev-parse --verify -q refs/remotes/origin/master 2>/dev/null)"
+
+c4b_exit="$(run_script "${c4b_root}/parent" "$c4b_records" "true")"
+
+expect_eq "case4b(unclean-refusal)" "exit code" "1" "$c4b_exit"
+expect_eq "case4b(unclean-refusal)" "parent pin NOT updated" "$c4b_pin_before" "$(parent_pin "${c4b_root}/parent")"
+expect_eq "case4b(unclean-refusal)" "submodule HEAD untouched" "$c4b_pin_before" "$(sub_head "${c4b_root}/parent")"
+expect_eq "case4b(unclean-refusal)" "submodule origin/master (proves no fetch ran)" "$c4b_sub_ref_before" \
+  "$(git -C "${c4b_root}/parent/${SUB_PATH}" rev-parse --verify -q refs/remotes/origin/master 2>/dev/null)"
+expect_eq "case4b(unclean-refusal)" "upstream received nothing" "$c4b_up_before" "$(upstream_head "${c4b_root}/upstream.git")"
+if c4b_rec="$(find_record "$c4b_records")"; then
+  expect_eq "case4b(unclean-refusal)" "outcome" "FAILED_PRECONDITION" "$(jq -r '.outcome' "$c4b_rec")"
+  expect_eq "case4b(unclean-refusal)" "parent_pin_updated" "false" "$(jq -r '.parent_pin_updated' "$c4b_rec")"
+  expect_eq "case4b(unclean-refusal)" "local_modifications_pushed" "false" "$(jq -r '.local_modifications_pushed' "$c4b_rec")"
+else
+  echo "FAIL: case4b(unclean-refusal): no Submodule Advance Record found"; FAILURES=$((FAILURES + 3))
+fi
+# The operator's bytes are still exactly where they were.
+if grep -qF "local uncommitted work" "${c4b_root}/parent/${SUB_PATH}/seed.txt"; then
+  echo "PASS: case4b(unclean-refusal): the operator's uncommitted bytes are untouched on disk"
+else
+  echo "FAIL: case4b(unclean-refusal): the operator's uncommitted work is no longer in the working tree"
+  FAILURES=$((FAILURES + 1))
+fi
+
+# ...and the removed flag is a LOUD refusal, never a silently-ignored argument.
+# LVA-120's lesson as a test: deleting an argument branch once let a flag fall
+# through to the catch-all, where `*) shift` read it as a repository path and
+# the run continued in a mode nobody asked for.
+c4b_flag_exit=0
+c4b_flag_out="$(
+  LAVA_ADVANCE_RECORD_DIR="${c4b_root}/records-flag" \
+  LAVA_ADVANCE_VERIFY_CMD="true" \
+  "$SCRIPT_UNDER_TEST" --allow-local-path-remotes --publish-local-modifications "${c4b_root}/parent" 2>&1
+)" || c4b_flag_exit=$?
+expect_eq "case4b(removed-flag)" "exit code for --publish-local-modifications" "2" "$c4b_flag_exit"
+expect_eq "case4b(removed-flag)" "records written" "0" \
+  "$(find "${c4b_root}/records-flag" -type f -name '*.json' 2>/dev/null | wc -l | tr -d ' ')"
+if grep -qF -- "REMOVED" <<<"$c4b_flag_out"; then
+  echo "PASS: case4b(removed-flag): the refusal states the capability was REMOVED"
+else
+  echo "FAIL: case4b(removed-flag): the refusal does not say the capability was removed"
+  FAILURES=$((FAILURES + 1))
+fi
+if grep -qF -- "more than one repository path" <<<"$c4b_flag_out"; then
+  echo "FAIL: case4b(removed-flag): the flag fell through and was read as a REPOSITORY PATH (the LVA-120 failure mode)"
+  FAILURES=$((FAILURES + 1))
+else
+  echo "PASS: case4b(removed-flag): the flag was not mistaken for a repository path"
 fi
 
 echo "---"
@@ -421,6 +530,118 @@ SUB_PATH="$_saved_sub_path"
 # (The over-correction guard for this case is Case 2 above: an ordinarily-named
 # submodule with the identical setup DOES advance. If a "fix" denied everything,
 # Case 2 would fail.)
+
+echo "---"
+# =========================================================================
+# Case 6: a submodule that carries NO standing operator authorization is
+#         refused — even though it is not `constitution`, and even though the
+#         rebuild-and-test step would pass.
+#
+# WHY (forensic anchor, LVA-138, 2026-08-26): governance was a DENY-list with
+# a single entry, `constitution`, while .gitmodules declares 25 submodules.
+# Root CLAUDE.md's Decoupled Reusable Architecture pin policy names 16 as
+# pins-frozen-by-default (each bump needs a deliberate per-submodule operator
+# authorization) and carries the standing Q9 waiver for `helixqa` — leaving 7
+# (doc_processor, llm_orchestrator, llm_provider, llms_verifier, panoptic,
+# superspec, vision_engine) named by NO operator decision at all, yet
+# mechanically advanceable by an unattended run. A deny-list can only ever be
+# as correct as it is complete, and that one was 1/25 complete.
+#
+# The policy was inverted to default-DENY on explicit operator decision. This
+# case is the regression proof: against the pre-inversion script BOTH fixtures
+# below recorded outcome=ADVANCED with parent_pin_updated=true.
+#
+# Each fixture also asserts the refusal states its OWN true reason. A refusal
+# that misstates its cause is a small bluff, and the reason table is the only
+# part of this that can silently drift out of date with root CLAUDE.md.
+#
+# The `panoptic` expectation was updated 2026-08-26 (T054 SHOULD-FIX-6). The
+# default arm used to assert a fact about the absence of operator decisions
+# ANYWHERE on record — a claim that goes stale the moment an operator
+# authorizes a submodule without that table being updated, i.e. exactly the
+# confidently-wrong drift the function's own comment says the default exists
+# to avoid. It now states what is true BY CONSTRUCTION: the submodule is not
+# in GOVERNANCE_ALLOW, which is the only authorization this script can act on.
+# =========================================================================
+_saved_sub_path="$SUB_PATH"
+C6_EXAMINED=0
+
+# name | expected substring of the refusal reason | why this class exists
+for c6_spec in \
+  "panoptic|absent from GOVERNANCE_ALLOW|one of the 7 named by no decision at all" \
+  "security|pins it frozen by default|one of the 16 requiring per-submodule authorization"
+do
+  c6_name="${c6_spec%%|*}"
+  c6_rest="${c6_spec#*|}"
+  c6_reason="${c6_rest%%|*}"
+  c6_class="${c6_rest#*|}"
+
+  SUB_PATH="$c6_name"
+  c6_root="$(make_fixture "ungoverned-${c6_name}" 1)"
+  FIXTURE_DIRS+=("$c6_root")
+  c6_records="${c6_root}/records"
+  c6_pin_before="$(parent_pin "${c6_root}/parent")"
+  c6_upstream_head="$(git -C "${c6_root}/upstream.git" rev-parse master)"
+
+  # verify-cmd is `true`: the rebuild-and-test step would PASS. Nothing except
+  # the governance refusal may stop this advance.
+  # Deliberately NOT `c6_exit="$(run_script ...)"`: run_script assigns the
+  # script output to a global, but every caller invokes it inside a command
+  # substitution, which is a SUBSHELL -- so that assignment never reaches the
+  # caller and the global stays stale. Cases 1-5 only read it inside FAIL
+  # branches that do not fire, so the staleness is invisible there; this case
+  # asserts on the output on the SUCCESS path, so it must capture in the
+  # current shell. (Harness bug recorded separately: every existing
+  # FAIL-branch diagnostic in this file prints a stale value.)
+  c6_exit=0
+  c6_out="$(
+    LAVA_ADVANCE_RECORD_DIR="$c6_records" \
+    LAVA_ADVANCE_VERIFY_CMD="true" \
+    "$SCRIPT_UNDER_TEST" "${ADV_FLAGS[@]}" "${c6_root}/parent" 2>&1
+  )" || c6_exit=$?
+
+  expect_eq "case6(${c6_name}: ${c6_class})" "exit code" "0" "$c6_exit"
+  expect_ne "case6(${c6_name})" "upstream really is ahead of the pin" "$c6_pin_before" "$c6_upstream_head"
+
+  if c6_rec="$(find_record "$c6_records")"; then
+    expect_eq "case6(${c6_name})" "outcome" "REFUSED_GOVERNANCE_DENY" "$(jq -r '.outcome' "$c6_rec")"
+    expect_eq "case6(${c6_name})" "parent_pin_updated" "false" "$(jq -r '.parent_pin_updated' "$c6_rec")"
+  else
+    echo "FAIL: case6(${c6_name}): no Submodule Advance Record found under ${c6_records} — a governance refusal that leaves no evidence is invisible at rest; script output: ${c6_out}"
+    FAILURES=$((FAILURES + 2))
+  fi
+
+  expect_eq "case6(${c6_name})" "parent pin NOT advanced" "$c6_pin_before" "$(parent_pin "${c6_root}/parent")"
+  expect_eq "case6(${c6_name})" "submodule HEAD NOT advanced" "$c6_pin_before" \
+    "$(git -C "${c6_root}/parent/${SUB_PATH}" rev-parse HEAD 2>/dev/null)"
+
+  # The refusal must state ITS OWN reason, not a borrowed one. Matching on a
+  # herestring, never `printf | grep -q`: under `set -o pipefail` a short-
+  # circuiting consumer SIGPIPEs the producer and turns a MATCH into a
+  # NO-MATCH above the 64KB pipe buffer (LVA-135).
+  if grep -qF "$c6_reason" <<<"$c6_out"; then
+    echo "PASS: case6(${c6_name}): refusal states its own true reason ('${c6_reason}')"
+  else
+    echo "FAIL: case6(${c6_name}): refusal did not state the reason for its class."
+    echo "      expected substring: ${c6_reason}"
+    echo "      actual output: ${c6_out}"
+    FAILURES=$((FAILURES + 1))
+  fi
+
+  C6_EXAMINED=$((C6_EXAMINED + 1))
+done
+SUB_PATH="$_saved_sub_path"
+
+# A gate that passes having examined nothing is the vacuous-pass defect this
+# repo has ~50 recorded instances of. If the loop body never ran — a typo in
+# the spec list, a shell-word-splitting change — every assertion above is
+# silently absent and this case would otherwise report success.
+if [[ "$C6_EXAMINED" -eq 2 ]]; then
+  echo "PASS: case6: examined ${C6_EXAMINED} ungoverned-submodule classes"
+else
+  echo "FAIL: case6: examined ${C6_EXAMINED} classes, expected 2 — the case list did not iterate, so its assertions never ran"
+  FAILURES=$((FAILURES + 1))
+fi
 
 if [[ "$FAILURES" -eq 0 ]]; then
   echo "PASS: all advance-all-submodules test cases passed"

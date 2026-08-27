@@ -127,6 +127,38 @@ repo has drifted, the agent acts on the claim.
 >
 > **VALIDATION ITERATION (2026-06-23, 4 parallel subagents, all real-evidence):** verify-all 40 PASS / 14 FAIL (ZERO new failures — all 14 pre-existing §6.AD/§6.AF/§6.AI-debt); §6.AB WEAK-challenge backlog is actually **0** (all 47 Challenges have real assertions); §6.N bluff-hunt cycle5 **3 genuine / 0 bluffs** (apigo version/middleware/discovery); containers §6.R inheritance fix pushed upstream `e635ad8` (device-gate-safe: diff is doc + 1 cuttlefish line, no emulator/runtime path) → Lava pin bumped `58a0d54→e635ad8`. The remaining §6.R finding `llm_orchestrator` + the submodule §6.AD-pointer churn are the operator's external Auto-commit-automation's pre-existing work (not committed by this session). On-device search-auth: **C44 (`Challenge44ApiSearchAuthTest`) PASS on the containerized KVM emulator** (boot 31s, `.lava-ci-evidence/thinker-c00-smoke/2026-06-23-C44-on-device-PASS.json`) — value-level proof `withAuth()` attaches the correct handoff-key VALUE on the wire + the search-auth flow returns 200 on-device. **HONEST CAVEAT:** C44 builds `ApiBackedTrackerClient` by hand with a BARE OkHttpClient (no `AuthInterceptor`), so it does NOT isolate H1 (the interceptor-overwrite). **H1 evidence stack:** (1) `AuthInterceptorHandoffKeyTest` (unit, interceptor ACTIVE, falsifiability-proven) = DEFINITIVE; (2) C44 = on-device flow works; (3) operator manual test = full DI→interceptor→engine→provider E2E. **2nd validation iteration (3 subagents): §6.N bluff-hunt cycle6 = 6 genuine / 0 bluffs** across the session's OWN telemetry (writeProviderError / webhook-redaction / enabled-gate — each mutation→FAIL) + Android-core (EndpointConverter key round-trip, PostConverters clamp, ProbeMirrorUseCase reproducing Crashlytics 39469d3b). Evidence: `.lava-ci-evidence/bluff-hunt/2026-06-23-cycle6-{session-telemetry,android-core}.json`. The session's telemetry tests are PROVEN genuine.
 >
+> **✅ 2026-08-26 — OPERATOR-BLOCKED BACKLOG FULLY DECIDED + 4 P0s CLOSED (feature 002 pipeline cycle).** The tracker held **14** operator-blocked items; the operator answered 8 interactive decision-sets and **all 14 are now decided or resolved**. **4 were stale** (LVA-124/125/126/127 = the T040/T041/T048/T049 amendment review gates, already answered and landed) — verified against the landed amendments in their target files, NOT against the tasks.md checkboxes, then closed via the canonical `workable-items` binary; round-trip gate exit 0, violation counts cross-checked 67 before / 67 after rather than trusting the gate's own exit code.
+>
+> **P0s closed, each with a captured mutation rehearsal:** (1) **LVA-138** governance inverted from a 1-entry deny-list to default-DENY with `helixqa` the sole allow — rehearsal proved that under the old policy `panoptic` and `security` both recorded `outcome: ADVANCED` / `parent_pin_updated: true` with pins genuinely moving; new case 6 catches it, 60 PASS / 0 FAIL, script restored byte-identical. (2) **LVA-135** SIGPIPE-under-pipefail — filed as 4 sites, actually **17**, including Check 10 where `|| continue` makes the SIGPIPE skip the ENTIRE gate and line 53 where a bare assignment under `set -e` ABORTS the hook on any branch over ~1600 commits; regression test drives the real hook with a 260,425-byte commit vs the 65,536-byte buffer and a 25-byte control with identical violating content passes under mutation, isolating the defect to the pipe buffer. (3) **Orchestrator recompute fail-open** — a REJECTED anti-bluff Evidence Record could sit physically on disk while the run reported `outcome: PASS` and exit 0, because `init_run_report` seeds `rejected_by_anti_bluff: 0` and recompute is the only thing that populates it; fixed, and the PERSISTED verdict downgraded to BLOCKED too, since §6.AA clause 8 reads the FILE's outcome and an exit code protects only the running process. (4) **LVA-120** combined `--debug-and-release` mode RETIRED — it shipped the R8-minified RELEASE APK while the only device-evidence gate that ran checked DEBUG-channel evidence (mechanically the 1.2.19-1039 setup); 11 code sites removed, and the retired flag now fails LOUDLY because the arg loop ends in `*) shift ;;` so deleting the arm would have silently degraded it to a debug-only distribute exiting 0.
+>
+> **NEW P0 found by a passing test:** the orchestrator's repo-path override records the WRONG repository. `git rev-parse HEAD` lacks `-C "$REPO_ROOT"` and the evidence paths are relative, so a run against a fixture repo deposited a report **into Lava's own evidence tree** claiming `commit_sha: 545920a1…` (Lava's HEAD, never tested) with `outcome: PASS`. §6.Z / §6.AK / §6.AA clause 8 all match evidence to artifacts BY COMMIT SHA. Three such artifacts were preserved verbatim to scratchpad forensics and removed; the 57 pre-existing reports untouched. Fix in flight.
+>
+> **T054 review executed — verdict APPROVE WITH FIXES, 3 blockers / 6 should-fix / 7 nit,** every blocker proven with a captured fixture run: **B-1** `old_commit` read from the submodule's HEAD instead of the parent index gitlink, so the non-fast-forward guard evaluates the wrong reference and a deliberately-pinned side-branch commit is silently DROPPED (the same script reads the pin correctly 280 lines earlier); **B-2** the blast-radius fix froze the path SET but not its CONTENT, so verify-build output at an already-modified path reaches the submodule's own upstream — including a tracked upstream file being DELETED; **B-3** command injection: `LAVA_PIPELINE_RUN_ID` interpolated into a single-quoted string fed to `bash -c`, where an injected `exit 0` makes the verify gate pass unconditionally and the pin advances with ZERO verification, recorded ADVANCED. All latent — the script has never touched a real upstream. What the review CONFIRMED sound: the governance boundary survived all three bypass attempts; zero forcing/history-rewrite/hook-bypass flags anywhere; a concurrent developer's commit survived a conflict intact.
+>
+> **LVA-008's filed root cause was WRONG** — never an upstream AndroidX defect, but a Lava off-main-thread `navigate()` already fixed 2026-06-30 by `ccdd84c1`. It left behind a `teardown_known_lva008` PASS-override in the autonomous-QA harness that converts a real crash into a reported PASS; operator approved removal. Cause corrected now, closure held pending a C06+C11 device re-run per §6.AK.
+>
+> **§6.AA amendment approved for landing:** clause-8 reassessment returned PARTLY LIVE — combined-invocation permission and the then-condition (D) dead, eight of the then-nine conditions live. Operator chose RE-LETTERING (A)–(H) over a retired-letter marker, and chose to resolve **LVA-147** by REWORDING the residual-gap condition rather than amending the run-report schema. The reassessment also declined to adopt a sentence from the existing proposal draft — *"each stage's §6.AK gate resolves the correct channel by construction"* — true of the channel LABEL but false as implied per-variant verification, because `check-cycle-coverage.sh` sets its channel variable, asserts it non-empty, then never reads it again.
+>
+> **LVA-136 [B] + T062 precondition closed** (partial-initialisation floor derived from `.gitmodules`, distinguishing an uninitialised checkout from real propagation drift, 6/6 tests; preventive `check-ignore` guard that refuses BEFORE creating anything, proven to leave a fixture tree clean). **LVA-5 (leaked Firebase CI token): operator decision = accept the risk, recorded as an accepted-risk decision rather than left looking like forgotten work.**
+>
+> **⚠️ SYSTEMIC CONSTRAINT worth carrying forward:** four separate "gate failures" this session DISSOLVED on isolated re-measurement, all from parallel agents contending on shared files in ONE working tree (latest: verify-all's export-sync gate failed because another agent was regenerating `.html`/`.pdf` siblings mid-sweep, transiently making `.md` newer than its exports — exactly that gate's staleness condition; isolated re-run 282 files / 0 problems / exit 0, four consecutive times). **A constitutional-gate failure is not a finding until it reproduces in isolation.** This has now cost four diagnoses; recorded once here so it is not rediscovered a fifth time.
+
+> **🔒 2026-08-27 — SESSION CLOSED, EVERYTHING COMMITTED AND PUSHED. Resume with `/speckit-superspec-execute 002` — see §7, which was REWRITTEN this cycle (the previous resume block pointed at a macOS path that does not exist on this Linux host).**
+>
+> **THE HEADLINE: `scripts/advance-all-submodules.sh`'s publish capability was REMOVED, not guarded.** Five adversarial review rounds produced **TWELVE** distinct, fixture-proven ways to publish unaudited content to another repository's default branch: 3 → 5 → 7 → 9 → 10 → 11 → 12. Every round confirmed the prior fixes AND found more. Guarding provably stopped converging — round 3 moved from enumerating *routes* to guarding the *artefact*, rounds 4-5 then enumerated *projections* of the artefact, and the eleventh escape was a projection nobody had listed (4000 bytes of payload in a commit's author-name header reached both mirrors with all five guards green). The convergent byte-equality instrument was tried and DEFEATED: `git commit-tree` inherits `i18n.commitEncoding`, so the expected commit is built in the same adversary-controlled config context and the poison cancels on both sides. **Resolution: 2966 → 2170 lines; the script now issues NO `git push` and creates NO commit on any path, so §6.T.3 holds structurally rather than by flag selection. 634 assertions, 4 suites, all exit 0; floors RAISED (355→405); no test case deleted — each retargeted to prove the capability is gone, six running the adversarial payload against a clean submodule where it genuinely fires and still cannot escape.** Governance diffs (FR-015, R-005 step 6, CLAUDE.md conditions D/E) are DRAFTED, NOT APPLIED — until they land the script is knowingly non-conformant with its own spec, stated rather than hidden.
+>
+> **22 workable items filed this cycle (LVA-149…170).** The pattern that matters is not any single defect: **gates built to prevent a failure mode permitted that exact failure mode.** The §6.AK gate written after the 2026-06-26 C00-only incident could not distinguish a passing release from a failing one — its verdict turned on how evidence was FORMATTED, and 5 of 9 shipped cycles passed against an arbitrary wrong HEAD (fixed; 5/9 → 0/9). Clause 8 condition (C) never reads WHICH Challenge ran. `tag.sh` Group-B Gate 3 compares against an empty `diag`. A §6.Z staleness check parsed every ISO-8601 timestamp as *today at midnight*, so nothing was ever stale. And round 4's own fix for the ninth escape left `refs/replace` refs behind — becoming the ninth escape's mechanism.
+>
+> **OPERATOR ACTION OWED: rotate the GitLab token (LVA-165).** A `${VAR:-default}` expansion printed a real token to a transcript — the IDENTICAL mistake LVA-5 records with the Firebase token. Containment verified: 0 tracked files, 0 unredacted artefacts, never reached git.
+>
+> **T062 reached `install_boot` and `live_verify` for the first time in four attempts** — but only via a run that skipped all testing, and LVA-168 means that run's `outcome: PASS` does not say so on its face. Scenario 2 is NOT satisfied. **A standing caveat repeated all session was WRONG and is corrected here: T037 is NOT unimplemented.** It is 1108 lines, wired at orchestrator `:275`, and it executed — `live_verify` proved the Go API *and* the on-device `:api-app` on a real containerized emulator with the auth gate verified (401 without key, not-401 with).
+>
+> **Recursive submodule scope was measured, not assumed.** 25 top-level → **61 recursive** rows after initialising 29 previously-uninitialised ones at their already-recorded pins (0 pins moved, proven three ways). **28 of the remotes are THIRD-PARTY** (google/perfetto, bytedance/UI-TARS, square/leakcanary, appium, chroma-core, plus top-level `superspec` → WangX0111). Operator decision: **push own-org only, refuse third-party with a named per-remote record.** The 27 newly-initialised are exactly `submodules/helixqa/tools/**` — precisely the set condition (C) forbids advancing, so initialising makes them recordable, never advanceable.
+
+> **Last updated:** 2026-08-27 (session closed — publish capability REMOVED after 12 proven escapes; 22 items filed LVA-149…170; §7 resume block rewritten for `/speckit-superspec-execute 002`; GitLab token rotation OWED.)
+
+> **Last updated:** 2026-08-26 (operator-blocked backlog fully decided — 14 items, 8 decision-sets; 4 P0s closed with mutation rehearsals; T054 review returned 3 proven blockers; §6.AA amendment approved for landing — see top banner.)
+
 > **Last updated:** 2026-08-20 (backlog-closure plan + final-review fixup — LVA-095/082/088/089/091/019 all closed, tracker exports resynced across Issues/Fixed/Issues_Summary/Fixed_Summary + HTML/PDF/DOCX; `scripts/snapshot-coverage-ledger.sh` side-effect fixed + companion doc added — see top banner.)
 
 > **Last updated (prior):** 2026-08-14 (LVA-098 cycle FULLY SHIPPED — client 1.3.17-1085 + api-app 0.2.13-27, both apps, both §6.AA stages, lava-api-go container restarted on final source, §6.Y post-distribute bump applied — see top banner.)
@@ -714,6 +746,175 @@ Built a self-driving QA harness under `scripts/autonomous-qa/` that boots a cont
 These items need the operator's environment / hardware / decisions
 that an agent cannot make alone.
 
+### 2.0 STATUS 2026-08-26 — the operator-blocked backlog is DECIDED
+
+All 14 items the tracker recorded as operator-blocked have been put to the operator
+as interactive decision-sets and answered. Nothing below this line is waiting on a
+decision that has not been made; what remains is execution and verification.
+
+| Item | Decision | State |
+|---|---|---|
+| LVA-124/125/126/127 | (already answered; items were stale) | CLOSED, verified against the landed amendments |
+| LVA-138 + T054 | fix governance first, then review | governance CLOSED; review DONE → 3 blockers being fixed |
+| LVA-120 + LVA-148 | retire the combined alias | DONE (11 sites; retired flag fails loudly) |
+| LVA-135 | apply fix + regression test | DONE (17 sites, not the 4 filed) |
+| LVA-5 | accept the risk | recorded as an accepted-risk decision |
+| LVA-129 / T062 | fix the gitignore gap first | precondition guard DONE; full run still owed |
+| LVA-147 | reword the residual-gap condition — (H) before the re-lettering, **(G)** after — do NOT amend the schema | in the §6.AA patch set; recorded through `build_artifacts[].build_output_path` |
+| LVA-136 | close what is provably done | [A] + [B] both CLOSED, 6/6 tests |
+| LVA-008 | correct the cause now, close on a device re-run | cause corrected; PASS-override removed |
+
+Standing authority granted this cycle: close any tracker item where the physical
+evidence that resolves it can be quoted. Items without such evidence stay open.
+
+**LATER THE SAME DAY — the picture changed, and it got larger.** The 4-item backlog was
+cleared or put in flight, but a §6.N.2 production-code sweep of 39 gate-shaping files returned
+**48 findings, 40 CONFIRMED with captured proof, 5 CRITICAL**, and those matter more than the
+backlog did. **21 of the 48 are ONE shape**: a gate whose corpus can become empty reports the
+empty case as success — with the correct fix ALREADY PRESENT in four places in the tree, applied
+unevenly. Landed since:
+
+- **§6.AK cycle-coverage gate (LVA-149) — the worst of them.** Its verdict was a function of how
+  evidence was FORMATTED, not what it said: the same four FAILED verdicts gave `§6.AK PASS` exit 0
+  in markdown (the format every recent release uses) and `FATAL §6.AK` exit 1 in JSON, because the
+  markdown path fell through to a bare fixed-string name match. This is the gate written IN
+  RESPONSE to the 2026-06-26 C00-only incident. Sibling defect: the commit-SHA binding was inert,
+  and **5 of 9 shipped cycles passed against an arbitrary wrong HEAD** — the five most recent.
+  FIXED: the parser now accepts seven verdict-STATING shapes found by reading the real evidence,
+  refuses an unrecognised format with exit 2 naming the file, and a zero-claim map exits 2 (was a
+  vacuous exit 0). Wrong-HEAD acceptance **5/9 → 0/9**.
+  BLAST RADIUS, measured per cycle: **8 of 9 hold up on substance** — the gate was broken, but
+  those releases were not shipped on nothing. **1.3.12-1077 is the exception** (LVA-156): 13
+  asserted covering refs, verdicts recorded for TWO — the 2026-06-26 incident shape recurring ONE
+  CYCLE after §6.AK was written. 1084 and 1085 declare no commit SHA at all.
+- **Three release-tagging fail-opens FIXED**, each mechanism established rather than guessed:
+  `tag.sh:513`'s staleness gate failed open IN PROPORTION to staleness (1 changed file caught 3/3,
+  2000 caught 0/3) — proven to be the LVA-135 SIGPIPE-under-pipefail shape by holding everything
+  constant but size with pipefail as the control; it printed the positively FALSE claim "pretag
+  evidence found at ancestor <sha>" and the mutated run's log shows a tag was actually cut.
+  `tag.sh:224-232` was satisfied by two mkdirs and a zero-byte file — and the fixing agent
+  CORRECTED the brief's hypothesis (`-e`/`-s` are indeed true for a directory, but those lines use
+  `-f`/`-d` correctly; the defect is asserting a path of the right TYPE and never reading its
+  CONTENT). `evidence.sh:252` + `phase-02-test.sh:348` was two defects composing: the writer
+  stamped every record `validated` — THE SAME VALUE the independent validator writes on accept, so
+  a record nobody examined was byte-identical on disk to one examined and accepted — and the
+  aggregator treated an absent status as "not rejected", an asymmetry against `result`, where an
+  unrecognised value already fell through to FAIL.
+- **LVA-157 (P0), the most serious of the day.** §6.AA clause 8's own three certifying suites call
+  `write_evidence_record` once and `validate_evidence_record` ZERO times. Condition (B) — "zero
+  Evidence Records carry an anti_bluff_status other than validated" — was therefore satisfiable by
+  records NOBODY EVER VALIDATED, including all four mandatory `real-device-challenge` records,
+  every one of them `Challenge00CrashSurvival`. Clause 8 authorises a distribution to go from
+  debug to release WITHOUT an operator pause. That is the C00-only forensic anchor reproduced ONE
+  LEVEL ABOVE where the sweep found it — in the fixture that CERTIFIES the gate. Attribution
+  settled by controlled A/B, not inferred.
+- **§6.AH-debt is HOST-scoped, not code-scoped.** The container emulator BOOTED here in 2m15s
+  through the real `pkg/emulator.Containerized` API — podman 5.7.1, the production code's own
+  `podman run` carrying `--device /dev/kvm`, ADB at `device`, `sdk=34` — with containerization
+  proven by NAMESPACE IDENTITY (qemu PID 1 in-guest, distinct mnt/pid namespaces, `libpod-…scope`
+  cgroup), not by a log line. The debt was recorded on macOS/arm64 where a Linux container can
+  reach neither `/dev/kvm` nor HVF. It is not open on this Linux x86_64 KVM host.
+- **T062 is NOT done** after three attempts, and the failures were honest ones: #1 killed
+  deliberately at load 15.49; #2 a genuine build failure from a gitignored `api-app/
+  google-services.json` the clone could not carry (an agent provisioning gap, not a pipeline
+  defect); #3 in flight. The pipeline behaved CORRECTLY under failure both times — it recorded the
+  one Build Artifact it could verify and explicitly REFUSED the three it could not ("2 of 5
+  expected Build Artifacts recorded (0 claimed-but-unverifiable)"), and it did not round a clean
+  `lava-api-go` build up to a passing phase. The interrupted-run invariant was observed LIVE
+  rather than in a fixture. `commit_sha` matched the clone's HEAD on all three runs — a sha
+  existing in no other repository, so the attribution fix cannot pass by coincidence.
+
+**LATE-DAY UPDATE — T054 reached FIVE review rounds and TEN proven publish escapes.**
+The count of distinct, fixture-proven ways `scripts/advance-all-submodules.sh` could publish
+unaudited content to another repository's default branch, by round: **3 -> 5 -> 7 -> 9 -> 10**.
+Every round confirmed the prior fixes AND found new defects; round 4's fix pass found the tenth
+ITSELF after being told to assume it was not the exception. **Four consecutive verdicts of
+APPROVE WITH FIXES; never a clean approval.** Round 5 is in flight and has been asked, beyond
+finding an eleventh, for an ARCHITECTURAL judgement: do the guards now close the class, or is the
+step-6 publish path structurally too permissive to secure by guarding, so that
+`--publish-local-modifications` should be REMOVED as a capability rather than kept as an opt-in?
+
+The escapes, for the record: (1) content, (2) mode/gitlink, (3) index scope beyond the audited
+set, (4) HEAD moved by a verify command that commits, (5) a remote added after the scan, (6) a
+pre-commit hook's `git add` landing in the commit `--only` builds, (7) `push.followTags`, (8) a
+post-commit hook re-pointing HEAD at a `commit-tree` merge whose TREE is byte-identical to the
+honest commit's, (9) `refs/replace/<final>` making the guard read a benign object while the push
+sends the real one, (10) **the push refspec source being `HEAD` — a MUTABLE ref git resolves at
+transfer time.** The tenth is the production shape: §6.W mandates two mirrors, so a `pre-push`
+hook firing during mirror 1's push changed what mirror 2 received. Captured: EXIT=0, ADVANCED,
+record and console both naming the honest commit, the leak on mirror 1, the honest commit on
+mirror 2, **§6.C reporting the divergence as SUCCESS**, and the parent pin staged at a commit the
+record does not name. Fixed by pushing the immutable `${final_commit}:refs/heads/<branch>`.
+
+The structural diagnosis, which is why enumeration kept failing: **the guards measure through the
+repository the adversary controls, while `git push` transmits HISTORY from the true object store,
+resolved later.** Four further routes were probed and found CLOSED (`refs/notes` + matching push
+refspec, `remote.mirror=true`, `objects/info/alternates`, `commit-graph`), and a fifth probe
+established that the object-list instrument has its own blind spot for a mode-only tamper which
+the retained tree-diff catches — which is WHY both instruments are kept.
+
+**Suites: 60 + 49 + 27 + 310 = 446 assertions, all EXIT=0** (independently re-measured).
+
+**FIRST TRUSTWORTHY FULL ROSTER — 117 suites, serial, sha-fenced around the two governance-
+mutating suites. 105 PASS / 12 FAIL, verdict NOT FIT TO PUSH**, four NEW breakages introduced by
+the session's own work, each reproducing in isolation. Three of the four were the same shape: a
+NEW anti-vacuous-pass guard colliding with a fixture that predated it — i.e. the guards working.
+All four are now fixed, and the fixes surfaced two further defects nobody had looked for:
+  - the §6.AK/§6.Z staleness floor's JSON extractors stripped with a greedy `s/.*:[[:space:]]*//`
+    which EATS an ISO-8601's own `HH:MM:` — `"2026-08-12T18:20:00+02:00"` parsed as TODAY AT
+    MIDNIGHT, so a genuinely 14-day-old evidence file was ALWAYS reported fresh;
+  - `check-workable-items.sh` carried a `pipefail`+SIGPIPE race (12/12 trials returned 141 with
+    pipefail, 0/12 without) that intermittently reddened the whole verify-all sweep. **This was
+    earlier mis-attributed by the conductor to its own concurrent tracker writes — a real defect
+    was blamed on benign activity.** Corrected here.
+
+**OPERATOR DECISIONS taken late in the session:**
+  - "all Submodules fully recursively" means the FULL RECURSIVE SET (**59**, not the 25 top-level),
+    initialising what is missing. Measured: 27 were uninitialised. An init at their ALREADY-RECORDED
+    pins is in progress; the load-bearing invariant is that NO pin moves (`--init`, never `--remote`).
+  - FR-017 wins over `quickstart.md:149`, which asserted "expect STAGED submodule pin changes, NOT a
+    clean tree" — stale from an earlier design where closure staged but did not commit.
+  - The closure phase commits a DECLARED PATH SET and refuses on anything outstanding-but-undeclared.
+    `scripts/commit_all.sh:121` uses `git add -A`, which on this tree would sweep 18 untracked paths
+    to two upstreams — the parent-repo instance of the same class as the ten escapes below it.
+  - `.specify/memory/constitution.md` stays at **3.0.0** (MAJOR, per the file's own policy).
+
+**MERGE STATE (measured):** `master` (`1e4210aa`) IS the merge-base and an ancestor of HEAD
+(`545920a1`); 1 commit ahead, 0 behind; a trial `merge-tree` shows **0 conflict markers**. So
+merging is a FAST-FORWARD. That one commit is what carries the pipeline, which is why `master` does
+not currently contain `scripts/pipeline-build-test-distribute.sh` at all.
+
+**T062 has NEVER completed.** Four attempts: #1 killed at load 15.49; #2 a genuine build failure
+from a gitignored `api-app/google-services.json` a clone cannot carry; #3 reached `test` and failed
+there on the 73-class timeout (LVA-161, now fixed); #4 in flight. `install_boot` and `live_verify`
+have never executed, so Scenario 2 is NOT satisfied. What the pipeline PROVED under those failures
+is worth keeping: it fabricated no passes for killed classes, REJECTED 12 Evidence Records for an
+empty `raw_output_ref`, recorded `2 of 5 expected Build Artifacts (0 claimed-but-unverifiable)`
+rather than rounding up, and its `recompute_evidence_summary` was confirmed genuine by an EXACT
+4190-record match between report and disk.
+
+**Items filed 2026-08-26: LVA-149 through LVA-162** (7 P0/P1). Closed: LVA-120, 130, 135, 136, 138,
+147, 150, 159.
+
+**Still genuinely owed (execution, not decisions):**
+0. **T054 ROUND-2 fixes**, then a THIRD review. The re-review confirmed all three original blockers
+   CLOSED with its own independent proofs, then found five more: two B-2 residuals in the same
+   class (a build's `chmod 755` publishes a mode change upstream; a nested submodule gitlink
+   fingerprints as the constant string `directory` — and `helixqa`, the ONLY allowed submodule,
+   declares 27 nested submodules), a vacuous pass in the BRAND-NEW condition-(C) gate (it certifies
+   having examined ZERO remotes), an honesty defect (the refusal claims "both versions are left on
+   disk"; `git hash-object` without `-w` stores nothing, so the printed blob sha is not a recovery
+   handle), and LOCAL_PATH permitted in production. Its closing judgement is the key one: every
+   push and both residuals sit behind `has_local_mods`, `helixqa` is clean today, so a run today is
+   safe — but the general case is not signed off, because that safety rests on a precondition the
+   script neither checks nor states.
+1. Three phase-05 suites are RED and CORRECTLY so (LVA-157) — fixtures under repair.
+2. The T062 end-to-end run on a disposable branch.
+3. LVA-008's C06 + C11 device re-run on a §6.AH container/VM emulator.
+4. A full constitutional-gate sweep on a QUIET tree — see the systemic constraint in
+   the top banner; the last sweep was measured against a tree that shifted mid-run and
+   is therefore not a clean baseline.
+
 ### 2.1 Phase 4 follow-up C (HelixQA Go-package linking) — STATUS UPDATE 2026-05-16
 
 **Phase 4-C-1 (pkg/evidence adapter): COMPLETED 2026-05-16.** All 10 open questions answered by operator + implementation landed in this cycle's commit. Operator decisions: Q1 Go 1.26 bump, Q2 WRAP, Q3 Path A tag-pin (transitional Path B replace+sibling-mount until HelixQA stabilizes), Q4 preserve HelixQA terminology (Collector / Detector / Generator), Q5 upstream-contribute CaptureGeneric first (HelixDevelopment/HelixQA PR #1, branch `feat/evidence-capture-generic`, commit `a1e2020dd759d025b67ef8e024061b103940470d`), Q6 SKIP 4-C-4 navigator entirely, Q7 NO recover() wrapping, Q8 accept 2x CI build-time delta, Q9 always-track-upstream for HelixQA (§6.AD waiver documented in CLAUDE.md), Q10 coverage-ledger bumped in same commit.
@@ -1032,65 +1233,132 @@ docs/todos/Lava_TODOs_001.md committed as historical; etc.)
 
 ## 7. RESUME PROMPT
 
-> **⏩ CURRENT RESUME (2026-08-14) — SHORT (one-paste):** *"Read `docs/CONTINUATION.md` §0 (top entry) + `.remember/remember.md`, `git fetch`, then continue on `master`. LVA-098 (P0: no tracker could log in, search failed for every provider) is root-caused + fixed + real-device-verified: `app/build.gradle.kts`'s generated-source directory registration for `lava.auth.LavaAuthGenerated` ran too late (`afterEvaluate`) for the Kotlin compile task to see it, so the class was written to disk every build but never compiled into the APK — meaning no authenticated request ever carried a `Lava-Auth` header, on any real device. Fixed via an eager (non-`afterEvaluate`) source-set registration; verified via `dexdump` (class now genuinely in the dex), a real non-instrumented device launch (`LavaAuthGenerated FOUND`, not `ClassNotFoundException`), and `Challenge70AutonomousQaProviderMatrixTest` PASSING end-to-end (server logs confirm `hdr_present=true` + HTTP 200 search/topic/download). Client bumped to 1.3.17-1085 (versionName held, §6.Y). Trust the top §0 entry over this stale §7 paste-block below (last substantively rewritten 2026-06-26); check `git log` for the true HEAD."*
->
-> **FULL (paste-ready):** read §0 top entry (2026-08-14 LVA-098 banner) first — it supersedes the state description in this paste-block, which is stale from 2026-06-26 and kept only for its detailed step-by-step scaffolding below. Binding constraints unchanged: anti-bluff §6.J/§6.L + Sixth/Seventh Laws, §6.AK coverage-intersection (every CHANGELOG claim needs an executed+PASSED covering device Challenge), no-force-push (§6.T.3/§11.4.113), §6.S CONTINUATION-in-same-commit, §6.AH no-host-direct-VMs, §6.X containerized-KVM emulator gate on Linux. **Immediate next actions per the 2026-08-14 LVA-098 cycle:** confirm the standalone `lava-api-go` container is running the exact committed source (restart if in doubt); rebuild + two-stage Firebase-distribute the client (debug then release) at 1.3.17-1085; check whether `:api-app` needs a matching rebuild (it embeds `lava-api-go` and picked up the same permanent §6.AC diagnostic-logging change, so its embedded binary changed even though it was never affected by the LVA-098 bug itself, which is `:app`-client-only). LVA-008 nav-teardown crash remains OPEN (upstream androidx-navigation defect, 8 candidates falsified, minimal-repro authored) — unrelated to this cycle.
+> **REWRITTEN 2026-08-27.** Everything below this line supersedes every earlier resume block.
+> The previous version pointed at `/Volumes/T7/Projects/lava` — a macOS path that does not exist
+> on this host — and described priorities from June that are all superseded. It has been removed
+> rather than kept, because a resume block that fails on its first line is worse than none.
 
-Paste the following into a new CLI agent session to continue this
-work. The agent needs no scrollback — everything it needs is in this
-file plus the spec/plan/CLAUDE.md set referenced from it.
+### 7.1 — The one-line resume
+
+The project is mid-flight on **SpecKit feature `002-build-test-distribute-pipeline`**. A fresh
+session resumes by running:
 
 ```
-Continue Lava project work. Read these in order before doing anything:
-
-  1. /Volumes/T7/Projects/lava/docs/CONTINUATION.md
-  2. /Volumes/T7/Projects/lava/CLAUDE.md
-  3. /Volumes/T7/Projects/lava/constitution/Constitution.md
-  
-Then check the git state vs the CONTINUATION.md "Last updated" line.
-If new commits exist on master beyond what CONTINUATION.md describes,
-trust the commits and update CONTINUATION.md before proceeding (per §6.S).
-
-Active state per CONTINUATION.md §0 (2026-06-26):
-  - HEAD at `28a8b79b` on master (GitHub + GitLab converged).
-  - Cycle-coverage gate §6.AK is WIRED (Check 10 pre-push + Gate 7 firebase-distribute).
-  - Last distribute: client 1.3.12-1076 + api-app 0.2.11-22 (2026-06-25).
-  - LVA-008 nav-teardown crash = OPEN (upstream androidx-navigation defect, 8 candidates falsified).
-  - Constitution, coverage ledger, submodules all up to date.
-
-Your default next action (priority order):
-  1. **Commit pending working-tree changes** — C48/C52/C66 LenientTeardownRule refinements,
-     stress-chaos re-runs (timestamps), design-spec post-1076 revisions, vision_engine pin advance.
-  2. **Graft the api-app Check 10 extension** — the patch at
-     `docs/superpowers/specs/2026-06-26-ak-check10-apiapp-extension.md` wraps the existing
-     single-channel loop into a two-channel loop (client + api-app). Proven hermetically
-     at `tests/cycle-coverage/test_wiring_apiapp.sh` (5/5 PASS).
-  3. **Advance to 1077 cycle** — search-flow device Challenges (C58–C62)
-     once LVA-008 unblocks or Genymotion harness matures.
-  4. **OpenDesign transitions** — answer operator decisions 1-6 from the design spec;
-     Wave A (tokens.css + codegen + parity gate) is the foundation.
-  5. **LVA-008** — upstream minimal-repro authored; operator call needed:
-     file with Google vs live with the LENIENT_TEARDOWN_RULE workaround.
-
-Do NOT re-run completed phases — they are committed + pushed + sweep-verified.
-The git log is the authoritative record.
-
-Constitutional bindings still in force (do not relax):
-  §6.AK (Cycle-Coverage Device Gate — every claim needs a covering Challenge)
-  §6.J / §6.L (Anti-Bluff Functional Reality Mandate)
-  §6.AB / §6.AC / §6.AE (anti-bluff scanners — STRICT)
-  §6.AD (HelixConstitution Inheritance)
-  §6.R (No-Hardcoding Mandate)
-  §6.S (Continuation Document Maintenance — THIS file)
-  §6.W (GitHub + GitLab Only Remote Mandate)
-  §6.AH (no host-direct VMs — Genymotion is the macOS equivalent)
-  §6.AJ / §11.4.140 (action-prefix expansion via registry)
-
-The operator's standing §6.L wall is preserved verbatim in CLAUDE.md.
-Read it.
+/speckit-superspec-execute 002
 ```
 
----
+Nothing else is required. That command reads `specs/002-build-test-distribute-pipeline/tasks.md`
+and `progress.yml`, which are accurate as of this commit.
+
+### 7.2 — Exactly what is left: 4 tasks, one chain
+
+`tasks.md`: **59 of 63 checked.** The 4 open ones are NOT independent — three form a strict chain.
+
+| Task | State | Blocked by |
+|---|---|---|
+| **T054** `[REVIEW]` | Five review rounds done. **The publish path it reviewed has since been DELETED** (see 7.3), so a **sixth review of the post-removal script** is owed. | nothing |
+| **T055** `[US4]` | Design + skeleton complete in scratchpad; **`scripts/pipeline/phase-07-closure.sh` does not exist.** | T054 |
+| **T056** `[US4]` | Runs quickstart Scenario 4. Its spec contradiction with FR-017 was resolved (FR-017 wins). | T055 |
+| **T062** `[REVIEW]` | Reached `install_boot` + `live_verify` for the first time — but ONLY via a run that skipped all testing. **Scenario 2 is NOT satisfied.** | LVA-168 |
+
+### 7.3 — The single most important thing to know
+
+`scripts/advance-all-submodules.sh` had **twelve distinct, fixture-proven ways** to publish
+unaudited content to another repository's default branch. Five adversarial review rounds each
+confirmed the prior fixes and found more: **3 → 5 → 7 → 9 → 10 → 11 → 12.**
+
+Guarding provably failed to converge. Round 3 stopped enumerating *routes* and began guarding the
+*artefact*; rounds 4-5 then enumerated *projections* of the artefact, and the eleventh escape was
+a projection nobody had listed — the commit object's own header bytes (4000 bytes of payload in an
+author name reached both mirrors with all five guards green). The convergent byte-equality
+instrument was tried and **defeated**: `git commit-tree` inherits `i18n.commitEncoding`, so the
+expected commit is built in the same adversary-controlled config context and the poison cancels
+out on both sides.
+
+**Resolution (landed in this commit): the capability was REMOVED, not guarded.**
+`--publish-local-modifications` and the entire step-6 publish path are gone — 2966 → 2170 lines.
+The script now issues **no `git push` and creates no commit on any path**, so §6.T.3 is satisfied
+structurally rather than by flag selection. All twelve escapes are unreachable by construction.
+Suites: **634 assertions, 4 suites, all exit 0**, floors RAISED (`MIN_ASSERTIONS` 355→405), and
+**no test case was deleted** — each was retargeted to assert the capability is gone, six of them
+running the adversarial payload against a clean submodule where it genuinely fires and still
+cannot reach an upstream.
+
+**Owed:** the governance diffs are drafted but NOT applied (operator approval required) —
+`spec.md` FR-015 (strike "commit and push any of the submodule's own local modifications"),
+`research.md` R-005 (mark step 6 REMOVED), and root `CLAUDE.md` conditions (D)/(E). **Until those
+land, the script is knowingly non-conformant with its own spec** — stated rather than hidden.
+
+### 7.4 — Open P0s a resuming session must not lose
+
+- **LVA-165 — OPERATOR ACTION: rotate the GitLab token.** A `${VAR:-default}` expansion printed a
+  real token to a transcript. Containment verified (0 tracked files, 0 unredacted artefacts, never
+  reached git). This is the *identical* mistake LVA-5 records with the Firebase token. A grep gate
+  over `:-` applied to any TOKEN/SECRET/KEY/PASSWORD name would close the class.
+- **LVA-166 — the script's stated safety property is FALSE.** Its header claims a clean-tree run is
+  "all local, nothing leaving this machine". `PUBLISH_LOCAL_MODS` was last consulted at line 1810
+  while the step-5 verify command runs later, unguarded, with the operator's live unencrypted SSH
+  key and 25 own-org upstreams in reach — demonstrated by a real SSH-authenticated push. Removing
+  step 6 does NOT touch this. Reviews #4 and #5 both approved on this false basis.
+- **LVA-168 — a skipped phase is omitted from the run report entirely**, so a `--skip test` run
+  reports `outcome: PASS` with every `phases[]` entry PASS. A zero-test run is byte-indistinguishable
+  from a full passing one. Bears directly on §6.AA clause 8 condition (B).
+- **LVA-160 / LVA-157** — clause 8 condition (C) never reads WHICH Challenge ran, and clause 8's own
+  certifying fixtures never validated their records. With LVA-168 that is **three independent ways
+  the same clause can qualify on evidence that proves nothing.**
+
+### 7.5 — What was measured about the sandbox (LVA-167)
+
+A real 4-variant Lava build **completes** inside a credential-masked `bwrap` sandbox
+(`BUILD SUCCESSFUL in 17m 50s`, all APKs `apksigner`-verified, cold rebuild byte-identical to the
+host). Push is blocked throughout, proven *during* the live build and falsified against a control.
+Cache poisoning is closable via `--tmp-overlay` at ~3× warm wall time.
+**Two traps for whoever implements it:** the analysis prototype masks `/run` wholesale, and **this
+repo lives at `/run/media/...`** — following it literally deletes the project and yields a false
+negative; mask `/run/user`, never `/run`. And it is a **git-credential sandbox, not a credential
+sandbox**: `.env`, both `google-services.json` and the keystores live in the tree the build is
+given, and the sandboxed build **uploaded to Firebase twice**.
+
+### 7.6 — Binding constraints (unchanged, non-negotiable)
+
+Anti-bluff §6.J / §6.L + Sixth and Seventh Laws · §6.AK coverage-intersection · §6.T.3 no
+force-push / no history rewrite / no hook bypass without explicit per-operation approval · §6.S
+CONTINUATION-in-the-same-commit · §6.AH container/VM emulators only, never host-direct · §6.AG
+never target a physical ADB device · §6.W GitHub + GitLab only · §6.U no `sudo`/`su` · §6.R no
+hardcoded IPv4 / host:port / UUID.
+
+**Environment facts a fresh session will otherwise rediscover the hard way:**
+`grep` is shadowed by a ugrep wrapper — run exit-code-sensitive greps inside `bash -c '...'`.
+`BASH_ENV=/home/milosvasic/.bashrc` **is set on this host** and is inherited by `bash -c`.
+The repo path is `/run/media/milosvasic/DATA4TB/Projects/lava`.
+
+### 7.7 — Paste-ready block
+
+```
+Continue Lava SpecKit feature 002-build-test-distribute-pipeline.
+
+Repo: /run/media/milosvasic/DATA4TB/Projects/lava   (branch: master)
+
+Read in order, then act:
+  1. docs/CONTINUATION.md  §0 top banner and §7 (this section)
+  2. CLAUDE.md
+  3. specs/002-build-test-distribute-pipeline/tasks.md + progress.yml
+
+Then run:  /speckit-superspec-execute 002
+
+4 tasks remain (59/63 done): T054 needs a SIXTH review now that the
+publish path was deleted; T055 implements phase-07-closure.sh and is
+blocked on it; T056 follows T055; T062 needs a full Scenario 2 run that
+does not skip testing.
+
+Do not re-litigate the publish-path removal — twelve proven escapes over
+five review rounds, guarding demonstrably non-convergent. Do read §7.3
+before touching scripts/advance-all-submodules.sh.
+
+Open P0s: LVA-165 (rotate GitLab token - OPERATOR), LVA-166 (the script's
+stated clean-tree safety property is false), LVA-168 (a skipped phase is
+omitted from the run report, so a zero-test run reports PASS).
+```
 
 ## 8. House-keeping the agent should keep doing
 

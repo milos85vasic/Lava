@@ -185,11 +185,22 @@ else
   fail "FAIL evidence record's result field is '$result_field', expected FAIL"
 fi
 
+# UPDATED 2026-08-26. This assertion previously required the placeholder to
+# be the literal string "validated" — the SAME value the real validator
+# writes on accept — which made "an independent validator examined this
+# record and accepted it" and "no validator ever looked at this record"
+# byte-identical on disk. Measured consequence: a real-device-challenge
+# record asserting only "did not crash", never validated by anything,
+# reached "phase-02-test: PASSED". The placeholder is now the REJECTED form
+# (the only other value evidence-record.schema.json's
+# ^(validated|REJECTED: .+)$ pattern permits), so an unvalidated record is
+# fail-CLOSED. It must ALSO still be schema-legal and must NOT be the
+# accept value.
 anti_bluff_field="$(python3 -c "import json; print(json.load(open('$fail_record_path'))['anti_bluff_status'])")"
-if [[ "$anti_bluff_field" == "validated" ]]; then
-  pass "FAIL evidence record's anti_bluff_status placeholder is 'validated' (per spec — not a real verdict yet)"
+if [[ "$anti_bluff_field" != "validated" && "$anti_bluff_field" == REJECTED:* ]]; then
+  pass "FAIL evidence record's anti_bluff_status placeholder is a schema-legal NOT-VALIDATED value, not the accept value 'validated'"
 else
-  fail "FAIL evidence record's anti_bluff_status is '$anti_bluff_field', expected placeholder 'validated'"
+  fail "FAIL evidence record's anti_bluff_status is '$anti_bluff_field'; the writer's placeholder must never be 'validated' (that is the validator's accept value) and must match ^REJECTED: .+$ so an unvalidated record fails closed"
 fi
 
 # anti_bluff_status pattern check: ^(validated|REJECTED: .+)$

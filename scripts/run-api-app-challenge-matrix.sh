@@ -47,6 +47,10 @@ NO_BUILD=0
 # cold-boot can exceed 5m purely on host contention (NOT a product defect);
 # raise this to give the boot headroom. Empty = use the CLI default.
 BOOT_TIMEOUT=""
+# LVA-161 (2026-08-26): forwarded to emulator-matrix --test-timeout (CLI default
+# 10m, TEST-step only). Sized by the caller to the selected class count; a kill
+# destroys the whole invocation's JUnit XML, not just the offending class.
+TEST_TIMEOUT=""
 # §6.X containerized-runner image + runtime. The pinned Containers
 # cmd/emulator-matrix CLI (>= 71d32562) REQUIRES --container-image when the
 # resolved runner is containerized (Linux + /dev/kvm path); forwarded only in
@@ -62,6 +66,7 @@ while [[ $# -gt 0 ]]; do
         --avds)          AVDS_OVERRIDE="$2"; shift 2 ;;
         --evidence-dir)  EVIDENCE_DIR="$2"; shift 2 ;;
         --boot-timeout)  BOOT_TIMEOUT="$2"; shift 2 ;;
+        --test-timeout)  TEST_TIMEOUT="$2"; shift 2 ;;
         --container-image)   CONTAINER_IMAGE="$2"; shift 2 ;;
         --container-runtime) CONTAINER_RUNTIME="$2"; shift 2 ;;
         --no-build)      NO_BUILD=1; shift ;;
@@ -164,6 +169,7 @@ echo "==> Delegating to Containers/cmd/emulator-matrix --runner=auto (module=$GR
     --image-manifest tools/lava-containers/vm-images.json \
     "${CONTAINER_ARGS[@]}" \
     ${BOOT_TIMEOUT:+--boot-timeout "$BOOT_TIMEOUT"} \
+    ${TEST_TIMEOUT:+--test-timeout "$TEST_TIMEOUT"} \
     --cold-boot \
     --concurrent=1
 RC=$?

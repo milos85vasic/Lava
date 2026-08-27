@@ -244,11 +244,13 @@
 <h1
 id="scriptspipeline-build-test-distributesh--user-guide"><code>scripts/pipeline-build-test-distribute.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-08-21 (phase wiring landed —
-T038; verified by real runs against disposable fixture repositories, see
-"Verification record" below) <strong>Inheritance:</strong>
-HelixConstitution §11.4.18 (script documentation mandate) + Lava's
-Anti-Bluff Pact (Sixth/Seventh Laws) + §6.T.2 (Resource Limits)</p>
+<p><strong>Last verified:</strong> 2026-08-25 (T046/T057 full-sequence
+wiring — <code>changelog_entry</code>, <code>distribute</code>,
+<code>docs_refresh</code>; independent audit of the <code>gate</code>
+mode, the evidence-directory derivation and <code>--help</code>)
+<strong>Inheritance:</strong> HelixConstitution §11.4.18 (script
+documentation mandate) + Lava's Anti-Bluff Pact (Sixth/Seventh Laws) +
+§6.T.2 (Resource Limits)</p>
 <h2 id="overview">Overview</h2>
 <p>The top-level orchestrator for this project's local
 build-test-distribute pipeline
@@ -298,31 +300,204 @@ feature exists to prevent.</p>
 <td>✅ both halves</td>
 </tr>
 <tr>
-<td>changelog / distribute</td>
-<td><code>phase-05a-*</code> / <code>phase-05-*</code></td>
-<td>❌ blocked on T040/T041</td>
+<td><code>changelog_entry</code></td>
+<td><code>scripts/pipeline/phase-05a-changelog-entry.sh</code></td>
+<td>✅ (T046)</td>
 </tr>
 <tr>
-<td>docs refresh</td>
-<td><code>phase-06-*</code></td>
-<td>❌ blocked on the same reviewed change</td>
+<td><code>distribute</code></td>
+<td><code>scripts/pipeline/phase-05-distribute.sh</code></td>
+<td>✅ (T046) — <strong>gate only; it cannot distribute</strong></td>
 </tr>
 <tr>
-<td>closure</td>
-<td><code>phase-07-*</code></td>
-<td>❌ blocked on T048/T049 + T054</td>
+<td><code>docs_refresh</code></td>
+<td><code>scripts/pipeline/phase-06-docs.sh</code></td>
+<td>✅ (T046)</td>
+</tr>
+<tr>
+<td><code>closure</code></td>
+<td><code>phase-07-closure.sh</code></td>
+<td>❌ the script does not exist — blocked on <strong>T054
+alone</strong></td>
 </tr>
 </tbody>
 </table>
-<p>The distribute, docs and closure phases are <strong>not</strong>
-unimplemented-by-accident. They are gated behind constitutional
-amendment tasks that have not been reviewed or merged: T040/T041 (an
-alternate path under <code>CLAUDE.md</code> §6.AA's Two-Stage Distribute
-Mandate and the Seventh Law's clause 3) and T048/T049 (a carve-out in
-the Decoupled Reusable Architecture rule's "submodule fetch/pull is an
-EXPLICIT operator action, never automatic"). Until those land, this
-script <strong>cannot</strong> distribute or push anything, by
-construction.</p>
+<p><code>closure</code> is <strong>not</strong>
+unimplemented-by-accident. <strong>CORRECTED 2026-08-26 — this paragraph
+used to name T048/T049 as a co-blocker, and that is no longer
+true.</strong> T048 and T049 (the carve-out in the Decoupled Reusable
+Architecture rule's "submodule fetch/pull is an EXPLICIT operator
+action, never automatic") both <strong>landed 2026-08-23</strong> under
+explicit operator approval, as did T040/T041; root
+<code>CLAUDE.md</code> now carries the
+<code>Automated Pipeline Pin-Advance Path</code> subsection with
+conditions (A)-(F). <strong>No constitutional amendment blocks this
+phase.</strong> The sole remaining blocker is <strong>T054</strong>, the
+dedicated review gate for <code>scripts/advance-all-submodules.sh</code>
+— the highest-blast-radius component in this feature, which has run four
+review rounds, returned APPROVE-WITH-FIXES every time, and has never
+returned a clean approval. T055 (the phase script itself) depends on it.
+<code>--until closure</code> is a usage error (exit <code>2</code>),
+never a silent no-op.</p>
+<p>One stale citation of the old blocker deliberately remains in the
+script itself, at the <code>--until</code> error message on line 375: it
+is operator-facing output rather than a comment, so the 2026-08-26
+comment-only correction pass left it for the commit that wires
+<code>closure</code>.</p>
+<p><strong>Wiring <code>distribute</code> did not make this script able
+to distribute.</strong> <code>phase-05-distribute.sh</code> is the §6.AA
+clause 8 refusal gate and today it is <em>only</em> that: it never
+invokes <code>scripts/firebase-distribute.sh</code>, writes no
+Distribution Record, and mutates <code>report.json</code> in no way. See
+"The distribute phase is a refusal gate" below for what its exit codes
+mean and how they are recorded.</p>
+<h3 id="r-004-ordering">R-004 ordering</h3>
+<p><code>changelog_entry</code> runs <strong>before</strong>
+<code>distribute</code>, and the broader <code>docs_refresh</code> runs
+<strong>after</strong> it.</p>
+<p><code>scripts/firebase-distribute.sh</code> treats the
+<code>CHANGELOG.md</code> entry (its Gate 2) and the per-version
+<code>.lava-ci-evidence/distribute-changelog/&lt;channel&gt;/&lt;version&gt;-&lt;code&gt;.md</code>
+snapshot (its Gate 3) as <strong>pre-existing inputs it
+verifies</strong>, never as things it authors. <code>spec.md</code>'s
+User Story 3 groups "distribute" and "refresh documentation" together,
+but the dependency direction for the CHANGELOG specifically is inverted
+from that naive reading. The broader documentation refresh has no such
+inversion and goes last.</p>
+<h3
+id="the-distribute-phase-is-a-refusal-gate-and-its-exit-3-is-neither-pass-nor-fail">The
+distribute phase is a refusal gate, and its exit 3 is neither pass nor
+fail</h3>
+<p><code>phase-05-distribute.sh</code> defines exactly three exit
+codes:</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>A distribution completed. <strong>Reserved, and unreachable
+today</strong> — no distribute step is implemented.</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td><strong>GATE REFUSED</strong> (one or more of FR-009 / §6.AA clause
+8 (A)–(H) failed, or a usage error). Refusal is the default.</td>
+</tr>
+<tr>
+<td><code>3</code></td>
+<td><strong>GATE QUALIFIED</strong>, and the distribute step is not
+implemented.</td>
+</tr>
+</tbody>
+</table>
+<p>Exit <code>3</code> is the interesting one, because the run report's
+<code>phases[].result</code> enum is <code>PASS | FAIL | SKIPPED</code>
+and <strong>none of the three means what it means</strong>:</p>
+<ul>
+<li><code>PASS</code> would put a <code>distribute: PASS</code> entry
+into the report for a run that distributed nothing. SC-008 tells an
+auditor to read <code>report.json</code> <em>first</em>; a reader of
+that entry would conclude a distribution happened. Manufacturing the
+appearance of a distribution that did not occur is the §6.Z / §6.AK
+bluff class, one level up.</li>
+<li><code>FAIL</code> would say the gate failed. It did not — it
+qualified.</li>
+<li><code>SKIPPED</code> is the closest word, but
+<code>finalize_run_report</code> treats a SKIPPED phase as
+<strong>not-PASS</strong> (deliberately, and documented as such in its
+own docblock), so recording it would finalize <em>every</em>
+otherwise-perfect run to <code>outcome: FAIL</code> and exit non-zero. A
+pipeline whose exit code is <code>1</code> for a good run and
+<code>1</code> for a broken one has no exit code at all, and an
+always-red gate is ignored within a week — which is how a real failure
+then ships unnoticed.</li>
+</ul>
+<p><strong>So on exit <code>3</code> the orchestrator records no
+<code>phases[]</code> entry for <code>distribute</code> at all</strong>,
+does not halt, and discloses the fact on stdout and in the run-summary
+box:</p>
+<pre><code>  distribute:  GATE QUALIFIED — NOTHING WAS DISTRIBUTED (no distribute step is
+               implemented; report.json has no &#39;distribute&#39; phase entry and its
+               &#39;distributions&#39; array is empty)</code></pre>
+<p>The absence of the entry is the honest record — nothing was
+distributed, so there is no distribution result to report — and the
+empty <code>distributions</code> array is its machine-readable half.
+This is the only path in the script that runs a phase and records
+nothing for it, and it is reachable only for a <code>gate</code>-mode
+phase exiting exactly <code>3</code>.</p>
+<p><strong>Every other exit code from that gate still fails the
+run</strong> and is recorded as <code>distribute: FAIL</code> by the
+orchestrator (the gate appends nothing of its own, so if the
+orchestrator does not record it, nobody does and
+<code>finalize_run_report</code>'s all-PASS rule is satisfied vacuously
+by the phases that <em>did</em> report). That includes exit
+<code>2</code> — the gate's own default refusal — and any code the gate
+never defined: an unmodelled state is read as failure, never as
+consent.</p>
+<p><strong>And a failure anywhere in a gate phase outranks a script that
+qualified.</strong> A phase may name several scripts.
+<code>distribute</code> names one today, but the registry supports more
+and <code>live_verify</code> already uses that shape. When an earlier
+script exits <code>3</code> and a later one fails, the phase
+<strong>failed</strong>: it is recorded <code>FAIL</code> and the run
+halts. The qualified-no-op path is reachable <em>only</em> when every
+script in the phase returned without failing.</p>
+<blockquote>
+<p><strong>Fixed 2026-08-25 (independent audit).</strong> The
+orchestrator used to test the qualified-no-op condition <em>before</em>
+the phase's failure, which made the failure branch unreachable the
+moment any script in the phase had exited <code>3</code>. Such a run
+recorded nothing for the phase, and <code>report.json</code> — the
+artifact SC-008 sends an auditor to <em>first</em> — finalized to
+<code>outcome: "PASS"</code> while the process exit code said
+<code>1</code>, with the run-summary box printing
+<code>outcome: PASS</code> and <code>halted at: distribute</code> side
+by side. The condition order is now failure-first. Regression coverage:
+<code>tests/pipeline/test_orchestrator_gate_and_registry_audit.sh</code>
+CASE A, with CASE B guarding the opposite over-correction (an
+all-qualified multi-script gate must still record no entry and
+pass).</p>
+</blockquote>
+<h3 id="the-default-run-now-writes-to-the-repository">The default run
+now writes to the repository</h3>
+<p><code>changelog_entry</code> writes a <code>CHANGELOG.md</code> entry
+and a per-version snapshot file; <code>docs_refresh</code> applies
+<code>research.md</code> R-002's stale-documentation fixes and
+regenerates the <code>.html</code>/<code>.pdf</code> siblings of every
+<code>.md</code> it changed. Both are what FR-013 / SC-006 ("zero manual
+documentation follow-up required") ask for, and both are now inside the
+default <code>--until docs_refresh</code>.</p>
+<p>Two consequences worth stating plainly rather than discovering:</p>
+<ul>
+<li>A completed default run leaves the working tree <strong>dirty on
+purpose</strong>. The phase that commits those changes is
+<code>closure</code>, which is not wired. Until it is, committing is a
+human act.</li>
+<li>Because FR-000 requires a clean tree, a <strong>second</strong> run
+started before those changes are committed or discarded will refuse at
+<code>precondition</code>. That refusal is correct, not a bug.</li>
+</ul>
+<p><code>--until live_verify</code> reproduces the pre-T046 default
+exactly, and <code>--skip changelog_entry,distribute,docs_refresh</code>
+does the same for a run that should touch nothing.</p>
+<p>Because an operator who types no flags at all never reads this guide
+or <code>--help</code>, a run that will genuinely reach one of those two
+phases <strong>also announces it on stdout</strong> before the first
+phase starts:</p>
+<pre><code>pipeline-build-test-distribute: NOTE — this run WRITES TO THE REPOSITORY. Phase(s)
+  changelog_entry docs_refresh edit tracked files (CHANGELOG.md, its per-version
+  snapshot, documentation and its regenerated .html/.pdf siblings).</code></pre>
+<p>The notice is computed from the phases the run will actually reach:
+<code>--until</code> short of them, or <code>--skip</code> of them,
+suppresses it — a warning that is wrong teaches the reader to ignore the
+next one. Regression coverage:
+<code>tests/pipeline/test_orchestrator_gate_and_registry_audit.sh</code>
+CASE H (positive <em>and</em> both suppression cases).</p>
 <p><strong><code>live_verify</code> covers both surfaces</strong> (since
 T037 landed, 2026-08-21): the running <code>lava-api-go</code> service,
 and the <code>:api-app</code> debug APK installed onto a
@@ -346,8 +521,8 @@ itself.</p>
 AVD (API 34 phone) — the only emulator image cached on this host. That
 is live-verification, not the §6.AE.2 release-gate matrix.</p>
 <h2 id="usage">Usage</h2>
-<div class="sourceCode" id="cb1"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/pipeline-build-test-distribute.sh</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span> <span class="pp">[</span><span class="ss">repo</span><span class="pp">-</span><span class="ss">path</span><span class="pp">]</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/pipeline-build-test-distribute.sh</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span> <span class="pp">[</span><span class="ss">repo</span><span class="pp">-</span><span class="ss">path</span><span class="pp">]</span></span></code></pre></div>
 <table>
 <thead>
 <tr>
@@ -358,11 +533,15 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 <tbody>
 <tr>
 <td><code>--until &lt;phase&gt;</code></td>
-<td>Stop after <code>&lt;phase&gt;</code> completes successfully.
-Default <code>live_verify</code> (the furthest wired phase). This is
-what makes <code>quickstart.md</code>'s per-user-story slices runnable:
-<code>--until test</code> is the US1 slice,
-<code>--until live_verify</code> is US1+US2.</td>
+<td>Stop after <code>&lt;phase&gt;</code> completes successfully. One of
+<code>precondition</code>, <code>build</code>, <code>test</code>,
+<code>install_boot</code>, <code>live_verify</code>,
+<code>changelog_entry</code>, <code>distribute</code>,
+<code>docs_refresh</code>. Default <code>docs_refresh</code> (the
+furthest wired phase). This is what makes <code>quickstart.md</code>'s
+per-user-story slices runnable: <code>--until test</code> is the US1
+slice, <code>--until live_verify</code> is US1+US2,
+<code>--until docs_refresh</code> is US1+US2+US3.</td>
 </tr>
 <tr>
 <td><code>--skip &lt;phase&gt;[,&lt;phase&gt;…]</code></td>
@@ -371,12 +550,16 @@ what makes <code>quickstart.md</code>'s per-user-story slices runnable:
 </tr>
 <tr>
 <td><code>-h</code>, <code>--help</code></td>
-<td>Print the usage block and exit <code>0</code>.</td>
+<td>Print the <strong>whole</strong> usage block (the script's header
+comment, ~190 lines) and exit <code>0</code>. It is produced by an awk
+scan that stops at the first non-comment line, not by a hardcoded line
+window — a fixed window silently truncates the moment the header is
+edited.</td>
 </tr>
 </tbody>
 </table>
-<p>Naming a phase that is not wired (e.g.
-<code>--until distribute</code>) is a <strong>usage error (exit
+<p>Naming a phase that is not wired (today that is only
+<code>--until closure</code>) is a <strong>usage error (exit
 2)</strong>, not a silent no-op.</p>
 <p><code>precondition</code> cannot be skipped because it is the FR-000
 safety boundary — a pipeline that can be talked out of checking its own
@@ -410,14 +593,22 @@ the offending paths rather than leaving you to hunt for it.</p>
 <code>.lava-ci-evidence/pipeline-runs/&lt;UTC-run-id&gt;/</code>
 containing a <code>report.json</code> (schema:
 <code>specs/002-build-test-distribute-pipeline/contracts/pipeline-run-report.schema.json</code>),
-one <code>phase-NN/</code> subdirectory per phase, and the phase's own
-Evidence Records. Per <code>research.md</code> R-010, a later invocation
-never reads a prior run's directory as input — every run restarts fully
-from scratch (FR-018).</p>
+one <code>phase-NN/</code> subdirectory per phase script, and the
+phase's own Evidence Records. The subdirectory name carries the script's
+number <strong>including any suffix letter</strong>:
+<code>phase-05a-changelog-entry.sh</code> owns <code>phase-05a/</code>
+and <code>phase-05-distribute.sh</code> owns <code>phase-05/</code>, and
+they are deliberately not the same directory. Per
+<code>research.md</code> R-010, a later invocation never reads a prior
+run's directory as input — every run restarts fully from scratch
+(FR-018).</p>
 <p>On <strong>every</strong> exit path once the report exists — success,
 phase failure, or interrupt — this script runs
-<code>recompute_evidence_summary</code> and then
-<code>finalize_run_report</code>.</p>
+<code>append_interrupted_phase_if_any</code>, then
+<code>recompute_evidence_summary</code>, then
+<code>finalize_run_report</code>, <strong>in that order</strong>. The
+interrupted-phase step runs first so the outcome rule sees the FAIL
+phase it records.</p>
 <p>The recompute step is not bookkeeping; it is load-bearing.
 <code>data-model.md</code>'s Validation rule makes
 <code>outcome: "PASS"</code> conditional on
@@ -435,6 +626,121 @@ finalized <code>outcome</code> is <code>FAIL</code> (because an Evidence
 Record was REJECTED by anti-bluff validation) <strong>exits
 non-zero</strong>. The finalized outcome is authoritative over the
 individual phase exit codes.</p>
+<h3 id="an-interrupted-run-can-never-finalize-to-pass">An interrupted
+run can never finalize to PASS</h3>
+<p>Added 2026-08-23, from the first genuine end-to-end runs of this
+pipeline.</p>
+<p><strong>The defect.</strong> Run <code>2026-08-23T10-15-30Z</code>
+was killed mid-build. The process exit code was honest — <code>1</code>,
+<code>halted at: build</code>. The <code>report.json</code>, which
+SC-008 tells an auditor to read <em>first</em>, said:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;outcome&quot;</span><span class="er">:</span> <span class="st">&quot;PASS&quot;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;phases&quot;</span><span class="er">:</span>  <span class="ot">[</span><span class="fu">{</span><span class="dt">&quot;name&quot;</span><span class="fu">:</span><span class="st">&quot;precondition&quot;</span><span class="fu">,</span><span class="dt">&quot;result&quot;</span><span class="fu">:</span><span class="st">&quot;PASS&quot;</span><span class="fu">}</span><span class="ot">]</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;build_artifacts&quot;</span><span class="er">:</span> <span class="ot">[]</span>        <span class="st">&quot;evidence_summary&quot;</span><span class="er">:</span> <span class="fu">{</span><span class="dt">&quot;total&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span> <span class="er">...</span><span class="fu">}</span></span></code></pre></div>
+<p>A run that never got past its first phase, produced zero artifacts
+and zero Evidence Records, reported success.</p>
+<p><code>finalize_run_report</code> could not have caught it. Its rule
+is
+<code>(.phases | length) &gt; 0 and (.phases | all(.result == "PASS"))</code>.
+The <code>length &gt; 0</code> guard closes the <strong>empty</strong>
+case; it cannot close the <strong>truncated prefix</strong> case,
+because a truncated run's <code>phases[]</code> is a perfectly valid
+all-PASS list — merely <em>shorter</em> than the run was supposed to be.
+Nothing in the report distinguished "ran everything and passed" from
+"stopped after phase 1". That is the same vacuous-pass class
+<code>phase-02-test.sh</code>'s PASS condition 4 closed (a phase passing
+on zero Evidence Records), sitting one level up.</p>
+<p><strong>The fix.</strong> A per-<strong>script</strong> in-flight
+marker, via three helpers in
+<code>scripts/pipeline/lib/run-report.sh</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Helper</th>
+<th>Called</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mark_phase_in_flight &lt;run_id&gt; &lt;phase&gt;</code></td>
+<td>immediately <strong>before</strong> a phase script is invoked</td>
+<td>writes the phase name to
+<code>&lt;run_dir&gt;/.phase-in-flight</code></td>
+</tr>
+<tr>
+<td><code>clear_phase_in_flight &lt;run_id&gt;</code></td>
+<td>the instant that script <strong>returns</strong></td>
+<td>removes the marker; removing an absent marker is not an error</td>
+</tr>
+<tr>
+<td><code>append_interrupted_phase_if_any &lt;run_id&gt;</code></td>
+<td>on <strong>every</strong> close path, before recompute/finalize</td>
+<td>a surviving marker becomes an honest
+<code>&lt;phase&gt;: FAIL</code> entry, then the marker is cleared so
+the operation is idempotent</td>
+</tr>
+</tbody>
+</table>
+<p>Three design points worth keeping:</p>
+<ul>
+<li><strong>A file, not a shell variable.</strong> The orchestrator can
+be killed outright; a variable dies with the process, a file survives so
+a later reader can still tell the run was interrupted. It lives inside
+the run directory, so it is per-run by construction and cannot leak
+between runs — and that directory is gitignored, so the marker never
+dirties the working tree.</li>
+<li><strong>Per script, not per phase.</strong> The marker means <em>"a
+phase script is executing right now"</em>, not <em>"a phase
+started"</em>. A script that returns was not interrupted, whatever its
+exit code, and has already recorded its own result. Marking per phase
+appends a phantom second FAIL to an ordinary phase failure, claiming the
+phase was interrupted when it ran to completion and failed. This was
+caught and corrected during the fix itself.</li>
+<li><strong>The report schema was not widened.</strong>
+<code>pipeline-run-report.schema.json</code> is
+<code>additionalProperties: false</code>, and an interrupted phase
+genuinely did not pass — so this is expressed in the existing
+<code>phases[]</code> field. Recording it as FAIL states a fact the
+report was missing rather than inventing a field.</li>
+</ul>
+<p>When a marker is found, the orchestrator prints to stderr:</p>
+<pre><code>pipeline-build-test-distribute: run was INTERRUPTED during phase &#39;&lt;name&gt;&#39; — recorded as FAIL. A run that did not finish is not a run that passed.</code></pre>
+<p><strong>Regression coverage.</strong>
+<code>tests/pipeline/test_interrupted_run_never_passes.sh</code> — 3
+cases, 6 checks. The RED run reproduced the real defect verbatim
+(<code>outcome is 'PASS', expected FAIL</code>); cases 2 and 3 were
+<strong>green before</strong> the fix, so a blanket fail-everything
+change could not have satisfied the suite. Case 3 asserts the marker is
+per-run and never leaks between runs. Verified additionally by real
+orchestrator runs against a disposable fixture: clean → exit 0,
+<code>outcome: PASS</code>, exactly one phase entry with no phantom
+FAIL; dirty → exit 2, <code>outcome: FAIL</code>, exactly one
+<code>precondition</code> entry with no duplicate; marker file absent
+after a completed run.</p>
+<h3 id="each-phase-script-gets-its-own-evidence-directory">Each phase
+script gets its own evidence directory</h3>
+<p>The per-phase evidence directory is derived from the script's
+<strong>own</strong> number, including any letter suffix, so it matches
+the directory that script writes into:
+<code>phase-05a-changelog-entry.sh</code> owns
+<code>&lt;run&gt;/phase-05a</code> and
+<code>phase-05-distribute.sh</code> owns
+<code>&lt;run&gt;/phase-05</code>, and they are <strong>not</strong> the
+same directory. A fixed-width slice of the script name returns
+<code>05</code> for both and silently merges their evidence.</p>
+<blockquote>
+<p><strong>Audited 2026-08-25.</strong> The suffix-aware derivation was
+correct, but nothing tested it: reverting that one line to the pre-fix
+fixed-width form left 117 checks green across five orchestrator suites,
+none of which ever looked at a directory name.
+<code>tests/pipeline/test_orchestrator_gate_and_registry_audit.sh</code>
+CASE D now asserts that a full run produces exactly eight distinct
+evidence directories including both <code>phase-05</code> and
+<code>phase-05a</code>, and that the derivation is not a fixed-width
+slice.</p>
+</blockquote>
 <h2 id="exit-codes">Exit codes</h2>
 <table>
 <thead>
@@ -447,7 +753,10 @@ individual phase exit codes.</p>
 <tr>
 <td><code>0</code></td>
 <td>Every phase that ran reported PASS, and the finalized
-<code>outcome</code> is <code>PASS</code>.</td>
+<code>outcome</code> is <code>PASS</code>. A <code>distribute</code>
+gate that QUALIFIED without distributing anything (its exit
+<code>3</code>) does not change this, and does not claim a distribution
+happened.</td>
 </tr>
 <tr>
 <td><code>1</code></td>
@@ -466,12 +775,49 @@ hardcoded).</td>
 <h2 id="individual-phase-scripts">Individual phase scripts</h2>
 <p>Per FR-005, every phase is independently invocable outside this
 orchestrator. All phase scripts except <code>phase-00</code> share the
-signature <code>&lt;run_id&gt; [repo-path]</code> and append their own
-<code>phases[]</code> entry to the shared <code>report.json</code>;
-<code>phase-00-precondition.sh</code> takes only
-<code>[repo-path]</code> and this orchestrator appends on its behalf.
-See
+signature <code>&lt;run_id&gt; [repo-path]</code>. See
 <code>specs/002-build-test-distribute-pipeline/contracts/cli-contract.md</code>.</p>
+<p>Who records a phase's <code>phases[]</code> entry is declared per
+phase in the orchestrator's <code>PHASES</code> registry, as its third
+field:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Meaning</th>
+<th>Phases</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>yes</code></td>
+<td>The phase script calls <code>append_phase_result</code> itself; the
+orchestrator must not append a second entry (a duplicate would corrupt
+the all-PASS outcome rule). The contract is still
+<strong>verified</strong>, not trusted, when the phase fails — see
+<code>phase_nonpass_count</code>.</td>
+<td><code>build</code>, <code>test</code>, <code>install_boot</code>,
+<code>live_verify</code>, <code>changelog_entry</code>,
+<code>docs_refresh</code></td>
+</tr>
+<tr>
+<td><code>no</code></td>
+<td>The phase script does not append; the orchestrator appends PASS on
+exit <code>0</code> and FAIL otherwise.</td>
+<td><code>precondition</code></td>
+</tr>
+<tr>
+<td><code>gate</code></td>
+<td>The phase script does not append <strong>and</strong> has a third
+outcome that is neither pass nor fail. Exit <code>0</code> → PASS; exit
+<code>3</code> → <em>no entry</em>; anything else → FAIL and halt.</td>
+<td><code>distribute</code></td>
+</tr>
+</tbody>
+</table>
+<p>Phase names are constrained to the <code>phases[].name</code> enum in
+<code>contracts/pipeline-run-report.schema.json</code>. The schema is
+the closed set; the registry does not get to invent names.</p>
 <h2 id="verification-record">Verification record</h2>
 <p>The phase wiring was verified by real execution against disposable
 fixture git repositories (never against real <code>master</code>):</p>
@@ -485,15 +831,119 @@ fixture git repositories (never against real <code>master</code>):</p>
 <li>Fixture with the <code>.gitignore</code> rule removed → exit
 <code>2</code> <strong>plus</strong> the <code>DIAGNOSIS</code> block
 naming the untracked run-directory paths.</li>
-<li>All five usage guards (<code>--help</code>, unknown
-<code>--until</code>, not-yet-wired <code>--until distribute</code>,
+<li>All usage guards (<code>--help</code>, unknown <code>--until</code>,
+not-yet-wired <code>--until closure</code>,
 <code>--skip precondition</code>, unknown option) → exit as
 specified.</li>
 </ul>
-<p>The full end-to-end run across all five wired phases is task
+<p>The full end-to-end run across all eight wired phases is task
 <strong>T062</strong>, a review gate that must first be executed on a
-disposable branch — it has deliberately <strong>not</strong> been run
-against real <code>master</code>.</p>
+disposable branch.</p>
+<p><strong>T046 / T057 (2026-08-25).</strong> The full-sequence wiring
+is covered by
+<code>tests/pipeline/test_pipeline_full_sequence_wiring.sh</code>, which
+substitutes synthetic phase scripts for the real ones (nothing there
+invokes Gradle, systemd, podman, an emulator or Firebase) and asserts on
+order, on <code>report.json</code>, and on the exit code. It was built
+RED-then-GREEN: 30 failing checks before the wiring landed, all passing
+after. Four deliberate mutations were rehearsed against it and each was
+caught:</p>
+<table>
+<thead>
+<tr>
+<th>Mutation</th>
+<th>Observed failure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>map gate exit <code>3</code> → <code>distribute: PASS</code></td>
+<td><code>FAIL: report.json contains a distribute entry (…, ('distribute', 'PASS'), …) for a run that distributed nothing</code></td>
+</tr>
+<tr>
+<td>map gate exit <code>3</code> → <code>distribute: SKIPPED</code></td>
+<td><code>FAIL: gate exit 3 made the whole run exit 1 — every otherwise-good run would fail</code>
+(+ 4 more)</td>
+</tr>
+<tr>
+<td>treat <em>every</em> non-zero gate code as the no-op (so the gate's
+failure cannot fail the run)</td>
+<td><code>FAIL: a REFUSED gate still exited 0 — a phase whose failure cannot fail the run is not wired, it is decorative</code>
+(+ 4 more)</td>
+</tr>
+<tr>
+<td>invert the R-004 order (<code>docs_refresh</code> before
+<code>distribute</code>)</td>
+<td><code>FAIL: changelog_entry at 7, distribute at 0 — R-004 requires changelog first</code>
+(+ 7 more)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Independent audit, 2026-08-25</strong> —
+<code>tests/pipeline/test_orchestrator_gate_and_registry_audit.sh</code>
+(48 checks). It was built RED-then-GREEN: 4 failing checks before the
+fixes landed, all passing after. Its own falsifiability rehearsals, each
+run against a temp-tree copy so the shipping script was never
+mutated:</p>
+<table>
+<thead>
+<tr>
+<th>Mutation</th>
+<th>Observed failure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>check <code>gate_no_op</code> before <code>phase_exit</code> again
+(the defect)</td>
+<td><code>FAIL: report.json says outcome='PASS' for a run that halted on a failure</code>
+(+ 2 more)</td>
+</tr>
+<tr>
+<td>revert <code>phase_dir</code> to
+<code>${script_name:6:2}</code></td>
+<td><code>FAIL: a full run produced 7 evidence directories, expected 8: phase-00 … phase-05 phase-06</code>
+(+ 2 more)</td>
+</tr>
+<tr>
+<td>revert <code>_usage()</code> to a hardcoded line window that
+truncates to nothing</td>
+<td><code>FAIL: --help printed only 1 lines — the header is ~190; a fixed window or an early stop has truncated it</code>
+(+ 9 more)</td>
+</tr>
+<tr>
+<td>remove the run-time repository-writing notice</td>
+<td><code>FAIL: a default run gives no run-time notice that it writes to the repository</code></td>
+</tr>
+</tbody>
+</table>
+<p>The same suite's CASE F drives each of the <strong>eight</strong>
+phases individually into a script that dies without appending, and
+asserts each one fails the run <em>and</em> is recorded
+<code>FAIL</code>. Before it, <code>install_boot</code> and the first
+half of <code>live_verify</code> had no such coverage anywhere. CASE G
+asserts that exit <code>3</code> is special only for a <code>gate</code>
+phase — from <code>build</code>, <code>live_verify</code>,
+<code>changelog_entry</code> or <code>docs_refresh</code> it is an
+ordinary failure, because the QUALIFIED meaning belongs to the gate
+contract, not to the number.</p>
+<p><strong>Updated 2026-08-23.</strong> The first genuine end-to-end
+runs of this pipeline have since been executed under tasks T031 / T058 /
+T061, and they are what surfaced the interrupted-run defect above and
+the <code>LAVA_STRESS_CHAOS_EVIDENCE_DIR</code> run-isolation defect
+documented in <code>docs/scripts/pipeline/phase-02-test-go.sh.md</code>.
+Recorded outcomes: T031 DONE (the US1 slice ran green with 1540 Evidence
+Records — 1528 PASS / 0 FAIL / 12 SKIPPED / 0 REJECTED); T058 DONE (run
+<code>10-15-30Z</code> killed, run <code>10-17-26Z</code> started fresh
+with zero cross-references to it); T061 DONE with a
+<strong>negative</strong> result —
+<code>scripts/ci.sh --changed-only</code> exits 1 on this branch on a
+§6.H credential-regex false positive against another stream's fixture
+file. UNCONFIRMED: whether the T062 review gate itself is satisfied by
+those runs is an operator determination, and this document does not
+claim it. See
+<code>specs/002-build-test-distribute-pipeline/progress.yml</code>
+(<code>t031_t058_t061_verdicts</code>) for the full verdicts.</p>
 <h2 id="falsifiability">Falsifiability</h2>
 <p><code>scripts/pipeline/lib/anti-bluff-validate.sh</code>,
 <code>scripts/pipeline/lib/run-report.sh</code>'s evidence aggregator,
@@ -514,6 +964,24 @@ documentation MUST stay in sync with the codebase.</p>
 <code>data-model.md</code>, <code>contracts/</code>,
 <code>tasks.md</code> — the full design and task breakdown this script
 implements.</li>
+<li><code>scripts/pipeline/lib/run-report.sh</code> —
+<code>mark_phase_in_flight</code> / <code>clear_phase_in_flight</code> /
+<code>append_interrupted_phase_if_any</code>.</li>
+<li><code>tests/pipeline/test_interrupted_run_never_passes.sh</code> —
+the interrupted-run suite.</li>
+<li><code>tests/pipeline/test_pipeline_full_sequence_wiring.sh</code> —
+the T046/T057 full-sequence wiring suite (order, the gate's tri-state
+exit contract, failure propagation).</li>
+<li><code>tests/pipeline/test_orchestrator_gate_and_registry_audit.sh</code>
+— the independent audit suite (the <code>gate</code> mode's
+failure-first ordering, per-script evidence directories,
+<code>--help</code> content, per-phase failure propagation).</li>
+<li><code>tests/pipeline/test_phase_05_distribute_gate.sh</code> — the
+distribute gate's own 24-case suite.</li>
+<li><code>specs/002-build-test-distribute-pipeline/research.md</code>
+R-004 — the changelog-before-distribute ordering decision.</li>
+<li><code>docs/scripts/pipeline/phase-02-test-go.sh.md</code> — the
+run-isolation seam that lets a run repeat.</li>
 <li><code>docs/helix-constitution-gates.md</code> — gate inventory.</li>
 <li>HelixConstitution <code>Constitution.md</code> §11.4.18 (the
 mandate).</li>

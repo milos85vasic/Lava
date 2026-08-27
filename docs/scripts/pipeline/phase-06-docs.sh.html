@@ -383,6 +383,21 @@ writing nothing is caught and fails the phase.</li>
 <li><strong>Honest skips.</strong> <code>--skip-exports</code> and
 dry-run record their non-execution in the Evidence Record's
 <code>assertion_summary</code> rather than reporting a pass.</li>
+<li><strong>No vacuous verification claim.</strong> Both post-run checks
+iterate over the files PASS 1 changed. <code>--regenerate-all</code> is
+the one flag that runs the export pass with that list
+<strong>empty</strong> (the docs were already correct but the operator
+asked for the whole-repo sweep anyway), and both loops then execute zero
+times. The <code>assertion_summary</code> states the number of files it
+examined, and when that number is zero it says so — <em>"…each examined
+ZERO files and verify nothing about this run's exports"</em> — instead
+of the vacuously-true <em>"every changed .md was verified
+first-hand"</em>. It also discloses that the whole-repo
+<code>--regenerate-all</code> sweep's own output is <strong>not</strong>
+verified by this phase, because confirming it would mean duplicating
+<code>sync-markdown-exports.sh</code>'s in-scope path rules, which this
+phase refuses to do. Covered by
+<code>tests/pipeline/test_phase_06_regenerate_all_claim.sh</code>.</li>
 </ol>
 <h2 id="exit-codes">Exit codes</h2>
 <table>

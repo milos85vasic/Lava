@@ -75,5 +75,53 @@ RESULTS_DIR="$REPO_ROOT/app/build/outputs/androidTest-results/connected"
 find "$RESULTS_DIR" -name '*.xml' -exec cp {} "$EVID/" \; 2>/dev/null || true
 
 echo "gradle_rc=$GRADLE_RC"
-echo "junit copied to $EVID"
+
+# ---------------------------------------------------------------------------
+# §6.J tests-executed floor (added 2026-08-26, LVA vacuous-pass sweep B11).
+#
+# The verdict used to be `exit $GRADLE_RC` and nothing else — no floor on how
+# many tests actually ran, in direct contrast to sibling run-iteration.sh:196-201
+# whose own comment records `gradle_rc=0 but tests=0` as an OBSERVED condition:
+#
+#   gradle_rc=0 ; results dir empty
+#   junit copied to .../EVID            <- printed unconditionally
+#     -> XML files actually copied: 0
+#     run-nav-challenges.sh exit=0      <- SUCCESS with 0 executed tests
+#
+# This script produces the §6.Z device evidence for the C24/C46/C55 nav
+# Challenges named in the §6.AK cycle-coverage-map, so a green exit here becomes
+# a covering-Challenge PASS downstream. §6.J: BUILD SUCCESSFUL is necessary,
+# never sufficient — a green with zero executed tests is a bluff by construction.
+#
+# The expectation is DERIVED from the class list this invocation was asked to
+# run ($# classes), not from a hardcoded number, so adding or removing a nav
+# Challenge cannot silently lower the bar.
+copied_xml=$(ls -1 "$EVID"/*.xml 2>/dev/null | wc -l)
+executed_tests=0
+if [[ "$copied_xml" -gt 0 ]]; then
+  executed_tests=$(
+    for x in "$EVID"/*.xml; do
+      grep -oE 'tests="[0-9]+"' "$x" 2>/dev/null | head -1 | grep -oE '[0-9]+' || true
+    done | awk '{n+=$1} END{print n+0}'
+  )
+fi
+echo "junit copied to $EVID (${copied_xml} XML file(s), ${executed_tests} executed test(s))"
+
+if [[ "$copied_xml" -eq 0 || "$executed_tests" -eq 0 ]]; then
+  echo "" >&2
+  echo "NAV-CHALLENGE GATE FAILED: gradle exited ${GRADLE_RC} but ZERO tests executed." >&2
+  echo "  → Examined: ${copied_xml} JUnit XML file(s), ${executed_tests} executed test(s)" >&2
+  echo "  → Expected: at least 1 test per requested class; ${#} class(es) were requested:" >&2
+  for _c in "$@"; do echo "      $_c" >&2; done
+  echo "  → Cause distinguished: this is NOT a test failure — nothing ran. Common" >&2
+  echo "    producers: a class FQN typo in the runner-argument filter, an emulator that" >&2
+  echo "    never reached 'device' state, or an androidTest APK that failed to install." >&2
+  echo "  → Look at: $GRADLE_LOG" >&2
+  echo "             $RESULTS_DIR" >&2
+  echo "  → A zero-test run cannot be §6.Z device evidence for C24/C46/C55; exiting" >&2
+  echo "    ${GRADLE_RC} here would report a covering Challenge as PASSED (§6.J/§6.AK)." >&2
+  exit 1
+fi
+
 exit $GRADLE_RC
+# END-OF-BLOCK §6.J tests-executed floor (regression-harness sentinel)

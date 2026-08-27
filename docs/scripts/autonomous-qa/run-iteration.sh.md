@@ -41,25 +41,37 @@ runs keyless (and `/v1` will 401 — recorded honestly).
 
 ## Verdict decision table (anti-bluff)
 
-Challenge70 logs `C70-RESULT ... DOWNLOAD-OK` only after the user-visible
-download/magnet affordance is confirmed on screen — hard evidence the real user
-flow reached the download. Separately, the test's `MainActivity` teardown can
-crash with the known-open upstream defect **LVA-008** (a process-FATAL
-`IllegalStateException` at activity destroy) that fails the JUnit run without
-being a product defect. Signals grepped from logcat + JUnit XML:
-
-- `marker_download_ok` — the on-screen download affordance was confirmed
-- `teardown_known_lva008` — logcat/JUnit contains BOTH LVA-008 phrases
-- `other_failure_signal` — ANY failure unrelated to LVA-008 (explicit C70
-  download-step failure marker, or any non-LVA-008 `AssertionError`)
+The verdict is decided by the gradle/JUnit outcome **alone**. A crash is a
+failure: no signature, marker, or "known defect" converts a failed run into a
+PASS.
 
 | Condition | Verdict |
 |---|---|
 | `gradle_rc=0`, 0 failures/errors, `tests>0`, not all skipped | **PASS** |
 | `gradle_rc=0` but `tests=0` | **FAIL** — a green run with zero executed tests is a bluff by construction |
 | all tests skipped | **SKIP** |
-| marker **AND** lva008-teardown **AND** no other failure signal | **PASS** (PASS-via-marker; all three MUST hold) |
-| anything else | **FAIL** |
+| anything else (including any crash) | **FAIL** |
+
+Two signals are grepped from logcat + JUnit XML and recorded as **diagnostic
+evidence only**. They describe what happened during the run; they do **not**
+gate the verdict:
+
+- `marker_download_ok` — Challenge70 logged `C70-RESULT ... DOWNLOAD-OK`, i.e.
+  the on-screen download/magnet affordance was confirmed
+- `other_failure_signal` — an explicit C70 download-step failure marker, or any
+  `AssertionError`. No phrase is whitelisted.
+
+### Removed: the LVA-008 PASS-override (do not re-introduce)
+
+A `teardown_known_lva008` signal and a PASS-via-marker branch used to convert a
+run into a PASS when the raw stream carried both LVA-008 teardown phrases
+(`State must be at least 'CREATED'` + `Unable to destroy activity`), on the
+premise that the crash was an unfixable-upstream AndroidX defect. That premise
+was **disproven**: LVA-008 was a Lava threading bug (an off-main-thread
+`navigate()` call) fixed on 2026-06-30 by commit `ccdd84c1`. With the cause
+fixed, the override was a live mechanism for reporting a genuine crash as
+green — the canonical §6.J bluff — and was removed on 2026-08-26. If that
+signature appears again it is a **regression** and must fail the iteration.
 
 A missing client APK writes a FAIL `verdict.json` immediately (never leaves a
 stale PASS behind — the 2026-07-03 incident).
@@ -73,8 +85,8 @@ stale PASS behind — the 2026-07-03 incident).
 ## `verdict.json` fields
 
 `backend`, `providers`, `query`, `serial`, `gradle_rc`, `tests`, `failures`,
-`errors`, `skipped`, `marker_download_ok`, `teardown_known_lva008`,
-`other_failure_signal`, `verdict`, `note`, `junit_xml`, `raw_dir`.
+`errors`, `skipped`, `marker_download_ok`, `other_failure_signal`, `verdict`,
+`note`, `junit_xml`, `raw_dir`.
 
 ## Companion files
 

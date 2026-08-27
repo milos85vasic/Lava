@@ -71,6 +71,18 @@ test_clauses_present() {
 }
 
 # -----------------------------------------------------------------------------
+# File-scope restore used by test 3's trap. Kept out of the function so the
+# handler still resolves after the frame is gone (EXIT/INT/TERM fire late).
+# Idempotent: safe to run twice, and a no-op before the backup exists.
+_COVENANT_BACKUP=""
+_covenant_restore() {
+  if [[ -n "${_COVENANT_BACKUP:-}" && -f "${_COVENANT_BACKUP}" ]]; then
+    cp -p "${_COVENANT_BACKUP}" "$CLAUDE_MD"
+    rm -f "${_COVENANT_BACKUP}"
+    _COVENANT_BACKUP=""
+  fi
+}
+
 # Test 3 (falsifiability): remove one anchor literal from the real CLAUDE.md,
 # run the REAL gate, assert it fails with a CM-COVENANT-114 violation, restore.
 # This exercises the exact production code path (no re-implementation).
@@ -87,7 +99,26 @@ test_removed_anchor_makes_gate_fire() {
     # test MUST leave shared state (mtime included) untouched.
     cp -p "$CLAUDE_MD" "$backup"
     # Guarantee restoration even if the test aborts/errors (preserve mtime too).
-    trap 'cp -p "$backup" "$CLAUDE_MD"; rm -f "$backup"' RETURN
+    # RETURN alone is NOT enough. A RETURN trap fires when this FUNCTION
+    # returns; it does not fire when the process is killed. This test mutates a
+    # GOVERNING DOCUMENT, so a kill mid-probe leaves root CLAUDE.md with an
+    # anchor literal replaced by a placeholder — which then fails the very gate
+    # this test exercises, in a way that looks like a real regression and is not.
+    #
+    # That is not hypothetical: on 2026-08-23 this test was run under
+    # `timeout 120`, exceeded it, was SIGTERMed mid-probe, and left
+    # `§11.4.134` replaced by `§REDACTED_ANCHOR` in CLAUDE.md. The next full
+    # `check-constitution.sh` run reported CM-COVENANT-114 VIOLATION, and the
+    # damage was attributed to a stray agent edit before the real cause was
+    # found. Trapping EXIT/INT/TERM as well makes the restore survive every
+    # termination path a signal can take.
+    # The handler must reference a FILE-SCOPE variable, not this function's
+    # `local backup`. A RETURN trap runs while the frame is still live, but an
+    # EXIT/INT/TERM trap can fire after it is gone — and under `set -u` that
+    # produced `backup: unbound variable` at exit. Guarded with ${:-} as well,
+    # so a signal arriving before the assignment is a no-op rather than an error.
+    _COVENANT_BACKUP="$backup"
+    trap '_covenant_restore' RETURN EXIT INT TERM
 
     # Mutate: delete EVERY occurrence of the 11.4.134 literal token so no
     # form of the anchor survives. 134 is chosen because it appears exactly

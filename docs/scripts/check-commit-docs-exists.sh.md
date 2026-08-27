@@ -1,6 +1,6 @@
 # `scripts/check-commit-docs-exists.sh` — User Guide
 
-**Last verified:** 2026-05-18 (1.2.30-1050 tooling cycle)
+**Last verified:** 2026-08-26 (§6.J corpus floor — an unresolvable or empty commit range now refuses instead of skipping; LVA vacuous-pass sweep F13)
 **Inheritance:** HelixConstitution §11.4.x (commit-references-resolve mandate) + Lava §6.AD-debt closure (CM-COMMIT-DOCS-EXISTS)
 
 ## Overview
@@ -28,8 +28,9 @@ LAVA_REPO_ROOT=/path/to/synthetic bash scripts/check-commit-docs-exists.sh
 
 | Code | Meaning |
 |------|---------|
-| 0 | Every referenced path resolves (exact or fuzzy-basename) |
-| 1 | At least one orphan reference; commit SHA + path printed to stderr |
+| 0 | Every referenced path resolves (exact or fuzzy-basename) — **and** at least one commit message was actually read |
+| 1 | At least one orphan reference (commit SHA + path printed to stderr), **or** the range resolved but selects zero commits |
+| 2 | The range failed to resolve — git could not name the commits, so nothing was examined (added 2026-08-26) |
 
 ## What counts as a path reference
 
@@ -69,6 +70,71 @@ The fallback prevents pedantic false-positives on human-written short-form paths
 3. Either `git commit --amend` removing the reference, OR create the file, OR drop the commit.
 
 The deliberate-phantom rehearsal proves the gate fires on real evidence gaps.
+
+## 2026-08-26 update — §6.J corpus floor: "no commits in range" is no longer a pass
+
+### The defect
+
+The gate collapsed three very different conditions into one `no commits in range
+'<range>' — skipping` message and **exit 0**:
+
+| Invocation | Old verdict |
+|---|---|
+| `HEAD~5..HEAD` in a repository with 1 commit | `no commits in range` — exit 0 |
+| `HEAD~5..HEAKD` (a typo in the ref) | `no commits in range` — exit 0 |
+| The same repository, range `HEAD` | `VIOLATION: 2 orphan refs` — exit 1 |
+
+Only the third examined anything. The first two reported a clean gate having read
+**zero commit messages**.
+
+This was not a theoretical corner. `scripts/verify-all-constitution-rules.sh`
+invokes this gate with a **hardcoded** `HEAD~5..HEAD`, so any checkout with fewer
+than six commits — a `--depth`-limited clone, a worktree cut from a fresh branch, a
+CI-side shallow fetch — passed it silently, forever, while the same tree with the
+range spelled `HEAD` produced real violations.
+
+The mechanism was `2>/dev/null` on the `git rev-list` call: git's **exit status** is
+the only thing that separates *"this ref cannot be resolved"* (128) from *"this
+range is valid and genuinely empty"* (0 with no output), and redirecting stderr
+discarded exactly that signal.
+
+### What the gate now refuses
+
+Two distinct refusals, because the two causes have different remedies and a
+diagnosis that misstates its cause sends the reader to the wrong one:
+
+**Exit 2 — the range failed to resolve.** git's own stderr and exit status are
+reported. The message states plainly that this is *not* an empty range: the range
+names a ref git cannot resolve — a typo, or a history too shallow for the offset.
+Three remedies are offered: fix the spelling, pass a range this history can satisfy
+(`LAVA_COMMIT_RANGE=HEAD`), or deepen a shallow clone with `git fetch --unshallow`.
+
+**Exit 1 — the range resolved but selects zero commits.** The message states that
+the range is *valid* (git resolved it without error) and simply names an empty set —
+an `A..B` where `B` is an ancestor of `A`, or a self-range such as `HEAD..HEAD`. A
+gate that reads no commit message asserts nothing about whether commit bodies cite
+paths that exist, so this is a failure rather than a skip.
+
+Both messages report `Examined: 0 commit message(s)` explicitly, so the corpus size
+is a stated fact rather than something the reader infers from the absence of output.
+
+### Consequence for callers
+
+A shallow or fresh checkout that previously sailed through this gate will now fail
+it, with an actionable message. That is the intended outcome: the alternative is a
+gate whose verdict is a function of clone depth rather than of commit-body honesty.
+Where a narrow scope is genuinely wanted, name it explicitly — `LAVA_COMMIT_RANGE=HEAD`
+for the tip commit alone, or `'@{u}..HEAD'` for everything unpushed.
+
+### §6.J falsifiability rehearsal of the floor itself
+
+1. `bash scripts/check-commit-docs-exists.sh 'HEAD~5..HEAKD'` (deliberate typo) →
+   expect **exit 2**, `FAILED TO RESOLVE`, and git's own error reproduced. Before this
+   change: exit 0, reported as a skip.
+2. `bash scripts/check-commit-docs-exists.sh 'HEAD..HEAD'` → expect **exit 1**,
+   `resolved but selects ZERO commits`. Before this change: exit 0.
+3. `bash scripts/check-commit-docs-exists.sh HEAD` → expect the normal verdict
+   (0 or 1 on the merits of the tip commit's own message).
 
 ## Integration
 

@@ -9,24 +9,54 @@
 #   # shellcheck source=scripts/pipeline/lib/run-report.sh
 #   source "$(dirname "${BASH_SOURCE[0]}")/lib/run-report.sh"
 #
-# Exposes four functions, all operating on the single consolidated
+# Exposes eight functions, all operating on the single consolidated
 # artifact at ".lava-ci-evidence/pipeline-runs/<run_id>/report.json" per
 # data-model.md's "Pipeline Run Report" entity and
-# contracts/pipeline-run-report.schema.json:
+# contracts/pipeline-run-report.schema.json (corrected 2026-08-25: this said
+# "four" while listing three, and the set has grown twice since):
 #
 #   init_run_report <run_id> <commit_sha>
 #   append_phase_result <run_id> <phase_name> <result> <duration_seconds> <evidence_dir>
 #   finalize_run_report <run_id>
+#   recompute_evidence_summary <run_id>
+#   phase_nonpass_count <run_id> <phase_name>                -> prints an integer
+#   mark_phase_in_flight <run_id> <phase_name>               -> prints the marker path
+#   clear_phase_in_flight <run_id>
+#   append_interrupted_phase_if_any <run_id> [fallback_phase_name]
+#                                                            -> prints the phase recorded
 #
-# All three print the report.json path they wrote to, on stdout, on
+# The first four print the report.json path they wrote to, on stdout, on
 # success (matching this project's existing CLI convention of printing
-# what was done) and return non-zero + a stderr message on any failure.
+# what was done) and return non-zero + a stderr message on any failure. The
+# last four print what their own doc-comments state; see each. A non-zero
+# return from ANY of them means the report may not describe the run — callers
+# MUST compare it rather than `|| true` it away.
 #
 # Path convention: every function takes a bare `run_id` and derives
 # ".lava-ci-evidence/pipeline-runs/<run_id>/report.json" from it, relative
 # to the current working directory — consistent with this project's
 # existing scripts (scripts/ci.sh, scripts/tag.sh, etc.), which are always
-# invoked from the repository root. Callers MUST run from the repo root.
+# invoked from the repository root.
+#
+# CALLERS MUST RUN FROM THE ROOT OF THE REPOSITORY UNDER TEST, and those last
+# four words are the part that bit (2026-08-26). "The repo root" is ambiguous
+# the moment a run is aimed at some OTHER repository via the orchestrator's
+# positional repo-path override: the CWD was then the operator's checkout while
+# the phases inspected a fixture, so this library filed the fixture's verdict —
+# PASS, plus the OPERATOR'S commit_sha — inside the operator's own evidence
+# tree. A report attributed to a commit the run never tested is precisely the
+# claim §6.Z / §6.AK / §6.AA clause 8 consume as proof.
+#
+# The base is not configurable here, deliberately. It cannot be, honestly: the
+# phase scripts spell their own evidence paths two ways ("PHASE_DIR=.lava-ci-
+# evidence/..." and "PHASE_DIR=${REPO_PATH}/.lava-ci-evidence/...") and a base
+# knob honoured by this library alone would relocate report.json while leaving
+# the phase logs behind — one run split across two repositories, which is worse
+# than the single wrong repository it replaced. The working directory is the
+# only base ALL of them share, so the orchestrator makes the working directory
+# BE the repository under test (it chdir's there before creating anything, then
+# verifies the report landed inside it) and this library needs no knob at all.
+# If you call these functions outside that orchestrator, chdir first.
 #
 # JSON is always read-modify-written via `jq` (preferred, since it never
 # needs to re-serialize the parts of the document it isn't touching
@@ -59,6 +89,12 @@ _RUN_REPORT_PHASE_NAMES=(
 _RUN_REPORT_PHASE_RESULTS=("PASS" "FAIL" "SKIPPED")
 
 # _run_report_path <run_id> — echoes the report.json path for a run_id.
+#
+# Relative, so it resolves under whatever the caller's working directory is.
+# That is the contract, not an oversight: see the "Path convention" note in this
+# file's header for why the CWD is the only base every participant in a run
+# agrees on, and for what went wrong when the orchestrator let its CWD and the
+# repository it was testing drift apart.
 _run_report_path() {
   printf '.lava-ci-evidence/pipeline-runs/%s/report.json' "$1"
 }
@@ -492,11 +528,20 @@ PYEOF
 #
 # Record selection: a real Evidence Record always lives at exactly
 # "<run_dir>/phase-NN/<category>/<test_id>.json" (see evidence.sh's
-# write_evidence_record). A wrapper's raw-output companion files always
-# live one level deeper, under "<category>/raw/", and are not .json. So
-# per-phase-dir `-mindepth 2 -maxdepth 2 -name '*.json'` selects exactly
-# the real Evidence Records — the same proven selector phase-02-test.sh
+# write_evidence_record), so per-phase-dir `-mindepth 2 -maxdepth 2
+# -name '*.json'` is the right depth — the same selector phase-02-test.sh
 # uses. report.json itself sits at the run-dir root and is never matched.
+#
+# CORRECTED 2026-08-25: this note used to claim wrappers' raw-output
+# companions "always live one level deeper, under <category>/raw/, and are
+# not .json", and leaned on that to argue the depth filter alone was
+# sufficient. Both halves are false. phase-02-test-constitutional-gate-sweep.sh
+# writes per-gate companions as .json (at <category>/raw/, so depth saved it),
+# and nothing stops a wrapper putting a companion at <phase-NN>/raw/<name>.json
+# — which IS depth 2 and was counted as an Evidence Record, inflating `total`
+# and `failed` with a file that is not a record at all. Hence the explicit
+# `-not -path '*/raw/*'`: a raw-output companion is excluded because of where
+# it is, not because of an assumption about its extension.
 #
 # Counting rules, mirroring phase-02-test.sh's aggregator exactly:
 #   - result PASS/FAIL/SKIPPED increment passed/failed/skipped respectively
@@ -537,20 +582,29 @@ recompute_evidence_summary() {
   # byte-for-byte the one phase-02-test.sh already proves in production.
   while IFS= read -r -d '' phase_dir; do
     while IFS= read -r -d '' record_path; do
+      # `|| true` inside each substitution is LOAD-BEARING, not decoration.
+      # A bare `var="$(cmd)"` carries cmd's exit status, and this library's own
+      # header tells callers to run under `set -euo pipefail` — so on the first
+      # malformed record jq's non-zero status ABORTED this function mid-scan,
+      # evidence_summary was never written, and it stayed at init's all-zeros.
+      # rejected_by_anti_bluff == 0 is exactly the condition finalize_run_report
+      # reads to allow "PASS". The documented rule below (an uninterpretable
+      # record counts as FAILED) only actually held for callers who happened to
+      # invoke this on the left of `||`, where set -e is suppressed.
       if command -v jq >/dev/null 2>&1; then
-        result="$(jq -r '.result // empty' "$record_path" 2>/dev/null)"
-        status="$(jq -r '.anti_bluff_status // empty' "$record_path" 2>/dev/null)"
+        result="$(jq -r '.result // empty' "$record_path" 2>/dev/null || true)"
+        status="$(jq -r '.anti_bluff_status // empty' "$record_path" 2>/dev/null || true)"
       else
         result="$(python3 -c "import json,sys
 try:
     print(json.load(open(sys.argv[1])).get('result',''))
 except Exception:
-    print('')" "$record_path" 2>/dev/null)"
+    print('')" "$record_path" 2>/dev/null || true)"
         status="$(python3 -c "import json,sys
 try:
     print(json.load(open(sys.argv[1])).get('anti_bluff_status',''))
 except Exception:
-    print('')" "$record_path" 2>/dev/null)"
+    print('')" "$record_path" 2>/dev/null || true)"
       fi
 
       total=$((total + 1))
@@ -564,7 +618,7 @@ except Exception:
       if [[ "$status" == REJECTED* ]]; then
         rejected=$((rejected + 1))
       fi
-    done < <(find "$phase_dir" -mindepth 2 -maxdepth 2 -type f -name '*.json' -print0 2>/dev/null)
+    done < <(find "$phase_dir" -mindepth 2 -maxdepth 2 -type f -name '*.json' -not -path '*/raw/*' -print0 2>/dev/null)
   done < <(find "$run_dir" -mindepth 1 -maxdepth 1 -type d -name 'phase-*' -print0 2>/dev/null)
 
   local tmp_path="${report_path}.tmp.$$"
@@ -630,4 +684,227 @@ PYEOF
   fi
 
   printf '%s\n' "$report_path"
+}
+
+# phase_nonpass_count <run_id> <phase_name>
+#
+# Prints how many entries in the report's phases[] name <phase_name> with a
+# result other than "PASS".
+#
+# WHY THIS EXISTS (forensic anchor, 2026-08-25): the orchestrator's PHASES
+# registry marks each phase "self-appends-result: yes/no", and for a `yes`
+# phase the orchestrator deliberately appends nothing so the script's own entry
+# is not duplicated. That contract is TRUSTED. A script that dies before
+# reaching its own append_phase_result — an early `set -e` abort, a usage error,
+# a missing dependency, a crash — appends nothing either, and then NOBODY
+# records the phase's result: finalize_run_report's all-PASS rule is satisfied
+# vacuously by the phases that did report, and a run that halted at `test`
+# finalizes to "PASS". This function is what lets the orchestrator CHECK the
+# contract instead of trusting it. Regression coverage:
+# tests/pipeline/test_phase_failure_always_recorded.sh.
+#
+# Prints a bare integer on stdout. Returns 1, printing NOTHING, on a usage
+# error, a missing report.json, or an unreadable one — so a caller that
+# defaults to 0 on no-output fails CLOSED (it records the failure itself rather
+# than assuming somebody else already did). Deliberately NOT a `// 0` default
+# inside the query: that would make "the report could not be read" and "the
+# phase reported no failure" the same answer, which is the parse-with-no-match
+# bluff this codebase keeps finding.
+phase_nonpass_count() {
+  if [[ "$#" -ne 2 ]]; then
+    echo "phase_nonpass_count: expected 2 arguments, got $#" >&2
+    echo "usage: phase_nonpass_count <run_id> <phase_name>" >&2
+    return 1
+  fi
+
+  local run_id="$1" phase_name="$2" report_path count
+  report_path="$(_run_report_path "$run_id")"
+
+  if [[ ! -f "$report_path" ]]; then
+    echo "phase_nonpass_count: no report.json found at '$report_path'" >&2
+    return 1
+  fi
+
+  if command -v jq >/dev/null 2>&1; then
+    count="$(jq --arg n "$phase_name" \
+      '[.phases[]? | select(.name == $n and .result != "PASS")] | length' \
+      "$report_path" 2>/dev/null)" || count=""
+  else
+    count="$(python3 -c "
+import json,sys
+with open(sys.argv[1]) as f:
+    report = json.load(f)
+print(sum(1 for p in report.get('phases', [])
+          if p.get('name') == sys.argv[2] and p.get('result') != 'PASS'))
+" "$report_path" "$phase_name" 2>/dev/null)" || count=""
+  fi
+
+  if [[ ! "$count" =~ ^[0-9]+$ ]]; then
+    echo "phase_nonpass_count: could not read phases[] from '$report_path'" >&2
+    return 1
+  fi
+
+  printf '%s\n' "$count"
+}
+
+# ---------------------------------------------------------------------------
+# In-flight phase tracking — so an INTERRUPTED run can never finalize to PASS
+# ---------------------------------------------------------------------------
+# FORENSIC ANCHOR (2026-08-23, the first genuine end-to-end run of this
+# pipeline): a run was killed mid-build. Its process exit code was honest
+# (1, "halted at: build"). Its report.json — the artifact SC-008 tells an
+# auditor to read FIRST — said:
+#
+#     "outcome": "PASS"
+#     "phases":  [{"name":"precondition","result":"PASS"}]
+#     "build_artifacts": []        "evidence_summary": {"total": 0, ...}
+#
+# A run that never got past its first phase, produced zero artifacts and zero
+# evidence, reported success.
+#
+# WHY finalize_run_report could not catch it: its rule is
+#     (.phases | length) > 0 and (.phases | all(.result == "PASS"))
+# The `length > 0` guard closes the EMPTY case. It cannot close the TRUNCATED
+# PREFIX case, because a truncated run's phases[] is a perfectly valid all-PASS
+# list — it is merely SHORTER than the run was supposed to be. Nothing in the
+# report distinguished "ran everything and passed" from "stopped after phase 1".
+# This is the same vacuous-pass class phase-02-test.sh's PASS condition 4 closed
+# (a phase passing on zero Evidence Records), sitting one level up.
+#
+# WHY A MARKER FILE rather than a shell variable: the orchestrator can be killed
+# outright. A variable dies with the process; a file survives, so a later reader
+# can still tell the run was interrupted. It lives INSIDE the run directory, so
+# it is per-run by construction and cannot leak between runs — and that
+# directory is gitignored, so the marker never dirties the working tree.
+#
+# WHY the report schema was not widened: pipeline-run-report.schema.json is
+# `additionalProperties: false`, and an interrupted phase genuinely did not
+# pass. Recording it as a FAIL phase entry states a fact the report was missing
+# rather than inventing a new field to carry it.
+#
+# Regression coverage: tests/pipeline/test_interrupted_run_never_passes.sh.
+
+# _phase_in_flight_marker <run_id> — path of the marker file for this run.
+_phase_in_flight_marker() {
+  local run_id="$1" report_path
+  report_path="$(_run_report_path "$run_id")"
+  printf '%s' "$(dirname -- "$report_path")/.phase-in-flight"
+}
+
+# mark_phase_in_flight <run_id> <phase_name>
+# Called immediately BEFORE a phase's scripts are invoked.
+mark_phase_in_flight() {
+  if [[ "$#" -ne 2 ]]; then
+    echo "mark_phase_in_flight: expected 2 arguments, got $#" >&2
+    echo "usage: mark_phase_in_flight <run_id> <phase_name>" >&2
+    return 1
+  fi
+  local run_id="$1" phase_name="$2" marker
+  if ! _run_report_is_one_of "$phase_name" "${_RUN_REPORT_PHASE_NAMES[@]}"; then
+    echo "mark_phase_in_flight: invalid phase name '$phase_name'" >&2
+    return 1
+  fi
+  marker="$(_phase_in_flight_marker "$run_id")"
+  mkdir -p -- "$(dirname -- "$marker")" || return 1
+
+  # Written via temp + atomic mv, then read back, so the marker is never
+  # observable half-written. `> "$marker"` truncates BEFORE printf runs, so a
+  # failed or partial write (a full disk is the ordinary cause) used to leave an
+  # EMPTY marker behind — a file whose existence proves a phase was in flight
+  # but whose content names nothing. append_interrupted_phase_if_any then read
+  # that as "not interrupted". The marker either says which phase, or it is not
+  # there at all.
+  local marker_tmp="${marker}.tmp.$$"
+  if ! printf '%s\n' "$phase_name" > "$marker_tmp"; then
+    rm -f -- "$marker_tmp"
+    echo "mark_phase_in_flight: could not write '$marker_tmp'" >&2
+    return 1
+  fi
+  if [[ "$(tr -d '[:space:]' < "$marker_tmp" 2>/dev/null)" != "$phase_name" ]]; then
+    rm -f -- "$marker_tmp"
+    echo "mark_phase_in_flight: '$marker_tmp' did not read back as '$phase_name'" >&2
+    return 1
+  fi
+  if ! mv -f -- "$marker_tmp" "$marker"; then
+    rm -f -- "$marker_tmp"
+    echo "mark_phase_in_flight: could not move '$marker_tmp' into place at '$marker'" >&2
+    return 1
+  fi
+  printf '%s\n' "$marker"
+}
+
+# clear_phase_in_flight <run_id>
+# Called immediately AFTER a phase's scripts have all succeeded. Removing a
+# marker that is not there is not an error — a run that never marked anything
+# has nothing to clear.
+clear_phase_in_flight() {
+  if [[ "$#" -ne 1 ]]; then
+    echo "clear_phase_in_flight: expected 1 argument, got $#" >&2
+    return 1
+  fi
+  rm -f -- "$(_phase_in_flight_marker "$1")"
+}
+
+# append_interrupted_phase_if_any <run_id> [fallback_phase_name]
+# Called on the close path, BEFORE recompute_evidence_summary and
+# finalize_run_report. If a phase was in flight, that phase did not complete —
+# record it as FAIL and clear the marker so the operation is idempotent.
+#
+# THE MARKER'S EXISTENCE IS THE SIGNAL. Its contents only NAME the phase.
+# The first version of this function conflated the two: any marker it could not
+# interpret — empty, whitespace-only, unreadable, or carrying a name the schema
+# enum rejects — took a `return 0` path that every caller reads as "this run was
+# not interrupted", and the run finalized PASS on a truncated all-PASS phases[].
+# That is the vacuous-pass shape this whole block exists to close, reachable
+# through the block's own error handling (audited 2026-08-25; regression
+# coverage in tests/pipeline/test_run_report_library_robustness.sh).
+#
+# `fallback_phase_name` exists because the caller usually knows something the
+# marker no longer does: the orchestrator has the phase it is executing in a
+# variable. It is used ONLY to name an interruption already proven by the
+# marker's existence — never to manufacture one. With no marker present, a
+# fallback changes nothing.
+#
+# Returns:
+#   0 — either no marker (nothing printed), or the interruption was recorded
+#       (the phase name is printed and the marker removed).
+#   1 — a marker was present and named a phase, but recording it FAILED. The
+#       marker is deliberately left in place.
+#   2 — a marker was present but neither it nor the fallback yields a valid
+#       phase name. The run WAS interrupted and the report cannot say so; the
+#       marker is left in place. A caller must not treat this as "completed".
+#
+# A non-zero return is never "nothing happened" — callers MUST compare it.
+append_interrupted_phase_if_any() {
+  if [[ "$#" -lt 1 || "$#" -gt 2 ]]; then
+    echo "append_interrupted_phase_if_any: expected 1 or 2 arguments, got $#" >&2
+    echo "usage: append_interrupted_phase_if_any <run_id> [fallback_phase_name]" >&2
+    return 1
+  fi
+  local run_id="$1" fallback="${2-}" marker phase_name report_path evidence_dir
+  marker="$(_phase_in_flight_marker "$run_id")"
+  [[ -f "$marker" ]] || return 0
+
+  # From here on the run WAS interrupted. The only open question is its name.
+  # `|| true` keeps an unreadable marker from aborting the caller under set -e;
+  # an empty read is handled below as "name unknown", never as "not interrupted".
+  phase_name="$(tr -d '[:space:]' < "$marker" 2>/dev/null || true)"
+  if ! _run_report_is_one_of "$phase_name" "${_RUN_REPORT_PHASE_NAMES[@]}"; then
+    if _run_report_is_one_of "$fallback" "${_RUN_REPORT_PHASE_NAMES[@]}"; then
+      phase_name="$fallback"
+    else
+      echo "append_interrupted_phase_if_any: a phase was in flight (marker '$marker' exists) but neither the marker nor the fallback names a known phase — this run was INTERRUPTED and report.json cannot be made to say so" >&2
+      return 2
+    fi
+  fi
+
+  report_path="$(_run_report_path "$run_id")"
+  evidence_dir="$(dirname -- "$report_path")"
+
+  if ! append_phase_result "$run_id" "$phase_name" "FAIL" 0 "$evidence_dir" >/dev/null; then
+    echo "append_interrupted_phase_if_any: could not record interrupted phase '$phase_name'" >&2
+    return 1
+  fi
+  rm -f -- "$marker"
+  printf '%s\n' "$phase_name"
 }

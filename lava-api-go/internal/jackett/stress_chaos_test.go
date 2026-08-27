@@ -50,8 +50,24 @@ import (
 // .lava-ci-evidence directory, then returns (and ensures) the
 // stress-chaos/jackett subdir. This avoids hardcoding an absolute path (§6.R)
 // while keeping evidence at the canonical project location.
+// Run-isolation seam: when this environment variable is set (the
+// build-test-distribute pipeline's phase-02 go wrapper sets it), evidence is
+// written there instead of at the tracked project-level
+// .lava-ci-evidence/stress-chaos/jackett/. That keeps a pipeline run's
+// output inside the run's OWN gitignored evidence directory, so a run never
+// modifies a tracked file and the next run's FR-000 clean-tree precondition
+// still passes (FR-018 / SC-007). Unset — a plain `go test` or `make test` —
+// leaves the historical behaviour byte-for-byte unchanged.
+const stressChaosEvidenceDirEnv = "LAVA_STRESS_CHAOS_EVIDENCE_DIR"
+
 func evidenceDir(t *testing.T) string {
 	t.Helper()
+	if override := os.Getenv(stressChaosEvidenceDirEnv); override != "" {
+		if mkErr := os.MkdirAll(override, 0o755); mkErr != nil {
+			t.Fatalf("mkdir evidence override %s: %v", override, mkErr)
+		}
+		return override
+	}
 	dir, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("getwd: %v", err)

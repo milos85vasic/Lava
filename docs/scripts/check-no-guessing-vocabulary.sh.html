@@ -244,9 +244,11 @@
 <h1
 id="scriptscheck-no-guessing-vocabularysh--user-guide"><code>scripts/check-no-guessing-vocabulary.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-05-17 (1.2.30-1050 tooling
-cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.6
-(no-guessing-vocabulary mandate) + Lava §6.AD.6 (extracted gate)</p>
+<p><strong>Last verified:</strong> 2026-08-26 (§6.J corpus floor — an
+unresolved or empty scan-path set now refuses instead of reporting "gate
+clean"; LVA vacuous-pass sweep F14) <strong>Inheritance:</strong>
+HelixConstitution §11.4.6 (no-guessing-vocabulary mandate) + Lava
+§6.AD.6 (extracted gate)</p>
 <h2 id="overview">Overview</h2>
 <p>Standalone gate that scans tracked status / closure / forensic-anchor
 files for forbidden guessing vocabulary. Extracted from
@@ -314,14 +316,102 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="
 <tbody>
 <tr>
 <td>0</td>
-<td>Gate clean (no forbidden vocabulary found)</td>
+<td>Gate clean — no forbidden vocabulary found, <strong>and</strong> at
+least one file was actually read. The verdict line now names the corpus:
+<code>§11.4.6 no-guessing vocabulary gate clean: &lt;N&gt; file(s) scanned across &lt;M&gt; director(ies).</code></td>
 </tr>
 <tr>
 <td>1</td>
-<td>At least one violation (paths printed to stderr)</td>
+<td>At least one violation (paths printed to stderr),
+<strong>or</strong> the scan corpus was empty / partial (added
+2026-08-26 — see below)</td>
 </tr>
 </tbody>
 </table>
+<h2
+id="2026-08-26-update--6j-corpus-floor-gate-clean-now-requires-having-read-something">2026-08-26
+update — §6.J corpus floor: "gate clean" now requires having read
+something</h2>
+<h3 id="the-defect">The defect</h3>
+<p>The scan loop opened with <code>[[ -d "$p" ]] || continue</code>,
+which skipped a missing scan path <strong>in silence</strong>. A
+configuration in which no path resolved therefore produced:</p>
+<pre><code>LAVA_NO_GUESSING_SCAN_PATHS=&lt;nonexistent&gt;  -&gt;  &quot;§11.4.6 no-guessing vocabulary gate clean.&quot;  exit 0</code></pre>
+<p>and so did a path that resolved but held no <code>*.md</code> /
+<code>*.json</code>. Both are "nothing was learned" reported as "nothing
+failed" — the shape §6.J forbids, and the same shape
+<code>scripts/check-constitution.sh</code>'s clause-6.H credential floor
+already guards against.</p>
+<p>The silent-skip also made the gate's verdict a function of
+<strong>checkout state</strong>: a tree where
+<code>.lava-ci-evidence/crashlytics-resolved/</code> happened not to
+exist yet scanned one directory instead of two and said nothing about
+the difference.</p>
+<h3 id="what-the-gate-now-refuses">What the gate now refuses</h3>
+<p>The loop counts what it resolves and what it reads, and three floors
+run <strong>before</strong> any clean verdict can be printed. All exit
+<strong>1</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No configured scan path resolved to a directory</td>
+<td><code>VIOLATION: NO scan path resolved to a directory.</code> —
+every configured path is listed with <code>(MISSING)</code></td>
+</tr>
+<tr>
+<td>Paths resolved but zero <code>*.md</code> / <code>*.json</code>
+files were read</td>
+<td><code>VIOLATION: the scan read ZERO files.</code> — resolved
+directories are listed as <code>(present, 0 matching files)</code>,
+unresolved ones separately</td>
+</tr>
+<tr>
+<td>Some paths resolved and some did not</td>
+<td><code>VIOLATION: the scan examined a PARTIAL corpus.</code> — the
+missing paths are named</td>
+</tr>
+</tbody>
+</table>
+<p>The first floor distinguishes its cause from the environment: if the
+paths came from <code>LAVA_NO_GUESSING_SCAN_PATHS</code> this is a
+<strong>configuration error</strong>, and the remedy is to correct that
+variable (colon-separated, relative to the repo root) or unset it to
+fall back to the built-in defaults; if they are the <strong>built-in
+defaults</strong>, then either this is not a Lava checkout or
+<code>LAVA_REPO_ROOT</code> points elsewhere — and the message prints
+the resolved root so the reader can see which.</p>
+<p>The partial-corpus floor exists because a floor that fires only at
+exactly zero is a floor with one stair. Its remedy line offers both
+honest options: restore the missing path, <strong>or</strong> narrow
+<code>LAVA_NO_GUESSING_SCAN_PATHS</code> to exactly the set you intend
+to audit — so the gate's claim matches the corpus it actually read.</p>
+<h3 id="effect-on-the-hermetic-test">Effect on the hermetic test</h3>
+<p><code>tests/check-constitution/test_no_guessing_vocabulary.sh</code>
+drives this gate through <code>LAVA_NO_GUESSING_SCAN_PATHS</code>
+against fixture directories. Fixtures must now point at directories that
+exist and contain at least one <code>*.md</code> or <code>*.json</code>
+— a fixture path that was quietly skipped before will now fail the gate,
+which is the point.</p>
+<h3 id="6j-falsifiability-rehearsal-of-the-floor-itself">§6.J
+falsifiability rehearsal of the floor itself</h3>
+<ol type="1">
+<li><code>LAVA_NO_GUESSING_SCAN_PATHS=/nonexistent/a:/nonexistent/b bash scripts/check-no-guessing-vocabulary.sh</code>
+→ expect <strong>exit 1</strong>, <code>NO scan path resolved</code>,
+both paths listed <code>(MISSING)</code>, and the configuration-error
+branch of the diagnosis. Before this change: exit 0,
+<code>gate clean</code>.</li>
+<li><code>mkdir -p /tmp/empty-scan &amp;&amp; LAVA_NO_GUESSING_SCAN_PATHS=/tmp/empty-scan ...</code>
+→ expect <strong>exit 1</strong>,
+<code>the scan read ZERO files</code>.</li>
+<li>Run with no override in the Lava tree → expect exit 0 and a verdict
+line naming the file and directory counts actually scanned.</li>
+</ol>
 <h2 id="integration">Integration</h2>
 <p><code>scripts/check-constitution.sh</code> (line ~575) delegates to
 this script. The pre-push hook invokes
@@ -354,8 +444,8 @@ violations and that the whitelist works.</p>
 <li>Real-repo sanity check</li>
 </ol>
 <p>Run the test:</p>
-<div class="sourceCode" id="cb4"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> tests/check-constitution/test_no_guessing_vocabulary.sh</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> tests/check-constitution/test_no_guessing_vocabulary.sh</span></code></pre></div>
 <h2 id="why-intentionally-not-scanned">Why intentionally NOT
 scanned</h2>
 <p>The gate intentionally does NOT scan <code>CLAUDE.md</code> /

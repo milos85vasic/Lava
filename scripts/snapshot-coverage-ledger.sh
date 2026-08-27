@@ -18,6 +18,16 @@ set -euo pipefail
 
 VERSION_CODE_TAG="${1:?Usage: scripts/snapshot-coverage-ledger.sh <version>-<code>}"
 
+# Guard: the tag is interpolated straight into a FILENAME under $SNAPSHOT_DIR,
+# so accept only a <version>-<code> shape. Without this guard a mis-invocation
+# such as `snapshot-coverage-ledger.sh --check` is silently accepted as a
+# version tag and writes a junk `--check.yaml` snapshot — which happened on
+# 2026-08-27 and reached commit 38986527 before being removed.
+if [[ ! "$VERSION_CODE_TAG" =~ ^[0-9]+(\.[0-9]+)*-[0-9]+$ ]]; then
+    echo "ERROR: expected <version>-<code> (e.g. 1.3.17-1085), got '$VERSION_CODE_TAG'" >&2
+    exit 2
+fi
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 

@@ -289,23 +289,9 @@ entry the iteration runs keyless (and <code>/v1</code> will 401 —
 recorded honestly).</p>
 <h2 id="verdict-decision-table-anti-bluff">Verdict decision table
 (anti-bluff)</h2>
-<p>Challenge70 logs <code>C70-RESULT ... DOWNLOAD-OK</code> only after
-the user-visible download/magnet affordance is confirmed on screen —
-hard evidence the real user flow reached the download. Separately, the
-test's <code>MainActivity</code> teardown can crash with the known-open
-upstream defect <strong>LVA-008</strong> (a process-FATAL
-<code>IllegalStateException</code> at activity destroy) that fails the
-JUnit run without being a product defect. Signals grepped from logcat +
-JUnit XML:</p>
-<ul>
-<li><code>marker_download_ok</code> — the on-screen download affordance
-was confirmed</li>
-<li><code>teardown_known_lva008</code> — logcat/JUnit contains BOTH
-LVA-008 phrases</li>
-<li><code>other_failure_signal</code> — ANY failure unrelated to LVA-008
-(explicit C70 download-step failure marker, or any non-LVA-008
-<code>AssertionError</code>)</li>
-</ul>
+<p>The verdict is decided by the gradle/JUnit outcome
+<strong>alone</strong>. A crash is a failure: no signature, marker, or
+"known defect" converts a failed run into a PASS.</p>
 <table>
 <thead>
 <tr>
@@ -329,16 +315,37 @@ bluff by construction</td>
 <td><strong>SKIP</strong></td>
 </tr>
 <tr>
-<td>marker <strong>AND</strong> lva008-teardown <strong>AND</strong> no
-other failure signal</td>
-<td><strong>PASS</strong> (PASS-via-marker; all three MUST hold)</td>
-</tr>
-<tr>
-<td>anything else</td>
+<td>anything else (including any crash)</td>
 <td><strong>FAIL</strong></td>
 </tr>
 </tbody>
 </table>
+<p>Two signals are grepped from logcat + JUnit XML and recorded as
+<strong>diagnostic evidence only</strong>. They describe what happened
+during the run; they do <strong>not</strong> gate the verdict:</p>
+<ul>
+<li><code>marker_download_ok</code> — Challenge70 logged
+<code>C70-RESULT ... DOWNLOAD-OK</code>, i.e. the on-screen
+download/magnet affordance was confirmed</li>
+<li><code>other_failure_signal</code> — an explicit C70 download-step
+failure marker, or any <code>AssertionError</code>. No phrase is
+whitelisted.</li>
+</ul>
+<h3 id="removed-the-lva-008-pass-override-do-not-re-introduce">Removed:
+the LVA-008 PASS-override (do not re-introduce)</h3>
+<p>A <code>teardown_known_lva008</code> signal and a PASS-via-marker
+branch used to convert a run into a PASS when the raw stream carried
+both LVA-008 teardown phrases
+(<code>State must be at least 'CREATED'</code> +
+<code>Unable to destroy activity</code>), on the premise that the crash
+was an unfixable-upstream AndroidX defect. That premise was
+<strong>disproven</strong>: LVA-008 was a Lava threading bug (an
+off-main-thread <code>navigate()</code> call) fixed on 2026-06-30 by
+commit <code>ccdd84c1</code>. With the cause fixed, the override was a
+live mechanism for reporting a genuine crash as green — the canonical
+§6.J bluff — and was removed on 2026-08-26. If that signature appears
+again it is a <strong>regression</strong> and must fail the
+iteration.</p>
 <p>A missing client APK writes a FAIL <code>verdict.json</code>
 immediately (never leaves a stale PASS behind — the 2026-07-03
 incident).</p>
@@ -353,9 +360,9 @@ FAIL verdict is written)</li>
 <p><code>backend</code>, <code>providers</code>, <code>query</code>,
 <code>serial</code>, <code>gradle_rc</code>, <code>tests</code>,
 <code>failures</code>, <code>errors</code>, <code>skipped</code>,
-<code>marker_download_ok</code>, <code>teardown_known_lva008</code>,
-<code>other_failure_signal</code>, <code>verdict</code>,
-<code>note</code>, <code>junit_xml</code>, <code>raw_dir</code>.</p>
+<code>marker_download_ok</code>, <code>other_failure_signal</code>,
+<code>verdict</code>, <code>note</code>, <code>junit_xml</code>,
+<code>raw_dir</code>.</p>
 <h2 id="companion-files">Companion files</h2>
 <ul>
 <li><code>scripts/autonomous-qa/run-matrix.sh</code> — the caller</li>

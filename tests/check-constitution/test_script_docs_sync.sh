@@ -128,38 +128,53 @@ EOF
 }
 
 # -----------------------------------------------------------------------------
-# Test 5: empty scaffold (no scripts, no docs) → pass (vacuously 0:0)
-# -----------------------------------------------------------------------------
-test_empty_scaffold_passes() {
+# Test 5: empty scaffold (no scripts, no docs) → REFUSED.
+#
+# INVERTED 2026-08-26 (LVA vacuous-pass sweep F12). This case previously asserted
+# exit 0 and its own comment named the reason: "pass (vacuously 0:0)". That is
+# the defect, not the contract. `0 scripts ↔ 0 docs (1:1)` satisfies the 1:1
+# invariant perfectly while having compared nothing — "nothing was learned"
+# reported as "nothing failed", which is the shape §6.J forbids and which the
+# clause-6.H credential floor (check-constitution.sh:188) and the verify-all
+# registry floor (verify-all-constitution-rules.sh:290) already guard against
+# elsewhere in this tree.
+#
+# The gate now refuses an empty corpus and derives its expectation from the git
+# index. This test asserts the refusal AND that the message is actionable — a
+# `set -e` abort with no output is also non-zero, and would not be acceptable.
+test_empty_scaffold_refused() {
     local f
     f=$(mktemp -d)
     scaffold "$f"
     local out rc
     out=$(LAVA_REPO_ROOT="$f" bash "$SCANNER" 2>&1)
     rc=$?
-    if [[ "$rc" -eq 0 ]]; then
-        echo "PASS test_empty_scaffold_passes"
+    if [[ "$rc" -ne 0 ]] && grep -q 'compared ZERO scripts against ZERO docs' <<<"$out"; then
+        echo "PASS test_empty_scaffold_refused"
     else
-        echo "FAIL test_empty_scaffold_passes: rc=$rc out=$out"
+        echo "FAIL test_empty_scaffold_refused: expected a refusal naming the empty corpus, rc=$rc out=$out"
         rm -rf "$f"; exit 1
     fi
     rm -rf "$f"
 }
 
 # -----------------------------------------------------------------------------
-# Test 6: missing scripts/ or docs/scripts/ directory → skip (exit 0)
-# -----------------------------------------------------------------------------
-test_missing_directories_skip() {
+# Test 6: missing scripts/ or docs/scripts/ directory → REFUSED.
+#
+# INVERTED 2026-08-26 (LVA vacuous-pass sweep F12), same reasoning as Test 5.
+# "skipping — scripts/ or docs/scripts/ missing" followed by exit 0 reports a
+# clean 1:1 sync that was never checked. A skip is not a pass.
+test_missing_directories_refused() {
     local f
     f=$(mktemp -d)
     # Don't scaffold — just an empty repo root
     local out rc
     out=$(LAVA_REPO_ROOT="$f" bash "$SCANNER" 2>&1)
     rc=$?
-    if [[ "$rc" -eq 0 ]] && echo "$out" | grep -q "skipping"; then
-        echo "PASS test_missing_directories_skip"
+    if [[ "$rc" -ne 0 ]] && grep -q 'a corpus directory is ABSENT' <<<"$out"; then
+        echo "PASS test_missing_directories_refused"
     else
-        echo "FAIL test_missing_directories_skip: rc=$rc out=$out"
+        echo "FAIL test_missing_directories_refused: expected a refusal naming the absent directory, rc=$rc out=$out"
         rm -rf "$f"; exit 1
     fi
     rm -rf "$f"
@@ -184,8 +199,8 @@ test_clean_1to1_passes
 test_orphan_script_rejected
 test_orphan_doc_rejected
 test_both_orphan_types_rejected
-test_empty_scaffold_passes
-test_missing_directories_skip
+test_empty_scaffold_refused
+test_missing_directories_refused
 test_real_repo_passes
 
 echo "All 7 script-docs-sync gate tests PASSED"

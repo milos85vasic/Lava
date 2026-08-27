@@ -52,12 +52,16 @@ git checkout master && git status   # confirm clean
 bash scripts/pipeline-build-test-distribute.sh
 ```
 
-**CORRECTED 2026-08-21: this scenario was titled "Full run" and is not one.** A bare invocation defaults to `--until live_verify`, the furthest wired phase, and runs `precondition → build → test → install_boot → live_verify`. It does **not** distribute, refresh documentation, or close out any repository, because those phases are not wired — `phase-05-distribute.sh` and `phase-07-closure.sh` do not exist, and `phase-05a-changelog-entry.sh` / `phase-06-docs.sh` exist but are not in the orchestrator's phase registry. Asking for one of them is a usage error, never a silent no-op:
+**CORRECTED 2026-08-21, REVISED 2026-08-26: this scenario was titled "Full run" and is still not one — but for a different and smaller reason than it used to be.** The 2026-08-21 text said a bare invocation defaults to `--until live_verify` and that `phase-05-distribute.sh`, `phase-05a-changelog-entry.sh` and `phase-06-docs.sh` were unwired. **All three of those statements are now stale.** MEASURED 2026-08-26: `pipeline-build-test-distribute.sh:315` sets `UNTIL_PHASE="docs_refresh"`, and the registry wires **eight** phases in R-004 order — `precondition → build → test → install_boot → live_verify → changelog_entry → distribute → docs_refresh` (T046/T057, landed 2026-08-25). `phase-05-distribute.sh` and `phase-06-docs.sh` both exist on disk.
+
+What remains true is the *reason* this is not a full run: **`closure` is the one phase still unwired**, because `scripts/pipeline/phase-07-closure.sh` does not exist. Asking for it is a usage error, never a silent no-op:
 
 ```bash
-bash scripts/pipeline-build-test-distribute.sh --until distribute
+bash scripts/pipeline-build-test-distribute.sh --until closure
 echo "exit code: $?"   # expect 2, with a message naming the wired phases
 ```
+
+**Consequence the operator should expect rather than discover** (`pipeline-build-test-distribute.sh:104-122`): because `changelog_entry` and `docs_refresh` are now inside the default, **a completed default run leaves the working tree DIRTY on purpose** — the CHANGELOG entry, the per-version snapshot, the R-002 documentation fixes and their regenerated `.html`/`.pdf` siblings. The phase that would commit them is `closure`. Until it is wired, committing is a human act, and a **second** run started before those changes are committed or discarded will correctly refuse at `precondition`. `--until live_verify` reproduces the pre-T046 default exactly.
 
 Two slices of this scenario are separately runnable, and they are what make the per-user-story claims testable: `--until test` is the US1 slice (build + test only), `--until live_verify` is US1 + US2.
 
@@ -120,7 +124,11 @@ git checkout -- .       # revert the mutation
 
 **A stronger variant of this scenario, available now.** Scenario 3 as written proves the pipeline stops on a genuinely failing test. The distinct and more valuable property — that a test which *reports* `PASS` but whose evidence is a bluff also blocks the run — is exercised by mutating an Evidence Record's `assertion_summary` to a forbidden generic phrase, or its `raw_output_ref` to a path that is not a regular file, and confirming the run finalizes `FAIL` with `evidence_summary.rejected_by_anti_bluff > 0` even though every phase exited 0. That is the case `outcome` exists to catch, and it is covered hermetically by `tests/pipeline/test_run_report_evidence_summary.sh` CASE 3 and `tests/pipeline/test_anti_bluff_missing_evidence_fields.sh`.
 
-## Scenario 4 — Submodule pin advancement (FR-015, the highest-risk new script)
+## Scenario 4 — Submodule pin advancement and repository closure (FR-015/FR-016/FR-017)
+
+**REVISED 2026-08-26 on explicit operator decision: FR-017 wins.** This scenario previously asserted a *staged, not clean* tree as its expected outcome. That contradicted FR-017, which defines a complete run as one whose repositories are clean and matching their upstreams, and it contradicted the closure behaviour the operator asked for (commit and push, then stop — never leave staged work behind). The scenario is now in two steps: **Step A** is the pin advance, which genuinely does end staged, and is an intermediate state; **Step B** is closure, whose assertions are FR-017's end state and which is the scenario's pass condition.
+
+### Step A — pin advancement (runnable today)
 
 Run this against a disposable clone, never against the real `master` on first use (per the plan's Human Checkpoint #2). **As of 2026-08-21 this checkpoint has not been cleared and the script has never been run against a real submodule upstream** — only against the disposable git fixtures in `tests/pipeline/test_advance_all_submodules.sh`.
 
@@ -145,16 +153,47 @@ json.dump({"run_id": run_id, "commit_sha": sha, "started_at": "1970-01-01T00:00:
 PY
 
 LAVA_PIPELINE_RUN_ID="$RUN_ID" bash scripts/advance-all-submodules.sh
-echo "exit code: $?"                # 0 = all ADVANCED or NO_NEWER_COMMIT; 1 = at least one REJECTED
-git status --porcelain              # expect STAGED submodule pin changes, NOT a clean tree
-git -C submodules/auth log -1       # expect this to match submodules/auth's own upstream HEAD at run time
+echo "exit code: $?"                # 0 = every submodule reached a non-rejecting outcome; 1 = at least one REJECTED
+git status --porcelain              # MID-RUN state, not the outcome: STAGED pin changes, tree not yet clean.
+                                    # Step B below is what turns this into FR-017's end state.
+git -C submodules/helixqa log -1    # expect this to match submodules/helixqa's own upstream HEAD at run time
 ```
+
+**Only `submodules/helixqa` can advance here, and that is the whole governance model, not a limitation of the fixture.** `scripts/advance-all-submodules.sh` was inverted from a deny-list to a **default-DENY allow-list on 2026-08-26** (LVA-138, explicit operator decision), and `GOVERNANCE_ALLOW` has **exactly one entry: `helixqa`** — the sole submodule carrying a standing operator authorization to track upstream unattended (root `CLAUDE.md`'s Q9 waiver). Every other submodule is recorded `REFUSED_GOVERNANCE_DENY` **without being examined for a newer commit**, before any fetch. So on this repository's 25 top-level submodules the expected shape of a successful run is **1 candidate for advance and 24 governance refusals**, each with its own Submodule Advance Record. A run in which `submodules/auth` advanced would be a governance failure, not a success — which is why the line above names `helixqa` and not `auth`.
 
 On a real repository the default verify command runs a full build and test pass per advanced submodule, so this is a long operation. Set `LAVA_ADVANCE_SUBMODULES` to an allow-list of one submodule path to keep a first trial bounded.
 
 **Expected outcome**, corrected: every submodule with a newer upstream commit is advanced, re-verified by a real rebuild-and-test, and staged; a submodule whose advance breaks that verification is **discarded** (restored to its prior pin) and recorded `REJECTED_BREAKING_CHANGE`, and one whose push cannot fast-forward is recorded `REJECTED_PUSH_CONFLICT` — a rejection is the correct outcome, never something to work around. Each `submodule-advances/*.json` validates against `contracts/submodule-advance-record.schema.json`; note the filename is the **sanitized** submodule path (`submodules/auth` → `submodules_auth.json`), while the `submodule_name` field inside keeps the real slashed path.
 
-**The original "expect clean `git status`" was wrong and would have looked like a failure.** The script stages the parent's pin with `git add` and **never commits in the parent repository** — deliberately, so a human review gate sits between "pins staged" and "pins pushed". Committing and pushing the parent belongs to the closure phase, which does not exist. So the parent tree after a successful run has staged changes; a clean parent tree would mean nothing was advanced.
+**Why a staged, not-clean tree is the correct result of Step A — and why it is NOT the result of this scenario.** The script stages the parent's pin with `git add` and **never commits in the parent repository**, deliberately, so a review gate sits between "pins staged" and "pins pushed". Step A therefore ends with staged changes; a clean parent tree after Step A would mean nothing was advanced. That is an **intermediate** state of an **incomplete** run, and this document previously presented it as the scenario's expected outcome — which contradicted FR-017 and has been corrected here (2026-08-26, on explicit operator decision that FR-017 wins). Committing and pushing the parent belongs to the closure phase.
+
+### Step B — closure: FR-017's end state (**not runnable today**)
+
+**FR-017 verbatim** (`spec.md:141`): *"A pipeline run is only considered complete when every repository it touched — the main project and every submodule — reports a clean working tree matching its upstream(s), with every submodule pin in the main repository matching that submodule's own upstream HEAD at the time of the run."*
+
+So the pass condition of this scenario is a **committed, pushed, clean** repository — never a staged one. `scripts/pipeline/phase-07-closure.sh` is the phase that produces it, and **it does not exist yet**: T054 gates T055. T054 is the mandatory review of `scripts/advance-all-submodules.sh` — MEASURED: four completed rounds, every verdict APPROVE-WITH-FIXES, never a clean approval, with the round-4 fixes landed and no fifth verdict returned. Stating the assertions here without being able to run them is deliberate — this is what Step B will assert on the day it runs, not a claim that it has:
+
+```bash
+# NOT RUNNABLE UNTIL T055 LANDS — scripts/pipeline/phase-07-closure.sh does not exist.
+bash scripts/pipeline/phase-07-closure.sh "$RUN_ID"
+echo "exit code: $?"                        # 0 = closure complete; 1 = closure failed; 2 = precondition, nothing attempted
+
+git status --porcelain                      # expect EMPTY — committed, nothing left staged, nothing left outstanding
+git rev-parse HEAD                          # the closure commit
+for r in $(git remote); do
+  test "$(git ls-remote "$r" "$(git branch --show-current)" | cut -f1)" = "$(git rev-parse HEAD)" \
+    || { echo "§6.C divergence at $r"; exit 1; }
+done                                        # every configured upstream carries the same tip SHA (§6.C)
+git submodule status --recursive | grep -c '^[+-]'   # expect 0 — every submodule, at every level, clean and at its pin
+```
+
+**Three assertions above are load-bearing and each replaces a weaker one this document used to imply.**
+
+1. **`git status --porcelain` empty.** Not "staged", not "clean except the pins" — empty. FR-017 defines completion as a *state*, so a run that ended with work staged did not complete.
+2. **Per-remote `ls-remote` equality.** "The push succeeded" is one claim; "every mirror converged on the same SHA" is the stronger one §6.C exists to force, and a partial push (one mirror carrying the commit, one not) is a reachable state that an exit code alone does not distinguish.
+3. **`--recursive`, not top-level.** Per the operator decision of 2026-08-26, the closure scope is the **full recursive submodule set**. MEASURED on this repository the same day: **25** top-level, **59** recursive, **27** of those uninitialised, **0** carrying a `+`.
+
+**One thing this scenario must NOT assert, because it is not achievable and asserting it would be the false-completeness signal this feature exists to prevent.** FR-017's clause *"every submodule pin … matching that submodule's own upstream HEAD"* is satisfiable only for submodules the governance allow-list permits this pipeline to advance. MEASURED: of the 59 recursive submodules, **exactly one** path (`submodules/helixqa`) has a final component on that allow-list, and **27** — every `submodules/helixqa/tools/**` entry — have third-party upstreams (`github.com/appium/appium`, `github.com/google/perfetto`, …) that root `CLAUDE.md` condition (C) forbids the automated path from advancing at all. The reachable assertion is therefore: *clean everywhere, at the recorded pin everywhere, and every submodule the allow-list permitted was advanced to its own upstream HEAD.* Reconciling that against FR-017's literal text is an open operator question recorded against T055, not something this document may quietly paper over.
 
 ## Scenario 5 — Restart-from-scratch on interruption (FR-018)
 
@@ -174,7 +213,7 @@ bash scripts/pipeline-build-test-distribute.sh
 2. **The killed run's report is `FAIL`, not left `BLOCKED`.** The orchestrator traps `INT` and `TERM` and closes the report on the way out, so `kill -TERM` produces a finalized report. `BLOCKED` at rest means finalize never ran at all — a `SIGKILL`, or a host crash. Use `kill -KILL` if the intent is to observe a genuinely unfinalized run.
 3. **Re-invoking within the same second fails.** `run_id` is `date -u +%Y-%m-%dT%H-%M-%SZ`, one-second resolution, and `init_run_report` refuses to overwrite an existing `report.json`. Allow at least a second between invocations. This refusal is correct — silently overwriting an earlier run's report would destroy evidence — but it is not what this scenario is trying to demonstrate.
 
-One thing that does hold as written, and is worth asserting explicitly: the second invocation still satisfies FR-000's clean-tree precondition, because everything the first run produced is gitignored (`releases/`, and `.lava-ci-evidence/pipeline-runs/`). A pipeline whose own output blocked its next run would fail SC-007 by construction.
+**REVISED 2026-08-26 — this paragraph used to claim more than is true.** It said the second invocation always satisfies FR-000's clean-tree precondition "because everything the first run produced is gitignored (`releases/`, and `.lava-ci-evidence/pipeline-runs/`)". That holds only for a run **interrupted before `changelog_entry`**, which is what this scenario's `kill` produces and is therefore still the right expectation *here*. It does **not** hold in general: since T046/T057 the default run reaches `changelog_entry` and `docs_refresh`, which write tracked files, so a *completed* default run does block its own next run at `precondition` until a human commits or discards. That is not a SC-007 violation — it is the gap that `closure` exists to close, and it is the strongest single argument for wiring it.
 
 ## Success signal for this quickstart as a whole
 
@@ -182,6 +221,14 @@ One thing that does hold as written, and is worth asserting explicitly: the seco
 
 All 5 scenarios passing demonstrates FR-000 through FR-009 and FR-018/FR-019 — the precondition boundary, build, test, evidence, anti-bluff validation, install/boot, live verification, restart-from-scratch, and the consolidated run report. That is a genuine feature-level Integration Challenge for the wired half of the pipeline.
 
-It does **not** demonstrate FR-010 through FR-017. Those requirements — distribute debug, distribute release, version monotonicity at distribute time, documentation refresh, commit-and-push the main repository, submodule pin advance, push-conflict refusal, and the clean-tree-everywhere closure guarantee — have **no wired phase to exercise**. The distribute and closure phases are blocked behind unapproved constitutional amendments (tasks T040/T041 and T048/T049), and Scenario 4's script has never been run against a real submodule upstream. Scenario 4 exercises FR-015/FR-016 against disposable fixtures only, which is real coverage but not the same claim.
+It does **not** demonstrate FR-010 through FR-017. **REVISED 2026-08-26 — the reason has changed, and the old reason is no longer true.** This paragraph used to say those phases were "blocked behind unapproved constitutional amendments (tasks T040/T041 and T048/T049)". MEASURED against `tasks.md`: **all four of those tasks are `[x]` and landed 2026-08-23 under explicit operator approval.** No constitutional amendment blocks anything here any more.
+
+What is true today, per requirement:
+
+- **FR-013** (documentation refresh) now has a wired phase, `docs_refresh` → `phase-06-docs.sh`, inside the default run. It is exercised by Scenario 2.
+- **FR-010 / FR-011 / FR-012** (distribute debug, distribute release, version monotonicity) have a wired `distribute` phase, but `phase-05-distribute.sh` is a **gate that cannot distribute** — it qualifies a run and exits 3 without uploading. So these three remain undemonstrated, and `distributions[]` is empty on every run, passing or failing.
+- **FR-014 / FR-015 / FR-016 / FR-017** (commit-and-push the main repository, submodule pin advance, push-conflict refusal, clean-everywhere closure) have **no wired phase**: `scripts/pipeline/phase-07-closure.sh` does not exist. The blocker is **T054** — the mandatory review of `scripts/advance-all-submodules.sh`, which has run four rounds, returned APPROVE-WITH-FIXES every time, has never returned a clean approval, and gates T055.
+
+Scenario 4 Step A exercises FR-015/FR-016 against disposable fixtures only, which is real coverage but not the same claim; Scenario 4 Step B, which is where FR-017 would actually be demonstrated, is not runnable until T055 lands.
 
 Two scenarios also carry caveats worth repeating here: Scenario 3's "zero Distribution Records" assertion is vacuous today (see its own note), and Scenario 2 is a run of the wired phases, not a full run.

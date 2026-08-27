@@ -3,7 +3,7 @@
 # Distribution and invite testers loaded from .env.
 #
 # Replaces the local releases/ delivery flow as the canonical operator
-# distribution channel (operator directive 2026-05-05).
+# distribution path (operator directive 2026-05-05).
 #
 # Usage:
 #   ./scripts/firebase-distribute.sh                    # debug + release APKs
@@ -35,14 +35,21 @@ source "$SCRIPT_DIR/firebase-env.sh"
 cd "$LAVA_REPO_ROOT"
 
 # §6.AA Two-Stage Distribute Mandate — closes §6.AA-debt:
-# Default mode is now `debug` (stage 1). The legacy `both` is reserved for
-# explicit operator-pre-authorized combined invocation (--debug-and-release).
-# A bare `--release-only` invocation REQUIRES a matching debug-stage evidence
-# section in the §6.Z evidence file for the same SHA, recorded by the prior
-# stage-1 run. The default flip prevents the single-sweep failure mode that
-# birthed §6.AA (1.2.19-1039 forensic anchor: combined distribute pushed both
-# debug + release before any device verification; release crashed every cold
-# launch via R8 + painterResource layer-list rejection).
+# MODE has exactly TWO reachable values: `debug` (stage 1, the default) and
+# `release` (stage 2). There is no combined mode.
+#
+# LVA-120 (retired 2026-08-26, operator-approved remedy [B]): the legacy
+# combined mode (`--debug-and-release` / `--both`, MODE="both") is RETIRED.
+# It uploaded the R8-minified RELEASE APK while the §6.AA staging gate below
+# never evaluated (it was guarded on MODE == "release") and the §6.AK/§6.Z
+# device-evidence gate resolved to the DEBUG build variant — mechanically the same
+# setup as the 1.2.19-1039 forensic anchor that birthed §6.AA in the first
+# place. The remedy is removal of the mode, not a gate bolted onto it: the
+# two-stage path already evaluates both gates on the correct build variant by
+# construction, so every caller inherits the fix.
+#
+# A bare `--release-only` invocation REQUIRES the debug stage to have already
+# distributed THIS versionCode (enforced unconditionally below).
 MODE="debug"
 RELEASE_NOTES_OVERRIDE=""
 # §6.P "Stream-D" app selector: --app client|api-app (default: client).
@@ -53,7 +60,22 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --debug-only) MODE="debug"; shift ;;
         --release-only) MODE="release"; shift ;;
-        --debug-and-release|--both) MODE="both"; shift ;;
+        --debug-and-release|--both)
+            # LVA-120: RETIRED, and it MUST fail loudly. Deleting this branch
+            # outright would let the flag fall through to the `*) shift` arm
+            # below and silently become a debug-only distribute — a caller
+            # asking for release would get no release and no error, which is
+            # worse than the defect being removed.
+            echo "FATAL §6.AA: '$1' is RETIRED (LVA-120). There is no combined distribute mode." >&2
+            echo "       It uploaded the release APK while the §6.AA staging gate never evaluated" >&2
+            echo "       and the §6.AK/§6.Z device-evidence gate checked DEBUG-variant evidence." >&2
+            echo "       Use the §6.AA two-stage flow instead — it is now the ONLY path:" >&2
+            echo "         1. $0 --debug-only   # stage 1: distribute debug, then obtain" >&2
+            echo "                              #          operator verification on the" >&2
+            echo "                              #          failure-surface device class" >&2
+            echo "         2. $0 --release-only # stage 2: ONLY after that written confirmation" >&2
+            exit 1
+            ;;
         --release-notes) RELEASE_NOTES_OVERRIDE="$2"; shift 2 ;;
         --app) SELECTED_APP="$2"; shift 2 ;;
         *) shift ;;
@@ -67,7 +89,7 @@ done
 # For each artifact we set:
 #   GRADLE_VERSION_FILE — source of versionName / versionCode
 #   RELEASE_BASE        — directory root where APKs live after build
-#   CHANGELOG_DIR       — .lava-ci-evidence channel directory
+#   CHANGELOG_DIR       — per-app .lava-ci-evidence evidence directory
 #   DEBUG_APP_ID_VAR    — name of the env-var holding the debug Firebase app-id
 #   RELEASE_APP_ID_VAR  — name of the env-var holding the release Firebase app-id
 #   CHANGELOG_PATTERN   — regex used by Gate 2 to match the CHANGELOG.md entry
@@ -76,6 +98,21 @@ done
 # §6.R: app-ids come from .env-exported vars (via firebase-env.sh's
 # LAVA_FIREBASE_* wildcard export), never as literals here.
 # §6.H: we reference the VAR NAME here and dereference only when needed.
+#
+# LVA-148 (2026-08-26) — AXIS NOTE for CHANGELOG_CHANNEL below.
+# CHANGELOG_CHANNEL carries AXIS A (which APPLICATION: client vs api-app). It is
+# NOT the build-variant axis — that is MODE / AK_BUILD_VARIANT. The contract at
+# contracts/distribution-record.schema.json now calls axis A `app` and axis B
+# `build_variant`, and defines neither as `channel`.
+#
+# This variable KEEPS its legacy name on purpose. It is a TEXTUAL contract:
+# scripts/pipeline/phase-05a-changelog-entry.sh's drift-check greps this file
+# for the literal `CHANGELOG_CHANNEL="<value>"` (see its needle_channel), and
+# tests/pipeline/test_phase_05a_per_app_raw_evidence.sh +
+# tests/pipeline/test_phase_05a_snapshot_claim.sh mirror the same literal.
+# Renaming it here alone would break that live gate. Renaming it to
+# CHANGELOG_APP across all four call sites at once is the owed follow-up; it is
+# recorded here rather than half-done.
 # ----------------------------------------------------------------
 case "$SELECTED_APP" in
     client)
@@ -133,30 +170,30 @@ echo "==> Distributing $APP_DISPLAY $APP_VERSION ($APP_VERSION_CODE)"
 # ----------------------------------------------------------------
 # 1a. §6.P (Distribution Versioning + Changelog Mandate) gates.
 # Refuses to operate when:
-#   - current versionCode <= last distributed versionCode for this channel
+#   - current versionCode <= last distributed versionCode for this build variant
 #   - CHANGELOG.md lacks entry for this version
 #   - per-version snapshot file is missing
 # ----------------------------------------------------------------
 CHANGELOG_DIR="$LAVA_REPO_ROOT/.lava-ci-evidence/distribute-changelog/$CHANGELOG_CHANNEL"
-# Legacy single-channel pointer (kept for backward compat + scripts/tag.sh).
+# Legacy variant-agnostic pointer (kept for backward compat + scripts/tag.sh).
 LAST_VERSION_FILE="$CHANGELOG_DIR/last-version"
-# §6.AA-debt PARTIAL CLOSE 2026-05-14: per-channel last-version pointers.
+# §6.AA-debt PARTIAL CLOSE 2026-05-14: per-build-variant last-version pointers.
 # Stage 1 (debug-only) advances last-version-debug; Stage 2 (release-only)
-# advances last-version-release. Combined-mode (legacy default `both`) writes
-# all three. The §6.P monotonic-version-code gate consults the pointer that
-# matches the current MODE so debug stage 1 + release stage 2 of the SAME
-# versionCode are both permitted (the canonical §6.AA two-stage flow that
-# was blocked by the prior single-pointer design).
+# advances last-version-release. Each also refreshes the legacy single pointer
+# to the higher of the two. The §6.P monotonic-version-code gate consults the
+# pointer that matches the current MODE so debug stage 1 + release stage 2 of
+# the SAME versionCode are both permitted (the canonical §6.AA two-stage flow
+# that was blocked by the prior single-pointer design).
 LAST_VERSION_DEBUG_FILE="$CHANGELOG_DIR/last-version-debug"
 LAST_VERSION_RELEASE_FILE="$CHANGELOG_DIR/last-version-release"
 SNAPSHOT_FILE="$CHANGELOG_DIR/$APP_VERSION-$APP_VERSION_CODE.md"
 
 mkdir -p "$CHANGELOG_DIR"
 
-# Initialize per-channel pointers from the legacy single pointer if absent.
+# Initialize per-build-variant pointers from the legacy single pointer if absent.
 # Treats "the last published versionCode" as the prior boundary for both
-# channels — first invocation after this PARTIAL CLOSE seeds equally; from
-# then on the channels diverge per actual distribute history.
+# variants — first invocation after this PARTIAL CLOSE seeds equally; from
+# then on the variants diverge per actual distribute history.
 if [[ -f "$LAST_VERSION_FILE" && ! -f "$LAST_VERSION_DEBUG_FILE" ]]; then
     cp "$LAST_VERSION_FILE" "$LAST_VERSION_DEBUG_FILE"
 fi
@@ -164,7 +201,7 @@ if [[ -f "$LAST_VERSION_FILE" && ! -f "$LAST_VERSION_RELEASE_FILE" ]]; then
     cp "$LAST_VERSION_FILE" "$LAST_VERSION_RELEASE_FILE"
 fi
 
-# Gate 1: monotonic version code (per-channel under the new model).
+# Gate 1: monotonic version code (per-build-variant under the new model).
 case "$MODE" in
     debug)
         GATE_FILE="$LAST_VERSION_DEBUG_FILE"
@@ -174,23 +211,17 @@ case "$MODE" in
         GATE_FILE="$LAST_VERSION_RELEASE_FILE"
         GATE_LABEL="last-version-release"
         ;;
-    both)
-        # Legacy combined mode — stricter check against the legacy pointer
-        # (the most-restrictive of the three).
-        GATE_FILE="$LAST_VERSION_FILE"
-        GATE_LABEL="last-version (combined channel)"
-        ;;
     *)
-        echo "FATAL: unknown MODE '$MODE' (expected debug|release|both)" >&2
+        echo "FATAL: unknown MODE '$MODE' (expected debug|release)" >&2
         exit 1
         ;;
 esac
 if [[ -f "$GATE_FILE" ]]; then
     LAST_DISTRIBUTED="$(cat "$GATE_FILE" 2>/dev/null || echo 0)"
     if [[ "$APP_VERSION_CODE" -le "$LAST_DISTRIBUTED" ]]; then
-        echo "FATAL §6.P: current versionCode $APP_VERSION_CODE is not strictly greater than the last distributed code $LAST_DISTRIBUTED on the $GATE_LABEL channel." >&2
+        echo "FATAL §6.P: current versionCode $APP_VERSION_CODE is not strictly greater than the last distributed code $LAST_DISTRIBUTED on the $GATE_LABEL pointer (build variant: $MODE)." >&2
         echo "       Bump versionCode in app/build.gradle.kts before re-running this script." >&2
-        echo "       Re-distribution of an already-published versionCode on this channel is forbidden." >&2
+        echo "       Re-distribution of an already-published versionCode for this build variant is forbidden." >&2
         exit 1
     fi
 fi
@@ -201,14 +232,20 @@ fi
 # stage 1 has already advanced the debug pointer for THIS versionCode). This
 # blocks the historical failure mode where release pushed before debug, surfacing
 # R8-only crashes only at release impact.
-if [[ "$MODE" == "release" && -f "$LAST_VERSION_DEBUG_FILE" ]]; then
+# LVA-120: this gate is now evaluated for EVERY release-mode invocation. The
+# prior `&& -f "$LAST_VERSION_DEBUG_FILE"` conjunct meant a build variant with no
+# debug pointer skipped the staging check entirely — the same class of hole as
+# the retired combined mode (a gate that does not evaluate is not a gate). An
+# absent pointer now reads as 0, which correctly fails: no debug stage has run.
+if [[ "$MODE" == "release" ]]; then
     LAST_DEBUG="$(cat "$LAST_VERSION_DEBUG_FILE" 2>/dev/null || echo 0)"
+    [[ -n "$LAST_DEBUG" ]] || LAST_DEBUG=0
     if [[ "$APP_VERSION_CODE" -gt "$LAST_DEBUG" ]]; then
         echo "FATAL §6.AA: --release-only invoked for versionCode $APP_VERSION_CODE but last-version-debug is $LAST_DEBUG (debug stage 1 has not yet distributed this versionCode)." >&2
         echo "       The §6.AA Two-Stage Distribute Mandate requires Stage 1 (debug) to complete BEFORE Stage 2 (release)." >&2
-        echo "       Either:" >&2
-        echo "         (a) run --debug-only first to distribute the debug variant + obtain operator verification on the failure-surface device" >&2
-        echo "         (b) operator-pre-authorize combined distribute via --debug-and-release (NOT recommended; bypasses staging)" >&2
+        echo "       Run --debug-only first to distribute the debug variant, then obtain operator verification" >&2
+        echo "       of the Firebase-distributed debug build on the failure-surface device class, and only" >&2
+        echo "       then re-run with --release-only. There is no combined mode (LVA-120: retired)." >&2
         exit 1
     fi
 fi
@@ -314,19 +351,48 @@ fi
 # incident (commit 627a0d58): a C00-only device gate while the CHANGELOG claimed
 # search / provider-selection / onboarding fixes. Verified by
 # tests/cycle-coverage/test_wiring.sh (5/5, mutation-rehearsal proven).
-# The gate's --evidence-dir is pinned to $CHANGELOG_DIR (the app-resolved §6.Z
-# evidence dir) and it also subsumes the §6.Z-debt runtime checks (evidence
+# The gate's --evidence-dir is pinned to $CHANGELOG_DIR (the APP-resolved §6.Z
+# evidence dir — axis A) and it also subsumes the §6.Z-debt runtime checks (evidence
 # presence + commit-SHA match + ≤24h freshness → exit 2 / exit 1).
 # ----------------------------------------------------------------
+# LVA-120: resolved EXPLICITLY per mode. The prior `*) AK_BUILD_VARIANT="debug"`
+# catch-all is what pointed this gate at debug-VARIANT evidence during a
+# combined distribute that uploaded the release APK. With the combined mode
+# retired there is no third value, and an unexpected one now fails loudly
+# rather than silently defaulting to the weaker variant.
+#
+# LVA-148 (2026-08-26) — AXIS RENAME. The variable this gate used to resolve
+# here was `AK_CHANNEL`, and it carried the BUILD VARIANT (debug|release) — a
+# DIFFERENT axis from the one the word "channel" named elsewhere in this
+# feature: contracts/distribution-record.schema.json used `channel` for the
+# APPLICATION (client vs api-app). One word naming two concepts in artifacts
+# that are read together is what LVA-148 records, and it sat directly under the
+# §6.AK repair path. The contract property set is now `app` (AXIS A) +
+# `build_variant` (AXIS B), and neither is called `channel`.
+#
+# LVA-149 (2026-08-26) — RESOLVED, and the owed follow-up named above is now
+# CLOSED in the other direction: check-cycle-coverage.sh's `--channel` was not
+# renamed, it was REMOVED. It selected nothing — that gate resolves BOTH the
+# cycle-coverage-map and the §6.Z evidence from --evidence-dir + --version
+# alone, so debug/release/anything produced byte-identical results. Passing it
+# now fails loudly there, so it is no longer passed from here, and the
+# AK_BUILD_VARIANT assignment it fed is gone with it. Axis B still selects
+# which artifact gets built and uploaded — it just never gated §6.AK.
+#
+# The MODE validation is RETAINED on its own merit: LVA-120 recorded that a
+# silent `*)` catch-all default at this point is exactly what pointed a release
+# distribute at debug-variant evidence. An unexpected MODE must still fail loudly.
 case "$MODE" in
-    release) AK_CHANNEL="release" ;;
-    *)       AK_CHANNEL="debug"   ;;
+    debug|release) : ;;
+    *)
+        echo "FATAL: unknown MODE '$MODE' (expected debug|release) at the §6.AK gate invocation" >&2
+        exit 1
+        ;;
 esac
 echo "    Phase 1 Gate 7 (§6.AK): cycle-coverage — CHANGELOG claims × executed device Challenges"
 ak_rc=0
 "$SCRIPT_DIR/check-cycle-coverage.sh" \
     --version="$APP_VERSION-$APP_VERSION_CODE" \
-    --channel="$AK_CHANNEL" \
     --evidence-dir="$CHANGELOG_DIR" \
     --strict || ak_rc=$?
 case "$ak_rc" in
@@ -402,7 +468,7 @@ DEBUG_APK="$(_pick_apk_by_version "$RELEASE_DIR/android-debug" debug)"
 RELEASE_APK="$(_pick_apk_by_version "$RELEASE_DIR/android-release" release)"
 
 # §6.Z content-versionCode guard (added 2026-06-23 after Lava-API-App 0.2.11-17's
-# RELEASE channel shipped a STALE versionCode-16 binary: the rebuild FAILED mid-
+# RELEASE variant shipped a STALE versionCode-16 binary: the rebuild FAILED mid-
 # package (transient crashlytics-DNS) so the release output stayed at the prior
 # cycle's 16 APK; the file was named *-17-release.apk but its binary manifest said
 # 16, and the filename-only picker above could not see the mismatch). Assert the
@@ -431,17 +497,17 @@ _assert_apk_versioncode() {  # $1=apk
     fi
     echo "    §6.Z content-check: $(basename "$apk") actual versionCode $actual == $APP_VERSION_CODE"
 }
-if [[ "$MODE" == "debug"   || "$MODE" == "both" ]]; then _assert_apk_versioncode "$DEBUG_APK"; fi
-if [[ "$MODE" == "release" || "$MODE" == "both" ]]; then _assert_apk_versioncode "$RELEASE_APK"; fi
+if [[ "$MODE" == "debug"   ]]; then _assert_apk_versioncode "$DEBUG_APK"; fi
+if [[ "$MODE" == "release" ]]; then _assert_apk_versioncode "$RELEASE_APK"; fi
 
-if [[ "$MODE" == "debug" || "$MODE" == "both" ]]; then
+if [[ "$MODE" == "debug" ]]; then
     if [[ -z "$DEBUG_APK" || ! -f "$DEBUG_APK" ]]; then
         echo "FATAL: debug APK not found under $RELEASE_DIR/android-debug/" >&2
         echo "       Run ./build_and_release.sh first." >&2
         exit 1
     fi
 fi
-if [[ "$MODE" == "release" || "$MODE" == "both" ]]; then
+if [[ "$MODE" == "release" ]]; then
     if [[ -z "$RELEASE_APK" || ! -f "$RELEASE_APK" ]]; then
         echo "FATAL: release APK not found under $RELEASE_DIR/android-release/" >&2
         echo "       Run ./build_and_release.sh first." >&2
@@ -504,13 +570,13 @@ distribute_apk() {
     echo "    $label APK distributed."
 }
 
-if [[ "$MODE" == "debug" || "$MODE" == "both" ]]; then
+if [[ "$MODE" == "debug" ]]; then
     # Debug APK uses applicationIdSuffix .dev → registered as a separate
     # Firebase Android app (per-app: LAVA_FIREBASE_ANDROID_DEV_APP_ID for client,
     # LAVA_FIREBASE_API_APP_DEV_APP_ID for api-app).
     distribute_apk "$DEBUG_APK" "debug" "$RESOLVED_DEBUG_APP_ID"
 fi
-if [[ "$MODE" == "release" || "$MODE" == "both" ]]; then
+if [[ "$MODE" == "release" ]]; then
     distribute_apk "$RELEASE_APK" "release" "$RESOLVED_RELEASE_APP_ID"
 fi
 
@@ -529,13 +595,13 @@ LOG="firebase-distribute-${SELECTED_APP}-${APP_VERSION}-${APP_VERSION_CODE}-${TI
 } > "$LOG"
 echo "==> Distribute log: $LOG (gitignored)"
 
-# §6.P + §6.AA-debt PARTIAL CLOSE: persist per-channel last-version so
+# §6.P + §6.AA-debt PARTIAL CLOSE: persist per-build-variant last-version so
 # stage 1 (debug) + stage 2 (release) of the same SHA are both permitted.
 case "$MODE" in
     debug)
         echo "$APP_VERSION_CODE" > "$LAST_VERSION_DEBUG_FILE"
         echo "==> §6.P last-version-debug recorded: $APP_VERSION_CODE → $LAST_VERSION_DEBUG_FILE"
-        # Also write legacy single pointer at the higher of the two channels
+        # Also write legacy single pointer at the higher of the two variants
         # so scripts/tag.sh + downstream scripts continue to see "latest
         # distributed at all" when they consult the legacy file.
         debug_v=$(cat "$LAST_VERSION_DEBUG_FILE" 2>/dev/null || echo 0)
@@ -551,11 +617,9 @@ case "$MODE" in
         max_v=$(( debug_v > release_v ? debug_v : release_v ))
         echo "$max_v" > "$LAST_VERSION_FILE"
         ;;
-    both)
-        echo "$APP_VERSION_CODE" > "$LAST_VERSION_DEBUG_FILE"
-        echo "$APP_VERSION_CODE" > "$LAST_VERSION_RELEASE_FILE"
-        echo "$APP_VERSION_CODE" > "$LAST_VERSION_FILE"
-        echo "==> §6.P last-version (combined) recorded: $APP_VERSION_CODE → all three pointers"
+    *)
+        echo "FATAL: unknown MODE '$MODE' (expected debug|release) at pointer persist" >&2
+        exit 1
         ;;
 esac
 

@@ -108,14 +108,33 @@
 #     positives — pure decoration. Whether a suppressed failure MATTERS is a
 #     question about what depends on the result, which is not on the line.
 #
+#   * CHECK B across a MULTI-LINE jq filter. `jq -r '` on one line with
+#     `.all_passed // "unknown"` on the next is the identical defect and is not
+#     seen: the scan is per-line. Demonstrated by fixture 2026-08-25. Not closed
+#     because joining lines correctly needs quote tracking, and CHECK F's cheap
+#     `line ends in |` join has no safe analogue here — a wrong join would
+#     manufacture hits in unrelated code.
+#
+#   * CHECK C on a variable NOT named `*_ref` / `*_path` / `*_file`.
+#     `[[ -s "$raw_output" ]]` is the same defect and is not seen. Demonstrated
+#     by fixture 2026-08-25. Deliberately not widened: the whole scanned surface
+#     contains exactly two `-e`/`-s` tests, one of them already annotated, so
+#     dropping the name filter buys no true positive today while making every
+#     future legitimate `-e`/`-s` an annotation chore — the hit profile that
+#     turns a check into decoration.
+#
 #   * Everything semantic. Whether an assertion is on user-visible state,
 #     whether a fake matches the real implementation, whether the thing
 #     measured is the thing claimed. CHECK D catches one narrow, mechanical
 #     tell of a fabricated corroboration claim; it does not read prose.
 #
 # CHECK F is the one check here that is precise rather than heuristic — the
-# pipe IS the defect, with no safe subset to carve out — and it is the only one
-# currently reporting hits. Those hits are real. See its note.
+# pipe IS the defect, with no safe subset to carve out. It reported real hits in
+# lib/anti-bluff-validate.sh when written; those have since been fixed, so every
+# check is green over the tree as it stands. A green scan is not evidence the
+# checks work: tests/pipeline/test_vacuous_pass_guard_discrimination.sh drives
+# each shape past this file in a fixture tree and asserts it is caught, in both
+# directions, so an all-green run here means "absent", not "unlooked-for".
 #
 # Exit 0 if no unexplained instance is found; non-zero otherwise.
 
@@ -146,11 +165,38 @@ _rel() { printf '%s' "${1#"${REPO_ROOT}/"}"; }
 # ---------------------------------------------------------------------------
 # CHECK A — an exit code captured into a variable and never compared.
 # ---------------------------------------------------------------------------
+# Widened 2026-08-25 after fixtures proved four spellings of the SAME capture
+# escaped it: `rc="$?"` (quoted), `${PIPESTATUS[1]}` (any index but 0), and
+# `declare -i` / `readonly` / `export` / `local -r` declarators. Each is the
+# defect this check names, written differently.
 # "Compared" means the variable appears somewhere in a test/case/arithmetic
 # context, NOT merely interpolated into an echo/printf for reporting. A
 # wrapper that prints "tool exited $RC" and then reports PASS anyway is the
 # exact defect: the value was observed, displayed, and ignored.
 echo "=== CHECK A: exit codes captured but never compared ==="
+# A test context must be at a COMMAND POSITION. A bare `[` ANYWHERE on the line
+# used to count, so any line mentioning the variable inside a bracketed label —
+# `_log "wrapper [${module}] exited ${rc}"` — satisfied it. Stripping
+# `echo`/`printf` lines (below) closed that for those two builtins only; every
+# other way of reporting (a `_log` helper, a leading `>&2` redirect, `tee`) still
+# defeated it, so the documented fix was incomplete. Requiring the opener to
+# follow start-of-line, `;`, `&&`, `||`, `(`, `!`, or a `then`/`else`/`elif`/`do`
+# keyword is what tells a test apart from a bracket inside a string. Same
+# reasoning for `if`/`while`/`until`/`case`, which previously matched those words
+# occurring in ordinary prose.
+A_TEST_CTX='((^|[;&|(!]|then|else|elif|do)[[:space:]]*(\[\[?[[:space:]]|if[[:space:]]|while[[:space:]]|until[[:space:]]|case[[:space:]])|\(\()'
+# A variable HANDED OFF to another command as a standalone argument is being
+# used, not merely reported, even when nothing in this file compares it: the
+# recipient can act on it. phase-02-test-challenge.sh is the tree's own case —
+# its matrix exit code is passed as a positional argument into an embedded
+# Python parser that decides `_rc_int in (1, 2)` from it. That is the FIX for
+# the very defect CHECK A names, so flagging it would punish the remedy.
+# The discriminator is STANDALONE WORD versus EMBEDDED IN PROSE:
+#     run_module_parser ... "$manifest" "$rc"     <- handed off, accepted
+#     _log "wrapper [${mod}] exited ${rc}"        <- embedded, still a HIT
+# so a reporting helper that is not echo/printf cannot buy its way out here.
+# VAR is substituted for the variable's name at use.
+A_HANDED_OFF='(^|[[:space:]])("\$\{?VAR\}?"|\$\{?VAR\}?)([[:space:]]|\\|$)'
 a_hits=0
 for f in "${SCRIPTS[@]}"; do
   # Precomputed ONCE per file: the file with its `echo`/`printf` lines removed.
@@ -162,7 +208,7 @@ for f in "${SCRIPTS[@]}"; do
     text="${line#*:}"
     [[ "$text" == *"vacuous-pass-ok:"* ]] && continue
 
-    var="$(printf '%s' "$text" | sed -nE 's/^[[:space:]]*(local[[:space:]]+)?([A-Za-z_][A-Za-z0-9_]*)=(\$\?|"?\$\{PIPESTATUS\[0\]\}"?).*/\2/p')"
+    var="$(printf '%s' "$text" | sed -nE 's/^[[:space:]]*((local|declare|typeset|readonly|export)([[:space:]]+-[a-zA-Z]+)*[[:space:]]+)?([A-Za-z_][A-Za-z0-9_]*)=("?\$\?"?|"?\$\{PIPESTATUS\[[0-9]+\]\}"?).*/\4/p')"
     [[ -z "$var" ]] && continue
 
     # Does this variable ever appear in a comparison/test context anywhere in
@@ -199,14 +245,15 @@ for f in "${SCRIPTS[@]}"; do
     # captured and never examined" was itself defeated by an exit code it did
     # not examine closely enough. Hence no pipelines here — the haystack is a
     # variable, so there is no upstream process left to signal.
-    if grep -qE "(\[\[|\[|case|if|while|until|\(\()[^\n]*\\\$\{?${var}\}?" <<< "$f_haystack" \
+    if grep -qE "${A_TEST_CTX}[^\n]*\\$\{?${var}\}?" <<< "$f_haystack" \
        || grep -qE "\\\$\{?${var}\}?[^\n]*(-eq|-ne|-gt|-lt|-ge|-le|==|!=)" <<< "$f_haystack" \
+       || grep -qE "${A_HANDED_OFF//VAR/${var}}" <<< "$f_haystack" \
        || grep -qE "^[[:space:]]*(exit|return)[[:space:]]+\"?\\\$\{?${var}\}?" "$f"; then
       continue
     fi
     echo "  HIT $(_rel "$f"):${lineno}  \$${var} captured, never compared"
     a_hits=$((a_hits + 1))
-  done < <(grep -nE '^[[:space:]]*(local[[:space:]]+)?[A-Za-z_][A-Za-z0-9_]*=(\$\?|"?\$\{PIPESTATUS\[0\]\}"?)' "$f" || true)
+  done < <(grep -nE '^[[:space:]]*((local|declare|typeset|readonly|export)([[:space:]]+-[a-zA-Z]+)*[[:space:]]+)?[A-Za-z_][A-Za-z0-9_]*=("?\$\?"?|"?\$\{PIPESTATUS\[[0-9]+\]\}"?)' "$f" || true)
 done
 if [[ "$a_hits" -eq 0 ]]; then
   pass "no exit code is captured and then left uncompared"
@@ -246,6 +293,9 @@ echo ""
 echo "=== CHECK C: -e / -s used on a reference that must be a regular file ==="
 # Both -e and -s are TRUE for a directory. Where the value is supposed to be a
 # captured-output FILE, -f is the only test that means what the code intends.
+# The `test -s "$x_ref"` builtin spelling is the identical defect and is matched
+# too (added 2026-08-25 after a fixture proved the `[[`-only pattern let it
+# past; the tree contains no instance, so this closes an escape, not a hit).
 c_hits=0
 for f in "${SCRIPTS[@]}"; do
   while IFS= read -r line; do
@@ -255,7 +305,7 @@ for f in "${SCRIPTS[@]}"; do
     echo "  HIT $(_rel "$f"):${lineno}  -e/-s on a *_ref/*_path/*_file value (true for a DIRECTORY too)"
     echo "      ${text#"${text%%[![:space:]]*}"}"
     c_hits=$((c_hits + 1))
-  done < <(grep -nEi '\[\[?[[:space:]]+-(e|s)[[:space:]]+"?\$\{?[A-Za-z_][A-Za-z0-9_]*(_ref|_path|_file|_REF|_PATH|_FILE)\}?"?' "$f" || true)
+  done < <(grep -nEi '(\[\[?|(^|[;&|(!]|then|else|elif|do)[[:space:]]*test)[[:space:]]+-(e|s)[[:space:]]+"?\$\{?[A-Za-z_][A-Za-z0-9_]*(_ref|_path|_file|_REF|_PATH|_FILE)\}?"?' "$f" || true)
 done
 if [[ "$c_hits" -eq 0 ]]; then
   pass "no -e/-s test stands in for -f on a file reference"
@@ -366,10 +416,13 @@ echo "=== CHECK F: 'grep -q' on the right-hand side of a pipe under pipefail ===
 # is present.
 #
 # This is not theoretical and it is not rare. It bit CHECK A of this very file
-# during its own construction (see the note there), and it is live in the tree
-# today: anti-bluff-validate.sh Rule 4 builds `combined` from `cat` of a
-# record's raw_output_ref and then tests it for the FALSIFIABILITY REHEARSAL
-# marker through exactly this shape. Measured on this host, the flip happens
+# during its own construction (see the note there), and it was live in the tree
+# when this check was written: anti-bluff-validate.sh Rule 4 built `combined`
+# from `cat` of a record's raw_output_ref and then tested it for the
+# FALSIFIABILITY REHEARSAL marker through exactly this shape. That site has
+# since been fixed and the file now contains no `| grep` at all (verified
+# 2026-08-25), so the check is green — which is the point of a guard, not a
+# reason to relax it. Measured on this host, the flip happens
 # between 100 KB and 130 KB of left-hand output; the real-device logcats that
 # feed raw_output_ref in this repo run 1.4 MB to 5 MB. Running that rule's own
 # code byte-for-byte against a 51-byte file and a 2 MB file with the SAME marker
@@ -405,7 +458,20 @@ for f in "${SCRIPTS[@]}"; do
   # `|| grep -qE ... <<< "$f_haystack"` on two consecutive lines and was duly
   # flagged by the first draft of this check. The optional `&` additionally
   # picks up `cmd |& grep -q`, a real pipe the first draft missed.
-  f_cands="$(grep -nE '[^|]\|&?[[:space:]]*grep([[:space:]]+-[a-zA-Z-]+)*[[:space:]]+-[a-zA-Z]*q' "$f" || true)"
+  # Joined haystack: a pipeline continued onto the NEXT line (`cmd |` with
+  # `grep -q ...` beneath it) is the same defect, and a per-line scan cannot see
+  # it. awk folds any line ending in `|` / `|&` into its successor while
+  # reporting the ORIGINAL line number of the line that opened the pipe.
+  f_joined="$(awk '{
+      line = $0; n = NR
+      while (line ~ /\|&?[[:space:]]*$/ && (getline nxt) > 0) {
+        sub(/^[[:space:]]+/, "", nxt); line = line " " nxt
+      }
+      print n ":" line
+    }' "$f")"
+  # `--quiet` is `-q` spelled out and has the identical SIGPIPE behaviour, and an
+  # intervening flag may carry digits (`-m1`), so neither may escape.
+  f_cands="$(grep -E '[^|]\|&?[[:space:]]*grep([[:space:]]+-[a-zA-Z0-9-]+)*[[:space:]]+(-[a-zA-Z]*q|--quiet)' <<< "$f_joined" || true)"
   [[ -z "$f_cands" ]] && continue
   while IFS= read -r line; do
     [[ -z "$line" ]] && continue

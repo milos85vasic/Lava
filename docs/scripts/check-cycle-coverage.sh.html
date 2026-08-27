@@ -283,13 +283,14 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># map next to the evidence file, HEAD from git, &quot;now&quot; from the system clock):</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/check-cycle-coverage.sh</span> <span class="at">--strict</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Explicit version + channel (the form firebase-distribute.sh Gate 7 uses):</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/check-cycle-coverage.sh</span> <span class="at">--version</span><span class="op">=</span><span class="st">&quot;1.3.13-1077&quot;</span> <span class="at">--channel</span><span class="op">=</span>debug <span class="at">--strict</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Fully pinned inputs (the form the hermetic test uses — no git, no clock, no gradle):</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/check-cycle-coverage.sh</span> <span class="at">--version</span><span class="op">=</span><span class="st">&quot;9.9.9-9999&quot;</span> <span class="at">--channel</span><span class="op">=</span>debug <span class="dt">\</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">--evidence-dir</span><span class="op">=</span><span class="st">&quot;&lt;dir&gt;&quot;</span> <span class="at">--map</span><span class="op">=</span><span class="st">&quot;&lt;map.yaml&gt;&quot;</span> <span class="dt">\</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">--head</span><span class="op">=</span><span class="st">&quot;&lt;sha40&gt;&quot;</span> <span class="at">--now-epoch</span><span class="op">=</span><span class="st">&quot;&lt;epoch&gt;&quot;</span></span></code></pre></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Explicit version + evidence dir (the form firebase-distribute.sh Gate 7 uses):</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/check-cycle-coverage.sh</span> <span class="at">--version</span><span class="op">=</span><span class="st">&quot;1.3.13-1077&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">--evidence-dir</span><span class="op">=</span><span class="st">&quot;.lava-ci-evidence/distribute-changelog/firebase-app-distribution&quot;</span> <span class="at">--strict</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Fully pinned inputs (the form the hermetic tests use — no git, no clock, no gradle):</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/check-cycle-coverage.sh</span> <span class="at">--version</span><span class="op">=</span><span class="st">&quot;9.9.9-9999&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">--evidence-dir</span><span class="op">=</span><span class="st">&quot;&lt;dir&gt;&quot;</span> <span class="at">--map</span><span class="op">=</span><span class="st">&quot;&lt;map.yaml&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">--head</span><span class="op">=</span><span class="st">&quot;&lt;sha40&gt;&quot;</span> <span class="at">--now-epoch</span><span class="op">=</span><span class="st">&quot;&lt;epoch&gt;&quot;</span></span></code></pre></div>
 <h3 id="flags">Flags</h3>
 <table>
 <thead>
@@ -307,12 +308,6 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 <td>Version under test, e.g. <code>1.3.12-1077</code>.</td>
 </tr>
 <tr>
-<td><code>--channel &lt;channel&gt;</code></td>
-<td><code>debug</code></td>
-<td><code>debug</code> or <code>release</code>. Selects the evidence dir
-when <code>--evidence-dir</code> is not given.</td>
-</tr>
-<tr>
 <td><code>--evidence-dir &lt;path&gt;</code></td>
 <td>resolved from channel (see below)</td>
 <td>Directory holding
@@ -326,8 +321,9 @@ when <code>--evidence-dir</code> is not given.</td>
 <tr>
 <td><code>--head &lt;sha&gt;</code></td>
 <td><code>git rev-parse HEAD</code></td>
-<td>Expected working-tree HEAD; the evidence <code>commit=</code> must
-match. Overridable for hermetic tests.</td>
+<td>Commit under test. The evidence MUST declare a matching SHA; an
+absent or <code>unknown</code> SHA is a REFUSAL (exit <code>2</code>),
+not a free pass. Overridable for hermetic tests.</td>
 </tr>
 <tr>
 <td><code>--now-epoch &lt;epoch&gt;</code></td>
@@ -394,18 +390,19 @@ rows.</td>
 </tr>
 <tr>
 <td><code>2</code></td>
-<td>Structural: evidence file or map file missing, evidence
-<code>version=</code> mismatch, or evidence <code>commit=</code> ≠
-working-tree HEAD.</td>
-</tr>
-<tr>
-<td><code>3</code></td>
-<td>Internal error: unknown CLI argument, version auto-detect failure,
-HEAD unresolved, missing/malformed evidence <code>cycle-coverage:</code>
-header, unparseable timestamp, or a map declaring zero claims.</td>
+<td><strong>REFUSAL.</strong> Evidence file or map missing; map
+<code>version:</code> mismatch; the evidence declares no usable commit
+SHA (or only <code>unknown</code>); the declared SHA ≠
+<code>--head</code>; the map declares <strong>zero</strong> claims; the
+evidence format yields <strong>no parseable verdict record at
+all</strong>; or an unknown CLI argument (including the removed
+<code>--channel</code>).</td>
 </tr>
 </tbody>
 </table>
+<p>There is no exit <code>3</code>. Every "the gate cannot determine an
+answer" condition is an exit-<code>2</code> REFUSAL, because a gate that
+cannot determine a verdict has not established a PASS.</p>
 <h2 id="input-file-formats">Input file formats</h2>
 <h3 id="1-cycle-coverage-map-vname-code-cycle-coverage-mapyaml">1.
 cycle-coverage-map
@@ -428,8 +425,10 @@ human-readable FAIL messages.</li>
 itself an uncovered claim (→ exit <code>1</code>) — that is the
 "CHANGELOG claims a fix but no Challenge was written" case the 1076
 incident is about.</li>
-<li>A map with <strong>zero</strong> <code>covering_challenge:</code>
-entries is malformed (→ exit <code>3</code>).</li>
+<li>A map with <strong>zero</strong> claims is a vacuous pass and
+REFUSES (→ exit <code>2</code>). A cycle with genuinely no user-visible
+change must say so explicitly as a claim with its re-verification
+Challenge, per §6.AK clause 6.</li>
 <li>Surrounding single/double quotes on values are stripped before
 matching.</li>
 </ul>
@@ -439,36 +438,125 @@ values are matched.)</p>
 <h3 id="2-6z-evidence-file-vname-code-test-evidencemdjson">2. §6.Z
 evidence file
 (<code>&lt;vname&gt;-&lt;code&gt;-test-evidence.{md,json}</code>)</h3>
-<p>The §6.Z device-gate evidence file must carry machine-readable result
-lines the gate consumes (the per-cycle requirement §6.AK adds, written
-by the cycle author alongside the prose evidence). Two line kinds:</p>
-<pre><code>cycle-coverage: version=1.3.12-1077 commit=&lt;sha40&gt; channel=debug timestamp=2026-06-26T12:00:00Z
-challenge: fqn=lava.app.challenges.Challenge58SearchReturnsResultsTest verdict=PASS runner=containers-submodule</code></pre>
-<ul>
-<li>Exactly <strong>one</strong> <code>cycle-coverage:</code> header
-line carries <code>version=</code> / <code>commit=</code> /
-<code>timestamp=</code> (ISO-8601, e.g.
-<code>2026-06-26T12:00:00Z</code>). A missing header, or one missing any
-of those three fields, is exit <code>3</code>.</li>
-<li>One <code>challenge:</code> line per executed Challenge, with its
-<code>verdict=</code> (<code>PASS</code> | <code>FAIL</code> |
-<code>SKIP</code>) and the device <code>runner=</code>.</li>
-<li>A claim counts as <strong>covered</strong> only when a
-<code>challenge:</code> line whose <code>fqn=</code>
-<strong>contains</strong> the map's <code>covering_challenge</code> name
-has <code>verdict=PASS</code> <strong>and</strong>
-<code>runner != host-direct</code> (host-direct rows are not
-gate-eligible per §6.AH).</li>
-<li>Matching is substring: the map carries short names
-(<code>Challenge58Search…</code>), the evidence carries full FQNs
-(<code>lava.app.challenges.Challenge58Search…Test</code>).</li>
-</ul>
-<p>Structural checks on the header: the evidence <code>version=</code>
-must equal the requested <code>--version</code> (else exit
-<code>2</code>); the evidence <code>commit=</code> must match the
-working-tree HEAD, tolerant of short-vs-long SHAs by prefix compare
-(else exit <code>2</code>); the <code>timestamp=</code> must be within
-24h of <code>--now-epoch</code> (else exit <code>1</code>).</p>
+<p><strong>The gate PARSES VERDICTS. It does not match names.</strong>
+(LVA-149 — see the history note at the top of the script.) It scans the
+evidence for records that STATE a result, in any of six shapes, and
+refuses if it finds none:</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Shape</th>
+<th>Where it is used in practice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R1</td>
+<td><code>challenge: fqn=&lt;FQN&gt; verdict=PASS runner=containers-submodule</code></td>
+<td>autonomous-QA / structured evidence</td>
+</tr>
+<tr>
+<td>R2</td>
+<td><code>"&lt;TestName&gt;": "PASS"</code> (also <code>FAIL</code> /
+<code>SKIP</code> / <code>ERROR</code>, with optional trailing
+prose)</td>
+<td>JSON <code>covering_challenges</code> maps</td>
+</tr>
+<tr>
+<td>R3</td>
+<td><code>"test_class": "&lt;FQN&gt;"</code> …
+<code>"test_passed": true</code></td>
+<td>JSON per-AVD attestation rows</td>
+</tr>
+<tr>
+<td>R4</td>
+<td><code>| &lt;TestName&gt; | … | **PASS** | … |</code></td>
+<td>markdown device-gate tables (the production format)</td>
+</tr>
+<tr>
+<td>R5</td>
+<td><code>&lt;TestName&gt;: PASS</code></td>
+<td>Go / colon-verdict blocks</td>
+</tr>
+<tr>
+<td>R6</td>
+<td><code>&lt;TestName&gt;: tests="7" failures="0" errors="0"</code></td>
+<td>JUnit summary lines (PASS iff tests&gt;0, failures=0, errors=0)</td>
+</tr>
+</tbody>
+</table>
+<p>A <code>not run</code> / <code>—</code> cell parses as
+<code>SKIP</code>, which is <strong>not</strong> a pass.</p>
+<p><strong>Coverage rule.</strong> A claim counts as covered only when a
+record whose name matches the map's covering name states
+<code>PASS</code> <strong>and</strong> the runner is not
+<code>host-direct</code> (host-direct is never gate-eligible per
+§6.AH/§6.AG).</p>
+<p><strong>Name matching is IDENTIFIER equality, not substring.</strong>
+Both sides are normalised to the last dot-segment with a single trailing
+<code>Test</code> stripped, so a map naming
+<code>Challenge58SearchReturnsResults</code> matches evidence naming
+<code>lava.app.challenges.Challenge58SearchReturnsResultsTest</code>.
+Substring matching is deliberately gone: it is how the pre-LVA-149 gate
+let a bare NAME anywhere in the file stand in for a verdict.</p>
+<p><strong>A name mentioned in prose is not a verdict.</strong> If the
+evidence names a Challenge but states no result for it, that claim is
+uncovered (exit <code>1</code>), and the message says so explicitly.</p>
+<p><strong>An unrecognised format REFUSES (exit <code>2</code>) and
+names the file.</strong> If the parser extracts zero verdict records, it
+prints the offending path and lists the six shapes above so the operator
+can fix their evidence rather than guess. It never falls back to
+assuming a pass.</p>
+<h3 id="3-commit-sha-binding-f2">3. Commit-SHA binding (F2)</h3>
+<p>The evidence must declare the commit it was produced against.
+Accepted fields, in both markdown and JSON:</p>
+<pre><code>cycle-coverage: ... commit=&lt;sha&gt;
+&quot;commit_sha&quot;: &quot;&lt;sha&gt;&quot;          &quot;tested_code_sha&quot;: &quot;&lt;sha&gt;&quot;     &quot;artifact_code_sha&quot;: &quot;&lt;sha&gt;&quot;
+commit_sha: &lt;sha&gt;              **Commit SHA:** &lt;sha&gt;          **Tested code SHA:** &lt;sha&gt;</code></pre>
+<p>Values are matched against <code>--head</code> by prefix in either
+direction (short SHAs are fine). If <strong>any</strong> declared SHA
+matches, the binding holds. If SHAs are declared but none matches → exit
+<code>2</code>. If <strong>none</strong> is declared, or the only value
+is the literal <code>unknown</code> → exit <code>2</code>. "Unknown" is
+a refusal, not a free pass.</p>
+<h3 id="4-freshness">4. Freshness</h3>
+<p>A timestamp is read from <code>cycle-coverage: … timestamp=</code>,
+<code>"timestamp"</code>, <code>"authored_utc"</code>, or markdown
+<code>**Evidence authored:** &lt;date&gt;</code>. If one is found and it
+is older than 24h relative to <code>--now-epoch</code>, the gate exits
+<code>1</code>.</p>
+<h3
+id="5-known-consequence--pre-push-check-10-and-the-self-reference-problem">5.
+KNOWN CONSEQUENCE — pre-push Check 10 and the self-reference
+problem</h3>
+<p>Read this before the next distribute cycle. It is an open design
+question, not a defect in the parser.</p>
+<p><code>scripts/firebase-distribute.sh</code> Gate 7 runs with
+<code>--head</code> = the commit that carries the code and the evidence,
+so a correctly-authored evidence file binds cleanly.
+<code>.githooks/pre-push</code> Check 10 re-runs the same gate with
+<code>--head</code> set to the <strong>pointer-advancing
+commit</strong>, which by construction cannot contain its own SHA — so
+the evidence (committed earlier, naming the code commit) will not match,
+and the strict binding now REFUSES there.</p>
+<p>Before LVA-149 this went unnoticed only because the binding was
+inert. Three resolutions exist, and the choice belongs to the
+operator:</p>
+<ol type="1">
+<li>Have Check 10 gate the code commit rather than the pointer-advance
+commit.</li>
+<li>Accept a declared SHA that is an <strong>ancestor</strong> of
+<code>--head</code> when no production file differs between them (only
+<code>.lava-ci-evidence/</code>, <code>docs/</code>,
+<code>CHANGELOG.md</code>). This is code-identity, not leniency — any
+source change still refuses.</li>
+<li>Leave it strict and author evidence at distribute time only.</li>
+</ol>
+<p>Option 2 is NOT implemented here: it could not be proven with a
+hermetic positive case in this change, and shipping an untested
+acceptance path into a safety gate is the class of thing this gate
+exists to prevent.</p>
 <h2 id="how-it-is-wired">How it is wired</h2>
 <ul>
 <li><strong><code>scripts/firebase-distribute.sh</code> — Phase 1 Gate 7

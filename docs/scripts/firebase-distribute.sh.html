@@ -173,15 +173,82 @@
       vertical-align: middle;
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
 </head>
 <body>
 <h1
 id="scriptsfirebase-distributesh--user-guide"><code>scripts/firebase-distribute.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-06-26 (§6.AK Phase-1 Gate 7
-wiring) <strong>Inheritance:</strong> HelixConstitution §11.4.18 (script
-documentation mandate)</p>
+<p><strong>Last verified:</strong> 2026-08-26 (LVA-120 combined mode
+RETIRED; §6.AA staging gate now unconditional; LVA-148/149 axis rename —
+<code>channel</code> split into <code>app</code> +
+<code>build_variant</code>) <strong>Inheritance:</strong>
+HelixConstitution §11.4.18 (script documentation mandate)</p>
 <h2 id="overview">Overview</h2>
 <p>Stub doc generated from the script's in-source header comment. See
 <code>scripts/firebase-distribute.sh</code> for canonical behavior. This
@@ -223,9 +290,10 @@ examples.</p>
 Gate 7 (§6.AK cycle-coverage) — added 2026-06-26</h2>
 <p>Closes the firebase-distribute portion of §6.AK-debt. After the
 §6.P/§6.AA/§6.Z Phase-1 gates, the script invokes
-<code>scripts/check-cycle-coverage.sh</code> for the version+channel
-being distributed (<code>--evidence-dir="$CHANGELOG_DIR"</code>,
-<code>--strict</code>) and <strong>refuses the distribute</strong>
+<code>scripts/check-cycle-coverage.sh</code> for the version being
+distributed (<code>--evidence-dir="$CHANGELOG_DIR"</code>,
+<code>--strict</code>; <code>--channel</code> is no longer passed — see
+the LVA-149 note below) and <strong>refuses the distribute</strong>
 unless EVERY CHANGELOG-claimed user-visible fix has an EXECUTED+PASSED
 covering device Challenge in the §6.Z evidence file for the SAME commit
 SHA. This is the gate that would have caught the 1076 incident
@@ -275,6 +343,202 @@ was generated, diffed byte-for-byte against the live
 <code>docs/coverage-ledger.yaml</code>, confirmed identical, then
 removed; this proves the snapshot step correctly captures ledger state
 as of the wiring commit rather than a stale or hand-authored copy.</p>
+<h2
+id="2026-08-26--lva-120-the-combined---debug-and-release-mode-is-retired">2026-08-26
+— LVA-120: the combined <code>--debug-and-release</code> mode is
+RETIRED</h2>
+<h3 id="the-defect">The defect</h3>
+<p><code>MODE</code> had three reachable values: <code>debug</code>,
+<code>release</code>, and <code>both</code>. The combined mode uploaded
+the <strong>R8-minified RELEASE APK</strong>, and in that mode:</p>
+<ul>
+<li>the <strong>§6.AA staging gate never evaluated</strong> — it was
+guarded on <code>MODE == "release"</code>, and <code>both</code> is not
+<code>release</code>; and</li>
+<li>the <strong>§6.AK / §6.Z device-evidence gate resolved to the DEBUG
+build variant</strong> — the gate's variable was set by
+<code>case "$MODE" in release) ... ;; *) debug ;; esac</code>, and
+<code>both</code> fell into the catch-all.</li>
+</ul>
+<p>That is mechanically the same setup as the <strong>1.2.19-1039
+forensic anchor</strong> that birthed §6.AA in the first place: a
+release APK distributed without release-variant verification, crashing
+every cold launch through an R8-specific <code>painterResource</code>
+rejection. The mode that existed to be convenient reproduced the failure
+§6.AA was written to prevent.</p>
+<h3 id="why-removal-not-another-gate">Why removal, not another gate</h3>
+<p>A gate bolted onto the combined mode would have had to re-derive, at
+that one call site, everything the two-stage path already establishes by
+construction. The two-stage path evaluates both gates against the
+<strong>correct build variant</strong> because each stage <em>is</em> a
+single variant — so removing the mode makes every caller inherit the
+fix, with no third code path to keep in lockstep. This was the
+operator-approved remedy <strong>[B]</strong>.</p>
+<h3 id="the-flag-fails-loudly-rather-than-disappearing">The flag fails
+loudly rather than disappearing</h3>
+<p><code>--debug-and-release</code> and <code>--both</code> are still
+parsed — and immediately <strong>exit 1</strong> with a FATAL §6.AA
+message naming the two-stage flow. This is deliberate. Deleting the
+branch outright would let the flag fall through to the argument parser's
+<code>*) shift</code> arm and silently become a
+<strong>debug-only</strong> distribute: a caller asking for release
+would get no release <em>and no error</em>, which is worse than the
+defect being removed.</p>
+<pre><code>FATAL §6.AA: &#39;--both&#39; is RETIRED (LVA-120). There is no combined distribute mode.
+       It uploaded the release APK while the §6.AA staging gate never evaluated
+       and the §6.AK/§6.Z device-evidence gate checked DEBUG-variant evidence.
+       Use the §6.AA two-stage flow instead — it is now the ONLY path:
+         1. ... --debug-only   # stage 1: distribute debug, then obtain
+                               #          operator verification on the
+                               #          failure-surface device class
+         2. ... --release-only # stage 2: ONLY after that written confirmation</code></pre>
+<p><code>MODE</code> now has exactly two reachable values, and an
+unexpected one is FATAL at three separate points (the Gate-1 pointer
+selection, the §6.AK gate invocation, and the pointer-persist step)
+rather than defaulting silently to the weaker variant.</p>
+<blockquote>
+<p><strong>Note on the in-script header.</strong> The
+<code># Usage:</code> block quoted verbatim earlier in this document
+still shows
+<code>./scripts/firebase-distribute.sh   # debug + release APKs</code>.
+That line is <strong>stale</strong>: the bare invocation has defaulted
+to debug-only since the §6.AA default flip, and combined mode no longer
+exists at all. Trust this section over the quoted header.</p>
+</blockquote>
+<h3 id="the-6aa-staging-gate-is-now-unconditional">The §6.AA staging
+gate is now unconditional</h3>
+<p>The release-stage check previously read:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">[[</span> <span class="st">&quot;</span><span class="va">$MODE</span><span class="st">&quot;</span> <span class="ot">==</span> <span class="st">&quot;release&quot;</span> <span class="kw">&amp;&amp;</span> <span class="ot">-f</span> <span class="st">&quot;</span><span class="va">$LAST_VERSION_DEBUG_FILE</span><span class="st">&quot;</span> <span class="kw">]];</span> <span class="cf">then</span></span></code></pre></div>
+<p>The second conjunct meant a build variant with <strong>no debug
+pointer</strong> skipped the staging check entirely — the same class of
+hole as the retired combined mode, because <em>a gate that does not
+evaluate is not a gate</em>. The condition is now
+<code>MODE == "release"</code> alone; an absent pointer reads as
+<code>0</code>, which correctly fails, since no debug stage has run.</p>
+<p>The failure message no longer offers the combined-mode escape hatch
+it used to list as option (b). The only remedy printed is the real one:
+run <code>--debug-only</code>, obtain operator verification of the
+<strong>Firebase-distributed</strong> debug build on the failure-surface
+device class, then re-run with <code>--release-only</code>.</p>
+<h2
+id="2026-08-26--lva-148--lva-149-the-channel-axis-split-and-named">2026-08-26
+— LVA-148 / LVA-149: the <code>channel</code> axis, split and named</h2>
+<h3 id="the-problem">The problem</h3>
+<p>One word named two different things in artifacts that are read
+together:</p>
+<table>
+<thead>
+<tr>
+<th>Axis</th>
+<th>What it selects</th>
+<th>What it used to be called</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>Which <strong>application</strong> — <code>client</code> vs
+<code>api-app</code></td>
+<td><code>channel</code> (in
+<code>contracts/distribution-record.schema.json</code>, and
+<code>CHANGELOG_CHANNEL</code> here)</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>Which <strong>build variant</strong> — <code>debug</code> vs
+<code>release</code></td>
+<td><code>channel</code> (in <code>AK_CHANNEL</code> here, and
+<code>check-cycle-coverage.sh --channel</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Two axes sharing one word, in the repair path for §6.AK, is what
+LVA-148 records. The contract's property set is now <code>app</code>
+(axis A) + <code>build_variant</code> (axis B), and <strong>neither is
+called <code>channel</code></strong>.</p>
+<h3 id="what-changed-in-this-script">What changed in this script</h3>
+<ul>
+<li><strong><code>AK_CHANNEL</code> is gone.</strong> LVA-149 found that
+<code>check-cycle-coverage.sh --channel</code> <em>selected nothing</em>
+— that gate resolves both the cycle-coverage map and the §6.Z evidence
+from <code>--evidence-dir</code> + <code>--version</code> alone, so
+<code>debug</code>, <code>release</code>, or anything else produced
+byte-identical results. Passing it now fails loudly there, so it is no
+longer passed from here, and the variable it fed went with it. Axis B
+still selects which artifact is built and uploaded — it just never gated
+§6.AK.</li>
+<li><strong>The <code>MODE</code> validation at that call site is
+retained on its own merit.</strong> LVA-120 recorded that a silent
+<code>*)</code> catch-all at exactly this point is what pointed a
+release distribute at debug-variant evidence. An unexpected
+<code>MODE</code> must still fail loudly, so the <code>case</code>
+remains — it validates rather than assigns.</li>
+<li><strong><code>CHANGELOG_CHANNEL</code> deliberately keeps its legacy
+name.</strong> It carries <strong>axis A</strong> (the application).
+Renaming it here alone would break a live gate: it is a <em>textual</em>
+contract — <code>scripts/pipeline/phase-05a-changelog-entry.sh</code>
+greps this file for the literal
+<code>CHANGELOG_CHANNEL="&lt;value&gt;"</code>, and
+<code>tests/pipeline/test_phase_05a_per_app_raw_evidence.sh</code> +
+<code>tests/pipeline/test_phase_05a_snapshot_claim.sh</code> mirror the
+same literal. Renaming it to <code>CHANGELOG_APP</code> across all four
+call sites at once is the <strong>owed follow-up</strong>, recorded
+rather than half-done.</li>
+<li><strong>Comment vocabulary swept.</strong> The per-variant pointer
+machinery (<code>last-version-debug</code> /
+<code>last-version-release</code>) is now described as
+<em>per-build-variant</em> throughout, not <em>per-channel</em>, so the
+two axes read distinctly in this file.</li>
+</ul>
+<h3 id="pointer-persistence">Pointer persistence</h3>
+<p>The <code>both</code> arm — which wrote all three pointers at once —
+is removed. <code>debug</code> advances <code>last-version-debug</code>,
+<code>release</code> advances <code>last-version-release</code>, and
+each then refreshes the legacy variant-agnostic
+<code>last-version</code> to the <strong>higher</strong> of the two, so
+<code>scripts/tag.sh</code> and other downstream readers still see
+"latest distributed at all". An unexpected <code>MODE</code> at this
+point is FATAL rather than a silent no-write.</p>
+<h3 id="modes-current-authoritative">Modes (current, authoritative)</h3>
+<table>
+<thead>
+<tr>
+<th>Invocation</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>(no flags)</em></td>
+<td>Stage 1 — debug APK only (<code>MODE=debug</code>, the default since
+the §6.AA flip)</td>
+</tr>
+<tr>
+<td><code>--debug-only</code></td>
+<td>Stage 1 — debug APK only</td>
+</tr>
+<tr>
+<td><code>--release-only</code></td>
+<td>Stage 2 — release APK only; <strong>refuses</strong> unless
+<code>last-version-debug &gt;= </code> this versionCode</td>
+</tr>
+<tr>
+<td><code>--debug-and-release</code> / <code>--both</code></td>
+<td><strong>RETIRED — exit 1</strong> with the two-stage remedy
+(LVA-120)</td>
+</tr>
+<tr>
+<td><code>--app client|api-app</code></td>
+<td>Axis A — selects which application's artifacts and evidence
+directory are used</td>
+</tr>
+<tr>
+<td><code>--release-notes "&lt;text&gt;"</code></td>
+<td>Override the release notes injected into App Distribution</td>
+</tr>
+</tbody>
+</table>
 <h2 id="maintenance">Maintenance</h2>
 <p>When this script is modified, update this document in the same commit
 (CM-SCRIPT-DOCS-SYNC requires it). Per §11.4.18, the documentation MUST

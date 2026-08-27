@@ -184,6 +184,160 @@ read_apigo_version_code() {
     "API-Go Code"
 }
 
+# ----------------------------------------------------------------------
+# Evidence-content assertions (anti-vacuity helpers)
+# ----------------------------------------------------------------------
+# Presence-of-path is not evidence. Every helper below asserts that an
+# artifact carries real, parseable content of the shape its gate's own
+# contract claims for it, so that a gate cannot be satisfied by `mkdir`
+# plus `touch`.
+
+# _scan_changed_since <base_commit>
+#
+# Lists the paths changed between <base_commit> and HEAD, and partitions
+# them into "under .lava-ci-evidence/" and everything else. Sets:
+#   _STALENESS_EXAMINED   count of changed paths actually examined
+#   _STALENESS_OFFENDERS  the non-evidence paths among them
+# Returns 0 on a successful scan, 2 if git could not produce the listing
+# (a failed listing is NEVER reported as "nothing changed").
+#
+# LVA-135 shape — why this is not a pipeline. The obvious spelling,
+#     git diff --name-only "$base..HEAD" -- | grep -qvE '^\.lava-ci-evidence/'
+# is size-dependent under this script's `set -Eeuo pipefail` (line 12):
+# `grep -q` exits at the FIRST matching path and closes the pipe, so once
+# the listing exceeds the 64 KiB pipe buffer git is killed by SIGPIPE and
+# exits 141; `pipefail` promotes 141 to the pipeline's status and the
+# enclosing `if` reads FALSE. A MATCH is thereby delivered to the caller
+# as a NO-MATCH. Measured 2026-08-26 against the real gate: 1 changed
+# file -> caught 10/10; 2000 changed files -> caught 0/10, with the gate
+# printing the positively false claim "only .lava-ci-evidence/ changed
+# since". The gate was weakest exactly where the evidence was most stale.
+# The listing is therefore captured whole, git's own status is checked
+# explicitly, and the scan uses a reader that consumes to EOF: no pipe,
+# no early-exiting consumer, no size-dependent verdict.
+_STALENESS_EXAMINED=0
+declare -a _STALENESS_OFFENDERS=()
+_scan_changed_since() {
+  local base="$1" listing line
+  _STALENESS_EXAMINED=0
+  _STALENESS_OFFENDERS=()
+  if ! listing="$(git diff --name-only "${base}..HEAD" --)"; then
+    return 2
+  fi
+  while IFS= read -r line; do
+    [[ -z "$line" ]] && continue
+    _STALENESS_EXAMINED=$((_STALENESS_EXAMINED + 1))
+    [[ "$line" == .lava-ci-evidence/* ]] && continue
+    _STALENESS_OFFENDERS+=("$line")
+  done <<< "$listing"
+  return 0
+}
+
+# _pack_json_object_ok <path>
+#
+# True iff <path> is a non-empty REGULAR file whose bytes parse as a JSON
+# object. A directory fails (-d check, and -f would already reject it); a
+# zero-byte file fails (-s); `null`, `[]`, a bare number or string fail
+# the type check. Sets _PACK_JSON_REASON to a human-readable reason on
+# failure.
+_PACK_JSON_REASON=""
+_pack_json_object_ok() {
+  local p="$1" t
+  _PACK_JSON_REASON=""
+  if [[ -d "$p" ]]; then _PACK_JSON_REASON="is a directory, not a file"; return 1; fi
+  if [[ ! -f "$p" ]]; then _PACK_JSON_REASON="missing"; return 1; fi
+  if [[ ! -s "$p" ]]; then _PACK_JSON_REASON="is zero bytes — an empty file certifies nothing"; return 1; fi
+  if ! command -v jq >/dev/null 2>&1; then
+    _PACK_JSON_REASON="jq is required to verify evidence-pack content and is not on PATH"
+    return 1
+  fi
+  t="$(jq -r 'type' "$p" 2>/dev/null || true)"
+  if [[ "$t" != "object" ]]; then
+    _PACK_JSON_REASON="does not parse as a JSON object (jq reports: ${t:-parse-error})"
+    return 1
+  fi
+  return 0
+}
+
+# _pack_dir_has_json <dir>
+#
+# True iff <dir> is a directory containing at least one *.json that is
+# itself a non-empty regular file parsing as a JSON object. An EMPTY
+# directory fails: the pack contract names "<recent>.json" INSIDE these
+# directories as the evidence, and `-d` never looks inside.
+_pack_dir_has_json() {
+  local d="$1" j
+  local -a jsons=()
+  _PACK_JSON_REASON=""
+  if [[ ! -d "$d" ]]; then _PACK_JSON_REASON="missing"; return 1; fi
+  mapfile -t jsons < <(find "$d" -maxdepth 1 -type f -name '*.json' 2>/dev/null | sort)
+  if (( ${#jsons[@]} == 0 )); then
+    _PACK_JSON_REASON="contains no *.json file — an empty directory is not evidence"
+    return 1
+  fi
+  for j in "${jsons[@]}"; do
+    if _pack_json_object_ok "$j"; then
+      _PACK_JSON_REASON=""
+      return 0
+    fi
+  done
+  _PACK_JSON_REASON="contains ${#jsons[@]} *.json file(s), none of which is a non-empty JSON object"
+  return 1
+}
+
+# _require_ci_sh_json <tag_id> <path>
+#
+# Asserts the three facts the evidence-pack header claims ci.sh.json
+# certifies: WHICH mode ran, that every gate passed, and WHICH commit it
+# ran against. scripts/ci.sh writes `mode` + `sha` under its own
+# timestamped evidence directory; this file is the operator's summary of
+# that run, and this gate IS its contract:
+#
+#   { "mode": "--full", "all_gates_passed": true, "sha": "<40-hex>" }
+#
+# `sha` must be HEAD or an ancestor of HEAD, and nothing outside
+# .lava-ci-evidence/ may have changed between it and HEAD — the same
+# freshness rule require_evidence_for_apigo applies, for the same reason:
+# a CI run against a commit whose code has since changed certifies the
+# code that was tested, not the code about to be tagged.
+_require_ci_sh_json() {
+  local tag_id="$1" f="$2"
+  local mode passed sha
+
+  mode="$(jq -r '.mode // empty' "$f" 2>/dev/null || true)"
+  # NOTE: `.all_gates_passed // false` cannot be used — jq's `//` also
+  # fires on the boolean `false`, which would make an ABSENT field and an
+  # explicit `false` indistinguishable. Same hazard, same explicit
+  # has()-based spelling, as the Group B `gating` gate below.
+  passed="$(jq -r 'if has("all_gates_passed") then (.all_gates_passed | tostring) else "<absent>" end' "$f" 2>/dev/null || true)"
+  sha="$(jq -r '.sha // empty' "$f" 2>/dev/null || true)"
+
+  if [[ "$mode" != "--full" && "$mode" != "full" ]]; then
+    die "Cannot tag $tag_id: $f does not record a full CI run (.mode = '${mode:-<absent>}', expected '--full'). The evidence pack certifies that scripts/ci.sh --full ran green; a file that does not say which mode ran certifies nothing."
+  fi
+  if [[ "$passed" != "true" ]]; then
+    die "Cannot tag $tag_id: $f does not record a green CI run (.all_gates_passed = '${passed}', expected true)."
+  fi
+  if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+    die "Cannot tag $tag_id: $f does not record which commit CI ran against (.sha = '${sha:-<absent>}', expected a 40-character commit SHA)."
+  fi
+  if ! git cat-file -e "${sha}^{commit}" 2>/dev/null; then
+    die "Cannot tag $tag_id: $f records .sha = $sha, which is not a commit in this repository."
+  fi
+  if ! git merge-base --is-ancestor "$sha" HEAD 2>/dev/null; then
+    die "Cannot tag $tag_id: $f records .sha = $sha, which is not HEAD nor an ancestor of HEAD. CI evidence from an unrelated commit does not certify the commit being tagged."
+  fi
+  local rc=0
+  _scan_changed_since "$sha" || rc=$?
+  if (( rc == 2 )); then
+    die "Cannot tag $tag_id: 'git diff --name-only ${sha}..HEAD' failed, so the freshness of $f cannot be established. Refusing to tag on unverifiable CI evidence."
+  fi
+  if (( ${#_STALENESS_OFFENDERS[@]} > 0 )); then
+    die "Cannot tag $tag_id: $f records a CI run at $sha but non-evidence files have changed since (${#_STALENESS_OFFENDERS[@]} of ${_STALENESS_EXAMINED} changed path(s), e.g. ${_STALENESS_OFFENDERS[0]}). Re-run scripts/ci.sh --full against the commit being tagged."
+  fi
+  log "[android] ci.sh evidence OK: mode=$mode, all_gates_passed=true, sha=$sha (examined ${_STALENESS_EXAMINED} changed path(s) since, all under .lava-ci-evidence/)"
+}
+
 # SP-3a Phase 5 Task 5.21 — Android evidence-pack gate.
 #
 # Refuse to tag the Android app at version V unless
@@ -220,16 +374,34 @@ require_evidence_for_android() {
   fi
 
   # Required subfiles (SP-3a Phase 5 Task 5.21 contract).
+  #
+  # These tests assert CONTENT, not the existence of a path. `-f`/`-d`
+  # alone answer only "does a path of the right type exist", which two
+  # `mkdir`s and a `touch` satisfy. Measured 2026-08-26 against the real
+  # gate: a pack whose ci.sh.json was ZERO BYTES and whose bluff-audit/
+  # and mirror-smoke/ were EMPTY DIRECTORIES reached "SP-3a evidence pack
+  # OK" and exit 0 — byte-for-byte the same verdict as a pack carrying
+  # real evidence. This function's own header states that the pack
+  # certifies scripts/ci.sh --full ran green, that the bluff-audit hunt
+  # ran, and that the mirror smoke test passed. An empty path certifies
+  # none of those. Presence is not evidence.
   local missing=()
-  [[ -f "$pack_dir/ci.sh.json" ]] || missing+=("ci.sh.json")
+  _pack_json_object_ok "$pack_dir/ci.sh.json" || missing+=("ci.sh.json (${_PACK_JSON_REASON})")
   [[ -d "$pack_dir/challenges" ]] || missing+=("challenges/")
-  [[ -d "$pack_dir/bluff-audit" ]] || missing+=("bluff-audit/")
-  [[ -d "$pack_dir/mirror-smoke" ]] || missing+=("mirror-smoke/")
-  [[ -f "$pack_dir/real-device-verification.md" ]] || missing+=("real-device-verification.md")
+  _pack_dir_has_json "$pack_dir/bluff-audit" || missing+=("bluff-audit/ (${_PACK_JSON_REASON})")
+  _pack_dir_has_json "$pack_dir/mirror-smoke" || missing+=("mirror-smoke/ (${_PACK_JSON_REASON})")
+  if [[ ! -f "$pack_dir/real-device-verification.md" ]]; then
+    missing+=("real-device-verification.md")
+  elif [[ ! -s "$pack_dir/real-device-verification.md" ]]; then
+    missing+=("real-device-verification.md (is zero bytes)")
+  fi
 
   if (( ${#missing[@]} > 0 )); then
-    die "Cannot tag $tag_id: evidence pack incomplete. Missing: ${missing[*]} under $pack_dir"
+    die "Cannot tag $tag_id: evidence pack incomplete or contentless. Missing: ${missing[*]} under $pack_dir"
   fi
+
+  # ci.sh.json must certify a green --full run against this commit.
+  _require_ci_sh_json "$tag_id" "$pack_dir/ci.sh.json"
 
   # Each Challenge Test C1-C8 MUST have an attestation file with
   # status: VERIFIED (not PENDING_OPERATOR).
@@ -353,22 +525,53 @@ require_matrix_attestation_clause_6_I() {
     die "Cannot tag $tag_id: clause 6.I clause 7 — matrix attestation has all_passed!=true in: ${failing_files[*]}"
   fi
 
-  # Parse compileSdk from buildSrc — single source of truth. Falls back
-  # to 35 if the file changes shape (with a warning, never silent
-  # passing). This dynamic parse fixes the 2026-05-05 latent helper
-  # bluff: the prior hardcoded `api >= 36` would have silently false-
-  # passed any future compileSdk=37 release with API-36-only evidence.
-  local compile_sdk=35
+  # --- compileSdk DERIVATION FLOOR: derive it, or refuse -------------------
+  # BEGIN compileSdk derivation floor (regression-harness sentinel)
+  #
+  # compileSdk is this gate's own EXPECTATION: §6.I clause 2 requires the
+  # matrix to cover API 28, 30, 34 AND the project's current compileSdk, so a
+  # wrong compileSdk silently redefines what "complete coverage" means. It is
+  # therefore DERIVED from buildSrc — the project's single source of truth —
+  # and never defaulted. This is the 2026-05-05 latent-helper bluff's fix
+  # (the prior hardcoded `api >= 36` would have false-passed a compileSdk=37
+  # release on API-36-only evidence) carried to its conclusion.
+  #
+  # THE DEFAULT ITSELF WAS THE SAME BLUFF (F18, corpus-floor sweep 2026-08-26).
+  # `compile_sdk=35` was seeded before the parse and the missing-file branch
+  # had no `else` at all, so an ABSENT AndroidCommon.kt left the gate asserting
+  # a coverage requirement no manifest supports — silently, with no warning.
+  # Measured, decisive control (identical evidence, identical pack, only the
+  # manifest's presence differing):
+  #
+  #   AndroidCommon.kt PRESENT, declares compileSdk = 36; rows 28 30 34 35
+  #     FATAL … matrix coverage incomplete. Missing API levels: 36
+  #     (project's compileSdk requirement) …                          EXIT=1
+  #   SAME evidence, AndroidCommon.kt ABSENT
+  #     VERDICT: matrix coverage gate PASSED (compile_sdk=35 …)        EXIT=0
+  #
+  # The worse state — no manifest at all — passed where the known state failed.
+  #
+  # The parse-failure branch is refused too, for two reasons. A floor with one
+  # stair is not a floor: a truncated or reshaped file is the likelier drift
+  # and would have kept the same silent 35. And its `warn`-then-continue arm
+  # was in fact UNREACHABLE: under this script's own `set -Eeuo pipefail`, a
+  # no-match `grep | head | grep` assignment aborts the shell outright, so a
+  # reshaped file killed tag.sh with no message at all (verified 2026-08-26,
+  # exit 1, zero output) — non-zero, but not a diagnosis anybody can act on.
   local convention_file="$REPO_ROOT/buildSrc/src/main/kotlin/lava/conventions/AndroidCommon.kt"
-  if [[ -f "$convention_file" ]]; then
-    local parsed
-    parsed=$(grep -oE 'compileSdk[[:space:]]*=[[:space:]]*[0-9]+' "$convention_file" | head -1 | grep -oE '[0-9]+$')
-    if [[ -n "$parsed" ]]; then
-      compile_sdk=$parsed
-    else
-      warn "[android] could not parse compileSdk from $convention_file — defaulting to 35"
+  local compile_sdk="" compile_sdk_cause=""
+  if [[ ! -f "$convention_file" ]]; then
+    compile_sdk_cause="no file exists at that path (checkout artifact, or the convention module moved)"
+  else
+    compile_sdk="$(grep -oE 'compileSdk[[:space:]]*=[[:space:]]*[0-9]+' "$convention_file" 2>/dev/null | head -1 | grep -oE '[0-9]+$' || true)"
+    if [[ -z "$compile_sdk" ]]; then
+      compile_sdk_cause="the file exists but declares no 'compileSdk = <n>' this gate can read (its shape changed)"
     fi
   fi
+  if [[ ! "$compile_sdk" =~ ^[0-9]+$ ]]; then
+    die "Cannot tag $tag_id: clause 6.I clause 2 — the project's compileSdk could NOT be derived, so this gate cannot state which API level the matrix is required to cover. Examined: $convention_file — $compile_sdk_cause. Expected: a 'compileSdk = <n>' declaration to derive the required API level from. Refusing rather than falling back to a built-in default: a default asserts a coverage requirement no manifest supports, and goes stale the moment the project moves to a newer compileSdk — measured 2026-08-26, an evidence pack carrying only API 28/30/34/35 rows was REFUSED while this file declared compileSdk=36 and ACCEPTED byte-identically once the file was removed. Do: restore the file (git checkout -- buildSrc/src/main/kotlin/lava/conventions/AndroidCommon.kt), or update this gate's parser if the convention module legitimately moved or changed shape."
+  fi
+  # END-OF-BLOCK compileSdk derivation floor (regression-harness sentinel)
 
   # Coverage check: every minimum API level MUST be represented.
   # Per root §6.I clause 2: API 28, API 30, API 34, AND the project's
@@ -510,10 +713,18 @@ require_evidence_for_apigo() {
     die "Cannot tag api-go: no pretag evidence file found in .lava-ci-evidence/ for HEAD or any of its 10 most-recent ancestors. Run lava-api-go/scripts/pretag-verify.sh first."
   fi
   if [[ "$ancestor_with_evidence" != "$head_commit" ]]; then
-    if git diff --name-only "${ancestor_with_evidence}..HEAD" -- | grep -qvE '^\.lava-ci-evidence/'; then
-      die "Cannot tag api-go: evidence is from $ancestor_with_evidence but non-evidence files have changed since. Re-run lava-api-go/scripts/pretag-verify.sh."
+    # See _scan_changed_since's header for why this is not written as
+    # `git diff ... | grep -qvE ...` — under pipefail that spelling
+    # failed open in direct proportion to how stale the evidence was.
+    local _stale_rc=0
+    _scan_changed_since "$ancestor_with_evidence" || _stale_rc=$?
+    if (( _stale_rc == 2 )); then
+      die "Cannot tag api-go: 'git diff --name-only ${ancestor_with_evidence}..HEAD' failed, so the age of .lava-ci-evidence/${ancestor_with_evidence}.json cannot be established. Refusing to tag on unverifiable pretag evidence."
     fi
-    log "[api-go] pretag evidence found at ancestor $ancestor_with_evidence (only .lava-ci-evidence/ changed since)"
+    if (( ${#_STALENESS_OFFENDERS[@]} > 0 )); then
+      die "Cannot tag api-go: evidence is from $ancestor_with_evidence but non-evidence files have changed since (${#_STALENESS_OFFENDERS[@]} of ${_STALENESS_EXAMINED} changed path(s), e.g. ${_STALENESS_OFFENDERS[0]}). Re-run lava-api-go/scripts/pretag-verify.sh."
+    fi
+    log "[api-go] pretag evidence found at ancestor $ancestor_with_evidence (examined ${_STALENESS_EXAMINED} changed path(s) since; all under .lava-ci-evidence/)"
   else
     log "[api-go] pretag evidence found: .lava-ci-evidence/${head_commit}.json"
   fi

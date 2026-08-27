@@ -151,6 +151,35 @@
 # exits 1. Regression coverage: tests/pipeline/test_phase_02_go_wrapper.sh
 # CASE 2.
 #
+# ---------------------------------------------------------------------------
+# Run isolation: a run must not dirty the working tree (FR-018 / SC-007)
+# ---------------------------------------------------------------------------
+# Added 2026-08-23 after the first genuine end-to-end pipeline run proved this
+# category could only ever run ONCE. Two of lava-api-go's own §11.4.85
+# stress/chaos test files write their evidence by walking UP from the test's
+# working directory to the repo's `.lava-ci-evidence` and writing into its
+# `stress-chaos/jackett/` subdir:
+#     internal/jackett/stress_chaos_test.go:53             evidenceDir()
+#     internal/handlers/v1/jackett_stress_chaos_test.go:42 handlerEvidenceDir()
+# Six files land there, and they are TRACKED and NOT gitignored (`git ls-files
+# --error-unmatch` succeeds; `git check-ignore` exits 1). Their payload carries
+# `captured_at` plus measured latency percentiles, so it differs on EVERY run
+# by construction. Net effect: a SUCCESSFUL run left the working tree dirty and
+# the NEXT invocation was refused by FR-000 with exit 2, "working tree is not
+# clean" — observed verbatim, run 2026-08-23T10-17-26Z succeeded and run
+# 2026-08-23T10-31-21Z was refused. That also falsified quickstart.md
+# Scenario 5's claim that everything a run produces is gitignored.
+#
+# Fix: both resolvers now honour a `LAVA_STRESS_CHAOS_EVIDENCE_DIR` env seam,
+# and this wrapper points it at `<phase_dir>/raw/go-stress-chaos-evidence/` —
+# inside the run's OWN evidence directory, which IS gitignored
+# (`.lava-ci-evidence/pipeline-runs/`). The evidence is still produced in full,
+# it just lands with the rest of this run's artifacts instead of overwriting a
+# tracked file, which is how every other test category already behaves. Leaving
+# the variable unset (a plain `go test` / `make test`) preserves the historical
+# behaviour byte-for-byte. Regression coverage:
+# tests/pipeline/test_phase_02_go_evidence_isolation.sh.
+#
 # Exit codes:
 #   0 - `go test` ran, at least one per-test outcome was parsed, every
 #       Evidence Record was written and validated, every recorded test result
@@ -225,10 +254,18 @@ STDERR_PATH="${PHASE_DIR}/raw/go-test-stderr.log"
 echo "phase-02-test-go: running lava-api-go's own 'make test' invocation (GOMAXPROCS=2 go test -race -count=1 ./...), +\"-json\" for structured per-test parsing, in ${LAVA_API_GO_DIR}"
 echo "phase-02-test-go: raw JSON test-event stream -> ${JSONL_PATH}"
 
+# Keep the suite's §11.4.85 stress/chaos evidence inside THIS run's own
+# gitignored evidence directory instead of the tracked project-level
+# .lava-ci-evidence/stress-chaos/jackett/ — see "Run isolation" above.
+STRESS_CHAOS_EVIDENCE_DIR="${PHASE_DIR}/raw/go-stress-chaos-evidence"
+mkdir -p "$STRESS_CHAOS_EVIDENCE_DIR"
+echo "phase-02-test-go: stress/chaos evidence from the suite -> ${STRESS_CHAOS_EVIDENCE_DIR}"
+
 set +e
 (
   cd "$LAVA_API_GO_DIR"
   export GOMAXPROCS=2
+  export LAVA_STRESS_CHAOS_EVIDENCE_DIR="$STRESS_CHAOS_EVIDENCE_DIR"
   go test -race -count=1 -json ./...
 ) > "$JSONL_PATH" 2> "$STDERR_PATH"
 GO_TEST_RC=$?

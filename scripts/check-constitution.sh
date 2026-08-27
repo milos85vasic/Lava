@@ -122,6 +122,57 @@ fi
 # (intentional template), CHANGELOG.md (may document historical incidents),
 # .lava-ci-evidence/ (forensic records of past leaks), this script
 # itself, and CLAUDE.md/AGENTS.md (which document the patterns themselves).
+#
+# Also excluded (added 2026-08-25, LVA-134; scope corrected 2026-08-26): the
+# GENERATED workable-items tracker renderings
+# {Issues,Fixed}{,_Summary}.{md,html,pdf,docx} — at the repository ROOT and
+# under docs/. The `(docs/)?` in the anchor is NOT a loosening: this repo
+# tracks the SAME generated renderings in BOTH locations, and the two copies
+# are byte-identical (verified with cmp on all four .md and all four .html
+# members). Naming only docs/ left the root copies scanned, so the moment the
+# trackers were regenerated the LVA-134 ticket body reproduced the violation
+# in Fixed.md, Fixed.html, Fixed_Summary.md and Fixed_Summary.html at the
+# root — measured: `git show HEAD:Fixed.md | grep -c` = 0, working tree = 1,
+# i.e. the hit was NEW output from the generator, not inherited content.
+#
+# WHY. Every exemption already in the list above is the same category: a
+# surface whose PURPOSE is to DESCRIBE the forbidden pattern rather than to
+# use a credential — .env.example (template), CHANGELOG.md (historical
+# incidents), .lava-ci-evidence/ (forensic leak records), docs/INCIDENT_*,
+# the governance docs, and this scanner's own source. The issue tracker was
+# the one such prose surface missing from the list, and it is the surface
+# MOST likely to describe a credential-pattern defect: LVA-134 — the ticket
+# filed about this very false positive — quotes the pattern verbatim in its
+# body, so regenerating the trackers from docs/workable_items.db reproduced
+# the violation in 4 more tracked files. Filing the bug re-created the bug.
+#
+# WHY ALL FOUR NAMES, not just the two that were hit. The trackers are
+# generated: an OPEN item renders into Issues*, and closing it MOVES the same
+# body into Fixed*. Exempting only Issues* would re-break this gate at the
+# moment LVA-134 is marked closed. The scope is derived from that mechanic,
+# not from which files happened to be red today.
+#
+# COVERAGE COST, stated plainly (§6.J — an exemption is surface no longer
+# scanned): 32 tracked files out of 5510 (0.58%) — 16 under docs/ and the 16
+# byte-identical copies at the root. All 32 are generated from
+# docs/workable_items.db; none is handwritten source. The .pdf/.docx/.db
+# members were already effectively unscanned (grep -I skips binaries), so the
+# REAL loss is 16 files: {Issues,Fixed}{,_Summary}.{md,html} × 2 dirs. The
+# root half of that is NOT additional information withheld from the scan —
+# it is the same bytes as the docs/ half, already exempt. Residual
+# risk: a real credential pasted into a ticket body would no longer be caught
+# in its markdown/HTML rendering. That risk is accepted here because the
+# rendering is a copy — the authoritative store, docs/workable_items.db, is
+# binary and was never scanned by this block in the first place.
+#
+# NOT exempted: tests/**. The hermetic fixture in
+# tests/check-constitution/test_credential_scan_corpus.sh that used to trip
+# this scan now ASSEMBLES its leak string at runtime (self-safe idiom, same
+# one scripts/scan-no-hardcoded-ipv4.sh uses on itself), so all 102 tracked
+# files under tests/ remain fully inside this corpus. That is deliberate: the
+# two sibling §6.R scanners (ipv4, hostport) blanket-exempt '^tests/', and
+# copying them here would have cost 102 files of coverage to fix 1 file's
+# false positive. Runtime assembly costs nothing and is self-verifying.
 # ---------------------------------------------------------------------
 forbidden_credential_patterns=(
   # The C2 bluff shape: a "private object *Bridge" containing string constants
@@ -133,7 +184,7 @@ forbidden_credential_patterns=(
 
 mapfile -t tracked_files < <(
   git ls-files 2>/dev/null |
-  grep -vE '^\.env\.example$|^CHANGELOG\.md$|^\.lava-ci-evidence/|^scripts/check-constitution\.sh$|^docs/INCIDENT_|^CLAUDE\.md$|^AGENTS\.md$|^lava-api-go/AGENTS\.md$|^lava-api-go/CLAUDE\.md$|^lava-api-go/CONSTITUTION\.md$' || true
+  grep -vE '^\.env\.example$|^CHANGELOG\.md$|^\.lava-ci-evidence/|^scripts/check-constitution\.sh$|^docs/INCIDENT_|^CLAUDE\.md$|^AGENTS\.md$|^lava-api-go/AGENTS\.md$|^lava-api-go/CLAUDE\.md$|^lava-api-go/CONSTITUTION\.md$|^(docs/)?(Issues|Fixed)(_Summary)?\.(md|html|pdf|docx)$' || true
 )
 
 # §6.J anti-bluff corpus assertion (added 2026-08-22, §6.N.2 gate-shaping
@@ -236,6 +287,89 @@ for clause in "${required_6n[@]}"; do
 done
 
 # ----------------------------------------------------------------
+# 8b. §6.J per-scope doc CORPUS floor (added 2026-08-26, LVA vacuous-pass
+# sweep F5) — covers AGENTS.md, CONSTITUTION.md and the fixed root/scope
+# doc list, which the CLAUDE.md-only floor further down does not.
+#
+# Blocks 9 / 9b / 9d / 9e, 6.S(5)-(6), 6.X(2)-(3) and 6.AD(4) all build their
+# corpus from files that EXIST — `for f in submodules/*/AGENTS.md …;
+# [[ -f "$f" ]] || continue`, and `[[ -f "$doc" ]] && …` for the fixed list.
+# Weakening a doc therefore fails, while DELETING it passes. Deletion is the
+# strictly worse state and it was the one that passed:
+#
+#   MUTATION A: EDIT submodules/auth/AGENTS.md to drop the pointer-block
+#     MISSING §6.AD inheritance pointer-block in 1 per-scope doc(s)      EXIT=1
+#   MUTATION B: DELETE submodules/auth/AGENTS.md entirely
+#     REACHED-CLEAN (6.AD(4) block passed)                              EXIT=0
+#   MUTATION C: DELETE lava-api-go/CONSTITUTION.md + core/CLAUDE.md
+#     REACHED-CLEAN (6.AD(4) block passed)                              EXIT=0
+#
+# The expectation is DERIVED from .gitmodules (submodule docs) and from the
+# fixed scope list this script already enumerates (root/lava-api-go/core/app/
+# feature) — never hardcoded, so adding or removing a submodule cannot silently
+# lower the bar. Same source of truth, and the same
+# uninitialised-vs-real-drift distinction, as the CLAUDE.md floor below.
+#
+# awk, not `grep -c`: `grep -c` exits 1 on a zero count, which under `set -e`
+# in a pipeline is its own hazard.
+declared_submodule_paths=()
+while read -r _decl; do
+  case "$_decl" in submodules/*) ;; *) continue ;; esac
+  is_helix_dev_owned "$_decl" && continue
+  declared_submodule_paths+=("$_decl")
+done < <(sed -n 's/^[[:space:]]*path = //p' .gitmodules 2>/dev/null)
+
+corpus_missing=()
+corpus_uninitialised=()
+for _decl in "${declared_submodule_paths[@]}"; do
+  for _doc in CLAUDE.md AGENTS.md CONSTITUTION.md; do
+    [[ -f "${_decl}/${_doc}" ]] && continue
+    if [[ ! -d "$_decl" ]] || [[ -z "$(ls -A "$_decl" 2>/dev/null)" ]]; then
+      corpus_uninitialised+=("${_decl}/${_doc}")
+    else
+      corpus_missing+=("${_decl}/${_doc}")
+    fi
+  done
+done
+
+# The fixed scope list. These are not optional members whose absence means
+# "nothing to check" — every downstream block that reads them guards with
+# `[[ -f ]] && …`, so an absent one is silently exempted from every §6.S / §6.X
+# / §6.AD assertion made about it.
+for _doc in CLAUDE.md AGENTS.md \
+            lava-api-go/CLAUDE.md lava-api-go/AGENTS.md lava-api-go/CONSTITUTION.md \
+            core/CLAUDE.md app/CLAUDE.md feature/CLAUDE.md; do
+  [[ -f "$_doc" ]] || corpus_missing+=("$_doc")
+done
+
+if [[ ${#corpus_missing[@]} -gt 0 || ${#corpus_uninitialised[@]} -gt 0 ]]; then
+  _expected_docs=$(( ${#declared_submodule_paths[@]} * 3 + 8 ))
+  _absent=$(( ${#corpus_missing[@]} + ${#corpus_uninitialised[@]} ))
+  echo "§6.AD/§6.S/§6.X per-scope doc corpus is INCOMPLETE." >&2
+  echo "  → Examined: $(( _expected_docs - _absent )) of ${_expected_docs} governance doc(s)" >&2
+  echo "  → Expected: ${_expected_docs} = ${#declared_submodule_paths[@]} own-org submodule(s) x 3 (CLAUDE/AGENTS/CONSTITUTION," >&2
+  echo "    derived from .gitmodules, HelixDevelopment-owned excluded) + the 8 fixed" >&2
+  echo "    root / lava-api-go / core / app / feature docs." >&2
+  if [[ ${#corpus_missing[@]} -gt 0 ]]; then
+    echo "  → REAL DRIFT — the tree is populated but these docs are gone. Every §6.S," >&2
+    echo "    §6.X and §6.AD assertion about them is silently skipped, so DELETING a doc" >&2
+    echo "    passes where WEAKENING it fails:" >&2
+    for f in "${corpus_missing[@]}"; do echo "      $f" >&2; done
+    echo "    Do: restore them (git checkout -- <path>) or, for a genuinely new scope," >&2
+    echo "    run scripts/inject-helix-inheritance-block.sh to create the doc." >&2
+  fi
+  if [[ ${#corpus_uninitialised[@]} -gt 0 ]]; then
+    echo "  → NOT INITIALISED — the submodule directory is absent or empty, so this is a" >&2
+    echo "    checkout artifact rather than propagation drift:" >&2
+    for f in "${corpus_uninitialised[@]}"; do echo "      $f" >&2; done
+    echo "    Do: git submodule update --init --recursive" >&2
+  fi
+  echo "  → A PASS over the surviving docs asserts nothing about the absent ones (§6.J)." >&2
+  exit 1
+fi
+# END-OF-BLOCK 8b per-scope doc CORPUS floor (regression-harness sentinel)
+
+# ----------------------------------------------------------------
 # 9. §6.N propagation count across 21 target files (Group A propagation)
 # ----------------------------------------------------------------
 declare -a propagation_targets=(
@@ -249,9 +383,71 @@ declare -a propagation_targets=(
 # EVERY submodule — turning blocks 9/9b/9d/9e into no-ops for submodules and
 # hiding real propagation drift. Fixed 2026-07-02 (falsifiability: the hermetic
 # test_missing_6n_from_submodule_fails now exercises the submodule path).
+submodule_propagation_targets=0
 for sub in submodules/*/CLAUDE.md; do
-  [[ -f "$sub" ]] && propagation_targets+=("$sub")
+  [[ -f "$sub" ]] || continue
+  propagation_targets+=("$sub")
+  submodule_propagation_targets=$((submodule_propagation_targets + 1))
 done
+# Floor on the submodule contribution. Without `nullglob` (unset here) an
+# unmatched glob yields the LITERAL string `submodules/*/CLAUDE.md`; `[[ -f ]]`
+# is false and nothing is appended. Because a failing NON-FINAL operand of an
+# `&&` list is exempt from `set -e`, the script does not abort — it continues
+# and blocks 9/9b/9d/9e verify only the 5 root docs, then report PASS. The same
+# repository state therefore yields OPPOSITE verdicts depending only on whether
+# submodules happen to be initialised: real drift is caught when they are, and
+# silently ignored when they are not. That is "nothing was learned" reported as
+# "nothing failed" — the shape §6.J forbids, and the same shape the clause-6.H
+# corpus floor above already guards against.
+# Not hypothetical: the comment above records the identical no-op occurring
+# after the §11.4.29 rename (CamelCase literals stopped resolving and "silently
+# skipped EVERY submodule ... hiding real propagation drift", fixed 2026-07-02).
+# The glob fixed the rename; this floor closes the uninitialised-clone route
+# into the same no-op. A real checkout has 17+ own-org submodules, so this can
+# only fire when the gate is about to make an unbacked claim.
+# LVA-136 choice [B] — PARTIAL initialisation, not just total.
+#
+# The zero-floor below catches a corpus of 0. It does NOT catch a corpus of 15
+# when 22 are declared: with 7 submodules uninitialised the propagation blocks
+# examine 20 targets instead of 27 and still PASS, so the gate's verdict stays
+# a function of checkout state rather than of the tree's compliance — which is
+# the whole defect LVA-136 records, merely at a smaller scale. A floor that only
+# fires at exactly zero is a floor with one stair.
+#
+# The expectation is DERIVED from .gitmodules rather than hardcoded, so adding
+# or removing a submodule cannot silently lower the bar. awk, not
+# `grep -c | ...`: `grep -c` exits 1 on a zero count, and under `set -e` in a
+# pipeline that is its own hazard (see LVA-135 for what pipes do to gate
+# conditions in this repo).
+declared_submodule_docs="$(awk '/^[[:space:]]*path = submodules\//{n++} END{print n+0}' .gitmodules 2>/dev/null || echo 0)"
+
+if [[ "$declared_submodule_docs" -gt 0 && "$submodule_propagation_targets" -lt "$declared_submodule_docs" ]]; then
+  echo "propagation gate examined ${submodule_propagation_targets} submodule CLAUDE.md files, but .gitmodules declares ${declared_submodule_docs} under submodules/." >&2
+  echo "  → The gate would PASS on a partial corpus, asserting nothing about the missing ones." >&2
+  echo "  → Missing, with the reason distinguished:" >&2
+  while read -r _decl; do
+    case "$_decl" in submodules/*) ;; *) continue ;; esac
+    [[ -f "${_decl}/CLAUDE.md" ]] && continue
+    if [[ ! -d "$_decl" ]] || [[ -z "$(ls -A "$_decl" 2>/dev/null)" ]]; then
+      echo "      ${_decl} — directory absent or empty: the submodule is NOT INITIALISED." >&2
+    else
+      echo "      ${_decl} — directory populated but carries NO CLAUDE.md: this is real propagation drift, not a checkout artifact (§6.AD requires the inheritance pointer-block in every submodule CLAUDE.md)." >&2
+    fi
+  done < <(sed -n 's/^[[:space:]]*path = //p' .gitmodules 2>/dev/null)
+  echo "  → If the cause is initialisation, run: git submodule update --init --recursive" >&2
+  exit 1
+fi
+
+if [[ "$submodule_propagation_targets" -eq 0 ]]; then
+  echo "propagation gate examined ZERO submodule CLAUDE.md files." >&2
+  echo "  → submodules/*/CLAUDE.md matched nothing, so the §6.N/§6.O/§6.P/§6.Q" >&2
+  echo "    propagation blocks would check only the ${#propagation_targets[@]} root docs." >&2
+  echo "  → A PASS here would assert nothing about submodule propagation." >&2
+  echo "  → Initialise the submodules and re-run:" >&2
+  echo "      git submodule update --init --recursive" >&2
+  echo "    (scripts/setup-clone.sh reports the same remedy at its step 4.)" >&2
+  exit 1
+fi
 for f in "${propagation_targets[@]}"; do
   if [[ ! -f "$f" ]]; then continue; fi
   if ! doc_inherits_clause "$f" "6.N"; then
@@ -684,7 +880,24 @@ fi
 # -----------------------------------------------------------------------------
 forbidden_remote_hosts=("gitflic" "gitverse")
 # Parent
-parent_remotes=$(git remote 2>/dev/null)
+#
+# §6.J (added 2026-08-26, LVA vacuous-pass sweep F19): `git remote`'s EXIT
+# STATUS is now checked. Before this, a failing `git remote` yielded the empty
+# string, the empty string matched no forbidden host, and §6.W "passed" — or,
+# under `set -e`, aborted at exit 128 with no message at all. Fail-closed with
+# an empty diagnosis is still a bad diagnosis: it sends the reader nowhere.
+parent_remote_rc=0
+parent_remotes="$(git remote 2>/dev/null)" || parent_remote_rc=$?
+if [[ "$parent_remote_rc" -ne 0 ]]; then
+  echo "§6.W CHECK FAILED: could not enumerate the parent repository's remotes." >&2
+  echo "  → Examined: 0 remote(s); 'git remote' exited ${parent_remote_rc}." >&2
+  echo "  → Cause distinguished: this is NOT 'no forbidden remotes found'. The" >&2
+  echo "    enumeration itself failed, so the §6.W verdict is unbacked." >&2
+  echo "  → Do: run from inside the Lava repository (cwd is $(pwd)); if this checkout" >&2
+  echo "    lives on an external mount, git may be refusing it for dubious ownership —" >&2
+  echo "    check 'git status' first." >&2
+  exit 1
+fi
 for h in "${forbidden_remote_hosts[@]}"; do
   if echo "$parent_remotes" | grep -qx "$h"; then
     echo "§6.W VIOLATION: parent repo has '$h' remote (forbidden — only github + gitlab permitted)" >&2
@@ -693,9 +906,40 @@ for h in "${forbidden_remote_hosts[@]}"; do
   fi
 done
 # vasic-digital submodules (every submodules/* — none is HelixDevelopment-owned)
+#
+# §6.J corpus floor (LVA vacuous-pass sweep F19): `[[ -d "$sub/.git" ]] ||
+# continue` skipped any submodule without a .git marker IN SILENCE, so a
+# forbidden remote inside an uninitialised submodule was never inspected and
+# §6.W reported clean:
+#
+#   REPRO: submodules/auth carries a 'gitverse' remote
+#     with .git present -> §6.W VIOLATION: submodules/auth/ has 'gitverse'  EXIT=1
+#     with .git absent   -> REACHED-CLEAN (§6.W block passed)               EXIT=0
+#
+# The expectation is DERIVED from .gitmodules, which is the repository's own
+# declaration of how many submodules exist — never a hardcoded number, which
+# would go stale the moment a submodule is added or removed.
+w_declared=0
+while read -r _decl; do
+  case "$_decl" in submodules/*) ;; *) continue ;; esac
+  w_declared=$((w_declared + 1))
+done < <(sed -n 's/^[[:space:]]*path = //p' .gitmodules 2>/dev/null)
+
+w_examined=0
+w_unexaminable=()
 for sub in submodules/*/; do
-  [[ -d "$sub/.git" || -f "$sub/.git" ]] || continue
-  sub_remotes=$(git -C "$sub" remote 2>/dev/null || true)
+  [[ -d "$sub" ]] || continue
+  if [[ ! -d "$sub/.git" && ! -f "$sub/.git" ]]; then
+    w_unexaminable+=("${sub%/}")
+    continue
+  fi
+  sub_remote_rc=0
+  sub_remotes="$(git -C "$sub" remote 2>/dev/null)" || sub_remote_rc=$?
+  if [[ "$sub_remote_rc" -ne 0 ]]; then
+    w_unexaminable+=("${sub%/} (git remote exited ${sub_remote_rc})")
+    continue
+  fi
+  w_examined=$((w_examined + 1))
   for h in "${forbidden_remote_hosts[@]}"; do
     if echo "$sub_remotes" | grep -qx "$h"; then
       echo "§6.W VIOLATION: $sub has '$h' remote (only github + gitlab permitted for Lava-owned submodules)" >&2
@@ -704,6 +948,20 @@ for sub in submodules/*/; do
     fi
   done
 done
+
+if [[ "$w_declared" -gt 0 && "$w_examined" -lt "$w_declared" ]]; then
+  echo "§6.W CHECK INCOMPLETE: the remote-host boundary was verified on a PARTIAL corpus." >&2
+  echo "  → Examined: ${w_examined} submodule(s)" >&2
+  echo "  → Expected: ${w_declared} (derived from .gitmodules)" >&2
+  echo "  → Not examinable — each was skipped in silence before this floor existed," >&2
+  echo "    so a forbidden remote inside any of them would go unreported:" >&2
+  for f in "${w_unexaminable[@]}"; do echo "      $f" >&2; done
+  echo "  → Cause distinguished: a submodule with no .git marker is NOT INITIALISED —" >&2
+  echo "    a checkout artifact, not a §6.W violation. It still cannot be cleared." >&2
+  echo "  → Do: git submodule update --init --recursive, then re-run." >&2
+  exit 1
+fi
+# END-OF-BLOCK §6.W remote-host boundary (regression-harness sentinel)
 
 # -----------------------------------------------------------------------------
 # §6.AD-debt item 4 + HelixConstitution §11.4.6 — no-guessing-vocabulary

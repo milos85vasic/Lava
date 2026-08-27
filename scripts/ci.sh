@@ -189,35 +189,118 @@ echo "==> API↔embed source-sync gate (no drift)"
 # propagates the failure.
 # ---------------------------------------------------------------------
 echo "==> Hermetic bash test suites"
-for suite_dir in tests/firebase tests/ci-sh tests/compose-layout \
-                 tests/tag-helper tests/pre-push tests/check-constitution \
-                 tests/vm-images tests/vm-signing tests/vm-distro; do
-  if [[ -d "$suite_dir" ]]; then
-    runner="$suite_dir/run_all.sh"
-    if [[ -x "$runner" ]]; then
-      echo "    -> $suite_dir"
-      bash "$runner" >/dev/null
-    elif [[ -f "$suite_dir/check_constitution_test.sh" ]]; then
-      # tests/check-constitution has a flat layout (one test_*.sh entry +
-      # additional test_*.sh files added per phase, e.g. §6.R Phase 1).
-      bash "$suite_dir/check_constitution_test.sh" >/dev/null
-      for t in "$suite_dir"/test_*.sh; do
-        [[ -f "$t" ]] || continue
-        bash "$t" >/dev/null
-      done
-    elif [[ -f "$suite_dir/check4_test.sh" ]]; then
-      # tests/pre-push has a flat layout (multiple check<N>_test.sh entries).
-      for t in "$suite_dir"/check*_test.sh; do
-        bash "$t" >/dev/null
-      done
+# §6.J corpus floor (added 2026-08-26, LVA vacuous-pass sweep F9). Three
+# silent no-ops lived in this loop, and each one turned a FAILING suite into a
+# clean run — the loop reported success having executed nothing:
+#
+#   BASELINE (tests/pre-push/check9_test.sh exits 1)                 EXIT=1
+#   MUTATION A: delete ONLY check4_test.sh — check9 still present,
+#               still exits 1 -> LOOP COMPLETED                      EXIT=0
+#   MUTATION B: chmod -x tests/firebase/run_all.sh (runner exits 1)  EXIT=0
+#   MUTATION C: delete the whole tests/check-constitution directory  EXIT=0
+#
+# MUTATION A is the sharpest: the flat-layout branch keys on ONE sentinel
+# filename, so deleting an UNRELATED file disables an entire failing suite.
+# verify-all-constitution-rules.sh fixed exactly this pattern in its own loops
+# (an absent suite becomes a FAIL row rather than disappearing); ci.sh carried
+# the unfixed copy. This mirrors verify-all's treatment: an absent directory, a
+# non-executable runner, and an empty glob are all explicit failures.
+#
+# The expectation is DERIVED — the suite list below for the directories, and
+# the git index for the flat-layout globs — so adding or removing a suite
+# cannot silently lower the bar.
+declare -a HERMETIC_SUITE_DIRS=(
+  tests/firebase tests/ci-sh tests/compose-layout
+  tests/tag-helper tests/pre-push tests/check-constitution
+  tests/vm-images tests/vm-signing tests/vm-distro
+)
+suite_failures=()
+suites_executed=0
+for suite_dir in "${HERMETIC_SUITE_DIRS[@]}"; do
+  if [[ ! -d "$suite_dir" ]]; then
+    suite_failures+=("$suite_dir — DIRECTORY ABSENT (the suite did not run; before this floor it was skipped in silence)")
+    continue
+  fi
+  runner="$suite_dir/run_all.sh"
+  if [[ -x "$runner" ]]; then
+    echo "    -> $suite_dir"
+    if bash "$runner" >/dev/null; then
+      suites_executed=$((suites_executed + 1))
+    else
+      suite_failures+=("$suite_dir — run_all.sh FAILED")
+    fi
+  elif [[ -f "$runner" ]]; then
+    suite_failures+=("$suite_dir — run_all.sh EXISTS BUT IS NOT EXECUTABLE (chmod +x $runner); the suite did not run")
+  elif [[ -f "$suite_dir/check_constitution_test.sh" ]]; then
+    # tests/check-constitution has a flat layout (one test_*.sh entry +
+    # additional test_*.sh files added per phase, e.g. §6.R Phase 1).
+    echo "    -> $suite_dir (flat layout)"
+    _ran=0
+    if bash "$suite_dir/check_constitution_test.sh" >/dev/null; then
+      _ran=$((_ran + 1))
+    else
+      suite_failures+=("$suite_dir/check_constitution_test.sh — FAILED")
+    fi
+    for t in "$suite_dir"/test_*.sh; do
+      [[ -f "$t" ]] || continue
+      if bash "$t" >/dev/null; then _ran=$((_ran + 1)); else suite_failures+=("$t — FAILED"); fi
+    done
+    _declared="$( { git ls-files -- "$suite_dir/test_*.sh" "$suite_dir/check_constitution_test.sh" 2>/dev/null || true; } | awk 'END{print NR+0}' )"
+    if [[ "$_ran" -lt "$_declared" ]]; then
+      suite_failures+=("$suite_dir — executed ${_ran} test file(s) but the git index declares ${_declared}: working-tree drift, not a smaller suite")
+    fi
+    suites_executed=$((suites_executed + 1))
+  else
+    # tests/pre-push has a flat layout (multiple check<N>_test.sh entries).
+    # NOTE: keyed on the GLOB, never on one sentinel filename — MUTATION A above
+    # is precisely what a sentinel key produces.
+    _ran=0
+    for t in "$suite_dir"/check*_test.sh; do
+      [[ -f "$t" ]] || continue
+      if bash "$t" >/dev/null; then _ran=$((_ran + 1)); else suite_failures+=("$t — FAILED"); fi
+    done
+    _declared="$( { git ls-files -- "$suite_dir/check*_test.sh" 2>/dev/null || true; } | awk 'END{print NR+0}' )"
+    if [[ "$_ran" -eq 0 ]]; then
+      suite_failures+=("$suite_dir — NO runner and NO check*_test.sh matched (git index declares ${_declared}); the suite did not run")
+    else
+      echo "    -> $suite_dir (flat layout, ${_ran} test file(s))"
+      if [[ "$_ran" -lt "$_declared" ]]; then
+        suite_failures+=("$suite_dir — executed ${_ran} test file(s) but the git index declares ${_declared}: working-tree drift, not a smaller suite")
+      fi
+      suites_executed=$((suites_executed + 1))
     fi
   fi
 done
+
+if [[ ${#suite_failures[@]} -gt 0 ]]; then
+  echo "HERMETIC SUITE GATE FAILED:" >&2
+  printf '    %s\n' "${suite_failures[@]}" >&2
+  echo "  → Examined: ${suites_executed} of ${#HERMETIC_SUITE_DIRS[@]} declared suite(s)" >&2
+  echo "  → A suite that is absent, non-executable, or whose glob matched nothing did" >&2
+  echo "    NOT pass — it did not run. Skipping it reports 'nothing failed' for work" >&2
+  echo "    that was never done (§6.J)." >&2
+  echo "  → Do: restore the missing suite (git checkout -- tests/), or chmod +x its" >&2
+  echo "    run_all.sh, then re-run." >&2
+  exit 1
+fi
+if [[ "$suites_executed" -eq 0 ]]; then
+  echo "HERMETIC SUITE GATE FAILED: ZERO suites executed." >&2
+  echo "  → Examined: 0 of ${#HERMETIC_SUITE_DIRS[@]} declared suite(s)" >&2
+  echo "  → A clean verdict over an empty suite set asserts nothing (§6.J)." >&2
+  echo "  → Do: confirm tests/ is present in this checkout and re-run." >&2
+  exit 1
+fi
+echo "    ${suites_executed}/${#HERMETIC_SUITE_DIRS[@]} hermetic suites executed"
 
 if [[ "$MODE" == "--changed-only" ]]; then
   echo "==> --changed-only: skipping parity, mutation, fixture-freshness, Compose UI"
   echo "$MODE" > "$EVIDENCE_DIR/mode"
   git rev-parse HEAD > "$EVIDENCE_DIR/sha"
+  # §6.J (LVA vacuous-pass sweep F21): record the device verdict on BOTH exit
+  # paths, so a consumer never has to infer it from the absence of a file.
+  # --changed-only declares up front that it does not run the device gate; the
+  # field states that as a fact rather than leaving the directory silent.
+  echo "skipped" > "$EVIDENCE_DIR/device_tests"
   echo "==> All --changed-only gates passed"
   exit 0
 fi
@@ -283,6 +366,7 @@ echo "==> Fixture freshness check"
 # ---------------------------------------------------------------------
 # 9. Compose UI Challenge Tests (requires a connected device).
 # ---------------------------------------------------------------------
+DEVICE_TESTS_RAN=skipped
 if [[ -n "${ANDROID_SERIAL:-}" ]] || \
    ([[ -n "${ANDROID_HOME:-}" ]] && \
     "$ANDROID_HOME/platform-tools/adb" devices 2>/dev/null | \
@@ -300,6 +384,7 @@ if [[ -n "${ANDROID_SERIAL:-}" ]] || \
   # operator-environment gap, not a script-level bluff.
   ./gradlew --no-daemon :app:connectedDebugAndroidTest \
     -Pandroid.testInstrumentationRunnerArguments.package=lava.app.challenges
+  DEVICE_TESTS_RAN=ran
 else
   echo "==> Compose UI Challenge Tests SKIPPED — no connected Android device"
   echo "    Per Sixth Law clause 5, operator real-device verification"
@@ -309,8 +394,38 @@ fi
 
 # ---------------------------------------------------------------------
 # 10. Record evidence.
-# ---------------------------------------------------------------------
+#
+# §6.J (added 2026-08-26, LVA vacuous-pass sweep F21). `--full` used to print
+# "All gates passed" and exit 0 with the Compose UI Challenge Tests skipped
+# whenever no device was detected. The skip was announced on stdout, but the
+# machine-readable output was byte-identical either way — the evidence
+# directory recorded only `mode` and `sha`, with no field saying whether the
+# device gate ran. A consumer reading the directory could not tell a full run
+# from a device-less one, so `mode=--full` was a claim the evidence did not
+# support.
+#
+# Two changes: the verdict is now RECORDED (device_tests), and a `--full` run
+# whose device gate did not run is no longer reported as a full pass. There is
+# deliberately NO bypass flag — §6.Z clause 6 forbids one, and a flag that
+# converts "did not run" into "passed" is the bluff this floor exists to close.
 echo "$MODE" > "$EVIDENCE_DIR/mode"
 git rev-parse HEAD > "$EVIDENCE_DIR/sha"
-echo "==> All gates passed"
+echo "$DEVICE_TESTS_RAN" > "$EVIDENCE_DIR/device_tests"
+
+if [[ "$DEVICE_TESTS_RAN" != "ran" ]]; then
+  echo "" >&2
+  echo "CI GATE INCOMPLETE: '$MODE' ran every gate EXCEPT the Compose UI Challenge Tests." >&2
+  echo "  → Examined: 0 device Challenge test(s) — no connected Android device was detected." >&2
+  echo "  → Expected: the device gate to run, because '$MODE' certifies a full run and" >&2
+  echo "    scripts/tag.sh consumes this evidence directory as proof of one." >&2
+  echo "  → Recorded: device_tests=skipped in $EVIDENCE_DIR (this run is NOT a full pass)." >&2
+  echo "  → Cause distinguished: this is not a test failure. The tests did not run at all," >&2
+  echo "    which is why reporting 'All gates passed' here would be a §6.J bluff." >&2
+  echo "  → Do: bring up a §6.AH-conformant container/VM emulator via" >&2
+  echo "    scripts/run-challenge-matrix.sh (never host-direct, never a live ADB device)," >&2
+  echo "    or run 'scripts/ci.sh --changed-only' if a device-less subset is what you want." >&2
+  exit 1
+fi
+
+echo "==> All gates passed (device_tests=$DEVICE_TESTS_RAN)"
 echo "Evidence: $EVIDENCE_DIR"

@@ -173,14 +173,79 @@
       vertical-align: middle;
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
 </head>
 <body>
 <h1 id="scriptstagsh--user-guide"><code>scripts/tag.sh</code> — User
 Guide</h1>
-<p><strong>Last verified:</strong> 2026-05-16 (Phase 6a + 6b §11.4.29
-snake_case migration: scripts/tag.sh path-references updated from
-<code>Submodules/</code> to <code>submodules/</code>)
+<p><strong>Last verified:</strong> 2026-08-26 (three fail-opens closed:
+size-dependent evidence-staleness scan, presence-not-content
+evidence-pack contract, hardcoded <code>compileSdk</code> seed)
 <strong>Inheritance:</strong> HelixConstitution §11.4.18 (script
 documentation mandate)</p>
 <h2 id="overview">Overview</h2>
@@ -202,6 +267,219 @@ See docs/TAGGING.md for the full operator guide.</code></pre>
 <h2 id="usage">Usage</h2>
 <p>See the script's in-source comment block (above) for canonical usage
 examples.</p>
+<h2
+id="2026-08-26--three-fail-opens-closed-in-the-release-gates">2026-08-26
+— three fail-opens closed in the release gates</h2>
+<p>Every change below has the same shape: a gate that returned a
+<strong>positive verdict</strong> in a state where it had verified
+nothing. Each was measured against the real script before being fixed,
+and each fix replaces a silent fallback with a refusal.</p>
+<h3
+id="1-the-evidence-staleness-scan-was-weakest-exactly-where-the-evidence-was-stalest">1.
+The evidence-staleness scan was weakest exactly where the evidence was
+stalest</h3>
+<p>Both the api-go pretag gate and (now) the Android CI-evidence gate
+must answer one question: <em>has anything outside
+<code>.lava-ci-evidence/</code> changed between the commit the evidence
+covers and <code>HEAD</code>?</em> The old spelling was the obvious
+one:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> diff <span class="at">--name-only</span> <span class="st">&quot;</span><span class="va">$base</span><span class="st">..HEAD&quot;</span> <span class="at">--</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-qvE</span> <span class="st">&#39;^\.lava-ci-evidence/&#39;</span></span></code></pre></div>
+<p>Under this script's <code>set -Eeuo pipefail</code>, that pipeline is
+<strong>size-dependent</strong>. <code>grep -q</code> exits at the
+<strong>first</strong> matching path and closes the pipe; once the
+listing exceeds the 64 KiB pipe buffer, <code>git</code> is killed by
+<code>SIGPIPE</code> and exits 141, <code>pipefail</code> promotes 141
+to the pipeline's status, and the enclosing <code>if</code> reads
+<strong>false</strong>. A match is thereby delivered to the caller as a
+<strong>no-match</strong>.</p>
+<p>Measured 2026-08-26 against the real gate:</p>
+<table>
+<thead>
+<tr>
+<th>Changed files between evidence commit and HEAD</th>
+<th>Staleness detected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>10 of 10 runs</td>
+</tr>
+<tr>
+<td>2000</td>
+<td><strong>0 of 10 runs</strong> — and the gate printed the positively
+false claim <em>"only <code>.lava-ci-evidence/</code> changed
+since"</em></td>
+</tr>
+</tbody>
+</table>
+<p>The more the tree had moved on, the more certainly the gate said it
+had not. That is the inverse of what a staleness check is for.</p>
+<p><strong>The fix</strong> is the helper
+<code>_scan_changed_since &lt;base&gt;</code>: the listing is captured
+whole, git's own exit status is checked explicitly, and the scan uses a
+reader that consumes to EOF. No pipe, no early-exiting consumer, no
+size-dependent verdict. It sets <code>_STALENESS_EXAMINED</code> (how
+many changed paths were actually looked at) and
+<code>_STALENESS_OFFENDERS</code> (the non-evidence ones), and returns
+<strong>2</strong> when git could not produce the listing at all — a
+failed listing is <strong>never</strong> reported as "nothing
+changed".</p>
+<p>Both call sites now report the corpus they examined rather than
+asserting a bare conclusion:
+<code>examined &lt;n&gt; changed path(s) since; all under .lava-ci-evidence/</code>.
+A failed listing is a refusal to tag: <em>the freshness cannot be
+established, so the evidence is unverifiable.</em></p>
+<h3 id="2-the-evidence-pack-asserted-path-presence-not-content">2. The
+evidence pack asserted path presence, not content</h3>
+<p><code>require_evidence_for_android</code>'s own header states that
+the pack certifies three things: that <code>scripts/ci.sh --full</code>
+ran green, that the bluff-audit hunt ran, and that the mirror smoke test
+passed. The checks were <code>[[ -f ... ]]</code> and
+<code>[[ -d ... ]]</code>, which answer only <em>"does a path of the
+right type exist"</em> — something two <code>mkdir</code>s and a
+<code>touch</code> satisfy.</p>
+<p>Measured 2026-08-26: a pack whose <code>ci.sh.json</code> was
+<strong>zero bytes</strong> and whose <code>bluff-audit/</code> and
+<code>mirror-smoke/</code> were <strong>empty directories</strong>
+reached <code>SP-3a evidence pack OK</code> and exit <strong>0</strong>
+— byte-for-byte the same verdict as a pack carrying real evidence. An
+empty path certifies none of the three claims. Presence is not
+evidence.</p>
+<p><strong>The fix</strong> — three content assertions:</p>
+<ul>
+<li><code>_pack_json_object_ok &lt;path&gt;</code> — true only for a
+<strong>non-empty regular file whose bytes parse as a JSON
+object</strong>. A directory fails; a zero-byte file fails;
+<code>null</code>, <code>[]</code>, a bare number or string fail the
+type check. <code>jq</code> is required, and its absence is itself a
+failure with a stated reason rather than a skip.</li>
+<li><code>_pack_dir_has_json &lt;dir&gt;</code> — true only when the
+directory contains at least one <code>*.json</code> that is itself a
+non-empty JSON object. The pack contract names
+<code>&lt;recent&gt;.json</code> <em>inside</em> these directories as
+the evidence, and <code>-d</code> never looks inside.
+<code>an empty directory is not evidence</code>.</li>
+<li><code>real-device-verification.md</code> is additionally rejected
+when it is <strong>zero bytes</strong>.</li>
+</ul>
+<p>Failures now name the reason per artifact, e.g.
+<code>ci.sh.json (is zero bytes — an empty file certifies nothing)</code>,
+and the summary reads
+<code>evidence pack incomplete or contentless</code>.</p>
+<h3
+id="3-cishjson-must-certify-a-green---full-run-against-this-commit">3.
+<code>ci.sh.json</code> must certify a green <code>--full</code> run
+against <strong>this</strong> commit</h3>
+<p>Content-parsing alone would still accept <code>{}</code>. The new
+<code>_require_ci_sh_json</code> asserts the three facts the pack header
+claims that file carries — <strong>which mode ran</strong>, <strong>that
+every gate passed</strong>, and <strong>which commit it ran
+against</strong> — making this gate the file's contract:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;mode&quot;</span><span class="fu">:</span> <span class="st">&quot;--full&quot;</span><span class="fu">,</span> <span class="dt">&quot;all_gates_passed&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span> <span class="dt">&quot;sha&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;40-hex&gt;&quot;</span> <span class="fu">}</span></span></code></pre></div>
+<ul>
+<li><code>.mode</code> must be <code>--full</code> (or
+<code>full</code>). <em>A file that does not say which mode ran
+certifies nothing.</em></li>
+<li><code>.all_gates_passed</code> must be literally <code>true</code>.
+Note the deliberate spelling: <code>jq</code>'s <code>//</code> operator
+<strong>also fires on the boolean <code>false</code></strong>, so
+<code>.all_gates_passed // false</code> would make an
+<strong>absent</strong> field and an explicit <code>false</code>
+indistinguishable. The check uses an explicit <code>has()</code> test
+and reports <code>&lt;absent&gt;</code> distinctly — the same hazard and
+the same spelling as the Group B <code>gating</code> gate elsewhere in
+this script.</li>
+<li><code>.sha</code> must be 40 hex characters, must resolve to a
+commit in this repository, and must be <code>HEAD</code> <strong>or an
+ancestor of</strong> <code>HEAD</code>. <em>CI evidence from an
+unrelated commit does not certify the commit being tagged.</em></li>
+<li>Freshness is then checked with <code>_scan_changed_since</code>
+above, for the same reason the api-go gate checks it: <strong>a CI run
+against a commit whose code has since changed certifies the code that
+was tested, not the code about to be tagged.</strong></li>
+</ul>
+<p>This pairs with the same-day change in <code>scripts/ci.sh</code>,
+which now records <code>device_tests=ran|skipped</code> in its evidence
+directory on every exit path and refuses to report <code>--full</code>
+as passing when the device gate never ran.</p>
+<h3 id="4-compilesdk-is-derived-or-the-tag-is-refused">4.
+<code>compileSdk</code> is derived, or the tag is refused</h3>
+<p>§6.I clause 2 requires the matrix to cover API 28, 30, 34 <strong>and
+the project's current <code>compileSdk</code></strong>. That value is
+therefore this gate's own <strong>expectation</strong>: a wrong
+<code>compileSdk</code> silently redefines what "complete coverage"
+means.</p>
+<p>The value was seeded <code>local compile_sdk=35</code> before the
+parse, and the missing-file branch had <strong>no <code>else</code> at
+all</strong>. An absent
+<code>buildSrc/src/main/kotlin/lava/conventions/AndroidCommon.kt</code>
+therefore left the gate asserting a coverage requirement no manifest
+supports — silently, with no warning. The decisive control, identical
+evidence and identical pack, differing only in whether the manifest was
+present:</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AndroidCommon.kt</code> present, declares
+<code>compileSdk = 36</code>; attestation rows 28/30/34/35</td>
+<td><code>FATAL … matrix coverage incomplete. Missing API levels: 36 (project's compileSdk requirement)</code>
+— exit <strong>1</strong></td>
+</tr>
+<tr>
+<td>Same evidence, <code>AndroidCommon.kt</code>
+<strong>absent</strong></td>
+<td><code>VERDICT: matrix coverage gate PASSED (compile_sdk=35 …)</code>
+— exit <strong>0</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The worse state — no manifest at all — passed where the known state
+failed.</p>
+<p><strong>The fix</strong> derives the value or refuses. Both failure
+routes are refusals:</p>
+<ul>
+<li><strong>No file at that path</strong> → cause reported as
+<em>checkout artifact, or the convention module moved</em>.</li>
+<li><strong>File present but declaring no readable
+<code>compileSdk = &lt;n&gt;</code></strong> → cause reported as <em>its
+shape changed</em>. This branch is refused too, for two reasons. A floor
+with one stair is not a floor — a truncated or reshaped file is the
+likelier drift and would have kept the same silent <code>35</code>. And
+the old <code>warn</code>-then-continue arm was in fact
+<strong>unreachable</strong>: under <code>set -Eeuo pipefail</code>, a
+no-match <code>grep | head | grep</code> assignment aborts the shell
+outright, so a reshaped file killed <code>tag.sh</code> with <strong>no
+message at all</strong> (verified 2026-08-26: exit 1, zero output) —
+non-zero, but not a diagnosis anybody can act on.</li>
+</ul>
+<p>The refusal message states what was examined, what was expected, why
+a built-in default is not an acceptable fallback (<em>it asserts a
+coverage requirement no manifest supports, and goes stale the moment the
+project moves to a newer <code>compileSdk</code></em>), cites the
+measured control above, and names both remedies: restore the file, or
+update this gate's parser if the convention module legitimately
+moved.</p>
+<p>The block is delimited by
+<code>BEGIN</code>/<code>END-OF-BLOCK compileSdk derivation floor</code>
+sentinel comments so a regression harness can extract the shipped code
+verbatim rather than test a copy that could drift from it.</p>
+<h3 id="operator-consequence">Operator consequence</h3>
+<p>A tag attempt that previously succeeded on a contentless pack, on
+stale evidence over a large diff, or on a checkout missing
+<code>AndroidCommon.kt</code>, now <strong>fails with a named cause and
+a remedy</strong>. That is the intended outcome. None of these gates
+gained a bypass flag, and none should: a flag that converts <em>"could
+not verify"</em> into <em>"verified"</em> is the class of defect all
+four of these changes exist to remove.</p>
 <h2 id="maintenance">Maintenance</h2>
 <p>When this script is modified, update this document in the same commit
 (CM-SCRIPT-DOCS-SYNC requires it). Per §11.4.18, the documentation MUST

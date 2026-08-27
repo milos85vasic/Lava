@@ -69,3 +69,34 @@ cases. Run:
 ```bash
 bash tests/check-constitution/test_emulator_runner_tag.sh
 ```
+
+## Two required conditions, not one (tightened 2026-08-26)
+
+A file "records emulator execution" only when **both** hold:
+
+1. **MARKER** — the file contains at least one emulator-run marker.
+2. **ATTESTATION SHAPE** — the file *records* a run rather than *discussing* one, via
+   either:
+   - **(2a)** an attestation FIELD in key position — one of the §6.I.4 per-row field
+     names (`"avd":`, `avd=`, `| avd |` and siblings) in JSON-key, key=value or
+     markdown-table-cell form; or
+   - **(2b)** a marker sharing a line with an INVOCATION or OUTCOME token — `gradlew`,
+     `BUILD SUCCESSFUL`/`FAILED`, `am instrument`, `--tests`, `adb -s`/`adb shell`,
+     `avdmanager`, `emulator-matrix -<flag>` — which is what a plaintext run log
+     looks like.
+
+### Why the mention test was not enough
+
+The previous version matched condition (1) alone, and asserted **in its own comment**
+that bluff-hunt logs "that merely quote a marker in prose" would stay clear because they
+are "unlikely to be NEW evidence files added in the same change".
+
+That assumption was stated and never tested, and it was wrong. A §6.N bluff-hunt record
+was flagged whose only marker sits inside an `"unconfirmed"` prose field whose own text
+reads *"Gradle was not run (resource constraint)"* — so the gate was calling a written
+record of **not** running an emulator an unattested emulator run.
+
+The tightening narrows by **what the file is**, never by where it lives: no path
+exemption was added, and a test writes a genuine untagged attestation *into*
+`.lava-ci-evidence/bluff-hunt/` and asserts it is still flagged. Measured across all 117
+tracked marker-bearing files, exactly 4 reclassify as prose; each was read and confirmed.

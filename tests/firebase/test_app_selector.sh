@@ -191,9 +191,34 @@ claims:
 MAPEOF
 
 # §6.Z test-evidence files (needed by §6.AK Gates 3-5)
+#
+# LVA-149 FIXTURE CORRECTION (2026-08-26). These files used to be:
+#     {"commit_sha": ..., "challenges": ["…Challenge00CrashSurvivalTest"], "passed": true}
+# i.e. a NAME LIST plus a document-level blanket boolean. No verdict was ever
+# attributed to the named Challenge. That satisfied the §6.AK gate only through
+# the bare-fixed-string-name fallthrough LVA-149 removed — the gate scored the
+# claim "covered and PASSED" because the NAME appeared in the file, not because
+# the evidence said the test passed. Under the repaired gate this shape REFUSES
+# (exit 2, "cannot determine ANY test verdict"), and that refusal is correct: a
+# list of names with a separate "passed": true cannot tell you WHICH of thirty
+# listed tests failed. The fixture, not the parser, was the thing that was wrong.
+# It now uses the same per-test verdict map real §6.Z evidence uses.
+#
+# TIMESTAMP FIXTURE CORRECTION (2026-08-26). These files also used to carry no
+# timestamp at all. §6.Z clause 2 requires the evidence to be within 24h of the
+# distribute attempt, and the §6.AK Phase-1 Gate 7 freshness floor now REFUSES
+# evidence whose age cannot be established — previously an absent or garbage
+# timestamp skipped the staleness check entirely, so untimestamped evidence was
+# never stale however old it was. The floor is right and blocks no real
+# distribute: all six most recent shipped *-test-evidence.{md,json} files under
+# .lava-ci-evidence/distribute-changelog/ carry one. This fixture was simply
+# writing a shape real evidence never has. It is generated fresh at each run so
+# the fixture exercises the in-window path rather than a frozen literal that
+# would silently turn into a staleness test 24 hours after being written.
 COMMIT_SHA="$(cd "$REPO_ROOT" && git rev-parse HEAD 2>/dev/null || echo \"deadbeef\")"
-echo '{"commit_sha": "'"$COMMIT_SHA"'", "version": "1.2.35-1055", "challenges": ["lava.app.challenges.Challenge00CrashSurvivalTest"], "passed": true}' > "$CLIENT_CHAN/1.2.35-1055-test-evidence.json"
-echo '{"commit_sha": "'"$COMMIT_SHA"'", "version": "0.1.0-1", "challenges": ["lava.app.challenges.Challenge00CrashSurvivalTest"], "passed": true}' > "$API_APP_CHAN/0.1.0-1-test-evidence.json"
+EVIDENCE_TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+echo '{"commit_sha": "'"$COMMIT_SHA"'", "timestamp": "'"$EVIDENCE_TS"'", "version": "1.2.35-1055", "covering_challenges": {"lava.app.challenges.Challenge00CrashSurvivalTest": "PASS"}, "passed": true}' > "$CLIENT_CHAN/1.2.35-1055-test-evidence.json"
+echo '{"commit_sha": "'"$COMMIT_SHA"'", "timestamp": "'"$EVIDENCE_TS"'", "version": "0.1.0-1", "covering_challenges": {"lava.app.challenges.Challenge00CrashSurvivalTest": "PASS"}, "passed": true}' > "$API_APP_CHAN/0.1.0-1-test-evidence.json"
 # Fake release APK trees. Each APK is seeded with a `versionCode='<code>'`
 # badging line so the §6.Z content-versionCode guard (via the fake aapt2 above)
 # resolves the EXPECTED code and PASSES — client code 1055, api-app code 1.
@@ -237,6 +262,13 @@ run_distribute() {
     # Pin the §6.Z guard at the FAKE SDK so the content-versionCode check
     # resolves the fake aapt2 (deterministic, host-independent) — never the
     # operator's real build-tools, which would error on the fixture APKs.
+    # LVA-149: pin the §6.AK gate's HEAD hermetically. The gate derives its repo
+    # root from its own path, which inside this fixture is $FAKE_REPO — a temp
+    # dir that is not a git repo — so `git rev-parse HEAD` there yields "unknown"
+    # and the (now genuinely binding) commit-SHA check refuses. Pinning the same
+    # SHA the fixture evidence declares makes this test deterministic instead of
+    # dependent on whether mktemp happens to land inside a checkout.
+    LAVA_CYCLE_COVERAGE_HEAD="$COMMIT_SHA" \
     FAKE_FIREBASE_LOG="$FIREBASE_CALLS_LOG" \
     ANDROID_SDK_ROOT="$FAKE_SDK_ROOT" \
     ANDROID_HOME="$FAKE_SDK_ROOT" \

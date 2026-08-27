@@ -436,5 +436,46 @@ tracker integration)</li>
 project-specific; the §11.4.25 ledger mandate is universal per
 HelixConstitution)</li>
 </ul>
+<h2
+id="submodule-test-counts-prune-nested-gitlinks-added-2026-08-27">Submodule
+test counts prune nested gitlinks (added 2026-08-27)</h2>
+<p><code>count_submodule_tests()</code> derives each submodule's nested
+gitlinks from <code>git ls-files --stage</code> (mode
+<code>160000</code>) and passes them to <code>find</code> as
+<code>-prune</code> arguments, so a submodule's own test count excludes
+the tests of third-party projects vendored <em>inside</em> it.</p>
+<h3 id="why-this-was-needed-measured">Why this was needed, measured</h3>
+<p><code>submodules/helixqa/tools/opensource/</code> contains <strong>27
+nested gitlinks</strong> to third-party projects — docling, appium,
+chroma, perfetto, skyvern, leakcanary, signoz and others. The unpruned
+<code>find</code> walked straight into them, counting their tests as
+helixqa's:</p>
+<pre><code>committed ledger : unit_test_count: 392
+unpruned find    : unit_test_count: 763      (763 − 392 = 371, exactly
+                                              what tools/opensource contributes)</code></pre>
+<p><strong>392 is the correct number</strong> — a
+<code>submodules/*</code> row means the submodule's own tests, per this
+generator's own header ("owned-by-us reusable code that ships with the
+project"). IBM's docling tests are not Lava's coverage.</p>
+<h3 id="the-determinism-violation-this-closed">The determinism violation
+this closed</h3>
+<p><code>763</code> was not merely wrong, it was <strong>machine state
+rather than tracked state</strong>. The identical git tree with the
+identical helixqa pin produced 392 or 763 depending purely on whether
+someone had run a recursive submodule init. That contradicts this
+generator's own contract (header point 4: <em>"Determinism. Same git
+tree → same generated ledger byte-for-byte"</em>).</p>
+<p>The failure surfaced only after the 29 nested submodules were
+initialised on 2026-08-26. Regenerating the ledger to <code>763</code>
+would have made the gate green on that machine and red on the next one,
+or on any fresh clone — the "regenerate until it agrees with itself"
+trap. The ledger was never stale; the generator was over-counting, and
+the ledger file was left byte-identical.</p>
+<p><strong>Known residual:</strong> <code>count_tests()</code> — used
+for <code>feature/*</code>, <code>core/*</code>, <code>app</code> and
+<code>lava-api-go</code> rows — still counts <strong>untracked</strong>
+files, so those rows remain sensitive to local build and scratch state.
+No such drift exists today; it is a latent instance of the same
+class.</p>
 </body>
 </html>

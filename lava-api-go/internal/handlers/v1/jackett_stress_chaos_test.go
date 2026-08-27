@@ -39,8 +39,23 @@ import (
 // Evidence helpers (handler-scoped; mirrors the jackett-package helper)
 // ---------------------------------------------------------------------------
 
+// Run-isolation seam — see the identical const in
+// lava-api-go/internal/jackett/stress_chaos_test.go. When set (the
+// build-test-distribute pipeline's phase-02 go wrapper sets it), evidence is
+// written there instead of at the tracked project-level
+// .lava-ci-evidence/stress-chaos/jackett/, so a pipeline run never modifies a
+// tracked file and the next run's FR-000 clean-tree precondition still passes
+// (FR-018 / SC-007). Unset -> historical behaviour, byte-for-byte.
+const stressChaosEvidenceDirEnv = "LAVA_STRESS_CHAOS_EVIDENCE_DIR"
+
 func handlerEvidenceDir(t *testing.T) string {
 	t.Helper()
+	if override := os.Getenv(stressChaosEvidenceDirEnv); override != "" {
+		if mkErr := os.MkdirAll(override, 0o755); mkErr != nil {
+			t.Fatalf("mkdir evidence override %s: %v", override, mkErr)
+		}
+		return override
+	}
 	dir, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("getwd: %v", err)

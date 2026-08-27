@@ -299,3 +299,27 @@ Related: the same empty-corpus shape was found at 20 further sites during the
 2026-08-26 §6.N.2 sweep and closed with this idiom. See also the propagation-target
 floor below, which additionally distinguishes an *uninitialised* submodule corpus from
 genuine propagation drift, because the two call for opposite remedies.
+
+## §6.H exemption anchor: scope corrected to cover BOTH tracker locations (2026-08-26, LVA-134)
+
+The §6.H credential-scan exemption list excludes the **generated** workable-items tracker
+renderings — `{Issues,Fixed}{,_Summary}.{md,html,pdf,docx}`. The anchor originally named
+only `docs/`. This repository tracks the **same** generated renderings in **two** places —
+the repository root *and* `docs/` — and the two copies are byte-identical (verified with
+`cmp` across all four `.md` and all four `.html` members).
+
+Naming only `docs/` therefore left the root copies scanned. The moment the trackers were
+regenerated, LVA-134's own ticket body — which quotes a credential-shaped literal
+verbatim, because that is what the ticket is *about* — reproduced the violation in
+`Fixed.md`, `Fixed.html`, `Fixed_Summary.md` and `Fixed_Summary.html` at the root.
+
+Measured, so the cause is not inferred: `git show HEAD:Fixed.md | grep -c` returned **0**
+while the working tree returned **1** — the hit was NEW output from the generator, not
+inherited content.
+
+The `(docs/)?` in the anchor is **not a loosening.** Every exemption in the list is the
+same category: a surface whose *purpose* is to DESCRIBE the forbidden pattern rather than
+to use a credential — `.env.example` (a template), `CHANGELOG.md` (historical record),
+the incident and closure logs (forensic anchors), and now the generated trackers. A
+near-miss file at the root that is *not* a generated rendering is still scanned, and a
+test asserts exactly that, so the exemption cannot be used as a sweep.

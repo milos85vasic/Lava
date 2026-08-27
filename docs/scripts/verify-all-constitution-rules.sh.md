@@ -205,3 +205,30 @@ remaining gates never run, and the sweep's summary reflects only what executed b
 
 When authoring a gate command that must signal failure, use `false` (or an external
 command that exits non-zero), never a bare `exit`.
+
+## `$cmd` now runs in a SUBSHELL — superseding the note above (2026-08-23)
+
+The section above records that gate command strings were evaluated in the sweep's **own**
+shell. That is no longer true, and the change is the point.
+
+In the old form, a gate command that reached `exit` terminated the **entire sweep** rather
+than failing one gate: every later gate was silently skipped, the FAIL rows already
+recorded were discarded, no attestation was written — and for `exit 0`, the sweep itself
+exited **0**. §11.4.32 is explicit: *"A sweep that exits PASS without running every
+implementable gate is a §11.4.32 violation."*
+
+`$cmd` is now evaluated inside a subshell — `if ( eval "$cmd" ) >/dev/null 2>&1; then` —
+which also prevents a gate from mutating `GATE_RESULTS` / `GATE_NAMES` and rewriting the
+sweep's own verdict. Covered by
+`tests/check-constitution/test_verify_all_gate_isolation.sh`.
+
+The advice in the earlier section still stands for gate authors: signal failure with
+`false` or an external non-zero command, not a bare `exit`. The subshell now contains the
+blast radius if someone does it anyway.
+
+## The suite list is an ARRAY, so the registry floor derives its own expectation
+
+The hermetic-suite list is held as an array rather than being iterated inline, so the
+registry floor can compute how many suites it *should* have registered from the list
+itself. A hardcoded count would go stale the moment a suite is added or removed — a stale
+floor is the same defect as no floor, wearing a number.

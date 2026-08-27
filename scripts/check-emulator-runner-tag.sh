@@ -23,15 +23,55 @@
 # evidence. Enforcing the tag on the NEXT file is what closes the
 # anti-forgetting gap; retroactively failing committed history is not the job.
 #
-# "Records emulator execution" heuristic (precise, to avoid false positives on
-# non-emulator evidence): the file mentions at least one of the emulator-run
-# markers below. Pure design docs, host-stability incidents, bluff-hunt logs,
-# etc. that merely *quote* a marker in prose are unlikely to be NEW evidence
-# files added in the same change, and the going-forward scope keeps them clear.
+# "Records emulator execution" — TWO conditions, both required (tightened
+# 2026-08-26; see WHY THE MENTION TEST WAS NOT ENOUGH below).
+#
+# (1) MARKER: the file contains at least one emulator-run marker:
 #   - adb_devices_state         (per-AVD forensic snapshot, §6.I.4 Group B)
 #   - boot_seconds              (cold-boot timing of an emulator)
 #   - connectedAndroidTest / connectedDebugAndroidTest  (instrumentation run)
 #   - emulator-matrix           (the Containers matrix CLI)
+#
+# (2) ATTESTATION SHAPE: the file also RECORDS a run rather than discussing
+#     one — either
+#       (2a) an attestation FIELD in key position: one of the §6.I.4 per-row
+#            field names ("avd": / avd= / | avd | and siblings), in JSON-key,
+#            key=value, or markdown-table-cell form; or
+#       (2b) a marker sharing a line with an INVOCATION or OUTCOME token
+#            (gradlew, BUILD SUCCESSFUL/FAILED, am instrument, --tests,
+#            adb -s / adb shell, avdmanager, `emulator-matrix -<flag>`),
+#            which is what a plaintext run log looks like.
+#
+# WHY THE MENTION TEST WAS NOT ENOUGH. The previous version matched (1) alone
+# and asserted in this very comment that "bluff-hunt logs … that merely quote a
+# marker in prose" would stay clear because they are "unlikely to be NEW
+# evidence files added in the same change". That assumption was stated, never
+# implemented, and it is false: a §6.N bluff-hunt record is a NEW file under
+# .lava-ci-evidence/ by construction, so the going-forward scope does nothing
+# for it. MEASURED on 2026-08-26 —
+# .lava-ci-evidence/bluff-hunt/2026-08-26-cycle-vacuous-pass-sweep.json was
+# flagged as an untagged emulator attestation on the strength of ONE marker,
+# inside an "unconfirmed" prose field whose own text reads "Gradle was not run
+# (resource constraint)". The gate was calling a written record of NOT running
+# an emulator an unattested emulator run. Its sibling
+# .lava-ci-evidence/bluff-hunt/2026-06-26-cycle-1.json is the same shape: its
+# only marker sits in "constraints": "… NO :app:connectedAndroidTest, NO
+# emulator/device …".
+#
+# WHY NOT A PATH EXEMPTION. Excusing .lava-ci-evidence/bluff-hunt/ would let a
+# real attestation hide by being written to that directory. Condition (2) is
+# keyed on what the file IS, not where it lives: an attestation dropped into
+# the bluff-hunt directory still carries per-row fields and is still flagged.
+# tests/check-constitution/test_emulator_runner_tag.sh pins both directions.
+#
+# COST, measured rather than asserted: across all 117 tracked evidence files
+# carrying a marker, condition (2) reclassifies exactly 4 as prose. Each was
+# read: two are bluff-hunt records whose marker is in a prose field, one is an
+# investigation note analysing a Gradle task, one is a subagent-dispatch
+# "purpose" string. None records a device run. Every genuine attestation in the
+# corpus — JSON per-row files, canary attestations, and the markdown
+# *-test-evidence.md files whose marker appears in a table header — still
+# satisfies (2).
 #
 # OVERRIDES:
 #   - LAVA_EMULATOR_EVIDENCE_FILES — newline-separated explicit file list to
@@ -50,6 +90,17 @@ cd "$(dirname "$0")/.." 2>/dev/null || true
 STRICT="${LAVA_EMULATOR_RUNNER_STRICT:-1}"
 
 EVIDENCE_MARKER='adb_devices_state|boot_seconds|connectedAndroidTest|connectedDebugAndroidTest|emulator-matrix'
+
+# (2a) §6.I.4 per-row attestation field names, in key position. Three syntaxes
+# are accepted because attestations in this repo are written in all three:
+# JSON ("avd":), key=value run logs (avd=), and markdown table headers (| avd |).
+ATTEST_FIELDS='adb_devices_state|boot_seconds|avd|avd_name|api_level|device|device_model|serial|emulator_serial|runner|runtime|gating|concurrent|test_class|test_passed|screen_density|form_factor|test_seconds'
+ATTEST_SHAPE="(\"(${ATTEST_FIELDS})\"[[:space:]]*:)|(^|[[:space:],{])(${ATTEST_FIELDS})[[:space:]]*=|(\\|[[:space:]]*(${ATTEST_FIELDS})[[:space:]]*\\|)"
+
+# (2b) Tokens that mark a line as a record of an INVOCATION or its OUTCOME, for
+# plaintext run logs that carry no structured per-row fields.
+RUN_TOKEN='gradlew|BUILD SUCCESSFUL|BUILD FAILED|am instrument|--tests|adb -s|adb shell|avdmanager|emulator-matrix[[:space:]]+-'
+
 # Accept either `runner: containers-submodule` or `runner=containers-submodule`
 # with optional surrounding quotes/whitespace.
 RUNNER_OK='runner["'"'"']?[[:space:]]*[:=][[:space:]]*["'"'"']?containers-submodule'
@@ -79,11 +130,22 @@ else
   fi
 fi
 
+# records_emulator_run <file> — condition (1) AND condition (2). Returns 0 when
+# the file is an attestation of a device run, 1 when the marker is a mention.
+records_emulator_run() {
+  local f=$1
+  grep -qiE "$EVIDENCE_MARKER" "$f" 2>/dev/null || return 1        # (1)
+  grep -qiE "$ATTEST_SHAPE" "$f" 2>/dev/null && return 0           # (2a)
+  grep -iE "$EVIDENCE_MARKER" "$f" 2>/dev/null \
+    | grep -qiE "$RUN_TOKEN" && return 0                           # (2b)
+  return 1
+}
+
 violations=0
 for f in "${candidates[@]}"; do
   [[ -f "$f" ]] || continue
   # Does this file record emulator execution?
-  if grep -qiE "$EVIDENCE_MARKER" "$f" 2>/dev/null; then
+  if records_emulator_run "$f"; then
     # Then it MUST carry the containers-submodule runner tag.
     if ! grep -qiE "$RUNNER_OK" "$f" 2>/dev/null; then
       echo "§6.X VIOLATION: $f records emulator execution but lacks 'runner: containers-submodule'." >&2

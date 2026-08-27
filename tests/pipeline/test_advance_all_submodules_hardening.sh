@@ -20,12 +20,26 @@
 #       word-boundary regex (+ positive: the named submodule still advances)
 #   H4  a pin move that is NOT a fast-forward must be refused (+ positive: a
 #       genuine fast-forward still advances)
-#   H5  local_modifications_pushed must be false when step 6 created no commit
-#   H6  local_modifications_pushed must be TRUE when one mirror accepted the
-#       push and a later mirror rejected it (the work IS published)
-#   H7  step 6 must push to each remote's OWN default branch
-#   H8  when parent-pin staging fails after a successful push, the local-work
-#       commit must be preserved by a rescue ref and reported as pushed
+#   H5  RETARGETED 2026-08-26 -- an untracked file the NEW upstream commit
+#       gitignores is still local work when it is MEASURED, so it is refused,
+#       and the upstream really receives nothing
+#   H6  RETARGETED 2026-08-26 -- two §6.W mirrors, the second of which would
+#       reject any push: NEITHER receives anything, whether the submodule is
+#       clean or unclean, because no push is ever issued
+#   H7  RETARGETED 2026-08-26 -- a mirror whose default branch is named
+#       differently gains no stray branch AND no commit on its own default,
+#       whether the submodule is clean or unclean
+#   H8  RETARGETED 2026-08-26 -- parent-pin staging failing is still
+#       REJECTED_PARENT_STAGING_FAILED, and NO rescue ref is created, because
+#       this script creates no commit for one to rescue
+#
+#   H5-H8 all used to exercise R-005 step 6 (committing and pushing a
+#   submodule's own local work). Step 6 and --publish-local-modifications were
+#   REMOVED on 2026-08-26 after five review rounds found twelve fixture-proven
+#   ways for unaudited content to reach another repository's default branch
+#   through them. Each case is RETARGETED rather than deleted: the fixture that
+#   used to prove the publish behaved correctly now proves the publish cannot
+#   happen at all.
 #   H9  a record-write failure on the governance-deny path must be counted
 #   H10 a failed restore-to-prior-pin must be surfaced in the run summary
 #   H11 a KILLED verify command must report its actual exit status
@@ -150,6 +164,24 @@ find_record() {
 
 LAST_OUTPUT=""
 RUN_EXIT=0
+# Both flags below are REQUIRED by every fixture in this file, and each says
+# something true about the fixture rather than about the production default:
+#
+#   --allow-local-path-remotes      every "upstream" here is a bare repo under
+#       mktemp -d, i.e. a filesystem path. Production refuses that shape
+#       (a local path can be another real repository, or a network mount that
+#       reaches another machine while naming no host); a hermetic fixture can
+#       have no other shape, and a suite that cannot reach the fetch path
+#       cannot prove the fetch path is safe.
+#
+# `--publish-local-modifications` was REMOVED on 2026-08-26 and is no longer
+# passed by anything in this suite.
+#
+# It is a command-line flag rather than an environment variable precisely so
+# that this suite's need for it cannot leak into an unattended pipeline run
+# through an inherited environment.
+ADV_FLAGS=(--allow-local-path-remotes)
+
 # run_script <parent-repo> <record-dir> <verify-cmd> [env assignments...]
 #
 # Deliberately NOT invoked via command substitution: a $(...) call site runs
@@ -166,7 +198,7 @@ run_script() {
   env "$@" \
     LAVA_ADVANCE_RECORD_DIR="$record_dir" \
     LAVA_ADVANCE_VERIFY_CMD="$verify_cmd" \
-    "$SCRIPT_UNDER_TEST" "$parent" > "$out_file" 2>&1 || RUN_EXIT=$?
+    "$SCRIPT_UNDER_TEST" "${ADV_FLAGS[@]}" "$parent" > "$out_file" 2>&1 || RUN_EXIT=$?
   LAST_OUTPUT="$(cat "$out_file")"
   rm -f -- "$out_file"
   return 0
@@ -188,15 +220,15 @@ run_script() {
 # destructive git flag.
 # =========================================================================
 h1_root="$(mktemp -d "${TMPDIR:-/tmp}/adv-h1-XXXXXX")"; FIXTURE_DIRS+=("$h1_root")
-mk_fixture "$h1_root" "subs/dep" 0
+mk_fixture "$h1_root" "subs/helixqa" 0
 # give the PARENT its own upstream that is AHEAD, so a script that mistakes the
 # parent for the submodule has something to "advance" it to
 git clone --quiet --bare "${h1_root}/parent" "${h1_root}/parent-upstream.git"
 git -C "${h1_root}/parent" remote add origin "${h1_root}/parent-upstream.git"
 up_commit "${h1_root}/parent-upstream.git" "${h1_root}/ppush" \
   "parent upstream moved ahead" "PARENT_ONLY_FILE.txt" "danger"
-rm -rf -- "${h1_root}/parent/subs/dep" "${h1_root}/parent/.git/modules"
-mkdir -p "${h1_root}/parent/subs/dep"
+rm -rf -- "${h1_root}/parent/subs/helixqa" "${h1_root}/parent/.git/modules"
+mkdir -p "${h1_root}/parent/subs/helixqa"
 
 h1_parent_head_before="$(git -C "${h1_root}/parent" rev-parse HEAD)"
 h1_branch_before="$(git -C "${h1_root}/parent" symbolic-ref --short -q HEAD || echo DETACHED)"
@@ -208,7 +240,7 @@ expect_eq "H1(uninitialized-submodule)" "PARENT repo HEAD untouched" "$h1_parent
 expect_eq "H1(uninitialized-submodule)" "PARENT repo still on its branch" "$h1_branch_before" "$(git -C "${h1_root}/parent" symbolic-ref --short -q HEAD || echo DETACHED)"
 expect_eq "H1(uninitialized-submodule)" "the parent's own upstream file was NOT checked out" "absent" \
   "$([[ -e "${h1_root}/parent/PARENT_ONLY_FILE.txt" ]] && echo present || echo absent)"
-if h1_rec="$(find_record "${h1_root}/records" "subs/dep")"; then
+if h1_rec="$(find_record "${h1_root}/records" "subs/helixqa")"; then
   expect_ne "H1(uninitialized-submodule)" "outcome must not claim an advance" "ADVANCED" "$(jq -r '.outcome' "$h1_rec")"
 else
   echo "PASS: H1(uninitialized-submodule): no record claiming an advance was written"
@@ -223,9 +255,9 @@ expect_contains "H1(uninitialized-submodule)" "run output" "uninitialized" "$LAS
 # LEARNED", never as "nothing FAILED".
 # =========================================================================
 h2_root="$(mktemp -d "${TMPDIR:-/tmp}/adv-h2-XXXXXX")"; FIXTURE_DIRS+=("$h2_root")
-mk_fixture "$h2_root" "subs/dep" 1
+mk_fixture "$h2_root" "subs/helixqa" 1
 cat > "${h2_root}/parent/.gitmodules" <<'GMEOF'
-[submodule "subs/dep"]
+[submodule "subs/helixqa"]
 	path =
 	url =
 GMEOF
@@ -248,28 +280,37 @@ expect_eq "H2b(genuinely-no-submodules)" "exit code" "0" "$h2b_exit"
 # =========================================================================
 # H3: LAVA_ADVANCE_SUBMODULES is an allow-list -- a control that NARROWS a
 # run. Matching it with `grep -qw` makes it a word-boundary REGEX over the
-# whole list, so naming "subs/dep-extra" also selects "subs/dep" ('-' is not a
+# whole list, so naming "subs/helixqa-extra" also selects "subs/helixqa" ('-' is not a
 # word character). A narrowing control must never widen.
 # =========================================================================
 h3_root="$(mktemp -d "${TMPDIR:-/tmp}/adv-h3-XXXXXX")"; FIXTURE_DIRS+=("$h3_root")
-mk_fixture "$h3_root" "subs/dep" 1
-h3_pin_before="$(parent_pin "${h3_root}/parent" "subs/dep")"
+mk_fixture "$h3_root" "subs/helixqa" 1
+h3_pin_before="$(parent_pin "${h3_root}/parent" "subs/helixqa")"
 run_script "${h3_root}/parent" "${h3_root}/records" "true" \
-  "LAVA_ADVANCE_SUBMODULES=subs/dep-extra"
+  "LAVA_ADVANCE_SUBMODULES=subs/helixqa-extra"
 h3_exit="$RUN_EXIT"
-expect_eq "H3(allow-list-over-match)" "pin of the UNNAMED submodule is untouched" "$h3_pin_before" "$(parent_pin "${h3_root}/parent" "subs/dep")"
-expect_eq "H3(allow-list-over-match)" "exit code" "0" "$h3_exit"
+expect_eq "H3(allow-list-over-match)" "pin of the UNNAMED submodule is untouched" "$h3_pin_before" "$(parent_pin "${h3_root}/parent" "subs/helixqa")"
+# Exit 2, not 0, since T054 SHOULD-FIX-2. `subs/helixqa-extra` names no
+# submodule this repository has, so it selects NOTHING -- and a run that
+# examined nothing used to report "0 advanced, 0 already current, 0
+# rejected/failed" with zero records and exit 0, which is indistinguishable
+# from a clean run over a healthy repository. The property H3 exists to
+# protect (a narrowing control must never widen) is still asserted by the
+# pin-untouched check above; what changed is that selecting nothing is now a
+# configuration error rather than a silent success.
+expect_eq "H3(allow-list-over-match)" "exit code (a token matching nothing is a config error, not a clean run)" "2" "$h3_exit"
+expect_contains "H3(allow-list-over-match)" "run output" "no submodule for" "$LAST_OUTPUT"
 
 # H3-positive: naming the submodule exactly MUST still advance it -- otherwise
 # a fix that simply ignored the allow-list would pass the negative case.
 h3b_root="$(mktemp -d "${TMPDIR:-/tmp}/adv-h3b-XXXXXX")"; FIXTURE_DIRS+=("$h3b_root")
-mk_fixture "$h3b_root" "subs/dep" 1
-h3b_pin_before="$(parent_pin "${h3b_root}/parent" "subs/dep")"
+mk_fixture "$h3b_root" "subs/helixqa" 1
+h3b_pin_before="$(parent_pin "${h3b_root}/parent" "subs/helixqa")"
 run_script "${h3b_root}/parent" "${h3b_root}/records" "true" \
-  "LAVA_ADVANCE_SUBMODULES=subs/dep"
+  "LAVA_ADVANCE_SUBMODULES=subs/helixqa"
 h3b_exit="$RUN_EXIT"
 expect_eq "H3b(allow-list-exact-match)" "exit code" "0" "$h3b_exit"
-expect_ne "H3b(allow-list-exact-match)" "pin of the NAMED submodule advanced" "$h3b_pin_before" "$(parent_pin "${h3b_root}/parent" "subs/dep")"
+expect_ne "H3b(allow-list-exact-match)" "pin of the NAMED submodule advanced" "$h3b_pin_before" "$(parent_pin "${h3b_root}/parent" "subs/helixqa")"
 
 # =========================================================================
 # H4: the remote's default-branch HEAD differing from the pin does NOT imply
@@ -278,8 +319,8 @@ expect_ne "H3b(allow-list-exact-match)" "pin of the NAMED submodule advanced" "$
 # pin to origin/HEAD DROPS the pinned work while recording "ADVANCED".
 # =========================================================================
 h4_root="$(mktemp -d "${TMPDIR:-/tmp}/adv-h4-XXXXXX")"; FIXTURE_DIRS+=("$h4_root")
-mk_fixture "$h4_root" "subs/dep" 0
-h4_sub="${h4_root}/parent/subs/dep"
+mk_fixture "$h4_root" "subs/helixqa" 0
+h4_sub="${h4_root}/parent/subs/helixqa"
 git -C "$h4_sub" checkout --quiet -b lava-pin/local-work
 printf 'critical pinned capability\n' > "${h4_sub}/pinned-feature.txt"
 git -C "$h4_sub" add -A
@@ -288,18 +329,18 @@ git -C "$h4_sub" push --quiet origin HEAD:refs/heads/lava-pin/local-work
 git -C "$h4_sub" checkout --quiet --detach HEAD
 git -C "${h4_root}/parent" add -A
 git -C "${h4_root}/parent" commit --quiet -m "pin to the side-branch commit"
-h4_pin_before="$(parent_pin "${h4_root}/parent" "subs/dep")"
+h4_pin_before="$(parent_pin "${h4_root}/parent" "subs/helixqa")"
 h4_sub_head_before="$(git -C "$h4_sub" rev-parse HEAD)"
 run_script "${h4_root}/parent" "${h4_root}/records" "true"
 h4_exit="$RUN_EXIT"
 
 expect_ne "H4(not-a-fast-forward)" "exit code (0 would certify a pin rewind)" "0" "$h4_exit"
-expect_eq "H4(not-a-fast-forward)" "parent pin untouched" "$h4_pin_before" "$(parent_pin "${h4_root}/parent" "subs/dep")"
+expect_eq "H4(not-a-fast-forward)" "parent pin untouched" "$h4_pin_before" "$(parent_pin "${h4_root}/parent" "subs/helixqa")"
 expect_eq "H4(not-a-fast-forward)" "submodule HEAD untouched" "$h4_sub_head_before" "$(git -C "$h4_sub" rev-parse HEAD)"
 expect_eq "H4(not-a-fast-forward)" "the pinned work is still checked out" "present" \
   "$([[ -e "${h4_sub}/pinned-feature.txt" ]] && echo present || echo absent)"
 expect_contains "H4(not-a-fast-forward)" "run output" "not a fast-forward" "$LAST_OUTPUT"
-if h4_rec="$(find_record "${h4_root}/records" "subs/dep")"; then
+if h4_rec="$(find_record "${h4_root}/records" "subs/helixqa")"; then
   expect_ne "H4(not-a-fast-forward)" "outcome must not claim an advance" "ADVANCED" "$(jq -r '.outcome' "$h4_rec")"
 else
   echo "PASS: H4(not-a-fast-forward): no record claiming an advance was written"
@@ -308,48 +349,64 @@ fi
 # H4-positive: a genuine fast-forward MUST still advance, so a fix that
 # refused every move would not pass.
 h4b_root="$(mktemp -d "${TMPDIR:-/tmp}/adv-h4b-XXXXXX")"; FIXTURE_DIRS+=("$h4b_root")
-mk_fixture "$h4b_root" "subs/dep" 1
-h4b_pin_before="$(parent_pin "${h4b_root}/parent" "subs/dep")"
+mk_fixture "$h4b_root" "subs/helixqa" 1
+h4b_pin_before="$(parent_pin "${h4b_root}/parent" "subs/helixqa")"
 run_script "${h4b_root}/parent" "${h4b_root}/records" "true"
 h4b_exit="$RUN_EXIT"
 expect_eq "H4b(genuine-fast-forward)" "exit code" "0" "$h4b_exit"
-expect_ne "H4b(genuine-fast-forward)" "parent pin advanced" "$h4b_pin_before" "$(parent_pin "${h4b_root}/parent" "subs/dep")"
-if h4b_rec="$(find_record "${h4b_root}/records" "subs/dep")"; then
+expect_ne "H4b(genuine-fast-forward)" "parent pin advanced" "$h4b_pin_before" "$(parent_pin "${h4b_root}/parent" "subs/helixqa")"
+if h4b_rec="$(find_record "${h4b_root}/records" "subs/helixqa")"; then
   expect_eq "H4b(genuine-fast-forward)" "outcome" "ADVANCED" "$(jq -r '.outcome' "$h4b_rec")"
 fi
 
 # =========================================================================
-# H5: has_local_mods is read from `git status --porcelain` BEFORE the step-4
-# checkout. The checkout can legitimately make those modifications vanish from
-# `git add -A`'s view -- here the new upstream commit adds a .gitignore rule
-# covering the operator's untracked scratch file. Step 6 then creates no
-# commit and pushes nothing, but reports local_modifications_pushed: true.
+# H5 (RETARGETED). `git status --porcelain -uall` runs BEFORE the step-4
+# checkout, so the operator's untracked scratch file is local work at the
+# moment it is measured, even though the NEW upstream commit adds a .gitignore
+# rule covering it.
+#
+# It used to test that step 6 then created no commit and correctly reported
+# local_modifications_pushed: false. Step 6 is gone: the correct behaviour is
+# a refusal before the fetch, and the fixture's value is that it still proves
+# the upstream received nothing.
 # =========================================================================
 h5_root="$(mktemp -d "${TMPDIR:-/tmp}/adv-h5-XXXXXX")"; FIXTURE_DIRS+=("$h5_root")
-mk_fixture "$h5_root" "subs/dep" 0
+mk_fixture "$h5_root" "subs/helixqa" 0
 up_commit "${h5_root}/upstream.git" "${h5_root}/p1" "upstream adds a .gitignore" ".gitignore" "scratch.txt"
-printf 'operator scratch\n' > "${h5_root}/parent/subs/dep/scratch.txt"
+printf 'operator scratch\n' > "${h5_root}/parent/subs/helixqa/scratch.txt"
 h5_upstream_before="$(git -C "${h5_root}/upstream.git" rev-parse master)"
+h5_pin_before="$(parent_pin "${h5_root}/parent" "subs/helixqa")"
 run_script "${h5_root}/parent" "${h5_root}/records" "true"
 h5_exit="$RUN_EXIT"
-expect_eq "H5(nothing-actually-committed)" "exit code" "0" "$h5_exit"
-expect_eq "H5(nothing-actually-committed)" "fixture upstream really received nothing" "$h5_upstream_before" "$(git -C "${h5_root}/upstream.git" rev-parse master)"
-if h5_rec="$(find_record "${h5_root}/records" "subs/dep")"; then
-  expect_eq "H5(nothing-actually-committed)" "local_modifications_pushed" "false" "$(jq -r '.local_modifications_pushed' "$h5_rec")"
+expect_eq "H5(soon-to-be-ignored-file-is-still-local-work)" "exit code" "1" "$h5_exit"
+expect_eq "H5(soon-to-be-ignored-file-is-still-local-work)" "fixture upstream really received nothing" "$h5_upstream_before" "$(git -C "${h5_root}/upstream.git" rev-parse master)"
+expect_eq "H5(soon-to-be-ignored-file-is-still-local-work)" "parent pin NOT updated" "$h5_pin_before" "$(parent_pin "${h5_root}/parent" "subs/helixqa")"
+expect_contains "H5(soon-to-be-ignored-file-is-still-local-work)" "the refusal names the path" "scratch.txt" "$LAST_OUTPUT"
+if h5_rec="$(find_record "${h5_root}/records" "subs/helixqa")"; then
+  expect_eq "H5(soon-to-be-ignored-file-is-still-local-work)" "outcome" "FAILED_PRECONDITION" "$(jq -r '.outcome' "$h5_rec")"
+  expect_eq "H5(soon-to-be-ignored-file-is-still-local-work)" "local_modifications_pushed" "false" "$(jq -r '.local_modifications_pushed' "$h5_rec")"
 else
-  echo "FAIL: H5(nothing-actually-committed): no record found"; FAILURES=$((FAILURES + 1))
+  echo "FAIL: H5(soon-to-be-ignored-file-is-still-local-work): no record found"; FAILURES=$((FAILURES + 2))
 fi
 
 # =========================================================================
-# H6: two mirrors (§6.W GitHub + GitLab). The first ACCEPTS the local-work
-# push; the second refuses it server-side. The work is now published on one
-# mirror and absent from the other -- and force-push is forbidden, so it
-# cannot be taken back. Recording local_modifications_pushed: false there
-# states the opposite of the upstream's observable state.
+# H6 (RETARGETED). Two mirrors (SS 6.W GitHub + GitLab), the second refusing
+# every push server-side.
+#
+# It used to test that when the FIRST mirror accepted the local-work push and
+# the second refused it, the record said local_modifications_pushed: true --
+# because the work really WAS published and no history-overwriting push may
+# take it back. The question that mattered was "which mirrors received it".
+#
+# The answer is now NONE, on either path, and this case measures exactly that.
+# Both halves are run against the SAME fixture shape: once with the submodule
+# unclean (the shape that used to arm the publish) and once clean (the shape
+# that advances). The rejecting hook is the witness -- if any push were
+# attempted, its stderr would appear in the run's output.
 # =========================================================================
 h6_root="$(mktemp -d "${TMPDIR:-/tmp}/adv-h6-XXXXXX")"; FIXTURE_DIRS+=("$h6_root")
-mk_fixture "$h6_root" "subs/dep" 1
-h6_sub="${h6_root}/parent/subs/dep"
+mk_fixture "$h6_root" "subs/helixqa" 1
+h6_sub="${h6_root}/parent/subs/helixqa"
 git clone --quiet --bare "${h6_root}/upstream.git" "${h6_root}/mirror2.git"
 cat > "${h6_root}/mirror2.git/hooks/pre-receive" <<'HOOKEOF'
 #!/usr/bin/env bash
@@ -357,34 +414,65 @@ echo "remote: refusing: this branch is protected" >&2
 exit 1
 HOOKEOF
 chmod +x "${h6_root}/mirror2.git/hooks/pre-receive"
-# named so it sorts AFTER origin: `git remote` output is alphabetical, so the
-# accepting mirror is pushed first and the rejection lands second.
+# named so it sorts AFTER origin: `git remote` output is alphabetical, so a
+# push loop (if one existed) would reach the accepting mirror first.
 git -C "$h6_sub" remote add zz-mirror2 "${h6_root}/mirror2.git"
 printf 'local uncommitted work\n' >> "${h6_sub}/seed.txt"
-h6_pin_before="$(parent_pin "${h6_root}/parent" "subs/dep")"
+h6_pin_before="$(parent_pin "${h6_root}/parent" "subs/helixqa")"
 h6_m1_before="$(git -C "${h6_root}/upstream.git" rev-parse master)"
+h6_m2_before="$(git -C "${h6_root}/mirror2.git" rev-parse master)"
 run_script "${h6_root}/parent" "${h6_root}/records" "true"
 h6_exit="$RUN_EXIT"
-expect_eq "H6(partial-mirror-push)" "exit code" "1" "$h6_exit"
-expect_ne "H6(partial-mirror-push)" "mirror 1 really did receive the work" "$h6_m1_before" "$(git -C "${h6_root}/upstream.git" rev-parse master)"
-expect_eq "H6(partial-mirror-push)" "parent pin NOT updated" "$h6_pin_before" "$(parent_pin "${h6_root}/parent" "subs/dep")"
-if h6_rec="$(find_record "${h6_root}/records" "subs/dep")"; then
-  expect_eq "H6(partial-mirror-push)" "outcome" "REJECTED_PUSH_CONFLICT" "$(jq -r '.outcome' "$h6_rec")"
-  expect_eq "H6(partial-mirror-push)" "local_modifications_pushed reflects the published mirror" "true" "$(jq -r '.local_modifications_pushed' "$h6_rec")"
-  expect_eq "H6(partial-mirror-push)" "parent_pin_updated" "false" "$(jq -r '.parent_pin_updated' "$h6_rec")"
+expect_eq "H6(no-mirror-receives-anything/unclean)" "exit code" "1" "$h6_exit"
+expect_eq "H6(no-mirror-receives-anything/unclean)" "mirror 1 received nothing" "$h6_m1_before" "$(git -C "${h6_root}/upstream.git" rev-parse master)"
+expect_eq "H6(no-mirror-receives-anything/unclean)" "mirror 2 received nothing" "$h6_m2_before" "$(git -C "${h6_root}/mirror2.git" rev-parse master)"
+expect_eq "H6(no-mirror-receives-anything/unclean)" "parent pin NOT updated" "$h6_pin_before" "$(parent_pin "${h6_root}/parent" "subs/helixqa")"
+if grep -qF -- "this branch is protected" <<<"$LAST_OUTPUT"; then
+  echo "FAIL: H6(no-mirror-receives-anything/unclean): the rejecting mirror's hook fired, so a push WAS attempted"
+  FAILURES=$((FAILURES + 1))
 else
-  echo "FAIL: H6(partial-mirror-push): no record found"; FAILURES=$((FAILURES + 3))
+  echo "PASS: H6(no-mirror-receives-anything/unclean): the rejecting mirror's pre-receive hook never fired -- no push was attempted"
+fi
+if h6_rec="$(find_record "${h6_root}/records" "subs/helixqa")"; then
+  expect_eq "H6(no-mirror-receives-anything/unclean)" "outcome" "FAILED_PRECONDITION" "$(jq -r '.outcome' "$h6_rec")"
+  expect_eq "H6(no-mirror-receives-anything/unclean)" "local_modifications_pushed" "false" "$(jq -r '.local_modifications_pushed' "$h6_rec")"
+else
+  echo "FAIL: H6(no-mirror-receives-anything/unclean): no record found"; FAILURES=$((FAILURES + 2))
 fi
 
+# ...and the same mirror pair on the CLEAN path, which DOES advance. A run
+# that succeeds must still leave both mirrors untouched: this is the half the
+# unclean case cannot prove, because a refusal reaches no push code either way.
+h6b_root="$(mktemp -d "${TMPDIR:-/tmp}/adv-h6b-XXXXXX")"; FIXTURE_DIRS+=("$h6b_root")
+mk_fixture "$h6b_root" "subs/helixqa" 1
+h6b_sub="${h6b_root}/parent/subs/helixqa"
+git clone --quiet --bare "${h6b_root}/upstream.git" "${h6b_root}/mirror2.git"
+cp "${h6_root}/mirror2.git/hooks/pre-receive" "${h6b_root}/mirror2.git/hooks/pre-receive"
+chmod +x "${h6b_root}/mirror2.git/hooks/pre-receive"
+git -C "$h6b_sub" remote add zz-mirror2 "${h6b_root}/mirror2.git"
+h6b_pin_before="$(parent_pin "${h6b_root}/parent" "subs/helixqa")"
+h6b_m1_before="$(git -C "${h6b_root}/upstream.git" rev-parse master)"
+h6b_m2_before="$(git -C "${h6b_root}/mirror2.git" rev-parse master)"
+run_script "${h6b_root}/parent" "${h6b_root}/records" "true"
+expect_eq "H6b(clean-advance-still-touches-no-mirror)" "exit code" "0" "$RUN_EXIT"
+expect_ne "H6b(clean-advance-still-touches-no-mirror)" "parent pin DID advance" "$h6b_pin_before" "$(parent_pin "${h6b_root}/parent" "subs/helixqa")"
+expect_eq "H6b(clean-advance-still-touches-no-mirror)" "mirror 1 received nothing" "$h6b_m1_before" "$(git -C "${h6b_root}/upstream.git" rev-parse master)"
+expect_eq "H6b(clean-advance-still-touches-no-mirror)" "mirror 2 received nothing" "$h6b_m2_before" "$(git -C "${h6b_root}/mirror2.git" rev-parse master)"
+
 # =========================================================================
-# H7: the push target branch is resolved ONCE, from the preferred remote, and
-# then used for EVERY remote. A mirror whose default branch is named
-# differently gets a brand-new branch pushed onto it while its real default
-# receives nothing -- silent §6.W/§6.C mirror divergence.
+# H7 (RETARGETED). A mirror whose own default branch is named differently.
+#
+# It used to test that step 6 resolved the target branch PER REMOTE, because
+# resolving it once from the preferred remote pushed a brand-new `master` onto
+# a mirror whose real default was `main`, leaving that default with nothing --
+# silent SS 6.W / SS 6.C divergence.
+#
+# There is no push, so the assertion is now the stronger one: the mirror gains
+# NO branch and its own default gains NO commit, on both paths.
 # =========================================================================
 h7_root="$(mktemp -d "${TMPDIR:-/tmp}/adv-h7-XXXXXX")"; FIXTURE_DIRS+=("$h7_root")
-mk_fixture "$h7_root" "subs/dep" 1
-h7_sub="${h7_root}/parent/subs/dep"
+mk_fixture "$h7_root" "subs/helixqa" 1
+h7_sub="${h7_root}/parent/subs/helixqa"
 git clone --quiet --bare "${h7_root}/upstream.git" "${h7_root}/mirror2.git"
 git -C "${h7_root}/mirror2.git" branch -m master main
 git -C "${h7_root}/mirror2.git" symbolic-ref HEAD refs/heads/main
@@ -392,21 +480,41 @@ git -C "$h7_sub" remote add zz-mirror2 "${h7_root}/mirror2.git"
 printf 'local uncommitted work\n' >> "${h7_sub}/seed.txt"
 h7_main_before="$(git -C "${h7_root}/mirror2.git" rev-parse main)"
 run_script "${h7_root}/parent" "${h7_root}/records" "true"
-h7_exit="$RUN_EXIT"
 h7_branches="$(git -C "${h7_root}/mirror2.git" for-each-ref --format='%(refname:short)' refs/heads | sort | tr '\n' ' ')"
-expect_eq "H7(mirror-default-branch-skew)" "no stray branch created on the mirror" "main " "$h7_branches"
-expect_ne "H7(mirror-default-branch-skew)" "the mirror's OWN default branch received the work" "$h7_main_before" "$(git -C "${h7_root}/mirror2.git" rev-parse main)"
+expect_eq "H7(mirror-default-branch-skew/unclean)" "no stray branch created on the mirror" "main " "$h7_branches"
+expect_eq "H7(mirror-default-branch-skew/unclean)" "the mirror's own default branch received nothing" "$h7_main_before" "$(git -C "${h7_root}/mirror2.git" rev-parse main)"
+
+# ...and on the CLEAN path, which advances.
+h7b_root="$(mktemp -d "${TMPDIR:-/tmp}/adv-h7b-XXXXXX")"; FIXTURE_DIRS+=("$h7b_root")
+mk_fixture "$h7b_root" "subs/helixqa" 1
+h7b_sub="${h7b_root}/parent/subs/helixqa"
+git clone --quiet --bare "${h7b_root}/upstream.git" "${h7b_root}/mirror2.git"
+git -C "${h7b_root}/mirror2.git" branch -m master main
+git -C "${h7b_root}/mirror2.git" symbolic-ref HEAD refs/heads/main
+git -C "$h7b_sub" remote add zz-mirror2 "${h7b_root}/mirror2.git"
+h7b_main_before="$(git -C "${h7b_root}/mirror2.git" rev-parse main)"
+run_script "${h7b_root}/parent" "${h7b_root}/records" "true"
+expect_eq "H7b(mirror-default-branch-skew/clean)" "exit code" "0" "$RUN_EXIT"
+h7b_branches="$(git -C "${h7b_root}/mirror2.git" for-each-ref --format='%(refname:short)' refs/heads | sort | tr '\n' ' ')"
+expect_eq "H7b(mirror-default-branch-skew/clean)" "no stray branch created on the mirror" "main " "$h7b_branches"
+expect_eq "H7b(mirror-default-branch-skew/clean)" "the mirror's own default branch received nothing" "$h7b_main_before" "$(git -C "${h7b_root}/mirror2.git" rev-parse main)"
 
 # =========================================================================
-# H8: step 7 (`git add <submodule>` in the parent) fails AFTER step 6 already
-# pushed. A stale .git/index.lock is the routine cause. The local-work commit
-# is on the upstream, HEAD is then moved back off it, and no rescue ref is
-# created -- so locally it survives only in the reflog.
+# H8 (RETARGETED). Step 7 (`git add <submodule>` in the parent) fails because
+# a stale .git/index.lock is present -- the routine cause, left here by the
+# verify command so it appears in the same window a concurrent or crashed git
+# process would leave one in.
+#
+# It used to test that a rescue ref preserved the step-6 commit that had
+# ALREADY been published before HEAD was moved back off it. There is no commit
+# and no push, so the case now asserts the two things that remain true and one
+# that must NOT hold: the outcome is recorded honestly, the pin is not staged,
+# and NO rescue ref exists -- a rescue ref here would mean this script had
+# created a commit, which it must never do.
 # =========================================================================
 h8_root="$(mktemp -d "${TMPDIR:-/tmp}/adv-h8-XXXXXX")"; FIXTURE_DIRS+=("$h8_root")
-mk_fixture "$h8_root" "subs/dep" 1
-h8_sub="${h8_root}/parent/subs/dep"
-printf 'local uncommitted work\n' >> "${h8_sub}/seed.txt"
+mk_fixture "$h8_root" "subs/helixqa" 1
+h8_sub="${h8_root}/parent/subs/helixqa"
 cat > "${h8_root}/verify.sh" <<VEOF
 #!/usr/bin/env bash
 # stands in for another git process (or a killed earlier run) holding the lock
@@ -415,25 +523,26 @@ exit 0
 VEOF
 chmod +x "${h8_root}/verify.sh"
 h8_up_before="$(git -C "${h8_root}/upstream.git" rev-parse master)"
+h8_pin_before="$(parent_pin "${h8_root}/parent" "subs/helixqa")"
 run_script "${h8_root}/parent" "${h8_root}/records" "bash ${h8_root}/verify.sh"
 h8_exit="$RUN_EXIT"
-rm -f -- "${h8_root}/parent/.git/index.lock"
-expect_eq "H8(staging-fails-after-push)" "exit code" "1" "$h8_exit"
-expect_ne "H8(staging-fails-after-push)" "the push really landed on the upstream" "$h8_up_before" "$(git -C "${h8_root}/upstream.git" rev-parse master)"
+rm -rf -- "${h8_root}/parent/.git/index.lock"
+expect_eq "H8(parent-staging-fails)" "exit code" "1" "$h8_exit"
+expect_eq "H8(parent-staging-fails)" "the upstream received nothing" "$h8_up_before" "$(git -C "${h8_root}/upstream.git" rev-parse master)"
+expect_eq "H8(parent-staging-fails)" "parent pin NOT staged" "$h8_pin_before" "$(parent_pin "${h8_root}/parent" "subs/helixqa")"
 h8_rescue="$(git -C "$h8_sub" for-each-ref --format='%(refname)' 'refs/lava-advance-rescue/**' | head -n1)"
-if [[ -n "$h8_rescue" ]]; then
-  echo "PASS: H8(staging-fails-after-push): local work preserved under rescue ref '${h8_rescue}'"
-  h8_seed="$(git -C "$h8_sub" show "${h8_rescue}:seed.txt" 2>/dev/null || echo '<unreadable>')"
-  expect_contains "H8(staging-fails-after-push)" "the rescue ref's tree" "local uncommitted work" "$h8_seed"
+if [[ -z "$h8_rescue" ]]; then
+  echo "PASS: H8(parent-staging-fails): no rescue ref exists -- this script creates no commit for one to rescue"
 else
-  echo "FAIL: H8(staging-fails-after-push): no refs/lava-advance-rescue/* ref -- the pushed local-work commit was left unreferenced locally"
-  FAILURES=$((FAILURES + 2))
+  echo "FAIL: H8(parent-staging-fails): a rescue ref '${h8_rescue}' exists, which can only mean a commit was created"
+  FAILURES=$((FAILURES + 1))
 fi
-if h8_rec="$(find_record "${h8_root}/records" "subs/dep")"; then
-  expect_eq "H8(staging-fails-after-push)" "local_modifications_pushed reflects the real push" "true" "$(jq -r '.local_modifications_pushed' "$h8_rec")"
-  expect_eq "H8(staging-fails-after-push)" "parent_pin_updated" "false" "$(jq -r '.parent_pin_updated' "$h8_rec")"
+if h8_rec="$(find_record "${h8_root}/records" "subs/helixqa")"; then
+  expect_eq "H8(parent-staging-fails)" "outcome" "REJECTED_PARENT_STAGING_FAILED" "$(jq -r '.outcome' "$h8_rec")"
+  expect_eq "H8(parent-staging-fails)" "local_modifications_pushed" "false" "$(jq -r '.local_modifications_pushed' "$h8_rec")"
+  expect_eq "H8(parent-staging-fails)" "parent_pin_updated" "false" "$(jq -r '.parent_pin_updated' "$h8_rec")"
 else
-  echo "FAIL: H8(staging-fails-after-push): no record found"; FAILURES=$((FAILURES + 2))
+  echo "FAIL: H8(parent-staging-fails): no record found"; FAILURES=$((FAILURES + 3))
 fi
 
 # =========================================================================
@@ -462,9 +571,9 @@ expect_eq "H9(governance-record-unwritable)" "parent pin still NOT advanced" \
 # only a stderr line lost in a 25-submodule run -- must say so.
 # =========================================================================
 h10_root="$(mktemp -d "${TMPDIR:-/tmp}/adv-h10-XXXXXX")"; FIXTURE_DIRS+=("$h10_root")
-mk_fixture "$h10_root" "subs/dep" 0
+mk_fixture "$h10_root" "subs/helixqa" 0
 up_commit "${h10_root}/upstream.git" "${h10_root}/p1" "upstream edits seed.txt" "seed.txt" "upstream version"
-h10_sub="${h10_root}/parent/subs/dep"
+h10_sub="${h10_root}/parent/subs/helixqa"
 cat > "${h10_root}/verify.sh" <<VEOF
 #!/usr/bin/env bash
 # a rebuild that stamps a tracked file (generated header / version stamp /
@@ -473,11 +582,11 @@ printf 'built artifact\n' > "${h10_sub}/seed.txt"
 exit 1
 VEOF
 chmod +x "${h10_root}/verify.sh"
-h10_pin_before="$(parent_pin "${h10_root}/parent" "subs/dep")"
+h10_pin_before="$(parent_pin "${h10_root}/parent" "subs/helixqa")"
 run_script "${h10_root}/parent" "${h10_root}/records" "bash ${h10_root}/verify.sh"
 h10_exit="$RUN_EXIT"
 expect_eq "H10(restore-failed)" "exit code" "1" "$h10_exit"
-expect_eq "H10(restore-failed)" "parent pin NOT updated" "$h10_pin_before" "$(parent_pin "${h10_root}/parent" "subs/dep")"
+expect_eq "H10(restore-failed)" "parent pin NOT updated" "$h10_pin_before" "$(parent_pin "${h10_root}/parent" "subs/helixqa")"
 expect_contains "H10(restore-failed)" "run SUMMARY line" "not restored" \
   "$(printf '%s\n' "$LAST_OUTPUT" | grep -E '^advance-all-submodules: [0-9]+ advanced' || echo '<summary line missing>')"
 
@@ -488,18 +597,18 @@ expect_contains "H10(restore-failed)" "run SUMMARY line" "not restored" \
 # at minimum state the real exit status instead of asserting a clean verdict.
 # =========================================================================
 h11_root="$(mktemp -d "${TMPDIR:-/tmp}/adv-h11-XXXXXX")"; FIXTURE_DIRS+=("$h11_root")
-mk_fixture "$h11_root" "subs/dep" 1
+mk_fixture "$h11_root" "subs/helixqa" 1
 cat > "${h11_root}/killed.sh" <<'KEOF'
 #!/usr/bin/env bash
 # stands in for an OOM kill / `timeout -s KILL` of the rebuild-and-test step
 kill -9 $$
 KEOF
 chmod +x "${h11_root}/killed.sh"
-h11_pin_before="$(parent_pin "${h11_root}/parent" "subs/dep")"
+h11_pin_before="$(parent_pin "${h11_root}/parent" "subs/helixqa")"
 run_script "${h11_root}/parent" "${h11_root}/records" "bash ${h11_root}/killed.sh"
 h11_exit="$RUN_EXIT"
 expect_eq "H11(verify-killed)" "exit code" "1" "$h11_exit"
-expect_eq "H11(verify-killed)" "parent pin NOT updated" "$h11_pin_before" "$(parent_pin "${h11_root}/parent" "subs/dep")"
+expect_eq "H11(verify-killed)" "parent pin NOT updated" "$h11_pin_before" "$(parent_pin "${h11_root}/parent" "subs/helixqa")"
 expect_contains "H11(verify-killed)" "run output" "exit status 137" "$LAST_OUTPUT"
 
 echo "---"

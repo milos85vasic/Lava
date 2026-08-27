@@ -65,9 +65,16 @@ declare -a GATE_RESULTS=()
 declare -a GATE_DURATIONS=()
 declare -a GATE_REFERENCES=()
 
-# NOTE: $cmd is run via `eval` in THIS shell, not a subshell. A command
-# string ending in `exit N` therefore terminates the whole sweep instead of
-# failing one gate. Use `false` (or an external command) to signal failure.
+# §6.J anti-bluff (2026-08-23, §6.N.2 gate-shaping bluff hunt): $cmd is
+# evaluated inside a SUBSHELL. It used to be evaluated in the sweep's own
+# shell, where a gate command that reached `exit` terminated the whole sweep
+# instead of failing one gate — every later gate silently skipped, the
+# already-recorded FAIL rows discarded, no attestation written, and (for
+# `exit 0`) the sweep itself exiting 0. §11.4.32: "A sweep that exits PASS
+# without running every implementable gate is a §11.4.32 violation." The
+# subshell also stops a gate from mutating GATE_RESULTS/GATE_NAMES and
+# rewriting the verdict. Covered by
+# tests/check-constitution/test_verify_all_gate_isolation.sh.
 run_gate() {
     local gate_name=$1
     local rule_ref=$2
@@ -76,7 +83,7 @@ run_gate() {
     [[ "$JSON_ONLY" == "1" ]] || echo "==> $gate_name ($rule_ref)"
     local start_ts end_ts duration rc
     start_ts=$(date +%s)
-    if eval "$cmd" >/dev/null 2>&1; then
+    if ( eval "$cmd" ) >/dev/null 2>&1; then
         rc=0
     else
         rc=$?
@@ -218,8 +225,14 @@ run_gate "workable-items-sync" "CM-WORKABLE-ITEMS-SYNC / HelixConstitution §11.
 # reported a clean "N PASS / 0 FAIL" with no signal that N had shrunk. Losing a
 # test suite is exactly the drift this sweep exists to catch, so the missing
 # suite is now registered as a FAIL row instead of disappearing.
-for suite in tests/firebase tests/ci-sh tests/compose-layout tests/tag-helper \
-             tests/vm-images tests/vm-signing tests/vm-distro; do
+# The suite list is an ARRAY so the registry floor below can derive its
+# expectation from it rather than carrying a hardcoded number that would go
+# stale the moment a suite is added or removed (LVA vacuous-pass sweep F15).
+declare -a HERMETIC_SUITES=(
+    tests/firebase tests/ci-sh tests/compose-layout tests/tag-helper
+    tests/vm-images tests/vm-signing tests/vm-distro
+)
+for suite in "${HERMETIC_SUITES[@]}"; do
     if [[ -x "$suite/run_all.sh" ]]; then
         run_gate "hermetic-suite-$(basename $suite)" "§11.4 anti-bluff hermetic test suite" \
             "bash $suite/run_all.sh"
@@ -287,6 +300,101 @@ if [[ "$total_gates" -eq 0 ]]; then
     echo "    that their run_all.sh files are still executable." >&2
     exit 2
 fi
+
+# -----------------------------------------------------------------------------
+# §6.J DERIVED registry floor (added 2026-08-26, LVA vacuous-pass sweep F15).
+#
+# The `-eq 0` floor above is a floor with one stair. 32 of the 58 gates a healthy
+# tree registers come from globs guarded only by that zero-check, so a registry
+# shrunken from 58 to 32 — or to 1 — reaches the clean-verdict path untouched:
+#
+#   REPRO (verbatim excerpt of :277-296, registry forced to 32) -> exit 0
+#   REPRO (same excerpt, registry forced to 1)                  -> exit 0
+#
+# and the sweep then writes "all_passed": true over a registry that lost 26
+# gates. The comment above even states the expectation ("A healthy tree
+# registers 50+ gates") — documented, not enforced.
+#
+# The expectation is DERIVED, never hardcoded, because a hardcoded number goes
+# stale the moment a gate is added or removed and a stale floor is this same
+# defect wearing a different mask. Each contributor is derived from its own
+# source of truth:
+#
+#   fixed run_gate call sites  <- this script itself (column-0 `run_gate "`)
+#   hermetic suite gates       <- ${#HERMETIC_SUITES[@]} (the array above)
+#   tests/pre-push gates       <- the git index (the repo's own declaration)
+#   tests/check-constitution   <- the git index, minus the deliberately skipped
+#                                 test_verify_all_rules.sh (recursion guard)
+#
+# The two glob loops each register a stand-in FAIL row when they match nothing,
+# so their contribution is at least 1 — hence the `(( x < 1 ))` clamps.
+#
+# `|| true` inside the braces: `git ls-files` exits 128 outside a repository and
+# under `set -e` that would abort here with no message at all. Degrading to 0
+# lets the clamps hold the floor at its structural minimum instead.
+_verify_all_self="${BASH_SOURCE[0]}"
+_expected_fixed="$(awk '/^run_gate "/{n++} END{print n+0}' "$_verify_all_self" 2>/dev/null || echo 0)"
+# The self-derivation must not be allowed to fail quietly: an unreadable
+# ${BASH_SOURCE[0]} would return 0 and LOWER the floor by 19, which is the very
+# defect this floor exists to close, merely relocated into the floor itself.
+if [[ "$_expected_fixed" -eq 0 ]]; then
+    echo "§11.4.32 VIOLATION: could not derive the fixed-gate expectation from this script." >&2
+    echo "  → Examined: '${_verify_all_self}' — found 0 column-0 'run_gate \"' call sites." >&2
+    echo "  → Expected: a non-zero count; this script has always carried unconditional" >&2
+    echo "    run_gate call sites, so 0 means the file could not be read rather than that" >&2
+    echo "    the gates are gone." >&2
+    echo "  → Cause distinguished: not a shrunken registry — a broken derivation. Falling" >&2
+    echo "    through would silently lower the registry floor by exactly those gates." >&2
+    echo "  → Do: invoke this script by path (bash scripts/verify-all-constitution-rules.sh)" >&2
+    echo "    rather than via stdin, and re-run." >&2
+    exit 2
+fi
+_expected_suites=${#HERMETIC_SUITES[@]}
+_expected_prepush="$(
+  { git ls-files -- 'tests/pre-push/check*_test.sh' 2>/dev/null || true; } |
+  awk 'END{print NR+0}'
+)"
+_expected_cc="$(
+  { git ls-files -- 'tests/check-constitution/test_*.sh' \
+                    'tests/check-constitution/check_constitution_test.sh' 2>/dev/null || true; } |
+  awk '!/\/test_verify_all_rules\.sh$/{n++} END{print n+0}'
+)"
+(( _expected_prepush < 1 )) && _expected_prepush=1
+(( _expected_cc < 1 )) && _expected_cc=1
+_expected_gates=$(( _expected_fixed + _expected_suites + _expected_prepush + _expected_cc ))
+
+if [[ "$total_gates" -lt "$_expected_gates" ]]; then
+    echo "§11.4.32 VIOLATION: the sweep registered a SHRUNKEN gate registry." >&2
+    echo "  → Examined: ${total_gates} gate(s)" >&2
+    echo "  → Expected: ${_expected_gates}, derived (never hardcoded) as:" >&2
+    printf '        %2d  fixed run_gate call sites   (column-0 %s in this script)\n' \
+        "$_expected_fixed" "'run_gate \"'" >&2
+    printf '        %2d  hermetic suite gates        (${#HERMETIC_SUITES[@]})\n' "$_expected_suites" >&2
+    printf '        %2d  tests/pre-push gates        (git ls-files, min 1)\n' "$_expected_prepush" >&2
+    printf '        %2d  tests/check-constitution    (git ls-files minus the recursion-guard skip, min 1)\n' "$_expected_cc" >&2
+    echo "  → Missing: $(( _expected_gates - total_gates )) gate(s). Registered names:" >&2
+    printf '        %s\n' "${GATE_NAMES[@]}" >&2
+    echo "  → Cause distinguished:" >&2
+    if [[ "$(ls -d tests/pre-push/check*_test.sh 2>/dev/null | wc -l)" -eq 0 ]] ||
+       [[ "$(ls -d tests/check-constitution/test_*.sh 2>/dev/null | wc -l)" -eq 0 ]]; then
+        echo "      at least one flat-layout glob matched NOTHING in the working tree while" >&2
+        echo "      the git index still declares those tests — working-tree drift (a" >&2
+        echo "      deletion, a bad checkout, or a partial clone), not a shrunken suite." >&2
+        echo "      Do: git checkout -- tests/pre-push tests/check-constitution" >&2
+    else
+        echo "      the globs resolve, so the shortfall is in the fixed call sites or the" >&2
+        echo "      hermetic suites — a suite whose run_all.sh lost its exec bit still" >&2
+        echo "      registers a FAIL row, so a MISSING row means a gate was removed from" >&2
+        echo "      this script without the expectation moving with it." >&2
+        echo "      Do: compare the names above against the last attestation under" >&2
+        echo "      .lava-ci-evidence/verify-all/ and restore the missing gate." >&2
+    fi
+    echo "  → A PASS over ${total_gates} of ${_expected_gates} gates asserts nothing about the other" >&2
+    echo "    $(( _expected_gates - total_gates )); §11.4.32: \"A sweep that exits PASS without running" >&2
+    echo "    every implementable gate is a §11.4.32 violation.\"" >&2
+    exit 2
+fi
+# END-OF-BLOCK §6.J DERIVED registry floor (regression-harness sentinel)
 
 pass_count=0
 fail_count=0

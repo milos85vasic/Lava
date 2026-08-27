@@ -2,6 +2,25 @@
 
 **Status: DRAFT — PROPOSED, NOT APPLIED. Requires operator approval before any governing document is touched.**
 
+> **SUPERSEDED 2026-08-26 — READ THIS FIRST.** §6.AA clause 8 was amended on
+> 2026-08-26 (LVA-120 + LVA-147; `.specify/memory/constitution.md` 2.0.0 → 3.0.0).
+> **Every by-letter condition citation in this document uses the original
+> nine-condition lettering and no longer matches the clause in force.** The clause
+> is now conjunctive over **eight** conditions, **(A)–(H)**, with no gap and no
+> letter (I): the former **(D)** (cycle-coverage on BOTH channels) was **withdrawn,
+> not renumbered**, and former (E)–(I) became (D)–(H). Clause 8 also no longer
+> authorizes the combined `--debug-and-release` invocation — that mode is retired
+> and clause 3 forbids it — and the residual-gap condition (now **(G)**) records the
+> gap through `build_artifacts[].build_output_path` instead of a schema-forbidden
+> `residual-gap` field.
+>
+> **This document is deliberately NOT re-lettered.** It records what was proposed and
+> what the operator approved on 2026-08-21; `tasks.md` T040 asserts the landed text was
+> extracted from it byte-identically, and rewriting it would falsify an approval record.
+> `CLAUDE.md` §6.AA clause 8 is authoritative. Map: (E)→(D), (F)→(E), (G)→(F),
+> (H)→(G), (I)→(H); (A), (B), (C) unchanged. Note that the separate **(A)–(F)** set in
+> this document's Pin-Advance Path section is a DIFFERENT lettering and is untouched.
+
 | Field | Value |
 |---|---|
 | Feature | `002-build-test-distribute-pipeline` |

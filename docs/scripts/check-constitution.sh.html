@@ -667,5 +667,37 @@ during the 2026-08-26 §6.N.2 sweep and closed with this idiom. See also
 the propagation-target floor below, which additionally distinguishes an
 <em>uninitialised</em> submodule corpus from genuine propagation drift,
 because the two call for opposite remedies.</p>
+<h2
+id="6h-exemption-anchor-scope-corrected-to-cover-both-tracker-locations-2026-08-26-lva-134">§6.H
+exemption anchor: scope corrected to cover BOTH tracker locations
+(2026-08-26, LVA-134)</h2>
+<p>The §6.H credential-scan exemption list excludes the
+<strong>generated</strong> workable-items tracker renderings —
+<code>{Issues,Fixed}{,_Summary}.{md,html,pdf,docx}</code>. The anchor
+originally named only <code>docs/</code>. This repository tracks the
+<strong>same</strong> generated renderings in <strong>two</strong>
+places — the repository root <em>and</em> <code>docs/</code> — and the
+two copies are byte-identical (verified with <code>cmp</code> across all
+four <code>.md</code> and all four <code>.html</code> members).</p>
+<p>Naming only <code>docs/</code> therefore left the root copies
+scanned. The moment the trackers were regenerated, LVA-134's own ticket
+body — which quotes a credential-shaped literal verbatim, because that
+is what the ticket is <em>about</em> — reproduced the violation in
+<code>Fixed.md</code>, <code>Fixed.html</code>,
+<code>Fixed_Summary.md</code> and <code>Fixed_Summary.html</code> at the
+root.</p>
+<p>Measured, so the cause is not inferred:
+<code>git show HEAD:Fixed.md | grep -c</code> returned
+<strong>0</strong> while the working tree returned <strong>1</strong> —
+the hit was NEW output from the generator, not inherited content.</p>
+<p>The <code>(docs/)?</code> in the anchor is <strong>not a
+loosening.</strong> Every exemption in the list is the same category: a
+surface whose <em>purpose</em> is to DESCRIBE the forbidden pattern
+rather than to use a credential — <code>.env.example</code> (a
+template), <code>CHANGELOG.md</code> (historical record), the incident
+and closure logs (forensic anchors), and now the generated trackers. A
+near-miss file at the root that is <em>not</em> a generated rendering is
+still scanned, and a test asserts exactly that, so the exemption cannot
+be used as a sweep.</p>
 </body>
 </html>

@@ -569,5 +569,37 @@ executed before it.</p>
 <p>When authoring a gate command that must signal failure, use
 <code>false</code> (or an external command that exits non-zero), never a
 bare <code>exit</code>.</p>
+<h2
+id="cmd-now-runs-in-a-subshell--superseding-the-note-above-2026-08-23"><code>$cmd</code>
+now runs in a SUBSHELL — superseding the note above (2026-08-23)</h2>
+<p>The section above records that gate command strings were evaluated in
+the sweep's <strong>own</strong> shell. That is no longer true, and the
+change is the point.</p>
+<p>In the old form, a gate command that reached <code>exit</code>
+terminated the <strong>entire sweep</strong> rather than failing one
+gate: every later gate was silently skipped, the FAIL rows already
+recorded were discarded, no attestation was written — and for
+<code>exit 0</code>, the sweep itself exited <strong>0</strong>.
+§11.4.32 is explicit: <em>"A sweep that exits PASS without running every
+implementable gate is a §11.4.32 violation."</em></p>
+<p><code>$cmd</code> is now evaluated inside a subshell —
+<code>if ( eval "$cmd" ) &gt;/dev/null 2&gt;&amp;1; then</code> — which
+also prevents a gate from mutating <code>GATE_RESULTS</code> /
+<code>GATE_NAMES</code> and rewriting the sweep's own verdict. Covered
+by
+<code>tests/check-constitution/test_verify_all_gate_isolation.sh</code>.</p>
+<p>The advice in the earlier section still stands for gate authors:
+signal failure with <code>false</code> or an external non-zero command,
+not a bare <code>exit</code>. The subshell now contains the blast radius
+if someone does it anyway.</p>
+<h2
+id="the-suite-list-is-an-array-so-the-registry-floor-derives-its-own-expectation">The
+suite list is an ARRAY, so the registry floor derives its own
+expectation</h2>
+<p>The hermetic-suite list is held as an array rather than being
+iterated inline, so the registry floor can compute how many suites it
+<em>should</em> have registered from the list itself. A hardcoded count
+would go stale the moment a suite is added or removed — a stale floor is
+the same defect as no floor, wearing a number.</p>
 </body>
 </html>

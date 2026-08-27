@@ -244,9 +244,10 @@
 <h1
 id="scriptscheck-commit-docs-existssh--user-guide"><code>scripts/check-commit-docs-exists.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-05-18 (1.2.30-1050 tooling
-cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.x
-(commit-references-resolve mandate) + Lava §6.AD-debt closure
+<p><strong>Last verified:</strong> 2026-08-26 (§6.J corpus floor — an
+unresolvable or empty commit range now refuses instead of skipping; LVA
+vacuous-pass sweep F13) <strong>Inheritance:</strong> HelixConstitution
+§11.4.x (commit-references-resolve mandate) + Lava §6.AD-debt closure
 (CM-COMMIT-DOCS-EXISTS)</p>
 <h2 id="overview">Overview</h2>
 <p>Per-commit reference resolver. Scans commit message bodies for file
@@ -280,12 +281,18 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 <tbody>
 <tr>
 <td>0</td>
-<td>Every referenced path resolves (exact or fuzzy-basename)</td>
+<td>Every referenced path resolves (exact or fuzzy-basename) —
+<strong>and</strong> at least one commit message was actually read</td>
 </tr>
 <tr>
 <td>1</td>
-<td>At least one orphan reference; commit SHA + path printed to
-stderr</td>
+<td>At least one orphan reference (commit SHA + path printed to stderr),
+<strong>or</strong> the range resolved but selects zero commits</td>
+</tr>
+<tr>
+<td>2</td>
+<td>The range failed to resolve — git could not name the commits, so
+nothing was examined (added 2026-08-26)</td>
 </tr>
 </tbody>
 </table>
@@ -354,6 +361,94 @@ create the file, OR drop the commit.</li>
 </ol>
 <p>The deliberate-phantom rehearsal proves the gate fires on real
 evidence gaps.</p>
+<h2
+id="2026-08-26-update--6j-corpus-floor-no-commits-in-range-is-no-longer-a-pass">2026-08-26
+update — §6.J corpus floor: "no commits in range" is no longer a
+pass</h2>
+<h3 id="the-defect">The defect</h3>
+<p>The gate collapsed three very different conditions into one
+<code>no commits in range '&lt;range&gt;' — skipping</code> message and
+<strong>exit 0</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Invocation</th>
+<th>Old verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HEAD~5..HEAD</code> in a repository with 1 commit</td>
+<td><code>no commits in range</code> — exit 0</td>
+</tr>
+<tr>
+<td><code>HEAD~5..HEAKD</code> (a typo in the ref)</td>
+<td><code>no commits in range</code> — exit 0</td>
+</tr>
+<tr>
+<td>The same repository, range <code>HEAD</code></td>
+<td><code>VIOLATION: 2 orphan refs</code> — exit 1</td>
+</tr>
+</tbody>
+</table>
+<p>Only the third examined anything. The first two reported a clean gate
+having read <strong>zero commit messages</strong>.</p>
+<p>This was not a theoretical corner.
+<code>scripts/verify-all-constitution-rules.sh</code> invokes this gate
+with a <strong>hardcoded</strong> <code>HEAD~5..HEAD</code>, so any
+checkout with fewer than six commits — a <code>--depth</code>-limited
+clone, a worktree cut from a fresh branch, a CI-side shallow fetch —
+passed it silently, forever, while the same tree with the range spelled
+<code>HEAD</code> produced real violations.</p>
+<p>The mechanism was <code>2&gt;/dev/null</code> on the
+<code>git rev-list</code> call: git's <strong>exit status</strong> is
+the only thing that separates <em>"this ref cannot be resolved"</em>
+(128) from <em>"this range is valid and genuinely empty"</em> (0 with no
+output), and redirecting stderr discarded exactly that signal.</p>
+<h3 id="what-the-gate-now-refuses">What the gate now refuses</h3>
+<p>Two distinct refusals, because the two causes have different remedies
+and a diagnosis that misstates its cause sends the reader to the wrong
+one:</p>
+<p><strong>Exit 2 — the range failed to resolve.</strong> git's own
+stderr and exit status are reported. The message states plainly that
+this is <em>not</em> an empty range: the range names a ref git cannot
+resolve — a typo, or a history too shallow for the offset. Three
+remedies are offered: fix the spelling, pass a range this history can
+satisfy (<code>LAVA_COMMIT_RANGE=HEAD</code>), or deepen a shallow clone
+with <code>git fetch --unshallow</code>.</p>
+<p><strong>Exit 1 — the range resolved but selects zero
+commits.</strong> The message states that the range is <em>valid</em>
+(git resolved it without error) and simply names an empty set — an
+<code>A..B</code> where <code>B</code> is an ancestor of <code>A</code>,
+or a self-range such as <code>HEAD..HEAD</code>. A gate that reads no
+commit message asserts nothing about whether commit bodies cite paths
+that exist, so this is a failure rather than a skip.</p>
+<p>Both messages report <code>Examined: 0 commit message(s)</code>
+explicitly, so the corpus size is a stated fact rather than something
+the reader infers from the absence of output.</p>
+<h3 id="consequence-for-callers">Consequence for callers</h3>
+<p>A shallow or fresh checkout that previously sailed through this gate
+will now fail it, with an actionable message. That is the intended
+outcome: the alternative is a gate whose verdict is a function of clone
+depth rather than of commit-body honesty. Where a narrow scope is
+genuinely wanted, name it explicitly —
+<code>LAVA_COMMIT_RANGE=HEAD</code> for the tip commit alone, or
+<code>'@{u}..HEAD'</code> for everything unpushed.</p>
+<h3 id="6j-falsifiability-rehearsal-of-the-floor-itself">§6.J
+falsifiability rehearsal of the floor itself</h3>
+<ol type="1">
+<li><code>bash scripts/check-commit-docs-exists.sh 'HEAD~5..HEAKD'</code>
+(deliberate typo) → expect <strong>exit 2</strong>,
+<code>FAILED TO RESOLVE</code>, and git's own error reproduced. Before
+this change: exit 0, reported as a skip.</li>
+<li><code>bash scripts/check-commit-docs-exists.sh 'HEAD..HEAD'</code> →
+expect <strong>exit 1</strong>,
+<code>resolved but selects ZERO commits</code>. Before this change: exit
+0.</li>
+<li><code>bash scripts/check-commit-docs-exists.sh HEAD</code> → expect
+the normal verdict (0 or 1 on the merits of the tip commit's own
+message).</li>
+</ol>
 <h2 id="integration">Integration</h2>
 <ul>
 <li>Wired into <code>scripts/verify-all-constitution-rules.sh</code> as

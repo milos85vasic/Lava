@@ -805,7 +805,17 @@ actions, and at least 3 screenshots OR a video recording referenced by
 hash. <code>scripts/tag.sh</code> MUST refuse to operate on a commit
 lacking the matching attestation. There is no exception. "Operator was
 busy" is not an exception. "Test environment was unstable" is not an
-exception. Untested-on-device commits do not get tags.</p></li>
+exception. Untested-on-device commits do not get tags.</p>
+<p><strong>Scope note (added 2026-08-21).</strong> This clause gates
+<strong>release tags</strong> via <code>scripts/tag.sh</code>. The
+automated pipeline of feature
+<code>002-build-test-distribute-pipeline</code> distributes artifacts
+but cuts no tag, and its §6.AA clause 8 Pipeline Distribution Path
+therefore does NOT reach, satisfy, or relax this clause. A Pipeline Run
+Report is NOT a real-device attestation and MUST NOT be presented as
+one. Cutting a release tag continues to require the operator-executed,
+operator-recorded attestation described above, without
+exception.</p></li>
 <li><p><strong>Forbidden Test Patterns (per-language).</strong> The
 following patterns are bluffs by construction. Pre-push hooks reject
 diffs that introduce them:</p>
@@ -2991,15 +3001,46 @@ the release APK. The §6.Z evidence file is APPENDED with a
 <code>release-stage</code> section recording the release-APK test
 execution + operator real-device verification on the release variant.
 Same SHA as stage 1 (no code change between stages); ≤24h since stage 1
-OR re-bump the version per §6.Y if more time has elapsed.</p></li>
-<li><p><strong>No combined distribute permitted by default.</strong>
-Running <code>scripts/firebase-distribute.sh</code> with no flags MUST
-default to <code>--debug-only</code> mode. The combined
-<code>--debug-and-release</code> flag (or any equivalent) MUST require
-explicit per-cycle operator authorization recorded in the §6.Z evidence
-file's <code>combined-distribute-authorization:</code> field. Pre-push
-hooks + the script itself reject release-only invocations not preceded
-by a documented debug-stage evidence entry.</p></li>
+OR re-bump the version per §6.Y if more time has elapsed. <strong>The
+written operator confirmation required by this clause has exactly ONE
+alternate satisfier: a qualifying Pipeline Run Report under clause 8. No
+other substitution exists — an agent's assertion, a green CI line, a
+compiled-but-unexecuted test, or a prior cycle's confirmation does NOT
+satisfy this clause.</strong></p></li>
+<li><p><strong>No combined distribute. The combined mode is RETIRED, not
+merely discouraged.</strong> Running
+<code>scripts/firebase-distribute.sh</code> with no flags distributes
+the DEBUG variant only; <code>MODE</code> has exactly two reachable
+values, <code>debug</code> (the default) and <code>release</code>. The
+combined <code>--debug-and-release</code> flag and its
+<code>--both</code> alias are <strong>RETIRED as of 2026-08-26 (LVA-120,
+operator-approved remedy [B])</strong>: the script now exits 1 naming
+this clause, and no equivalent flag may be added. The mode was REMOVED
+rather than gated because, in combined mode, the §6.AA staging gate
+never evaluated (it was guarded on <code>MODE == "release"</code>) and
+the §6.AK/§6.Z device-evidence gate resolved to the DEBUG channel
+through a catch-all, while the R8-minified RELEASE APK was uploaded
+regardless — mechanically the same setup as the 1.2.19-1039 forensic
+anchor that birthed this section. Removal fixes every caller (pipeline,
+operator, hotfix) at once; a gate bolted onto the mode would have fixed
+only the callers that remembered to pass it. The
+<code>combined-distribute-authorization:</code> field remains in
+existing §6.Z evidence files as a historical record; it authorizes
+nothing going forward, because there is no combined invocation left to
+authorize, and no script reads it. A <code>--release-only</code>
+invocation is rejected unless the debug stage has already distributed
+THAT versionCode, and that check now evaluates on EVERY release-mode
+invocation rather than only when a debug pointer file happens to exist.
+<strong>A qualifying Pipeline Run Report under clause 8 constitutes a
+STANDING per-cycle authorization for
+<code>scripts/pipeline/phase-05-distribute.sh</code> to run the
+<code>--debug-only</code> and <code>--release-only</code> stages
+back-to-back within ONE pipeline run without an operator pause between
+them, and its <code>run_id</code> MUST be recorded verbatim in the §6.Z
+evidence file for BOTH stages so the audit trail names the exact run
+that authorized each. This standing authorization is available ONLY to
+that script; every hand invocation remains bound by clauses 1–2 in
+full.</strong></p></li>
 <li><p><strong>The R8 / minification surprise class</strong> is the
 load-bearing reason for the staging. The §6.Z forensic anchor
 (<code>painterResource()</code> layer-list rejection) was reported on
@@ -3018,22 +3059,181 @@ compose vs. the <code>docker-compose.dev.yml</code> dev compose;
 container image push to a staging registry is stage 1, push to the
 production registry is stage 2 after stage-1 soak
 verification).</p></li>
-<li><p><strong>Mechanical enforcement (owed via §6.AA-debt).</strong>
-<code>scripts/firebase-distribute.sh</code> MUST gain default-debug-only
-mode (today the default is debug + release combined; that default
-flips). The script MUST refuse <code>--release-only</code> invocations
-when no companion debug-stage evidence section exists in the §6.Z
-evidence file for the same SHA. Pre-push hook MUST reject commits that
-advance <code>last-version</code> for the release-app-id channel without
-a matching debug-app-id <code>last-version</code> advance for the same
-SHA. Until §6.AA-debt closes, the operator MUST manually request the
-release distribute as a separate explicit step after debug
+<li><p><strong>Mechanical enforcement.</strong>
+<code>scripts/firebase-distribute.sh</code> MUST default to debug-only
+mode — <strong>LANDED</strong>: <code>MODE="debug"</code> is the
+initialized default and the combined mode is retired per clause 3, so
+debug-only is not merely the default but the only mode a flagless
+invocation can reach. The script MUST refuse <code>--release-only</code>
+invocations when no companion debug-stage evidence section exists in the
+§6.Z evidence file for the same SHA. Pre-push hook MUST reject commits
+that advance <code>last-version</code> for the release-app-id channel
+without a matching debug-app-id <code>last-version</code> advance for
+the same SHA. Until §6.AA-debt closes, the operator MUST manually
+request the release distribute as a separate explicit step after debug
 verification.</p></li>
 <li><p><strong>Inheritance.</strong> Applies recursively to every
 submodule's distributable artifacts and every new artifact added to the
 project. Submodule constitutions MAY add stricter rules (e.g. "this
 submodule's debug + release stages each get a 24-hour soak window") but
 MUST NOT relax this clause.</p></li>
+<li><p><strong>Pipeline Distribution Path (added 2026-08-21, feature
+<code>002-build-test-distribute-pipeline</code>; scope narrowed and
+conditions re-lettered 2026-08-26 by the LVA-120 retirement).</strong> A
+distribution performed by
+<code>scripts/pipeline/phase-05-distribute.sh</code> within a single run
+of <code>scripts/pipeline-build-test-distribute.sh</code> MAY proceed
+from the debug stage to the release stage without an operator pause
+between them — that is, a qualifying Pipeline Run Report is the ONE
+permitted substitute for the clause 2 written operator confirmation, and
+nothing else — IF AND ONLY IF <strong>every</strong> condition below
+holds. <strong>This clause does NOT authorize a combined
+single-invocation distribute; that mode is retired per clause 3 and no
+equivalent may be added.</strong> The two stages are two separate
+invocations of <code>scripts/firebase-distribute.sh</code>
+(<code>--debug-only</code>, then <code>--release-only</code>), each
+subject to every one of its own Phase-1 gates. Clause 8 is conjunctive
+over <strong>eight</strong> conditions, lettered <strong>(A) through
+(H)</strong> with no gap. Failure of any single condition returns the
+distribution to the clause 1–3 human path in full. There is no partial
+qualification. <strong>Re-lettering note (2026-08-26):</strong> the
+former condition (D) (cycle-coverage on BOTH channels) is
+<strong>withdrawn, not renumbered</strong> — its premise was that
+<code>scripts/firebase-distribute.sh</code> resolved the §6.AK channel
+to <code>debug</code> for any mode other than exactly
+<code>release</code>, and that catch-all no longer exists; the channel
+is now resolved by an explicit two-arm <code>case</code> that
+hard-errors on any third value. Former (E)–(I) are now (D)–(H).
+<strong>No condition letter (I) exists in this clause.</strong> Every
+by-letter citation of clause 8 written before 2026-08-26 refers to the
+nine-condition lettering and MUST be read against the map (E)→(D),
+(F)→(E), (G)→(F), (H)→(G), (I)→(H).</p>
+<p><strong>(A) Run Report identity.</strong> A Pipeline Run Report
+exists at
+<code>.lava-ci-evidence/pipeline-runs/&lt;run_id&gt;/report.json</code>,
+validates against
+<code>specs/002-build-test-distribute-pipeline/contracts/pipeline-run-report.schema.json</code>,
+and its <code>commit_sha</code> equals <code>git rev-parse HEAD</code>
+at the moment of the distribute invocation. Every Distribution Record's
+<code>version_code</code> equals the <code>versionCode</code> compiled
+into the artifact actually being uploaded. A report whose
+<code>commit_sha</code> does not match is not stale evidence to be
+tolerated — it is a REFUSAL condition.</p>
+<p><strong>(B) Unqualified pass.</strong> The report's
+<code>outcome</code> is <code>PASS</code>; every entry in
+<code>phases[]</code> is <code>PASS</code>; zero Evidence Records carry
+<code>result: FAIL</code>; and zero Evidence Records carry an
+<code>anti_bluff_status</code> other than validated. A
+<code>SKIPPED</code> Evidence Record in any category named in condition
+(C) or (D) disqualifies the run.</p>
+<p><strong>(C) Device evidence for BOTH variants.</strong> At least one
+Evidence Record of <code>category: real-device-challenge</code>, with
+<code>result: PASS</code>, exists for <strong>each</strong> Android
+artifact variant being distributed — <code>app-debug</code>,
+<code>app-release</code>, <code>api-app-debug</code>,
+<code>api-app-release</code> — executed on a §6.AH-conformant
+container-or-VM emulator (never host-direct, never a live ADB device,
+per §6.AG), against the exact artifact being uploaded.
+<strong>Release-variant device evidence is mandatory and is NOT
+inferable from debug-variant evidence.</strong> The R8-minified release
+artifact is a different artifact; the §6.Z forensic anchor was a
+release-variant-only failure. Cold-start survival (§6.Z clause 4) is the
+minimum per variant, and does not by itself satisfy §6.AK.</p>
+<p><strong>(D) Live verification of every distributed live
+surface.</strong> The run's live-verification phase has exercised,
+against actually-running services over their real interfaces, every live
+surface represented in the run's Distribution Records — the
+<code>lava-api-go</code> service <strong>and</strong> the on-device
+<code>:api-app</code>. A run whose live-verification covers only one of
+the two does NOT qualify, irrespective of that half's result.</p>
+<p><strong>(E) Unmodified distribute path.</strong> The distribution was
+performed by invoking <code>scripts/firebase-distribute.sh</code>
+unmodified, with all of its own Phase-1 gates active. §6.Z clause 6 is
+unchanged and remains absolute: no bypass flag exists, none may be
+added, and invoking <code>firebase appdistribution:distribute</code>
+outside this script remains a §6.Z violation whether a pipeline is
+running or not.</p>
+<p><strong>(F) Scope.</strong> This clause applies ONLY to distributions
+produced by this pipeline, on <code>master</code>, with the FR-000
+precondition guard (clean tree, correct branch) satisfied at invocation.
+Every other distribution — an operator running
+<code>firebase-distribute.sh</code> by hand, a hotfix, a re-upload, any
+future channel not driven by this pipeline — remains bound by clauses
+1–3 in full. This clause grants no general permission to skip
+staging.</p>
+<p><strong>(G) Disclosed residual gap (honest, and NOT closed by this
+amendment).</strong> The clause 1 human path verifies the debug APK
+<strong>as installed from the Firebase invite</strong>, not the
+locally-built APK. The pipeline's machine evidence exercises
+LOCALLY-BUILT artifacts and therefore does NOT cover the Firebase upload
+→ download → install path on a physical device. This gap is real and is
+not closed here. It is recorded as <strong>§6.AA-pipeline-debt</strong>:
+a post-distribute verification that downloads the just-distributed
+artifact from its Firebase channel and cold-starts it is OWED.
+<strong>The gap is recorded in the run report through a property the
+report schema already defines, never through a field it
+forbids.</strong> Every Android artifact variant this clause authorizes
+for distribution MUST appear in the run report's
+<code>build_artifacts[]</code> with a non-empty
+<code>build_output_path</code> — the property defined at
+<code>pipeline-run-report.schema.json</code>
+<code>build_artifacts.items.properties.build_output_path</code> and
+listed among that item's <code>required</code> properties. That path
+names, in the artifact itself, the locally-built file every Evidence
+Record in this run exercised, which is exactly why the
+Firebase-delivered install is unverified: a reader of the report can see
+from <code>build_output_path</code> alone that the evidence covers a
+local build output and not a build installed from a Firebase invite.
+<strong>This condition's mechanical content is that recording and no
+more; the substantive protection against a bad release is carried by
+condition (C), never by this one.</strong> No <code>residual-gap</code>
+field is emitted, no property outside the schema is written, and the run
+report continues to validate under condition (A) unchanged. <strong>This
+is how the (A)-versus-residual-gap deadlock recorded as LVA-147 is
+resolved — by rewording this condition, never by amending
+<code>specs/002-build-test-distribute-pipeline/contracts/pipeline-run-report.schema.json</code>.</strong>
+A run report carrying a top-level <code>residual-gap</code> property is
+NOT compliant: that property is not in the schema,
+<code>additionalProperties</code> is <code>false</code>, and condition
+(A) refuses it.</p>
+<p><strong>(H) Automatic suspension trigger.</strong> If any
+distribution authorized under this clause produces a Crashlytics FATAL
+on first user-visible interaction, or an operator-reported cold-start
+failure, this clause is <strong>SUSPENDED automatically</strong> — every
+subsequent distribution reverts to the clause 1–3 human path — until (i)
+a §6.Z-class incident record is written under
+<code>.lava-ci-evidence/sixth-law-incidents/</code>, (ii) a covering
+device Challenge that reproduces the failure RED-then-GREEN lands per
+§6.AK clause 2, and (iii) the operator re-authorizes this clause in
+writing. Suspension is the default state on failure; re-authorization is
+an explicit act, never an inference from time passing.</p>
+<p><strong>Standing note.</strong> This clause substitutes a
+<em>mechanism</em>, not a <em>standard</em>. The safety property §6.AA
+protects — no release-variant distribution without real, executed,
+artifact-specific proof it works — is preserved by condition
+<strong>(C)</strong>, which since the withdrawal of the former
+cycle-coverage condition is the SOLE mechanical guarantee inside this
+clause that the R8-minified release artifact was itself exercised.
+<strong>What this clause does NOT claim, stated plainly rather than left
+to inference:</strong> it does not claim that debug-variant and
+release-variant CYCLE-COVERAGE are independently verified.
+<code>scripts/check-cycle-coverage.sh</code> accepts
+<code>--channel</code>, asserts it non-empty, and never reads it again —
+both artifacts it checks resolve from <code>--evidence-dir</code> and
+<code>--version</code> alone, so <code>debug</code>,
+<code>release</code> and an arbitrary value produce identical results —
+and no release-variant coverage artifacts exist, because the evidence
+tree under <code>.lava-ci-evidence/distribute-changelog/</code>
+partitions by APP, not by build variant. The per-variant coverage check
+the withdrawn condition was reaching for <strong>does not exist, and
+withdrawing that condition does not create it</strong>; it is recorded
+as <strong>§6.AA-pipeline-debt-D</strong> and is OWED. Any future
+reading of this clause that treats a green run report as sufficient
+WITHOUT condition (C) having genuinely executed — against the
+release-variant artifact specifically, never inferred from the debug
+variant — is the §6.J bluff class this project has recorded three times
+(§6.Z, §6.AB, §6.AK), and is a violation of this clause, not a use of
+it. Any weakening of (C) re-opens the LVA-120 gap in full.</p></li>
 </ol>
 <h5
 id="6ab--anti-bluff-test-suite-reinforcement-27th-6l-invocation-added-2026-05-14">6.AB
@@ -3245,9 +3445,11 @@ hermetic test) is OWED. Until close:</p>
 <li>6.AA.1 (debug-first staging) is operator-driven; the operator
 manually requests <code>--debug-only</code> then
 <code>--release-only</code> as separate steps.</li>
-<li>6.AA.3 (default-debug-only) is documented requirement only; today
-<code>firebase-distribute.sh</code> defaults to debug + release
-combined.</li>
+<li>6.AA.3 (default-debug-only) is <strong>LANDED</strong>:
+<code>firebase-distribute.sh</code> initializes
+<code>MODE="debug"</code>, and since the 2026-08-26 LVA-120 retirement
+of the combined mode there is no debug + release invocation for it to
+default to.</li>
 <li>6.AA.6 (mechanical enforcement) is documented requirement only.</li>
 </ul>
 <p>The next phase that touches
@@ -5639,12 +5841,80 @@ fork.</li>
 <li><strong>Submodule fetch/pull is an EXPLICIT operator action, never
 automatic.</strong> No git hooks that silently update pins, no
 <code>git submodule update --remote</code> in any release script. The
-pin is the contract; changing the contract is a code review event.</li>
+pin is the contract; changing the contract is a code review event.
+<strong>ONE bounded exception exists: the Automated Pipeline Pin-Advance
+Path defined immediately below. No other automation may advance a pin,
+and no git hook may do so under any circumstances.</strong></li>
 <li><strong>Mirror policy applies recursively.</strong> Every
 <code>vasic-digital</code> submodule we own MUST be mirrored to the same
 set of upstreams Lava itself mirrors to (GitHub + GitLab), unless
 explicitly waived for that submodule with a documented reason.</li>
 </ul>
+<h4
+id="automated-pipeline-pin-advance-path-added-2026-08-21-feature-002-build-test-distribute-pipeline">Automated
+Pipeline Pin-Advance Path (added 2026-08-21, feature
+<code>002-build-test-distribute-pipeline</code>)</h4>
+<p><code>scripts/advance-all-submodules.sh</code>, invoked by
+<code>scripts/pipeline/phase-07-closure.sh</code> within a single run of
+<code>scripts/pipeline-build-test-distribute.sh</code>, MAY advance
+submodule pins without a per-submodule operator action, IF AND ONLY IF
+every condition below holds. This is the sole exception to the bullet
+above.</p>
+<p><strong>(A) Advance-verify-or-revert is mandatory, per submodule,
+before the pin is recorded.</strong> For each submodule, in this order:
+fetch its own configured upstream(s); compare the current pin to the
+remote default-branch HEAD; if identical, no-op; if different, check the
+remote HEAD into the submodule's working tree, then <strong>rebuild and
+re-run the affected test categories against the advanced state</strong>.
+If that rebuild-and-test fails, the advance is DISCARDED (the prior pin
+is restored) and the specific incompatibility is reported. Only a
+submodule that builds and tests green at the advanced commit may have
+its pin recorded in the parent. A pin that broke the build is never
+committed — it is refused.</p>
+<p><strong>(B) The <code>constitution/</code> submodule is EXCLUDED,
+without exception.</strong> <code>submodules/</code>-adjacent governance
+is not ordinary code: advancing <code>./constitution/</code>
+automatically would let an unattended process rewrite the rules the same
+process is bound by. Per the standing rule recorded earlier in this
+document, the <code>./constitution/</code> submodule remains pinned and
+advanced <strong>only</strong> per CONST-049's 7-step pipeline.
+<code>scripts/advance-all-submodules.sh</code> MUST exclude it by
+default — not by an operator remembering to pass an allow-list, but by a
+default deny that requires code change to override.</p>
+<p><strong>(C) Own-org upstreams only, §6.W scope unchanged.</strong>
+The path advances only submodules whose configured upstreams are
+<code>vasic-digital/*</code> or <code>HelixDevelopment/*</code> on
+GitHub or GitLab. §6.W is not relaxed: no new remote, no other provider,
+no externally-maintained upstream is advanced automatically.</p>
+<p><strong>(D) No forced push, no history rewrite, no divergence
+overwrite.</strong> If any submodule cannot be pushed without
+overwriting diverged remote history, the pipeline STOPS and reports that
+specific conflict. It does not force, and it does not silently skip.
+§6.T.3 is unchanged and absolute: force push, history rewrite, and hook
+bypass continue to require explicit, in-conversation, per-operation
+operator approval, which an unattended pipeline cannot obtain and
+therefore may never assume.</p>
+<p><strong>(E) Per-submodule record.</strong> Every submodule processed
+produces a Submodule Advance Record conforming to
+<code>specs/002-build-test-distribute-pipeline/contracts/submodule-advance-record.schema.json</code>,
+naming the old commit, the new commit, and the outcome
+(<code>NO_NEWER_COMMIT</code>, <code>ADVANCED</code>,
+<code>REJECTED_BREAKING_CHANGE</code>,
+<code>REJECTED_PUSH_CONFLICT</code>). "All submodules advanced" without
+per-submodule records is not evidence, per the same reasoning §6.I
+applies to per-AVD attestation rows.</p>
+<p><strong>(F) Scope.</strong> Applies ONLY within this pipeline's own
+runs. A human advancing a pin outside the pipeline continues to do so as
+a deliberate, reviewed act per the bullet above. Nothing here authorizes
+a git hook, a <code>git submodule update --remote</code> in any other
+script, or a background job to move a pin.</p>
+<p><strong>Standing note.</strong> The bullet above exists because the
+pin is the contract and drift between projects is the highest-bandwidth
+bluff vector. This exception does not deny that; it substitutes a
+<em>mechanical</em> review (build-and-test at the advanced commit,
+revert on failure) for a <em>human</em> review, for own-org submodules
+only, and preserves refusal — not force — as the response to every
+conflict.</p>
 <h3 id="what-this-rule-does-not-forbid-1">What this rule does NOT
 forbid</h3>
 <ul>

@@ -33,11 +33,12 @@ evidence line-by-line with `grep`/`sed`/`bash` (no `yq` dependency).
 # map next to the evidence file, HEAD from git, "now" from the system clock):
 ./scripts/check-cycle-coverage.sh --strict
 
-# Explicit version + channel (the form firebase-distribute.sh Gate 7 uses):
-./scripts/check-cycle-coverage.sh --version="1.3.13-1077" --channel=debug --strict
+# Explicit version + evidence dir (the form firebase-distribute.sh Gate 7 uses):
+./scripts/check-cycle-coverage.sh --version="1.3.13-1077" \
+  --evidence-dir=".lava-ci-evidence/distribute-changelog/firebase-app-distribution" --strict
 
-# Fully pinned inputs (the form the hermetic test uses — no git, no clock, no gradle):
-./scripts/check-cycle-coverage.sh --version="9.9.9-9999" --channel=debug \
+# Fully pinned inputs (the form the hermetic tests use — no git, no clock, no gradle):
+./scripts/check-cycle-coverage.sh --version="9.9.9-9999" \
   --evidence-dir="<dir>" --map="<map.yaml>" \
   --head="<sha40>" --now-epoch="<epoch>"
 ```
@@ -47,10 +48,9 @@ evidence line-by-line with `grep`/`sed`/`bash` (no `yq` dependency).
 | Flag | Default | Meaning |
 |---|---|---|
 | `--version <name-code>` | auto-detect from `app/build.gradle.kts` (`versionName-versionCode`) | Version under test, e.g. `1.3.12-1077`. |
-| `--channel <channel>` | `debug` | `debug` or `release`. Selects the evidence dir when `--evidence-dir` is not given. |
 | `--evidence-dir <path>` | resolved from channel (see below) | Directory holding `<version>-test-evidence.{md,json}`. |
 | `--map <path>` | auto-resolve (see below) | Path to the `cycle-coverage-map` YAML. |
-| `--head <sha>` | `git rev-parse HEAD` | Expected working-tree HEAD; the evidence `commit=` must match. Overridable for hermetic tests. |
+| `--head <sha>` | `git rev-parse HEAD` | Commit under test. The evidence MUST declare a matching SHA; an absent or `unknown` SHA is a REFUSAL (exit `2`), not a free pass. Overridable for hermetic tests. |
 | `--now-epoch <epoch>` | `date +%s` | "Now" (Unix epoch) for the ≤24h freshness check. Overridable for determinism. |
 | `--strict` | on by default (`STRICT=1`) | Reject on any uncovered claim. The flag is accepted but the behavior is the default. |
 | `-h`, `--help` | — | Print usage to stderr and exit `0`. |
@@ -77,8 +77,11 @@ argument prints usage and exits `3`.
 |---|---|
 | `0` | All claims covered by executed + PASSED, same-SHA, ≤24h device rows. |
 | `1` | One or more claims lack a covering executed+PASSED Challenge (missing / `FAIL` / `SKIP` / `host-direct`), OR the evidence timestamp is older than 24h. |
-| `2` | Structural: evidence file or map file missing, evidence `version=` mismatch, or evidence `commit=` ≠ working-tree HEAD. |
-| `3` | Internal error: unknown CLI argument, version auto-detect failure, HEAD unresolved, missing/malformed evidence `cycle-coverage:` header, unparseable timestamp, or a map declaring zero claims. |
+| `2` | **REFUSAL.** Evidence file or map missing; map `version:` mismatch; the evidence declares no usable commit SHA (or only `unknown`); the declared SHA ≠ `--head`; the map declares **zero** claims; the evidence format yields **no parseable verdict record at all**; or an unknown CLI argument (including the removed `--channel`). |
+
+There is no exit `3`. Every "the gate cannot determine an answer" condition is an
+exit-`2` REFUSAL, because a gate that cannot determine a verdict has not
+established a PASS.
 
 ## Input file formats
 
@@ -100,7 +103,9 @@ claims:
 - A claim whose `covering_challenge` is empty/absent is itself an uncovered claim
   (→ exit `1`) — that is the "CHANGELOG claims a fix but no Challenge was written"
   case the 1076 incident is about.
-- A map with **zero** `covering_challenge:` entries is malformed (→ exit `3`).
+- A map with **zero** claims is a vacuous pass and REFUSES (→ exit `2`). A cycle
+  with genuinely no user-visible change must say so explicitly as a claim with
+  its re-verification Challenge, per §6.AK clause 6.
 - Surrounding single/double quotes on values are stripped before matching.
 
 (Other keys such as `covers_issues:` may appear per the spec but are NOT read by
@@ -108,30 +113,87 @@ the gate; only `covering_challenge:` values are matched.)
 
 ### 2. §6.Z evidence file (`<vname>-<code>-test-evidence.{md,json}`)
 
-The §6.Z device-gate evidence file must carry machine-readable result lines the
-gate consumes (the per-cycle requirement §6.AK adds, written by the cycle author
-alongside the prose evidence). Two line kinds:
+**The gate PARSES VERDICTS. It does not match names.** (LVA-149 — see the
+history note at the top of the script.) It scans the evidence for records that
+STATE a result, in any of six shapes, and refuses if it finds none:
+
+| # | Shape | Where it is used in practice |
+|---|---|---|
+| R1 | `challenge: fqn=<FQN> verdict=PASS runner=containers-submodule` | autonomous-QA / structured evidence |
+| R2 | `"<TestName>": "PASS"` (also `FAIL` / `SKIP` / `ERROR`, with optional trailing prose) | JSON `covering_challenges` maps |
+| R3 | `"test_class": "<FQN>"` … `"test_passed": true` | JSON per-AVD attestation rows |
+| R4 | `\| <TestName> \| … \| **PASS** \| … \|` | markdown device-gate tables (the production format) |
+| R5 | `<TestName>: PASS` | Go / colon-verdict blocks |
+| R6 | `<TestName>: tests="7" failures="0" errors="0"` | JUnit summary lines (PASS iff tests>0, failures=0, errors=0) |
+
+A `not run` / `—` cell parses as `SKIP`, which is **not** a pass.
+
+**Coverage rule.** A claim counts as covered only when a record whose name
+matches the map's covering name states `PASS` **and** the runner is not
+`host-direct` (host-direct is never gate-eligible per §6.AH/§6.AG).
+
+**Name matching is IDENTIFIER equality, not substring.** Both sides are
+normalised to the last dot-segment with a single trailing `Test` stripped, so a
+map naming `Challenge58SearchReturnsResults` matches evidence naming
+`lava.app.challenges.Challenge58SearchReturnsResultsTest`. Substring matching is
+deliberately gone: it is how the pre-LVA-149 gate let a bare NAME anywhere in
+the file stand in for a verdict.
+
+**A name mentioned in prose is not a verdict.** If the evidence names a
+Challenge but states no result for it, that claim is uncovered (exit `1`), and
+the message says so explicitly.
+
+**An unrecognised format REFUSES (exit `2`) and names the file.** If the parser
+extracts zero verdict records, it prints the offending path and lists the six
+shapes above so the operator can fix their evidence rather than guess. It never
+falls back to assuming a pass.
+
+### 3. Commit-SHA binding (F2)
+
+The evidence must declare the commit it was produced against. Accepted fields,
+in both markdown and JSON:
 
 ```
-cycle-coverage: version=1.3.12-1077 commit=<sha40> channel=debug timestamp=2026-06-26T12:00:00Z
-challenge: fqn=lava.app.challenges.Challenge58SearchReturnsResultsTest verdict=PASS runner=containers-submodule
+cycle-coverage: ... commit=<sha>
+"commit_sha": "<sha>"          "tested_code_sha": "<sha>"     "artifact_code_sha": "<sha>"
+commit_sha: <sha>              **Commit SHA:** <sha>          **Tested code SHA:** <sha>
 ```
 
-- Exactly **one** `cycle-coverage:` header line carries `version=` / `commit=` /
-  `timestamp=` (ISO-8601, e.g. `2026-06-26T12:00:00Z`). A missing header, or one
-  missing any of those three fields, is exit `3`.
-- One `challenge:` line per executed Challenge, with its `verdict=`
-  (`PASS` | `FAIL` | `SKIP`) and the device `runner=`.
-- A claim counts as **covered** only when a `challenge:` line whose `fqn=`
-  **contains** the map's `covering_challenge` name has `verdict=PASS` **and**
-  `runner != host-direct` (host-direct rows are not gate-eligible per §6.AH).
-- Matching is substring: the map carries short names (`Challenge58Search…`),
-  the evidence carries full FQNs (`lava.app.challenges.Challenge58Search…Test`).
+Values are matched against `--head` by prefix in either direction (short SHAs
+are fine). If **any** declared SHA matches, the binding holds. If SHAs are
+declared but none matches → exit `2`. If **none** is declared, or the only value
+is the literal `unknown` → exit `2`. "Unknown" is a refusal, not a free pass.
 
-Structural checks on the header: the evidence `version=` must equal the requested
-`--version` (else exit `2`); the evidence `commit=` must match the working-tree
-HEAD, tolerant of short-vs-long SHAs by prefix compare (else exit `2`); the
-`timestamp=` must be within 24h of `--now-epoch` (else exit `1`).
+### 4. Freshness
+
+A timestamp is read from `cycle-coverage: … timestamp=`, `"timestamp"`,
+`"authored_utc"`, or markdown `**Evidence authored:** <date>`. If one is found
+and it is older than 24h relative to `--now-epoch`, the gate exits `1`.
+
+### 5. KNOWN CONSEQUENCE — pre-push Check 10 and the self-reference problem
+
+Read this before the next distribute cycle. It is an open design question, not
+a defect in the parser.
+
+`scripts/firebase-distribute.sh` Gate 7 runs with `--head` = the commit that
+carries the code and the evidence, so a correctly-authored evidence file binds
+cleanly. `.githooks/pre-push` Check 10 re-runs the same gate with `--head` set
+to the **pointer-advancing commit**, which by construction cannot contain its
+own SHA — so the evidence (committed earlier, naming the code commit) will not
+match, and the strict binding now REFUSES there.
+
+Before LVA-149 this went unnoticed only because the binding was inert. Three
+resolutions exist, and the choice belongs to the operator:
+
+1. Have Check 10 gate the code commit rather than the pointer-advance commit.
+2. Accept a declared SHA that is an **ancestor** of `--head` when no production
+   file differs between them (only `.lava-ci-evidence/`, `docs/`, `CHANGELOG.md`).
+   This is code-identity, not leniency — any source change still refuses.
+3. Leave it strict and author evidence at distribute time only.
+
+Option 2 is NOT implemented here: it could not be proven with a hermetic
+positive case in this change, and shipping an untested acceptance path into a
+safety gate is the class of thing this gate exists to prevent.
 
 ## How it is wired
 

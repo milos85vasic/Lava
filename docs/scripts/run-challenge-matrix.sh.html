@@ -244,11 +244,12 @@
 <h1
 id="scriptsrun-challenge-matrixsh--user-guide"><code>scripts/run-challenge-matrix.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-07-26 (LVA-014 durable
-device-gate fixes — AVD-name resolution, WaitForBoot container-liveness,
-emulator-image preflight) <strong>Inheritance:</strong>
-HelixConstitution §11.4.18 + Lava §6.AE.6 + §6.X (Container-Submodule
-Emulator Wiring) + §6.I (Multi-Emulator Container Matrix)</p>
+<p><strong>Last verified:</strong> 2026-08-26 (LVA-161 —
+<code>--test-timeout</code> pass-through; the CLI's 10m default was
+killing whole-module sweeps and destroying every class's results)
+<strong>Inheritance:</strong> HelixConstitution §11.4.18 + Lava §6.AE.6
++ §6.X (Container-Submodule Emulator Wiring) + §6.I (Multi-Emulator
+Container Matrix)</p>
 <h2 id="overview">Overview</h2>
 <p>Operator entry point for §6.AE gate-mode Challenge Test runs.
 Pre-bakes the §6.AE.2 minimum AVD matrix (API 28 / 30 / 34 / latest
@@ -440,6 +441,74 @@ HelixQA wrapper evidence lands at
 promotes the final aggregate exit code (matrix exit dominates if both
 fail). See <code>docs/scripts/run-helixqa-challenges.sh.md</code> for
 full details.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="lva-161----test-timeout-pass-through-2026-08-26">LVA-161 —
+<code>--test-timeout</code> pass-through (2026-08-26)</h2>
+<h3 id="the-defect">The defect</h3>
+<p><code>submodules/containers/cmd/emulator-matrix</code> defaults
+<code>--test-timeout</code> to <strong>10 minutes</strong>
+(<code>cmd/emulator-matrix/main.go:123</code>). That budget covers the
+<strong>TEST step only</strong> — cold boot is timed separately and
+reported as <code>boot_seconds</code> — and this script never set it, so
+every run inherited the default.</p>
+<p>A whole-module Challenge sweep is a <strong>single gradle
+invocation</strong> covering every selected class, so 10 minutes is far
+below the real workload. Measured: the <code>2026-08-26T14-09-17Z</code>
+run was killed at <code>test_seconds=600.02</code> with
+<code>signal: killed</code>, having completed <strong>81 of 104
+tests</strong>.</p>
+<p>What makes this worse than a truncated run: gradle writes its JUnit
+XML at the <strong>end</strong> of the invocation. A kill therefore
+destroys the results of <strong>every</strong> class in the sweep,
+including the ones that had already passed — so the matrix reports the
+whole selection as failed when nothing about the product was wrong. That
+is a verdict determined by a clock, not by the code under test.</p>
+<h3 id="what-changed-here">What changed here</h3>
+<p>This script gained a <code>--test-timeout &lt;duration&gt;</code>
+argument that is forwarded verbatim to
+<code>emulator-matrix --test-timeout</code> when set, and omitted
+entirely when empty (preserving the CLI default). That is the whole
+change: this script does <strong>not</strong> compute a value.</p>
+<p><strong>Callers MUST size it to the selected workload.</strong> The
+pipeline's Challenge phase
+(<code>scripts/pipeline/phase-02-test-challenge.sh</code>) derives it as
+<code>300s + 45s × &lt;selected class count&gt;</code> — a fixed
+overhead plus a per-class budget — and prints the derivation with the
+class count before invoking. Both terms are overridable
+(<code>LAVA_PIPELINE_CHALLENGE_TEST_TIMEOUT_OVERHEAD_S</code>,
+<code>LAVA_PIPELINE_CHALLENGE_TEST_TIMEOUT_PER_CLASS_S</code>), and an
+explicit <code>LAVA_PIPELINE_CHALLENGE_TEST_TIMEOUT</code> wins
+verbatim. Operators invoking this script directly for a large selection
+should pass <code>--test-timeout</code> themselves rather than accept
+10m.</p>
+<h3 id="reading-a-timeout-kill-honestly">Reading a timeout kill
+honestly</h3>
+<p>A run killed at the timeout is <strong>not</strong> a test failure
+and must not be recorded as one. The distinguishing evidence is
+<code>test_seconds</code> sitting within a rounding error of the
+configured budget together with <code>signal: killed</code>, and a JUnit
+XML that is absent rather than reporting failures. The remedy is to
+raise <code>--test-timeout</code> (or reduce the class selection) and
+re-run to obtain a real verdict — never to re-interpret the kill as a
+product defect.</p>
+<h3 id="inputs-addition">Inputs (addition)</h3>
+<table>
+<thead>
+<tr>
+<th>Arg</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--test-timeout &lt;duration&gt;</code></td>
+<td>Forwarded to <code>emulator-matrix --test-timeout</code> (Go
+duration syntax, e.g. <code>2400s</code>, <code>40m</code>). Empty = the
+CLI default of 10m, which is <strong>too small for a whole-module
+sweep</strong>. Applies to the TEST step only; cold boot is budgeted
+separately by <code>--boot-timeout</code>.</td>
 </tr>
 </tbody>
 </table>

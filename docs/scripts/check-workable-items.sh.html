@@ -247,10 +247,9 @@ single-source-of-truth) + §11.4.95 (DB tracked-in-git, never
 gitignored). Gate ID: <code>CM-WORKABLE-ITEMS-SYNC</code>.</p>
 <p><strong>Type:</strong> Local CI gate (invoked by
 <code>scripts/verify-all-constitution-rules.sh</code>).</p>
-<p><strong>Last verified:</strong> 2026-08-20 (re-verified against
-<code>scripts/check-workable-items.sh</code> at HEAD — ledger-filtered
-<code>validate</code> step added;
-<code>diff</code>/<code>git-tracked</code> steps unchanged).</p>
+<p><strong>Last verified:</strong> 2026-08-26 (corpus-scope floor — both
+<code>_Summary</code> trackers are now regenerated from the DB and
+byte-compared; LVA vacuous-pass sweep F17)</p>
 <h2 id="what-it-does">What it does</h2>
 <p>Verifies Lava's workable-items tracker is internally consistent,
 using the <strong>canonical</strong> <code>workable-items</code> Go
@@ -270,6 +269,11 @@ machine-readable block still fails the gate.</li>
 <li><code>workable-items diff --db docs/workable_items.db --issues docs/Issues.md --fixed docs/Fixed.md</code>
 — exits 1 on DB↔︎Markdown divergence
 (CM-WORKABLE-ITEMS-MD-DB-IN-SYNC).</li>
+<li><strong>Summary-tracker byte comparison (added 2026-08-26).</strong>
+Regenerates <code>Issues_Summary.md</code> +
+<code>Fixed_Summary.md</code> from the <em>same</em> DB into a temp dir
+and compares them byte-for-byte against the committed files. See
+"Corpus-scope floor" below.</li>
 <li><code>git ls-files --error-unmatch docs/workable_items.db</code> —
 asserts the DB is git-tracked (§11.4.95
 CM-WORKABLE-ITEMS-DB-TRACKED).</li>
@@ -307,6 +311,101 @@ restored the line → gate correctly PASSED again.
 <code>docs/workable_items.db</code> was independently confirmed
 unaffected by the rehearsal (<code>git diff</code> showed zero bytes
 changed on the DB across the mutate/restore cycle).</p>
+<h2 id="corpus-scope-floor--added-2026-08-26">Corpus-scope floor — added
+2026-08-26</h2>
+<h3 id="the-defect">The defect</h3>
+<p>Step 3 passes <code>--issues</code> and <code>--fixed</code> to
+<code>workable-items diff</code>, and those are the <strong>only
+two</strong> markdown renderings it inspects. The tracker artifact is
+<strong>four</strong> files, not two: the binary's <code>export</code>
+subcommand also writes <code>Issues_Summary.md</code> and
+<code>Fixed_Summary.md</code> beside them. Those two were outside the
+gate's corpus entirely, so they could carry arbitrary text while the
+gate still reported "DB ↔︎ Markdown in sync".</p>
+<p>Measured, with a decisive control:</p>
+<table>
+<thead>
+<tr>
+<th>Tree</th>
+<th>Gate output</th>
+<th>Exit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Real DB, real <code>Issues.md</code>/<code>Fixed.md</code>,
+<strong>both <code>_Summary</code> files replaced</strong> with
+<code>"TOTALS ARE FABRICATED: 9999 open items, none of which exist."</code></td>
+<td><code>diff: DB and Markdown are in sync</code></td>
+<td><strong>0</strong></td>
+</tr>
+<tr>
+<td>Same tree, one byte appended to <code>Issues.md</code> instead</td>
+<td><code>~ LVA-152 body differs ... diff: 1 difference(s)</code></td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>Fabricating half the artifact passed; touching the other half failed.
+A gate that certifies "in sync" having read half the artifact asserts
+nothing about the other half — and the <code>_Summary</code> files are
+precisely the ones a reader skims for totals.</p>
+<h3 id="why-the-check-is-done-here-rather-than-in-the-binary">Why the
+check is done here rather than in the binary</h3>
+<p>The canonical binary's <code>diff</code> subcommand takes no
+<code>_Summary</code> flags — <code>workable-items diff --help</code>
+offers only <code>-db</code> / <code>-issues</code> /
+<code>-fixed</code>. Rather than reimplement the summary format on the
+Lava side (which would drift from the renderer the moment either
+changes), the gate <strong>regenerates</strong> the summaries from the
+same DB with <code>export --no-formats</code> into a temp dir and
+compares bytes. Same source of truth, same renderer, no second
+implementation to keep in lockstep.</p>
+<h3 id="what-the-gate-now-refuses">What the gate now refuses</h3>
+<p>Three refusals, all <strong>exit 1</strong>:</p>
+<ol type="1">
+<li><strong>A <code>_Summary</code> file is absent</strong> —
+<code>summary tracker(s) ABSENT — the gate would certify a partial artifact.</code>
+The message states what was examined
+(<code>2 of the 4 files 'export' produces</code>) and distinguishes the
+cause: these are <em>output</em> files of the same renderer, so an
+absent one is a regeneration that never ran or was reverted, not an
+optional artifact. The remedy printed is the exact
+<code>export --no-formats</code> command.</li>
+<li><strong>Regeneration failed</strong> —
+<code>could not regenerate the summary trackers for comparison.</code>
+Explicitly labelled a <strong>tooling failure, not a sync
+verdict</strong>: skipping it would let the summary half go unchecked in
+silence. The binary's stderr is reproduced, indented.</li>
+<li><strong>A <code>_Summary</code> file is stale</strong> —
+<code>summary tracker(s) are STALE against the DB</code>, with the
+drifting paths named and the first differing lines of a unified diff
+shown so the drift is visible without a second command.</li>
+</ol>
+<h3 id="paths-and-overrides">Paths and overrides</h3>
+<p><code>Issues_Summary.md</code> is resolved beside
+<code>--issues</code>, <code>Fixed_Summary.md</code> beside
+<code>--fixed</code>. Both can be overridden for hermetic testing via
+<code>LAVA_WORKABLE_ITEMS_ISSUES_SUMMARY</code> and
+<code>LAVA_WORKABLE_ITEMS_FIXED_SUMMARY</code>. The temp dir used for
+regeneration is removed on exit via <code>trap</code>; the committed
+files are only ever <strong>read</strong>, never rewritten by the gate —
+it reports drift, it does not silently repair it.</p>
+<h3 id="6j-falsifiability-rehearsal-of-the-floor-itself">§6.J
+falsifiability rehearsal of the floor itself</h3>
+<ol type="1">
+<li>Overwrite <code>docs/Issues_Summary.md</code> with arbitrary text →
+run <code>bash scripts/check-workable-items.sh</code> → expect
+<strong>exit 1</strong>,
+<code>summary tracker(s) are STALE against the DB</code>,
+<code>docs/Issues_Summary.md</code> named, and the differing lines
+shown. Before this change: exit 0,
+<code>DB ↔︎ Markdown in sync</code>.</li>
+<li><code>rm docs/Fixed_Summary.md</code> → expect <strong>exit
+1</strong>, <code>summary tracker(s) ABSENT</code>.</li>
+<li>Regenerate with the printed <code>export --no-formats</code> command
+→ expect exit 0 and the four-tracker success line.</li>
+</ol>
 <h2 id="usage">Usage</h2>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/check-workable-items.sh</span></code></pre></div>
@@ -316,9 +415,13 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--db</span> docs/workable_items.db <span class="at">--out-issues</span> docs/Issues.md <span class="at">--out-fixed</span> docs/Fixed.md</span></code></pre></div>
 <h2 id="exit-codes">Exit codes</h2>
 <ul>
-<li><code>0</code> — DB validated, DB↔︎Markdown in sync, DB tracked.</li>
-<li><code>1</code> — validation failure, divergence, build failure, or
-DB untracked.</li>
+<li><code>0</code> — DB validated, <strong>all four</strong> rendered
+trackers (<code>Issues.md</code>, <code>Fixed.md</code>,
+<code>Issues_Summary.md</code>, <code>Fixed_Summary.md</code>) in sync
+with the DB, DB tracked. The success line names all four.</li>
+<li><code>1</code> — validation failure, divergence in any of the four
+trackers, a missing <code>_Summary</code> file, a failed regeneration,
+build failure, or DB untracked.</li>
 </ul>
 <h2 id="hermetic-test">Hermetic test</h2>
 <p><code>tests/check-workable-items/test_workable_items_sync.sh</code> —

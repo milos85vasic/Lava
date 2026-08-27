@@ -332,5 +332,32 @@ itself the kind of side effect the Anti-Bluff Pact exists to catch)</li>
 wiring is project-specific; the §11.4.25 per-release snapshot discipline
 is universal per HelixConstitution)</li>
 </ul>
+<h2 id="snapshot-name-format-guard-added-2026-08-27">Snapshot name
+format guard (added 2026-08-27)</h2>
+<p>The first positional argument is now validated against a
+<code>&lt;version&gt;-&lt;code&gt;</code> shape before it is used as a
+filename.</p>
+<h3 id="why">Why</h3>
+<p>The script previously used only <code>${1:?...}</code>, which checks
+that the argument is non-empty and nothing more — so
+<strong>any</strong> string became a filename. A stray invocation
+carrying a flag produced a tracked file literally named
+<code>.lava-ci-evidence/coverage-ledger-snapshots/--check.yaml</code>,
+which was then committed. It was a verbatim copy of the ledger whose
+only difference was the inflated submodule count described in the
+generator's companion doc, it was referenced by no tracked file, and it
+was the <em>only</em> file in that directory — no legitimate snapshot
+had ever been taken there.</p>
+<p>The guard rejects <code>--check</code> (exit 2), an empty argument
+(exit 1) and traversal forms such as <code>../evil</code>; it accepts
+real identities like <code>1.3.17-1085</code>, <code>0.2.11-22</code>
+and <code>1.2.3-1023</code>. A rejected invocation writes no file at
+all.</p>
+<p><strong>Known residual, deliberately not changed here:</strong> this
+script regenerates the tracked <code>docs/coverage-ledger.yaml</code> as
+a side effect and restores it only when it was clean beforehand. If the
+ledger is dirty mid-edit, in-progress work is silently overwritten.
+Changing that is a design decision, not a bug fix, so it is recorded
+rather than acted on.</p>
 </body>
 </html>

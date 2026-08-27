@@ -244,10 +244,11 @@
 <h1
 id="scriptscheck-script-docs-syncsh--user-guide"><code>scripts/check-script-docs-sync.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-05-17 (1.2.30-1050 tooling
-cycle) <strong>Inheritance:</strong> HelixConstitution §11.4.18 (script
-documentation mandate) + Lava §6.AD-debt closure
-(CM-SCRIPT-DOCS-SYNC)</p>
+<p><strong>Last verified:</strong> 2026-08-26 (§6.J corpus floor —
+<code>0 scripts ↔︎ 0 docs (1:1)</code> and a partial corpus now refuse;
+LVA vacuous-pass sweep F12) <strong>Inheritance:</strong>
+HelixConstitution §11.4.18 (script documentation mandate) + Lava
+§6.AD-debt closure (CM-SCRIPT-DOCS-SYNC)</p>
 <h2 id="overview">Overview</h2>
 <p>Bidirectional drift detector between <code>scripts/*.sh</code> and
 <code>docs/scripts/*.sh.md</code>. Each script MUST have a matching doc
@@ -279,12 +280,16 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="
 <tbody>
 <tr>
 <td>0</td>
-<td>Gate clean — 1:1 mapping between scripts and docs</td>
+<td>Gate clean — 1:1 mapping, <strong>and</strong> the corpus actually
+examined matches what the git index declares. The verdict names both:
+<code>gate clean: &lt;N&gt; scripts ↔︎ &lt;M&gt; docs (1:1) — corpus floor &lt;N&gt;/&lt;M&gt; (git-index-derived) satisfied.</code></td>
 </tr>
 <tr>
 <td>1</td>
 <td>At least one orphan (paths printed to stderr with remediation
-directive)</td>
+directive), <strong>or</strong> a corpus directory was absent,
+<strong>or</strong> the gate examined an empty or partial corpus (added
+2026-08-26 — see below)</td>
 </tr>
 </tbody>
 </table>
@@ -305,6 +310,114 @@ it.</p>
 instead of GNU <code>find -printf '%f\n'</code> so it works on both
 Linux (GNU find) gate-hosts AND macOS (BSD find) developer
 workstations.</p>
+<h2
+id="2026-08-26-update--6j-corpus-floor-0--0-is-no-longer-a-11-pass">2026-08-26
+update — §6.J corpus floor: <code>0 ↔︎ 0</code> is no longer a 1:1
+pass</h2>
+<h3 id="the-defect">The defect</h3>
+<p>Two empty-corpus routes reported success:</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Old output</th>
+<th>Old exit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scripts/</code> or <code>docs/scripts/</code> absent</td>
+<td><code>skipping — scripts/ or docs/scripts/ missing</code></td>
+<td>0</td>
+</tr>
+<tr>
+<td>Both present, both empty</td>
+<td><code>gate clean: 0 scripts ↔︎ 0 docs (1:1).</code></td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>The second is the sharper bluff: <strong>0 == 0 satisfies the 1:1
+invariant perfectly</strong>, so the gate printed a positive verdict
+having compared nothing. "Nothing was learned" reported as "nothing
+failed" is the shape §6.J forbids — the same shape the clause-6.H
+credential floor in <code>scripts/check-constitution.sh</code> already
+guards against.</p>
+<p>Because this gate is what makes <code>CM-SCRIPT-DOCS-SYNC</code> mean
+anything, an empty-corpus pass silently retired §11.4.18 enforcement for
+the whole run.</p>
+<h3 id="what-the-gate-now-refuses">What the gate now refuses</h3>
+<p>Three refusals, all <strong>exit 1</strong>:</p>
+<ol type="1">
+<li><strong>A corpus directory is absent</strong> — replaces the old
+exit-0 skip. States <code>Examined: 0 scripts, 0 docs</code>, and prints
+<code>present</code> / <code>MISSING</code> for each of the two
+directories so the reader can see which one is gone.</li>
+<li><strong>Zero scripts compared against zero docs</strong> — runs
+<em>before</em> the clean verdict, because that verdict is the thing
+that must not be reachable over an empty corpus. The message says so
+explicitly:
+<code>'0 scripts ↔︎ 0 docs (1:1)' is vacuously true and asserts nothing (§6.J)</code>.</li>
+<li><strong>A partial corpus</strong> —
+<code>the gate examined a PARTIAL corpus</code>, with every declared-
+but-absent path named individually. As the in-source comment puts it: a
+floor that only fires at exactly zero is a floor with one stair; 2 of 60
+scripts present would otherwise pass as cleanly as 60 of 60.</li>
+</ol>
+<h3 id="why-the-expectation-is-derived-from-the-git-index">Why the
+expectation is derived from the git index</h3>
+<p><code>Expected</code> comes from <code>git ls-files -- scripts</code>
+and <code>git ls-files -- docs/scripts</code>, filtered to depth-correct
+<code>*.sh</code> and <code>*.sh.md</code> entries — never a literal
+count. A hardcoded number goes stale the moment a script is added or
+removed, and a stale floor is this same defect wearing a different
+mask.</p>
+<p>That derived count is also what lets each refusal <strong>distinguish
+its cause</strong>: if the index declares these paths and the working
+tree lacks them, this is working-tree drift (a deletion, a partial
+checkout) and the remedy is
+<code>git checkout -- scripts docs/scripts</code>; if the index declares
+neither, this is not a Lava checkout or <code>LAVA_REPO_ROOT</code>
+points elsewhere, and the remedy is to set the root correctly. Two
+situations, two remedies, never one generic failure.</p>
+<p>Two implementation notes for anyone editing this block:</p>
+<ul>
+<li>The counts use <code>awk</code>, not <code>grep -c</code>.
+<code>grep -c</code> exits 1 on a zero count, which under
+<code>set -e</code> inside a pipeline is its own hazard.</li>
+<li><code>git ls-files</code> is wrapped in
+<code>{ ...; } || true</code>. Outside a repository it exits 128, and
+under <code>set -euo pipefail</code> that would abort the script with
+<strong>no message at all</strong> — fail-closed, but with a diagnosis
+so empty it sends the reader nowhere. Degrading to a declared count of 0
+lets the not-a-checkout branch say what actually happened.</li>
+</ul>
+<h3 id="note-for-hermetic-test-authors">Note for hermetic-test
+authors</h3>
+<p><code>LAVA_REPO_ROOT=/path/to/synthetic</code> still works, but a
+synthetic tree must now contain at least one <code>scripts/*.sh</code>
+and one matching <code>docs/scripts/*.sh.md</code>. A fixture with two
+empty directories used to pass; it now fails on floor 2, correctly,
+because it asserts nothing.</p>
+<h3 id="6j-falsifiability-rehearsal-of-the-floor-itself">§6.J
+falsifiability rehearsal of the floor itself</h3>
+<ol type="1">
+<li><code>LAVA_REPO_ROOT=$(mktemp -d) bash scripts/check-script-docs-sync.sh</code>
+(an empty directory) → expect <strong>exit 1</strong>,
+<code>a corpus directory is ABSENT</code>, and the not-a-checkout branch
+of the diagnosis. Before this change: exit 0.</li>
+<li><code>mkdir -p $T/scripts $T/docs/scripts</code> in that same tree,
+re-run → expect <strong>exit 1</strong>,
+<code>the gate compared ZERO scripts against ZERO docs</code>. Before
+this change: exit 0 with
+<code>gate clean: 0 scripts ↔︎ 0 docs (1:1)</code>.</li>
+<li>In the real tree, <code>mv scripts/ci.sh /tmp/hold</code> → expect
+<strong>exit 1</strong>, <code>examined a PARTIAL corpus</code>, with
+<code>scripts/ci.sh</code> named as missing. Restore → exit 0.</li>
+</ol>
+<p>The original orphan-detection rehearsal below still applies
+unchanged, and exercises the other direction (real 1:1 drift over a full
+corpus).</p>
 <h2 id="6j-anti-bluff-falsifiability-rehearsal">§6.J anti-bluff
 falsifiability rehearsal</h2>
 <ol type="1">

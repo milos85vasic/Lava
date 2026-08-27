@@ -33,9 +33,59 @@ cd "$REPO_ROOT"
 STRICT="${LAVA_CHALLENGE_DISCRIMINATION_STRICT:-1}"
 
 challenge_dir="app/src/androidTest/kotlin/lava/app/challenges"
+
+# ---------------------------------------------------------------------------
+# §6.J anti-bluff corpus floor (added 2026-08-26, LVA vacuous-pass sweep F7).
+#
+# Before this floor, BOTH of the empty-corpus routes below reported success:
+#
+#   challenge_dir absent            -> "no Challenge tests found"          exit 0
+#   challenge_dir present, 0 files  -> "Challenge tests: 0"                exit 0
+#                                      "✓ all Challenge tests carry ...    "
+#                                      "✓ all Challenge test bodies ...    "
+#
+# The second is the worse of the two: it prints two explicit ✓ claims ABOUT
+# ALL CHALLENGE TESTS having examined none of them. "Nothing was learned"
+# reported as "nothing failed" is the shape §6.J forbids, and the same shape
+# the clause-6.H credential floor (check-constitution.sh:188) and the
+# verify-all registry floor (verify-all-constitution-rules.sh:290) already
+# guard against elsewhere in this tree.
+#
+# The expectation is DERIVED from the git index rather than hardcoded, for the
+# same reason .gitmodules is the source of truth for the propagation floor: a
+# hardcoded number goes stale the moment a Challenge is added or removed, and a
+# stale floor is this same defect wearing a different mask. The git index is
+# the repository's own declaration of which Challenge files are supposed to
+# exist, so it moves in lockstep with the corpus.
+#
+# awk, not `grep -c`: `grep -c` exits 1 on a zero count, which under `set -e`
+# in a pipeline is its own hazard (the very failure mode this sweep records).
+# The `|| true` inside the braces is deliberate: `git ls-files` exits 128
+# outside a repository, and under `set -euo pipefail` that would abort this
+# script with NO message at all — fail-closed, but with a diagnosis so empty it
+# sends the reader nowhere. Degrading to a declared count of 0 lets the
+# not-a-checkout branch below say what actually happened.
+declared_challenges="$(
+  { git ls-files -- "$challenge_dir" 2>/dev/null || true; } |
+  awk '/\/Challenge[^\/]*Test\.kt$/{n++} END{print n+0}'
+)"
+
 if [[ ! -d "$challenge_dir" ]]; then
-    echo "==> §6.AB scan: no Challenge tests found (looked in $challenge_dir)"
-    exit 0
+    echo "§6.AB VIOLATION: the Challenge-discrimination scan corpus directory is ABSENT." >&2
+    echo "  → Examined: 0 Challenge*Test.kt files (looked in $challenge_dir)" >&2
+    echo "  → Expected: ${declared_challenges} (derived from 'git ls-files -- $challenge_dir')" >&2
+    if [[ "$declared_challenges" -gt 0 ]]; then
+        echo "  → Cause distinguished: the git index DECLARES ${declared_challenges} Challenge file(s)," >&2
+        echo "    but the directory is missing from the working tree. This is working-tree" >&2
+        echo "    drift (a deletion, a bad checkout, or a partial clone), not an absent feature." >&2
+        echo "  → Do: restore the tree — 'git checkout -- $challenge_dir' — and re-run." >&2
+    else
+        echo "  → Cause distinguished: the git index declares ZERO Challenge files either, so" >&2
+        echo "    this is not a Lava checkout, or the scan is running from the wrong root." >&2
+        echo "  → Do: run this script from the Lava repository root and re-run." >&2
+    fi
+    echo "  → A PASS here would assert §6.AB.3 compliance for a corpus that was never read." >&2
+    exit 1
 fi
 
 violations=()
@@ -93,6 +143,50 @@ echo "==> §6.AB Challenge-Test discrimination scan"
 echo "    Challenge tests: $total"
 echo "    Lacking discrimination marker / companion evidence: ${#violations[@]}"
 echo "    Marker present but body has NO real assertion: ${#body_violations[@]}"
+
+# §6.J anti-bluff corpus floor, part 2 (LVA vacuous-pass sweep F7). Runs BEFORE
+# the ✓ claims below, because those claims are universally quantified over the
+# corpus and a universally quantified claim over an empty set is vacuously true
+# — which is precisely what makes it a bluff.
+if [[ "$total" -eq 0 ]]; then
+    echo "" >&2
+    echo "§6.AB VIOLATION: the Challenge-discrimination scan examined ZERO Challenge tests." >&2
+    echo "  → Examined: 0 file(s) under $challenge_dir" >&2
+    echo "  → Expected: ${declared_challenges} (derived from 'git ls-files -- $challenge_dir')" >&2
+    if [[ "$declared_challenges" -gt 0 ]]; then
+        echo "  → Cause distinguished: the git index DECLARES ${declared_challenges} Challenge file(s)" >&2
+        echo "    but the directory holds none. This is working-tree drift, not an empty feature set." >&2
+        echo "  → Do: 'git checkout -- $challenge_dir' and re-run." >&2
+    else
+        echo "  → Cause distinguished: the git index declares ZERO Challenge files, so the corpus" >&2
+        echo "    is genuinely absent from this checkout rather than merely unpopulated." >&2
+        echo "  → Do: verify you are at the Lava repository root with the app/ module present." >&2
+    fi
+    echo "  → The two ✓ lines this gate prints are claims about ALL Challenge tests; over an" >&2
+    echo "    empty corpus they are vacuously true and therefore assert nothing (§6.J)." >&2
+    exit 1
+fi
+
+# Partial-corpus floor. A floor that only fires at exactly zero is a floor with
+# one stair: 73 declared and 2 present passes just as cleanly as 73 and 73.
+if [[ "$declared_challenges" -gt 0 && "$total" -lt "$declared_challenges" ]]; then
+    echo "" >&2
+    echo "§6.AB VIOLATION: the Challenge-discrimination scan examined a PARTIAL corpus." >&2
+    echo "  → Examined: ${total} Challenge*Test.kt file(s) under $challenge_dir" >&2
+    echo "  → Expected: ${declared_challenges} (derived from 'git ls-files -- $challenge_dir')" >&2
+    echo "  → Missing from the working tree:" >&2
+    { git ls-files -- "$challenge_dir" 2>/dev/null || true; } |
+      awk '/\/Challenge[^\/]*Test\.kt$/{print}' |
+      while read -r _decl; do
+        [[ -f "$_decl" ]] && continue
+        echo "      ${_decl}" >&2
+      done
+    echo "  → A PASS over ${total} of ${declared_challenges} files asserts nothing about the other" >&2
+    echo "    $((declared_challenges - total)); the verdict would be a function of checkout state" >&2
+    echo "    rather than of §6.AB.3 compliance." >&2
+    echo "  → Do: 'git checkout -- $challenge_dir' and re-run." >&2
+    exit 1
+fi
 
 if [[ ${#violations[@]} -eq 0 && ${#body_violations[@]} -eq 0 ]]; then
     echo "    ✓ all Challenge tests carry §6.AB.3 falsifiability rehearsal documentation"

@@ -41,10 +41,41 @@ if [[ "$current_branch" != "master" ]]; then
   exit 2
 fi
 
-dirty_status="$(git -C "$REPO_PATH" status --porcelain)"
+# §6.J corpus floor (added 2026-08-26, LVA vacuous-pass sweep P11 — recorded
+# there as UNCONFIRMED, CONFIRMED by fixture on 2026-08-26).
+#
+# `--ignore-submodules=none` is REQUIRED here. .gitmodules sets
+# `ignore = untracked` for submodules/containers (:4) and submodules/challenges
+# (:32), and a bare `git status --porcelain` honours that setting — so untracked
+# files inside either submodule are invisible to this guard and the tree reads
+# clean when it is not:
+#
+#   REPRO (parent with submodule.<name>.ignore=untracked, one untracked file
+#          planted inside that submodule):
+#     git status --porcelain                     -> (empty)
+#     FR-000: precondition satisfied — ... clean   EXIT=0
+#   CONTROL (same tree, same moment):
+#     git status --porcelain --ignore-submodules=none ->  M submodules/containers
+#
+# FR-018/SC-007 require that a run neither starts from nor leaves a dirty tree;
+# a guard that cannot see two of the submodules cannot make that claim. The
+# corpus here is the working tree itself, and `ignore = untracked` silently
+# removes part of it.
+dirty_status="$(git -C "$REPO_PATH" status --porcelain --ignore-submodules=none)"
 
 if [[ -n "$dirty_status" ]]; then
   echo "FR-000: precondition failed — working tree is not clean" >&2
+  echo "  → Examined: the full working tree, including submodules whose .gitmodules" >&2
+  echo "    entry sets 'ignore = untracked' (this guard passes --ignore-submodules=none" >&2
+  echo "    precisely so those are not excluded from the corpus)." >&2
+  echo "  → Not clean:" >&2
+  printf '%s\n' "$dirty_status" | sed 's/^/      /' >&2
+  echo "  → Do: commit, stash, or remove the entries above. If an entry is a submodule" >&2
+  echo "    shown as ' M submodules/<name>', inspect it with:" >&2
+  echo "      git -C \"$REPO_PATH\" status --porcelain --ignore-submodules=none" >&2
+  echo "      git -C \"$REPO_PATH/submodules/<name>\" status --porcelain" >&2
+  echo "    An untracked leftover inside such a submodule does NOT show in a plain" >&2
+  echo "    'git status' — that asymmetry is the defect this guard now closes." >&2
   exit 2
 fi
 

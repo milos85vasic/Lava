@@ -43,7 +43,7 @@ run_case() {
   local label="$1" want="$2" edir="$3" map="$4" head="${5:-$HEAD}"
   local out got
   set +e
-  out="$(bash "$GATE" --version="$VERSION" --channel=debug \
+  out="$(bash "$GATE" --version="$VERSION" \
         --evidence-dir="$edir" --map="$map" \
         --head="$head" --now-epoch="$NOW_EPOCH" 2>&1)"
   got=$?

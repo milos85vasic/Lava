@@ -27,11 +27,13 @@
       "pattern": "^[0-9a-f]{7,40}$"
     },
     "local_modifications_pushed": {
-      "type": "boolean"
+      "type": "boolean",
+      "const": false,
+      "description": "ALWAYS false. R-005 step 6 -- committing a submodule's own pre-existing uncommitted work and pushing it to that submodule's upstream default branch -- was REMOVED from scripts/advance-all-submodules.sh on 2026-08-26, together with the --publish-local-modifications flag that was its only entry, after five T054 review rounds found TWELVE distinct, fixture-proven ways for content no guard had read to reach another repository's default branch through it (the count rose at every round: 3 -> 5 -> 7 -> 9 -> 10 -> 11 -> 12), and after the convergent byte-equality instrument was itself defeated because 'git commit-tree' inherits i18n.commitEncoding. The writer no longer accepts this value as a parameter and emits the literal false; the const here pins the same fact from the contract side. The field is RETAINED rather than dropped because data-model.md and root CLAUDE.md's Automated Pipeline Pin-Advance Path condition (E) both name it, and a consumer must not have to branch on its presence. An unclean submodule working tree is now a plain FAILED_PRECONDITION refusal with no opt-in."
     },
     "parent_pin_updated": {
       "type": "boolean",
-      "description": "MUST be false when outcome is REJECTED_BREAKING_CHANGE or REJECTED_PUSH_CONFLICT (research.md R-005 step 5)."
+      "description": "ADVANCED is the ONLY outcome that may be true: every other outcome MUST be false, because nothing but a completed advance moves the parent pin (research.md R-005 step 5)."
     },
     "outcome": {
       "type": "string",
@@ -40,9 +42,13 @@
         "NO_NEWER_COMMIT",
         "REJECTED_BREAKING_CHANGE",
         "REJECTED_PUSH_CONFLICT",
-        "REFUSED_GOVERNANCE_DENY"
+        "REFUSED_GOVERNANCE_DENY",
+        "FAILED_PRECONDITION",
+        "REFUSED_NOT_FAST_FORWARD",
+        "REFUSED_FOREIGN_UPSTREAM",
+        "REJECTED_PARENT_STAGING_FAILED"
       ],
-      "description": "REFUSED_GOVERNANCE_DENY (added 2026-08-21) means the submodule is on the governance deny-list and was never even examined for a newer commit: its pin is governed by a separate, human-driven process, not by this pipeline. It is recorded rather than skipped, because a governance refusal that leaves no evidence is invisible at rest."
+      "description": "REFUSED_GOVERNANCE_DENY (added 2026-08-21) means the submodule is on the governance deny-list and was never even examined for a newer commit: its pin is governed by a separate, human-driven process, not by this pipeline. It is recorded rather than skipped, because a governance refusal that leaves no evidence is invisible at rest. FAILED_PRECONDITION: a precondition for examining or advancing this submodule could not be established (uninitialised submodule, working tree not on the pinned commit, unreadable status, an UNCLEAN working tree -- see local_modifications_pushed -- no remote, failed fetch, unresolvable remote default branch, fetched object absent). REFUSED_NOT_FAST_FORWARD: the remote default branch HEAD does not contain the pinned commit, so moving the pin would DROP pinned work. REFUSED_FOREIGN_UPSTREAM: a configured remote falls outside the own-org GitHub/GitLab scope condition (C) permits; the writer FETCHES from every configured remote, so an out-of-scope one is an object-injection surface whose objects would end up under the pin staged for every clone. REJECTED_BREAKING_CHANGE: the rebuild-and-test step failed against the advanced state, so the advance was discarded and the prior pin restored. REJECTED_PARENT_STAGING_FAILED: the parent index could not be staged, or staged something other than the commit this run measured, after an otherwise successful advance. REJECTED_PUSH_CONFLICT: RETAINED but currently UNEMITTABLE. The writer issues no git push on any path -- the only pushing code it ever had was R-005 step 6, removed 2026-08-26. This value stays in the enum because root CLAUDE.md's Automated Pipeline Pin-Advance Path condition (E) names it explicitly as one of four outcomes, and a schema that cannot express a value the governing document names is a worse disagreement than a value nothing currently emits. Removing it requires an operator amendment to condition (E). REMOVED 2026-08-26 together with R-005 step 6, because each named a cause that could arise ONLY while committing or pushing a submodule's local work and no code path can now produce any of them: REJECTED_VERIFY_MUTATED_LOCAL_WORK, REJECTED_SUBMODULE_STAGING_FAILED, REJECTED_SUBMODULE_COMMIT_FAILED, REJECTED_COMMIT_SCOPE_EXCEEDED. A contract value nothing can emit describes a writer that does not exist, which is the same defect as a missing value in the other direction. ZERO Submodule Advance Records existed at rest at the time of removal -- measured, not assumed: no 'submodule-advances' directory exists anywhere under .lava-ci-evidence -- so no record at rest carries a value this enum no longer admits."
     }
   },
   "allOf": [
@@ -51,8 +57,14 @@
         "properties": {
           "outcome": {
             "enum": [
+              "NO_NEWER_COMMIT",
               "REJECTED_BREAKING_CHANGE",
-              "REJECTED_PUSH_CONFLICT"
+              "REJECTED_PUSH_CONFLICT",
+              "REFUSED_GOVERNANCE_DENY",
+              "FAILED_PRECONDITION",
+              "REFUSED_NOT_FAST_FORWARD",
+              "REFUSED_FOREIGN_UPSTREAM",
+              "REJECTED_PARENT_STAGING_FAILED"
             ]
           }
         }

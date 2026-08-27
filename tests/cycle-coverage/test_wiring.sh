@@ -133,15 +133,17 @@ APP_VERSION="9.9.9"
 APP_VERSION_CODE="9999"
 CHANGELOG_DIR="$2"
 # --- >>> BEGIN §6.AK Phase-1 Gate 7 block (copy into firebase-distribute.sh) >>>
+# LVA-149: --channel was REMOVED from check-cycle-coverage.sh (it selected
+# nothing). The MODE validation is retained per LVA-120 — a silent catch-all
+# default here is what once pointed a release distribute at debug evidence.
 case "\$MODE" in
-    release) AK_CHANNEL="release" ;;
-    *)       AK_CHANNEL="debug"   ;;
+    debug|release) : ;;
+    *) echo "FATAL: unknown MODE '\$MODE'" >&2; exit 1 ;;
 esac
 echo "    Phase 1 Gate 7 (§6.AK): cycle-coverage — CHANGELOG claims × executed device Challenges"
 ak_rc=0
 "\$SCRIPT_DIR/check-cycle-coverage.sh" \\
     --version="\$APP_VERSION-\$APP_VERSION_CODE" \\
-    --channel="\$AK_CHANNEL" \\
     --evidence-dir="\$CHANGELOG_DIR" \\
     --strict || ak_rc=\$?
 case "\$ak_rc" in
@@ -187,7 +189,6 @@ if [[ "\$ADVANCE" == "true" ]]; then
   ak_rc=0
   "\$ROOT/scripts/check-cycle-coverage.sh" \\
       --version="\$AK_VERSION" \\
-      --channel="\$AK_CHANNEL" \\
       --evidence-dir="\$AK_EVIDENCE_DIR" \\
       --head="\$sha" \\
       --strict >/dev/null 2>&1 || ak_rc=\$?

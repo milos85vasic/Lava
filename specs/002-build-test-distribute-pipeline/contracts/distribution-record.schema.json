@@ -2,15 +2,48 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://lava.vasic.digital/schemas/pipeline/distribution-record.schema.json",
   "title": "Distribution Record",
-  "description": "One completed distribution of a specific Build Artifact variant to a specific channel, per spec.md's Distribution Record entity.",
+  "description": "One completed distribution of a specific Build Artifact to Firebase App Distribution, per spec.md's Distribution Record entity. TWO INDEPENDENT AXES (LVA-148, renamed 2026-08-26): `app` says WHICH APPLICATION was distributed; `build_variant` says WHICH BUILD VARIANT of it. Both were previously called `channel`, in this contract and in scripts/firebase-distribute.sh respectively, which made one word name two concepts in artifacts that are read together. Neither axis may be substituted for the other, and no property here is named `channel` any more.",
   "type": "object",
-  "required": ["artifact_id", "channel", "version_code", "evidence_ref", "distributed_at"],
+  "required": ["artifact_id", "app", "build_variant", "version_code", "evidence_ref", "distributed_at"],
   "additionalProperties": false,
   "properties": {
-    "artifact_id": { "type": "string", "enum": ["app-debug", "app-release", "api-app-debug", "api-app-release"] },
-    "channel": { "type": "string", "enum": ["firebase-app-distribution", "firebase-app-distribution-api-app"] },
-    "version_code": { "type": "integer", "minimum": 1 },
+    "artifact_id": {
+      "type": "string",
+      "enum": ["app-debug", "app-release", "api-app-debug", "api-app-release"],
+      "description": "Which Build Artifact this distributes. It encodes BOTH axes in one token; `app` and `build_variant` below decompose it, and the allOf invariants keep all three in agreement."
+    },
+    "app": {
+      "type": "string",
+      "enum": ["firebase-app-distribution", "firebase-app-distribution-api-app"],
+      "description": "AXIS A — which of the two Android applications was distributed: the user client (:app) or the on-device API server (:api-app). Named `app` after this codebase's own existing word for the axis — `--app client|api-app` and SELECTED_APP in scripts/firebase-distribute.sh, --app/APP in scripts/pipeline/phase-05a-changelog-entry.sh, and the `app-`/`api-app-` prefixes of artifact_id above. The VALUES are unchanged by the LVA-148 rename because they are also the on-disk evidence-directory names under .lava-ci-evidence/distribute-changelog/. NOT a build variant: `debug` and `release` are NOT valid here."
+    },
+    "build_variant": {
+      "type": "string",
+      "enum": ["debug", "release"],
+      "description": "AXIS B — which build variant of that application was distributed. Named `build_variant` after this codebase's own existing word for the axis — buildTypes/`variant` throughout app/build.gradle.kts, the `$2=buildtype(debug|release)` parameter of _pick_apk_by_version in scripts/firebase-distribute.sh, and spec.md's own 'a specific Build Artifact variant' (§Key Entities) / FR-010 'the debug variant' / SC-005 'every distributed build variant'. This is the axis scripts/firebase-distribute.sh calls MODE, and the axis its last-version-debug / last-version-release pointers partition. NOT an application: `firebase-app-distribution` and `firebase-app-distribution-api-app` are NOT valid here."
+    },
+    "version_code": { "type": "integer", "minimum": 1, "description": "MUST be strictly greater than the previously recorded distribution for this (app, build_variant) PAIR — the pairing is what the last-version-<variant> pointer inside the per-app evidence directory records. Enforced by firebase-distribute.sh's own §6.P gate, not re-implemented here." },
     "evidence_ref": { "type": "string", "minLength": 1, "description": "Path to this run's Pipeline Run Report — replaces a human attestation reference per research.md R-001." },
     "distributed_at": { "type": "string", "format": "date-time" }
-  }
+  },
+  "allOf": [
+    {
+      "$comment": "artifact_id ⇒ app. A record claiming an api-app artifact was distributed to the client app (or vice versa) is the exact axis mix-up LVA-148 names, and is refused here rather than left to a reader to notice.",
+      "if": { "required": ["artifact_id"], "properties": { "artifact_id": { "enum": ["app-debug", "app-release"] } } },
+      "then": { "properties": { "app": { "const": "firebase-app-distribution" } } }
+    },
+    {
+      "if": { "required": ["artifact_id"], "properties": { "artifact_id": { "enum": ["api-app-debug", "api-app-release"] } } },
+      "then": { "properties": { "app": { "const": "firebase-app-distribution-api-app" } } }
+    },
+    {
+      "$comment": "artifact_id ⇒ build_variant. This is the §6.Z/1.2.19-1039 shape in schema form: a record whose artifact is the R8-minified release APK cannot claim the debug variant.",
+      "if": { "required": ["artifact_id"], "properties": { "artifact_id": { "enum": ["app-debug", "api-app-debug"] } } },
+      "then": { "properties": { "build_variant": { "const": "debug" } } }
+    },
+    {
+      "if": { "required": ["artifact_id"], "properties": { "artifact_id": { "enum": ["app-release", "api-app-release"] } } },
+      "then": { "properties": { "build_variant": { "const": "release" } } }
+    }
+  ]
 }

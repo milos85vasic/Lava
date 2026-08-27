@@ -277,21 +277,42 @@ _resolve_app_config() {
 }
 
 # _assert_no_drift <app> — verify every literal this script copied from
-# firebase-distribute.sh is still verbatim present in that file.
+# firebase-distribute.sh is still verbatim present in that file, IN ITS
+# ASSIGNMENT CONTEXT.
+#
+# The assignment context is load-bearing, not decoration. The two apps'
+# literals are substrings of one another:
+#     "firebase-app-distribution" is a PREFIX of "firebase-app-distribution-api-app"
+#     "app/build.gradle.kts"      is a SUBSTRING of "api-app/build.gradle.kts"
+# and both paths also appear in ordinary comment/error-message prose in that
+# file. A bare `grep -qF -- "$APP_CHANNEL"` for the CLIENT channel is therefore
+# satisfied by the API-APP channel's line, and a bare grep for the client
+# gradle file is satisfied by the api-app line or by a comment. The check would
+# pass having matched a DIFFERENT app's literal, this script would resolve the
+# stale channel, write the snapshot into the stale directory, report PASS — and
+# firebase-distribute.sh Gate 3 would then refuse the distribute for a snapshot
+# it cannot find. Matching `VARNAME="literal"` cannot be satisfied that way:
+# the closing quote rules out the longer sibling value, and the variable name
+# plus quote rules out prose.
 _assert_no_drift() {
   local app="$1" missing=()
   if [[ ! -f "$DISTRIBUTE_SH" ]]; then
     _fail "[${app}] drift-check impossible: ${DISTRIBUTE_SH} does not exist (this phase's whole contract is to satisfy that script's Gates 2+3)"
     return 1
   fi
-  grep -qF -- "$APP_GRADLE_FILE"   "$DISTRIBUTE_SH" || missing+=("GRADLE_VERSION_FILE '${APP_GRADLE_FILE}'")
-  grep -qF -- "$APP_CHANNEL"       "$DISTRIBUTE_SH" || missing+=("CHANGELOG_CHANNEL '${APP_CHANNEL}'")
-  grep -qF -- "$APP_PATTERN_TMPL"  "$DISTRIBUTE_SH" || missing+=("CHANGELOG_PATTERN_TMPL '${APP_PATTERN_TMPL}'")
+  # Each needle is the whole assignment as it appears in that file's
+  # `case "$SELECTED_APP"` block, quotes included — never the bare value.
+  local needle_gradle="GRADLE_VERSION_FILE=\"${APP_GRADLE_FILE}\""
+  local needle_channel="CHANGELOG_CHANNEL=\"${APP_CHANNEL}\""
+  local needle_pattern="CHANGELOG_PATTERN_TMPL='${APP_PATTERN_TMPL}'"
+  grep -qF -- "$needle_gradle"  "$DISTRIBUTE_SH" || missing+=("${needle_gradle}")
+  grep -qF -- "$needle_channel" "$DISTRIBUTE_SH" || missing+=("${needle_channel}")
+  grep -qF -- "$needle_pattern" "$DISTRIBUTE_SH" || missing+=("${needle_pattern}")
   if [[ ${#missing[@]} -gt 0 ]]; then
-    _fail "[${app}] DRIFT against scripts/firebase-distribute.sh — these literals are no longer present there: ${missing[*]}. Re-sync this script's _resolve_app_config with that file's 'case \$SELECTED_APP' block before distributing."
+    _fail "[${app}] DRIFT against scripts/firebase-distribute.sh — these assignments are no longer present there verbatim: ${missing[*]}. Re-sync this script's _resolve_app_config with that file's 'case \$SELECTED_APP' block before distributing."
     return 1
   fi
-  _log "[${app}] drift-check OK: gradle-file, channel, and Gate-2 pattern template all still verbatim in scripts/firebase-distribute.sh"
+  _log "[${app}] drift-check OK: the gradle-file, channel, and Gate-2 pattern-template ASSIGNMENTS are all still verbatim in scripts/firebase-distribute.sh (matched as VARNAME=\"value\", so another app's longer value or a comment cannot satisfy them)"
   return 0
 }
 
@@ -342,6 +363,33 @@ for APP in "${APPS[@]}"; do
       | head -1 | sed 's/.*= \([0-9]*\).*/\1/')"
   if [[ -z "$APP_VERSION" || -z "$APP_VERSION_CODE" ]]; then
     _fail "[${APP}] could not parse versionName/versionCode from ${APP_GRADLE_FILE}"
+    continue
+  fi
+
+  # The -z guard above is byte-identical to the gate's, and it is not enough.
+  # `sed` prints its INPUT UNCHANGED when the pattern does not match, and the
+  # greps above are more permissive than the seds that follow them: the grep
+  # accepts `versionCode\s*=` (no space required) while the sed demands a
+  # literal "= ". So a perfectly valid Kotlin `versionCode=1086` passes the
+  # grep, fails the sed, and yields the WHOLE LINE — non-empty, so -z is
+  # satisfied and a no-match parse reads as success. Unguarded, this phase
+  # went on to report PASS while writing a real file named
+  # `…/firebase-app-distribution/9.9.1-        versionCode=9001.md` and a
+  # CHANGELOG heading to match. The same applies to an unquoted versionName.
+  #
+  # The parse EXPRESSION deliberately stays byte-identical to
+  # firebase-distribute.sh's (the two must agree or Gates 2+3 refuse), so the
+  # check belongs on its OUTPUT. A versionCode is an integer — the gate itself
+  # compares it arithmetically (`[[ "$APP_VERSION_CODE" -le "$LAST_DISTRIBUTED" ]]`)
+  # — and a versionName never contains whitespace or a quote. Both rules are
+  # loose enough for every real value (`1.3.17`, `0.2.13`, `9.9.2-rc1`) and
+  # tight enough that an unparsed line cannot pass.
+  if [[ ! "$APP_VERSION_CODE" =~ ^[0-9]+$ ]]; then
+    _fail "[${APP}] versionCode did not parse from ${APP_GRADLE_FILE}: got '${APP_VERSION_CODE}', which is not a plain integer. sed prints its input unchanged on a no-match, so this is the raw matched line, not a version code. scripts/firebase-distribute.sh uses the same expression and would parse the same value, then compare it arithmetically. Refusing to author a CHANGELOG entry or a snapshot filename around it — write the version as 'versionCode = <n>'."
+    continue
+  fi
+  if [[ ! "$APP_VERSION" =~ ^[A-Za-z0-9._+-]+$ ]]; then
+    _fail "[${APP}] versionName did not parse from ${APP_GRADLE_FILE}: got '${APP_VERSION}', which contains whitespace or a character no version name carries. sed prints its input unchanged on a no-match, so this is the raw matched line, not a version name. Refusing to author a CHANGELOG entry or a snapshot filename around it — write the version as 'versionName = \"<x.y.z>\"'."
     continue
   fi
 

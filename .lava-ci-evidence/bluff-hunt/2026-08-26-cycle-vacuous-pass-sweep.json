@@ -1,0 +1,1208 @@
+{
+  "_comment": "§6.N.2 bluff-hunt of GATE-SHAPING PRODUCTION CODE, targeting the 'vacuous pass' defect family: a gate that reports success without having established the fact it claims. Twelve defect shapes were probed. Every reported finding was reproduced by direct measurement (fixture + captured verdict), not by reading alone. Findings whose defect is real but currently unreachable in this tree are labelled latent, with the measurement that establishes reachability stated plainly rather than omitted. NO repository file was modified by this hunt: it was read-and-prove only, because other agents were editing several targets concurrently. All fixtures were built in a session scratchpad; mutation-style probes ran against copies or verbatim excerpts.",
+  "hunt_date": "2026-08-26",
+  "recorded_date": "2026-08-26",
+  "trigger": "§6.N.2 mandatory-minimum production-code hunt. Prompted by six vacuous-pass defects proven earlier the same day (17 grep -q/pipefail sites in .githooks/pre-push; an orchestrator PASS over a REJECTED anti-bluff Evidence Record; advance-all-submodules.sh examining 0 submodules and exiting 0; a zero-iteration push loop reading as success; check-workable-items.sh omitting the *_Summary docs; a run report attributing a PASS to an untested commit). The family was evidently not exhausted.",
+  "method": "For each target: (1) read the gate's decision path in full; (2) determine which of the 12 shapes the code can express; (3) build a fixture that exercises it; (4) MEASURE the verdict (exit code, stdout verbatim, PIPESTATUS), repeating N times where the defect is a scheduling race; (5) where the whole script could not be driven (hardcoded repo root, gradle/device dependencies), extract the decision block VERBATIM into a harness and drive that, labelling it as an excerpt. Negative results were recorded per file so the hunt has a denominator.",
+  "safety_posture": {
+    "repo_files_modified": 0,
+    "reason": "Read-and-prove task; other agents held several targets mid-edit. A concurrent write would have collided.",
+    "fixtures_location": "session scratchpad (outside the repo)",
+    "sudo_or_su_used": false,
+    "git_mutating_commands_used": false,
+    "device_or_emulator_used": false,
+    "distribute_or_push_scripts_executed": false
+  },
+  "measurement_hazards_controlled": {
+    "shadowed_grep": "`grep` is a shell function dispatching to a ugrep-argv wrapper whose exit codes diverge from GNU grep. Every exit-code-sensitive probe ran as `command grep` inside `bash -c`.",
+    "shape_6_preconditions": "SIGPIPE-under-pipefail was claimed ONLY where all three were established: pipefail actually in effect for that code, the consumer short-circuits, and the producer can exceed the pipe buffer. Note scripts/tag.sh sets `set -Eeuo pipefail` (line 12) — an initial `set -euo` grep missed it; the correction is recorded here rather than silently applied.",
+    "invalidated_probe_discarded": "A first attempt to measure check-challenge-coverage.sh's per-feature detection layer passed a 670 KB corpus through argv and died with 'Argument list too long', which silently pushed features down to a lower detection layer. Those numbers were DISCARDED and the probe re-run through a temp file. The invalid run is recorded because a hunt that hides a retracted measurement is not an honest record."
+  },
+  "defect_shapes_probed": 12,
+  "targets_probed": [
+    "scripts/check-cycle-coverage.sh",
+    "scripts/check-workable-items.sh",
+    "scripts/check-constitution.sh",
+    "scripts/verify-all-constitution-rules.sh",
+    "scripts/ci.sh",
+    "scripts/tag.sh",
+    "scripts/check-challenge-discrimination.sh",
+    "scripts/check-challenge-coverage.sh",
+    "scripts/check-no-guessing-vocabulary.sh",
+    "scripts/check-script-docs-sync.sh",
+    "scripts/check-commit-docs-exists.sh",
+    "scripts/check-markdown-export-sync.sh",
+    "scripts/snapshot-coverage-ledger.sh"
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "CRITICAL",
+      "status": "REPORT-ONLY (no code change made; a rejection-path change needs an operator decision)",
+      "file": "scripts/check-cycle-coverage.sh",
+      "sites": [
+        129
+      ],
+      "shape": "8 — trusting a marker instead of verifying the underlying fact",
+      "gate_shape": "challenge_passed() free-text branch, final fallback `grep -qF \"$leaf\" \"$EVI\" && return 0`",
+      "defect": "In free-text mode the §6.AK gate treats the mere APPEARANCE of a Challenge class name anywhere in the evidence file as proof the Challenge was EXECUTED and PASSED. Nothing binds the name to a verdict, a runner, or an execution record.",
+      "why_it_matters": "check-cycle-coverage.sh IS the §6.AK Phase-1 Gate 7 implementation (scripts/firebase-distribute.sh:358) and pre-push Check 10 (.githooks/pre-push:282). §6.AK was written in response to the 2026-06-26 'C00-only gate shipped broken flows' incident; this is that gate.",
+      "reachability_measured": "Free-text is the shape ALL recent shipped evidence takes, on BOTH channels. structured / jsonPASS / shaExtractable counts: api-app 0.2.13-27 = 0/0/0; client 1.3.17-1085 = 0/0/0; 1.3.17-1084 = 0/0/0; 1.3.16-1083 = 0/0/0.",
+      "measurement_verbatim": {
+        "fixture": "real cycle-coverage-map-0.2.13-27.yaml + an evidence file stating 'THE DEVICE GATE DID NOT RUN', 'Zero tests executed', 'NOT EXECUTED', 'CRASHED ON LAUNCH', 'BUILD FAILED. 0 tests, 0 passed.'",
+        "gate_stdout": "§6.AK PASS: 1 claim(s) covered by executed+PASSED device Challenges (SHA deadbeefdeadbeefdeadbeefdeadbeefdeadbeef)",
+        "gate_exit": 0
+      },
+      "verdict": "GENUINE BLUFF — the gate emits the words 'executed+PASSED device Challenges' against evidence that states in plain English that nothing executed",
+      "invisible_to_existing_tests": "The hermetic fixtures drive the STRUCTURED branch (fqn=/verdict= lines), which does bind name to verdict. The free-text branch that all real evidence takes is not exercised.",
+      "one_line_fix": "Delete the bare-substring fallback at line 129 and refuse in free-text mode unless a verdict token appears on the same line as the challenge name.",
+      "decisive_control_same_verdicts_two_formats": {
+        "fixture": "all four covering Challenges recorded as FAILED, ending '4 of 4 Challenges FAILED. The app crashes on cold start. DO NOT DISTRIBUTE.'",
+        "markdown_free_text_the_shape_all_real_evidence_uses": "§6.AK PASS: 1 claim(s) covered by executed+PASSED device Challenges (SHA z)   EXIT=0",
+        "identical_verdicts_in_the_json_shape_the_gate_recognises": "FATAL §6.AK: 1 of 1 claim(s) lack a covering executed+PASSED device Challenge for 0.2.13-27 (4 uncovered ref(s))   EXIT=1",
+        "conclusion": "The gate's verdict is a function of how the evidence is FORMATTED, not of what it SAYS."
+      },
+      "evidence_standard": "CONFIRMED-BY-FIXTURE (a wrong verdict was captured)"
+    },
+    {
+      "id": "F2",
+      "severity": "HIGH",
+      "status": "REPORT-ONLY",
+      "file": "scripts/check-cycle-coverage.sh",
+      "sites": [
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89
+      ],
+      "shape": "2 + 4 + 8 — a no-match parse read as success; empty compared equal; self-reported field trusted",
+      "gate_shape": "ESHA defaults to \"unknown\"; line 89 accepts \"unknown\" as a match",
+      "defect": "The three SHA extractor patterns are `cycle-coverage:.*commit=`, `\"commit_sha\"`, `^commit_sha:`. Real evidence writes `**Commit SHA:** <sha>`, matched by none of them (measured 0/0/0), so ESHA stays \"unknown\" and the commit binding never engages.",
+      "measurement_verbatim": {
+        "command": "bash scripts/check-cycle-coverage.sh --version=0.2.13-27 --channel=release --evidence-dir=.lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app --head=ffffffffffffffffffffffffffffffffffffffff --strict",
+        "note": "REAL shipped map and REAL shipped evidence, both unmodified; the evidence declares commit 0244aa2cd4a369ed4637f4462bb654648e575b46",
+        "gate_stdout": "§6.AK PASS: 1 claim(s) covered by executed+PASSED device Challenges (SHA ffffffffffffffffffffffffffffffffffffffff)",
+        "gate_exit": 0,
+        "second_probe": "evidence containing only four bare challenge names and no SHA at all also passes against --head=0000000000000000000000000000000000000000"
+      },
+      "verdict": "GENUINE BLUFF — the commit-to-evidence binding is inert on the production evidence format",
+      "one_line_fix": "Add `**Commit SHA:**` to the extractor set and make an un-extractable SHA exit 2 instead of passing.",
+      "generalises_to_client_channel": {
+        "command": "bash scripts/check-cycle-coverage.sh --version=1.3.17-1085 --channel=release --evidence-dir=.lava-ci-evidence/distribute-changelog/firebase-app-distribution --head=ffffffffffffffffffffffffffffffffffffffff --strict",
+        "gate_stdout": "§6.AK PASS: 1 claim(s) covered by executed+PASSED device Challenges (SHA ffffffff…)",
+        "gate_exit": 0,
+        "note": "That evidence file carries no commit SHA at all — its only commit reference is the prose line '**Fix commit:** LVA-098 auth-blob source-set wiring fix (this cycle)'. On the client channel there is nothing to bind to."
+      },
+      "evidence_standard": "CONFIRMED-BY-FIXTURE (a wrong verdict was captured)"
+    },
+    {
+      "id": "F3",
+      "severity": "HIGH",
+      "status": "REPORT-ONLY",
+      "file": "scripts/tag.sh",
+      "sites": [
+        513
+      ],
+      "shape": "6 — early-exiting consumer on the RHS of a pipe under pipefail",
+      "gate_shape": "`git diff --name-only \"${ancestor_with_evidence}..HEAD\" -- | grep -qvE '^\\.lava-ci-evidence/'` as an `if` condition under `set -Eeuo pipefail` (tag.sh:12)",
+      "defect": "grep -qv exits at the first non-evidence path; the still-writing git diff takes SIGPIPE and reports 141; pipefail promotes 141 to the pipeline status; the `if` is FALSE, so the api-go evidence-staleness gate does not fire and the release tag proceeds on stale evidence.",
+      "direction": "Monotone and dangerous: barely-stale evidence (small diff) is caught every time; catastrophically-stale evidence (large diff) is never caught.",
+      "threshold_scan": {
+        "fixture": "throwaway git repo; ancestor holds the evidence; N code files changed since; 10 trials per row",
+        "rows": [
+          "changed-code-files=1     diff-bytes=54      FIRES(correct)=10 SILENT(bluff)=0",
+          "changed-code-files=50    diff-bytes=2700    FIRES(correct)=10 SILENT(bluff)=0",
+          "changed-code-files=500   diff-bytes=27000   FIRES(correct)=10 SILENT(bluff)=0",
+          "changed-code-files=1000  diff-bytes=54000   FIRES(correct)=8  SILENT(bluff)=2",
+          "changed-code-files=1500  diff-bytes=81000   FIRES(correct)=1  SILENT(bluff)=9",
+          "changed-code-files=2000  diff-bytes=108000  FIRES(correct)=0  SILENT(bluff)=10",
+          "changed-code-files=4000  diff-bytes=216000  FIRES(correct)=0  SILENT(bluff)=10"
+        ],
+        "flip_point": "the 64 KiB pipe buffer"
+      },
+      "reachability_in_this_repo": "Today's HEAD~10..HEAD listing is 8715 bytes — below the flip. But real single commits in this history produce 97783 and 76268 bytes of --name-only output (f1a2c362, 56f24177); one such commit inside the gate's own 10-ancestor search window puts the diff over the buffer.",
+      "verdict": "GENUINE BLUFF — reachable, and the failure mode scales with the severity of the condition being checked",
+      "one_line_fix": "Capture the diff into a variable (or mapfile) and test it without a pipe, e.g. `stale=$(git diff --name-only ... | grep -vE '^\\.lava-ci-evidence/' || true); [[ -n \"$stale\" ]]`.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE (a wrong verdict was captured)"
+    },
+    {
+      "id": "F4",
+      "severity": "HIGH",
+      "status": "REPORT-ONLY",
+      "file": "scripts/tag.sh",
+      "sites": [
+        224,
+        225,
+        226,
+        227,
+        228
+      ],
+      "shape": "5 + 8 — -d/-f standing in for a content check; marker trusted instead of the fact",
+      "defect": "The header (tag.sh:193-198) states the pack certifies ci.sh --full ran green (ci.sh.json), the bluff-audit hunt ran (bluff-audit/<recent>.json), and the mirror smoke test passed (mirror-smoke/<recent>.json). The code only tests `-f ci.sh.json`, `-d bluff-audit`, `-d mirror-smoke`. An empty directory satisfies -d; a zero-byte file satisfies -f.",
+      "measurement_verbatim": {
+        "fixture": "verbatim excerpt of tag.sh:222-232 against a minimal tree",
+        "state": "bluff-audit file count = 0; mirror-smoke file count = 0; ci.sh.json size = 0 bytes",
+        "verdict_line": "VERDICT: evidence-pack subfile block PASSES"
+      },
+      "verdict": "GENUINE BLUFF — two `mkdir`s and a `touch` satisfy the release evidence-pack contract",
+      "one_line_fix": "Require at least one *.json inside bluff-audit/ and mirror-smoke/, and assert ci.sh.json is non-empty and carries the expected pass field.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE (a wrong verdict was captured)"
+    },
+    {
+      "id": "F5",
+      "severity": "HIGH",
+      "status": "REPORT-ONLY",
+      "file": "scripts/check-constitution.sh",
+      "sites": [
+        525,
+        553,
+        564,
+        652
+      ],
+      "shape": "7 + 12 — no corpus floor; verdict is a function of checkout state",
+      "defect": "Blocks §6.X(2), §6.X(3), §6.S(6) and §6.AD(4) build their corpus from files that exist. DELETING a required governance doc removes its requirement; WEAKENING the same doc fails the gate. The only corpus floor (lines 327-344) counts submodules/*/CLAUDE.md alone — submodule_propagation_targets is incremented only in the CLAUDE.md loop at 292-296 — so AGENTS.md, CONSTITUTION.md, lava-api-go/* and core|app|feature/CLAUDE.md have no floor at all.",
+      "measurement_verbatim": {
+        "fixture": "verbatim excerpt of check-constitution.sh lines 29-36 + 651-671, two synthetic submodules, six docs",
+        "baseline": "all 6 docs carry the pointer-block -> EXIT=0",
+        "mutation_a_edit": "EDIT submodules/auth/AGENTS.md to drop the pointer-block -> 'MISSING §6.AD inheritance pointer-block in 1 per-scope doc(s): submodules/auth/AGENTS.md' EXIT=1",
+        "mutation_b_delete": "DELETE submodules/auth/AGENTS.md entirely (strictly worse) -> EXIT=0"
+      },
+      "live_state": "The tree is currently 22 CLAUDE.md / 22 AGENTS.md / 22 CONSTITUTION.md against 22 paths declared in .gitmodules, so no gap is open today. The defect is the absent floor, not a present hole.",
+      "verdict": "GENUINE GAP — the strictly worse state is the one that passes",
+      "one_line_fix": "Extend the .gitmodules-derived floor to count AGENTS.md and CONSTITUTION.md separately, and assert the fixed root-doc list exists rather than skipping absent members.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE (a wrong verdict was captured)"
+    },
+    {
+      "id": "F6",
+      "severity": "MEDIUM (latent — see reachability)",
+      "status": "REPORT-ONLY",
+      "file": "scripts/check-no-guessing-vocabulary.sh",
+      "sites": [
+        61,
+        62,
+        63,
+        64
+      ],
+      "shape": "6",
+      "gate_shape": "`grep -ihnE \"$W\" \"$f\" | grep -ivE ... | grep -ivE ... | head -3 | grep -q .` as an `if` condition under `set -euo pipefail` (line 37)",
+      "defect": "head -3 closes its stdin after three lines; the upstream grep takes SIGPIPE and reports 141; pipefail promotes it; the `if` is FALSE and the violation is never recorded. The gate detects ONE violating line and goes blind on many.",
+      "measurement_verbatim": {
+        "control_1_line": "§6.AD/HelixConstitution §11.4.6 VIOLATION: forbidden guessing vocabulary in: .../incident.md   EXIT=1",
+        "same_defect_4000_lines_764000_bytes": "trial 1..5 EXIT=0 (gate reports clean)",
+        "mechanism_under_pipefail": "if-branch=FALSE (violation MISSED)  status=141",
+        "mechanism_pipefail_off": "if-branch=TRUE  (violation recorded)"
+      },
+      "threshold_scan": {
+        "lines_are_156_bytes_each_10_trials": [
+          "lines=70  bytes=10920 DETECTED=10/10 BLIND=0/10",
+          "lines=85  bytes=13260 DETECTED=4/10  BLIND=6/10",
+          "lines=100 bytes=15600 DETECTED=5/10  BLIND=5/10",
+          "lines=150 bytes=23400 DETECTED=0/10  BLIND=10/10"
+        ],
+        "low_end_control": "1..50 violating lines (59..2950 bytes): DETECTED 10/10 at every size"
+      },
+      "reachability_measured": "Largest per-file matched-output volume in the real 31-file scan corpus is 3696 bytes — below the flip. LATENT today; live the moment one incident file's matched output exceeds ~13 KB.",
+      "inherited_by": "scripts/check-constitution.sh:815 delegates to this script, so verify-all gate #1 carries the same blindness.",
+      "verdict": "GENUINE BLUFF, currently latent",
+      "one_line_fix": "Replace `head -3 | grep -q .` with a captured variable test: `out=$(...); [[ -n \"$out\" ]]`.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE (a wrong verdict was captured)"
+    },
+    {
+      "id": "F7",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/check-challenge-discrimination.sh",
+      "sites": [
+        36,
+        37,
+        38,
+        39,
+        44,
+        90,
+        97
+      ],
+      "shape": "7 + 12 — success reported having examined zero items",
+      "defect": "With the challenge directory present but containing no Challenge*Test.kt, total=0 and both violation arrays are empty, so the gate prints two explicit ✓ claims ABOUT ALL CHALLENGE TESTS and exits 0. A missing directory (line 36) exits 0 as well.",
+      "measurement_verbatim": {
+        "stdout": "==> §6.AB Challenge-Test discrimination scan / Challenge tests: 0 / Lacking discrimination marker / companion evidence: 0 / Marker present but body has NO real assertion: 0 / ✓ all Challenge tests carry §6.AB.3 falsifiability rehearsal documentation / ✓ all Challenge test bodies contain real assertions (UI / JUnit / classpath)",
+        "exit": 0
+      },
+      "verdict": "GENUINE BLUFF — an affirmative claim about a corpus of zero",
+      "one_line_fix": "Refuse when total is 0 (or below a recorded expected count).",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE (a wrong verdict was captured)"
+    },
+    {
+      "id": "F8",
+      "severity": "MEDIUM (latent)",
+      "status": "REPORT-ONLY",
+      "file": "scripts/check-challenge-discrimination.sh",
+      "sites": [
+        86
+      ],
+      "shape": "4 + 8 — the check can be satisfied by text that is not the thing being checked",
+      "defect": "Layer 2 exists to catch 'marker present but body proves nothing'. Its grep runs against the WHOLE file, KDoc included, and the canonical Layer-1 rehearsal block's 'Expected failure:' line routinely names an assertion function — so the block Layer 1 demands can satisfy Layer 2 on its own. The alternation also admits the bare token `::[a-zA-Z_][a-zA-Z0-9_]*`, which matches any Kotlin method reference anywhere.",
+      "measurement_verbatim": {
+        "note": "the two runs differ ONLY in the KDoc's 'Expected failure:' wording; the test body is byte-identical and empty in both",
+        "b_kdoc_names_an_assertion": "'Expected failure: assertEquals(expected=1, actual=0)' -> Marker present but body has NO real assertion: 0   EXIT=0",
+        "c_kdoc_names_no_assertion": "'Expected failure: the screen renders a white placeholder' -> Marker present but body has NO real assertion: 1   EXIT=1"
+      },
+      "live_state": "Of 73 real Challenge files, 0 are comment-only-satisfied and exactly 1 (Challenge30RatingDialogReachableTest.kt) rests solely on the loose `::` alternative. LATENT, not a shipped bluff.",
+      "verdict": "GENUINE GAP — Layer 2 can be satisfied by the documentation Layer 1 mandates",
+      "one_line_fix": "Strip comment/KDoc lines before the Layer-2 match and drop the bare `::[a-zA-Z_]…` alternative.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE (a wrong verdict was captured)"
+    },
+    {
+      "id": "F9",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/ci.sh",
+      "sites": [
+        192,
+        195,
+        197,
+        200,
+        208,
+        213,
+        215
+      ],
+      "shape": "11 + 12 — loop bodies that never execute, indistinguishable from success",
+      "defect": "Three silent no-ops: an absent suite directory is skipped; a run_all.sh that loses its exec bit and has no sibling sentinel is skipped; and the tests/pre-push branch keys on check4_test.sh specifically, so deleting that one file disables the whole pre-push suite including still-present FAILING tests.",
+      "measurement_verbatim": {
+        "fixture": "verbatim excerpt of ci.sh:191-215; tests/pre-push/check9_test.sh exits 1 throughout",
+        "baseline": "EXIT=1 (correctly fails)",
+        "mutation_a": "delete ONLY check4_test.sh (check9 still present, still exits 1) -> 'LOOP COMPLETED, EXIT 0'  EXIT=0",
+        "mutation_b": "chmod -x tests/firebase/run_all.sh (runner now exits 1) -> EXIT=0",
+        "mutation_c": "delete the whole tests/check-constitution directory -> EXIT=0"
+      },
+      "mitigation_stated_honestly": "scripts/verify-all-constitution-rules.sh runs earlier in the same script (ci.sh:168) and registers explicit FAIL rows for all three conditions across all nine of ci.sh's suite directories. The loss is defence-in-depth, not a live hole. verify-all fixed exactly this pattern in its own loops (2026-08-22); ci.sh retains the unfixed copy.",
+      "verdict": "GENUINE GAP — redundancy lost, covered today by verify-all",
+      "one_line_fix": "Mirror verify-all: an absent directory / non-executable runner / empty glob becomes an explicit failure rather than a skip.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE (a wrong verdict was captured)"
+    },
+    {
+      "id": "F10",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/check-cycle-coverage.sh",
+      "sites": [
+        152,
+        155,
+        170,
+        171,
+        172,
+        173
+      ],
+      "shape": "7 — success reported having examined zero items",
+      "defect": "The awk parser recognises a claim start only via `^[ \\t]*-[ \\t]+(fix|bullet):`. A map using any other key yields claims=0, and line 170 exits 0 with a stderr WARN. Parser drift silently empties the corpus.",
+      "measurement_verbatim": {
+        "fixture": "map with `- change:` and `- claim:` keys carrying two real user-visible claims; evidence file containing nothing relevant",
+        "stdout": "WARN §6.AK: no claims in .../cycle-coverage-map-0.2.13-27.yaml — nothing to verify",
+        "exit": 0
+      },
+      "live_state": "The real shipped maps do use `- fix:`, so this is a drift hazard rather than a present hole.",
+      "verdict": "GENUINE GAP",
+      "one_line_fix": "Exit 2 when claims==0 while the map's `claims:` block is non-empty.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE (a wrong verdict was captured)"
+    },
+    {
+      "id": "F11",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/check-cycle-coverage.sh",
+      "sites": [
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100
+      ],
+      "shape": "8 — absence trusted",
+      "defect": "The ≤24h freshness check runs only when a timestamp is extracted; an absent timestamp, or one `date` cannot parse (line 99 ends `|| echo \"\"`), skips the check entirely. §6.Z clause 2 requires the evidence be within 24 hours.",
+      "measurement_verbatim": {
+        "command": "--now-epoch=99999999999 against evidence with no timestamp",
+        "stdout": "§6.AK PASS: 1 claim(s) covered by executed+PASSED device Challenges",
+        "exit": 0
+      },
+      "verdict": "GENUINE GAP — evidence with no timestamp is never stale",
+      "one_line_fix": "Treat an absent or unparseable timestamp as a refusal.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE (a wrong verdict was captured)"
+    },
+    {
+      "id": "F12",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/check-script-docs-sync.sh",
+      "sites": [
+        29,
+        30,
+        31,
+        32,
+        37,
+        38,
+        88
+      ],
+      "shape": "7 + 12",
+      "defect": "An empty corpus reports a 1:1 match; absent directories report 'skipping' and exit 0. Both are declared clean verdicts from a gate that examined nothing.",
+      "measurement_verbatim": {
+        "empty_dirs": "CM-SCRIPT-DOCS-SYNC gate clean: 0 scripts ↔ 0 docs (1:1).   EXIT=0",
+        "control_one_orphan": "CM-SCRIPT-DOCS-SYNC / HelixConstitution §11.4.18 VIOLATION: scripts/orphan.sh   EXIT=1",
+        "dirs_absent": "CM-SCRIPT-DOCS-SYNC: skipping — scripts/ or docs/scripts/ missing in <root>   EXIT=0"
+      },
+      "prior_art": "The 2026-08-23 hunt recorded the vacuous-equality shape in this same file as a hazard to avoid; the zero-corpus route into it is still open.",
+      "verdict": "GENUINE GAP",
+      "one_line_fix": "Refuse when ${#scripts_present[@]} is 0, and make the missing-directory branch exit 1.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE (a wrong verdict was captured)"
+    },
+    {
+      "id": "F13",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/check-commit-docs-exists.sh",
+      "sites": [
+        54,
+        57,
+        58,
+        59,
+        60
+      ],
+      "shape": "7 + 12",
+      "defect": "`git rev-list \"$range\" 2>/dev/null` swallows a resolution failure; zero commits is then reported as a skip with exit 0. verify-all invokes this gate with a hardcoded HEAD~5..HEAD (scripts/verify-all-constitution-rules.sh:200), so any checkout with fewer than six commits passes silently.",
+      "measurement_verbatim": {
+        "note": "same repo, same commit, same two orphan citations — only the range differs",
+        "range_head5_in_1_commit_repo": "CM-COMMIT-DOCS-EXISTS: no commits in range 'HEAD~5..HEAD' — skipping   EXIT=0",
+        "range_head": "CM-COMMIT-DOCS-EXISTS VIOLATION: commit b6443711: docs/THIS-FILE-DOES-NOT-EXIST.md ; commit b6443711: scripts/also-missing.sh   EXIT=1",
+        "typo_range": "LAVA_COMMIT_RANGE='HEAD~5..HEAKD' -> 'no commits in range' EXIT=0"
+      },
+      "verdict": "GENUINE GAP",
+      "one_line_fix": "Check git rev-list's exit status and refuse when the range fails to resolve, distinguishing that from a legitimately empty range.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE (a wrong verdict was captured)"
+    },
+    {
+      "id": "F14",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/check-no-guessing-vocabulary.sh",
+      "sites": [
+        54,
+        55
+      ],
+      "shape": "12",
+      "defect": "`[[ -d \"$p\" ]] || continue` skips a scan path that does not exist; if none resolves, zero files are scanned and the gate declares itself clean.",
+      "measurement_verbatim": {
+        "command": "LAVA_NO_GUESSING_SCAN_PATHS=<nonexistent>",
+        "stdout": "§11.4.6 no-guessing vocabulary gate clean.",
+        "exit": 0
+      },
+      "verdict": "GENUINE GAP",
+      "one_line_fix": "Refuse when no configured scan path resolves, or when zero files were scanned.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE (a wrong verdict was captured)"
+    },
+    {
+      "id": "F15",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/verify-all-constitution-rules.sh",
+      "sites": [
+        250,
+        268,
+        290
+      ],
+      "shape": "7 — a floor with one stair",
+      "defect": "All three numeric floors test `-eq 0`. A shrunken-but-nonzero registry passes with a clean verdict. The script's own comment states 'A healthy tree registers 50+ gates' — documented but not enforced.",
+      "measurement": {
+        "floors_found": "lines 250, 268, 290 — all `-eq 0`",
+        "live_registry": "58 gates (attestation .lava-ci-evidence/verify-all/2026-08-26T08-33-52Z.json)",
+        "glob_fed_gates": "27 tests/check-constitution/test_*.sh + 6 tests/pre-push/check*_test.sh",
+        "consequence": "deleting 26 of the 27 leaves 32 registered gates and a clean verdict; nothing fires"
+      },
+      "verdict": "GENUINE GAP — partial corpus shrink is undetected",
+      "one_line_fix": "Floor the registry against a recorded expected gate count rather than against zero.",
+      "evidence_standard": "CONFIRMED-BY-MEASUREMENT (live tree measured; no verdict flip staged)",
+      "registry_composition_reconciles_with_attestation": {
+        "fixed_run_gate_call_sites": 19,
+        "hermetic_suite_loop": 7,
+        "tests_pre_push_glob": 6,
+        "tests_check_constitution_glob": "27 minus 1 skipped = 26",
+        "sum": 58,
+        "attestation_total_gates": 58,
+        "glob_fed_share": "32 of 58 gates (55%) come from globs guarded only by a zero-floor"
+      }
+    },
+    {
+      "id": "F16",
+      "severity": "LOW-MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/check-challenge-coverage.sh",
+      "sites": [
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104
+      ],
+      "shape": "8",
+      "defect": "Layer-4 detection is an incidental substring match over the concatenated 670 KB Challenge corpus: `forum` is credited because 'Forum|Browse' appears somewhere; credentials* would be credited by the token 'Auth' alone.",
+      "measurement": {
+        "per_feature_detection_layer_19_modules": "5 by real import; 12 by `// covers-feature:` marker (sanctioned by §6.AE.1); 1 by filename (menu); 1 by bare substring (forum)",
+        "live_gate": "Feature modules: 19 / Covered: 19 / Exempted: 0 / Uncovered: 0",
+        "invalidated_first_attempt": "An earlier run of this probe passed the corpus through argv, died with 'Argument list too long', and mis-assigned most features to layer 3. Those numbers were discarded; the figures above come from the re-run through a temp file."
+      },
+      "verdict": "GENUINE GAP — one feature's coverage rests on an unverifiable substring",
+      "one_line_fix": "Delete the layer-4 heuristics; require an import or an explicit marker.",
+      "evidence_standard": "CONFIRMED-BY-MEASUREMENT (live tree measured; no verdict flip staged)"
+    },
+    {
+      "id": "F17",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY (pre-known, verified this session)",
+      "file": "scripts/check-workable-items.sh",
+      "sites": [
+        122
+      ],
+      "shape": "7 — corpus scope excludes part of the artifact under test",
+      "defect": "`diff --db ... --issues docs/Issues.md --fixed docs/Fixed.md` never sees docs/Issues_Summary.md or docs/Fixed_Summary.md, both of which exist in the tree. The gate can exit 0 while the _Summary renderings carry stale text and tallies.",
+      "measurement": "ls confirms docs/Fixed.md, docs/Fixed_Summary.md, docs/Issues.md, docs/Issues_Summary.md all present; the diff invocation at line 122 passes only two of the four.",
+      "verdict": "GENUINE GAP — confirmed",
+      "one_line_fix": "Pass the two _Summary paths to diff, or add a second diff invocation covering them.",
+      "evidence_standard": "CONFIRMED-BY-INSPECTION (source read; no verdict captured)"
+    },
+    {
+      "id": "F18",
+      "severity": "LOW (latent)",
+      "status": "REPORT-ONLY",
+      "file": "scripts/tag.sh",
+      "sites": [
+        363,
+        364,
+        365,
+        366,
+        367,
+        368,
+        369,
+        370,
+        371
+      ],
+      "shape": "2 + 12",
+      "defect": "When buildSrc/src/main/kotlin/lava/conventions/AndroidCommon.kt is ABSENT, compile_sdk silently stays at the hardcoded 35 with no warning — the warn fires only on the parse-failure branch, not the missing-file branch. The in-source comment states the dynamic parse exists so the gate never 'silently false-passes'.",
+      "measurement": "File verified PRESENT today: `compileSdk = 35`. LATENT.",
+      "verdict": "GENUINE GAP, latent",
+      "one_line_fix": "Add an else-branch warn (or die) when the convention file is missing.",
+      "evidence_standard": "CONFIRMED-BY-INSPECTION (source read; no verdict captured)"
+    },
+    {
+      "id": "F19",
+      "severity": "LOW",
+      "status": "REPORT-ONLY",
+      "file": "scripts/check-constitution.sh",
+      "sites": [
+        788,
+        789,
+        790,
+        797,
+        798
+      ],
+      "shape": "2 + 12",
+      "defect": "`parent_remotes=$(git remote 2>/dev/null)` yields an empty string when git fails, and the empty string matches no forbidden host, so §6.W passes. The submodule loop additionally skips any submodule lacking a .git entry, so an uninitialised submodule's remotes are never checked.",
+      "verdict": "GENUINE GAP",
+      "one_line_fix": "Check git remote's exit status and count submodules examined against .gitmodules.",
+      "evidence_standard": "CONFIRMED-BY-INSPECTION (source read; no verdict captured)"
+    },
+    {
+      "id": "F20",
+      "severity": "UNCONFIRMED",
+      "status": "REPORT-ONLY",
+      "file": "scripts/ci.sh",
+      "sites": [
+        260
+      ],
+      "shape": "6 (inverted direction)",
+      "defect": "`find core/network/impl/src/test -name '*ParityTest*' -type f | grep -q .` runs under set -euo pipefail with a short-circuiting consumer. The more parity tests exist, the more likely find takes SIGPIPE and the gate takes the 'Parity test class not present — gate SKIPPED' branch. Reachability is low: the listing is a handful of paths.",
+      "one_line_fix": "mapfile the find output and test the array length.",
+      "evidence_standard": "UNCONFIRMED",
+      "why_unconfirmed": "No flip was reproduced: the real find listing is a handful of paths, far below the pipe buffer. The three shape-6 preconditions are met structurally but reachability was not demonstrated.",
+      "what_would_settle_it": "A fixture planting >64 KiB of matching paths under core/network/impl/src/test and showing the gate report 'Parity test class not present — gate SKIPPED'.",
+      "verdict": "UNCONFIRMED — structural preconditions met, reachability not demonstrated"
+    },
+    {
+      "id": "F21",
+      "severity": "LOW-MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/ci.sh",
+      "sites": [
+        31,
+        286,
+        303,
+        304,
+        313,
+        314
+      ],
+      "shape": "12",
+      "defect": "`ci.sh --full` exits 0 and prints 'All gates passed' with the Compose UI Challenge Tests skipped when no device is detected. The skip is announced on stdout, but the machine-readable output is identical either way: the evidence directory records only `mode` and `sha`, with no field recording whether the device gate ran. A consumer reading the evidence directory cannot distinguish a full run from a device-less one.",
+      "supporting_measurement": {
+        "note": "the evidence directory is created by a bare mkdir -p at line 31, before any gate runs, so an aborted run leaves a directory that looks like evidence",
+        "live_tree": [
+          ".lava-ci-evidence/2026-08-25T20-30-29Z/  -> mode, sha",
+          ".lava-ci-evidence/2026-08-25T20-40-44Z/  -> EMPTY (no files at all)",
+          ".lava-ci-evidence/2026-08-23T10-27-42Z/  -> EMPTY (no files at all)"
+        ]
+      },
+      "verdict": "GENUINE GAP",
+      "one_line_fix": "Record a `device_tests: ran|skipped` field, create the evidence directory only after the first gate passes, and make --full exit non-zero when the device gate is skipped.",
+      "evidence_standard": "CONFIRMED-BY-MEASUREMENT (live tree measured; no verdict flip staged)"
+    }
+  ],
+  "sweep_structure": {
+    "lead_agent_scope": "13 gate scripts: check-cycle-coverage, check-workable-items, check-constitution, verify-all-constitution-rules, ci.sh, tag.sh, check-challenge-discrimination, check-challenge-coverage, check-no-guessing-vocabulary, check-script-docs-sync, check-commit-docs-exists, check-markdown-export-sync, snapshot-coverage-ledger",
+    "delegated_sub_sweep_A": "11 pipeline files (lib/evidence.sh, lib/anti-bluff-validate.sh, phase-00 through phase-06 excluding the files another agent held mid-edit). Its two CRITICAL findings plus P4, P5, P8 and P10 were independently re-verified in source by the lead agent before being recorded here.",
+    "delegated_sub_sweep_B": "15 files (the three scan-no-hardcoded-* scanners + scripts/autonomous-qa/*). COMPLETE.",
+    "explicitly_out_of_scope": [
+      ".githooks/pre-push",
+      "scripts/advance-all-submodules.sh",
+      "scripts/firebase-distribute.sh",
+      "scripts/pipeline-build-test-distribute.sh",
+      "scripts/pipeline/lib/run-report.sh"
+    ],
+    "out_of_scope_reason": "Already swept earlier the same day, or held mid-edit by another agent. Cited in findings only as consumers."
+  },
+  "concurrency_note": "Other agents held several targets mid-edit throughout. Every cited line number was re-verified against the working tree at the end of the sweep and still resolves to the quoted code; scripts/check-constitution.sh is 828 lines now as at read time.",
+  "delegated_findings_pipeline": [
+    {
+      "id": "P1",
+      "severity": "CRITICAL",
+      "status": "REPORT-ONLY",
+      "file": "scripts/pipeline/lib/evidence.sh",
+      "sites": [
+        252,
+        279
+      ],
+      "also": "scripts/pipeline/phase-02-test.sh:325,348",
+      "shape": "8 — a self-reported field trusted as a verdict",
+      "defect": "write_evidence_record unconditionally stamps `anti_bluff_status: \"validated\"` into every record. The source itself documents this as a PLACEHOLDER, not a verdict (evidence.sh:94-102: 'This is NOT a real verdict ... until a separate, independent component ... overwrites this field for real'). Nothing mechanically requires that validator to run, and phase-02-test.sh:348 counts a record as rejected only when the field starts with REJECTED — so 'validated by the validator' and 'never validated at all' are byte-identical on disk and indistinguishable to the aggregator.",
+      "independently_verified_by_lead": "evidence.sh:252 `--arg anti_bluff_status \"validated\"`; evidence.sh:94-102 placeholder comment; phase-02-test.sh:325 `jq -r '.anti_bluff_status // empty'`; phase-02-test.sh:348 `[[ \"$status\" == REJECTED* ]]` — all confirmed in source by the lead agent.",
+      "measurement_verbatim": {
+        "record_written_with_no_validator_call": "{\"test_id\":\"lava.fake.BluffTest#t\",\"category\":\"real-device-challenge\",\"result\":\"PASS\",\"assertion_summary\":\"did not crash\",\"raw_output_ref\":\"../../nope.log\",\"anti_bluff_status\":\"validated\"}",
+        "what_the_real_validator_says_about_that_record": "REJECTED: assertion_summary matches generic bluff pattern 'did not crash' with no other specific content   (validator exit=1)",
+        "end_to_end_through_real_phase_02": "Evidence Records found: 1 / PASS: 1 / FAIL: 0 / REJECTED (anti-bluff): 0 -> phase-02-test: PASSED ... EXIT 0"
+      },
+      "constitutional_impact": "CLAUDE.md §6.AA clause 8 condition (B) requires 'zero Evidence Records carry an anti_bluff_status other than validated'. That condition is satisfied by records that were never examined.",
+      "one_line_fix": "Have phase-02-test.sh's aggregation loop call validate_evidence_record on every scanned record itself (the validator documents itself as idempotent and not sticky for exactly this reason) instead of trusting the producer's self-stamp."
+    },
+    {
+      "id": "P2",
+      "severity": "CRITICAL",
+      "status": "REPORT-ONLY",
+      "file": "scripts/pipeline/phase-02-test.sh",
+      "sites": [
+        189,
+        190,
+        191,
+        192,
+        270,
+        381
+      ],
+      "shape": "7 + 12 — no per-category corpus floor; a missing wrapper is a silent success",
+      "defect": "_dispatch returns 0 when the wrapper path does not exist (:189-192), and the PASS rule (:381) tests only `_total -eq 0` — 'at least one record overall'. One record from one category therefore certifies the whole test phase.",
+      "independently_verified_by_lead": "phase-02-test.sh:189-192 `if [[ ! -f \"$wrapper\" ]]; then echo SKIPPING; return 0; fi` and :381 `[[ ... || \"$_total\" -eq 0 ]]` confirmed in source by the lead agent.",
+      "measurement_verbatim": {
+        "run_a_six_of_seven_wrappers_absent": "SKIPPING go / hermetic / stress-chaos / constitutional-gate-sweep / release-canary / real-device-challenge ... wrappers dispatched: 1 (kotlin) / Evidence Records found: 1 -> phase-02-test: PASSED ... EXIT 0",
+        "run_b_all_seven_present_five_find_nothing": "wrappers dispatched: 6 (go kotlin hermetic stress-chaos constitutional-gate-sweep real-device-challenge) / Evidence Records found: 1 / PASS: 1 -> phase-02-test: PASSED ... EXIT 0",
+        "records_on_disk_run_b": "kotlin-unit/one-test.json  (real-device-challenge produced ZERO)"
+      },
+      "constitutional_impact": "§6.AA clause 8 condition (C) makes a PASSing real-device-challenge record mandatory for all four Android variants. That category contributed zero records and nothing noticed. This is the 2026-06-26 §6.AK 'C00-only gate' forensic anchor reproduced at the phase-02 layer.",
+      "one_line_fix": "Require a minimum record count PER dispatched category, and make an absent wrapper for a category the run claims to cover a FAIL rather than `return 0`."
+    },
+    {
+      "id": "P3",
+      "severity": "HIGH",
+      "status": "REPORT-ONLY",
+      "file": "scripts/pipeline/phase-02-test.sh",
+      "sites": [
+        325,
+        348
+      ],
+      "shape": "4 — a comparison that matches when the key is absent entirely",
+      "defect": "`jq -r '.anti_bluff_status // empty'` yields \"\" for an absent field, and `[[ \"\" == REJECTED* ]]` is false, so a record with no anti-bluff field at all is counted clean. This is the exact defect anti-bluff-validate.sh documents and fixed for itself in Rule 0c (:69-81); the aggregator still carries it. Note the asymmetry: an absent `result` falls to the `*)` arm (:340-345) and is counted FAIL — fail-closed — while an absent `anti_bluff_status` is fail-open.",
+      "measurement_verbatim": {
+        "record_with_no_anti_bluff_and_no_assertion_summary": "Evidence Records found: 1 / PASS: 1 / REJECTED (anti-bluff): 0 -> phase-02-test: PASSED ... EXIT 0",
+        "what_the_real_validator_says": "REJECTED: required field(s) missing or empty: assertion_summary (a record that asserts nothing and points at nothing is not evidence)   (validator exit=1)"
+      },
+      "one_line_fix": "Treat a status that is neither exactly `validated` nor `REJECTED*` as rejected — the same fail-closed reading `result` already gets three lines above."
+    },
+    {
+      "id": "P4",
+      "severity": "HIGH",
+      "status": "REPORT-ONLY",
+      "file": "scripts/pipeline/phase-04-live-verify-api.sh",
+      "sites": [
+        271,
+        272,
+        273,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281,
+        282
+      ],
+      "shape": "8 — trusting a surface instead of verifying identity",
+      "defect": "Live verification's verdict is curl rc + an HTTP status matching ^2[0-9][0-9]$ + a non-empty body. It asserts nothing about content or service identity, though the file's own header states the real service returns {\"status\":\"alive\"} / {\"status\":\"ready\"} / a provider catalogue.",
+      "measurement_verbatim": {
+        "fixture": "a 15-line Python HTTPS impostor bound to the configured port, answering every path with {\"impostor\":\"this is NOT lava-api-go\"}",
+        "gate_stdout": "phase-04-live-verify-api: real base URL = https://127.0.0.1:18443 / http_status: 200 (curl_exit_code=0) x3 / Evidence Record anti_bluff_status=validated x3 / phase result: PASS / 'all real HTTP requests against the real running lava-api-go service succeeded and were anti-bluff-validated' / EXIT 0"
+      },
+      "realistic_production_trigger": "A stale lava-api-go still bound to the port from a prior cycle. phase-03's stale cleanup fires only when `systemctl --user is-active` reports active (:132), so a leftover container or process started outside that unit is never detected — and this phase then certifies the PREVIOUS build.",
+      "constitutional_impact": "§6.AA clause 8 condition (E) rests on this phase.",
+      "one_line_fix": "Assert real per-endpoint content (/health -> \"status\":\"alive\", /ready -> \"status\":\"ready\", /providers -> non-empty array) and cross-check a version identifier against this run's recorded lava-api-go Build Artifact."
+    },
+    {
+      "id": "P5",
+      "severity": "HIGH",
+      "status": "REPORT-ONLY",
+      "file": "scripts/pipeline/phase-01-build.sh",
+      "sites": [
+        104,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        118,
+        119,
+        120
+      ],
+      "shape": "2 (+ 10 at :118) — sed prints its input unchanged on a no-match; ${var:-default} converts a failed parse into a confident wrong value",
+      "defect": "_record_build_artifact applies no shape check to either parsed value. When Android version declarations move to the version catalog, grep matches and sed does not, so the raw source line is recorded as the version_name. When lava-api-go --version output drifts or the binary cannot exec (`|| true` at :118 swallows the rc), version_code falls back to 0.",
+      "measurement_verbatim": {
+        "case_a": "phase-01-build: recorded Build Artifact 'app-debug' (version=        versionName = libs.versions.appName.get()/) ... 'all 5 Build Artifacts produced, verified on disk, and recorded' EXIT 0 ; record: {\"version_name\": \"        versionName = libs.versions.appName.get()\", \"version_code\": 0}",
+        "case_b": "record: {\"artifact_id\": \"lava-api-go\", \"version_name\": \"unknown\", \"version_code\": 0}"
+      },
+      "constitutional_impact": "§6.AA clause 8 condition (A) requires each Distribution Record's version_code to equal the code compiled into the uploaded artifact. A recorded 0 or a recorded raw source line silently defeats any comparison against it.",
+      "prior_art_in_tree": "phase-05a-changelog-entry.sh:369-394 documents this exact sed-no-match defect and guards it with ^[0-9]+$ / ^[A-Za-z0-9._+-]+$. phase-01-build.sh has no such guard.",
+      "one_line_fix": "Apply phase-05a's two shape regexes here and return 1 (counting the artifact unverifiable) instead of falling back to unknown/0; check the --version rc rather than `|| true`."
+    },
+    {
+      "id": "P6",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/pipeline/phase-01-build.sh",
+      "sites": [
+        104
+      ],
+      "shape": "1 + 2 — an exit code never compared; empty capture treated as OK",
+      "defect": "`built_from_commit=\"$(cd \"$REPO_PATH\" && git rev-parse HEAD)\"` is never checked. On failure the empty string is written into the record and the artifact is still counted.",
+      "measurement_verbatim": "fatal: not a git repository ... (x5 on stderr) -> every record written with \"built_from_commit\": \"\" -> 'all 5 Build Artifacts produced, verified on disk, and recorded' EXIT 0",
+      "honest_limit": "UNKNOWN: whether an empty built_from_commit flips a later gate lives in phase-05-distribute.sh / lib/run-report.sh, both outside this sweep's scope. Not claimed.",
+      "one_line_fix": "`if ! built_from_commit=...; then return 1; fi`, plus a ^[0-9a-f]{40}$ shape check."
+    },
+    {
+      "id": "P7",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/pipeline/phase-01-build-android.sh",
+      "sites": [
+        107,
+        138
+      ],
+      "shape": "2",
+      "defect": "Same root cause as P5, upstream of it: the `-z` emptiness guard at :138 cannot fire, because a no-match sed returns the whole line rather than nothing. The garbage value then becomes the releases/<version>/ destination directory the APKs are copied into and announced from.",
+      "measurement_verbatim": "parsed version_name = [        versionName = libs.versions.appName.get()] ; the -z guard at line 138 does NOT fire -> release_dir becomes releases/[        versionName = libs.versions.appName.get()]",
+      "one_line_fix": "Replace the -z guard with the same ^[A-Za-z0-9._+-]+$ shape check phase-05a uses."
+    },
+    {
+      "id": "P8",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/pipeline/lib/anti-bluff-validate.sh",
+      "sites": [
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319
+      ],
+      "shape": "2 — a blacklist with no specificity floor",
+      "defect": "Rule 1 rejects four exact phrases; any string avoiding them is validated, including strings that assert nothing.",
+      "measurement_verbatim": [
+        "A1 'BUILD SUCCESSFUL in 12s'                       exit=0 validated",
+        "A2 'build successful'                               exit=1 REJECTED (exact-match rule)",
+        "A3 'BUILD SUCCESSFUL'                               exit=1 REJECTED (exact-match rule)",
+        "A4 'the test passed as expected'                    exit=0 validated",
+        "A5 'OK'                                             exit=0 validated",
+        "A6 'did not crash'                                  exit=1 REJECTED (generic bluff pattern)",
+        "A7 'no crash occurred during the run of the suite here' exit=0 validated",
+        "A8 '0 tests executed, 0 failures — suite is green'  exit=0 validated"
+      ],
+      "analysis": "A1 defeats the exact-match rule with two appended words, yet Seventh Law clause 4 names 'acceptance gates whose chief assertion is BUILD SUCCESSFUL' as a forbidden pattern by name. A8 is a record that STATES it examined zero items and is stamped validated — and P2 shows the aggregator then reports the phase PASS on it. A7 shows the 20-character remainder threshold is defeated by filler words.",
+      "one_line_fix": "Add a minimum-specificity floor before the blacklist (reject a summary under N alphanumeric characters, or one containing no digit / identifier / quoted token), and match 'build successful' as a prefix-with-only-timing-suffix rather than an exact string."
+    },
+    {
+      "id": "P9",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/pipeline/lib/anti-bluff-validate.sh",
+      "sites": [
+        324,
+        325,
+        326,
+        327,
+        328,
+        329,
+        330,
+        331,
+        332,
+        333,
+        334,
+        335,
+        336,
+        337,
+        338,
+        339,
+        340,
+        341,
+        342,
+        343,
+        344,
+        345,
+        346,
+        347,
+        348,
+        349,
+        350,
+        351,
+        352,
+        353,
+        354,
+        355,
+        356,
+        357,
+        358
+      ],
+      "shape": "8 — the evidence is never bound to the test",
+      "defect": "Rule 2 asks only 'is it a regular file', rule 3 'is it non-empty', rule 4 'does a marker string appear in the summary OR the file'.",
+      "measurement_verbatim": [
+        "B1_unrelated_evidence   exit=0 validated   (raw_output_ref = /etc/hostname, a 6-byte unrelated system file)",
+        "B2_selfasserted_marker  exit=0 validated   (assertion_summary = 'FALSIFIABILITY REHEARSAL: I say I did one', ref = /etc/hostname)",
+        "B3_no_marker            exit=1 REJECTED: category is real-device-challenge but no FALSIFIABILITY REHEARSAL / §6.AB-discrimination: marker found"
+      ],
+      "analysis": "Rule 4's own doc (:136-152) says raw_output_ref IS the companion evidence, but the marker is accepted from the self-authored assertion_summary alone. phase-05a:202-209 fixed the sibling problem (two records citing one shared log) by hand, per-script; the validator does not enforce it.",
+      "one_line_fix": "Require raw_output_ref to resolve inside the record's own run directory, and require rule 4's marker to appear in the raw_output_ref content specifically, not in the self-authored summary."
+    },
+    {
+      "id": "P10",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/pipeline/phase-02-test.sh:385, phase-03-install-boot.sh:265, phase-04-live-verify-api.sh:336, phase-05a-changelog-entry.sh:685, phase-06-docs.sh:618",
+      "sites": [
+        385,
+        265,
+        336,
+        685,
+        618
+      ],
+      "shape": "1 — an exit code captured (or discarded) and never compared",
+      "defect": "Every phase's append_phase_result return value is discarded, and the exit decision immediately after reads a local variable instead. A failed report write leaves a green phase and an empty phases[].",
+      "measurement_verbatim": "STUB append_phase_result FAILING -> 'phase-02-test: PASSED ... EXIT 0' while report.json phases[] == []",
+      "constitutional_impact": "§6.AA clause 8 condition (B) requires 'every entry in phases[] is PASS'. An absent entry satisfies that vacuously.",
+      "secondary": "phase-03:242 and phase-06:603 additionally append `|| true` on their FAIL paths (shape 10), though both exit 1 immediately after, so no verdict flips there.",
+      "one_line_fix": "`append_phase_result ... || { echo ...; exit 1; }` at each of the five call sites."
+    },
+    {
+      "id": "P11",
+      "severity": "UNCONFIRMED",
+      "status": "UNCONFIRMED — see what_would_settle_it",
+      "file": "scripts/pipeline/phase-00-precondition.sh",
+      "sites": [
+        44
+      ],
+      "shape": "12 — verdict a function of checkout config rather than of the tree",
+      "claim": "FR-000's clean-tree guard is `git status --porcelain`, whose output is shaped by per-submodule config. .gitmodules sets `ignore = untracked` for submodules/containers (:4) and submodules/challenges (:32). Per git's own documentation of that value, untracked files inside those submodules do not make the tree dirty for this gate — so the pipeline's only safety boundary would let a run proceed from a tree that is not clean.",
+      "why_unconfirmed": "Both submodules are currently clean on this host, so no live differential was capturable read-only. Default porcelain and --ignore-submodules=none both returned empty; no untracked files are present inside those submodules right now.",
+      "what_would_settle_it": "Create one untracked file under submodules/containers/ and run phase-00-precondition.sh on a master checkout; a `git status --porcelain` that stays empty while the file exists is the wrong verdict. Not performed: it requires writing into the repo, which this hunt forbids, and the equivalent hermetic fixture requires `git commit` to create a gitlink, also forbidden.",
+      "one_line_fix": "`git -C \"$REPO_PATH\" status --porcelain --ignore-submodules=none`."
+    }
+  ],
+  "sub_sweep_B_status": "COMPLETE — 15 files swept, 16 findings confirmed with captured proof, 3 UNCONFIRMED items, 5 files with zero findings. B2 and B7 were independently re-verified in source and re-reproduced live by the lead agent.",
+  "summary": {
+    "files_swept_lead": 13,
+    "files_swept_delegated_A": 11,
+    "files_swept_delegated_B": 15,
+    "findings_confirmed_by_fixture_lead": 14,
+    "findings_confirmed_by_measurement_lead": 3,
+    "findings_confirmed_by_inspection_lead": 3,
+    "findings_unconfirmed_lead": 1,
+    "findings_confirmed_delegated_A": 10,
+    "findings_unconfirmed_delegated_A": 1,
+    "severity_counts_recorded_here": {
+      "CRITICAL": 5,
+      "HIGH": 16,
+      "LOW": 3,
+      "LOW-MEDIUM": 2,
+      "MEDIUM": 20,
+      "UNCONFIRMED": 2
+    },
+    "most_serious": "F1 — scripts/check-cycle-coverage.sh:129. The §6.AK distribute gate accepts the mere mention of a Challenge's name as proof it was executed and passed. On the evidence format every recent release actually uses, a file recording all four covering Challenges as FAILED yields '§6.AK PASS ... executed+PASSED device Challenges' and exit 0; the identical verdicts in the JSON shape the gate recognises yield exit 1. The verdict is a function of formatting, not of content.",
+    "cross_cutting_pattern": "Twenty-one of the recorded findings are one shape: a gate whose corpus can become empty — or whose required field can be absent — reports the empty case as success. The tree already contains the correct fix in four places: check-constitution.sh:188 (credential-scan floor), verify-all-constitution-rules.sh:290 (registry floor), phase-02-test.sh:389 (zero-record message), and run-iteration.sh:196-201 (tests>0 floor). The remedy is a known local idiom, applied unevenly.",
+    "all_mutations_reverted": "N/A — no production mutation was applied. Every probe ran against a copy, a verbatim excerpt, or a scratchpad fixture.",
+    "production_mutations_left_in_tree": 0,
+    "repo_files_modified": 0,
+    "device_or_emulator_used": false,
+    "full_build_run": false,
+    "issues_opened": "none — this is a report-only hunt; each finding carries a described one-line fix that was deliberately NOT applied.",
+    "severity_counts_derived_by": "counted programmatically from the findings arrays in this file, not asserted by hand",
+    "files_swept_total": 39,
+    "findings_total_recorded": 48,
+    "findings_confirmed_delegated_B": 16,
+    "findings_unconfirmed_delegated_B": 3,
+    "files_with_zero_findings": 9,
+    "findings_confirmed_by_fixture_total": 40,
+    "findings_confirmed_by_measurement_or_inspection_total": 6,
+    "findings_unconfirmed_total": 2,
+    "additional_unconfirmed_subitems_inside_confirmed_findings": "3 (B14 trigger, B14 readdir amplifier, B15 trigger)"
+  },
+  "no_guessing_compliance": "§11.4.6: the report and this record were scanned for the forbidden vocabulary (likely/probably/maybe/might/possibly/presumably/seemingly/apparently/perhaps/supposedly/conjectured/seems to/appears to) and are clean. One finding (F20) was downgraded to UNCONFIRMED rather than described with a hedge, and one delegated finding (P11) and one scope limit (P6) are marked UNCONFIRMED:/UNKNOWN: with the evidence that would settle each.",
+  "retracted_measurements": [
+    {
+      "id": "R1-DISCARDED",
+      "what": "A first attempt to measure check-challenge-coverage.sh's per-feature detection layer passed the 670 KB concatenated Challenge corpus through argv.",
+      "failure_verbatim": "/bin/bash: line 28: /usr/bin/bash: Argument list too long",
+      "effect": "Detection layers 1 and 2 silently failed to evaluate, pushing most features down to layer 3 and producing a wrong per-feature table.",
+      "action": "Numbers DISCARDED; the probe was re-run through a temp file. The corrected result is recorded in F16.",
+      "why_recorded": "A hunt that hides a retracted measurement is not an honest record."
+    }
+  ],
+  "delegated_findings_scanners_and_autonomous_qa": [
+    {
+      "id": "B1",
+      "severity": "HIGH",
+      "status": "REPORT-ONLY",
+      "file": "scripts/scan-no-hardcoded-uuid.sh",
+      "sites": [
+        60,
+        61
+      ],
+      "shape": "6",
+      "defect": "`grep -oE '<uuid>' \"$p\" | grep -qvE '^0{8}-…'` under `set -uo pipefail` (line 35). grep -q exits at the first non-nil UUID, SIGPIPEs the producer, 141 flips the `if` to FALSE and the file is not flagged.",
+      "measurement_verbatim": {
+        "threshold": [
+          "N=1 exit=1 CAUGHT",
+          "N=100 exit=1 CAUGHT",
+          "N=200 exit=1 CAUGHT",
+          "N=300 exit=0 MISSED",
+          "N=1000 exit=0 MISSED",
+          "N=5000 exit=0 MISSED"
+        ],
+        "mechanism": "N=100 rc=0 PIPESTATUS=[0 0] | N=400 rc=141 PIPESTATUS=[141 0]"
+      },
+      "reachability_measured": "LATENT — the real corpus (2645 files surviving exemptions) has no file with >=20 UUID matches.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE",
+      "one_line_fix": "Drop the pipe: capture the producer output into a variable and test the string."
+    },
+    {
+      "id": "B2",
+      "severity": "HIGH",
+      "status": "REPORT-ONLY",
+      "file": "scripts/scan-no-hardcoded-{uuid,ipv4,hostport}.sh",
+      "sites": [
+        65,
+        64,
+        87
+      ],
+      "shape": "7 + 10",
+      "defect": "The `git ls-files -z | … | while …` enumeration is terminated by `|| true` with no floor asserting N>0 files scanned. Any git failure at gate time turns the pre-push §6.R gate into a no-op reporting success.",
+      "independently_verified_by_lead": "`|| true` confirmed at uuid:65, ipv4:64, hostport:87; the live GIT_DIR reproduction was re-run by the lead agent with identical results.",
+      "measurement_verbatim": {
+        "real_repo_transient_git_failure": "GIT_DIR=/nonexistent/x.git -> uuid exit=0, ipv4 exit=0, hostport exit=0",
+        "control_normal_env": "uuid exit=0, ipv4 exit=0, hostport exit=0",
+        "note": "The broken-corpus run is byte-identical to the clean run in exit code AND output — the scanners print nothing on success.",
+        "fixture_with_real_violations_non_git_dir": "all three exit 0; the same tree with `git init` -> all three exit 1"
+      },
+      "realistic_triggers": "index.lock contention with a concurrent git process, a corrupt index, safe.directory dubious-ownership refusal (this repo lives on an external mount), a stray GIT_DIR in the environment.",
+      "corpus_at_risk": "UUID 2645 files (47% of 5531 tracked); IPv4/host:port 1402 files (25%)",
+      "hermetic_tests_not_vacuous_on_this_axis": "tests/check-constitution/test_no_hardcoded_{uuid,ipv4,hostport}.sh each `git init -q` their fixtures — the gap is runtime-only.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE (re-reproduced live by the lead agent)",
+      "one_line_fix": "Count enumerated files and exit 1 with an explicit 'scanner examined 0 files' message when zero; do not swallow git ls-files failure with `|| true`."
+    },
+    {
+      "id": "B3",
+      "severity": "HIGH",
+      "status": "REPORT-ONLY",
+      "file": "scripts/scan-no-hardcoded-ipv4.sh",
+      "sites": [
+        74
+      ],
+      "shape": "4 + 2",
+      "defect": "The reserved-address filter is `grep -vE` over the whole path:lineno:content line, so a line carrying both a reserved literal and a routable one is dropped entirely.",
+      "measurement_verbatim": [
+        "A: routable IP alone exit=1",
+        "B: SAME routable IP on a line that also has 127.0.0.1 exit=0",
+        "C: SAME routable IP on a line that also has 0.0.0.0 exit=0"
+      ],
+      "note": "Case B's line is `val prod = if (dev) \"127.0.0.1\" else \"203.0.55.17\"` — idiomatic, not contrived.",
+      "reachability_measured": "LATENT — 0 lines in the real corpus mix a reserved IP with another dotted-quad.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE",
+      "one_line_fix": "Filter the matched literal, not the line."
+    },
+    {
+      "id": "B4",
+      "severity": "HIGH",
+      "status": "REPORT-ONLY",
+      "file": "scripts/scan-no-hardcoded-hostport.sh",
+      "sites": [
+        94
+      ],
+      "shape": "4 + 2",
+      "defect": "Same whole-line defect in the loopback filter.",
+      "measurement_verbatim": "`val api = if (dev) \"http://localhost:8443\" else \"https://prod.example.com:8443/v1\"` -> MISSED (exit=0); the production URL alone -> exit=1",
+      "reachability_measured": "LATENT",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE",
+      "one_line_fix": "Filter per extracted URL literal, not per line."
+    },
+    {
+      "id": "B5",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/scan-no-hardcoded-ipv4.sh",
+      "sites": [
+        75
+      ],
+      "shape": "4 + 2",
+      "defect": "Contradicts the file's own documented invariant (header 44-47: 'a routable IP in those same files … is still flagged'). The implementation drops the whole line on any 10.0.2.x token.",
+      "measurement_verbatim": [
+        "A: routable IP on its own line in the emulator helper exit=1",
+        "B: SAME routable IP on a line that also contains a slirp literal exit=0",
+        "C: same mix in a NON-emulator qa file (control) exit=1"
+      ],
+      "reachable_today": "lib-emulator.sh:146 already carries 0.0.0.0/0 + 10.0.2.2 on one line.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE",
+      "one_line_fix": "Filter the matched literal, not the line."
+    },
+    {
+      "id": "B6",
+      "severity": "CRITICAL",
+      "status": "REPORT-ONLY",
+      "file": "scripts/autonomous-qa/aggregate-evidence.sh",
+      "sites": [
+        180
+      ],
+      "shape": "7 + 10",
+      "defect": "Zero iterations is a WARNING, after which the script continues and exits 0, emitting a schema-valid <VER>-test-evidence.json and cycle-coverage-map-<VER>.yaml for the §6.AK distribute gate.",
+      "measurement_verbatim": "WARN: no iterations found … / coverage-map (0 PASS claim(s)) / test-evidence (0 iteration row(s)) / totals iter=0 PASS=0 SKIP=0 FAIL=0 / exit=0 ; emitted {\"version\":\"1.9.9-9999\",\"commit_sha\":\"unknown\",\"test_results\":[]}",
+      "triggers": "A mistyped --date, a matrix that never ran, or a wrong --evidence-dir.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE",
+      "one_line_fix": "exit 1 (not WARN) when ov_iter is 0, and refuse to write the §6.AK artifacts at all."
+    },
+    {
+      "id": "B7",
+      "severity": "CRITICAL",
+      "status": "REPORT-ONLY",
+      "file": "scripts/autonomous-qa/aggregate-evidence.sh",
+      "sites": [
+        167
+      ],
+      "shape": "8",
+      "defect": "The §6.AK claim gate is `if [[ \"$verdict\" == \"PASS\" ]]` — the self-reported string only. `t` (tests) is parsed at line 127 and never used in the claim decision, so a verdict.json recording PASS with tests=0 becomes an asserted 'the feature works' claim.",
+      "independently_verified_by_lead": "aggregate-evidence.sh:167 `if [[ \"$verdict\" == \"PASS\" ]]; then` confirmed, with t/f/e/s parsed at :127-128 and absent from that condition.",
+      "measurement_verbatim": "iteration verdict=PASS tests=0 -> coverage-map (1 PASS claim(s)), totals iter=1 PASS=1, exit=0; claim emitted: - fix: \"goapi/rutracker — search '1080p' returns results, opens details, obtains download\"",
+      "note": "The file's own header asserts 'every number is derived from the actual verdict.json files on disk' — true of the numbers, false of the CLAIM, which is derived from a string. run-iteration.sh:196-201 has the tests>0 floor; the aggregator does not re-check it.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE",
+      "one_line_fix": "Gate the claim on verdict==PASS && t>0 && f==0 && e==0."
+    },
+    {
+      "id": "B8",
+      "severity": "HIGH",
+      "status": "REPORT-ONLY",
+      "file": "scripts/autonomous-qa/aggregate-evidence.sh",
+      "sites": [
+        112,
+        172
+      ],
+      "shape": "12",
+      "defect": "`for idir in \"$bdir\"/*/` aggregates every iteration directory present, with no freshness or identity check; run-matrix.sh:146 clears verdict.json only for the subsets this invocation runs. A leftover directory from an earlier run on the same date is aggregated as a current-cycle §6.AK claim.",
+      "measurement_verbatim": "mtimes 2026-08-20 kinozal-mp3/verdict.json vs 2026-08-26 rutracker-1080p/verdict.json -> totals iter=2 PASS=1 FAIL=1, and the 6-day-old kinozal-mp3 claim is asserted for this cycle",
+      "structural_note": "Unfixable at the aggregator as things stand: the iteration verdict.json schema (run-iteration.sh:217-232) carries no timestamp and no commit SHA.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE",
+      "one_line_fix": "Add timestamp + commit_sha to the iteration verdict.json and reject any iteration whose SHA != HEAD or whose timestamp is outside the cycle window."
+    },
+    {
+      "id": "B9",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/autonomous-qa/aggregate-evidence.sh",
+      "sites": [
+        70
+      ],
+      "shape": "10",
+      "defect": "`SHA=\"$(git … rev-parse HEAD 2>/dev/null || echo unknown)\"` writes the literal string `unknown` into <VER>-test-evidence.json as \"commit_sha\". §6.AA clause 8 condition (A) requires that field to equal git rev-parse HEAD.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE (captured in the B6 output)",
+      "one_line_fix": "exit 1 on rev-parse failure rather than emitting a sentinel."
+    },
+    {
+      "id": "B10",
+      "severity": "HIGH",
+      "status": "REPORT-ONLY",
+      "file": "scripts/autonomous-qa/release-coldstart-canary.sh",
+      "sites": [
+        71,
+        72
+      ],
+      "shape": "2 + 8",
+      "defect": "An absent, empty, or error-carrying logcat is indistinguishable from a clean one — both give fatal=0. Line 68 captures with `|| true` and `2>&1`, so an adb failure both goes unnoticed and writes its own error text into the evidence file, which the crash check then reads as 'no crash'.",
+      "measurement_verbatim": [
+        "1: logcat with a genuine release cold-start crash  fatal=[2] verdict=FAIL",
+        "2: logcat capture FAILED — file absent            fatal=[0] verdict=PASS",
+        "3: adb error text landed IN the file via 2>&1     fatal=[0] verdict=PASS",
+        "4: logcat present but EMPTY (0 bytes)             fatal=[0] verdict=PASS"
+      ],
+      "honest_residual_scope": "Conditions 2 (pidof) and 3 (dumpsys top) still catch a crash that kills the process at check time. What this bypasses is a crash the process survives or recovers from inside the 20s window (relaunch, secondary-activity crash, background-thread FATAL, ANR) — and it writes \"fatal_count\": 0 as a positive assertion from a file never proven readable.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE",
+      "one_line_fix": "Assert the logcat exists and exceeds a minimum line count before evaluating fatal; treat an unreadable/empty logcat as verdict=FAIL."
+    },
+    {
+      "id": "B11",
+      "severity": "HIGH",
+      "status": "REPORT-ONLY",
+      "file": "scripts/autonomous-qa/run-nav-challenges.sh",
+      "sites": [
+        71,
+        79
+      ],
+      "shape": "7 + 8 + 10",
+      "defect": "The verdict is `exit $GRADLE_RC` and nothing else — no tests-executed floor, in direct contrast to sibling run-iteration.sh:196-201 whose comment documents `gradle_rc=0 but tests=0` as an observed condition. Line 75's `find … -exec cp … || true` swallows collection failure and line 78 prints 'junit copied to …' unconditionally.",
+      "measurement_verbatim": "gradle_rc=0, results dir empty -> 'junit copied to …/EVID' printed; XML files actually copied: 0; run-nav-challenges.sh exit=0",
+      "blast_radius": "This script produces the §6.Z device evidence for the C24/C46/C55 nav Challenges named in the §6.AK cycle-coverage-map.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE",
+      "one_line_fix": "Port run-iteration.sh's decision table: parse the JUnit XML and exit 1 when tests==0 or no XML was collected."
+    },
+    {
+      "id": "B12",
+      "severity": "HIGH",
+      "status": "REPORT-ONLY",
+      "file": "scripts/autonomous-qa/run-matrix.sh",
+      "sites": [
+        47
+      ],
+      "shape": "9 + 7",
+      "defect": "`mapfile -t SUBSET_LINES < <(qa_emit_subsets)` — a process substitution's exit status is invisible to set -euo pipefail. The manual --subsets path has a floor (76-79, exit 2); the DEFAULT --subsets all path has none.",
+      "measurement_verbatim": "lib-subsets.sh: line 43: sha1sum: command not found -> mapfile rc=0, SUBSET_LINES count=0 (expected 31); matrix would report Totals: PASS=0 SKIP=0 FAIL=0 and exit 0",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE",
+      "one_line_fix": "Add the same floor the manual path has, and assert the expected count (31) for --subsets all."
+    },
+    {
+      "id": "B13",
+      "severity": "MEDIUM",
+      "status": "REPORT-ONLY",
+      "file": "scripts/autonomous-qa/run-iteration.sh",
+      "sites": [
+        91
+      ],
+      "shape": "9 + 11",
+      "defect": "Under set -euo pipefail the .env parse aborts the script whenever the key is absent, making the explicit keyless-degradation path at lines 92-97 dead code.",
+      "measurement_verbatim": [
+        ".env missing -> outer rc=2 (died BEFORE line 92/97)",
+        "key line missing -> outer rc=1 (the documented keyless fallback is UNREACHABLE)",
+        "key present -> REACHED line 92"
+      ],
+      "direction": "Fail-closed downstream, but the operator sees 'run-iteration died before writing any verdict' with no indication the cause was a condition the code explicitly intended to tolerate.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE",
+      "one_line_fix": "`acl=\"$(… || true)\"` so the intended keyless path at 92-97 actually runs."
+    },
+    {
+      "id": "B14",
+      "severity": "HIGH (mechanism CONFIRMED; trigger UNCONFIRMED)",
+      "status": "REPORT-ONLY",
+      "file": "scripts/autonomous-qa/run-iteration.sh",
+      "sites": [
+        127,
+        135
+      ],
+      "shape": "12",
+      "defect": "`XML=\"$(find \"$RESULTS_DIR\" -name '*.xml' … | head -1 || true)\"` selects a JUnit XML by traversal order with no freshness and no identity assertion; app/build/outputs/androidTest-results/connected is never cleared by any script in the tree.",
+      "measurement_verbatim": "XML picked = …/TEST-emulator-5554.xml, mtime 2026-08-20 (6 days old); parsed tests=1 failures=0 errors=0; VERDICT = PASS",
+      "unconfirmed": "Whether :app:connectedDebugAndroidTest can exit 0 without writing a fresh XML (task UP-TO-DATE, or an instrumentation run producing no result file). Settling evidence: run that task twice with unchanged inputs, recording the task outcome (UP-TO-DATE vs EXECUTED) and the XML mtime. Gradle was not run (resource constraint). Also UNCONFIRMED: the multi-XML readdir amplifier on btrfs — across 5 trials readdir returned the newest-created file first.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE for the mechanism; UNCONFIRMED for the trigger",
+      "one_line_fix": "Clear RESULTS_DIR before the gradle invocation and reject any XML older than the run start or whose testsuite name is not $TEST_CLASS."
+    },
+    {
+      "id": "B15",
+      "severity": "MEDIUM (mechanism CONFIRMED; trigger UNCONFIRMED)",
+      "status": "REPORT-ONLY",
+      "file": "scripts/autonomous-qa/record-qa-session.sh",
+      "sites": [
+        184
+      ],
+      "shape": "6",
+      "defect": "`printf '%s\\n' \"$probe_out\" | grep -qE 'Stream .* Video:'` under set -euo pipefail. The Video line is near the top of ffmpeg's output; grep -q exits there, SIGPIPEs the producer, pipefail sets 141, and `!` inverts it — so a verified-good video is declared unverifiable and the script exit 2s with the false message 'no video stream found'.",
+      "measurement_verbatim": [
+        "probe_out=4941 B -> verified OK",
+        "probe_out=72141 B -> verified OK",
+        "probe_out=240141 B -> VERIFICATION FAILED -> exit 2",
+        "probe_out=960141 B -> VERIFICATION FAILED -> exit 2",
+        "PIPESTATUS proof: pipeline_rc=141 PIPESTATUS=[141 0]"
+      ],
+      "direction": "Fail-closed (a false FAIL), not a vacuous pass — but the operator is handed a false diagnosis.",
+      "unconfirmed": "Whether a real `ffmpeg -hide_banner -i <qa.mp4> -f null -` stderr for a representative recording reaches ~240KB. Settling evidence: that command piped to `wc -c` on the longest recorded QA session.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE for the mechanism; UNCONFIRMED for the trigger",
+      "one_line_fix": "Drop the pipe: `[[ \"$probe_out\" == *\"Video:\"* ]]`."
+    },
+    {
+      "id": "B16",
+      "severity": "LOW",
+      "status": "REPORT-ONLY",
+      "file": "scripts/autonomous-qa/record-qa-session.sh",
+      "sites": [
+        200
+      ],
+      "shape": "6 + 10 interacting",
+      "defect": "On SIGPIPE, head has already printed the value AND `|| echo unknown` then appends, producing a two-line string.",
+      "measurement_verbatim": "resolution=[1080x2280\\nunknown]",
+      "impact": "Consumed only by the log line at 202 — cosmetic.",
+      "evidence_standard": "CONFIRMED-BY-FIXTURE",
+      "one_line_fix": "Capture without the pipe, or `|| true` instead of `|| echo unknown`."
+    }
+  ],
+  "swept_clean_zero_findings": [
+    "scripts/check-markdown-export-sync.sh",
+    "scripts/snapshot-coverage-ledger.sh",
+    "scripts/pipeline/phase-01-build-lava-api-go.sh",
+    "scripts/autonomous-qa/lib-subsets.sh",
+    "scripts/autonomous-qa/lib-summary.sh",
+    "scripts/autonomous-qa/lib-backend.sh",
+    "scripts/autonomous-qa/lib-emulator.sh",
+    "scripts/autonomous-qa/lib-jackett.sh",
+    "scripts/autonomous-qa/lib-remote.sh"
+  ]
+}

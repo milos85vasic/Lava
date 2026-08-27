@@ -88,11 +88,42 @@ authored separately.
    for every literal it copied and **fails loudly** if any is no longer
    present, instead of silently emitting an entry the real gate would not
    match.
-2. **Post-write self-verification.** After writing, it re-runs the gate's own
+
+   Each literal is matched **in its assignment context** —
+   `GRADLE_VERSION_FILE="…"`, `CHANGELOG_CHANNEL="…"`,
+   `CHANGELOG_PATTERN_TMPL='…'` — never as a bare value. That is
+   load-bearing, because the two apps' values are substrings of one another:
+   `firebase-app-distribution` is a *prefix* of
+   `firebase-app-distribution-api-app`, and `app/build.gradle.kts` is a
+   *substring* of `api-app/build.gradle.kts` (both paths also appear in
+   ordinary comment prose in that file). A bare substring grep for the client
+   channel was satisfied by the **api-app** channel's line, so renaming the
+   client channel upstream left the drift check green, this phase wrote the
+   snapshot into the stale channel directory and reported `PASS`, and
+   `firebase-distribute.sh` Gate 3 then refused the distribute for a snapshot
+   it could not find. Including the variable name and the closing quote rules
+   out both the longer sibling value and prose. Covered by
+   `tests/pipeline/test_phase_05a_drift_detection.sh`.
+2. **The version parse is validated, not just non-empty.** The parse
+   expressions are byte-identical to `firebase-distribute.sh`'s (lines
+   113-116) and must stay that way — the two have to agree or Gates 2+3 refuse
+   the distribute. But `sed` prints its input **unchanged** on a no-match, and
+   the greps are looser than the seds that follow them (`versionCode\s*=`
+   versus a literal `"= "`). So a valid Kotlin `versionCode=1086` written
+   without spaces passed the grep, failed the sed, and yielded the whole line —
+   non-empty, so the `-z` guard was satisfied and a **no-match parse read as
+   success**: the phase reported `PASS` while writing
+   `…/firebase-app-distribution/9.9.1-        versionCode=9001.md` and a
+   matching CHANGELOG heading. The fix keeps the shared expression and
+   validates its **output**: `versionCode` must be a plain integer (the gate
+   compares it arithmetically), and `versionName` must carry no whitespace or
+   quotes. Real values (`1.3.17`, `0.2.13`, `9.9.2-rc1`) all pass. Covered by
+   `tests/pipeline/test_phase_05a_version_parse_sanity.sh`.
+3. **Post-write self-verification.** After writing, it re-runs the gate's own
    two checks — the same `grep -qE "$CHANGELOG_PATTERN"` against the real
    `CHANGELOG.md`, and the same `[[ -f "$SNAPSHOT_FILE" ]]`. A failure there is
    reported as this script's own bug (`FAIL`), never as success.
-3. **Idempotent.** An already-present entry for the same version is detected
+4. **Idempotent.** An already-present entry for the same version is detected
    with the gate's own regex and left untouched (no duplicate). An existing
    snapshot is left alone unless `--force`.
 

@@ -120,6 +120,16 @@ declare -a EXTRA_APKS=()        # additional APKs installed on each AVD after th
 BOOT_TIMEOUT=""                 # forwarded to emulator-matrix --boot-timeout (default 5m).
                                 # Raise on a loaded host where an ARM/HVF cold-boot legitimately
                                 # exceeds 5m on contention (NOT a product defect). Empty = CLI default.
+# LVA-161 (2026-08-26): forwarded to emulator-matrix --test-timeout. The CLI
+# default is 10m (cmd/emulator-matrix/main.go:123), which is the TEST-step
+# budget only (cold boot is timed separately as boot_seconds). A whole-module
+# Challenge sweep is a SINGLE gradle invocation covering every selected class,
+# so that 10m default is far below the real workload: the 2026-08-26T14-09-17Z
+# run was killed at test_seconds=600.02 with "signal: killed" having completed
+# only 81 of 104 tests. Gradle writes its JUnit XML at the END of the run, so a
+# kill destroys the results of every class, including the ones that already
+# passed. Callers MUST size this to the selected workload. Empty = CLI default.
+TEST_TIMEOUT=""
 # §6.X containerized-runner image + runtime. The pinned Containers
 # cmd/emulator-matrix CLI (>= 71d32562) REQUIRES --container-image when the
 # resolved runner is containerized (Linux + /dev/kvm), and accepts
@@ -159,6 +169,7 @@ while [[ $# -gt 0 ]]; do
         --avds)          AVDS_OVERRIDE="$2"; shift 2 ;;
         --extra-apk)     EXTRA_APKS+=("$2"); shift 2 ;;
         --boot-timeout)  BOOT_TIMEOUT="$2"; shift 2 ;;
+        --test-timeout)  TEST_TIMEOUT="$2"; shift 2 ;;
         --container-image)   CONTAINER_IMAGE="$2"; shift 2 ;;
         --container-runtime) CONTAINER_RUNTIME="$2"; shift 2 ;;
         --latest-api)    LATEST_API="$2"; shift 2 ;;
@@ -474,6 +485,7 @@ echo "==> Delegating to Containers/cmd/emulator-matrix --runner=auto (resolves t
     "${CONTAINER_ARGS[@]}" \
     "${EXTRA_APK_ARGS[@]}" \
     ${BOOT_TIMEOUT:+--boot-timeout "$BOOT_TIMEOUT"} \
+    ${TEST_TIMEOUT:+--test-timeout "$TEST_TIMEOUT"} \
     --cold-boot \
     "${TEST_CLASS_ARGS[@]}"
 RC=$?

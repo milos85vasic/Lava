@@ -179,9 +179,10 @@
 <h1
 id="scriptsscan-no-hardcoded-uuidsh--user-guide"><code>scripts/scan-no-hardcoded-uuid.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-05-15 (1.2.23 closure-cycle,
-§6.AD-debt task #61 backfill) <strong>Inheritance:</strong>
-HelixConstitution §11.4.18 (script documentation mandate)</p>
+<p><strong>Last verified:</strong> 2026-08-26 (§6.J corpus floor —
+"examined ZERO files" now refuses; LVA vacuous-pass sweep B2)
+<strong>Inheritance:</strong> HelixConstitution §11.4.18 (script
+documentation mandate)</p>
 <h2 id="overview">Overview</h2>
 <p>Stub doc generated from the script's in-source header comment. See
 <code>scripts/scan-no-hardcoded-uuid.sh</code> for canonical behavior.
@@ -213,6 +214,160 @@ Exemptions (kept in lockstep with the §6.R clause body):
 <h2 id="usage">Usage</h2>
 <p>See the script's in-source comment block (above) for canonical usage
 examples.</p>
+<h2
+id="2026-08-26-update--6j-corpus-floor-an-unread-corpus-is-no-longer-a-clean-scan">2026-08-26
+update — §6.J corpus floor: an unread corpus is no longer a clean
+scan</h2>
+<p>All three §6.R scanners (<code>scan-no-hardcoded-uuid.sh</code>,
+<code>scan-no-hardcoded-ipv4.sh</code>,
+<code>scan-no-hardcoded-hostport.sh</code>) received the same change,
+for the same measured defect. Read this section together with the two
+sibling docs; the text below is deliberately identical across them
+because the guard is.</p>
+<h3 id="the-defect">The defect</h3>
+<p>These scanners are silent on success — a clean scan printed nothing
+at all and exited 0. The corpus came from
+<code>git ls-files -z | grep -zv &lt;exemptions&gt; | while read ...</code>,
+and the whole pipeline was terminated with <code>|| true</code>. Nothing
+asserted that a single file had actually been read, so <strong>a broken
+corpus was byte-identical to a clean scan</strong>:</p>
+<pre><code>GIT_DIR=/nonexistent/x.git   -&gt;  uuid exit=0   ipv4 exit=0   hostport exit=0
+control (normal environment)  -&gt;  uuid exit=0   ipv4 exit=0   hostport exit=0</code></pre>
+<p>The decisive control: a fixture tree containing real violations of
+all three rules, in a directory that is <strong>not</strong> a git
+repository, passed all three scanners. Running <code>git init</code> on
+the same tree — changing nothing about the violating content — made all
+three fail. The verdict was a function of whether
+<code>git ls-files</code> worked, not of whether the code was clean.</p>
+<p>The realistic triggers are ordinary, not exotic:
+<code>index.lock</code> contention from a concurrent git process, a
+corrupt index, a <code>safe.directory</code> dubious-ownership refusal
+(this checkout lives on an external mount, where that refusal is a known
+class), or a stray <code>GIT_DIR</code> inherited from a parent process.
+Each one silently converts §6.R enforcement into a no-op, and — because
+pre-push runs these through <code>scripts/check-constitution.sh</code> —
+into a green push.</p>
+<h3 id="what-the-scanner-now-refuses">What the scanner now refuses</h3>
+<p>Three refusals, all <strong>exit 2</strong> (distinct from exit 1,
+which still means real violations were found in a corpus that was
+genuinely read):</p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Message</th>
+<th>Why it is not a pass</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>git ls-files</code> exits non-zero</td>
+<td><code>6.R SCAN FAILED: could not enumerate the tracked-file corpus.</code>
+— git's own stderr is reproduced, indented</td>
+<td>The enumeration failed; a clean exit would assert nothing. The
+message explicitly states this is <strong>not</strong> "no violations
+found"</td>
+</tr>
+<tr>
+<td>The corpus survives the exemption filter but contains no readable
+regular file</td>
+<td><code>6.R SCAN FAILED: the scan examined ZERO files.</code></td>
+<td>A clean exit over an empty corpus asserts nothing, and this scanner
+prints nothing on success — so the empty case is otherwise
+indistinguishable from a real pass</td>
+</tr>
+<tr>
+<td>Some tracked paths are not readable regular files, are not declared
+submodule gitlinks, and are not reported deleted by git</td>
+<td><code>6.R SCAN INCOMPLETE: the scan examined a PARTIAL corpus.</code>
+— the offending paths are named</td>
+<td>A verdict over a subset asserts nothing about the absent files. A
+floor that fires only at exactly zero is a floor with one stair</td>
+</tr>
+</tbody>
+</table>
+<p>Each message distinguishes its cause rather than emitting one generic
+failure. The zero-files refusal, for example, separates
+<em>"<code>git ls-files</code> succeeded but the exemption filter left
+nothing"</em> (wrong tree, or the filter regex has drifted to exclude
+everything) from <em>"paths were listed but none is a readable regular
+file"</em> (working-tree drift, not an empty repository), because those
+two have different remedies and a diagnosis that misstates its cause
+sends the reader to the wrong one.</p>
+<h3 id="why-the-expectation-is-derived-never-hardcoded">Why the
+expectation is derived, never hardcoded</h3>
+<p>The floor compares against <code>git ls-files</code> output and
+<code>.gitmodules</code>, not against a literal file count. A hardcoded
+count goes stale on the next commit that adds or removes a file, and a
+stale floor is the same defect wearing a different mask.</p>
+<p>Two classes of tracked path are legitimately <strong>not</strong>
+readable regular files, and both are classified rather than dropped:</p>
+<ul>
+<li><strong>Declared submodule gitlinks</strong> — read from
+<code>.gitmodules</code> (<code>path = ...</code>). Expected;
+contributes nothing to scan and triggers nothing.</li>
+<li><strong>Paths git itself reports deleted</strong>
+(<code>git ls-files --deleted</code>) — a pending <code>git rm</code> or
+an unstaged deletion. Already visible to the operator through
+<code>git status</code>, and a deleted file holds no content that could
+carry a violation. These are <strong>excluded from the
+expectation</strong> and <strong>named in the clean verdict</strong>, so
+the scanner's claim always states the corpus it actually read.</li>
+</ul>
+<p>The distinction that carries the weight: <em>absent and reported by
+git</em> is a deletion in progress; <em>absent and not reported by
+git</em> is invisible drift that no other gate would surface. Only the
+second is a refusal.</p>
+<h3 id="the-clean-verdict-now-states-its-corpus">The clean verdict now
+states its corpus</h3>
+<p>Silence on success was half the defect, so success now says what it
+examined (written to stderr, so stdout-consuming callers are
+unaffected):</p>
+<pre><code>6.R UUID scan clean: &lt;N&gt; tracked file(s) examined.</code></pre>
+<p>When pending deletions were excluded, the count is followed by a
+parenthetical naming how many and why.</p>
+<h3 id="exit-codes-updated">Exit codes (updated)</h3>
+<p>The header block quoted above lists only 0 and 1; it predates this
+change and is incomplete. The full set is:</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>No violations — <strong>and</strong> at least one file was actually
+examined</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Violation(s) found (paths printed to stderr)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>The scan could not be trusted: corpus enumeration failed, examined
+zero files, or examined a partial corpus</td>
+</tr>
+</tbody>
+</table>
+<p>Callers that previously treated any non-zero exit as "violations
+found" now distinguish 1 (a real finding) from 2 (a scan that must not
+be believed either way).</p>
+<h3 id="6j-falsifiability-rehearsal">§6.J falsifiability rehearsal</h3>
+<ol type="1">
+<li><code>GIT_DIR=/nonexistent/x.git bash scripts/scan-no-hardcoded-uuid.sh</code>
+→ expect <strong>exit 2</strong> with
+<code>could not enumerate the tracked-file corpus</code> and git's own
+stderr reproduced. Before this change: exit 0, no output.</li>
+<li>Run normally in the Lava tree → expect <strong>exit 0</strong> and
+the corpus-count line.</li>
+<li><code>git rm --cached &lt;some tracked source file&gt;</code>
+(leaving the file on disk), re-run → still exit 0; the file simply
+leaves the corpus, and the reported count drops.</li>
+</ol>
 <h2 id="maintenance">Maintenance</h2>
 <p>When this script is modified, update this document in the same commit
 (CM-SCRIPT-DOCS-SYNC requires it). Per §11.4.18, the documentation MUST

@@ -51,6 +51,14 @@
 # applicable to this run (an actual test-suite failure, or an anti-bluff
 # rejection, always IS a failure — see the overall-result rule below).
 #
+# NARROWED 2026-08-26 (corpus-floor sweep, P2). That tolerance now applies
+# ONLY to a wrapper whose path was redirected by its PHASE02_*_WRAPPER
+# override — i.e. the isolated-test hook described above. All seven wrappers
+# exist in this directory today, so a wrapper resolved to its in-tree DEFAULT
+# path and missing from disk is drift, not a not-yet-landed category, and the
+# category it covers would silently disappear from every pipeline run. That is
+# refused (condition 5 below) rather than skipped.
+#
 # "kotlin" and "real-device-challenge" both independently invoke Gradle
 # (`./gradlew ... test` and `./gradlew ... connectedDebugAndroidTest`
 # respectively) against this SAME project checkout — Gradle daemon/lock
@@ -99,6 +107,13 @@
 #   3. Zero scanned Evidence Records have anti_bluff_status starting with
 #      "REJECTED".
 #   4. At LEAST ONE Evidence Record was actually scanned.
+#   5. EVERY dispatched wrapper produced at least one Evidence Record of its
+#      own, and every wrapper resolved to its in-tree default path exists on
+#      disk. Added 2026-08-26 (corpus-floor sweep finding P2) — see the
+#      PER-CATEGORY CORPUS FLOOR block below for the measured reproduction.
+#      Condition 4 is a floor with one stair: it counts records in TOTAL, so a
+#      category that was dispatched, exited 0 and wrote nothing is invisible
+#      behind any other category's records.
 #
 # Condition 4 was added 2026-08-21 and is not a formality. Conditions 1-3 are
 # all satisfied vacuously by a run in which every dispatched wrapper exits 0
@@ -122,7 +137,10 @@
 #       REJECTED Evidence Records.
 #   1 - at least one dispatched wrapper exited non-zero, OR at least one
 #       Evidence Record reports result FAIL, OR at least one Evidence Record
-#       was REJECTED by its own wrapper's anti-bluff validation.
+#       is REJECTED by this phase's own independent anti-bluff re-validation,
+#       OR at least one Evidence Record ends up with an anti_bluff_status
+#       that is neither exactly "validated" nor a "REJECTED: ..." verdict
+#       (i.e. it was never actually evaluated — see the aggregation loop).
 #   2 - usage/precondition error (missing run_id, report.json absent, jq
 #       missing).
 
@@ -133,6 +151,12 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # shellcheck source=scripts/pipeline/lib/run-report.sh
 source "$SCRIPT_DIR/lib/run-report.sh"
+
+# shellcheck source=scripts/pipeline/lib/anti-bluff-validate.sh
+# The aggregator below re-validates EVERY Evidence Record it scans with this
+# independent validator rather than trusting the anti_bluff_status field it
+# finds on disk — see the long note above the aggregation loop.
+source "$SCRIPT_DIR/lib/anti-bluff-validate.sh"
 
 RUN_ID="${1:-}"
 REPO_PATH_OVERRIDE="${2:-}"
@@ -167,6 +191,31 @@ RELEASE_CANARY_WRAPPER="${PHASE02_RELEASE_CANARY_WRAPPER:-$SCRIPT_DIR/phase-02-t
 CHALLENGE_WRAPPER="${PHASE02_CHALLENGE_WRAPPER:-$SCRIPT_DIR/phase-02-test-challenge.sh}"
 GATE_SWEEP_WRAPPER="${PHASE02_GATE_SWEEP_WRAPPER:-$SCRIPT_DIR/phase-02-test-constitutional-gate-sweep.sh}"
 
+# --- PER-CATEGORY EVIDENCE MANIFEST (corpus-floor sweep 2026-08-26, P2) ----
+# Dispatch name -> the Evidence Record directory name(s) that category's
+# wrapper writes under PHASE_DIR. This is the manifest the per-category floor
+# below derives its expectation from; it is NOT a cosmetic label map.
+#
+# "go" carries two because phase-02-test-go.sh classifies each Go package at
+# runtime (real-binary-contract for tests/contract/**, go-unit-integration
+# otherwise), so either directory alone is a legitimate outcome for that
+# wrapper — the floor requires records in at least one of them, never in both.
+#
+# Every name passed to _dispatch MUST appear here. A dispatched category with
+# no entry is refused below rather than skipped, because silently exempting an
+# unmapped category from the floor would be this same defect relocated INTO
+# the floor (the failure mode verify-all-constitution-rules.sh guards against
+# in its own derived registry count).
+declare -A CATEGORY_EVIDENCE_DIRS=(
+  [go]="go-unit-integration real-binary-contract"
+  [kotlin]="kotlin-unit"
+  [hermetic]="hermetic-script"
+  [stress-chaos]="stress-chaos"
+  [release-canary]="release-canary"
+  [constitutional-gate-sweep]="constitutional-gate-sweep"
+  [real-device-challenge]="real-device-challenge"
+)
+
 START_TS=$(date +%s)
 
 echo "phase-02-test: dispatching available test-category wrappers as parallel processes"
@@ -174,6 +223,16 @@ echo "phase-02-test: dispatching available test-category wrappers as parallel pr
 declare -a DISPATCHED_NAMES=()
 declare -a DISPATCHED_PIDS=()
 declare -a DISPATCHED_LOGS=()
+
+# Absent wrappers, split by CAUSE — a diagnosis that misstates its cause sends
+# the reader to the wrong remedy. A wrapper resolved to its in-tree default
+# path under this script's own directory but not present on disk is real drift
+# (deleted, renamed, or never landed) and the category vanishes from every
+# pipeline run; a wrapper whose path was redirected by a PHASE02_*_WRAPPER
+# override is the documented isolation hook this file's header describes, and
+# its absence is that harness's deliberate choice, not drift.
+declare -a MISSING_DEFAULT_WRAPPERS=()
+declare -a ABSENT_OVERRIDDEN_WRAPPERS=()
 
 # _dispatch <name> <wrapper-path> [args...] — backgrounds <wrapper-path> with
 # the given args, redirecting its stdout+stderr to its own log file under
@@ -187,7 +246,13 @@ _dispatch() {
   local log="${PHASE_DIR}/${name}.log"
 
   if [[ ! -f "$wrapper" ]]; then
-    echo "phase-02-test: SKIPPING '${name}' wrapper — script not found at '${wrapper}' (category not yet wired in / not applicable this run)"
+    if [[ "$wrapper" == "$SCRIPT_DIR/"* ]]; then
+      echo "phase-02-test: MISSING '${name}' wrapper — its in-tree default '${wrapper}' does not exist on disk"
+      MISSING_DEFAULT_WRAPPERS+=("${name} -> ${wrapper}")
+    else
+      echo "phase-02-test: SKIPPING '${name}' wrapper — overridden path '${wrapper}' does not exist (isolated-test override; not the in-tree default)"
+      ABSENT_OVERRIDDEN_WRAPPERS+=("${name} -> ${wrapper}")
+    fi
     return 0
   fi
 
@@ -312,18 +377,80 @@ done
 # companion files always live one level deeper, under "<category>/raw/", so
 # -mindepth 2 -maxdepth 2 reliably selects only real Evidence Records.
 # ---------------------------------------------------------------------------
+#
+# ANTI-BLUFF STATUS IS RE-DERIVED HERE, NEVER TRUSTED AS FOUND (fixed
+# 2026-08-26; forensic anchor). This loop used to read anti_bluff_status
+# straight off disk and count a record rejected only when that string began
+# with "REJECTED". Two defects composed into a fail-open gate:
+#
+#   1. lib/evidence.sh's write_evidence_record stamped every record it wrote
+#      with the literal "validated" as a placeholder, so "the independent
+#      validator accepted this record" and "no validator ever looked at this
+#      record" were byte-identical on disk; and
+#   2. an ABSENT or empty anti_bluff_status compared equal to "not rejected"
+#      (`// empty` yields "", and `[[ "" == REJECTED* ]]` is false), so a
+#      record carrying no status at all counted as clean. Note the asymmetry
+#      this removes: an unrecognised `result` already fell to the `*)` arm and
+#      counted as FAIL (fail-closed), while an unrecognised anti_bluff_status
+#      counted as fine (fail-open).
+#
+# Measured consequence, end-to-end through this script: a real-device-challenge
+# Evidence Record whose entire assertion_summary was "did not crash" reached
+# "phase-02-test: PASSED" with "REJECTED (anti-bluff): 0", while the real
+# validator's verdict on that same record was "REJECTED: assertion_summary
+# matches generic bluff pattern 'did not crash' with no other specific
+# content". Per §6.Z clause 4 a cold-start survival check is the MINIMUM and
+# explicitly not sufficient alone, and §6.AK exists precisely because a
+# C00-only gate green-lit a release whose claimed fixes were never exercised.
+#
+# The loop therefore invokes validate_evidence_record on every record itself.
+# That function is documented IDEMPOTENT and NOT STICKY (it re-derives its
+# verdict from the record's other fields and never reads the prior status as
+# an input), so re-running it over records a wrapper already validated is
+# both safe and the point: this phase's verdict now rests on a validation
+# that provably ran, in this process, over these exact bytes. Three outcomes
+# are distinguished, and only the first is a pass:
+#     validated      an independent validator examined it and accepted it
+#     REJECTED: ...  an independent validator examined it and refused it
+#     anything else  it was never evaluated -> counted as unevaluated, FAIL
 _total=0
 _pass=0
 _fail=0
 _skipped=0
 _rejected=0
+_unevaluated=0
+_revalidated=0
+_placeholder_on_disk=0
 declare -a _fail_records=()
 declare -a _rejected_records=()
+declare -a _unevaluated_records=()
+declare -a _unvalidated_by_wrapper=()
+declare -A _records_by_dir=()
 
 while IFS= read -r -d '' record_path; do
+  # Tally each record against the category directory it sits in — the
+  # per-category floor below needs to know WHICH categories produced
+  # evidence, not merely that some total was non-zero.
+  _rel="${record_path#"$PHASE_DIR"/}"
+  _cat_dir="${_rel%%/*}"
+  _records_by_dir["$_cat_dir"]=$(( ${_records_by_dir["$_cat_dir"]:-0} + 1 ))
+
   result="$(jq -r '.result // empty' "$record_path" 2>/dev/null)"
-  status="$(jq -r '.anti_bluff_status // empty' "$record_path" 2>/dev/null)"
   test_id="$(jq -r '.test_id // empty' "$record_path" 2>/dev/null)"
+
+  # What the record claimed about itself BEFORE this phase looked at it.
+  # Recorded only so a wrapper that never ran the validator is visible in
+  # the summary; it is never used as the verdict.
+  status_on_disk="$(jq -r '.anti_bluff_status // empty' "$record_path" 2>/dev/null)"
+  if [[ "$status_on_disk" == "REJECTED: anti-bluff validation has not run on this record"* ]]; then
+    _placeholder_on_disk=$((_placeholder_on_disk + 1))
+    _unvalidated_by_wrapper+=("${record_path} :: ${test_id}")
+  fi
+
+  # Independent re-validation — the authoritative step.
+  validate_evidence_record "$record_path" >/dev/null 2>&1
+  _revalidated=$((_revalidated + 1))
+  status="$(jq -r '.anti_bluff_status // empty' "$record_path" 2>/dev/null)"
 
   _total=$((_total + 1))
   case "$result" in
@@ -345,11 +472,68 @@ while IFS= read -r -d '' record_path; do
       ;;
   esac
 
-  if [[ "$status" == REJECTED* ]]; then
+  if [[ "$status" == "validated" ]]; then
+    :
+  elif [[ "$status" == REJECTED* ]]; then
     _rejected=$((_rejected + 1))
     _rejected_records+=("${record_path} :: ${status}")
+  else
+    # Neither verdict. The validator could not be run, could not write, or
+    # something else left this record unexamined. An unexamined record is
+    # NOT a passing record — that equivalence is the exact bluff this
+    # branch exists to refuse.
+    _unevaluated=$((_unevaluated + 1))
+    _unevaluated_records+=("${record_path} :: anti_bluff_status='${status:-<absent>}' — never evaluated")
   fi
 done < <(find "$PHASE_DIR" -mindepth 2 -maxdepth 2 -type f -name '*.json' -print0 2>/dev/null)
+
+# ---------------------------------------------------------------------------
+# PER-CATEGORY CORPUS FLOOR (corpus-floor sweep 2026-08-26, finding P2).
+#
+# The `_total -eq 0` rule below is a floor with ONE stair: it fires only when
+# the run produced no evidence AT ALL, so one record from one category
+# certifies the whole test phase. Measured on this script, verbatim:
+#
+#   wrappers dispatched:    2 (hermetic real-device-challenge)
+#   wrapper exit codes:     0 0
+#   Evidence Records found: 1
+#   phase-02-test: PASSED — all 2 dispatched wrapper(s) exited 0 …    EXIT=0
+#   records on disk:        hermetic-script/stub.HonestSuite.json
+#                           (real-device-challenge produced ZERO)
+#
+# real-device-challenge is the category §6.AA clause 8 condition (C) makes
+# mandatory for all four Android variants, and §6.AK exists because a gate
+# that ran one thing green-lit a release claiming many. Its wrapper already
+# says so in its own source: "the aggregate guard there does NOT rescue it,
+# because it only fires when the run has zero records IN TOTAL, so any other
+# wrapper's records let this one contribute nothing while the phase still
+# reports PASS" (phase-02-test-challenge.sh, the TOTAL_SELECTED/TOTAL_RECORDS
+# floor). That was documented one level down and unenforced up here.
+#
+# The expectation is DERIVED per dispatched category from CATEGORY_EVIDENCE_
+# DIRS above and from the wrappers this run actually invoked — never a
+# hardcoded record count, which would go stale the moment a suite grows or
+# shrinks. A wrapper that exits 0 having written nothing is a bug in that
+# wrapper (every one of them has its own zero-record refusal), so on a healthy
+# run this floor cannot fire; it fires only when the phase is about to make an
+# unbacked claim.
+declare -a _silent_categories=()
+declare -a _unmapped_categories=()
+for i in "${!DISPATCHED_NAMES[@]}"; do
+  _name="${DISPATCHED_NAMES[$i]}"
+  _expected_dirs="${CATEGORY_EVIDENCE_DIRS[$_name]:-}"
+  if [[ -z "$_expected_dirs" ]]; then
+    _unmapped_categories+=("$_name")
+    continue
+  fi
+  _n=0
+  for _d in $_expected_dirs; do
+    _n=$(( _n + ${_records_by_dir["$_d"]:-0} ))
+  done
+  if [[ "$_n" -eq 0 ]]; then
+    _silent_categories+=("${_name} (exit ${EXIT_CODES[$i]}; expected Evidence Records under ${PHASE_DIR}/{${_expected_dirs// /,}}/)")
+  fi
+done
 
 echo ""
 echo "phase-02-test: SUMMARY"
@@ -360,6 +544,11 @@ echo "  PASS:                       ${_pass}"
 echo "  FAIL:                       ${_fail}"
 echo "  SKIPPED:                    ${_skipped}"
 echo "  REJECTED (anti-bluff):      ${_rejected}"
+echo "  UNEVALUATED (anti-bluff):   ${_unevaluated}"
+echo "  independently re-validated: ${_revalidated} of ${_total}"
+echo "  arrived unvalidated:        ${_placeholder_on_disk} (record(s) whose wrapper never ran the validator)"
+echo "  categories with 0 records:  ${#_silent_categories[@]} (of ${#DISPATCHED_NAMES[@]} dispatched)"
+echo "  wrappers missing in-tree:   ${#MISSING_DEFAULT_WRAPPERS[@]}"
 
 if [[ "${#_fail_records[@]}" -gt 0 ]]; then
   echo ""
@@ -377,8 +566,31 @@ if [[ "${#_rejected_records[@]}" -gt 0 ]]; then
   done
 fi
 
+if [[ "${#_unevaluated_records[@]}" -gt 0 ]]; then
+  echo ""
+  echo "  UNEVALUATED Evidence Records (no anti-bluff verdict exists for these):"
+  for r in "${_unevaluated_records[@]}"; do
+    echo "    - ${r}"
+  done
+fi
+
+if [[ "${#_unvalidated_by_wrapper[@]}" -gt 0 ]]; then
+  echo ""
+  echo "  NOTE — Evidence Records that arrived still carrying write_evidence_record's"
+  echo "  not-yet-validated placeholder, i.e. the wrapper that wrote them never ran"
+  echo "  anti-bluff validation itself. This phase validated them independently, so"
+  echo "  the verdict above is real; the wrapper is nonetheless not holding up its"
+  echo "  end of FR-004 and should be fixed:"
+  for r in "${_unvalidated_by_wrapper[@]}"; do
+    echo "    - ${r}"
+  done
+fi
+
 PHASE_RESULT="PASS"
-if [[ "$_any_wrapper_nonzero" -ne 0 || "$_fail" -gt 0 || "$_rejected" -gt 0 || "$_total" -eq 0 ]]; then
+if [[ "$_any_wrapper_nonzero" -ne 0 || "$_fail" -gt 0 || "$_rejected" -gt 0 \
+      || "$_unevaluated" -gt 0 || "$_total" -eq 0 \
+      || "${#_silent_categories[@]}" -gt 0 || "${#_unmapped_categories[@]}" -gt 0 \
+      || "${#MISSING_DEFAULT_WRAPPERS[@]}" -gt 0 ]]; then
   PHASE_RESULT="FAIL"
 fi
 
@@ -389,10 +601,31 @@ if [[ "$PHASE_RESULT" == "FAIL" ]]; then
   if [[ "$_total" -eq 0 ]]; then
     echo "phase-02-test: FAILED — ${#DISPATCHED_NAMES[@]} wrapper(s) were dispatched and every one exited 0, but they produced ZERO Evidence Records between them. An empty test phase proves nothing: there is no evidence here to have passed. Check each wrapper's log under ${PHASE_DIR} — a wrapper exiting 0 without writing a single record is a bug in that wrapper, not a passing run." >&2
   fi
-  echo "phase-02-test: FAILED — any_wrapper_nonzero=${_any_wrapper_nonzero} fail=${_fail} rejected=${_rejected} evidence_records=${_total}" >&2
+  if [[ "${#MISSING_DEFAULT_WRAPPERS[@]}" -gt 0 ]]; then
+    echo "phase-02-test: FAILED — ${#MISSING_DEFAULT_WRAPPERS[@]} test-category wrapper(s) resolved to their in-tree default path but do not exist on disk, so those categories were never dispatched and this run tested nothing of what they cover:" >&2
+    for w in "${MISSING_DEFAULT_WRAPPERS[@]}"; do echo "    - ${w}" >&2; done
+    echo "  → Examined: ${#DISPATCHED_NAMES[@]} dispatched categor(y/ies) (${DISPATCHED_NAMES[*]:-none}); expected every wrapper script named above to be present in $SCRIPT_DIR." >&2
+    echo "  → A category that silently vanishes is worse than a failing one: the run summary still looks complete. This file's own history records exactly that (constitutional-gate-sweep existed, was functional, and was never dispatched)." >&2
+    echo "  → Do: restore the missing script (git checkout -- <path>), or, if the category was deliberately retired, remove its _dispatch call and its CATEGORY_EVIDENCE_DIRS entry in the same change." >&2
+  fi
+  if [[ "${#_unmapped_categories[@]}" -gt 0 ]]; then
+    echo "phase-02-test: FAILED — ${#_unmapped_categories[@]} dispatched categor(y/ies) have no CATEGORY_EVIDENCE_DIRS entry, so the per-category evidence floor cannot state what they were expected to produce: ${_unmapped_categories[*]}" >&2
+    echo "  → Do: add each name to CATEGORY_EVIDENCE_DIRS near the top of this script, mapping it to the Evidence Record directory its wrapper writes. Exempting it instead would move this very defect into the floor." >&2
+  fi
+  if [[ "${#_silent_categories[@]}" -gt 0 ]]; then
+    echo "phase-02-test: FAILED — ${#_silent_categories[@]} of ${#DISPATCHED_NAMES[@]} dispatched test categor(y/ies) exited 0 having produced ZERO Evidence Records, so nothing they cover was actually proven by this run:" >&2
+    for c in "${_silent_categories[@]}"; do echo "    - ${c}" >&2; done
+    echo "  → Examined: ${_total} Evidence Record(s) across ${#DISPATCHED_NAMES[@]} dispatched categor(y/ies) (${DISPATCHED_NAMES[*]}); expected at least one record from EACH." >&2
+    echo "  → A non-empty total is not per-category evidence: one category's records let a silent one pass unnoticed, which is the §6.AK \"C00-only gate\" shape at the phase-02 layer. Every wrapper here carries its own zero-record refusal, so a wrapper exiting 0 with nothing written is a bug in that wrapper, not a passing run." >&2
+    echo "  → Do: read that category's log under ${PHASE_DIR}/<category>.log and fix the wrapper (or its inputs) so it writes records or fails honestly." >&2
+  fi
+  if [[ "$_unevaluated" -gt 0 ]]; then
+    echo "phase-02-test: FAILED — ${_unevaluated} Evidence Record(s) carry no anti-bluff verdict at all (neither \"validated\" nor \"REJECTED: ...\"). A record nobody evaluated is not a record that passed; treating the absence of a validation as its presence is the bluff class §6.J, §6.Z clause 4 and §6.AK all exist to refuse." >&2
+  fi
+  echo "phase-02-test: FAILED — any_wrapper_nonzero=${_any_wrapper_nonzero} fail=${_fail} rejected=${_rejected} unevaluated=${_unevaluated} evidence_records=${_total} independently_revalidated=${_revalidated} silent_categories=${#_silent_categories[@]} unmapped_categories=${#_unmapped_categories[@]} missing_default_wrappers=${#MISSING_DEFAULT_WRAPPERS[@]}" >&2
   exit 1
 fi
 
 echo ""
-echo "phase-02-test: PASSED — all ${#DISPATCHED_NAMES[@]} dispatched wrapper(s) exited 0, ${_total} Evidence Records scanned, 0 FAIL, 0 REJECTED (${_skipped} SKIPPED, which does not block PASS)"
+echo "phase-02-test: PASSED — all ${#DISPATCHED_NAMES[@]} dispatched wrapper(s) exited 0 and EACH produced at least one Evidence Record (${DISPATCHED_NAMES[*]}), ${_total} Evidence Records scanned and all ${_revalidated} independently anti-bluff re-validated, 0 FAIL, 0 REJECTED, 0 UNEVALUATED (${_skipped} SKIPPED, which does not block PASS)"
 exit 0

@@ -2271,21 +2271,29 @@ operator (or designated tester) verifies the
 <strong>Firebase-distributed</strong> debug APK on the failure-surface
 device class. Stage 2: ONLY AFTER written debug verification,
 <code>firebase-distribute.sh --release-only</code> distributes the
-release APK; §6.Z evidence file appended with release-stage section. No
-combined distribute permitted by default — that requires explicit
-per-cycle operator authorization recorded in the evidence file. The R8 /
-minification surprise class (§6.Z forensic anchor was a release-only
-<code>painterResource()</code> rejection) is the load-bearing reason:
-staging surfaces non-R8 bugs at debug's smaller blast radius AND
-isolates R8-specific failures to the release stage. §6.AA-debt is open:
-<code>scripts/firebase-distribute.sh</code> default flip to
-<code>--debug-only</code> + refusal of out-of-order
-<code>--release-only</code> + paired
-<code>last-version-{debug,release}</code> per-channel are documented but
-not yet mechanically enforced. Forensic anchor: 2026-05-14 operator:
-"for purposes like this one we shall distribute via Firebase DEV / DEBUG
-version only. Once we try it, you continue and once all verified you
-distribute RELEASE too!"</p>
+release APK; §6.Z evidence file appended with release-stage section.
+There is no combined distribute: <code>--debug-and-release</code> /
+<code>--both</code> are RETIRED as of 2026-08-26 (LVA-120) and now exit
+1; <code>MODE</code> has exactly two reachable values,
+<code>debug</code> (the flagless default) and <code>release</code>. The
+R8 / minification surprise class (§6.Z forensic anchor was a
+release-only <code>painterResource()</code> rejection) is the
+load-bearing reason: staging surfaces non-R8 bugs at debug's smaller
+blast radius AND isolates R8-specific failures to the release stage.
+§6.AA-debt is CLOSED (see <code>CLAUDE.md</code> §6.AA-debt): the
+<code>--debug-only</code> default, the refusal of an out-of-order
+<code>--release-only</code>, and the paired
+<code>last-version-{debug,release}</code> per-channel pointers are all
+mechanically enforced in <code>scripts/firebase-distribute.sh</code>.
+§6.AA clause 8 (Pipeline Distribution Path) lets a qualifying Pipeline
+Run Report stand in for the written operator confirmation BETWEEN the
+two stages, for <code>scripts/pipeline/phase-05-distribute.sh</code>
+only, under eight conjunctive conditions lettered (A)–(H);
+<code>CLAUDE.md</code> §6.AA clause 8 is authoritative for that
+condition set and is deliberately not restated here. Forensic anchor:
+2026-05-14 operator: "for purposes like this one we shall distribute via
+Firebase DEV / DEBUG version only. Once we try it, you continue and once
+all verified you distribute RELEASE too!"</p>
 <p>Inheritance: applies recursively to every submodule's distributable
 artifacts and every new artifact added to the project.</p>
 <h2

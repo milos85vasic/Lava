@@ -44,7 +44,49 @@ SUMMARY="$RUN_ROOT/summary.md"
 # Build the subset list ("csv|slug|hash" lines).
 declare -a SUBSET_LINES
 if [[ "$SUBSETS" == "all" ]]; then
-  mapfile -t SUBSET_LINES < <(qa_emit_subsets)
+  # §6.J subset floor (added 2026-08-26, LVA vacuous-pass sweep B12).
+  #
+  # A process substitution's exit status is invisible to `set -euo pipefail`, so
+  # a failing qa_emit_subsets produced an EMPTY list and the matrix ran nothing:
+  #
+  #   lib-subsets.sh: line 43: sha1sum: command not found
+  #     mapfile rc=0  SUBSET_LINES count=0   (expected 31)
+  #     matrix would report: Totals: PASS=0 SKIP=0 FAIL=0  and exit 0
+  #
+  # The manual --subsets path already has a floor (the `exit 2` below); the
+  # DEFAULT `--subsets all` path — the one every unattended run takes — had
+  # none. Capturing the status explicitly is what makes the failure visible.
+  _emit_rc=0
+  _emit_out="$(qa_emit_subsets)" || _emit_rc=$?
+  if [[ "$_emit_rc" -ne 0 ]]; then
+    echo "[matrix] ERROR qa_emit_subsets failed (exit ${_emit_rc}) — refusing to run a matrix over an empty subset list." >&2
+    echo "  → Examined: 0 subset(s)" >&2
+    echo "  → Cause distinguished: this is NOT 'nothing to test'. The subset generator" >&2
+    echo "    itself failed; lib-subsets.sh depends on sha1sum being on PATH." >&2
+    echo "  → Do: confirm 'sha1sum' resolves (coreutils), then re-run." >&2
+    exit 2
+  fi
+  # Filter into a FRESH, explicitly-assigned array. `unset 'SUBSET_LINES[-1]'`
+  # on a one-element array leaves the name unbound under `set -u` in bash 5.2,
+  # which would abort here with no message — fail-closed, but with an empty
+  # diagnosis, which is the failure mode this whole sweep is about.
+  mapfile -t _emit_lines <<< "$_emit_out"
+  SUBSET_LINES=()
+  for _l in "${_emit_lines[@]}"; do
+    [[ -n "$_l" ]] && SUBSET_LINES+=("$_l")
+  done
+  if [[ ${#SUBSET_LINES[@]} -eq 0 ]]; then
+    echo "[matrix] ERROR qa_emit_subsets exited 0 but emitted ZERO subsets." >&2
+    echo "  → Examined: 0 subset(s)" >&2
+    echo "  → Expected: one line per API-backed provider subset (a healthy tree emits 31)." >&2
+    echo "  → Cause distinguished: the generator succeeded and produced nothing, so this" >&2
+    echo "    is generator drift rather than a missing dependency." >&2
+    echo "  → Do: run 'qa_emit_subsets' from scripts/autonomous-qa/lib-subsets.sh directly" >&2
+    echo "    and inspect its output; a matrix over zero subsets reports PASS=0 FAIL=0" >&2
+    echo "    and exits 0, which asserts nothing (§6.J)." >&2
+    exit 2
+  fi
+  # END-OF-BLOCK §6.J subset floor (regression-harness sentinel)
 else
   # Validate manual subsets against the API-backed set (QA_PROVIDERS, sourced from
   # lib-subsets.sh). Ids not vended by GET /v1/providers — rutor (native bundled-

@@ -44,7 +44,14 @@ mkdir -p "$WORK/.lava-ci-evidence"
 
 PACK="$WORK/.lava-ci-evidence/Lava-Android-1.2.1-127"
 mkdir -p "$PACK/challenges" "$PACK/bluff-audit" "$PACK/mirror-smoke" "$PACK/matrix/run1" "$PACK/vm-distro/run1"
-echo '{}' > "$PACK/ci.sh.json"
+# UPDATED 2026-08-26: `{}` used to satisfy the evidence-pack gate, because the
+# gate only tested `-f`. It now asserts the content the pack's contract
+# claims ci.sh.json certifies: which mode ran, that every gate passed, and
+# which commit it ran against (HEAD or an ancestor with only
+# .lava-ci-evidence/ changed since — the real operator workflow, where CI
+# runs at commit X and the pack is then committed on top).
+CI_EVIDENCE_SHA="$(git -C "$WORK" rev-parse HEAD)"
+printf '{"mode":"--full","all_gates_passed":true,"sha":"%s"}\n' "$CI_EVIDENCE_SHA" > "$PACK/ci.sh.json"
 for i in 1 2 3 4 5 6 7 8; do echo '{"status":"VERIFIED"}' > "$PACK/challenges/C${i}.json"; done
 echo '{}' > "$PACK/bluff-audit/x.json"
 echo '{}' > "$PACK/mirror-smoke/x.json"

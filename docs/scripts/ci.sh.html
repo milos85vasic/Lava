@@ -178,9 +178,9 @@
 <body>
 <h1 id="scriptscish--user-guide"><code>scripts/ci.sh</code> — User
 Guide</h1>
-<p><strong>Last verified:</strong> 2026-05-16 (Phase 6a + 6b §11.4.29
-snake_case migration: scripts/ci.sh path-references updated from
-<code>Submodules/</code> to <code>submodules/</code>)
+<p><strong>Last verified:</strong> 2026-08-26 (§6.J corpus floors —
+hermetic-suite no-ops and a device-less <code>--full</code> no longer
+report a pass; LVA vacuous-pass sweep F9 + F21)
 <strong>Inheritance:</strong> HelixConstitution §11.4.18 (script
 documentation mandate)</p>
 <h2 id="overview">Overview</h2>
@@ -284,6 +284,160 @@ Reverted: yes — the mutation fixture was <code>git reset</code> +
 <code>rm -rf</code>'d immediately after the positive-detection check
 passed; confirmed via <code>git status --short</code> showing a clean
 tree before this commit.</p>
+<h2
+id="2026-08-26-update--6j-corpus-floor-on-the-hermetic-suite-loop-finding-f9">2026-08-26
+update — §6.J corpus floor on the hermetic suite loop (finding F9)</h2>
+<h3 id="the-defect">The defect</h3>
+<p>The hermetic-suite loop contained <strong>three silent
+no-ops</strong>, and each one turned a <em>failing</em> suite into a
+clean run — the loop reported success having executed nothing. Measured
+against a tree in which <code>tests/pre-push/check9_test.sh</code>
+genuinely exits 1:</p>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Baseline (<code>check9_test.sh</code> fails)</td>
+<td>exit <strong>1</strong> — correct</td>
+</tr>
+<tr>
+<td><strong>Mutation A:</strong> delete only
+<code>tests/pre-push/check4_test.sh</code>; <code>check9_test.sh</code>
+still present, still failing</td>
+<td>loop completed, exit <strong>0</strong></td>
+</tr>
+<tr>
+<td><strong>Mutation B:</strong>
+<code>chmod -x tests/firebase/run_all.sh</code> (runner exits 1)</td>
+<td>exit <strong>0</strong></td>
+</tr>
+<tr>
+<td><strong>Mutation C:</strong> delete the whole
+<code>tests/check-constitution/</code> directory</td>
+<td>exit <strong>0</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Mutation A is the sharpest.</strong> The flat-layout branch
+keyed on a single sentinel filename
+(<code>if [[ -f "$suite_dir/check4_test.sh" ]]</code>), so deleting an
+<em>unrelated</em> file disabled an entire failing suite. Mutation B and
+C are the same class arriving by different routes: a non-executable
+runner fell through every branch, and an absent directory was skipped by
+the outer <code>if [[ -d ... ]]</code> with no record that it was
+skipped.</p>
+<p><code>scripts/verify-all-constitution-rules.sh</code> had already
+fixed exactly this pattern in its own loops — an absent suite becomes a
+FAIL row rather than disappearing. <code>ci.sh</code> carried the
+unfixed copy.</p>
+<h3 id="what-the-loop-now-does">What the loop now does</h3>
+<p>The declared suite list is explicit
+(<code>HERMETIC_SUITE_DIRS</code>), and each of the three conditions is
+now an <strong>explicit failure</strong> rather than a skip:</p>
+<ul>
+<li><strong>Directory absent</strong> → recorded as
+<code>DIRECTORY ABSENT (the suite did not run; before this floor it was skipped in silence)</code>.</li>
+<li><strong><code>run_all.sh</code> exists but is not
+executable</strong> → recorded as
+<code>EXISTS BUT IS NOT EXECUTABLE (chmod +x ...); the suite did not run</code>.</li>
+<li><strong>Flat-layout glob matched nothing</strong> → recorded as
+<code>NO runner and NO check*_test.sh matched</code>.</li>
+</ul>
+<p>The flat-layout branch is now keyed on the <strong>glob</strong>,
+never on one sentinel filename — Mutation A is precisely what a sentinel
+key produces. Individual test-file failures are collected rather than
+aborting, so one run names every broken suite instead of only the
+first.</p>
+<p>Each flat-layout branch additionally compares the number of test
+files it executed against what <code>git ls-files</code> declares for
+that directory, and reports a shortfall as
+<code>executed &lt;n&gt; test file(s) but the git index declares &lt;m&gt;: working-tree drift, not a smaller suite</code>.
+The expectation is derived, never hardcoded, so adding or removing a
+suite cannot silently lower the bar.</p>
+<p>Failure output states
+<code>Examined: &lt;n&gt; of &lt;m&gt; declared suite(s)</code> and
+spells out the principle: <em>a suite that is absent, non-executable, or
+whose glob matched nothing did NOT pass — it did not run.</em> A final
+floor refuses when <strong>zero</strong> suites executed. On success the
+loop prints <code>&lt;n&gt;/&lt;m&gt; hermetic suites executed</code>,
+so the count is a reported fact.</p>
+<h2
+id="2026-08-26-update----full-no-longer-certifies-a-run-whose-device-gate-never-ran-finding-f21">2026-08-26
+update — <code>--full</code> no longer certifies a run whose device gate
+never ran (finding F21)</h2>
+<h3 id="the-defect-1">The defect</h3>
+<p><code>--full</code> printed <code>==&gt; All gates passed</code> and
+exited <strong>0</strong> with the Compose UI Challenge Tests skipped
+whenever no connected device was detected. The skip was announced on
+stdout — but the <strong>machine-readable output was byte-identical
+either way</strong>: the evidence directory recorded only
+<code>mode</code> and <code>sha</code>, with no field saying whether the
+device gate ran.</p>
+<p>A consumer reading that directory could not distinguish a full run
+from a device-less one. <code>mode=--full</code> was therefore a claim
+the evidence did not support — and <code>scripts/tag.sh</code> consumes
+this directory as proof of a full run.</p>
+<h3 id="what-changed">What changed</h3>
+<p>Two changes, deliberately paired:</p>
+<ol type="1">
+<li><strong>The verdict is recorded.</strong>
+<code>$EVIDENCE_DIR/device_tests</code> is written on
+<strong>both</strong> exit paths — <code>ran</code> or
+<code>skipped</code> — so a consumer never has to infer the verdict from
+the absence of a file. <code>--changed-only</code> writes
+<code>skipped</code> explicitly: it declares up front that it does not
+run the device gate, and the field states that as a fact.</li>
+<li><strong>A <code>--full</code> run whose device gate did not run is
+no longer reported as a full pass.</strong> It exits <strong>1</strong>
+with <code>CI GATE INCOMPLETE</code>, and the message distinguishes the
+cause: <em>this is not a test failure — the tests did not run at all,
+which is why reporting "All gates passed" here would be a §6.J
+bluff.</em> The remedy it prints is to bring up a §6.AH-conformant
+container/VM emulator via <code>scripts/run-challenge-matrix.sh</code>
+(never host-direct, never a live ADB device), or to run
+<code>--changed-only</code> if a device-less subset is genuinely what
+was wanted.</li>
+</ol>
+<p>There is deliberately <strong>no bypass flag</strong>. §6.Z clause 6
+forbids one, and a flag that converts "did not run" into "passed" is the
+exact bluff this floor exists to close.</p>
+<p>On success the final line now names the verdict it recorded:
+<code>==&gt; All gates passed (device_tests=ran)</code>.</p>
+<h3 id="consequence-for-callers">Consequence for callers</h3>
+<p>A <code>--full</code> invocation on a host with no emulator, which
+previously exited 0, now exits 1. That is the intended outcome. Use
+<code>--changed-only</code> for the device-less subset, or bring up the
+container/VM emulator first.</p>
+<h3 id="evidence-directory-contents-updated">Evidence directory contents
+(updated)</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mode</code></td>
+<td><code>--changed-only</code> or <code>--full</code></td>
+</tr>
+<tr>
+<td><code>sha</code></td>
+<td><code>git rev-parse HEAD</code> at the time of the run</td>
+</tr>
+<tr>
+<td><code>device_tests</code></td>
+<td><code>ran</code> or <code>skipped</code> — written on
+<strong>every</strong> exit path (added 2026-08-26)</td>
+</tr>
+</tbody>
+</table>
 <h2 id="6ae-matrix-gate-separate-entry-point">§6.AE matrix gate
 (separate entry point)</h2>
 <p>For §6.AE.2 gate-mode runs producing per-AVD attestation:

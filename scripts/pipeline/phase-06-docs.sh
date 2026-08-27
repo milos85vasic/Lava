@@ -395,6 +395,11 @@ _log "=== PASS 2 (T044): derived-export regeneration (scripts/sync-markdown-expo
 
 SYNC_SH="${REPO_PATH}/scripts/sync-markdown-exports.sh"
 EXPORTS_STATUS="not-run"
+# How many .md files the first-hand on-disk check below actually examined, and
+# what the whole-repo sweep returned. Both feed the Evidence Record's claim,
+# which may only describe work this run really did.
+VERIFIED_N=0
+REGEN_ALL_RC="not-run"
 CHECK_OUTPUT=""
 PREEXISTING_PROBLEMS=""
 
@@ -414,10 +419,16 @@ else
   EXPORTS_STATUS="ran"
   if [[ "$REGENERATE_ALL" == "true" ]]; then
     _log "\$ ${SYNC_SH} --regenerate-all"
-    if ( cd "$REPO_PATH" && bash "$SYNC_SH" --regenerate-all ) >>"$COMBINED_LOG" 2>&1; then
-      _log "phase-06-docs: --regenerate-all succeeded"
+    # Captured unconditionally and COMPARED below, not merely interpolated
+    # into the Evidence Record's claim: a wrapper that prints "tool exited
+    # $RC" and then reports PASS anyway is the captured-never-compared defect
+    # tests/pipeline/test_no_vacuous_pass_patterns.sh CHECK A exists to catch.
+    ( cd "$REPO_PATH" && bash "$SYNC_SH" --regenerate-all ) >>"$COMBINED_LOG" 2>&1
+    REGEN_ALL_RC=$?
+    if [[ "$REGEN_ALL_RC" -eq 0 ]]; then
+      _log "phase-06-docs: --regenerate-all exited 0"
     else
-      _fail "scripts/sync-markdown-exports.sh --regenerate-all failed (see the combined log)"
+      _fail "scripts/sync-markdown-exports.sh --regenerate-all failed (exit ${REGEN_ALL_RC}; see the combined log)"
     fi
   fi
   for f in "${CHANGED_FILES[@]}"; do
@@ -461,6 +472,7 @@ if [[ "$EXPORTS_STATUS" == "ran" ]]; then
   # (a) first-hand: are this phase's own claimed outputs really on disk?
   MISSING_SIBLINGS=()
   for f in "${CHANGED_FILES[@]}"; do
+    VERIFIED_N=$((VERIFIED_N + 1))
     base="${f%.md}"
     for ext in html pdf; do
       sib="${REPO_PATH}/${base}.${ext}"
@@ -473,8 +485,13 @@ if [[ "$EXPORTS_STATUS" == "ran" ]]; then
   done
   if [[ ${#MISSING_SIBLINGS[@]} -gt 0 ]]; then
     _fail "PASS 2 verification (first-hand, on disk): sync-markdown-exports.sh reported success but these derived exports are still missing or stale: ${MISSING_SIBLINGS[*]}"
+  elif [[ "$VERIFIED_N" -gt 0 ]]; then
+    _log "phase-06-docs: PASS 2 first-hand check — all ${VERIFIED_N} changed .md file(s) have an .html and a .pdf sibling on disk, none older than its .md"
   else
-    _log "phase-06-docs: PASS 2 first-hand check — every changed .md has an .html and a .pdf sibling on disk, none older than its .md"
+    # Reachable only via --regenerate-all, the one flag that sets
+    # EXPORTS_STATUS=ran with an empty CHANGED_FILES. Saying "every changed
+    # .md verified" here would be a vacuous truth dressed up as a check.
+    _log "phase-06-docs: PASS 2 first-hand check examined ZERO files — PASS 1 changed nothing, so this check verifies nothing about this run"
   fi
 
   # (b) --check-only, with its exit code actually examined.
@@ -544,7 +561,16 @@ fi
 # re-checked with ... --check-only". An Evidence Record may only assert what
 # this run really did.
 if [[ "$EXPORTS_STATUS" == "ran" ]]; then
-  EXPORT_CLAIM="every changed .md was verified first-hand on disk (an .html and a .pdf sibling present, neither older than its .md) and re-checked with scripts/sync-markdown-exports.sh --check-only (exit ${CHECK_RC:-unknown}), with none of their .html/.pdf siblings in its MISSING/STALE list"
+  if [[ "$VERIFIED_N" -gt 0 ]]; then
+    EXPORT_CLAIM="the ${VERIFIED_N} .md file(s) this phase changed were each verified first-hand on disk (an .html and a .pdf sibling present, neither older than its .md) and re-checked with scripts/sync-markdown-exports.sh --check-only (exit ${CHECK_RC:-unknown}), with none of their .html/.pdf siblings in its MISSING/STALE list"
+  else
+    # Both verification loops iterate over CHANGED_FILES. With none, each ran
+    # ZERO times and could not have failed, so neither verified anything.
+    EXPORT_CLAIM="PASS 1 changed no .md files, so the first-hand on-disk check and the scoped --check-only re-check (exit ${CHECK_RC:-unknown}) each examined ZERO files and verify nothing about this run's exports"
+  fi
+  if [[ "$REGENERATE_ALL" == "true" ]]; then
+    EXPORT_CLAIM="${EXPORT_CLAIM}; --regenerate-all was also invoked and exited ${REGEN_ALL_RC}, but this phase does NOT verify that whole-repo sweep's output — confirming it would require duplicating scripts/sync-markdown-exports.sh's in-scope path rules, which this phase refuses to do, so no claim is made here about any file outside the ${VERIFIED_N} listed above"
+  fi
 else
   EXPORT_CLAIM="no --check-only re-verification was performed for this run, because the derived-export pass did not run (${EXPORTS_STATUS})"
 fi

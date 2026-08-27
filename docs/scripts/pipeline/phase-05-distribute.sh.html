@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.10" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>phase-05-distribute.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptspipelinephase-05-distributesh--user-guide"><code>scripts/pipeline/phase-05-distribute.sh</code>
+— User Guide</h1>
+<p><strong>Last verified:</strong> 2026-08-26 (feature
+<code>002-build-test-distribute-pipeline</code>, task T043 — gate-only
+slice; clause 8 re-lettered to eight conditions (A)–(H) by the
+LVA-120/LVA-147 amendment) <strong>Inheritance:</strong>
+HelixConstitution §11.4.18 (script documentation mandate); Lava §6.AA
+clause 8 (Pipeline Distribution Path), §6.Z (Anti-Bluff Distribute
+Guard), §6.AK (Cycle-Coverage Device Gate), §6.AH/§6.AG (container-or-VM
+emulators), §6.J (Anti-Bluff)</p>
+<h2 id="overview">Overview</h2>
+<p>This script is the <strong>§6.AA clause 8 refusal gate</strong>. It
+decides whether a pipeline run has earned the clause 8 "Pipeline
+Distribution Path" permission — the permission to go debug → release
+with no operator pause — and then, deliberately, <strong>distributes
+nothing</strong>.</p>
+<p>Clause 8 grants that permission if and only if <strong>eight
+conjunctive conditions (A)–(H)</strong> hold. The clause closes with its
+own standing note:</p>
+<blockquote>
+<p>Any future reading of this clause that treats a green run report as
+sufficient WITHOUT condition (C) having genuinely executed — against the
+release-variant artifact specifically, never inferred from the debug
+variant — is the §6.J bluff class this project has recorded three times
+(§6.Z, §6.AB, §6.AK), and is a violation of this clause, not a use of
+it.</p>
+</blockquote>
+<blockquote>
+<p><strong>Re-lettered 2026-08-26.</strong> The former condition (D) —
+cycle-coverage on BOTH channels — was <strong>withdrawn, not
+renumbered</strong>, and former (E)–(I) became (D)–(H). <strong>There is
+no condition (I).</strong> Anything written before 2026-08-26 that cites
+clause 8 by letter must be read against the map (E)→(D), (F)→(E),
+(G)→(F), (H)→(G), (I)→(H). (A), (B), (C) are unchanged.</p>
+</blockquote>
+<p>A permission that broad is only safe if the thing enforcing it
+exists, is tested, and refuses by default <strong>first</strong>. So the
+guard ships on its own, with its own hermetic suite, and the distribute
+call is deferred.</p>
+<h2 id="what-it-does-not-do-honest-scope">What it does NOT do (honest
+scope)</h2>
+<ul>
+<li>It <strong>never invokes</strong>
+<code>scripts/firebase-distribute.sh</code>. Condition (E) is verified
+by <em>static inspection</em>. Executing it would attempt a real upload
+to Firebase App Distribution.</li>
+<li>It writes <strong>no Distribution Record</strong> and mutates
+<code>report.json</code> in <strong>no</strong> way. It is a read-only
+reader of the run, plus one verdict artifact of its own at
+<code>&lt;run&gt;/phase-05/gate-verdict.json</code>.</li>
+<li>It is <strong>not wired</strong> into
+<code>scripts/pipeline-build-test-distribute.sh</code>.</li>
+</ul>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/pipeline/phase-05-distribute.sh</span> <span class="op">&lt;</span>run_id<span class="op">&gt;</span> <span class="pp">[</span><span class="ss">repo</span><span class="pp">-</span><span class="ss">path</span><span class="pp">]</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span></span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--report &lt;path&gt;</code></td>
+<td>override the <code>report.json</code> location</td>
+</tr>
+<tr>
+<td><code>--firebase-distribute-script &lt;path&gt;</code></td>
+<td>override the script condition (E) <strong>inspects</strong></td>
+</tr>
+<tr>
+<td><code>--schema &lt;path&gt;</code></td>
+<td>override the run-report schema</td>
+</tr>
+<tr>
+<td><code>--suspension-dir &lt;path&gt;</code></td>
+<td>override the clause-8 suspension directory</td>
+</tr>
+</tbody>
+</table>
+<p><code>--cycle-coverage-script</code> and
+<code>--changelog-root</code> were <strong>removed</strong> on
+2026-08-26 together with the condition that used them. An unknown flag
+is fatal, so passing either now exits 2 rather than being silently
+ignored.</p>
+<p>Every option selects <strong>where to look</strong>. None can change
+a verdict.</p>
+<h3 id="there-is-no-escape-hatch">There is no escape hatch</h3>
+<p>There is deliberately no <code>--force</code>, <code>--bypass</code>,
+<code>--skip</code>, <code>--override</code> or equivalent, <strong>and
+none may be added</strong>. §6.Z clause 6 is absolute: no bypass flag
+exists and none may be added. A gate with an escape hatch is not a gate.
+An unrecognized argument is a hard error, never silently ignored —
+silently ignoring a <code>--force</code> someone believed worked is its
+own failure mode.</p>
+<p>A condition the script <strong>cannot evaluate refuses</strong>. It
+never passes on the grounds that it could not tell.</p>
+<h2 id="exit-codes">Exit codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>A distribution completed. <strong>Reserved and unreachable
+today</strong> — no distribute step is implemented, so nothing returns
+0.</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td><strong>GATE REFUSED</strong> — one or more of FR-009 / (A)–(H)
+failed; or a usage/configuration error. Refusal is the default.</td>
+</tr>
+<tr>
+<td><code>3</code></td>
+<td><strong>GATE QUALIFIED</strong>, and the distribute step is not
+implemented.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-is-checked">What is checked</h2>
+<h3 id="fr-009-baseline-evaluated-before-ah">FR-009 baseline (evaluated
+before (A)–(H))</h3>
+<p>Refuses unless every US1/US2 phase (<code>build</code>,
+<code>test</code>, <code>install_boot</code>, <code>live_verify</code>)
+is <code>PASS</code>,
+<code>evidence_summary.rejected_by_anti_bluff</code> is <code>0</code>,
+and no individual Evidence Record carries <code>result: FAIL</code> or a
+non-<code>validated</code> <code>anti_bluff_status</code>. FR-009
+requires reporting <em>exactly which</em> evidence blocked, so every
+offending record is <strong>named individually</strong> rather than
+counted. A run with zero Evidence Records refuses — there is no evidence
+to authorize a distribution with.</p>
+<p><strong>Record shape is checked first.</strong> Every
+<code>*.json</code> under the run directory (excluding
+<code>report.json</code>, <code>gate-verdict.json</code>, and anything
+under <code>raw/</code>) must be a well-formed Evidence Record per
+<code>contracts/evidence-record.schema.json</code>: all seven required
+fields present and non-empty, <code>result</code> within
+<code>PASS|FAIL|SKIPPED</code>, <code>category</code> within its enum,
+and <code>anti_bluff_status</code> matching
+<code>^(validated|REJECTED: .+)$</code>. A file that does not parse, or
+is missing a field, is <strong>unevaluable</strong> — it can be read
+neither as passing nor as failing — and refuses. A missing
+<code>anti_bluff_status</code> specifically means the independent
+validator (FR-004) never saw that record, which is not the same as a
+record it validated.</p>
+<p>A phase name may legitimately appear <strong>more than once</strong>:
+the lava-api-go and <code>:api-app</code> live-verification scripts each
+append their own <code>live_verify</code> entry. Every entry under a
+required phase name must be <code>PASS</code>; the count is not
+constrained.</p>
+<h3 id="the-eight-conditions">The eight conditions</h3>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>What this script actually checks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>(A)</strong> Run Report identity</td>
+<td>Report exists, parses, and validates structurally against
+<code>contracts/pipeline-run-report.schema.json</code> (required
+properties, <code>additionalProperties</code>, types, enums, patterns,
+minimums, item schemas, and the <code>allOf</code> PASS rule).
+<code>commit_sha</code> must equal <code>git rev-parse HEAD</code>
+<strong>now</strong> — a mismatch is a refusal, not tolerable staleness.
+Each Distribution Record's <code>version_code</code> is cross-checked
+against the matching <code>build_artifacts</code> entry.</td>
+</tr>
+<tr>
+<td><strong>(B)</strong> Unqualified pass</td>
+<td><code>outcome</code> is <code>PASS</code>; every
+<code>phases[]</code> entry is <code>PASS</code>; no record is
+<code>FAIL</code>; no record has a non-<code>validated</code>
+<code>anti_bluff_status</code>; and no record is <code>SKIPPED</code> in
+a category named by (C) or (D). A run with <strong>zero</strong>
+Evidence Records refuses here too: "every record validated" over an
+empty set is an unexamined pass, not an unqualified one.</td>
+</tr>
+<tr>
+<td><strong>(C)</strong> Device evidence for BOTH variants</td>
+<td>All four variants — <code>app-debug</code>,
+<code>app-release</code>, <code>api-app-debug</code>,
+<code>api-app-release</code> — need a record whose own
+<code>category</code> field is <code>real-device-challenge</code> (the
+field, not merely the directory it sits in), that is <code>PASS</code>,
+<code>validated</code>, identifies a <strong>container-or-VM</strong>
+runner, and does <strong>not</strong> indicate host-direct or a live
+physical device (§6.AH/§6.AG — the negative test is applied first, so a
+record carrying both markers cannot launder itself). <strong>One record,
+one artifact:</strong> a record whose text names more than one of the
+four variants is credited to none of them — it does not say which
+artifact it ran against, and a single emulator run is not evidence for
+two different APKs. Clause 8(C): release-variant evidence "is NOT
+inferable from debug-variant evidence". The report must also carry a
+matching <code>build_artifacts</code> entry built from the run's
+commit.</td>
+</tr>
+<tr>
+<td><strong>(D)</strong> Live verification of every live surface</td>
+<td>Every <code>live_verify</code> phase entry is <code>PASS</code>, and
+both live surfaces — the <code>lava-api-go</code> service
+<strong>and</strong> the on-device <code>api-app</code> — have their own
+<code>PASS</code>ing record. <strong>Provenance:</strong> only records
+written under a <code>live_verify</code> phase's own
+<code>evidence_dir</code> count. A build-time record — a
+<code>go build</code> of lava-api-go, a JVM unit test naming api-app —
+starts no service and satisfies nothing here, whatever it names.
+Device-challenge records are excluded for the same reason. A record
+naming <strong>both</strong> surfaces is credited to
+<strong>neither</strong>: one probe is not two surfaces exercised,
+whatever its summary says.</td>
+</tr>
+<tr>
+<td><strong>(E)</strong> Unmodified distribute path</td>
+<td><code>scripts/firebase-distribute.sh</code> exists, is tracked and
+git-clean, still carries its own Phase-1 gate markers, and defines no
+bypass-shaped option. <strong>Inspected, never executed.</strong></td>
+</tr>
+<tr>
+<td><strong>(F)</strong> Scope</td>
+<td>Branch is <code>master</code>, working tree is clean, and the
+report's <code>precondition</code> phase is <code>PASS</code>
+(FR-000).</td>
+</tr>
+<tr>
+<td><strong>(G)</strong> Disclosed residual gap</td>
+<td>Every one of the four Android variants has a
+<code>build_artifacts[]</code> entry carrying a non-empty
+<code>build_output_path</code> — the property that names the
+<strong>locally-built</strong> file this run's evidence exercised, which
+is why the Firebase-delivered install is unverified. A report carrying a
+top-level <code>residual-gap</code> property is refused: that field was
+retired on 2026-08-26 and the schema forbids it. <strong>This is a
+disclosure check, not a verification of the release build</strong>; the
+substantive release-variant protection is (C).</td>
+</tr>
+<tr>
+<td><em>(all)</em> Recorded verdict</td>
+<td>The verdict artifact at
+<code>&lt;run&gt;/phase-05/gate-verdict.json</code> must actually be
+written. An authorization the gate cannot record leaves clause 8 with no
+audit trail, so a failed write adds a refusal; it can never remove
+one.</td>
+</tr>
+<tr>
+<td><strong>(H)</strong> Automatic suspension trigger</td>
+<td>No <code>ACTIVE</code> marker of any kind under
+<code>.lava-ci-evidence/clause-8-suspension/</code>, and no incident
+under <code>.lava-ci-evidence/sixth-law-incidents/</code> recording a
+clause-8 suspension without an <strong>affirmative</strong> operator
+re-authorization. The re-authorization <strong>value</strong> is read,
+not merely the key: <code>"reauthorized": false</code> is a denial and
+keeps the suspension, and a free-text note never grants. If the
+suspension directory, the marker, or an incident file exists but cannot
+be read or parsed, the condition is unevaluable and
+<strong>refuses</strong> — it never reads as "not suspended". Suspension
+is cleared only by an explicit recorded act, never by age.</td>
+</tr>
+</tbody>
+</table>
+<h2
+id="honest-defects-this-gate-surfaces-rather-than-papers-over">Honest
+defects this gate surfaces rather than papers over</h2>
+<h3
+id="1-nothing-verifies-per-variant-cycle-coverage-not-this-gate-either">1.
+Nothing verifies per-variant cycle coverage. Not this gate either.</h3>
+<p>Until 2026-08-26 a condition (D) required the §6.AK cycle-coverage
+check to pass for the <code>debug</code> channel <strong>and</strong>
+the <code>release</code> channel. It was <strong>withdrawn</strong>, for
+two independently sufficient reasons.</p>
+<p><strong>Its premise was false.</strong> The condition existed because
+<code>scripts/firebase-distribute.sh</code> resolved the §6.AK channel
+to <code>debug</code> for any <code>MODE</code> other than exactly
+<code>release</code>, via a <code>*) AK_CHANNEL="debug"</code>
+catch-all. That catch-all is gone: <code>MODE</code> has exactly two
+reachable values and an explicit two-arm <code>case</code> hard-errors
+on a third (LVA-120 retired the combined mode).</p>
+<p><strong>And it never achieved what it claimed.</strong> In
+<code>scripts/check-cycle-coverage.sh</code>, <code>CHAN</code> is
+assigned by the <code>--channel</code> parse arms (lines 37–38) and
+asserted non-empty (line 51) — and never read again. Both artifacts it
+reads, the cycle-coverage-map and the §6.Z evidence file, resolve from
+<code>$EDIR</code> + <code>$VER</code> alone. There is no
+<code>eval</code>, no <code>${!indirect}</code>, no
+<code>declare -n</code>. <code>--channel=debug</code>,
+<code>--channel=release</code> and <code>--channel=banana</code> produce
+<strong>byte-identical output</strong> against identical fixtures.
+Repairing the condition to "invoke <code>--channel=release</code>" would
+have mandated a call that provably does nothing.</p>
+<p><strong>Stated plainly, because withdrawing the condition does not
+create the check it was reaching for:</strong> no release-variant
+coverage artifacts exist — the evidence tree under
+<code>.lava-ci-evidence/distribute-changelog/</code> partitions by
+<strong>app</strong>, not by build variant. Per-variant cycle coverage
+is <strong>unverified</strong>, is tracked as
+<strong>§6.AA-pipeline-debt-D</strong>, and the release-variant
+protection inside clause 8 rests <strong>entirely</strong> on condition
+(C). The gate prints this on every run rather than leaving it to be
+inferred from a condition that is no longer listed.</p>
+<h3
+id="2-the-aresidual-gap-deadlock-is-resolved-and-residual-gap-now-fails">2.
+The (A)/<code>residual-gap</code> deadlock is resolved, and
+<code>residual-gap</code> now fails</h3>
+<p>Until 2026-08-26 condition (H) mandated a top-level
+<code>residual-gap</code> field on the run report, while
+<code>contracts/pipeline-run-report.schema.json</code> is
+<code>"additionalProperties": false</code> and defines no such property.
+Taken literally (A) and (H) could not both hold, so <strong>no run could
+ever qualify</strong> (LVA-147). This gate previously tolerated
+<code>residual-gap</code> as a single clause-8 extension to keep the
+clause operable.</p>
+<p><strong>That tolerance is removed.</strong> The condition — now
+<strong>(G)</strong> — was reworded to record the same gap through
+<code>build_artifacts[].build_output_path</code>, a property the schema
+already defines and already requires. No schema amendment was made and
+none is owed for this. A report carrying a top-level
+<code>residual-gap</code> property is now refused by (A) like any other
+unknown property, which is what the schema has always said.</p>
+<p>The gap itself is <strong>unchanged and still open</strong>: the
+pipeline's evidence exercises locally-built artifacts and does not cover
+the Firebase upload → download → install path on a physical device. That
+remains <strong>§6.AA-pipeline-debt</strong>, OWED.</p>
+<h3 id="a-third-smaller-limitation-worth-stating">A third, smaller
+limitation worth stating</h3>
+<p><code>evidence-record.schema.json</code> has <strong>no artifact
+field</strong>, so a record cannot structurally declare which variant it
+exercised. Condition (C) therefore binds a record to a variant by
+requiring the variant's <code>artifact_id</code> token to appear in the
+record's <code>test_id</code>, <code>command</code>, or
+<code>assertion_summary</code>. That binding is weaker than a typed
+field would be. It <strong>errs toward refusal</strong> — a record that
+does not say which artifact it ran against counts for no variant, and a
+record that names <em>several</em> also counts for none. Adding an
+<code>artifact_id</code> to the Evidence Record schema would close
+this.</p>
+<h3 id="a-fourth-clause-8h-is-checked-on-two-of-its-three-limbs">A
+fourth: clause 8(H) is checked on two of its three limbs</h3>
+<p>Clause 8(H) lifts a suspension on three things: (i) a §6.Z-class
+incident record, (ii) a covering device Challenge that reproduces the
+failure RED-then-GREEN per §6.AK clause 2, and (iii) a written operator
+re-authorization. This gate mechanically checks <strong>(i) and
+(iii)</strong>. Limb (ii) has no machine-readable form in the incident
+convention, and inventing one here would assert a check that is not
+happening — it stays operator- and reviewer-verified. Stated rather than
+implied, so nobody reads a green (H) as proof the covering Challenge
+exists.</p>
+<h2 id="output-artifact">Output artifact</h2>
+<p><code>&lt;run&gt;/phase-05/gate-verdict.json</code> records the run
+id, evaluation time, HEAD sha, the
+<code>QUALIFIED</code>/<code>REFUSED</code> verdict, the FR-009 result,
+every condition's verdict and detail, and a
+<code>per_variant_cycle_coverage</code> field stating that it is
+<strong>NOT VERIFIED</strong> (§6.AA-pipeline-debt-D). What the gate
+does not check lives in the artifact, not only on a terminal someone has
+since closed.</p>
+<h2 id="tests">Tests</h2>
+<p>Two hermetic suites, both building disposable git fixtures and
+running nothing real.</p>
+<p><code>tests/pipeline/test_phase_05_distribute_gate.sh</code> asserts
+a fully-qualifying run <strong>passes</strong> (so a blanket
+refuse-everything implementation cannot pass the suite), that each
+condition mutated <strong>alone</strong> flips the verdict to
+<code>REFUSED</code> and names itself, that no plausible override
+argument forces a failing run through, that the gate never invokes the
+distribute script, that <strong>no</strong> condition (I) is reported,
+that a variant missing its <code>build_output_path</code> is refused by
+(G), and that a report carrying the retired <code>residual-gap</code>
+property is refused by (A).</p>
+<p><code>tests/pipeline/test_phase_05_distribute_gate_vacuity.sh</code>
+attacks the other direction: for each condition, what happens when the
+thing it examines is absent, empty, unreadable, malformed, or merely
+<em>shaped like</em> the thing it should be. A gate that wrongly refuses
+is an annoyance; a gate that wrongly passes authorises an unattended
+release. Every case in that file was first observed returning
+<code>QUALIFIED</code> against an earlier revision of this script, so
+each is a regression test with a recorded RED — build-time records
+satisfying what is now (D), two debug records satisfying all four
+variants of (C), an incident recording <code>reauthorized: false</code>
+clearing what is now (H), <code>--schema</code> pointed at a non-object
+document turning (A) from <code>FAIL</code> into <code>PASS</code>, and
+an evidence file containing the literal text
+<code>this is not json</code> being counted among "N record(s) all
+validated". It carries its own positive controls so the fixes cannot
+degenerate into refusing everything.</p>
+<p><code>tests/pipeline/test_phase_05_distribute_fix_audit.sh</code> is
+the <strong>second pair of eyes on the repairs themselves</strong>. The
+nine fixes the two suites above describe were written and verified by
+the same agent that wrote the code they repaired, which makes 416 lines
+of unreviewed gate logic. Auditing them as unreviewed code found seven
+more defects — three of them reaching <code>QUALIFIED</code>:</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Where</th>
+<th>What was wrong</th>
+<th>Direction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>(C)</td>
+<td><code>_names_variant</code> answered "does this name
+<code>app-debug</code>?" with <strong>no</strong> whenever
+<code>api-app-debug</code> appeared <em>at all</em>, including when the
+text named both — so the "a record naming more than one variant counts
+for none" guard never fired for that pair. Four records that all ran a
+<strong>client-app</strong> artifact satisfied all four variants, with
+<strong>zero</strong> <code>:api-app</code> device runs in the run.</td>
+<td>wrongly <strong>PASSED</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td>(A)</td>
+<td>Refusing a <em>non-object</em> <code>--schema</code> left
+<code>{}</code>, an object that constrains nothing just as completely. A
+report carrying a property the real schema forbids went
+<code>REFUSED</code> → <code>QUALIFIED</code>, with (A) asserting
+"report schema-valid".</td>
+<td>wrongly <strong>PASSED</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td>verdict artifact</td>
+<td>Condition rows were <code>printf</code>'d as TAB-separated lines and
+split back apart, and details quote report content verbatim — so a
+report value carrying a newline and a tab <strong>injected
+rows</strong>: 11 rows for the 9 conditions clause 8 then had, and a
+duplicate whose last value read <code>PASS</code>. The clause 8 audit
+record was forgeable from the artifact it audits.</td>
+<td>forged <strong>record</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td>now (H)</td>
+<td>Reading the re-authorization <strong>value</strong> fixes nothing
+for an incident the scan never reaches.
+<code>"§6.AA clause 8(I) suspension is ACTIVE"</code> (fixture text
+quoted verbatim from before the 2026-08-26 re-lettering; the gate
+matches "clause 8" plus a suspension word in any order, so no letter is
+load-bearing) carrying <code>"operator_reauthorization": "none"</code> —
+an explicit written <strong>denial</strong> — was invisible, and the run
+qualified.</td>
+<td>wrongly <strong>PASSED</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td>now (D)</td>
+<td>Over-corrected. The <code>:api-app</code> <strong>is a client
+of</strong> <code>lava-api-go</code>, so its live-verification summary
+names the service it reached; crediting a both-naming record to
+<em>neither</em> surface refused an honest run and reported the api-app
+surface had no evidence when it did.</td>
+<td>wrongly <strong>REFUSED</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td>now (F)</td>
+<td>Carried the exact defect FR-009 was repaired for —
+<code>select(.name=="precondition") | .result</code> unaggregated
+concatenates two entries into <code>PASS\nPASS</code>. The repair was
+applied at one site and not swept.</td>
+<td>wrongly <strong>REFUSED</strong></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>--help</code></td>
+<td>Still shape-coupled. The <code>awk</code> range ended at the first
+horizontal rule, so a separator rule added <em>inside</em> the Usage
+block silently dropped the exit codes, and shortening the rules printed
+1316 lines.</td>
+<td>cosmetic</td>
+</tr>
+</tbody>
+</table>
+<p>Each has a recorded RED and a positive control. The controls are the
+point: case 2P proves <code>--schema</code> still works against the real
+contract schema, 4P proves broadening what is now (H) does not start
+refusing on the existing incident corpus (the whole real
+<code>.lava-ci-evidence/sixth-law-incidents/</code> tree is copied into
+a fixture and must not refuse), and 5P proves one record is still never
+two live surfaces. Without them, "refuse unconditionally" would pass the
+suite — which is how an anti-bluff gate suite becomes a bluff.</p>
+<h2 id="the-todo-that-remains">The TODO that remains</h2>
+<p>The distribute step itself. When it lands it must invoke
+<code>firebase-distribute.sh</code> unmodified <strong>twice</strong> —
+once <code>--debug-only</code>, then once <code>--release-only</code> —
+with all its Phase-1 gates active (never
+<code>firebase appdistribution:distribute</code> directly, which is a
+§6.Z violation whether or not a pipeline is running, and never a
+combined invocation, which no longer exists), write one Distribution
+Record per uploaded artifact whose <code>version_code</code> equals the
+<code>versionCode</code> compiled into that artifact, append its result
+via <code>append_phase_result</code>, and define what happens when the
+debug stage succeeds and the release stage refuses — a
+partially-distributed cycle is now reachable in a way the retired
+combined invocation never made it, and that semantics is
+<strong>undecided</strong>.</p>
+<p>Until then the script exits non-zero even when the gate qualifies: a
+gate that returned success while distributing nothing would be its own
+small bluff.</p>
+</body>
+</html>

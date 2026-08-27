@@ -303,6 +303,55 @@ mkdir -p "$RAW_DIR"
 
 CONTAINER_RUNTIME="${LAVA_PIPELINE_CHALLENGE_CONTAINER_RUNTIME:-podman}"
 
+# --- LVA-161: an explicitly-sized --test-timeout, DERIVED from the real
+# workload rather than guessed -------------------------------------------
+# cmd/emulator-matrix defaults --test-timeout to 10m (main.go:123) and that
+# budget covers the TEST step only (boot is timed separately as boot_seconds).
+# This wrapper deliberately runs ONE gradle invocation covering EVERY selected
+# class in a module (one cold boot instead of N), so the budget must scale with
+# the selection or it silently rots the moment classes are added -- which is
+# exactly what happened: 73 app classes / 104 tests were selected against an
+# unchanged 10m default and the run was killed at test_seconds=600.02.
+#
+# Sizing evidence (measured, not assumed):
+#   * killed run 2026-08-26T14-09-17Z: 81 of 104 tests completed in 600.02s of
+#     TEST-step time => 7.41 s/test aggregate, INCLUDING gradle configure +
+#     APK install, and progress was still advancing at the moment of the kill.
+#   * 73 classes / 108 @Test methods => ~1.48 tests per class, so the observed
+#     aggregate is ~10.9 s per CLASS.
+#   * slowest real single testcases actually on disk in this repo's own JUnit
+#     XML: Challenge00CrashSurvivalTest 22.84s, Challenge02ApiAppBootAndServe
+#     Test 33.58s.
+# A 45 s/class budget is ~4.1x the measured 10.9 s/class and comfortably above
+# the slowest observed single test, leaving headroom for a loaded host and for
+# failing Compose tests that burn their own 15s ComposeTimeout before failing.
+# The fixed overhead covers gradle configure + APK install + first-test warmup.
+CHALLENGE_TIMEOUT_OVERHEAD_S="${LAVA_PIPELINE_CHALLENGE_TEST_TIMEOUT_OVERHEAD_S:-300}"
+CHALLENGE_TIMEOUT_PER_CLASS_S="${LAVA_PIPELINE_CHALLENGE_TEST_TIMEOUT_PER_CLASS_S:-45}"
+
+# derive_test_timeout <selected_class_count> -> prints a Go duration string.
+# An explicit LAVA_PIPELINE_CHALLENGE_TEST_TIMEOUT wins verbatim.
+derive_test_timeout() {
+  local n="$1"
+  if [[ -n "${LAVA_PIPELINE_CHALLENGE_TEST_TIMEOUT:-}" ]]; then
+    printf '%s' "${LAVA_PIPELINE_CHALLENGE_TEST_TIMEOUT}"
+    return 0
+  fi
+  printf '%ss' "$(( CHALLENGE_TIMEOUT_OVERHEAD_S + CHALLENGE_TIMEOUT_PER_CLASS_S * n ))"
+}
+
+# timeout_to_seconds <go-duration> -> integer seconds (supports Ns/Nm/Nh, bare N=seconds).
+timeout_to_seconds() {
+  local d="$1" n unit
+  [[ "$d" =~ ^([0-9]+)([smh]?)$ ]] || { printf '0'; return 0; }
+  n="${BASH_REMATCH[1]}"; unit="${BASH_REMATCH[2]}"
+  case "$unit" in
+    h) printf '%s' $(( n * 3600 )) ;;
+    m) printf '%s' $(( n * 60 )) ;;
+    *) printf '%s' "$n" ;;
+  esac
+}
+
 echo "phase-02-test-challenge: repo=${REPO_PATH}"
 echo "phase-02-test-challenge: phase_dir=${PHASE_DIR}"
 echo "phase-02-test-challenge: container_runtime=${CONTAINER_RUNTIME}"
@@ -484,7 +533,21 @@ except ImportError:  # pragma: no cover - falls back to stdlib if absent
 
 (repo_path, raw_dir, module_label, mode, avd_spec, matrix_script_rel,
  container_image_ref, container_runtime, diag_file, xml_search_dir,
- marker_file, manifest_file, matrix_rc) = sys.argv[1:14]
+ marker_file, manifest_file, matrix_rc, abort_reason, abort_detail) = sys.argv[1:16]
+
+# LVA-161 (2026-08-26): `abort_reason` is non-empty ONLY when the caller
+# proved, from the runner's own attestation row, that this invocation was
+# KILLED or TIMED OUT rather than allowed to finish. That distinction is
+# load-bearing and cannot be re-derived here: gradle writes its JUnit XML
+# once, at the END of connectedAndroidTest, so a kill leaves ZERO parsed
+# files and every selected class looks identical to "class filter matched
+# nothing". Before this flag existed, both produced FAIL for all 73 classes,
+# and the 2026-08-26T14-09-17Z run was consequently reported as 74 broken
+# features when the runner had in fact completed 81 of 104 tests with 12
+# real failures. Reporting a killed run as 73 FAILs is dishonest in one
+# direction; reporting it as a pass is dishonest in the other. Neither is
+# acceptable, so an aborted invocation yields SKIPPED-with-UNCONFIRMED per
+# class AND a hard non-zero phase exit driven by the caller.
 
 # The sibling matrix script's own documented exit codes (see this file's
 # header): 0 = the matrix ran and every row passed; 1 = a real per-row test
@@ -666,18 +729,50 @@ for fqcn, kt_path in requested:
         ]
     else:
         tcs = testcases_by_class.get(fqcn, [])
-        if not tcs:
+        if not tcs and abort_reason:
+            # The invocation was KILLED/TIMED OUT (proved by the runner's own
+            # attestation row -- see abort_reason/abort_detail). The absence of
+            # a <testcase> for this class therefore carries NO information
+            # about the class: it was never given the chance to report. Calling
+            # that FAIL would manufacture a defect; calling it PASS would hide
+            # one. It is UNCONFIRMED, and it is recorded as such.
+            result = "SKIPPED"
+            assertion_summary = one_line(
+                f'UNCONFIRMED: the runner was ABORTED ({abort_reason}), not allowed to finish, so '
+                f'classname="{fqcn}" has NO result in either direction. Gradle writes its JUnit XML '
+                f'only at the END of connectedAndroidTest, so this abort discarded the results of '
+                f'every selected class at once ({len(xml_files_used)} XML file(s) parsed) -- '
+                f'including any that had already passed AND any that had already genuinely failed. '
+                f'This is NOT evidence the feature works and NOT evidence it is broken. '
+                f'Runner-reported progress before the abort: {one_line(abort_detail, 400)}'
+            )
+            raw_lines += [
+                f"outcome: SKIPPED (UNCONFIRMED -- invocation ABORTED: {abort_reason})",
+                "",
+                "WHY THIS IS NOT 'FAIL': the runner never completed, so no per-class verdict",
+                "exists for this class. WHY THIS IS NOT 'PASS': the runner never completed, so",
+                "no per-class verdict exists for this class. Re-run with a sufficient",
+                "--test-timeout (or a reduced class selection) to obtain a real verdict.",
+                "",
+                "--- runner-reported progress captured before the abort (real, verbatim) ---",
+                abort_detail,
+                f"XML files parsed ({len(xml_files_used)}): " + ", ".join(os.path.relpath(x, repo_path) for x in xml_files_used),
+                "--- real run context ---",
+                diag_text,
+            ]
+        elif not tcs:
             result = "FAIL"
             known = ", ".join(sorted(all_found_classnames)[:15]) if all_found_classnames else "(none)"
             assertion_summary = one_line(
                 f'No <testcase classname="{fqcn}"> entry was found in the real, freshly-written '
-                f'JUnit XML report(s) for this run ({len(xml_files_used)} file(s) parsed) -- either '
-                f'the class filter did not match any executed test, or the run aborted before '
-                f'instrumentation completed for this class. classnames actually present in the '
-                f'report: {known}'
+                f'JUnit XML report(s) for this run ({len(xml_files_used)} file(s) parsed), and the '
+                f'runner was NOT aborted (its attestation row reports a completed invocation) -- so '
+                f'the class filter did not match any executed test. classnames actually present in '
+                f'the report: {known}'
             )
             raw_lines += [
-                "outcome: FAIL (no matching <testcase> found in the real JUnit XML report for this run)",
+                "outcome: FAIL (no matching <testcase> found in the real JUnit XML report for this run;"
+                " the runner ran to completion, so this is a genuine absence, not an abort artefact)",
                 f"XML files parsed ({len(xml_files_used)}): " + ", ".join(os.path.relpath(x, repo_path) for x in xml_files_used),
                 f"classnames actually present in those reports: {sorted(all_found_classnames)}",
                 "--- real run context ---",
@@ -772,6 +867,54 @@ TOTAL_SELECTED=0
 declare -a FAILED_IDS=()
 declare -a REJECTED_RECORDS=()
 declare -a EXAMPLE_RECORDS=()
+# LVA-161 / LVA-162
+declare -a ABORTED_MODULES=()
+declare -a DIAG_GATE_VIOLATIONS=()
+ABORT_REASON=""
+ABORT_DETAIL=""
+
+# --- LVA-162: refuse a gating attestation row that carries an empty diag ---
+# scripts/tag.sh Group-B Gate 3 (the AVD-shadow gate) is written as:
+#   jq '.rows[] | select(.diag.sdk != null and .api_level != null
+#                        and .diag.sdk != .api_level)'
+# With diag == {} the `.diag.sdk != null` guard filters the row OUT, so the
+# gate reports "no mismatches" and the row sails through -- on a row that
+# declares itself `gating: true`. That carve-out (tag.sh's own comment: "rows
+# lacking diag ... are skipped") was meant for pre-Group-B attestations, but
+# a CURRENT emitter writing diag:{} slides through the identical hole, leaving
+# the gate inert on exactly the rows it exists to police.
+#
+# The emitter is submodules/containers/pkg/emulator/matrix.go:611
+# (writeAttestation), which this repo may not edit (pins are frozen). So the
+# refusal lives here, Lava-side: an inert gate that REFUSES is strictly better
+# than one that passes. §6.I.4 Group B requires diag.target, diag.sdk,
+# diag.device and diag.adb_devices_state on EVERY row.
+check_gating_row_diag() {
+  local attestation="$1" module_label="$2"
+  command -v jq >/dev/null 2>&1 || return 0
+  local gating offenders
+  gating="$(jq -r 'if (.gating == null) then "true" else (.gating | tostring) end' "$attestation" 2>/dev/null)"
+  [[ "$gating" == "true" ]] || return 0
+
+  offenders="$(jq -r '
+    [ .rows[]?
+      | . as $r
+      | ( ["target","sdk","device","adb_devices_state"]
+          | map(select((($r.diag // {})[.] // "") | tostring | length == 0)) ) as $missing
+      | select(($missing | length) > 0)
+      | "\($r.avd // "?") (api_level=\($r.api_level // "?")): missing diag field(s): \($missing | join(", "))"
+    ] | join(" ;; ")' "$attestation" 2>/dev/null)"
+  [[ "$offenders" == "null" ]] && offenders=""
+
+  if [[ -n "$offenders" ]]; then
+    echo "" >&2
+    echo "phase-02-test-challenge: [$module_label] §6.I.4 GROUP-B VIOLATION — this attestation declares gating: true but has row(s) with an incomplete diag: ${offenders}" >&2
+    echo "phase-02-test-challenge: [$module_label] scripts/tag.sh Group-B Gate 3 compares diag.sdk against api_level to catch the AVD-shadow bluff; with diag empty that comparison has nothing to read and the gate is INERT on this row. A gating row that cannot be policed is refused here rather than passed on." >&2
+    echo "phase-02-test-challenge: [$module_label] emitter: submodules/containers/pkg/emulator/matrix.go writeAttestation() — Diag is serialised from TestResult.Diag, which was empty for this run." >&2
+    return 1
+  fi
+  return 0
+}
 
 process_module() {
   local module_label="$1" matrix_script="$2" matrix_script_rel="$3" \
@@ -783,6 +926,11 @@ process_module() {
     echo "phase-02-test-challenge: [$module_label] zero classes selected — skipping this module entirely"
     return 0
   fi
+
+  # Reset the per-module abort signals; these are consulted by the parser and
+  # by the final exit decision, and MUST NOT leak from a previous module.
+  ABORT_REASON=""
+  ABORT_DETAIL=""
 
   local test_class_arg
   test_class_arg="$(cut -f1 "$manifest" | paste -sd, -)"
@@ -798,12 +946,18 @@ process_module() {
   echo "phase-02-test-challenge: [$module_label] ${selected_count} class(es) selected: ${test_class_arg}"
   echo "phase-02-test-challenge: [$module_label] RUN (real): ${matrix_script_rel} --no-build --avds \"${AVD_SPEC}\" --test-class \"<${selected_count} classes>\" --container-image \"${CONTAINER_IMAGE_REF}\" --container-runtime \"${CONTAINER_RUNTIME}\" --evidence-dir \"${matrix_evidence_dir}\""
 
+  local test_timeout test_timeout_s
+  test_timeout="$(derive_test_timeout "$selected_count")"
+  test_timeout_s="$(timeout_to_seconds "$test_timeout")"
+  echo "phase-02-test-challenge: [$module_label] --test-timeout=${test_timeout} (${test_timeout_s}s) for ${selected_count} class(es) [overhead ${CHALLENGE_TIMEOUT_OVERHEAD_S}s + ${CHALLENGE_TIMEOUT_PER_CLASS_S}s/class]"
+
   bash "$matrix_script" \
     --no-build \
     --avds "$AVD_SPEC" \
     --test-class "$test_class_arg" \
     --container-image "$CONTAINER_IMAGE_REF" \
     --container-runtime "$CONTAINER_RUNTIME" \
+    --test-timeout "$test_timeout" \
     --evidence-dir "$matrix_evidence_dir" \
     > "$run_log" 2>&1
   local rc=$?
@@ -831,6 +985,59 @@ process_module() {
       fi
     } > "$diag_file"
     echo "phase-02-test-challenge: [$module_label] real per-AVD attestation found — parsing real JUnit XML for per-class results"
+
+    # --- LVA-161: was this invocation ABORTED (killed / deadline exceeded)? ---
+    # Proved from the runner's OWN attestation row, never inferred from the
+    # empty XML directory (an empty directory is exactly what a
+    # filter-matched-nothing run also produces -- that ambiguity IS the defect).
+    # Two independent signals, either sufficient:
+    #   (a) test_error names a kill/timeout ("signal: killed", "deadline
+    #       exceeded", "timeout"), which is what cmd/emulator-matrix records
+    #       when it kills the gradle child at --test-timeout; or
+    #   (b) the row failed AND burned >=98% of the budget we ourselves passed.
+    if command -v jq >/dev/null 2>&1; then
+      ABORT_REASON="$(jq -r --argjson budget "${test_timeout_s:-0}" '
+        [ .rows[]?
+          | select(
+              (((.test_error // "") | test("signal: *killed|killed|deadline exceeded|timed? ?out"; "i")))
+              or ( $budget > 0
+                   and ((.test_seconds // 0) >= ($budget * 0.98))
+                   and (((.test_passed) // false) == false) )
+            )
+          | "AVD \(.avd // "?") test_seconds=\(.test_seconds // 0) test_error=\(.test_error // "(none)")"
+        ] | join(" ;; ")' "$attestation" 2>/dev/null)"
+      [[ "$ABORT_REASON" == "null" ]] && ABORT_REASON=""
+    fi
+
+    if [[ -n "$ABORT_REASON" ]]; then
+      # Salvage whatever the runner DID report before it was killed. Gradle
+      # prints a running "Tests N/M completed. (S skipped) (F failed)" progress
+      # line to its log even though it writes the JUnit XML only at the end, so
+      # this is the ONLY surviving record of how far the run actually got --
+      # and, critically, of how many tests had ALREADY genuinely failed. It is
+      # surfaced so nobody reads "aborted" as "nothing was wrong".
+      local gl
+      while IFS= read -r gl; do
+        [[ -z "$gl" ]] && continue
+        local gpath="${matrix_evidence_dir}/${gl}"
+        [[ -f "$gpath" ]] || continue
+        local tail_line
+        tail_line="$(grep -aoE 'Tests [0-9]+/[0-9]+ completed\.[^\r]*' "$gpath" 2>/dev/null | tail -n 1)"
+        if [[ -n "$tail_line" ]]; then
+          ABORT_DETAIL="${ABORT_DETAIL}[${gl}] ${tail_line} "
+        fi
+      done < <(jq -r '.rows[]?.gradle_log_path // empty' "$attestation" 2>/dev/null)
+      if [[ -z "$ABORT_DETAIL" ]]; then
+        ABORT_DETAIL="(no gradle progress line survived in ${matrix_evidence_dir}; the runner was killed before printing one, so the number of already-failing tests is UNKNOWN -- treat every selected class as UNCONFIRMED)"
+      fi
+      ABORTED_MODULES+=("${module_label}: ${ABORT_REASON} | progress: ${ABORT_DETAIL}")
+      echo "phase-02-test-challenge: [$module_label] ABORTED — ${ABORT_REASON}" >&2
+      echo "phase-02-test-challenge: [$module_label] salvaged runner progress: ${ABORT_DETAIL}" >&2
+    fi
+
+    # --- LVA-162: a gating row with an empty diag makes tag.sh Group-B Gate 3
+    # inert on exactly the rows it exists to police. Refuse it here. ---
+    check_gating_row_diag "$attestation" "$module_label" || DIAG_GATE_VIOLATIONS+=("$module_label")
   else
     mode="blocked"
     xml_search_dir=""
@@ -855,6 +1062,7 @@ process_module() {
     "$REPO_PATH" "$module_raw_dir" "$module_label" "$mode" "$AVD_SPEC" \
     "$(basename "$matrix_script_rel")" "$CONTAINER_IMAGE_REF" "$CONTAINER_RUNTIME" \
     "$diag_file" "$xml_search_dir" "$marker_file" "$manifest" "$rc" \
+    "$ABORT_REASON" "$ABORT_DETAIL" \
     > "$jsonl"
 
   while IFS= read -r line; do
@@ -923,6 +1131,7 @@ echo "  chosen AVD:            ${AVD_SPEC} (image: ${CONTAINER_IMAGE_REF})"
 echo "  PASS:                  ${TOTAL_PASS}"
 echo "  FAIL:                  ${TOTAL_FAIL}"
 echo "  SKIPPED (blocked):     ${TOTAL_SKIPPED}"
+echo "  ABORTED modules:       ${#ABORTED_MODULES[@]} (killed/timed-out runners; their classes are UNCONFIRMED, not FAIL)"
 echo "  anti_bluff validated:  ${TOTAL_VALIDATED}"
 echo "  anti_bluff REJECTED:   ${TOTAL_REJECTED}"
 
@@ -950,6 +1159,29 @@ done
 
 echo ""
 echo "phase-02-test-challenge: Evidence Records under ${CATEGORY_DIR#"$REPO_PATH"/}"
+
+# --- LVA-162: a gating attestation whose rows cannot be policed is refused ---
+if [[ ${#DIAG_GATE_VIOLATIONS[@]} -gt 0 ]]; then
+  echo "" >&2
+  echo "phase-02-test-challenge: FAILED — §6.I.4 Group-B diag gate refused the attestation for: ${DIAG_GATE_VIOLATIONS[*]}. A row that declares gating: true while carrying an empty diag makes scripts/tag.sh Group-B Gate 3 (the AVD-shadow bluff gate) inert on exactly that row. Refusing is the only honest outcome available Lava-side, because the emitter (submodules/containers/pkg/emulator/matrix.go writeAttestation) is a frozen pin this repo does not edit." >&2
+  exit 1
+fi
+
+# --- LVA-161: an ABORTED runner never produced verdicts; it must not PASS ----
+# SKIPPED alone does not block the phase (by design -- an honestly-blocked host
+# is not a failure). An abort is different in kind: the run DID start, the host
+# WAS eligible, and the results were destroyed mid-flight. Letting that exit 0
+# would let a timed-out gate masquerade as a green one.
+if [[ ${#ABORTED_MODULES[@]} -gt 0 ]]; then
+  echo "" >&2
+  echo "phase-02-test-challenge: FAILED — the Challenge runner was ABORTED (killed / deadline exceeded) before it could write per-class results." >&2
+  for a in "${ABORTED_MODULES[@]}"; do
+    echo "    - ${a}" >&2
+  done
+  echo "phase-02-test-challenge: every selected class in an aborted module is recorded SKIPPED/UNCONFIRMED, NOT FAIL — the runner never gave those classes a verdict, so calling them broken would manufacture defects. It is equally NOT a pass. Read the salvaged progress line above: any test count it reports as already failed is a REAL failure that still needs fixing and MUST NOT be dismissed as 'just the timeout'." >&2
+  echo "phase-02-test-challenge: remedy — raise LAVA_PIPELINE_CHALLENGE_TEST_TIMEOUT (or LAVA_PIPELINE_CHALLENGE_TEST_TIMEOUT_PER_CLASS_S, currently ${CHALLENGE_TIMEOUT_PER_CLASS_S}s/class) and re-run, or reduce the selection via LAVA_PIPELINE_CHALLENGE_*_TEST_CLASSES." >&2
+  exit 1
+fi
 
 if [[ "$TOTAL_FAIL" -gt 0 || "$TOTAL_REJECTED" -gt 0 ]]; then
   echo "phase-02-test-challenge: FAILED — ${TOTAL_FAIL} real FAIL(s), ${TOTAL_REJECTED} anti-bluff rejection(s)" >&2

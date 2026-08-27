@@ -91,15 +91,44 @@
 #          required field, or a self-check JSON-validity failure after
 #          writing — see "Anti-bluff note" below).
 #
-# anti_bluff_status is ALWAYS written as the literal placeholder string
-# "validated" by this function. This is NOT a real verdict — it is a
-# placeholder satisfying the schema's required-field + pattern constraint
-# (`^(validated|REJECTED: .+)$`) until a separate, independent component
+# anti_bluff_status is ALWAYS written as a NOT-YET-VALIDATED placeholder by
+# this function (see _EVIDENCE_SH_UNVALIDATED_PLACEHOLDER below). This is
+# NOT a verdict — it is the honest statement that no verdict exists yet,
+# held until a separate, independent component
 # (scripts/pipeline/lib/anti-bluff-validate.sh, per research.md R-009 /
 # FR-004) inspects the finished record and overwrites this field for real.
 # This function MUST NOT be extended to perform that check itself — doing
 # so would collapse the "an independent validator can catch a test lying
 # about itself" property FR-004 exists to guarantee.
+#
+# WHY THE PLACEHOLDER IS NOT "validated" (fixed 2026-08-26; forensic
+# anchor). Until this change the placeholder was the literal string
+# "validated" — the exact value the real validator writes on ACCEPT. That
+# made "the independent validator examined this record and accepted it"
+# and "no validator has ever looked at this record" BYTE-IDENTICAL on
+# disk, and every consumer reads this field as a verdict. Measured
+# consequence, captured end-to-end through the real
+# scripts/pipeline/phase-02-test.sh: a `real-device-challenge` Evidence
+# Record whose entire assertion_summary was "did not crash", written
+# without any validator ever running, produced
+#   Evidence Records found: 1 / PASS: 1 / REJECTED (anti-bluff): 0
+#   phase-02-test: PASSED
+# while the real validator's verdict on that same record was
+#   REJECTED: assertion_summary matches generic bluff pattern 'did not
+#   crash' with no other specific content
+# Per §6.Z clause 4 a cold-start "did not crash" check is the MINIMUM and
+# explicitly not sufficient on its own; §6.AK exists because a C00-only
+# gate green-lit a release whose claimed fixes were never exercised. A
+# defaulted stamp is not a validation — it is the ABSENCE of one being
+# read as its presence, which is the §6.J bluff class by construction.
+#
+# The placeholder therefore takes the REJECTED form, which is (a) the
+# only other value evidence-record.schema.json's
+# `^(validated|REJECTED: .+)$` pattern permits, so no schema change is
+# needed, and (b) fail-CLOSED: every existing consumer that tests
+# `== "validated"` correctly refuses it, and every consumer that tests
+# `REJECTED*` correctly flags it. A record nobody validated can no longer
+# pass as a record somebody validated.
 #
 # Deviation from the contract doc: contracts/cli-contract.md's "Shared
 # library contract" section originally documented this function's
@@ -153,6 +182,12 @@ _EVIDENCE_SH_CATEGORIES=(
 
 # _evidence_is_valid_category <value> — exit 0 iff value is one of the 8
 # enum values from evidence-record.schema.json's "category" property.
+# The not-yet-validated placeholder written by write_evidence_record. MUST
+# match evidence-record.schema.json's `^(validated|REJECTED: .+)$` pattern,
+# and MUST NOT be "validated" — see the long note in write_evidence_record's
+# header for the measured reason.
+_EVIDENCE_SH_UNVALIDATED_PLACEHOLDER="REJECTED: anti-bluff validation has not run on this record (placeholder written by write_evidence_record; scripts/pipeline/lib/anti-bluff-validate.sh must evaluate this record and overwrite this field)"
+
 _evidence_is_valid_category() {
   local candidate="$1" known
   for known in "${_EVIDENCE_SH_CATEGORIES[@]}"; do
@@ -249,7 +284,7 @@ write_evidence_record() {
       --arg result "$result" \
       --arg assertion_summary "$assertion_summary" \
       --arg raw_output_ref "$raw_output_ref" \
-      --arg anti_bluff_status "validated" \
+      --arg anti_bluff_status "$_EVIDENCE_SH_UNVALIDATED_PLACEHOLDER" \
       '{
         test_id: $test_id,
         category: $category,
@@ -264,11 +299,11 @@ write_evidence_record() {
       return 1
     fi
   else
-    if ! python3 - "$tmp_path" "$test_id" "$category" "$command_str" "$result" "$assertion_summary" "$raw_output_ref" <<'PYEOF'
+    if ! python3 - "$tmp_path" "$test_id" "$category" "$command_str" "$result" "$assertion_summary" "$raw_output_ref" "$_EVIDENCE_SH_UNVALIDATED_PLACEHOLDER" <<'PYEOF'
 import json
 import sys
 
-tmp_path, test_id, category, command, result, assertion_summary, raw_output_ref = sys.argv[1:8]
+tmp_path, test_id, category, command, result, assertion_summary, raw_output_ref, anti_bluff_status = sys.argv[1:9]
 record = {
     "test_id": test_id,
     "category": category,
@@ -276,7 +311,7 @@ record = {
     "result": result,
     "assertion_summary": assertion_summary,
     "raw_output_ref": raw_output_ref,
-    "anti_bluff_status": "validated",
+    "anti_bluff_status": anti_bluff_status,
 }
 with open(tmp_path, "w") as f:
     json.dump(record, f, indent=2, ensure_ascii=False)

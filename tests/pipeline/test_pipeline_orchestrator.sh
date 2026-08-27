@@ -16,7 +16,7 @@
 # FIXTURE git repositories created by mktemp -d. Nothing here invokes
 # Gradle, systemd, podman or an Android emulator, and nothing here touches
 # this repository's real working tree or its real .lava-ci-evidence/ tree.
-# The full end-to-end run across all five wired phases is task T062, a human
+# The full end-to-end run across all eight wired phases is task T062, a human
 # review gate that must first execute on a disposable branch — this suite
 # does NOT cover it and must not be read as if it did.
 #
@@ -110,6 +110,12 @@ echo "==============================================================="
 # checkout when the guard regresses is itself a hazard. Aimed at a fixture,
 # the same regression fails fast and harmlessly instead (the fixture has no
 # gradlew, no systemd unit and no emulator).
+#
+# This matters MORE since T046: the default `--until` is now `docs_refresh`,
+# so a fallen-through run would additionally reach the two phases that WRITE
+# to the repository (phase-05a-changelog-entry.sh authors a CHANGELOG entry,
+# phase-06-docs.sh edits documentation and regenerates exports). Aimed at a
+# fixture, those never touch the real checkout either.
 GUARDS_FIXTURE="$(_new_fixture guards)"
 
 set +e
@@ -117,7 +123,14 @@ set +e
 set -e
 if [[ "$rc" -eq 0 ]]; then pass "--help exits 0"; else fail "--help exited $rc, expected 0"; fi
 
-for bad_until in "bogus-phase" "distribute" "closure"; do
+# `closure` is the ONLY remaining not-wired phase name (T046 wired
+# changelog_entry / distribute / docs_refresh; phase-07-closure.sh still does
+# not exist, blocked behind T048/T049 + T054's review gate). It is listed here
+# BY NAME rather than as "some unwired phase", because the property under test
+# is that a real, spec'd, schema-enumerated phase which is not yet implemented
+# is refused rather than silently skipped — which a mere typo like
+# "bogus-phase" does not exercise.
+for bad_until in "bogus-phase" "closure"; do
   set +e
   out="$( cd "$GUARDS_FIXTURE" && bash "$ORCH" --until "$bad_until" "$GUARDS_FIXTURE" 2>&1 )"; rc=$?
   set -e
@@ -130,6 +143,31 @@ for bad_until in "bogus-phase" "distribute" "closure"; do
     pass "--until '${bad_until}' explains that the phase is not wired"
   else
     fail "--until '${bad_until}' did not explain why it refused; output: ${out}"
+  fi
+done
+
+# The mirror of the above: the three phases T046 wired must NOT be refused.
+# Without this, deleting them from the registry again would leave this suite
+# green — the not-wired guard would simply have more to refuse. `--skip` is
+# passed for every phase past `precondition` so an accepted phase name is
+# proved accepted WITHOUT running any real phase script.
+for good_until in "changelog_entry" "distribute" "docs_refresh"; do
+  # A FRESH fixture per iteration. run_ids are second-resolution and
+  # init_run_report refuses to reuse one (R-010), so three invocations inside
+  # the same second would collide in a shared fixture and exit 1 for a reason
+  # that has nothing to do with what this check is about.
+  ACCEPT_FIXTURE="$(_new_fixture "accept-${good_until}")"
+  set +e
+  out="$( cd "$ACCEPT_FIXTURE" && bash "$ORCH" --until "$good_until" \
+            --skip build,test,install_boot,live_verify,changelog_entry,distribute,docs_refresh \
+            "$ACCEPT_FIXTURE" 2>&1 )"; rc=$?
+  set -e
+  if grep -q "is not a wired phase" <<< "$out"; then
+    fail "--until '${good_until}' was refused as not-wired, but T046 wired it"
+  elif [[ "$rc" -ne 0 ]]; then
+    fail "--until '${good_until}' was accepted but the run exited ${rc} with every phase past precondition skipped; output: ${out}"
+  else
+    pass "--until '${good_until}' is an accepted phase name and the skipped-tail run exits 0"
   fi
 done
 
@@ -240,10 +278,39 @@ if [[ "$ORCH_RC" -eq 2 ]]; then
 else
   fail "missing gitignore rule: exited ${ORCH_RC}, expected 2; output: ${out}"
 fi
-if grep -q "DIAGNOSIS" <<< "$out" && grep -q "pipeline-runs" <<< "$out"; then
-  pass "missing gitignore rule: self-diagnosis fires and names the offending run-directory paths"
+# UPDATED 2026-08-26: a PREVENTIVE `git check-ignore` guard now runs before
+# init_run_report creates anything, so this scenario is caught EARLIER than the
+# post-hoc DIAGNOSIS this case originally asserted. The requirement is
+# unchanged and the guarantee is strictly stronger: the orchestrator must still
+# say plainly that its own output is the problem, and must now additionally
+# leave the tree untouched. Asserting the old DIAGNOSIS string here would be
+# asserting the WEAKER behaviour, so the assertion moved up, it did not relax.
+#
+# The post-hoc diagnosis is retained in the orchestrator as a second line of
+# defence for the narrower case the guard cannot see: the ignore rule EXISTS,
+# yet something under pipeline-runs still reports dirty (a tracked file there,
+# or a negating pattern). It is no longer reachable via this fixture.
+if grep -q "REFUSING TO START" <<< "$out" && grep -q "pipeline-runs" <<< "$out"; then
+  pass "missing gitignore rule: refuses up front and names the offending run directory"
 else
-  fail "missing gitignore rule: no DIAGNOSIS naming the pipeline's own output. Output was: ${out}"
+  fail "missing gitignore rule: the orchestrator did not refuse up front while naming its own output. Output was: ${out}"
+fi
+
+# The load-bearing half: refusing is only an improvement if it also created
+# nothing. A refusal that still deposits a run directory leaves the operator
+# with the same mess plus a better error message.
+if [[ -e "${FOOTGUN}/.lava-ci-evidence" ]]; then
+  fail "missing gitignore rule: REFUSED but still created ${FOOTGUN}/.lava-ci-evidence — the whole point of refusing before init_run_report is that nothing is left behind. Contents: $(find "${FOOTGUN}/.lava-ci-evidence" | head -5 | tr '\n' ' ')"
+else
+  pass "missing gitignore rule: nothing was created — the fixture tree is untouched"
+fi
+
+# And the tree it refused to dirty must genuinely still be clean, measured
+# rather than inferred from the absence of that one directory.
+if [[ -z "$(git -C "$FOOTGUN" status --porcelain --untracked-files=all)" ]]; then
+  pass "missing gitignore rule: fixture working tree is still clean"
+else
+  fail "missing gitignore rule: fixture tree was dirtied despite the refusal: $(git -C "$FOOTGUN" status --porcelain --untracked-files=all | tr '\n' ' ')"
 fi
 
 echo ""

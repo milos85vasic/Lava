@@ -244,10 +244,11 @@
 <h1
 id="scriptscheck-challenge-discriminationsh--user-guide"><code>scripts/check-challenge-discrimination.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-05-15 (1.2.23 closure-cycle,
-§6.AB-debt close) <strong>Inheritance:</strong> HelixConstitution
-§11.4.18 (script documentation mandate) + Lava §6.AB (Anti-Bluff
-Test-Suite Reinforcement, 27th §6.L invocation)</p>
+<p><strong>Last verified:</strong> 2026-08-26 (§6.J corpus floor — an
+unread Challenge corpus no longer prints ✓; LVA vacuous-pass sweep F7)
+<strong>Inheritance:</strong> HelixConstitution §11.4.18 (script
+documentation mandate) + Lava §6.AB (Anti-Bluff Test-Suite
+Reinforcement, 27th §6.L invocation)</p>
 <h2 id="overview">Overview</h2>
 <p>Mechanical enforcement of §6.AB.3 — every
 <code>Challenge*Test.kt</code> file MUST carry a falsifiability
@@ -350,6 +351,128 @@ added without marker</h3>
 invokes this scanner. A commit that adds
 <code>app/src/androidTest/.../ChallengeXX_NoMarker.kt</code> will be
 REJECTED by pre-push under strict mode.</p>
+<h2
+id="2026-08-26-update--6j-corpus-floor-the-two--lines-can-no-longer-be-printed-over-an-empty-corpus">2026-08-26
+update — §6.J corpus floor: the two ✓ lines can no longer be printed
+over an empty corpus</h2>
+<h3 id="the-defect">The defect</h3>
+<p>This scanner's success output is two universally quantified
+claims:</p>
+<pre><code>    ✓ all Challenge tests carry §6.AB.3 falsifiability rehearsal documentation
+    ✓ all Challenge test bodies contain real assertions (UI / JUnit / classpath)</code></pre>
+<p>A universally quantified claim over an empty set is vacuously true.
+Both of the empty-corpus routes into this gate reported success:</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Old output</th>
+<th>Old exit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>app/src/androidTest/kotlin/lava/app/challenges</code>
+absent</td>
+<td><code>==&gt; §6.AB scan: no Challenge tests found (looked in ...)</code></td>
+<td>0</td>
+</tr>
+<tr>
+<td>Directory present, zero <code>Challenge*Test.kt</code></td>
+<td><code>Challenge tests: 0</code> <strong>plus both ✓
+lines</strong></td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>The second is the sharper of the two: it prints two explicit claims
+<em>about all Challenge tests</em> having examined none of them.
+"Nothing was learned" reported as "nothing failed" is the shape §6.J
+forbids — and the same shape
+<code>scripts/check-constitution.sh</code>'s clause-6.H credential floor
+and <code>scripts/verify-all-constitution-rules.sh</code>'s registry
+floor already guard against elsewhere in this tree. This scanner simply
+had no equivalent.</p>
+<p>The ordinary way to arrive at the first route is a
+<code>git clone</code> that never checked out <code>app/</code>, or a
+partial checkout; the second is reachable through a deletion or a bad
+merge that empties the directory without removing it.</p>
+<h3 id="what-the-scanner-now-refuses">What the scanner now refuses</h3>
+<p>Three refusals, all <strong>exit 1</strong>:</p>
+<ol type="1">
+<li><strong>Corpus directory absent</strong> —
+<code>§6.AB VIOLATION: the Challenge-discrimination scan corpus directory is ABSENT.</code>
+Replaces the old exit-0 "no Challenge tests found" message
+entirely.</li>
+<li><strong>Zero Challenge files examined</strong> —
+<code>§6.AB VIOLATION: ... examined ZERO Challenge tests.</code> This
+check runs <strong>before</strong> the ✓ lines, precisely because those
+lines are the thing that must not be reachable over an empty
+corpus.</li>
+<li><strong>Partial corpus</strong> —
+<code>§6.AB VIOLATION: ... examined a PARTIAL corpus.</code> A floor
+that only fires at exactly zero is a floor with one stair: 73 declared
+and 2 present would otherwise pass just as cleanly as 73 and 73. The
+missing files are named individually, not just counted.</li>
+</ol>
+<p>Every message states <code>Examined: &lt;n&gt;</code> against
+<code>Expected: &lt;n&gt;</code> so the corpus size is an explicit,
+reported fact rather than something the reader has to infer.</p>
+<h3 id="why-the-expectation-is-derived-from-the-git-index">Why the
+expectation is derived from the git index</h3>
+<p><code>Expected</code> comes from
+<code>git ls-files -- &lt;challenge_dir&gt;</code> filtered to
+<code>Challenge*Test.kt</code>, never from a literal number. The git
+index is the repository's own declaration of which Challenge files are
+supposed to exist, so it moves in lockstep with the corpus. A hardcoded
+count would go stale the moment a Challenge is added or removed — the
+same defect wearing a different mask.</p>
+<p>Each refusal distinguishes its cause from the derived count: if the
+index declares Challenge files and the working tree has none, that is
+<strong>working-tree drift</strong> and the remedy is
+<code>git checkout -- &lt;challenge_dir&gt;</code>; if the index
+declares zero too, this is <strong>not a Lava checkout</strong> (or the
+scan is running from the wrong root) and the remedy is to re-run from
+the repository root. Two different situations, two different remedies,
+never one generic failure.</p>
+<p>Two implementation notes worth keeping in mind if this block is
+edited:</p>
+<ul>
+<li>The count uses <code>awk</code>, not <code>grep -c</code>.
+<code>grep -c</code> exits 1 on a zero count, which under
+<code>set -e</code> inside a pipeline is its own hazard — the exact
+failure mode this sweep records.</li>
+<li><code>git ls-files</code> is wrapped in
+<code>{ ...; } || true</code>. Outside a repository it exits 128, and
+under <code>set -euo pipefail</code> that would abort the script with
+<strong>no message at all</strong> — fail-closed, but with a diagnosis
+so empty it sends the reader nowhere. Degrading to a declared count of 0
+lets the not-a-checkout branch say what actually happened.</li>
+</ul>
+<h3 id="interaction-with-advisory-mode">Interaction with advisory
+mode</h3>
+<p><code>LAVA_CHALLENGE_DISCRIMINATION_STRICT=0</code> still downgrades
+<em>violation</em> reporting to advisory. It does <strong>not</strong>
+downgrade the corpus floors: a scan that read nothing is not a scan
+whose findings can be advisory, because it has no findings either
+way.</p>
+<h3 id="6j-falsifiability-rehearsal-of-the-floor-itself">§6.J
+falsifiability rehearsal of the floor itself</h3>
+<ol type="1">
+<li><code>mv app/src/androidTest/kotlin/lava/app/challenges /tmp/chal-hold</code>
+→ run the scanner → expect <strong>exit 1</strong>,
+<code>corpus directory is ABSENT</code>, and
+<code>Expected: &lt;n&gt;</code> naming the count the git index
+declares. Before this change: exit 0.</li>
+<li><code>mkdir</code> the directory back empty → run → expect
+<strong>exit 1</strong>, <code>examined ZERO Challenge tests</code>, and
+<strong>neither ✓ line printed</strong>.</li>
+<li>Restore a subset of the files → run → expect <strong>exit
+1</strong>, <code>examined a PARTIAL corpus</code>, with the
+still-missing files named.</li>
+<li><code>mv /tmp/chal-hold ...</code> back in full → run → expect exit
+0 and both ✓ lines.</li>
+</ol>
 <h2 id="cross-references">Cross-references</h2>
 <ul>
 <li><code>scripts/check-non-fatal-coverage.sh</code> (sister scanner for

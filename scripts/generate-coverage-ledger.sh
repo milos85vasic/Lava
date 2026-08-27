@@ -178,6 +178,34 @@ count_tests() {
         | grep -c . || true
 }
 
+# Count test files inside an owned submodule, EXCLUDING nested gitlink trees.
+#
+# NESTED-SUBMODULE PRUNE (§11.4.25 determinism + §6.J anti-bluff):
+# An owned submodule may itself vendor third-party repos as nested submodules
+# (e.g. submodules/helixqa/tools/opensource/* — docling, appium, chroma,
+# perfetto, ...). Those trees are NOT this project's coverage, and whether they
+# are checked out is per-machine local state rather than tracked state.
+# Counting through them BOTH inflates the coverage number with foreign tests
+# AND makes the ledger non-deterministic across machines (identical git tree,
+# different count) — breaking the determinism contract asserted in this
+# script's header (point 4) and producing spurious STALE verdicts in
+# scripts/check-coverage-ledger.sh. Prune every nested gitlink so the count is
+# a function of the submodule's own pinned tree only.
+count_submodule_tests() {
+    local base="$1"
+    local pattern="$2"
+    [[ -d "$base" ]] || { echo 0; return; }
+    local prunes=()
+    local nested
+    while IFS= read -r nested; do
+        [[ -n "$nested" ]] && prunes+=( -path "$base/$nested" -prune -o )
+    done < <(git -C "$base" ls-files --stage 2>/dev/null \
+             | awk '$1 == "160000" { sub(/^[^\t]*\t/, ""); print }')
+    find "$base" -path '*/build' -prune -o -path '*/.git' -prune -o \
+        ${prunes[@]+"${prunes[@]}"} -name "$pattern" -print 2>/dev/null \
+        | grep -c . || true
+}
+
 sample_tests() {
     local base="$1"
     local pattern="$2"
@@ -438,7 +466,7 @@ EOF
         unit_count=0
         local p c
         for p in "*_test.go" "*Test.kt" "test_*.sh"; do
-            c=$(count_tests "$d" "$p")
+            c=$(count_submodule_tests "$d" "$p")
             unit_count=$((unit_count + c))
         done
         has_docs=0

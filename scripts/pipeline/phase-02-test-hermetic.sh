@@ -79,11 +79,11 @@
 #      wrapper is broader (`-name '*.sh'`), which is why the rule is needed
 #      here specifically.
 #
-#   3. tests/codegraph/lib.sh — a `source`-only shared-helper library
+#   4. tests/codegraph/lib.sh — a `source`-only shared-helper library
 #      (`set -u`, no test logic, no assertions of its own). It is sourced
 #      BY tests/codegraph/test_*.sh, not independently invocable as a suite.
 #
-#   4. tests/vm-distro/boot-and-probe.sh and tests/vm-signing/sign-and-hash.sh
+#   5. tests/vm-distro/boot-and-probe.sh and tests/vm-signing/sign-and-hash.sh
 #      — per their own header comments, both "run[] INSIDE each VM in the
 #      matrix": they curl real localhost services (proxy/lava-api-go health
 #      endpoints) or sign a real APK that only exist once uploaded into a
@@ -93,7 +93,7 @@
 #      this host, producing a meaningless FAIL that says nothing real about
 #      the check they implement inside an actual VM-matrix run.
 #
-#   5. tests/check-constitution/check_constitution_test.sh — per its own
+#   6. tests/check-constitution/check_constitution_test.sh — per its own
 #      header/inline comments, this suite builds FOUR full filtered
 #      repo-copy fixtures per run (rsync-excluding .git/build/.gradle/
 #      releases/worktrees) specifically because an earlier `cp -r` version

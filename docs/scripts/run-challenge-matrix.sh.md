@@ -1,6 +1,6 @@
 # `scripts/run-challenge-matrix.sh` — User Guide
 
-**Last verified:** 2026-07-26 (LVA-014 durable device-gate fixes — AVD-name resolution, WaitForBoot container-liveness, emulator-image preflight)
+**Last verified:** 2026-08-26 (LVA-161 — `--test-timeout` pass-through; the CLI's 10m default was killing whole-module sweeps and destroying every class's results)
 **Inheritance:** HelixConstitution §11.4.18 + Lava §6.AE.6 + §6.X (Container-Submodule Emulator Wiring) + §6.I (Multi-Emulator Container Matrix)
 
 ## Overview
@@ -81,6 +81,57 @@ bash scripts/run-challenge-matrix.sh --include-helixqa
 | `--add-tv` | Add a TV-class AVD to the matrix |
 | `--add-foldable` | Add a foldable AVD |
 | `--include-helixqa` | ALSO invoke `scripts/run-helixqa-challenges.sh` (the 11 HelixQA Challenge scripts per Option 1 wiring). OFF by default so existing matrix runs are unaffected. HelixQA runs on the HOST BEFORE the AVD matrix → independent of §6.X-debt darwin/arm64 gate-host gap. HelixQA wrapper evidence lands at `<evidence-dir>/helixqa/`. Non-zero HelixQA exit promotes the final aggregate exit code (matrix exit dominates if both fail). See `docs/scripts/run-helixqa-challenges.sh.md` for full details. |
+
+## LVA-161 — `--test-timeout` pass-through (2026-08-26)
+
+### The defect
+
+`submodules/containers/cmd/emulator-matrix` defaults `--test-timeout` to **10 minutes**
+(`cmd/emulator-matrix/main.go:123`). That budget covers the **TEST step only** — cold
+boot is timed separately and reported as `boot_seconds` — and this script never set it,
+so every run inherited the default.
+
+A whole-module Challenge sweep is a **single gradle invocation** covering every selected
+class, so 10 minutes is far below the real workload. Measured: the
+`2026-08-26T14-09-17Z` run was killed at `test_seconds=600.02` with `signal: killed`,
+having completed **81 of 104 tests**.
+
+What makes this worse than a truncated run: gradle writes its JUnit XML at the **end** of
+the invocation. A kill therefore destroys the results of **every** class in the sweep,
+including the ones that had already passed — so the matrix reports the whole selection as
+failed when nothing about the product was wrong. That is a verdict determined by a clock,
+not by the code under test.
+
+### What changed here
+
+This script gained a `--test-timeout <duration>` argument that is forwarded verbatim to
+`emulator-matrix --test-timeout` when set, and omitted entirely when empty (preserving the
+CLI default). That is the whole change: this script does **not** compute a value.
+
+**Callers MUST size it to the selected workload.** The pipeline's Challenge phase
+(`scripts/pipeline/phase-02-test-challenge.sh`) derives it as
+`300s + 45s × <selected class count>` — a fixed overhead plus a per-class budget — and
+prints the derivation with the class count before invoking. Both terms are overridable
+(`LAVA_PIPELINE_CHALLENGE_TEST_TIMEOUT_OVERHEAD_S`,
+`LAVA_PIPELINE_CHALLENGE_TEST_TIMEOUT_PER_CLASS_S`), and an explicit
+`LAVA_PIPELINE_CHALLENGE_TEST_TIMEOUT` wins verbatim. Operators invoking this script
+directly for a large selection should pass `--test-timeout` themselves rather than
+accept 10m.
+
+### Reading a timeout kill honestly
+
+A run killed at the timeout is **not** a test failure and must not be recorded as one.
+The distinguishing evidence is `test_seconds` sitting within a rounding error of the
+configured budget together with `signal: killed`, and a JUnit XML that is absent rather
+than reporting failures. The remedy is to raise `--test-timeout` (or reduce the class
+selection) and re-run to obtain a real verdict — never to re-interpret the kill as a
+product defect.
+
+### Inputs (addition)
+
+| Arg | Description |
+|---|---|
+| `--test-timeout <duration>` | Forwarded to `emulator-matrix --test-timeout` (Go duration syntax, e.g. `2400s`, `40m`). Empty = the CLI default of 10m, which is **too small for a whole-module sweep**. Applies to the TEST step only; cold boot is budgeted separately by `--boot-timeout`. |
 
 ## §6.AE.2 mandatory minimum matrix
 
