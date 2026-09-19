@@ -124,6 +124,43 @@ declare -a PREFIXES=(
 )
 prefix_pattern="$(IFS='|'; echo "${PREFIXES[*]}")"
 
+# ---------------------------------------------------------------------------
+# Submodule-nested path resolution (added 2026-09-19, fixes a false positive
+# on commit f6ff59eb).
+#
+# f6ff59eb's body cites "tests/data/uspto/sources/pftaps057006474.txt" as
+# forensic detail about a fix made INSIDE the nested third-party submodule
+# submodules/helixqa/tools/opensource/docling (docling is itself a submodule
+# of the HelixQA submodule). The commit never claimed that path exists at
+# Lava's own repo root — it exists at
+# submodules/helixqa/tools/opensource/docling/tests/data/uspto/sources/pftaps057006474.txt.
+# The root-only existence check had no way to know that, so it flagged a
+# real, resolvable reference as an orphan.
+#
+# Fix: enumerate every submodule root, top-level AND nested (recursively —
+# a commit describing work inside a submodule-of-a-submodule is exactly the
+# f6ff59eb shape), and additionally accept a candidate path if it resolves
+# under ANY submodule root. This does not weaken the check for its real
+# purpose: a path that resolves NOWHERE — not at the repo root, not inside
+# any submodule, top-level or nested — still fails. See
+# tests/check-commit-docs-exists/ for the paired positive/negative fixtures.
+mapfile -t SUBMODULE_ROOTS < <(git submodule foreach --quiet --recursive 'echo "$displaypath"' 2>/dev/null)
+
+# Resolve a repo-relative path CANDIDATE against every known submodule root.
+# Echoes the first matching root-joined path and returns 0 on a hit; returns
+# 1 with no output when the candidate resolves under no submodule.
+resolve_in_submodules() {
+    local candidate="$1" root
+    for root in "${SUBMODULE_ROOTS[@]}"; do
+        [[ -z "$root" ]] && continue
+        if [[ -e "$root/$candidate" ]]; then
+            echo "$root/$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
 orphan_count=0
 declare -a orphan_reports=()
 
@@ -182,6 +219,12 @@ for sha in "${commits[@]}"; do
         # to files that were SUPPOSED to be committed but never were; a path the
         # repo deliberately ignores is out of that scope.
         if git check-ignore -q -- "$clean" 2>/dev/null; then
+            continue
+        fi
+        # Submodule-nested resolution: the candidate may describe a file
+        # inside a (possibly nested) submodule without spelling out the
+        # submodule prefix — see the SUBMODULE_ROOTS block above.
+        if resolve_in_submodules "$clean" >/dev/null; then
             continue
         fi
         # Fuzzy fallback: short-form prose references like

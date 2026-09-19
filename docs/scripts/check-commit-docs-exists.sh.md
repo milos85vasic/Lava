@@ -1,6 +1,6 @@
 # `scripts/check-commit-docs-exists.sh` — User Guide
 
-**Last verified:** 2026-08-26 (§6.J corpus floor — an unresolvable or empty commit range now refuses instead of skipping; LVA vacuous-pass sweep F13)
+**Last verified:** 2026-09-19 (submodule-nested path resolution — a commit body describing a fix made inside a top-level OR nested submodule no longer needs to spell out the submodule prefix to resolve; fixes a false positive on commit f6ff59eb)
 **Inheritance:** HelixConstitution §11.4.x (commit-references-resolve mandate) + Lava §6.AD-debt closure (CM-COMMIT-DOCS-EXISTS)
 
 ## Overview
@@ -59,6 +59,33 @@ A prose reference like `feature/search_result/SearchPageState.kt` resolves the r
 4. If 1+ matches found, treat as resolved.
 
 The fallback prevents pedantic false-positives on human-written short-form paths while still catching genuinely-missing files.
+
+## Submodule-nested path resolution (added 2026-09-19)
+
+A commit may legitimately describe a fix made **inside** a submodule — top-level
+(`submodules/helixqa`) or nested (a submodule-of-a-submodule, e.g.
+`submodules/helixqa/tools/opensource/docling`) — without spelling out the
+submodule's own path prefix in prose. Example forensic anchor: commit `f6ff59eb`
+cited `tests/data/uspto/sources/pftaps057006474.txt`, describing a CRLF fix made
+inside `submodules/helixqa`'s nested `docling` submodule, where the file actually
+lives at
+`submodules/helixqa/tools/opensource/docling/tests/data/uspto/sources/pftaps057006474.txt`.
+The root-only existence check had no way to resolve that and flagged a real,
+resolvable reference as an orphan.
+
+Resolution order per candidate path:
+
+1. Exact path check at the repo root.
+2. `.gitignore` skip (operator-local evidence).
+3. **Submodule-nested resolution** — enumerate every submodule root, top-level
+   AND nested, via `git submodule foreach --quiet --recursive 'echo "$displaypath"'`,
+   and accept the candidate if `<submodule-root>/<candidate>` exists on disk.
+4. Fuzzy top-level basename fallback (unchanged).
+
+This does **not** weaken the check for its real purpose: a path that resolves
+nowhere — not at the repo root, not inside any submodule at any depth — still
+fails. A candidate is only accepted when a real file exists at the joined path;
+there is no blanket "commit mentions a submodule" exemption.
 
 ## §6.J anti-bluff falsifiability rehearsal
 
@@ -144,7 +171,7 @@ for the tip commit alone, or `'@{u}..HEAD'` for everything unpushed.
 
 ## Hermetic test
 
-`tests/check-constitution/test_commit_docs_exists.sh` — 7 fixtures:
+`tests/check-constitution/test_commit_docs_exists.sh` — 10 fixtures:
 
 1. Commit with no path refs → pass
 2. All-existing paths → pass
@@ -152,7 +179,10 @@ for the tip commit alone, or `'@{u}..HEAD'` for everything unpushed.
 4. Stale ref inside `~~strikethrough~~` → pass (skipped)
 5. Stale ref inside backticks → pass (skipped)
 6. Fuzzy basename short-form → pass (resolved via find)
-7. Real-repo HEAD sanity check → pass
+7. Indented Bluff-Audit/quoted-output content → pass (skipped)
+8. Submodule-nested reference (no submodule prefix in prose) → pass (resolved via `git submodule foreach --recursive`)
+9. Submodule-nested-LOOKING reference that resolves nowhere → reject (exit 1) — proves fixture 8 is not a blanket exemption
+10. Real-repo HEAD sanity check → pass
 
 Run:
 ```bash

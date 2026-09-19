@@ -180,6 +180,71 @@ Bluff-Audit: scripts/foo.sh
 }
 
 # -----------------------------------------------------------------------------
+# Test 9: submodule-nested reference (no submodule prefix in prose) → exit 0
+#
+# Reproduces the f6ff59eb false positive: a commit body cites a path
+# ("tests/fixture.md") that is real but lives INSIDE a submodule, without
+# spelling out the submodule's own path prefix. The scanner MUST resolve it
+# via SUBMODULE_ROOTS rather than flagging an orphan.
+# -----------------------------------------------------------------------------
+test_submodule_nested_ref_passes() {
+    local subsrc; subsrc=$(mktemp -d)
+    git -C "$subsrc" init -q -b master 2>/dev/null
+    git -C "$subsrc" config user.email "test@example.com"
+    git -C "$subsrc" config user.name "Test"
+    git -C "$subsrc" config commit.gpgsign false
+    mkdir -p "$subsrc/tests"
+    : > "$subsrc/tests/fixture.md"
+    git -C "$subsrc" add . >/dev/null
+    git -C "$subsrc" commit -q -m "seed fixture"
+
+    local f; f=$(mktemp -d); scaffold "$f"
+    git -c protocol.file.allow=always -C "$f" submodule add -q "file://$subsrc" vendor/sub >/dev/null 2>&1
+    git -C "$f" commit -q -m "chore: vendor sub submodule"
+    commit_body "$f" "fix: adjusted tests/fixture.md behavior inside the vendored submodule (no submodule/ prefix in this prose, mirrors f6ff59eb)"
+    local out rc
+    out=$(LAVA_REPO_ROOT="$f" bash "$SCANNER" 2>&1); rc=$?
+    if [[ "$rc" -eq 0 ]] && echo "$out" | grep -q "gate clean"; then
+        echo "PASS test_submodule_nested_ref_passes"
+    else
+        echo "FAIL test_submodule_nested_ref_passes: rc=$rc out=$out"; rm -rf "$f" "$subsrc"; exit 1
+    fi
+    rm -rf "$f" "$subsrc"
+}
+
+# -----------------------------------------------------------------------------
+# Test 10: submodule-nested-LOOKING reference that resolves NOWHERE → exit 1
+#
+# Guards against turning the fix into a blanket exemption: a path that does
+# not exist at the root AND does not exist inside any submodule must still
+# be rejected.
+# -----------------------------------------------------------------------------
+test_submodule_nested_ref_still_rejects_genuinely_missing() {
+    local subsrc; subsrc=$(mktemp -d)
+    git -C "$subsrc" init -q -b master 2>/dev/null
+    git -C "$subsrc" config user.email "test@example.com"
+    git -C "$subsrc" config user.name "Test"
+    git -C "$subsrc" config commit.gpgsign false
+    mkdir -p "$subsrc/tests"
+    : > "$subsrc/tests/fixture.md"
+    git -C "$subsrc" add . >/dev/null
+    git -C "$subsrc" commit -q -m "seed fixture"
+
+    local f; f=$(mktemp -d); scaffold "$f"
+    git -c protocol.file.allow=always -C "$f" submodule add -q "file://$subsrc" vendor/sub >/dev/null 2>&1
+    git -C "$f" commit -q -m "chore: vendor sub submodule"
+    commit_body "$f" "fix: claims a fix to tests/genuinely-missing-fixture.md which exists NOWHERE (not root, not any submodule)"
+    local out rc
+    out=$(LAVA_REPO_ROOT="$f" bash "$SCANNER" 2>&1); rc=$?
+    if [[ "$rc" -eq 1 ]] && echo "$out" | grep -q "tests/genuinely-missing-fixture.md"; then
+        echo "PASS test_submodule_nested_ref_still_rejects_genuinely_missing"
+    else
+        echo "FAIL test_submodule_nested_ref_still_rejects_genuinely_missing: rc=$rc out=$out"; rm -rf "$f" "$subsrc"; exit 1
+    fi
+    rm -rf "$f" "$subsrc"
+}
+
+# -----------------------------------------------------------------------------
 # Test 8: real-repo sanity check at HEAD
 # -----------------------------------------------------------------------------
 test_real_repo_passes() {
@@ -199,6 +264,8 @@ test_strikethrough_skipped
 test_backtick_skipped
 test_fuzzy_basename_passes
 test_indented_quoted_output_skipped
+test_submodule_nested_ref_passes
+test_submodule_nested_ref_still_rejects_genuinely_missing
 test_real_repo_passes
 
-echo "All 8 commit-docs-exists gate tests PASSED"
+echo "All 10 commit-docs-exists gate tests PASSED"
