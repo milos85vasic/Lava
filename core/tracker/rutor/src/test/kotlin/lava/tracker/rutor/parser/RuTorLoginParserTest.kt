@@ -21,7 +21,7 @@ class RuTorLoginParserTest {
 
     @Test
     fun `success target home page is classified as Success and AuthState_Authenticated`() {
-        val html = loader.load("login", "success-target-home-2026-07-02.html")
+        val html = loader.load("login", "success-target-home-2026-09-19.html")
         val classification = parser.classify(html)
         assertEquals(RuTorLoginParser.Outcome.Success, classification.outcome)
         // Sixth Law clause 3 anchor: AuthState is the user-visible decision the

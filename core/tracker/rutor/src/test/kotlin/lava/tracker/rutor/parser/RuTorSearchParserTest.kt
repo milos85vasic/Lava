@@ -84,7 +84,7 @@ class RuTorSearchParserTest {
 
     @Test
     fun `cyrillic search results carry Cyrillic characters in titles`() {
-        val html = loader.load("search", "search-cyrillic-2026-07-02.html")
+        val html = loader.load("search", "search-cyrillic-2026-09-19.html")
         val result = parser.parse(html, pageHint = 0)
 
         assertTrue("cyrillic search should return non-empty items", result.items.isNotEmpty())
@@ -96,8 +96,10 @@ class RuTorSearchParserTest {
                 result.items.take(3).map { it.title },
             anyCyrillic,
         )
-        // 15-page pagination block (refreshed 2026-07-02); the parser picks max(int) = 15.
-        assertEquals(15, result.totalPages)
+        // Single-page pagination block (refreshed 2026-09-19); the live "Кино
+        // новинки" query now returns 3 results on one page, so `Страницы:  1`
+        // is the only pagination text and the parser's max(int) = 1.
+        assertEquals(1, result.totalPages)
         // Falsifiability anchor: a parser drift that returns rutor news_table rows would
         // surface non-Cyrillic English-only news titles. The dedicated div#index scope
         // protects against that.
