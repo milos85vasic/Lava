@@ -21,9 +21,9 @@
 # Invariant values: pass | gap | n/a | "waiver: <rationale>" | "pass: <rationale>"
 metadata:
   schema_version: 1
-  generated_at: "2026-08-20T12:16:37Z"
+  generated_at: "2026-09-19T12:57:49Z"
   generator: "scripts/generate-coverage-ledger.sh"
-  commit_sha: "995c210df635824646b5594def630a46e54065ed"
+  commit_sha: "3ad417050cffe75500b52a8482ba2310fc84dfe7"
   mandate: "HelixConstitution §11.4.25 Full-Automation-Coverage Mandate"
 
 rows:
@@ -851,7 +851,7 @@ rows:
   - path: "lava-api-go"
     kind: "api"
     status: "covered"
-    unit_test_count: 229
+    unit_test_count: 231
     integration_test_count: 2
     challenge_count: 0
     challenges: []
@@ -944,7 +944,7 @@ rows:
   - path: "submodules/containers"
     kind: "submodule"
     status: "covered"
-    unit_test_count: 320
+    unit_test_count: 323
     integration_test_count: 0
     challenge_count: 0
     challenges: []
@@ -1166,6 +1166,21 @@ rows:
       no_open_bugs: "pass: per cross-cutting B + §6.AD.3 equivalence — tracker-credentials-in-git-history closed per .lava-ci-evidence/sixth-law-incidents/2026-05-13-tracker-credentials-in-git-history.json"
       documented: "pass: per §6.AD inheritance pointer-block; submodules/security/CLAUDE.md + AGENTS.md + CONSTITUTION.md"
       four_layer: "pass: per §11.4.28 the submodule maintains its own four-layer floor; Lava integration via core/network crypto suite + scripts/scan-no-hardcoded-* gates"
+  - path: "submodules/superspec"
+    kind: "submodule"
+    status: "gap"
+    unit_test_count: 0
+    integration_test_count: 0
+    challenge_count: 0
+    challenges: []
+    sample_tests: []
+    invariants:
+      anti_bluff: "gap"
+      working_capability: "gap"
+      documented_promise: "gap"
+      no_open_bugs: "gap"
+      documented: "pass"
+      four_layer: "gap"
   - path: "submodules/tracker_sdk"
     kind: "submodule"
     status: "covered"
