@@ -10,8 +10,10 @@ updated_at: "2026-08-26T11:40:00Z"
 
 totals:
   tasks_total: 63
-  tasks_done: 59
-  tasks_open: 4
+  tasks_done: 62
+  tasks_open: 1
+  # T062 ATTEMPTED 2026-09-19 -- honest partial, not a pass (outcome: FAIL,
+  # halted at 'test'). See t062_attempt_2026_09_19 below. Remains open.
   # CORRECTED 2026-08-26. This block read 48/15 while tasks.md
   # recorded 59 checked and 4 unchecked -- the rolled-up view was
   # asserting 11 tasks open that its own authoritative source records
@@ -19,7 +21,11 @@ totals:
   # landed. A state artifact that misreports state is the same defect
   # class as the four stale operator-blocked tracker items closed the
   # same day: it is not bookkeeping lag, it is a false claim at rest.
-  # The 4 genuinely open are T054, T055, T056, T062.
+  # UPDATED 2026-09-18: T054 (the mandatory review gate) was ACCEPTED
+  # this session -- see t054_closure_2026_09_18 below. T055
+  # (phase-07-closure.sh) was then IMPLEMENTED this session -- see
+  # t055_implementation_2026_09_18 below. The 2 genuinely open are now
+  # T056, T062.
 
 phases:
   - id: 1
@@ -79,17 +85,25 @@ phases:
   - id: 6
     name: "US4 repository closure"
     tasks: T048-T056
-    state: BLOCKED
-    blocked_by: [T054]   # T048/T049 landed 2026-08-23; T054 review returned APPROVE WITH FIXES (3 proven blockers) and is NOT closed
+    state: IN_PROGRESS
+    blocked_by: []   # T048/T049 landed 2026-08-23; T054 ACCEPTED 2026-09-18; T055 IMPLEMENTED 2026-09-18 -- only T056 remains in this phase
     note: >-
       T048/T049 are constitutional amendments (the Decoupled Reusable
       Architecture rule's "submodule fetch/pull is an EXPLICIT operator action,
-      never automatic"). T054 is a separate mandatory review gate before
-      advance-all-submodules.sh may touch any real submodule upstream. The
-      T050-T053 TDD cycle against DISPOSABLE FIXTURE repos is COMPLETE (36/36
-      assertions green, independently re-run by the orchestrating session; real
-      submodules confirmed untouched). advance-all-submodules.sh has NEVER been
-      run against a real submodule or upstream.
+      never automatic"). T054 was a separate mandatory review gate before
+      advance-all-submodules.sh may touch any real submodule upstream; it
+      closed 2026-09-18 after the capability that motivated it (R-005 step 6)
+      was removed outright in commit 97cc64a8 and independently re-verified.
+      The T050-T053 TDD cycle against DISPOSABLE FIXTURE repos is COMPLETE
+      (36/36 assertions green, independently re-run by the orchestrating
+      session; real submodules confirmed untouched). T055
+      (scripts/pipeline/phase-07-closure.sh) IMPLEMENTED 2026-09-18 -- see
+      t055_implementation_2026_09_18 below; 97/97 assertions across its two
+      hermetic suites, 0 FAIL, independently re-run twice by the orchestrating
+      session. Neither advance-all-submodules.sh nor phase-07-closure.sh has
+      ever been run against a real submodule upstream from a live invocation
+      (only against hermetic fixtures) -- T056 Step A is that first real-clone
+      run, against a disposable clone per Human Checkpoint #2.
   - id: 7
     name: "Polish & cross-cutting"
     tasks: T057-T063
@@ -117,8 +131,9 @@ human_review_gates:
     what: ".specify/memory/constitution.md update matching T048"
   - id: T054
     kind: code-review
-    status: PENDING
-    what: "Mandatory review of advance-all-submodules.sh before ANY invocation against a real submodule upstream — highest blast radius in this feature"
+    status: ACCEPTED
+    accepted_at: "2026-09-18"
+    what: "Mandatory review of advance-all-submodules.sh before ANY invocation against a real submodule upstream — highest blast radius in this feature. See t054_closure_2026_09_18 below for the full verdict."
   - id: T062
     kind: code-review
     status: PENDING
@@ -1690,3 +1705,774 @@ clause_8_amendment_2026_08_26:
     Draft item D-2, partial-distribution semantics: what happens when the debug stage
     succeeds and the release stage refuses. Reachable now in a way the retired
     combined invocation never made it. Operator decision.
+
+t054_closure_2026_09_18:
+  what: >-
+    T054 (mandatory review of scripts/advance-all-submodules.sh, Human Checkpoint #2)
+    ACCEPTED. This is a closure of a review whose substantive resolution already
+    landed in commit 97cc64a8 (2026-08-27) from an earlier session; this entry
+    records the independent re-verification pass performed under the
+    003-combined-feature-roadmap umbrella execution that actually cleared the
+    task's checkbox and human-review-gate status.
+  history_this_closure_verified_rather_than_trusted: >-
+    Five adversarial review rounds (round numbers 3, 5, 7, 9, 10, 11, 12 --
+    non-consecutive because rounds were re-numbered as escapes were found, per
+    the script's own header) found twelve distinct, fixture-proven ways R-005
+    step 6 (committing and publishing a submodule's own uncommitted work) could
+    leak unaudited content to a real upstream default branch. Guarding provably
+    stopped converging: the eleventh escape smuggled 4000 bytes through a commit
+    object's own author-name header past all five prior publish guards, and the
+    convergent byte-equality instrument built to catch exactly that was itself
+    defeated because git commit-tree inherits i18n.commitEncoding, so the
+    expected commit was built in the same adversary-controlled config context
+    and the poison cancelled out on both sides. RESOLUTION: the capability was
+    removed outright rather than guarded a sixth time -- --publish-local-modifications
+    and the entire step-6 publish path deleted (2966 -> 2170 lines). The script
+    now issues no git push and creates no commit on any path, structurally
+    rather than by flag selection.
+  independent_verification_performed_2026_09_18:
+    - "Read the full script end to end (2170 lines), not sampled."
+    - >-
+      Re-ran all four hermetic test suites from a clean invocation rather than
+      trusting the prior commit's stated numbers: test_advance_all_submodules.sh
+      74/74, test_advance_all_submodules_hardening.sh 61/61,
+      test_advance_all_submodules_blast_radius.sh 43/43,
+      test_advance_all_submodules_t054.sh 456/456. Total 634/634 assertions, 0
+      failures -- matches the commit message's claimed total exactly, reproduced
+      rather than assumed.
+    - >-
+      Grepped for 'git push' and 'git commit' across the file: zero reachable
+      invocations of either outside an isolated self-test subshell that operates
+      on a disposable temp repository (proving the hardened object reader
+      ignores refs/replace/*), never a submodule or the parent.
+    - >-
+      Checked whether this review's own test run touched real repository state:
+      'constitution' and 'submodules/helixqa' show as dirty in git status, but
+      the dirtiness traces (via .git mtime, ~1 hour older than the test
+      invocation) to pre-existing nested sub-submodule drift inside helixqa's
+      own tools/opensource/* tree and untracked directories inside constitution's
+      own working tree -- unrelated to and not caused by this review.
+  disclosed_open_risk_not_closed_by_this_review: >-
+    The R-005 step-5 rebuild-and-test command runs via bash -c with this host's
+    live push credentials (SSH agent, gh/glab config) and no sandbox -- the
+    script's own header discloses this rather than claiming "nothing leaves this
+    machine". A supply-chain-compromised build script inside an advanced
+    submodule could push using those ambient credentials, structurally bypassing
+    this script's own no-push guarantee. Bounded today because GOVERNANCE_ALLOW
+    authorizes only helixqa (whose own working tree is currently dirty from
+    nested tool sub-submodules, so a real invocation right now would refuse it
+    via the clean-tree precondition before touching anything), but not
+    eliminated. Tracked as owed work (a bwrap sandbox around the verify command).
+  operator_decision_2026_09_18: >-
+    Accept the review and proceed to T055/T056/T062 without first closing the
+    disclosed credential-sandbox gap. quickstart.md's Scenario 4 narrative
+    (frozen at "four rounds, no clean approval") corrected in the same pass to
+    match this actual history.
+  classification: project-specific
+
+t055_implementation_2026_09_18:
+  what: >-
+    T055 (implement scripts/pipeline/phase-07-closure.sh) IMPLEMENTED. First
+    working version of the feature's final wired phase, against the design
+    already recorded verbatim in tasks.md's T055 bullet (three operator
+    decisions, 2026-08-26) -- there is no separate design file, that task text
+    IS the design.
+  implementation: >-
+    scripts/pipeline/phase-07-closure.sh, companion doc
+    docs/scripts/pipeline/phase-07-closure.sh.md (with .html/.pdf siblings
+    regenerated via scripts/sync-markdown-exports.sh). Implements: (1) a
+    per-level recursive walk driving the UNCHANGED
+    scripts/advance-all-submodules.sh once per level, initializing
+    declared-but-uninitialized submodules at their recorded pin
+    (git submodule update --init, never --remote), excluding constitution
+    from the walk entirely at every level; (2) FR-017 as the actual pass
+    condition rather than a staged-tree intermediate state; (3) a declared
+    path set (baseline dirty paths at phase start, unioned with this run's
+    own top-level ADVANCED submodule paths) passed to
+    scripts/commit_all.sh --files, refusing on any path dirty afterward that
+    is in neither set; (4) the merge helper T055's own design note flagged
+    as missing -- every Submodule Advance Record produced across every
+    level, merged into report.json's submodule_advances[].
+  parallel_subagent_dispatch: >-
+    Two subagents dispatched in parallel, each in an isolated git worktree,
+    per the operator's "fan out subagents" instruction: one wrote
+    tests/pipeline/test_phase_07_closure.sh (core happy-path + governance
+    coverage), the other wrote
+    tests/pipeline/test_phase_07_closure_hardening.sh (adversarial/edge-case
+    coverage). Both followed strict TDD against the script as first written
+    (RED confirmed before any fix), and both independently found and fixed
+    THE SAME TWO real bugs -- cross-confirmed rather than each trusting its
+    own diagnosis, since the second agent's worktree had no write access to
+    the first agent's already-landed fix and had to reproduce and fix the
+    same defects from scratch, then diffed its own fix against the
+    meanwhile-updated shared file and confirmed equivalence.
+  bugs_found_and_fixed:
+    - id: commit-all-path-resolution
+      what: >-
+        scripts/commit_all.sh derives its own repository root from its own
+        BASH_SOURCE and unconditionally cd's there -- it has no repo-path
+        override. The first draft resolved COMMIT_ALL_SCRIPT relative to
+        phase-07-closure.sh's OWN location rather than the TARGET repository
+        (REPO_ROOT), so a [repo-path] override never actually redirected the
+        commit/push step. Invisible in production (this checkout either way);
+        fatal against any disposable clone or hermetic fixture -- reproduced
+        directly: `cd <fixture> && bash <wrong-repo-copy>/commit_all.sh
+        --files <fixture-relative-path>` -> `fatal: pathspec ... did not
+        match any files`.
+      fix: "Resolved via \"${REPO_ROOT}/scripts/commit_all.sh\" instead of \"${SCRIPT_DIR}/../commit_all.sh\"."
+    - id: verify-cmd-env-passthrough-syntax
+      what: >-
+        The original ${LAVA_ADVANCE_VERIFY_CMD+LAVA_ADVANCE_VERIFY_CMD="$LAVA_ADVANCE_VERIFY_CMD"}
+        idiom is not a valid bash env-var-prefix assignment: bash recognizes
+        NAME=value command prefixes SYNTACTICALLY AT PARSE TIME, and a word
+        starting with ${ is never reclassified as one regardless of what it
+        expands to. Bash instead tried to EXECUTE the expanded string
+        ("LAVA_ADVANCE_VERIFY_CMD=true") as a command -> "command not found",
+        exit 127. The exit-code handling only branched on 1 and 2, so 127
+        fell through as an implicit success -- advance-all-submodules.sh
+        could silently never run, at any level, while the phase still
+        reported PASS. PRODUCTION-REACHABLE, not test-only: any real,
+        non-trivial verify command supplied via this variable would have hit
+        the identical failure mode on its first real use, and a value
+        containing spaces/redirection characters would have been worse (word
+        split and interpreted by the CALLING shell).
+      fix: >-
+        Built into a proper NAME=value array passed to `env`, and added an
+        explicit catch-all branch for any advance_rc other than 0/1/2 so an
+        undocumented exit code is now a hard failure rather than silently
+        accepted.
+  test_suites:
+    - path: tests/pipeline/test_phase_07_closure.sh
+      assertions: 49
+      failures: 0
+      covers: >-
+        helixqa-basename governance-allowed advance to ADVANCED with real
+        commit+push to both github/gitlab fixture mirrors; non-helixqa
+        submodule REFUSED_GOVERNANCE_DENY with proof it was never fetched
+        (object absent via cat-file -e); an uninitialized submodule
+        (deinit'd after being added) restored via git submodule update
+        --init at its RECORDED pin, not upstream HEAD; a two-level-deep
+        nested submodule recursed into and recorded; a dedicated fixture
+        proving THIS PHASE'S OWN constitution-exclusion (distinct from
+        advance-all-submodules.sh's pre-existing governance-deny of
+        "constitution" as a submodule name) -- constitution's own nested
+        submodule proven never fetched, never examined, no record written;
+        report.json submodule_advances[] + phases[] wiring; FR-017 end
+        state; §6.C mirror convergence.
+    - path: tests/pipeline/test_phase_07_closure_hardening.sh
+      assertions: 48
+      failures: 0
+      covers: >-
+        I1 a stray untracked file injected via the verify-command side
+        effect is refused (exit 1, nothing committed, refusal names the
+        path) rather than silently absorbed; I2 a forced non-fast-forward
+        push rejection propagates as phase FAILURE, not a false success; I3
+        FR-017's post-closure verification checked directly against a real
+        leftover-uninitialized-nested-submodule fixture, WITH a
+        falsifiability rehearsal (neutering the dirty_recursive guard makes
+        the run wrongly report success; reverting restores the correct
+        FAIL); I4 a 3-submodule/2-level fixture producing ADVANCED +
+        REFUSED_GOVERNANCE_DENY + NO_NEWER_COMMIT all land correctly in
+        submodule_advances[], confirmed non-duplicating on a second run; I5
+        --help / missing-run_id / missing-report.json usage-error paths,
+        each confirmed to create no evidence directory.
+      falsifiability_rehearsals_performed: 2
+      falsifiability_note: >-
+        The I1 (surprise-path) rehearsal's honest result was reported
+        plainly rather than reshaped into a cleaner-looking one: neutering
+        the SURPRISE_PATHS guard still produced a correct FAIL, but via the
+        FR-017 empty-tree check instead (defense-in-depth, not a single
+        point of failure, since Step 3 never git-adds anything outside the
+        declared set regardless). This is a genuine finding about the
+        script's layered design, not a failed rehearsal.
+  independent_reverification_by_orchestrating_session: >-
+    Both suites copied from their respective agent worktrees into the shared
+    checkout and RE-RUN from scratch by the orchestrating session (not taken
+    on either agent's word): test_phase_07_closure.sh 49/49 PASS exit 0,
+    test_phase_07_closure_hardening.sh 48/48 PASS exit 0 -- run TWICE each,
+    back to back, for determinism. Confirmed both fixes are present in the
+    shared checkout (diffed against the first agent's worktree copy: byte
+    identical). Confirmed zero residue: no leftover /tmp fixture directories,
+    no stray changes to constitution/ or submodules/ beyond pre-existing,
+    unrelated drift already investigated and dated during the T054 review.
+  honest_scope_note: >-
+    scripts/advance-all-submodules.sh reached its current structurally-safe
+    shape only after 5 adversarial review rounds against fixture-proven
+    attack scenarios (T054). phase-07-closure.sh has NOT yet been through an
+    equivalent adversarial pass against a REAL submodule tree -- it is a
+    first implementation, validated only by hermetic fixtures so far. This is
+    stated in the script's own header, not left implicit. T056 (disposable
+    clone) and T062 (disposable branch, full end-to-end) are what exist to
+    close that gap next, per Human Checkpoint #2 and #3 respectively.
+  classification: project-specific
+
+t056_attempt_2026_09_18:
+  what: >-
+    T056 (run quickstart.md Scenario 4 against a disposable clone) ATTEMPTED.
+    Result: HONEST PARTIAL -- the run executed safely end-to-end but did NOT
+    reach the task's pass condition (every submodule with a newer upstream
+    commit advances, every repository ends clean). It correctly FAILED
+    instead, for a real, pre-existing, unrelated reason. Not marked done in
+    tasks.md.
+  execution_design: >-
+    Two subagents dispatched in parallel per the operator's "fan out
+    subagents" instruction. Executor: built a fully network-isolated
+    disposable clone (git clone --dissociate, no network for the parent;
+    every one of the ~62 recursive submodules re-pointed to a throwaway
+    local bare mirror using ONLY already-locally-present git objects via
+    file:// URLs -- zero network calls needed since the real checkout
+    already has everything on disk; constitution never entered at any
+    level; one synthetic commit added to helixqa's mirror specifically to
+    exercise a real ADVANCED candidate), then ran phase-07-closure.sh
+    against it with a bounded real verify command (git fsck, not the
+    default Android/Go build) and LAVA_CLOSURE_ALLOW_LOCAL_PATH_REMOTES=true.
+    Concurrent auditor: read-only adversarial review of that isolation
+    design (no execution), hunting specifically for any path by which a
+    push or fetch could reach a real github.com/gitlab.com host.
+  safety_verification:
+    auditor_finding: >-
+      No CRITICAL (push-to-real-remote) issue found. One MEDIUM finding:
+      phase-07-closure.sh's own "initialize declared-but-uninitialized
+      submodule at recorded pin" step has NO scope/governance check of its
+      own -- if it ever hits a genuinely-uninitialized submodule with a
+      real URL, it would perform a real but READ-ONLY fetch (never a push
+      -- advance-all-submodules.sh contains zero git push calls anywhere,
+      confirmed by full-file read) before any governance gate runs. The
+      helper script's own "zero real remotes survive" self-check has a
+      blind spot for this exact case (git submodule foreach --recursive
+      only visits already-initialized submodules).
+    independent_confirmation_this_finding_is_inert_today: >-
+      Checked THREE times independently: by the auditor (2 levels deep), by
+      the executor (confirmed 0 occurrences of "initializing uninitialized
+      submodule" in the actual run log, plus re-ran the precondition check),
+      and by the orchestrating session (git submodule status --recursive on
+      the REAL repo: 62/62 entries, zero showing a '-' prefix, at every
+      depth). Zero uninitialized submodules exist anywhere in the real
+      repo's recursive tree, so this code path had nothing real to reach.
+    orchestrating_session_own_verification_not_taken_on_faith: >-
+      Captured the real remotes' HEAD SHA (git ls-remote against both
+      git@github.com:milos85vasic/Lava.git and
+      git@gitlab.com:milos85vasic/lava.git) BEFORE dispatching either
+      subagent: 97cc64a80f6a7874923342b71b6942542da014bf on both. Re-ran the
+      identical read-only check AFTER the executor reported completion:
+      IDENTICAL SHA on both, confirmed by the orchestrating session directly,
+      not relayed from either subagent. Also independently grepped the
+      disposable clone tree (git remote -v on the parent, git submodule
+      foreach --recursive 'git remote -v' across all submodules) for any
+      surviving github.com/gitlab.com string: none. Independently inspected
+      report.json and the raw closure log rather than trusting either
+      subagent's summarized numbers.
+  result:
+    exit_code: 1
+    phase_result: FAIL
+    submodule_advance_distribution: "53 REFUSED_GOVERNANCE_DENY, 1 FAILED_PRECONDITION (submodules/helixqa)"
+    helixqa_record: >-
+      old_commit == new_commit == 40d410d29a99818f354125bfaaf754ee2cdeb255 --
+      confirms nothing was fetched, checked out, verified, staged,
+      committed, or contacted for helixqa. Exactly what FAILED_PRECONDITION
+      with old==new must show, per the schema's own invariant.
+    levels_processed: 5
+    what_this_run_DID_prove: >-
+      The recursive per-level walk correctly traversed real .gitmodules
+      structure to depth 4 against real repository shape (not a minimal
+      synthetic fixture) for the first time ever, per phase-07-closure.sh's
+      own header. The constitution exclusion held. commit_all.sh's path
+      resolution (fixed during T055) resolved correctly against the target
+      clone, not the script's own location. The github/gitlab-named-remote
+      push filter, declared-path reconciliation, submodule_advances[] merge
+      across 5 real levels, and Evidence Record anti-bluff validation all
+      behaved exactly per their documented contracts -- independently
+      verified against report.json and the raw log, not trusted from either
+      subagent's prose summary.
+    what_this_run_did_NOT_prove: >-
+      The ADVANCED success path and the commit_all.sh commit+push+section-6.C-convergence
+      step were never reached -- the precondition refusal happens before
+      either. FR-017's actual clean-and-pushed end state remains unproven
+      end-to-end.
+  root_cause_of_the_failure:
+    what: >-
+      submodules/helixqa/tools/opensource/docling's tracked file
+      tests/data/uspto/sources/pftaps057006474.txt shows as locally modified
+      immediately after a plain checkout, at commit
+      4f37eeee07a1741526671eff5329b3cca2e685b8, which docling's own
+      .gitattributes declares "text: set, eol: lf" for -- a mismatch between
+      that declaration and the historically-committed blob's actual line
+      endings on this host's git configuration. A deterministic
+      normalization artifact, not something the T056 clone/mirror procedure
+      introduced.
+    independently_reconfirmed_against_the_REAL_repo_by_the_orchestrating_session: >-
+      git -C submodules/helixqa/tools/opensource/docling status --porcelain
+      on the REAL repo (not the disposable clone) shows the IDENTICAL
+      modified file, at the IDENTICAL commit
+      (4f37eeee07a1741526671eff5329b3cca2e685b8), with the IDENTICAL
+      .gitattributes declaration (text: set, eol: lf) confirmed via git
+      check-attr. This is not an artifact of the clone/mirror procedure --
+      it is a real, present-tense defect in the real repository today.
+    operational_consequence: >-
+      A real invocation of phase-07-closure.sh against the REAL repo, right
+      now, would ALSO refuse to advance helixqa for this identical reason.
+      This is the load-bearing finding of this task's attempt: T056 revealed
+      a genuine pre-existing operational blocker, not a bug in the scripts
+      T054/T055 built and reviewed.
+    path_to_a_clean_pass: >-
+      Fix requires three real, cascading commits: renormalize + commit the
+      affected file inside docling (git add --renormalize), re-pin docling
+      inside helixqa's own commit, then re-pin helixqa in the parent. This
+      touches real submodule history and is recorded here as an OPERATOR
+      DECISION POINT, not something to do unilaterally mid-task -- root
+      CLAUDE.md's Decoupled Reusable Architecture pin-discipline rules
+      govern submodule commits of this kind.
+  artifacts_preserved: >-
+    Not cleaned up, since the run did not fully succeed. Left under the
+    orchestrating session's scratchpad t056/ directory (lava-clone/ the
+    disposable clone, mirrors/ the throwaway bare repos, report.json and the
+    raw closure log under lava-clone/.lava-ci-evidence/pipeline-runs/2026-09-18T20-21-25Z/)
+    for inspection.
+  classification: project-specific
+
+t056_resolution_2026_09_18:
+  what: >-
+    T056 RESOLVED same day. Operator approved "fix it now, then re-attempt"
+    for the docling CRLF blocker recorded above. A subagent (dispatched per
+    the operator's standing "fan out subagents" instruction) made the fix as
+    three local-only commits, then re-attempted the disposable-clone dry run
+    to a genuine PASS. tasks.md T056 is now checked done.
+  the_three_local_commits:
+    - repo: submodules/helixqa/tools/opensource/docling
+      sha: ea53ca0a
+      message: "fix: renormalize CRLF/LF line-ending mismatch in tests/data/uspto/sources/pftaps057006474.txt"
+      pushed: false
+    - repo: submodules/helixqa
+      sha: c01f9f2
+      message: "chore: re-pin docling after CRLF renormalization fix"
+      pushed: false
+    - repo: parent (master)
+      sha: f6ff59eb
+      message: "chore: re-pin submodules/helixqa after docling CRLF fix"
+      pushed: false
+  self_disclosed_and_self_corrected_error: >-
+    The subagent's first attempt at the parent commit accidentally captured
+    two unrelated pre-staged paths (.gitmodules, submodules/superspec) into
+    the same commit. It caught this itself via its own re-verification step,
+    fixed it with git reset --mixed HEAD~1 (no data loss) followed by
+    re-staging those two paths back to their exact original staged-not-committed
+    state and re-committing submodules/helixqa alone via an explicit
+    pathspec. Disclosed honestly in its report rather than omitted.
+  independent_verification_by_orchestrating_session_not_taken_on_faith:
+    - "git ls-remote against both real upstreams: unchanged SHA (97cc64a80f6a7874923342b71b6942542da014bf) before this fix AND after the full re-attempt completed."
+    - "git rev-list --count 97cc64a8..HEAD on the parent: exactly 1 -- confirms no scope creep, no extra commits."
+    - "git show --stat on all 3 commits individually: each touches exactly one intended path."
+    - "git status --porcelain on the parent: byte-identical file list to the pre-fix snapshot, with submodules/helixqa the sole intended delta."
+    - "git -C submodules/helixqa/tools/opensource/docling status --porcelain: now genuinely empty (was previously showing the CRLF-modified file)."
+    - "git -C submodules/helixqa rev-parse HEAD matches the parent's newly-committed gitlink exactly (git ls-files -s)."
+  reattempt_result:
+    outcome: PASS
+    runs_needed: 3
+    run_1_id: 2026-09-18T20-XX (docling still unfixed at the time this clone was first attempted in the prior session -- superseded)
+    run_2_id: 2026-09-18T21-01-46Z
+    run_2_helixqa_record: >-
+      {"submodule_name": "submodules/helixqa", "old_commit": "c01f9f2191804869bf85ffd4151fad38ee65b249",
+      "new_commit": "69a4e5a33ea2988d8f3d74275c154215b2f6a124", "parent_pin_updated": true,
+      "outcome": "ADVANCED"} -- read directly from report.json by the orchestrating session, not
+      taken from the subagent's summary.
+    run_2_overall_result: >-
+      FAIL, despite the genuine ADVANCED transition and a genuine commit+push+convergence to
+      both throwaway mirrors (verified by the orchestrating session: closure commit c46bc244
+      converged on both mirror bare repos with the identical tip SHA) -- because Step 4's
+      FR-017 verification legitimately found constitution's own nested submodules
+      uninitialized in the disposable clone. See test_harness_gaps below: this is a test-harness
+      limitation, not a production-script defect.
+    run_3_id: 2026-09-18T21-05-09Z
+    run_3_result: "PASS -- \"nothing declared to commit — the tree may already be at the FR-017 end state\", confirming stability after the harness fixes below."
+  test_harness_gaps_found_and_fixed_in_build_disposable_clone_sh_not_in_the_production_scripts:
+    - id: stale-submodule-url-config
+      what: >-
+        A submodule's SUPERPROJECT-level submodule.<path>.url config entry could retain a
+        stale file://<live-checkout-path> value after the harness's remote-reconfiguration
+        step (which correctly fixes the submodule's OWN internal 'origin' remote, but not
+        this separate superproject-level config key) -- causing a spurious 'git fetch --all'
+        "not our ref" error inside a nested submodule during the second attempt.
+      fix: "Synced submodule.<path>.url to match each submodule's own already-corrected origin remote, recursively, at every level, before re-running."
+      confirmed_not_a_production_defect: >-
+        advance-all-submodules.sh and phase-07-closure.sh never read or write
+        submodule.<path>.url themselves -- they operate on each submodule's own directly-configured
+        remote via `git -C <path> remote`/`fetch`. This config key is purely a superproject-level
+        convenience `git submodule sync`/`update` mechanism the test harness's own setup touched.
+    - id: constitution-never-initialized-in-harness
+      what: >-
+        The harness deliberately never initializes constitution (matching phase-07-closure.sh's
+        own documented exclusion), but phase-07-closure.sh's Step 4 FR-017 check legitimately
+        verifies the WHOLE recursive submodule tree for consistency, including submodules the
+        phase itself never touches for advancement -- so an un-initialized constitution in the
+        CLONE (never a problem in the REAL repo, where constitution is already fully initialized
+        and current, confirmed by the orchestrating session at the start of this whole T054-T056
+        arc) failed the post-closure check.
+      fix: "Initialized constitution and its own 7 nested submodules read-only, offline, at their already-recorded pins (verified to exactly match the real repo's actual state before touching anything), then repointed each to a throwaway mirror for consistency with the zero-real-remote invariant."
+      confirmed_not_a_production_defect: >-
+        This is the FR-017 verification working exactly as designed (operator decision 2,
+        T055): "clean everywhere, at the recorded pin everywhere" is a real, intentional,
+        whole-tree requirement, not a bug that should be relaxed. The real repo already
+        satisfies it for constitution today.
+  recommendation: >-
+    build_disposable_clone.sh (session-scratchpad-only, not a tracked project file) could fold
+    both fixes in for reuse if a future session needs to re-run this kind of dry run again; not
+    required for T056's own closure since the goal (prove phase-07-closure.sh works against
+    real repository shape) is now met.
+  artifacts_preserved: >-
+    Left in place under the orchestrating session's scratchpad t056/ directory
+    (lava-clone/, mirrors/, closure_run{,2,3}.log, run_id{,2,3}.txt,
+    init_constitution_readonly.sh) for inspection. Session-scoped, not part of
+    the tracked repository.
+  classification: project-specific
+
+t062_attempt_2026_09_19:
+  what: >-
+    T062 (full end-to-end run of quickstart.md Scenario 2, all phases, on a
+    disposable branch, Human Checkpoint #3) ATTEMPTED. Result: HONEST
+    PARTIAL, not a pass -- outcome FAIL, halted at 'test'. Genuinely
+    valuable evidence produced (first-ever successful 'build' phase, a
+    large real anti-bluff-validated test corpus with real findings), but
+    'install_boot'/'live_verify'/'changelog_entry'/'docs_refresh'/'closure'
+    were never reached. tasks.md T062 remains unchecked.
+  prerequisite_work_this_session:
+    what: >-
+      closure was NOT wired into scripts/pipeline-build-test-distribute.sh
+      before this attempt (its own header said so explicitly). A subagent
+      wired it as the 9th phase, test-first: updated
+      tests/pipeline/test_pipeline_full_sequence_wiring.sh plus 4 sibling
+      suites that broke as a direct, predictable consequence of the
+      registry/default change (all additive extensions, never a weakened
+      assertion), ran a falsifiability rehearsal (reverting UNTIL_PHASE to
+      docs_refresh produced 6 distinct RED failures; reverted, GREEN again),
+      and corrected quickstart.md Scenario 2's stale "closure is
+      unwired" text plus the matching companion doc.
+    independent_verification: >-
+      All 5 orchestrator-dependent hermetic suites re-run from scratch by
+      the orchestrating session (not trusted from the subagent's word):
+      test_pipeline_full_sequence_wiring.sh, test_orchestrator_gate_and_registry_audit.sh,
+      test_pipeline_orchestrator.sh, test_phase_failure_always_recorded.sh,
+      test_run_report_evidence_summary.sh -- all exit 0. PHASES array and
+      UNTIL_PHASE default inspected directly in the script.
+  execution_design: >-
+    Operator-approved scope: --skip distribute only (this host has no
+    google-services.json/Firebase token; distribute would fail regardless
+    and must not be attempted). Two subagents dispatched per the operator's
+    standing "fan out subagents" instruction: executor (build the disposable
+    copy, run the pipeline to completion) and a concurrent adversarial
+    safety auditor reviewing the NEW filesystem-copy-based construction
+    method specifically (different from T056's git-clone-based method,
+    needed because the real repo had substantial session work still
+    uncommitted that git clone would have missed).
+  critical_safety_finding_relayed_mid_task: >-
+    The auditor found that resolving submodules/helixqa's pre-existing dirty
+    nested-submodule state (19 tools/opensource/* entries diverged from
+    helixqa's own pin) via `git submodule deinit` would flip those entries
+    to uninitialized ('-'), and phase-07-closure.sh's own per-level init
+    pass (process_level, ~line 292-298) would then automatically run a REAL
+    credentialed `git submodule update --init` against those submodules'
+    real upstreams, resolving the URL from that level's own .gitmodules/config
+    rather than any already-reconfigured remote. This is a genuine
+    fetch/clone-class real-remote-reach risk (not a push -- confirmed
+    separately that advance-all-submodules.sh contains zero git push calls
+    anywhere in its 2170 lines). Relayed to the executor before it reached
+    this step. Executor's response, self-reported and independently
+    plausible given the described mitigation: used `git clean -ffd` for
+    constitution's untracked nested-repo dirs (never flips a submodule-status
+    prefix) and `git submodule update` WITHOUT `--init` for helixqa's 19
+    diverged tools, after confirming every target commit object was already
+    present locally (git cat-file -e) so no fetch of any kind was triggered.
+    Zero `git submodule deinit` used anywhere, per the executor's own report.
+  host_environment_gaps_found_and_provisioned_operator_approved_in_scope:
+    - "Host's only JDK was 25.0.4; Gradle 8.9/buildSrc need 17 -- fixed via a user-scoped Temurin JDK 17 download (no system changes, no sudo)."
+    - "app/build.gradle.kts declares .env and keystores/{debug,release}.keystore as required Gradle task INPUT FILES; neither exists on this host (both .gitignored by design, per this project's own §6.H) -- fixed via keytool-generated throwaway self-signed keystores + the project's OWN .env.example placeholder template (copied verbatim, only KEYSTORE_PASSWORD overridden to match)."
+    - "app/google-services.json and api-app/google-services.json absent (also .gitignored by design) -- fixed with well-formed dummy JSON (fake project id/API key, correct package_name entries)."
+    - "/tmp disk-quota exhaustion during the Go cross-compile step (tmpfs, shared with other host activity) -- fixed via GOTMPDIR/TMPDIR redirected to spacious ext4 scratch space."
+    - "Genymotion (gmtool) absent -- NOT remediated (materially larger/more invasive than the above; correctly left as an honest environmental finding, consistent with operator guidance given after the fact)."
+    - "Also found (not fixed in the codebase, worked around by supplying a complete .env): a latent bug in lava-api-go/scripts/build-cshared.sh -- under set -euo pipefail, a no-match grep inside a command-substitution assignment for LAVA_AUTH_FIELD_NAME silently aborts the whole script with zero output when .env exists but lacks that one key."
+  operator_decisions_2026_09_19:
+    - "Environment provisioning (JDK, throwaway keystores/.env/google-services.json): IN SCOPE, same class of fixture the project's own tests already use."
+    - "Host memory pressure (peaked at 27Gi/30Gi RAM + swap 100%% full mid-run, independently confirmed by the orchestrating session): let it continue, monitor closely, rather than stop the build -- process was doing real active work, not hung/leaking."
+  final_result:
+    outcome: FAIL
+    halted_at: test
+    run_id: "2026-09-19T00-53-55Z"
+    commit_sha_in_disposable_copy: 1db5e2d5587f24011a03b36eac43f76f816d3ca0
+    phases: "precondition PASS(1s), build PASS(1043s) -- FIRST TIME EVER, 5 real build artifacts produced (app-debug/release, api-app-debug/release, lava-api-go binary, all matching commit SHAs), test FAIL(1679s)"
+    evidence_summary: "total=4196, passed=3949, failed=141, skipped=106, rejected_by_anti_bluff=12"
+    independent_verification_by_orchestrating_session: >-
+      Re-read report.json directly from disk after the executor reported
+      PID 1819577 had exited (not trusted from its word that the run
+      finished -- discovered independently via `ps -p` returning nothing,
+      then read report.json directly). jsonschema.validate against
+      pipeline-run-report.schema.json: VALID. Re-ran git ls-remote against
+      both real upstreams one final time: unchanged SHA
+      (97cc64a80f6a7874923342b71b6942542da014bf), matching this whole
+      session's baseline throughout every task from T054 onward.
+    independent_verification_by_executor: >-
+      Recomputed evidence_summary from the actual 4196 evidence-record files
+      on disk (excluding raw/ log dirs) by reading each record's result and
+      anti_bluff_status field directly in Python -- exact match to the
+      aggregator's own summary (3949+141+106=4196; 4184 validated + 12
+      REJECTED=4196). Spot-checked 2 individual records' full content
+      against their referenced raw-output files: one genuine Kotlin FAIL
+      (UnsatisfiedLinkError, real JUnit XML stack trace verbatim in a real
+      13355-byte log) and one genuine hermetic REJECTED (0-byte raw log,
+      confirmed on disk, matching its own "no captured output" claim) --
+      neither fabricated.
+  test_phase_findings_not_individually_root_caused_beyond_what_is_stated:
+    - "112 of 141 FAILs: Robolectric's native SQLite shadow library (UnsatisfiedLinkError on SQLiteConnectionNatives.nativeOpen) failing to load on this host -- a host/toolchain gap, not a code defect. Hits core/tracker/client (56), feature/login (26), feature/credentials (18), feature/provider_config (12, all 6 tests both variants)."
+    - "real-device-challenge: a real containerized Android emulator genuinely booted (confirms section-6.AH machinery works on this host) and ran several :app Challenges, but all 7 :api-app Challenges were correctly REFUSED by the section-6.I.4 Group-B anti-bluff diag-gate over an incomplete attestation row emitted by the pinned Containers submodule's writeAttestation -- a real cross-repo integration gap (Lava vs. its pinned Containers version), not a defect introduced this session, not fixed here."
+    - "constitutional-gate-sweep: 47 PASS / 12 FAIL -- not individually root-caused; several plausibly disposable-clone-specific artifacts (e.g. commit-docs-exists reading a 1-commit-deep synthetic git history) rather than genuine defects, but this is UNCONFIRMED, not asserted as fact."
+    - "hermetic: 12 REJECTED (anti-bluff), all identical root cause -- raw output log exists but is 0 bytes, one confirmed to be an explicit 120s timeout. Plausibly connected to sustained host CPU/memory contention during the run (multiple heavy JVM/Gradle/Kotlin/Go processes the whole time) -- correlation noted, causal link NOT confirmed."
+    - "2 FAILs not investigated at all: core/downloads coroutine timeout (release variant), core/tracker/kinozal (single failure)."
+  new_gap_found_not_fixed: >-
+    lava-api-go/internal/handlers/v1/.lava-ci-evidence/ and
+    lava-api-go/internal/jackett/.lava-ci-evidence/ are untracked and NOT
+    covered by .gitignore (confirmed via git check-ignore -v, no match) --
+    the Go test suite writes stress-chaos evidence using package-relative
+    paths, landing outside the top-level .lava-ci-evidence/pipeline-runs/
+    ignore rule. A second run against the same disposable copy would now
+    fail precondition (dirty tree) until these are committed, discarded, or
+    the gitignore pattern is broadened to **/.lava-ci-evidence/. Not fixed
+    in this task per operator instruction (no further remediation needed).
+  artifacts_preserved: >-
+    /home/milosvasic/t062_work/ -- lava-disposable/ (16G, the disposable
+    copy, branch master, commit 1db5e2d5, all remotes still local mirrors,
+    full run evidence, real APKs under releases/, real Go binary),
+    mirrors/ (3.8G, 63 throwaway bare repos), jdk17/ (502M, the JDK
+    actually used), jdk21/ (544M, an insufficient-alone intermediate step),
+    go-tmp/ (17M), reconfigure_remotes.sh, pipeline_run{1..5}.log (all 5
+    attempts, oldest first). Session-scoped, not part of the tracked
+    repository. Real repo at /home/milosvasic/Projects/lava confirmed
+    untouched by this task beyond its initial read-only inspection.
+  path_to_an_actual_pass: >-
+    Either fix the Robolectric native-SQLite host issue and re-run in full
+    (all phases, no shortcuts, the literal T062 requirement), or run a
+    scoped follow-up (e.g. --skip test) specifically to exercise
+    install_boot through closure -- which is what this Human Checkpoint
+    most exists to validate, given closure is the newest, highest-risk
+    piece (T054/T055/T056). Both are operator decisions, not made in this
+    task.
+  classification: project-specific
+
+t062_followup_2026_09_19:
+  what: >-
+    Follow-up to t062_attempt_2026_09_19, reusing the same disposable copy
+    with --skip test,distribute to reach install_boot through closure
+    directly, plus a separate systematic-debugging investigation (per
+    superpowers:systematic-debugging, operator-selected target) into the
+    root cause of the 112 UnsatisfiedLinkError test failures from the
+    original attempt.
+  followup_run_result:
+    outcome: FAIL, halted at install_boot (one phase further than the
+      original test-phase halt)
+    two_distinct_real_causes_found_and_handled:
+      - id: env-example-parens-bug
+        what: >-
+          .env.example line 253 (LAVA_API_DEV_MDNS_INSTANCE=Lava API (dev))
+          is an unquoted value containing parentheses -- a real bash syntax
+          error under `set -a; source .env; set +a`, exactly the pattern
+          start.sh's own documented setup uses. Reproduced twice
+          (independently, by both the follow-up subagent and the
+          orchestrating session with a RED-then-GREEN rehearsal: reverted to
+          the buggy form, confirmed `bash -c 'set -a; source ...'` throws
+          `syntax error near unexpected token '('`, then confirmed the fix
+          sources cleanly with the value preserved intact).
+        fix: 'Quoted the value: LAVA_API_DEV_MDNS_INSTANCE="Lava API (dev)". Landed for real in the actual .env.example (operator-approved).'
+      - id: port-8443-collision
+        what: >-
+          After the .env.example fix, install_boot progressed further:
+          lava-postgres came up healthy, lava-migrate ran real migrations
+          (exit 0), but lava-api-go itself failed: "listen udp :8443: bind:
+          address already in use". Root-caused via ss/lsof/procfs: an
+          unrelated, already-running process from a DIFFERENT project on
+          this shared host (helixllm, an LLM-gateway, running since
+          2026-09-17) already holds :8443. docker-compose.yml hardcodes
+          LAVA_API_LISTEN: ":8443" with no env-var override path.
+        decision: >-
+          NOT remediated -- operator decision: leave as a recorded finding,
+          do not touch the unrelated process or edit docker-compose.yml to
+          dodge the collision (that would test a different port config than
+          what ships). closure remains unexercised.
+    cleanup_confirmed: >-
+      install_boot's real systemd unit + containers (installed/started by
+      design, not auto-torn-down on failure) were manually stopped via the
+      project's own scripts/systemd-uninstall.sh after both attempts --
+      confirmed via systemctl --user status (unit not found) and podman ps
+      -a --filter name=lava (empty). Nothing left running on the host.
+    dirty_submodule_handling: >-
+      No dirty submodule state was present this time (the prior session's
+      git clean -ffd / git submodule update-without-init resolution held);
+      the only untracked residue was the known .gitignore-gap evidence dirs
+      from the prior test run, removed via plain rm -rf. Zero git submodule
+      deinit used, confirmed explicitly by the executor.
+    safety_reconfirmed: >-
+      git ls-remote against both real upstreams unchanged
+      (97cc64a80f6a7874923342b71b6942542da014bf) before and after; zero real
+      github.com/gitlab.com remotes anywhere in the disposable copy tree,
+      re-verified independently.
+  robolectric_root_cause_investigation:
+    trigger: >-
+      Operator invoked superpowers:systematic-debugging with no target
+      named; asked which issue to investigate; operator selected the
+      Robolectric native-SQLite UnsatisfiedLinkError (112 of 141 test
+      failures from t062_attempt_2026_09_19).
+    phase_1_root_cause_investigation:
+      - "Read the exact JUnit XML stack trace and raw log for a representative failing test (ProviderConfigViewModelTest) -- confirmed the failure occurs inside ShadowNativeSQLiteConnection.nativeOpen, a real UnsatisfiedLinkError with the full method signature quoted (not a 'no X in java.library.path' message)."
+      - "Reproduced consistently and independently, OUTSIDE the disposable copy (in the real repo, read-only build/test artifacts only, no git state touched): a targeted `./gradlew :feature:provider_config:testDebugUnitTest --tests` run hit the identical failure, 3/3 tests, deterministic (not intermittent)."
+      - "Extracted and inspected the actual native library (librobolectric-nativeruntime.so) from the resolved nativeruntime-dist-compat-1.0.10.jar: valid ELF x86_64, `ldd` resolves every dependency on this host (glibc 2.43), sha256 identical across 4 independently-extracted copies (no corruption). Confirmed it uses JNI_OnLoad + dynamic RegisterNatives, not static Java_* symbol naming (ruled out a simple missing-symbol theory)."
+      - "A bare-minimum System.load() repro (no classpath) showed JNI_OnLoad performs its own FindClass lookups against Android framework classes and aborts natively if they're absent -- informative about the loading mechanism, but a different failure mode than the real test's clean (non-aborting) UnsatisfiedLinkError."
+      - "Decompiled the actual DefaultNativeRuntimeLoader.class bytecode from nativeruntime-4.12.2.jar (this project's exact Robolectric version): confirmed ensureLoaded() sets its internal 'loaded' AtomicBoolean flag to true BEFORE the actual native-load-and-registration step runs (not after success) -- explains why a genuine registration failure surfaces as a clean UnsatisfiedLinkError at first native-method call rather than a wrapped AssertionError from the loader itself."
+      - "Checked upstream Robolectric GitHub issues (WebSearch + gh CLI): ruled out the historical GLIBC_2.29 bug (#7879, fixed in 4.9.2, long before our 4.12.2) and the Linux-aarch64-unsupported issue (#8046 -- this host is x86_64, not affected); found no exact match for this specific host/JDK/Robolectric combination, consistent with this being a genuinely new incompatibility on a very recent Ubuntu 26.04.1/glibc 2.43 + Temurin JDK 17.0.20.1 host that Robolectric's May-2024-built native runtime was never validated against."
+    phase_3_hypothesis_and_minimal_test: >-
+      Hypothesis: switching to Robolectric's legacy (non-native) SQLite
+      shadow via `sqliteMode=LEGACY` avoids the broken native-runtime path
+      entirely. Tested minimally: added ONE new file
+      (feature/provider_config/src/test/resources/robolectric.properties,
+      content `sqliteMode=LEGACY`) -- no source changes -- and re-ran the
+      same previously-failing test. CONFIRMED: 3/3 tests PASS with real,
+      non-zero execution times (0.15s-4.4s, consistent with real SQLite
+      operations actually running), 0 skipped.
+    phase_4_implementation_operator_approved:
+      - "Applied the same one-line fix to all 4 affected modules: feature/provider_config, feature/login, feature/credentials, core/tracker/client (each gets its own src/test/resources/robolectric.properties with sqliteMode=LEGACY)."
+      - "Verified independently across ALL 4 modules' FULL test suites (both debug and release variants, not just the one file originally checked): 180 tests total (12 provider_config + 168 across the other 3), 0 failures, 0 UnsatisfiedLinkError -- confirmed by parsing the actual JUnit XML result files, not trusting Gradle's own BUILD SUCCESSFUL line alone."
+    honest_scope_note: >-
+      This fixes 112 of the 141 original test-phase failures. The
+      remaining ~29 (real-device-challenge's 7 :api-app Challenge failures
+      from the pinned Containers submodule attestation gap, the 12
+      constitutional-gate-sweep failures, the 12 hermetic REJECTED records,
+      the 2 not-individually-investigated failures) are unrelated to this
+      root cause and remain open. A full pipeline run with this fix applied
+      has NOT yet been re-attempted end-to-end; that would be the next
+      logical step to see how close to a clean `outcome: PASS` this gets.
+  classification: project-specific
+port_collision_dynamic_fix_2026_09_19:
+  trigger: >-
+    Operator's explicit, twice-repeated request after the t062_followup
+    port-collision finding was left unremediated by operator decision:
+    "Make sure port are chose dynamically u[s]ing our Containers Submodule"
+    -- i.e. fix the :8443 collision with an unrelated project's process on
+    this shared host by making lava-api-go's port selection dynamic,
+    specifically via the vasic-digital/Containers submodule (Decoupled
+    Reusable Architecture rule). Operator initially believed Containers
+    already had this capability fully implemented; independently verified
+    (both current pin and latest upstream, 7 commits ahead) that it did
+    not, confirmed with operator, then proceeded to IMPLEMENT (not merely
+    use) the capability upstream first.
+  containers_submodule_change:
+    what: >-
+      New package submodules/containers/pkg/network/ephemeral.go:
+      ListenEphemeral(host) / ListenEphemeralPort() -- binds a TCP listener
+      on an OS-assigned free port and returns the LIVE listener plus the
+      real port, never releasing the OS's hold on the port between
+      allocation and use (unlike PortAllocator.Allocate /
+      serviceregistry.FindAvailablePort, both documented check-then-use /
+      TOCTOU helpers already in this submodule that bind, close, and hand
+      back an int another process can claim before the caller re-binds).
+      4 new tests in ephemeral_test.go.
+    real_push_verification: >-
+      Committed and pushed for real to github.com:vasic-digital/Containers.git
+      and gitlab.com:vasic-digital/containers.git, commit
+      0053986a4f6f367308efc0ab453148a2e27c820a. Independently verified via
+      `git ls-remote` against both real upstreams (not taken on the
+      implementing subagent's word) -- both remotes report the same SHA as
+      local HEAD. Independently re-read the actual ephemeral.go file
+      content and independently re-ran the 4 new tests plus the full
+      pkg/network package suite myself: all pass.
+    lava_pin_bump: >-
+      submodules/containers working-tree checkout bumped to
+      0053986a4f6f367308efc0ab453148a2e27c820a via `git -C
+      submodules/containers checkout main --quiet`. Uncommitted in the
+      parent Lava repo (consistent with this session's pattern of not
+      committing Lava-side changes without explicit instruction).
+  lava_api_go_wiring:
+    dispatched_to: subagent (agentId a6d5b3fbcf5675c9b), explicitly instructed not to commit or push anything
+    root_cause_confirmed_worse_than_believed: >-
+      Read cmd/lava-api-go/main.go, internal/config/config.go,
+      internal/discovery/mdns.go, internal/server/{server,altsvc}.go, and
+      submodules/http3/pkg/server/server.go before touching anything.
+      Confirmed the mDNS/Alt-Svc-before-bind ordering bug was worse than a
+      mere async race: discovery.Announce and the Alt-Svc middleware
+      (closure captured at router-construction time, before server.New)
+      both used the raw configured address BEFORE ANY BIND WAS EVEN
+      ATTEMPTED -- the real bind happened later, asynchronously, inside
+      Server.Start's goroutine.
+    design: >-
+      New server.ResolveListen(addr) function: if addr's port is literally
+      "0", delegates to network.ListenEphemeral and substitutes the real
+      kernel-assigned port; otherwise binds the fixed address directly via
+      net.Listen. Both paths additionally probe-bind+release a UDP listener
+      on the resolved address to prove that namespace is free too, before
+      returning. Returns an error immediately on any bind failure --
+      including the exact fixed-port-collision forensic anchor from this
+      session. server.Config gained a Listener field; Server.Start reuses
+      it via ServeTLS instead of asking the stdlib to re-bind from a
+      string address (closes the TOCTOU window for the TCP/HTTP-2 surface
+      fully). Honest, disclosed residual limitation: submodules/http3's
+      Config only accepts an Addr string, not a pre-bound net.PacketConn,
+      so a small TOCTOU window remains on the UDP/HTTP-3 bind
+      (probe-bind-then-release, then quic-go rebinds moments later) --
+      closing that would require extending the http3 submodule, out of
+      scope for this task (only Containers was authorized/pinned).
+    main_go_wiring: >-
+      server.ResolveListen(cfg.Listen) called immediately after
+      httpx.Configure, BEFORE apirouter.Build (so Alt-Svc bakes in the real
+      port) and before any mDNS/logging. New pure function
+      resolveMDNSPort(configuredMDNSPort, resolvedListen, dynamic) decides
+      the mDNS-advertised port: fixed mode returns the configured value
+      unchanged (byte-for-byte existing behavior); dynamic mode ignores
+      LAVA_API_MDNS_PORT and returns the real bound port instead, logging
+      the override. Factored out as a pure decision function specifically
+      so it is unit-testable without real network I/O.
+    docker_compose_change: >-
+      docker-compose.yml line ~66: LAVA_API_LISTEN changed from the bare
+      literal ":8443" to "${LAVA_API_LISTEN:-:8443}" -- same default, now
+      overridable (including to ":0"), matching docker-compose.dev.yml's
+      existing LAVA_API_DEV_LISTEN pattern exactly.
+    tests_new:
+      - "internal/server/resolve_listen_test.go (5 tests, all against the REAL network.ListenEphemeral, no mocks): dynamic-port returns a real connectable listener that becomes unreachable once closed; consecutive dynamic allocations never collide; fixed-port preserves existing behavior byte-identical; fixed-port collision is refused (direct regression test for this session's forensic anchor); end-to-end Challenge driving a real HTTP/3 client AND a real HTTP/2+TLS client against the resolved dynamic address."
+      - "cmd/lava-api-go/mdns_port_test.go (6 tests): resolveMDNSPort at the wiring-decision level -- fixed-mode passthrough, dynamic-mode uses the real port (never stale/pre-bind/literal-zero), no-op when already matching, zero-configured edge case, defensive fallback on malformed input."
+    subagent_falsifiability_rehearsals:
+      - mutation: "resolveMDNSPort forced to always return (configuredMDNSPort, false), reintroducing the historical stale/pre-bind-port bug"
+        observed: "3 tests failed with clear messages, e.g. \"port = 8443; want the REAL bound port 54321, not the configured value 8443\""
+        reverted: yes
+      - mutation: "server.ResolveListen forced to return (addr, nil, addr == \":0\", nil) immediately, reintroducing the pre-fix wire-without-binding behavior"
+        observed: "TestResolveListen_DynamicPort_ReturnsRealConnectableListener failed (nil listener); TestResolveListen_FixedPort_CollisionIsRefused failed (no error despite a real holder on the exact address); go vet independently flagged the mutated code as unreachable"
+        reverted: yes
+    independent_reverification_by_orchestrating_session: >-
+      Before trusting the subagent's report: re-read server.go and main.go
+      diffs in full (matched the report's description exactly, including
+      doc comments); re-read docker-compose.yml diff (matched exactly);
+      independently ran the 11 new tests myself (all PASS); performed an
+      INDEPENDENT falsifiability rehearsal of my own, distinct from the
+      subagent's -- mutated the fixed-port collision-handling branch in
+      ResolveListen to silently return success instead of propagating the
+      net.Listen error, ran TestResolveListen_FixedPort_CollisionIsRefused,
+      confirmed it FAILED with a clear assertion message ("succeeded
+      despite an already-bound holder on that exact address"), then
+      reverted via the exact original file content (confirmed via `git
+      diff --stat` returning to the identical pre-mutation line counts)
+      and re-ran the test to confirm PASS again. Ran the FULL lava-api-go
+      suite myself: 50 packages ok, 0 FAIL (including tests/contract,
+      which covers the source-hash manifest regeneration). Ran `go vet
+      ./...` (clean) and `gofmt -l` on all 3 touched Go files (clean).
+      Confirmed go.mod diff adds exactly the one expected require line.
+      Confirmed via `git log -1` that HEAD is unchanged at f6ff59eb
+      throughout -- nothing committed or pushed, per instruction.
+  companion_fix: >-
+    core/apiengine/src/main/resources/api-source.hash regenerated via the
+    project's own deterministic scripts/compute-api-source-hash.sh after
+    the lava-api-go source edits changed its embed source hash (the
+    tests/contract/sourcehash_contract_test.go mechanism that keeps the
+    Android on-device .so embed in sync with lava-api-go source). This is
+    the documented, correct maintenance step (confirmed via the test's own
+    failure message before regeneration), not a workaround.
+  status: >-
+    Real, independently-verified fix landed in the working tree
+    (uncommitted, per instruction -- committing/pushing was not part of
+    this request). Fixes the exact port-collision finding recorded in
+    t062_followup_2026_09_19 as "correctly left unremediated". A full
+    pipeline re-run exercising install_boot onward with this fix applied
+    has NOT yet been attempted -- not requested as the next step by the
+    operator for this immediate work.
+  classification: project-specific

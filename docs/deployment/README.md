@@ -99,7 +99,10 @@ Service wiring:
 - `lava-api-go` — built from the Dockerfile `runtime` stage; depends on
   `lava-migrate` completing successfully; **`network_mode: host`** so mDNS
   reaches the LAN. Key env (`docker-compose.yml:64-83`):
-  `LAVA_API_PG_URL`, `LAVA_API_LISTEN=":8443"`,
+  `LAVA_API_PG_URL`, `LAVA_API_LISTEN` (env-var-overridable, default
+  `":8443"`; set to `":0"` to bind a real, OS-assigned free port instead —
+  e.g. to avoid a fixed-port collision with an unrelated process on a
+  shared host — see `internal/server.ResolveListen`),
   `LAVA_API_METRICS_LISTEN=":9091"`, `LAVA_API_TLS_CERT` / `LAVA_API_TLS_KEY`
   (mounted from `./lava-api-go/docker/tls`), `LAVA_API_OTLP_ENDPOINT`,
   and the `LAVA_AUTH_*` set (field name, HMAC secret, active/retired client

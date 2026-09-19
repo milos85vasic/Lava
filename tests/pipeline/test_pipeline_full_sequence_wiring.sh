@@ -166,6 +166,7 @@ EOF
   _phase_ok phase-05a-changelog-entry.sh changelog_entry
   _phase_gate phase-05-distribute.sh distribute 3
   _phase_ok phase-06-docs.sh docs_refresh
+  _phase_ok phase-07-closure.sh closure
 }
 
 RUN_EXIT=0; RUN_OUTCOME=""; RUN_PHASES=""; RUN_ORDER=""; RUN_MARKERS=""
@@ -206,30 +207,30 @@ echo "==============================================================="
 
 _reset_phases
 
-for p in changelog_entry distribute docs_refresh; do
+for p in changelog_entry distribute docs_refresh closure; do
   _run --until "$p"
   if [[ "$RUN_EXIT" -eq 2 ]] && grep -q "is not a wired phase" <<< "$RUN_CONSOLE"; then
-    fail "--until '${p}' is still rejected as not-wired — T046 requires it to be an accepted phase name"
+    fail "--until '${p}' is still rejected as not-wired — it must be an accepted phase name"
   else
     pass "--until '${p}' is an accepted phase name (exit ${RUN_EXIT})"
   fi
 done
 
-# closure has no phase-07-closure.sh at all (blocked behind T054's review).
-_run --until closure
+# `closure` (T055) is now wired and is the schema's last phase name, so there
+# is no remaining example of a real, schema-enumerated, not-yet-implemented
+# phase to assert against — every enum value is wired. "bogus-phase" instead
+# exercises a name that will NEVER be a real phase, which is the property
+# this refusal path actually guards: a typo, or a stale reference to a phase
+# that was renamed or removed, must still be a usage error rather than a
+# silent no-op.
+_run --until bogus-phase
 if [[ "$RUN_EXIT" -eq 2 ]] && grep -q "is not a wired phase" <<< "$RUN_CONSOLE"; then
-  pass "--until closure is still a usage error (exit 2) naming it as not wired"
+  pass "--until bogus-phase is still a usage error (exit 2) naming it as not wired"
 else
-  fail "--until closure exited ${RUN_EXIT} — it must stay a usage error, never a silent no-op. Console: ${RUN_CONSOLE}"
+  fail "--until bogus-phase exited ${RUN_EXIT} — it must stay a usage error, never a silent no-op. Console: ${RUN_CONSOLE}"
 fi
 
-if grep -q "closure" <<< "$RUN_CONSOLE"; then
-  pass "the not-wired refusal still explains that closure specifically is blocked"
-else
-  fail "the not-wired refusal no longer mentions closure: ${RUN_CONSOLE}"
-fi
-
-for p in changelog_entry distribute docs_refresh; do
+for p in changelog_entry distribute docs_refresh closure; do
   _run --skip "$p" --until live_verify
   if [[ "$RUN_EXIT" -eq 2 ]] && grep -q "is not a wired phase" <<< "$RUN_CONSOLE"; then
     fail "--skip '${p}' is rejected as not-wired — every wired phase must be skippable except precondition"
@@ -239,7 +240,7 @@ for p in changelog_entry distribute docs_refresh; do
 done
 
 # Preflight must cover the NEW scripts, not just the original five.
-for missing in phase-05a-changelog-entry.sh phase-05-distribute.sh phase-06-docs.sh; do
+for missing in phase-05a-changelog-entry.sh phase-05-distribute.sh phase-06-docs.sh phase-07-closure.sh; do
   _reset_phases
   mv "${HARNESS}/scripts/pipeline/${missing}" "${HARNESS}/${missing}.hidden"
   _run --until precondition
@@ -265,9 +266,9 @@ echo "==============================================================="
 
 _reset_phases
 _run
-EXPECTED_ORDER="precondition build test install_boot live_verify live_verify changelog_entry distribute docs_refresh "
+EXPECTED_ORDER="precondition build test install_boot live_verify live_verify changelog_entry distribute docs_refresh closure "
 if [[ "$RUN_ORDER" == "$EXPECTED_ORDER" ]]; then
-  pass "all eight phases ran, in the full R-004 sequence"
+  pass "all nine phases ran, in the full R-004 sequence"
 else
   fail "phase order was '${RUN_ORDER}', expected '${EXPECTED_ORDER}'"
 fi
@@ -275,7 +276,7 @@ fi
 # Assert the ordering RELATION explicitly, not only the whole string, so a
 # future reordering fails with a message that says which pair inverted.
 _idx() { local needle="$1"; local i=0 w; for w in $RUN_ORDER; do i=$((i+1)); [[ "$w" == "$needle" ]] && { echo "$i"; return 0; }; done; echo 0; }
-i_cl="$(_idx changelog_entry)"; i_di="$(_idx distribute)"; i_do="$(_idx docs_refresh)"
+i_cl="$(_idx changelog_entry)"; i_di="$(_idx distribute)"; i_do="$(_idx docs_refresh)"; i_cs="$(_idx closure)"
 if [[ "$i_cl" -gt 0 && "$i_di" -gt 0 && "$i_cl" -lt "$i_di" ]]; then
   pass "changelog_entry runs BEFORE distribute (R-004: the gate reads the CHANGELOG as a pre-existing input)"
 else
@@ -286,10 +287,16 @@ if [[ "$i_di" -gt 0 && "$i_do" -gt 0 && "$i_di" -lt "$i_do" ]]; then
 else
   fail "distribute at ${i_di}, docs_refresh at ${i_do} — R-004 requires the broader docs pass last"
 fi
+if [[ "$i_do" -gt 0 && "$i_cs" -gt 0 && "$i_do" -lt "$i_cs" ]]; then
+  pass "closure runs LAST, after docs_refresh (it commits what every earlier phase wrote)"
+else
+  fail "docs_refresh at ${i_do}, closure at ${i_cs} — closure must be the final phase"
+fi
 
 if [[ "$RUN_MARKERS" == *"changelog_entry=changelog_entry"* \
    && "$RUN_MARKERS" == *"distribute=distribute"* \
-   && "$RUN_MARKERS" == *"docs_refresh=docs_refresh"* ]]; then
+   && "$RUN_MARKERS" == *"docs_refresh=docs_refresh"* \
+   && "$RUN_MARKERS" == *"closure=closure"* ]]; then
   pass "each newly-wired phase is marked in flight, under its own name, while it runs"
 else
   fail "in-flight markers were '${RUN_MARKERS}' — each new phase must be marked with its own name"
@@ -398,12 +405,13 @@ fi
 
 echo ""
 echo "==============================================================="
-echo "CASE G: the two SELF-APPENDING new phases still fail the run when"
+echo "CASE G: the three SELF-APPENDING new phases still fail the run when"
 echo "they die before appending anything"
 echo "==============================================================="
 
 for spec in "phase-05a-changelog-entry.sh:changelog_entry:distribute" \
-            "phase-06-docs.sh:docs_refresh:"; do
+            "phase-06-docs.sh:docs_refresh:closure" \
+            "phase-07-closure.sh:closure:"; do
   script="${spec%%:*}"; rest="${spec#*:}"; phase="${rest%%:*}"; must_not_run="${rest#*:}"
   _reset_phases
   _phase_dies_early "$script" "$phase" 1
@@ -433,13 +441,14 @@ echo "every case above."
 _reset_phases
 _run
 if [[ "$RUN_EXIT" -eq 0 && "$RUN_OUTCOME" == "PASS" ]]; then
-  pass "the full eight-phase happy path exits 0 with outcome PASS"
+  pass "the full nine-phase happy path exits 0 with outcome PASS"
 else
   fail "the happy path gave exit=${RUN_EXIT} outcome='${RUN_OUTCOME}' phases=${RUN_PHASES}"
 fi
 for expected in "('precondition', 'PASS')" "('build', 'PASS')" "('test', 'PASS')" \
                 "('install_boot', 'PASS')" "('live_verify', 'PASS')" \
-                "('changelog_entry', 'PASS')" "('docs_refresh', 'PASS')"; do
+                "('changelog_entry', 'PASS')" "('docs_refresh', 'PASS')" \
+                "('closure', 'PASS')"; do
   if [[ "$RUN_PHASES" == *"$expected"* ]]; then
     pass "phases[] contains ${expected}"
   else
@@ -448,10 +457,11 @@ for expected in "('precondition', 'PASS')" "('build', 'PASS')" "('test', 'PASS')
 done
 _n_cl="$(grep -c -o "('changelog_entry', 'PASS')" <<< "$RUN_PHASES" || true)"
 _n_do="$(grep -c -o "('docs_refresh', 'PASS')" <<< "$RUN_PHASES" || true)"
-if [[ "$_n_cl" -eq 1 && "$_n_do" -eq 1 ]]; then
+_n_cs="$(grep -c -o "('closure', 'PASS')" <<< "$RUN_PHASES" || true)"
+if [[ "$_n_cl" -eq 1 && "$_n_do" -eq 1 && "$_n_cs" -eq 1 ]]; then
   pass "the self-appending new phases are recorded exactly once each (no double-append)"
 else
-  fail "changelog_entry appears ${_n_cl} time(s) and docs_refresh ${_n_do} time(s), expected 1 each: ${RUN_PHASES}"
+  fail "changelog_entry appears ${_n_cl} time(s), docs_refresh ${_n_do} time(s), closure ${_n_cs} time(s), expected 1 each: ${RUN_PHASES}"
 fi
 if [[ "$RUN_PHASES" != *"'FAIL'"* && "$RUN_PHASES" != *"'SKIPPED'"* ]]; then
   pass "no phantom FAIL/SKIPPED entry in a fully green run"
@@ -477,6 +487,20 @@ if [[ "$RUN_ORDER" == *"distribute"* && "$RUN_ORDER" != *"docs_refresh"* ]]; the
   pass "--until distribute runs the gate and stops before docs_refresh"
 else
   fail "--until distribute produced order '${RUN_ORDER}'"
+fi
+_reset_phases
+_run --until docs_refresh
+if [[ "$RUN_ORDER" == *"docs_refresh"* && "$RUN_ORDER" != *"closure"* ]]; then
+  pass "--until docs_refresh runs the broader docs pass and stops before closure"
+else
+  fail "--until docs_refresh produced order '${RUN_ORDER}'"
+fi
+_reset_phases
+_run --until closure
+if [[ "$RUN_ORDER" == *"docs_refresh closure"* ]]; then
+  pass "--until closure (== the default) runs the full tail through closure"
+else
+  fail "--until closure produced order '${RUN_ORDER}'"
 fi
 
 echo ""

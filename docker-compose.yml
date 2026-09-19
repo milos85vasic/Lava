@@ -63,7 +63,14 @@ services:
       lava-migrate: { condition: service_completed_successfully }
     environment:
       LAVA_API_PG_URL: "postgres://lava:${LAVA_PG_PASSWORD}@127.0.0.1:8432/lava_api?sslmode=disable"
-      LAVA_API_LISTEN: ":8443"                        # public LAN listener (HTTP/3 + HTTP/2)
+      # Public LAN listener (HTTP/3 + HTTP/2). Overridable so an operator can
+      # avoid a fixed-port collision with an unrelated process on a shared
+      # host (this is exactly the collision LVA session 2026-09-19 hit) —
+      # set LAVA_API_LISTEN=":0" to bind a real, OS-assigned free port
+      # instead (see internal/server.ResolveListen). Matches the same
+      # env-var-indirected pattern docker-compose.dev.yml already uses for
+      # LAVA_API_DEV_LISTEN, with the identical default preserved.
+      LAVA_API_LISTEN: "${LAVA_API_LISTEN:-:8443}"
       # Bind metrics to all interfaces so the bridged Prometheus container
       # (`docker.io/prom/prometheus`) can scrape via `host.containers.internal:9091`.
       # The api-go uses `network_mode: host`, so this is host-side

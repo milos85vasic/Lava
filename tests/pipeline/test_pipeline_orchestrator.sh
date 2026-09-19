@@ -123,14 +123,15 @@ set +e
 set -e
 if [[ "$rc" -eq 0 ]]; then pass "--help exits 0"; else fail "--help exited $rc, expected 0"; fi
 
-# `closure` is the ONLY remaining not-wired phase name (T046 wired
-# changelog_entry / distribute / docs_refresh; phase-07-closure.sh still does
-# not exist, blocked behind T048/T049 + T054's review gate). It is listed here
-# BY NAME rather than as "some unwired phase", because the property under test
-# is that a real, spec'd, schema-enumerated phase which is not yet implemented
-# is refused rather than silently skipped — which a mere typo like
-# "bogus-phase" does not exercise.
-for bad_until in "bogus-phase" "closure"; do
+# CORRECTED 2026-09-18: `closure` (T055) is now wired, and every name in the
+# `phases[].name` schema enum is wired along with it — there is no remaining
+# example of a real, spec'd, schema-enumerated phase that is not yet
+# implemented. "bogus-phase" instead exercises the property this refusal path
+# actually guards: a typo, or a stale reference to a phase that was renamed
+# or removed, must still be a usage error (exit 2) rather than a silent
+# no-op. `closure`'s own acceptance is asserted below, alongside the other
+# three phases T046 wired.
+for bad_until in "bogus-phase"; do
   set +e
   out="$( cd "$GUARDS_FIXTURE" && bash "$ORCH" --until "$bad_until" "$GUARDS_FIXTURE" 2>&1 )"; rc=$?
   set -e
@@ -146,20 +147,22 @@ for bad_until in "bogus-phase" "closure"; do
   fi
 done
 
-# The mirror of the above: the three phases T046 wired must NOT be refused.
-# Without this, deleting them from the registry again would leave this suite
-# green — the not-wired guard would simply have more to refuse. `--skip` is
-# passed for every phase past `precondition` so an accepted phase name is
-# proved accepted WITHOUT running any real phase script.
-for good_until in "changelog_entry" "distribute" "docs_refresh"; do
+# The mirror of the above: the four phases T046 + T055 wired must NOT be
+# refused. Without this, deleting them from the registry again would leave
+# this suite green — the not-wired guard would simply have more to refuse.
+# `--skip` is passed for every phase past `precondition`, INCLUDING the
+# target phase itself, so an accepted phase name is proved accepted WITHOUT
+# running any real phase script — `closure` included, so this never invokes
+# the real commit-and-push step against the fixture.
+for good_until in "changelog_entry" "distribute" "docs_refresh" "closure"; do
   # A FRESH fixture per iteration. run_ids are second-resolution and
-  # init_run_report refuses to reuse one (R-010), so three invocations inside
+  # init_run_report refuses to reuse one (R-010), so four invocations inside
   # the same second would collide in a shared fixture and exit 1 for a reason
   # that has nothing to do with what this check is about.
   ACCEPT_FIXTURE="$(_new_fixture "accept-${good_until}")"
   set +e
   out="$( cd "$ACCEPT_FIXTURE" && bash "$ORCH" --until "$good_until" \
-            --skip build,test,install_boot,live_verify,changelog_entry,distribute,docs_refresh \
+            --skip build,test,install_boot,live_verify,changelog_entry,distribute,docs_refresh,closure \
             "$ACCEPT_FIXTURE" 2>&1 )"; rc=$?
   set -e
   if grep -q "is not a wired phase" <<< "$out"; then

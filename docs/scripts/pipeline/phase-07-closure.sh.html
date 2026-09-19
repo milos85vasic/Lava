@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.11" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>phase-07-closure.sh</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="scriptspipelinephase-07-closuresh--user-guide"><code>scripts/pipeline/phase-07-closure.sh</code>
+— User Guide</h1>
+<p><strong>Last verified:</strong> 2026-09-18 (feature
+<code>002-build-test-distribute-pipeline</code>, task T055)
+<strong>Inheritance:</strong> HelixConstitution §11.4.18 (script
+documentation mandate); Lava §6.J (Anti-Bluff), §6.T.3 (no force-push),
+Decoupled Reusable Architecture rule's Automated Pipeline Pin-Advance
+Path</p>
+<h2 id="overview">Overview</h2>
+<p>The pipeline's <strong>repository closure</strong> phase
+(FR-014/FR-015/FR-016/FR-017, <code>tasks.md</code> T055). It is the
+last phase in a full pipeline run: it advances every submodule this
+project has authorized the pipeline to advance unattended, then commits
+and pushes all outstanding main-repository changes — including any
+updated pins — to every configured upstream.</p>
+<p>The T055 entry in
+<code>specs/002-build-test-distribute-pipeline/tasks.md</code>
+<strong>is this script's design document</strong> — there is no separate
+design file. It records three operator decisions (2026-08-26) this
+script implements exactly:</p>
+<ol type="1">
+<li><strong>Recursive scope, per-level invocation.</strong> The
+submodule set examined is the FULL RECURSIVE set, not just this
+repository's direct submodules. The script drives the
+<strong>unchanged</strong>
+<code>scripts/advance-all-submodules.sh</code> once per level: the main
+repository, then every already-initialized submodule that itself
+declares nested submodules. It never advances a level-2+ pin — doing so
+would require a commit <em>inside</em> a level-1 submodule, which is the
+R-005 step-6 capability that <code>advance-all-submodules.sh</code>
+removed outright on 2026-08-26 (see that script's own header /
+<code>docs/scripts/advance-all-submodules.sh.md</code>). A submodule
+declared but not yet checked out is initialized <strong>at its
+already-recorded pin</strong> (<code>git submodule update --init</code>,
+never <code>--remote</code>) so it becomes enumerable and recordable —
+never so it becomes advanceable; only
+<code>advance-all-submodules.sh</code>'s own
+<code>GOVERNANCE_ALLOW</code> (currently the single entry
+<code>helixqa</code>) decides that, unchanged by this phase.
+<code>constitution</code> is excluded from the walk
+<strong>entirely</strong>, at every level — never entered, never init'd,
+never passed as a target repository — per root <code>CLAUDE.md</code>
+condition (B)'s default-deny on the governance submodule itself.</li>
+<li><strong>FR-017 wins.</strong> A run that ends with pins staged but
+not committed is an intermediate state, never this phase's pass
+condition. This phase's own advance walk may legitimately leave the tree
+staged-not-clean; the commit+push+verify step that follows is what
+reaches FR-017's actual end state.</li>
+<li><strong>Declared path set, refuse on surprises.</strong>
+<code>scripts/commit_all.sh</code> defaults to <code>git add -A</code>.
+This phase instead computes a <em>declared</em> path set — everything
+dirty when the phase started (which, because FR-000 already guarantees a
+clean tree at the <strong>start of the pipeline run</strong>, can only
+be output from this run's own earlier phases) plus whatever this phase's
+own top-level advance staged — and passes exactly that set to
+<code>commit_all.sh --files</code>. Anything dirty afterward that is in
+neither set is a surprise, and the phase refuses to commit it, naming
+the paths.</li>
+</ol>
+<h2 id="usage">Usage</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/pipeline/phase-07-closure.sh</span> <span class="op">&lt;</span>run_id<span class="op">&gt;</span> <span class="pp">[</span><span class="ss">repo</span><span class="pp">-</span><span class="ss">path</span><span class="pp">]</span></span></code></pre></div>
+<p><code>&lt;run_id&gt;</code> must already have a
+<code>report.json</code> (via <code>lib/run-report.sh</code>'s
+<code>init_run_report</code>), exactly like every other wired phase.
+This script appends one <code>closure</code> phase entry to that report
+and merges every Submodule Advance Record this run produced — across
+every level — into its <code>submodule_advances[]</code> array (the
+merge helper T055's own design note flagged as missing; this script is
+where it lives).</p>
+<h3 id="test-only-environment-overrides">Test-only environment
+overrides</h3>
+<p>Neither is required, or able to relax a safety boundary, for a real
+invocation — they only make a hermetic fixture reachable, the same
+posture <code>advance-all-submodules.sh</code>'s own
+<code>--allow-local-path-remotes</code> takes:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LAVA_ADVANCE_VERIFY_CMD</code></td>
+<td>Passed straight through to every
+<code>advance-all-submodules.sh</code> invocation this phase makes.
+Unset by default, so production gets that script's own default (a real
+rebuild-and-test via <code>phase-01-build.sh</code> +
+<code>phase-02-test.sh</code>).</td>
+</tr>
+<tr>
+<td><code>LAVA_CLOSURE_ALLOW_LOCAL_PATH_REMOTES</code></td>
+<td>When <code>true</code>, adds <code>--allow-local-path-remotes</code>
+to every <code>advance-all-submodules.sh</code> invocation. A hermetic
+fixture's "upstream" is a local bare repo, which that script otherwise
+refuses to fetch from by design (root <code>CLAUDE.md</code> condition
+(C)).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="exit-codes">Exit codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>closure complete: every level examined and recorded, the main
+repository committed and pushed to every configured upstream (or there
+was genuinely nothing to commit because the tree was already at the end
+state), working tree empty, 0 recursive submodule entries showing
+<code>+</code> or <code>-</code></td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>closure failed: an advance was rejected somewhere this phase treats
+as a real failure, an undeclared path appeared, the commit/push step
+failed (including a §6.C mirror-divergence, which
+<code>commit_all.sh</code>'s own push step already detects), or the
+post-closure FR-017 verification found the tree not clean or not fully
+initialized</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>usage/precondition error (missing <code>run_id</code>, absent
+<code>report.json</code>, unreadable repo path). Nothing attempted</td>
+</tr>
+</tbody>
+</table>
+<h2 id="anti-bluff-properties">Anti-bluff properties</h2>
+<ol type="1">
+<li><strong>Declared-path reconciliation, not
+<code>git add -A</code>.</strong> Verified by
+<code>tests/pipeline/test_phase_07_closure_hardening.sh</code>'s I1
+case: a deliberately-injected stray untracked file during the advance
+step is detected and refused, never silently committed.</li>
+<li><strong>FR-017 is checked directly, not inferred from a successful
+commit.</strong>
+<code>git status --porcelain --ignore-submodules=none</code> and
+<code>git submodule status --recursive</code> are read for real after
+closure. Falsifiability-rehearsed (hardening suite case I3): neutering
+the <code>dirty_recursive</code> guard makes a run with a
+genuinely-uninitialized nested submodule wrongly report success;
+reverting restores the correct <code>FAIL</code>.</li>
+<li><strong>Per-submodule evidence at every level, merged exactly
+once.</strong> The hardening suite's I4 case exercises a 3-submodule,
+2-level fixture producing a mix of <code>ADVANCED</code> /
+<code>REFUSED_GOVERNANCE_DENY</code> / <code>NO_NEWER_COMMIT</code>
+outcomes and confirms every one lands in <code>report.json</code>'s
+<code>submodule_advances[]</code>, and that re-running the merge does
+not duplicate entries.</li>
+<li><strong>Honest scope note, not a false completeness claim.</strong>
+<code>scripts/advance-all-submodules.sh</code> reached its current
+structurally-safe shape only after five adversarial review rounds (T054,
+accepted 2026-09-18). This phase has <strong>not</strong> yet been
+through an equivalent adversarial pass against a real submodule tree —
+it is a first implementation, exercised only by its own two hermetic
+test suites so far. <code>tasks.md</code> T056 (a disposable-clone dry
+run) and T062 (a disposable-branch, full end-to-end run) are what exist
+to close that gap next; this script's own header states this plainly
+rather than implying a maturity it has not earned yet.</li>
+</ol>
+<h2
+id="known-defects-found-and-fixed-during-t055s-own-test-writing-2026-09-18">Known
+defects found and fixed during T055's own test-writing (2026-09-18)</h2>
+<p>Two independent subagents, writing separate test suites in parallel
+worktrees, each independently discovered and fixed the same two real
+bugs in the first draft of this script — recorded here because "found by
+construction of the tests, before any real invocation" is exactly the
+anti-bluff discipline this project's testing culture requires:</p>
+<ol type="1">
+<li><strong><code>commit_all.sh</code> path resolution.</strong>
+<code>scripts/commit_all.sh</code> derives its own repository root from
+its own <code>BASH_SOURCE</code> and unconditionally <code>cd</code>s
+there — it has no repo-path override of its own. The first draft
+resolved <code>COMMIT_ALL_SCRIPT</code> relative to <em>this
+script's</em> location rather than the <em>target</em> repository, so a
+<code>[repo-path]</code> override never actually redirected the
+commit/push step. Invisible in production (same checkout either way);
+fatal against any disposable clone or test fixture. Fixed: resolved via
+<code>${REPO_ROOT}/scripts/commit_all.sh</code>.</li>
+<li><strong><code>LAVA_ADVANCE_VERIFY_CMD</code> passthrough
+syntax.</strong> The original
+<code>${LAVA_ADVANCE_VERIFY_CMD+LAVA_ADVANCE_VERIFY_CMD="$LAVA_ADVANCE_VERIFY_CMD"}</code>
+idiom is not a valid bash env-var-prefix assignment — bash recognizes
+<code>NAME=value</code> command prefixes syntactically at parse time,
+and a word starting with <code>${</code> is never reclassified as one
+regardless of what it expands to. Bash instead tried to <em>execute</em>
+the expanded string as a command, failing with exit 127 — which the
+exit-code handling did not distinguish from a normal non-zero outcome,
+so <code>advance-all-submodules.sh</code> could silently never run at
+all while the phase still reported success. This was
+production-reachable (not test-only): any real, non-trivial verify
+command supplied via this variable would have hit the same failure mode
+on its very first invocation. Fixed: built into a proper
+<code>NAME=value</code> array passed to <code>env</code>, with an
+explicit catch-all for any undocumented
+<code>advance-all-submodules.sh</code> exit code.</li>
+</ol>
+<h2 id="maintenance">Maintenance</h2>
+<p>When this script is modified, update this document in the same commit
+(§11.4.18 / <code>CM-SCRIPT-DOCS-SYNC</code> convention).</p>
+<h2 id="cross-references">Cross-references</h2>
+<ul>
+<li><code>scripts/pipeline/phase-07-closure.sh</code> — the script
+itself</li>
+<li><code>scripts/advance-all-submodules.sh</code> — the per-level
+advance engine this phase drives unchanged
+(<code>docs/scripts/advance-all-submodules.sh.md</code> if present;
+otherwise see that script's own header)</li>
+<li><code>scripts/commit_all.sh</code> — the commit+push wrapper this
+phase's Step 3 invokes with a declared <code>--files</code> set</li>
+<li><code>tests/pipeline/test_phase_07_closure.sh</code> — core hermetic
+suite (governance allow/deny, per-level recursion,
+<code>constitution</code> exclusion, uninitialized-submodule init)</li>
+<li><code>tests/pipeline/test_phase_07_closure_hardening.sh</code> —
+adversarial suite (surprise-path refusal, commit/push failure
+propagation, FR-017 verification, <code>submodule_advances[]</code>
+merge correctness, usage errors)</li>
+<li><code>specs/002-build-test-distribute-pipeline/tasks.md</code> —
+T055's own text is this script's design document</li>
+<li><code>specs/002-build-test-distribute-pipeline/quickstart.md</code>
+— Scenario 4, Step B</li>
+</ul>
+</body>
+</html>

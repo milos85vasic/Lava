@@ -1,13 +1,13 @@
 # `scripts/pipeline-build-test-distribute.sh` — User Guide
 
-**Last verified:** 2026-08-25 (T046/T057 full-sequence wiring — `changelog_entry`, `distribute`, `docs_refresh`; independent audit of the `gate` mode, the evidence-directory derivation and `--help`)
+**Last verified:** 2026-09-18 (`closure` wired — T055's phase script, its own hermetic suite, and a real disposable-clone dry run (T056) all reached a genuine PASS; T054's review of `scripts/advance-all-submodules.sh` was accepted the same day. Prior verification: 2026-08-25 T046/T057 full-sequence wiring — `changelog_entry`, `distribute`, `docs_refresh`; independent audit of the `gate` mode, the evidence-directory derivation and `--help`)
 **Inheritance:** HelixConstitution §11.4.18 (script documentation mandate) + Lava's Anti-Bluff Pact (Sixth/Seventh Laws) + §6.T.2 (Resource Limits)
 
 ## Overview
 
 The top-level orchestrator for this project's local build-test-distribute pipeline (`specs/002-build-test-distribute-pipeline/`). It sequences the pipeline's phase scripts against one shared run identifier, and consolidates their results into a single Pipeline Run Report per invocation.
 
-## What is wired today — and what deliberately is not
+## What is wired today
 
 This section is the authoritative statement of what this script can currently do. It is deliberately explicit, because a pipeline that quietly does less than its name implies is the exact failure this feature exists to prevent.
 
@@ -21,11 +21,9 @@ This section is the authoritative statement of what this script can currently do
 | `changelog_entry` | `scripts/pipeline/phase-05a-changelog-entry.sh` | ✅ (T046) |
 | `distribute` | `scripts/pipeline/phase-05-distribute.sh` | ✅ (T046) — **gate only; it cannot distribute** |
 | `docs_refresh` | `scripts/pipeline/phase-06-docs.sh` | ✅ (T046) |
-| `closure` | `phase-07-closure.sh` | ❌ the script does not exist — blocked on **T054 alone** |
+| `closure` | `scripts/pipeline/phase-07-closure.sh` | ✅ (T055, wired 2026-09-18) — commits and pushes; see `docs/scripts/pipeline/phase-07-closure.sh.md` |
 
-`closure` is **not** unimplemented-by-accident. **CORRECTED 2026-08-26 — this paragraph used to name T048/T049 as a co-blocker, and that is no longer true.** T048 and T049 (the carve-out in the Decoupled Reusable Architecture rule's "submodule fetch/pull is an EXPLICIT operator action, never automatic") both **landed 2026-08-23** under explicit operator approval, as did T040/T041; root `CLAUDE.md` now carries the `Automated Pipeline Pin-Advance Path` subsection with conditions (A)-(F). **No constitutional amendment blocks this phase.** The sole remaining blocker is **T054**, the dedicated review gate for `scripts/advance-all-submodules.sh` — the highest-blast-radius component in this feature, which has run four review rounds, returned APPROVE-WITH-FIXES every time, and has never returned a clean approval. T055 (the phase script itself) depends on it. `--until closure` is a usage error (exit `2`), never a silent no-op.
-
-One stale citation of the old blocker deliberately remains in the script itself, at the `--until` error message on line 375: it is operator-facing output rather than a comment, so the 2026-08-26 comment-only correction pass left it for the commit that wires `closure`.
+**CORRECTED 2026-09-18.** Every prior version of this table marked `closure` unwired, blocked on **T054 alone** (the review of `scripts/advance-all-submodules.sh`, which had run four rounds and never returned a clean approval before that). T054 was accepted 2026-09-18 after a fifth, adversarial review round; `phase-07-closure.sh` (T055) exists, is covered by its own hermetic suite (`tests/pipeline/test_phase_07_closure.sh`, `tests/pipeline/test_phase_07_closure_hardening.sh`), and a real disposable-clone dry run (T056) reached a genuine PASS. `closure` is now the ninth wired phase, is a normal `yes`-mode self-appending phase (not a `gate`), and is the new default `--until` target — see "The default run now writes to the repository — and commits it" below for what that changes about a default run's end state.
 
 **Wiring `distribute` did not make this script able to distribute.** `phase-05-distribute.sh` is the §6.AA clause 8 refusal gate and today it is *only* that: it never invokes `scripts/firebase-distribute.sh`, writes no Distribution Record, and mutates `report.json` in no way. See "The distribute phase is a refusal gate" below for what its exit codes mean and how they are recorded.
 
@@ -67,26 +65,41 @@ The absence of the entry is the honest record — nothing was distributed, so th
 
 > **Fixed 2026-08-25 (independent audit).** The orchestrator used to test the qualified-no-op condition *before* the phase's failure, which made the failure branch unreachable the moment any script in the phase had exited `3`. Such a run recorded nothing for the phase, and `report.json` — the artifact SC-008 sends an auditor to *first* — finalized to `outcome: "PASS"` while the process exit code said `1`, with the run-summary box printing `outcome: PASS` and `halted at: distribute` side by side. The condition order is now failure-first. Regression coverage: `tests/pipeline/test_orchestrator_gate_and_registry_audit.sh` CASE A, with CASE B guarding the opposite over-correction (an all-qualified multi-script gate must still record no entry and pass).
 
-### The default run now writes to the repository
+### The default run now writes to the repository — and commits it
 
-`changelog_entry` writes a `CHANGELOG.md` entry and a per-version snapshot file; `docs_refresh` applies `research.md` R-002's stale-documentation fixes and regenerates the `.html`/`.pdf` siblings of every `.md` it changed. Both are what FR-013 / SC-006 ("zero manual documentation follow-up required") ask for, and both are now inside the default `--until docs_refresh`.
+`changelog_entry` writes a `CHANGELOG.md` entry and a per-version snapshot file; `docs_refresh` applies `research.md` R-002's stale-documentation fixes and regenerates the `.html`/`.pdf` siblings of every `.md` it changed. Both are what FR-013 / SC-006 ("zero manual documentation follow-up required") ask for, and both are inside the default `--until closure`.
 
-Two consequences worth stating plainly rather than discovering:
+**CORRECTED 2026-09-18.** Every prior version of this section said a completed default run leaves the working tree dirty on purpose, because the phase that commits — `closure` — was not wired. That is no longer this script's behaviour:
 
-- A completed default run leaves the working tree **dirty on purpose**. The phase that commits those changes is `closure`, which is not wired. Until it is, committing is a human act.
-- Because FR-000 requires a clean tree, a **second** run started before those changes are committed or discarded will refuse at `precondition`. That refusal is correct, not a bug.
+- A completed **default** run (nothing short-circuited by `--until` or by `--skip closure`) now reaches `closure`, which commits every outstanding tracked change this run's own earlier phases produced (the CHANGELOG entry, its per-version snapshot, refreshed docs and their regenerated `.html`/`.pdf` siblings, and any submodule pins it was authorized to advance) and pushes to every configured upstream — FR-014/FR-015/FR-016/FR-017. The working tree is **clean** when such a run finishes; committing is no longer a human act.
+- A run that **stops short of `closure`** (`--until docs_refresh` or earlier, or `--skip closure` while `closure` would otherwise run) still leaves the working tree **dirty on purpose**, because the phase that would have committed those changes never ran. Because FR-000 requires a clean tree, a **second** run started before those changes are committed or discarded will refuse at `precondition`. That refusal is correct, not a bug — it is exactly the property `closure` now closes for the default path.
 
-`--until live_verify` reproduces the pre-T046 default exactly, and `--skip changelog_entry,distribute,docs_refresh` does the same for a run that should touch nothing.
+`--until live_verify` reproduces the pre-T046 default exactly, and `--skip changelog_entry,distribute,docs_refresh,closure` does the same for a run that should touch nothing.
 
-Because an operator who types no flags at all never reads this guide or `--help`, a run that will genuinely reach one of those two phases **also announces it on stdout** before the first phase starts:
+Because an operator who types no flags at all never reads this guide or `--help`, a run that will genuinely reach one of the writing phases **also announces it on stdout** before the first phase starts, and now says whether `closure` will clean up after it:
 
 ```
 pipeline-build-test-distribute: NOTE — this run WRITES TO THE REPOSITORY. Phase(s)
   changelog_entry docs_refresh edit tracked files (CHANGELOG.md, its per-version
   snapshot, documentation and its regenerated .html/.pdf siblings).
+  This run also reaches 'closure', which commits those changes (and any submodule
+  pins it was authorized to advance) and pushes them to every configured upstream
+  as its final phase — FR-014/FR-015/FR-016/FR-017. A completed run therefore
+  leaves the working tree CLEAN, not dirty.
 ```
 
-The notice is computed from the phases the run will actually reach: `--until` short of them, or `--skip` of them, suppresses it — a warning that is wrong teaches the reader to ignore the next one. Regression coverage: `tests/pipeline/test_orchestrator_gate_and_registry_audit.sh` CASE H (positive *and* both suppression cases).
+or, when the run stops short of `closure`:
+
+```
+pipeline-build-test-distribute: NOTE — this run WRITES TO THE REPOSITORY. Phase(s)
+  changelog_entry docs_refresh edit tracked files (CHANGELOG.md, its per-version
+  snapshot, documentation and its regenerated .html/.pdf siblings).
+  A completed run will leave the working tree DIRTY on purpose; the phase that
+  commits is 'closure', which this run does not reach (--until 'docs_refresh',
+  or --skip closure), so committing is a human act. ...
+```
+
+The notice is computed from the phases the run will actually reach: `--until` short of them, or `--skip` of them, suppresses or reshapes it — a warning that is wrong teaches the reader to ignore the next one. Regression coverage: `tests/pipeline/test_orchestrator_gate_and_registry_audit.sh` CASE H (positive *and* both suppression cases).
 
 **`live_verify` covers both surfaces** (since T037 landed, 2026-08-21): the running `lava-api-go` service, and the `:api-app` debug APK installed onto a Containers-submodule emulator per §6.AH driving its real boot-and-serve Challenge. A phase may own more than one script; they run in listed order and the phase halts at the first failure, so a later script can never append a PASS entry for a phase whose earlier half already failed. Both append their own `live_verify` entry to `phases[]` — the report schema permits that (`phases[]` declares no `uniqueItems`), and it is the honest shape, since `finalize_run_report` requires *every* entry to be PASS.
 
@@ -102,11 +115,11 @@ The api-app half establishes §6.AH compliance as a **checked fact**, not a logg
 
 | Option | Meaning |
 |---|---|
-| `--until <phase>` | Stop after `<phase>` completes successfully. One of `precondition`, `build`, `test`, `install_boot`, `live_verify`, `changelog_entry`, `distribute`, `docs_refresh`. Default `docs_refresh` (the furthest wired phase). This is what makes `quickstart.md`'s per-user-story slices runnable: `--until test` is the US1 slice, `--until live_verify` is US1+US2, `--until docs_refresh` is US1+US2+US3. |
+| `--until <phase>` | Stop after `<phase>` completes successfully. One of `precondition`, `build`, `test`, `install_boot`, `live_verify`, `changelog_entry`, `distribute`, `docs_refresh`, `closure`. Default `closure` (the furthest wired phase — the full pipeline, including the commit-and-push step). This is what makes `quickstart.md`'s per-user-story slices runnable: `--until test` is the US1 slice, `--until live_verify` is US1+US2, `--until docs_refresh` is US1+US2+US3 without committing, and `--until closure` (or no `--until` at all) is US1+US2+US3 with the repository committed and pushed. |
 | `--skip <phase>[,<phase>…]` | Do not run the named phase(s). `precondition` may **not** be skipped. |
-| `-h`, `--help` | Print the **whole** usage block (the script's header comment, ~190 lines) and exit `0`. It is produced by an awk scan that stops at the first non-comment line, not by a hardcoded line window — a fixed window silently truncates the moment the header is edited. |
+| `-h`, `--help` | Print the **whole** usage block (the script's header comment) and exit `0`. It is produced by an awk scan that stops at the first non-comment line, not by a hardcoded line window — a fixed window silently truncates the moment the header is edited. |
 
-Naming a phase that is not wired (today that is only `--until closure`) is a **usage error (exit 2)**, not a silent no-op.
+Every name in the `phases[].name` schema enum is now wired. Naming any OTHER phase (a typo, or a name that was never real) is still a **usage error (exit 2)**, not a silent no-op.
 
 `precondition` cannot be skipped because it is the FR-000 safety boundary — a pipeline that can be talked out of checking its own preconditions has no safety boundary at all.
 
@@ -219,7 +232,7 @@ Who records a phase's `phases[]` entry is declared per phase in the orchestrator
 
 | Mode | Meaning | Phases |
 |---|---|---|
-| `yes` | The phase script calls `append_phase_result` itself; the orchestrator must not append a second entry (a duplicate would corrupt the all-PASS outcome rule). The contract is still **verified**, not trusted, when the phase fails — see `phase_nonpass_count`. | `build`, `test`, `install_boot`, `live_verify`, `changelog_entry`, `docs_refresh` |
+| `yes` | The phase script calls `append_phase_result` itself; the orchestrator must not append a second entry (a duplicate would corrupt the all-PASS outcome rule). The contract is still **verified**, not trusted, when the phase fails — see `phase_nonpass_count`. | `build`, `test`, `install_boot`, `live_verify`, `changelog_entry`, `docs_refresh`, `closure` |
 | `no` | The phase script does not append; the orchestrator appends PASS on exit `0` and FAIL otherwise. | `precondition` |
 | `gate` | The phase script does not append **and** has a third outcome that is neither pass nor fail. Exit `0` → PASS; exit `3` → *no entry*; anything else → FAIL and halt. | `distribute` |
 
@@ -232,9 +245,9 @@ The phase wiring was verified by real execution against disposable fixture git r
 - Clean `master` fixture, `--until precondition` → exit `0`, `outcome: PASS`, exactly one `phases[]` entry.
 - Fixture dirtied with a real tracked-file change → exit `2`, `outcome: FAIL`, halted at `precondition`, no false-positive diagnosis.
 - Fixture with the `.gitignore` rule removed → exit `2` **plus** the `DIAGNOSIS` block naming the untracked run-directory paths.
-- All usage guards (`--help`, unknown `--until`, not-yet-wired `--until closure`, `--skip precondition`, unknown option) → exit as specified.
+- All usage guards (`--help`, unknown `--until` (e.g. `bogus-phase`), `--skip precondition`, unknown option) → exit as specified.
 
-The full end-to-end run across all eight wired phases is task **T062**, a review gate that must first be executed on a disposable branch.
+The full end-to-end run across all nine wired phases, including `closure`'s commit-and-push step, is task **T062**, a review gate to be executed on a disposable branch. T056 (a real disposable-clone dry run of `closure` alone) has already reached a genuine PASS; T062 exercises the full chain in one run.
 
 **T046 / T057 (2026-08-25).** The full-sequence wiring is covered by `tests/pipeline/test_pipeline_full_sequence_wiring.sh`, which substitutes synthetic phase scripts for the real ones (nothing there invokes Gradle, systemd, podman, an emulator or Firebase) and asserts on order, on `report.json`, and on the exit code. It was built RED-then-GREEN: 30 failing checks before the wiring landed, all passing after. Four deliberate mutations were rehearsed against it and each was caught:
 

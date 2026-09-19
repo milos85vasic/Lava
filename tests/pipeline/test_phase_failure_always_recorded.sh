@@ -152,6 +152,7 @@ EOF
   _phase_ok phase-05a-changelog-entry.sh changelog_entry
   _phase_gate_qualified phase-05-distribute.sh
   _phase_ok phase-06-docs.sh docs_refresh
+  _phase_ok phase-07-closure.sh closure
 }
 
 RUN_EXIT=0; RUN_OUTCOME=""; RUN_PHASES=""

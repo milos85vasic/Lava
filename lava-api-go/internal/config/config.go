@@ -39,7 +39,18 @@ type Config struct {
 	PGSchema string
 
 	// Listeners
-	Listen        string // public LAN listener, e.g. ":8443"
+	//
+	// Listen is normally a fixed address ("host:port", e.g. ":8443"). It
+	// ALSO accepts Go's own "OS assigns a free port" convention: a port of
+	// literally "0" (":0", "0.0.0.0:0", "127.0.0.1:0", ...) requests a
+	// genuinely free, race-free ephemeral port via
+	// digital.vasic.containers/pkg/network.ListenEphemeral instead of the
+	// fixed default. server.ResolveListen (called from cmd/lava-api-go
+	// before anything else depends on the port — mDNS, the Alt-Svc header,
+	// the "listening" log line) is what interprets this convention and
+	// mutates Config.Listen in place to the real, resolved address; nothing
+	// downstream of that call ever sees the literal "0" form.
+	Listen        string // public LAN listener, e.g. ":8443", or ":0" for a dynamic OS-assigned port
 	MetricsListen string // private metrics listener, e.g. "127.0.0.1:9091"
 
 	// TLS material for the public HTTP/3 listener
@@ -57,7 +68,13 @@ type Config struct {
 	// mDNS
 	MDNSInstanceName string
 	MDNSServiceType  string
-	MDNSPort         int
+	// MDNSPort is the port advertised in the mDNS TXT/SRV record. It is
+	// used verbatim when Listen is a fixed address. When Listen requests a
+	// dynamic port (":0" — see the Listen field's doc comment above),
+	// cmd/lava-api-go IGNORES this configured value and advertises the
+	// real, OS-assigned bound port instead — a fixed MDNSPort would
+	// otherwise advertise a port nothing is actually listening on.
+	MDNSPort int
 
 	// rutracker upstream
 	RutrackerBaseURL string

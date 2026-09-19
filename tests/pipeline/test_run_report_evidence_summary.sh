@@ -377,6 +377,7 @@ echo "distribute: gate qualified; nothing to distribute"
 exit 3
 EOF
   _c6_ok phase-06-docs.sh docs_refresh
+  _c6_ok phase-07-closure.sh closure
   printf '%s' "$H"
 }
 

@@ -159,6 +159,7 @@ EOF
   _phase_ok phase-05a-changelog-entry.sh changelog_entry
   _phase_rc phase-05-distribute.sh distribute 3
   _phase_ok phase-06-docs.sh docs_refresh
+  _phase_ok phase-07-closure.sh closure
 }
 
 RUN_EXIT=0; RUN_OUTCOME=""; RUN_PHASES=""; RUN_ORDER=""; RUN_CONSOLE=""; RUN_EVIDENCE_DIRS=""
@@ -282,7 +283,7 @@ echo "The pre-fix \${script_name:6:2} slice returned '05' for both and merged"
 echo "them. No orchestrator suite looked at a directory name, so reverting the"
 echo "fix left 117 checks green."
 
-for expected in phase-00 phase-01 phase-02 phase-03 phase-04 phase-05a phase-05 phase-06; do
+for expected in phase-00 phase-01 phase-02 phase-03 phase-04 phase-05a phase-05 phase-06 phase-07; do
   if [[ " $RUN_EVIDENCE_DIRS " == *" $expected "* ]]; then
     pass "a full run creates the evidence directory '${expected}'"
   else
@@ -290,10 +291,10 @@ for expected in phase-00 phase-01 phase-02 phase-03 phase-04 phase-05a phase-05 
   fi
 done
 _n_dirs="$(wc -w <<< "$RUN_EVIDENCE_DIRS")"
-if [[ "$_n_dirs" -eq 8 ]]; then
-  pass "exactly 8 evidence directories for 8 phases — none merged, none phantom"
+if [[ "$_n_dirs" -eq 9 ]]; then
+  pass "exactly 9 evidence directories for 9 phases — none merged, none phantom"
 else
-  fail "a full run produced ${_n_dirs} evidence directories, expected 8: ${RUN_EVIDENCE_DIRS}"
+  fail "a full run produced ${_n_dirs} evidence directories, expected 9: ${RUN_EVIDENCE_DIRS}"
 fi
 
 # The derivation itself, against every real script name plus the shapes that
@@ -343,7 +344,7 @@ if [[ "$_help_lines" -ge 100 ]]; then
 else
   fail "--help printed only ${_help_lines} lines — the header is ~190; a fixed window or an early stop has truncated it"
 fi
-for needle in "--until <phase>" "--skip <phase>" "-h, --help" "Default: docs_refresh" \
+for needle in "--until <phase>" "--skip <phase>" "-h, --help" "Default: closure" \
               "precondition" "changelog_entry" "docs_refresh" "Exit codes" "closure"; do
   if grep -qF -- "$needle" <<< "$_help_out"; then
     pass "--help documents '${needle}'"
@@ -359,7 +360,7 @@ fi
 
 echo ""
 echo "==============================================================="
-echo "CASE F: EACH of the eight phases fails the run when its script dies"
+echo "CASE F: EACH of the nine phases fails the run when its script dies"
 echo "without appending — a phase whose failure cannot fail the run is"
 echo "decorative, not wired"
 echo "==============================================================="
@@ -383,6 +384,7 @@ live_verify|phase-04-live-verify-api-app.sh
 changelog_entry|phase-05a-changelog-entry.sh
 distribute|phase-05-distribute.sh
 docs_refresh|phase-06-docs.sh
+closure|phase-07-closure.sh
 SPECS
 
 echo ""
@@ -407,6 +409,7 @@ build|phase-01-build.sh
 live_verify|phase-04-live-verify-api.sh
 changelog_entry|phase-05a-changelog-entry.sh
 docs_refresh|phase-06-docs.sh
+closure|phase-07-closure.sh
 SPECS
 
 echo ""

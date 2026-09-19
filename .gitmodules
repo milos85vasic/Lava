@@ -72,6 +72,6 @@
 [submodule "submodules/vision_engine"]
 	path = submodules/vision_engine
 	url = git@github.com:vasic-digital/VisionEngine.git
-[submodule "superspec"]
-	path = superspec
+[submodule "submodules/superspec"]
+	path = submodules/superspec
 	url = https://github.com/WangX0111/superspec.git

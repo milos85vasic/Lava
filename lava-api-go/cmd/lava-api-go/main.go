@@ -27,9 +27,11 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -100,11 +102,48 @@ func run() error {
 		return fmt.Errorf("upstream proxy: %w", err)
 	}
 
+	// Resolve + synchronously confirm-bind the public listen address BEFORE
+	// anything downstream bakes it in: the Alt-Svc middleware wired into the
+	// Gin engine below (apirouter.Build → NewAltSvcMiddleware) closes over
+	// this string at construction time, and the mDNS announcement further
+	// down advertises whatever port we hand it. LAVA_API_LISTEN=":0" (or any
+	// "host:0" form) requests a genuinely free, OS-assigned port via
+	// digital.vasic.containers/pkg/network.ListenEphemeral — the race-free
+	// allocator now available through the Containers submodule pin bump —
+	// instead of the historical fixed :8443 default, which this session
+	// found collides with an unrelated project's process on a shared host.
+	// A fixed address (the default, and every existing deployment's
+	// configuration) is bound here too, unchanged in the address it binds,
+	// so both paths get the same fix for the ordering bug described next.
+	//
+	// This ALSO fixes a real ordering bug confirmed in this session: this
+	// function used to call discovery.Announce (below) and construct the
+	// Alt-Svc middleware using the CONFIGURED address before Start() had
+	// bound anything at all — the actual socket bind happened later,
+	// asynchronously, inside the goroutine that calls srv.Start(). A
+	// collision on the configured port would surface only after mDNS had
+	// already told the LAN "come talk to me here". ResolveListen performs
+	// the bind synchronously right here and returns an error (refusing to
+	// start) if it fails, so mDNS/Alt-Svc/the "listening" log line are only
+	// ever wired using a port PROVEN available. See server.ResolveListen's
+	// doc comment for the full rationale, including the honestly-documented
+	// residual limitation on the HTTP/3 (UDP) side.
+	requestedListen := cfg.Listen
+	resolvedListen, publicListener, dynamicPort, err := server.ResolveListen(cfg.Listen)
+	if err != nil {
+		return fmt.Errorf("listen: %w", err)
+	}
+	cfg.Listen = resolvedListen
+
 	logger := observability.NewLogger(observability.LogConfig{
 		Output: os.Stdout,
 		Level:  slog.LevelInfo,
 	})
 	logger.Info("starting", "service", "lava-api-go", "version", version.Name, "build", version.Code)
+	if dynamicPort {
+		logger.Info("dynamic public port requested via LAVA_API_LISTEN; bound a real, race-free ephemeral port",
+			"requested", requestedListen, "resolved", cfg.Listen)
+	}
 
 	metricsRegistry := prometheus.NewRegistry()
 	metrics := observability.NewMetrics(metricsRegistry)
@@ -196,16 +235,28 @@ func run() error {
 		Engine:         engine,
 		MetricsHandler: metrics.Handler(),
 		TLSConfig:      tlsConfig,
+		Listener:       publicListener,
 	})
 	if err != nil {
+		_ = publicListener.Close()
 		return fmt.Errorf("server: %w", err)
 	}
 
-	mdnsService, mdnsErr := discovery.Announce(cfg.MDNSInstanceName, cfg.MDNSServiceType, cfg.MDNSPort)
+	// mDNS-advertised port. See resolveMDNSPort's doc comment: fixed-port
+	// mode is unchanged; dynamic-port mode advertises the REAL bound port
+	// instead of whatever LAVA_API_MDNS_PORT was configured to, because a
+	// fixed value would otherwise advertise a port nothing is listening on.
+	mdnsPort, overrodeConfiguredMDNSPort := resolveMDNSPort(cfg.MDNSPort, cfg.Listen, dynamicPort)
+	if overrodeConfiguredMDNSPort {
+		logger.Info("dynamic public port mode: ignoring configured LAVA_API_MDNS_PORT in favor of the real bound port",
+			"configured_mdns_port", cfg.MDNSPort, "actual_bound_port", mdnsPort)
+	}
+
+	mdnsService, mdnsErr := discovery.Announce(cfg.MDNSInstanceName, cfg.MDNSServiceType, mdnsPort)
 	if mdnsErr != nil {
 		logger.Warn("mDNS announcement failed; LAN discovery disabled", "err", mdnsErr)
 	} else {
-		logger.Info("mDNS announced", "instance", cfg.MDNSInstanceName, "type", cfg.MDNSServiceType, "port", cfg.MDNSPort)
+		logger.Info("mDNS announced", "instance", cfg.MDNSInstanceName, "type", cfg.MDNSServiceType, "port", mdnsPort)
 	}
 
 	startErrCh := make(chan error, 1)
@@ -267,6 +318,48 @@ func loadTLSConfig(certPath, keyPath string) (*tls.Config, error) {
 	}, nil
 }
 
+// resolveMDNSPort decides which port to advertise via mDNS.
+//
+// In fixed-listen mode (dynamic == false) it returns configuredMDNSPort
+// unchanged — byte-for-byte the existing, pre-dynamic-port behavior.
+//
+// In dynamic-listen mode (dynamic == true, i.e. LAVA_API_LISTEN requested
+// ":0") it parses the REAL bound port out of resolvedListen (the value
+// server.ResolveListen returned, already substituted into cfg.Listen by the
+// caller) and returns that instead, ignoring configuredMDNSPort: a fixed,
+// operator-configured mDNS port would otherwise advertise a port nothing is
+// actually listening on once the public port itself is chosen by the OS.
+//
+// This function performs no I/O and does no logging itself — it is the
+// pure decision the caller then logs and acts on — specifically so it can
+// be unit-tested directly (dial a real socket / start real mDNS broadcast
+// is neither necessary nor sufficient to prove this wiring decision is
+// correct; this is the "config/wiring-decision level" the decision
+// genuinely lives at).
+//
+// The second return value reports whether an operator-configured, non-zero
+// configuredMDNSPort was overridden by a DIFFERENT real port, so the caller
+// can log that override instead of silently diverging from what the
+// operator asked for.
+func resolveMDNSPort(configuredMDNSPort int, resolvedListen string, dynamic bool) (port int, overrodeConfigured bool) {
+	if !dynamic {
+		return configuredMDNSPort, false
+	}
+	_, portStr, err := net.SplitHostPort(resolvedListen)
+	if err != nil {
+		// resolvedListen is expected to already be a valid "host:port" pair
+		// by the time this is called (server.ResolveListen validated it);
+		// fall back to the configured value rather than advertising a
+		// nonsensical port if that invariant is ever violated.
+		return configuredMDNSPort, false
+	}
+	actualPort, err := strconv.Atoi(portStr)
+	if err != nil {
+		return configuredMDNSPort, false
+	}
+	return actualPort, configuredMDNSPort != 0 && configuredMDNSPort != actualPort
+}
+
 func envOrDefault(key, def string) string {
 	if v := os.Getenv(key); v != "" {
 		return v
@@ -288,6 +381,8 @@ Configuration is via environment variables (see internal/config):
   LAVA_API_PG_URL         Postgres connection URL (required)
   LAVA_API_PG_SCHEMA      Postgres schema name (default: lava_api)
   LAVA_API_LISTEN         Public HTTP/3 listener (default: :8443)
+                          Set the port to 0 (e.g. ":0") to bind a real,
+                          OS-assigned free port instead of a fixed one.
   LAVA_API_METRICS_LISTEN Private metrics listener (default: 127.0.0.1:9091)
   LAVA_API_TLS_CERT       TLS certificate path (required)
   LAVA_API_TLS_KEY        TLS private-key path (required)
@@ -295,6 +390,8 @@ Configuration is via environment variables (see internal/config):
   LAVA_API_MDNS_INSTANCE  mDNS instance name (default: Lava API)
   LAVA_API_MDNS_TYPE      mDNS service type (default: _lava-api._tcp)
   LAVA_API_MDNS_PORT      mDNS advertised port (default: 8443)
+                          Ignored when LAVA_API_LISTEN requests a dynamic
+                          port (":0") — the real bound port is advertised.
   LAVA_API_RUTRACKER_URL  rutracker.org base URL (default: https://rutracker.org)
 `, version.Name)
 }

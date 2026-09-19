@@ -14,13 +14,16 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 
+	"digital.vasic.containers/pkg/network"
 	h3 "digital.vasic.http3/pkg/server"
 )
 
@@ -31,6 +34,17 @@ type Config struct {
 	Engine         *gin.Engine // Lava-domain Gin router (handlers + middleware)
 	MetricsHandler http.Handler
 	TLSConfig      *tls.Config // HTTP/3 mandates TLS 1.3
+
+	// Listener, when non-nil, is an ALREADY-BOUND TCP listener for the
+	// public port (typically obtained from ResolveListen) that Start MUST
+	// reuse via http.Server.ServeTLS instead of asking the stdlib to bind
+	// Listen a second time. This is what closes the classic
+	// allocate-a-port-then-rebind-it TOCTOU race for the HTTP/2 (TCP)
+	// surface — see ResolveListen's doc comment. When nil, Start falls back
+	// to the historical ListenAndServeTLS(addr) behavior (kept for callers,
+	// including this package's own tests, that construct a Config directly
+	// without pre-binding).
+	Listener net.Listener
 }
 
 // Server hosts both the HTTP/3 public listener (UDP) AND an HTTP/2-over-TLS
@@ -42,9 +56,101 @@ type Server struct {
 	h2srv   *http.Server // TCP HTTP/2 fallback on the same port as the HTTP/3 listener
 	metrics *http.Server
 
-	mu       sync.Mutex
-	stopped  bool
-	listened net.Listener // resolved metrics listener (kept so Shutdown can close it)
+	mu             sync.Mutex
+	stopped        bool
+	listened       net.Listener // resolved metrics listener (kept so Shutdown can close it)
+	publicListener net.Listener // pre-bound public TCP listener, when Config.Listener was supplied (see ResolveListen)
+}
+
+// ResolveListen determines the REAL public listen address for addr and
+// proves — via an actual synchronous bind, not a guess — that the address is
+// available BEFORE the caller wires anything that bakes the address in
+// (mDNS announcement, the Alt-Svc header, a "listening on" log line).
+//
+// This exists to fix two related problems in one place:
+//
+//  1. Dynamic port allocation. Go's own "OS assigns" convention is port 0.
+//     When addr's port is literally "0" (e.g. ":0", "0.0.0.0:0"), ResolveListen
+//     delegates to digital.vasic.containers/pkg/network.ListenEphemeral, which
+//     performs a genuinely race-free ephemeral-port allocation (see that
+//     function's doc comment: it never releases the OS's hold on the port
+//     between allocation and use, unlike a check-then-use "find a free port,
+//     close it, hand back the int" helper). The real, kernel-assigned port
+//     replaces the literal "0" in the returned address.
+//  2. The mDNS-before-bind ordering bug. Historically cmd/lava-api-go called
+//     discovery.Announce (and wired the Alt-Svc middleware) using the
+//     CONFIGURED address before any bind was even attempted — the actual
+//     socket bind happened later, asynchronously, inside Server.Start's
+//     goroutine. A collision (another process already holding the port, or —
+//     as this session found — an unrelated project's container already
+//     bound to the configured fixed port) would surface only after mDNS had
+//     already told the LAN "come talk to me here" and the Alt-Svc header had
+//     already advertised a port nothing was listening on. ResolveListen
+//     performs the bind synchronously and returns an error if it fails, so
+//     callers can refuse to advance to mDNS/Alt-Svc/logging on a port that
+//     was never actually secured. This applies identically to a FIXED
+//     address (e.g. ":8443") — it is bound here, up front, instead of later.
+//
+// The returned net.Listener is the TCP listener for the public port (backing
+// the HTTP/2-over-TLS fallback). The caller MUST pass it to Server via
+// Config.Listener so Start reuses it (http.Server.ServeTLS on an existing
+// listener) instead of asking the stdlib to bind the same address again —
+// that second bind is exactly the TOCTOU window this function exists to
+// close for the TCP surface.
+//
+// ResolveListen ALSO probe-binds a UDP listener on the same resolved address
+// (independent kernel namespace from TCP) and releases it immediately, to
+// prove the number is free there too before the caller proceeds. This is a
+// best-effort, honestly-documented mitigation, not a full guarantee: this
+// project's HTTP/3 wrapper (digital.vasic.http3/pkg/server) does not accept a
+// pre-bound net.PacketConn through its Config surface (only an address
+// string, bound internally inside Server.Start via quic-go's
+// http3.Server.ListenAndServe), so a small residual TOCTOU window remains on
+// the UDP/HTTP-3 bind performed later. Extending that wrapper to accept an
+// existing net.PacketConn (quic-go's http3.Server.Serve(net.PacketConn) DOES
+// support this) would close that residual window fully but touches a
+// separate submodule and is out of scope here.
+//
+// The returned bool reports whether addr requested dynamic allocation (port
+// "0"), so callers can decide whether an operator-configured value that
+// assumed a fixed port (e.g. LAVA_API_MDNS_PORT) should be overridden by the
+// real bound port instead.
+func ResolveListen(addr string) (resolved string, tcpListener net.Listener, dynamic bool, err error) {
+	host, port, err := net.SplitHostPort(addr)
+	if err != nil {
+		return "", nil, false, fmt.Errorf("server: invalid listen address %q: %w", addr, err)
+	}
+
+	if port == "0" {
+		ln, resolvedPort, lErr := network.ListenEphemeral(host)
+		if lErr != nil {
+			return "", nil, false, fmt.Errorf("server: dynamic port allocation on %q: %w", addr, lErr)
+		}
+		tcpListener = ln
+		resolved = net.JoinHostPort(host, strconv.Itoa(resolvedPort))
+		dynamic = true
+	} else {
+		ln, lErr := net.Listen("tcp", addr)
+		if lErr != nil {
+			return "", nil, false, fmt.Errorf("server: bind public TCP listener %q: %w", addr, lErr)
+		}
+		tcpListener = ln
+		resolved = addr
+	}
+
+	// Probe-bind + release the UDP side of the SAME resolved port. See the
+	// doc comment above for why this is a probe rather than a hand-off.
+	udpProbe, uErr := net.ListenPacket("udp", resolved)
+	if uErr != nil {
+		_ = tcpListener.Close()
+		return "", nil, false, fmt.Errorf("server: bind public UDP (HTTP/3) probe on %q: %w", resolved, uErr)
+	}
+	if cErr := udpProbe.Close(); cErr != nil {
+		_ = tcpListener.Close()
+		return "", nil, false, fmt.Errorf("server: release UDP probe on %q: %w", resolved, cErr)
+	}
+
+	return resolved, tcpListener, dynamic, nil
 }
 
 // New constructs a Server from a validated Config.
@@ -74,8 +180,9 @@ func New(cfg Config) (*Server, error) {
 	h2cfg := cfg.TLSConfig.Clone()
 	h2cfg.NextProtos = []string{"h2", "http/1.1"}
 	return &Server{
-		cfg:   cfg,
-		h3srv: h3srv,
+		cfg:            cfg,
+		publicListener: cfg.Listener,
+		h3srv:          h3srv,
 		h2srv: &http.Server{
 			Addr:              cfg.Listen,
 			Handler:           cfg.Engine,
@@ -103,9 +210,20 @@ func (s *Server) Start() error {
 		errCh <- s.h3srv.Start()
 	}()
 
-	// HTTP/2 fallback (TCP/TLS) on the same port. Spec §8.1.
+	// HTTP/2 fallback (TCP/TLS) on the same port. Spec §8.1. When the
+	// caller supplied an already-bound listener (via Config.Listener, the
+	// normal path once main.go calls ResolveListen up front), reuse it via
+	// ServeTLS instead of asking the stdlib to bind Addr a second time —
+	// that second bind is exactly the TOCTOU window ResolveListen exists to
+	// close. Falls back to ListenAndServeTLS for callers (including this
+	// package's own tests) that construct a Config without pre-binding.
 	go func() {
-		err := s.h2srv.ListenAndServeTLS("", "")
+		var err error
+		if s.publicListener != nil {
+			err = s.h2srv.ServeTLS(s.publicListener, "", "")
+		} else {
+			err = s.h2srv.ListenAndServeTLS("", "")
+		}
 		if errors.Is(err, http.ErrServerClosed) {
 			err = nil
 		}

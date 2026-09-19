@@ -1,0 +1,56 @@
+feature: 003-combined-feature-roadmap
+type: umbrella-index
+created: 2026-09-18
+purpose: >-
+  Index tracking overall status across the two merged member specs, per the
+  operator's "concatenate under one directory, don't renumber" decision.
+  This file is NOT authoritative for any individual task's evidence — that
+  remains in each member spec's own progress.yml / tasks.md checkboxes.
+  This file exists only so overall status is readable in one place.
+
+member_specs:
+  - id: "001"
+    path: specs/001-multi-provider-extension
+    tasks_total: 241
+    tasks_done: 0
+    status: not_started
+    authoritative_tracking: specs/001-multi-provider-extension/tasks.md
+  - id: "002"
+    path: specs/002-build-test-distribute-pipeline
+    tasks_total: 63
+    tasks_done: 62
+    status: in_progress
+    remaining_tasks: [T062]
+    authoritative_tracking:
+      - specs/002-build-test-distribute-pipeline/tasks.md
+      - specs/002-build-test-distribute-pipeline/progress.yml
+
+execution_order:
+  - "Part A (002): T054 -> T055 -> T056 -> T062"
+  - "Part B (001): Phase 1 -> Phase 2 -> Phases 3-9 -> Phase 10"
+
+last_updated: 2026-09-19
+last_updated_reason: >-
+  T054 accepted, T055 implemented, T056 resolved to a genuine PASS (see
+  prior entries below). T062 ATTEMPTED (outcome FAIL at test, build PASSED
+  for the first time ever) then FOLLOWED UP same day: a scoped
+  --skip-test,distribute re-run reached install_boot, found+fixed a real
+  .env.example bug, then hit an unrelated process's port collision on this
+  shared host; separately, a superpowers:systematic-debugging investigation
+  root-caused the 112 UnsatisfiedLinkError test failures to a genuine
+  Robolectric-4.12.2/host incompatibility (decompiled Robolectric's own
+  loader bytecode; ruled out known upstream issues) and landed a verified
+  fix (sqliteMode=LEGACY) across all 4 affected modules -- 180 tests, 0
+  failures, 0 regressions, operator-approved. Later the same day the port
+  collision itself was fixed on operator's explicit request: implemented a
+  race-free ephemeral-port helper upstream in vasic-digital/Containers
+  (real push, independently verified against both remotes), wired
+  lava-api-go to consume it via a new server.ResolveListen() (which also
+  fixed a genuinely-worse-than-believed mDNS/Alt-Svc-before-any-bind
+  ordering bug), with 11 new real tests and 3 independent falsifiability
+  rehearsals, full lava-api-go suite independently re-run (50 packages ok,
+  0 FAIL). Nothing committed/pushed on the Lava side per instruction.
+  Real-remote safety reconfirmed unchanged throughout. T062 remains open
+  -- closure still hasn't been exercised. Next: a full pipeline re-run
+  with all three fixes applied, or continued work toward the cross-repo
+  attestation gap -- operator decision.

@@ -34,7 +34,7 @@ From `api/openapi.yaml` `servers:` and `docker-compose.yml`:
 
 | URL | Transport | Notes |
 | --- | --- | --- |
-| `https://localhost:8443` | HTTP/3 (QUIC) + HTTP/2-over-TLS | Default Go-service listener (`LAVA_API_LISTEN: ":8443"`, `docker-compose.yml:66`). The container exposes `8443/udp` (QUIC) and `8443/tcp` (`Dockerfile:52`). |
+| `https://localhost:8443` | HTTP/3 (QUIC) + HTTP/2-over-TLS | Default Go-service listener (`LAVA_API_LISTEN: "${LAVA_API_LISTEN:-:8443}"`, `docker-compose.yml:66`). The container exposes `8443/udp` (QUIC) and `8443/tcp` (`Dockerfile:52`). `LAVA_API_LISTEN` can be overridden to `":0"` to bind a real, OS-assigned free port instead of the fixed default (`internal/server.ResolveListen`); mDNS then advertises the actual bound port, ignoring `LAVA_API_MDNS_PORT`. |
 
 mDNS service type for the Go service is `_lava-api._tcp` (`api/openapi.yaml`
 `info.description`; advertised via `discovery.Announce(...)`, `cmd/lava-api-go/main.go:189`).
