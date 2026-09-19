@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc 3.10" />
+  <meta name="generator" content="pandoc 3.11" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>pipeline-build-test-distribute.sh</title>
   <style>
@@ -41,7 +41,6 @@
       body {
         background-color: transparent;
         color: black;
-        font-size: 12pt;
       }
       p, h2, h3 {
         orphans: 3;
@@ -172,7 +171,6 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
     /* CSS for syntax highlighting */
     html { -webkit-text-size-adjust: 100%; }
     pre > code.sourceCode { white-space: pre; position: relative; }
@@ -244,7 +242,11 @@
 <h1
 id="scriptspipeline-build-test-distributesh--user-guide"><code>scripts/pipeline-build-test-distribute.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-08-25 (T046/T057 full-sequence
+<p><strong>Last verified:</strong> 2026-09-18 (<code>closure</code>
+wired — T055's phase script, its own hermetic suite, and a real
+disposable-clone dry run (T056) all reached a genuine PASS; T054's
+review of <code>scripts/advance-all-submodules.sh</code> was accepted
+the same day. Prior verification: 2026-08-25 T046/T057 full-sequence
 wiring — <code>changelog_entry</code>, <code>distribute</code>,
 <code>docs_refresh</code>; independent audit of the <code>gate</code>
 mode, the evidence-directory derivation and <code>--help</code>)
@@ -258,8 +260,7 @@ build-test-distribute pipeline
 the pipeline's phase scripts against one shared run identifier, and
 consolidates their results into a single Pipeline Run Report per
 invocation.</p>
-<h2 id="what-is-wired-today--and-what-deliberately-is-not">What is wired
-today — and what deliberately is not</h2>
+<h2 id="what-is-wired-today">What is wired today</h2>
 <p>This section is the authoritative statement of what this script can
 currently do. It is deliberately explicit, because a pipeline that
 quietly does less than its name implies is the exact failure this
@@ -316,34 +317,27 @@ feature exists to prevent.</p>
 </tr>
 <tr>
 <td><code>closure</code></td>
-<td><code>phase-07-closure.sh</code></td>
-<td>❌ the script does not exist — blocked on <strong>T054
-alone</strong></td>
+<td><code>scripts/pipeline/phase-07-closure.sh</code></td>
+<td>✅ (T055, wired 2026-09-18) — commits and pushes; see
+<code>docs/scripts/pipeline/phase-07-closure.sh.md</code></td>
 </tr>
 </tbody>
 </table>
-<p><code>closure</code> is <strong>not</strong>
-unimplemented-by-accident. <strong>CORRECTED 2026-08-26 — this paragraph
-used to name T048/T049 as a co-blocker, and that is no longer
-true.</strong> T048 and T049 (the carve-out in the Decoupled Reusable
-Architecture rule's "submodule fetch/pull is an EXPLICIT operator
-action, never automatic") both <strong>landed 2026-08-23</strong> under
-explicit operator approval, as did T040/T041; root
-<code>CLAUDE.md</code> now carries the
-<code>Automated Pipeline Pin-Advance Path</code> subsection with
-conditions (A)-(F). <strong>No constitutional amendment blocks this
-phase.</strong> The sole remaining blocker is <strong>T054</strong>, the
-dedicated review gate for <code>scripts/advance-all-submodules.sh</code>
-— the highest-blast-radius component in this feature, which has run four
-review rounds, returned APPROVE-WITH-FIXES every time, and has never
-returned a clean approval. T055 (the phase script itself) depends on it.
-<code>--until closure</code> is a usage error (exit <code>2</code>),
-never a silent no-op.</p>
-<p>One stale citation of the old blocker deliberately remains in the
-script itself, at the <code>--until</code> error message on line 375: it
-is operator-facing output rather than a comment, so the 2026-08-26
-comment-only correction pass left it for the commit that wires
-<code>closure</code>.</p>
+<p><strong>CORRECTED 2026-09-18.</strong> Every prior version of this
+table marked <code>closure</code> unwired, blocked on <strong>T054
+alone</strong> (the review of
+<code>scripts/advance-all-submodules.sh</code>, which had run four
+rounds and never returned a clean approval before that). T054 was
+accepted 2026-09-18 after a fifth, adversarial review round;
+<code>phase-07-closure.sh</code> (T055) exists, is covered by its own
+hermetic suite (<code>tests/pipeline/test_phase_07_closure.sh</code>,
+<code>tests/pipeline/test_phase_07_closure_hardening.sh</code>), and a
+real disposable-clone dry run (T056) reached a genuine PASS.
+<code>closure</code> is now the ninth wired phase, is a normal
+<code>yes</code>-mode self-appending phase (not a <code>gate</code>),
+and is the new default <code>--until</code> target — see "The default
+run now writes to the repository — and commits it" below for what that
+changes about a default run's end state.</p>
 <p><strong>Wiring <code>distribute</code> did not make this script able
 to distribute.</strong> <code>phase-05-distribute.sh</code> is the §6.AA
 clause 8 refusal gate and today it is <em>only</em> that: it never
@@ -463,39 +457,68 @@ CASE A, with CASE B guarding the opposite over-correction (an
 all-qualified multi-script gate must still record no entry and
 pass).</p>
 </blockquote>
-<h3 id="the-default-run-now-writes-to-the-repository">The default run
-now writes to the repository</h3>
+<h3
+id="the-default-run-now-writes-to-the-repository--and-commits-it">The
+default run now writes to the repository — and commits it</h3>
 <p><code>changelog_entry</code> writes a <code>CHANGELOG.md</code> entry
 and a per-version snapshot file; <code>docs_refresh</code> applies
 <code>research.md</code> R-002's stale-documentation fixes and
 regenerates the <code>.html</code>/<code>.pdf</code> siblings of every
 <code>.md</code> it changed. Both are what FR-013 / SC-006 ("zero manual
-documentation follow-up required") ask for, and both are now inside the
-default <code>--until docs_refresh</code>.</p>
-<p>Two consequences worth stating plainly rather than discovering:</p>
+documentation follow-up required") ask for, and both are inside the
+default <code>--until closure</code>.</p>
+<p><strong>CORRECTED 2026-09-18.</strong> Every prior version of this
+section said a completed default run leaves the working tree dirty on
+purpose, because the phase that commits — <code>closure</code> — was not
+wired. That is no longer this script's behaviour:</p>
 <ul>
-<li>A completed default run leaves the working tree <strong>dirty on
-purpose</strong>. The phase that commits those changes is
-<code>closure</code>, which is not wired. Until it is, committing is a
-human act.</li>
-<li>Because FR-000 requires a clean tree, a <strong>second</strong> run
+<li>A completed <strong>default</strong> run (nothing short-circuited by
+<code>--until</code> or by <code>--skip closure</code>) now reaches
+<code>closure</code>, which commits every outstanding tracked change
+this run's own earlier phases produced (the CHANGELOG entry, its
+per-version snapshot, refreshed docs and their regenerated
+<code>.html</code>/<code>.pdf</code> siblings, and any submodule pins it
+was authorized to advance) and pushes to every configured upstream —
+FR-014/FR-015/FR-016/FR-017. The working tree is <strong>clean</strong>
+when such a run finishes; committing is no longer a human act.</li>
+<li>A run that <strong>stops short of <code>closure</code></strong>
+(<code>--until docs_refresh</code> or earlier, or
+<code>--skip closure</code> while <code>closure</code> would otherwise
+run) still leaves the working tree <strong>dirty on purpose</strong>,
+because the phase that would have committed those changes never ran.
+Because FR-000 requires a clean tree, a <strong>second</strong> run
 started before those changes are committed or discarded will refuse at
-<code>precondition</code>. That refusal is correct, not a bug.</li>
+<code>precondition</code>. That refusal is correct, not a bug — it is
+exactly the property <code>closure</code> now closes for the default
+path.</li>
 </ul>
 <p><code>--until live_verify</code> reproduces the pre-T046 default
-exactly, and <code>--skip changelog_entry,distribute,docs_refresh</code>
-does the same for a run that should touch nothing.</p>
+exactly, and
+<code>--skip changelog_entry,distribute,docs_refresh,closure</code> does
+the same for a run that should touch nothing.</p>
 <p>Because an operator who types no flags at all never reads this guide
-or <code>--help</code>, a run that will genuinely reach one of those two
-phases <strong>also announces it on stdout</strong> before the first
-phase starts:</p>
+or <code>--help</code>, a run that will genuinely reach one of the
+writing phases <strong>also announces it on stdout</strong> before the
+first phase starts, and now says whether <code>closure</code> will clean
+up after it:</p>
 <pre><code>pipeline-build-test-distribute: NOTE — this run WRITES TO THE REPOSITORY. Phase(s)
   changelog_entry docs_refresh edit tracked files (CHANGELOG.md, its per-version
-  snapshot, documentation and its regenerated .html/.pdf siblings).</code></pre>
+  snapshot, documentation and its regenerated .html/.pdf siblings).
+  This run also reaches &#39;closure&#39;, which commits those changes (and any submodule
+  pins it was authorized to advance) and pushes them to every configured upstream
+  as its final phase — FR-014/FR-015/FR-016/FR-017. A completed run therefore
+  leaves the working tree CLEAN, not dirty.</code></pre>
+<p>or, when the run stops short of <code>closure</code>:</p>
+<pre><code>pipeline-build-test-distribute: NOTE — this run WRITES TO THE REPOSITORY. Phase(s)
+  changelog_entry docs_refresh edit tracked files (CHANGELOG.md, its per-version
+  snapshot, documentation and its regenerated .html/.pdf siblings).
+  A completed run will leave the working tree DIRTY on purpose; the phase that
+  commits is &#39;closure&#39;, which this run does not reach (--until &#39;docs_refresh&#39;,
+  or --skip closure), so committing is a human act. ...</code></pre>
 <p>The notice is computed from the phases the run will actually reach:
 <code>--until</code> short of them, or <code>--skip</code> of them,
-suppresses it — a warning that is wrong teaches the reader to ignore the
-next one. Regression coverage:
+suppresses or reshapes it — a warning that is wrong teaches the reader
+to ignore the next one. Regression coverage:
 <code>tests/pipeline/test_orchestrator_gate_and_registry_audit.sh</code>
 CASE H (positive <em>and</em> both suppression cases).</p>
 <p><strong><code>live_verify</code> covers both surfaces</strong> (since
@@ -521,8 +544,8 @@ itself.</p>
 AVD (API 34 phone) — the only emulator image cached on this host. That
 is live-verification, not the §6.AE.2 release-gate matrix.</p>
 <h2 id="usage">Usage</h2>
-<div class="sourceCode" id="cb3"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/pipeline-build-test-distribute.sh</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span> <span class="pp">[</span><span class="ss">repo</span><span class="pp">-</span><span class="ss">path</span><span class="pp">]</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/pipeline-build-test-distribute.sh</span> <span class="pp">[</span><span class="ss">options</span><span class="pp">]</span> <span class="pp">[</span><span class="ss">repo</span><span class="pp">-</span><span class="ss">path</span><span class="pp">]</span></span></code></pre></div>
 <table>
 <thead>
 <tr>
@@ -537,11 +560,15 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="
 <code>precondition</code>, <code>build</code>, <code>test</code>,
 <code>install_boot</code>, <code>live_verify</code>,
 <code>changelog_entry</code>, <code>distribute</code>,
-<code>docs_refresh</code>. Default <code>docs_refresh</code> (the
-furthest wired phase). This is what makes <code>quickstart.md</code>'s
-per-user-story slices runnable: <code>--until test</code> is the US1
-slice, <code>--until live_verify</code> is US1+US2,
-<code>--until docs_refresh</code> is US1+US2+US3.</td>
+<code>docs_refresh</code>, <code>closure</code>. Default
+<code>closure</code> (the furthest wired phase — the full pipeline,
+including the commit-and-push step). This is what makes
+<code>quickstart.md</code>'s per-user-story slices runnable:
+<code>--until test</code> is the US1 slice,
+<code>--until live_verify</code> is US1+US2,
+<code>--until docs_refresh</code> is US1+US2+US3 without committing, and
+<code>--until closure</code> (or no <code>--until</code> at all) is
+US1+US2+US3 with the repository committed and pushed.</td>
 </tr>
 <tr>
 <td><code>--skip &lt;phase&gt;[,&lt;phase&gt;…]</code></td>
@@ -551,16 +578,15 @@ slice, <code>--until live_verify</code> is US1+US2,
 <tr>
 <td><code>-h</code>, <code>--help</code></td>
 <td>Print the <strong>whole</strong> usage block (the script's header
-comment, ~190 lines) and exit <code>0</code>. It is produced by an awk
-scan that stops at the first non-comment line, not by a hardcoded line
-window — a fixed window silently truncates the moment the header is
-edited.</td>
+comment) and exit <code>0</code>. It is produced by an awk scan that
+stops at the first non-comment line, not by a hardcoded line window — a
+fixed window silently truncates the moment the header is edited.</td>
 </tr>
 </tbody>
 </table>
-<p>Naming a phase that is not wired (today that is only
-<code>--until closure</code>) is a <strong>usage error (exit
-2)</strong>, not a silent no-op.</p>
+<p>Every name in the <code>phases[].name</code> schema enum is now
+wired. Naming any OTHER phase (a typo, or a name that was never real) is
+still a <strong>usage error (exit 2)</strong>, not a silent no-op.</p>
 <p><code>precondition</code> cannot be skipped because it is the FR-000
 safety boundary — a pipeline that can be talked out of checking its own
 preconditions has no safety boundary at all.</p>
@@ -634,10 +660,10 @@ pipeline.</p>
 was killed mid-build. The process exit code was honest — <code>1</code>,
 <code>halted at: build</code>. The <code>report.json</code>, which
 SC-008 tells an auditor to read <em>first</em>, said:</p>
-<div class="sourceCode" id="cb4"><pre
-class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;outcome&quot;</span><span class="er">:</span> <span class="st">&quot;PASS&quot;</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;phases&quot;</span><span class="er">:</span>  <span class="ot">[</span><span class="fu">{</span><span class="dt">&quot;name&quot;</span><span class="fu">:</span><span class="st">&quot;precondition&quot;</span><span class="fu">,</span><span class="dt">&quot;result&quot;</span><span class="fu">:</span><span class="st">&quot;PASS&quot;</span><span class="fu">}</span><span class="ot">]</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;build_artifacts&quot;</span><span class="er">:</span> <span class="ot">[]</span>        <span class="st">&quot;evidence_summary&quot;</span><span class="er">:</span> <span class="fu">{</span><span class="dt">&quot;total&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span> <span class="er">...</span><span class="fu">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;outcome&quot;</span><span class="er">:</span> <span class="st">&quot;PASS&quot;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;phases&quot;</span><span class="er">:</span>  <span class="ot">[</span><span class="fu">{</span><span class="dt">&quot;name&quot;</span><span class="fu">:</span><span class="st">&quot;precondition&quot;</span><span class="fu">,</span><span class="dt">&quot;result&quot;</span><span class="fu">:</span><span class="st">&quot;PASS&quot;</span><span class="fu">}</span><span class="ot">]</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;build_artifacts&quot;</span><span class="er">:</span> <span class="ot">[]</span>        <span class="st">&quot;evidence_summary&quot;</span><span class="er">:</span> <span class="fu">{</span><span class="dt">&quot;total&quot;</span><span class="fu">:</span> <span class="dv">0</span><span class="fu">,</span> <span class="er">...</span><span class="fu">}</span></span></code></pre></div>
 <p>A run that never got past its first phase, produced zero artifacts
 and zero Evidence Records, reported success.</p>
 <p><code>finalize_run_report</code> could not have caught it. Its rule
@@ -798,7 +824,7 @@ the all-PASS outcome rule). The contract is still
 <code>phase_nonpass_count</code>.</td>
 <td><code>build</code>, <code>test</code>, <code>install_boot</code>,
 <code>live_verify</code>, <code>changelog_entry</code>,
-<code>docs_refresh</code></td>
+<code>docs_refresh</code>, <code>closure</code></td>
 </tr>
 <tr>
 <td><code>no</code></td>
@@ -831,14 +857,16 @@ fixture git repositories (never against real <code>master</code>):</p>
 <li>Fixture with the <code>.gitignore</code> rule removed → exit
 <code>2</code> <strong>plus</strong> the <code>DIAGNOSIS</code> block
 naming the untracked run-directory paths.</li>
-<li>All usage guards (<code>--help</code>, unknown <code>--until</code>,
-not-yet-wired <code>--until closure</code>,
-<code>--skip precondition</code>, unknown option) → exit as
-specified.</li>
+<li>All usage guards (<code>--help</code>, unknown <code>--until</code>
+(e.g. <code>bogus-phase</code>), <code>--skip precondition</code>,
+unknown option) → exit as specified.</li>
 </ul>
-<p>The full end-to-end run across all eight wired phases is task
-<strong>T062</strong>, a review gate that must first be executed on a
-disposable branch.</p>
+<p>The full end-to-end run across all nine wired phases, including
+<code>closure</code>'s commit-and-push step, is task
+<strong>T062</strong>, a review gate to be executed on a disposable
+branch. T056 (a real disposable-clone dry run of <code>closure</code>
+alone) has already reached a genuine PASS; T062 exercises the full chain
+in one run.</p>
 <p><strong>T046 / T057 (2026-08-25).</strong> The full-sequence wiring
 is covered by
 <code>tests/pipeline/test_pipeline_full_sequence_wiring.sh</code>, which

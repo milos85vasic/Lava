@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc 3.10" />
+  <meta name="generator" content="pandoc 3.11" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>check-helix-deps-manifest.sh</title>
   <style>
@@ -41,7 +41,6 @@
       body {
         background-color: transparent;
         color: black;
-        font-size: 12pt;
       }
       p, h2, h3 {
         orphans: 3;
@@ -172,7 +171,6 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
     /* CSS for syntax highlighting */
     html { -webkit-text-size-adjust: 100%; }
     pre > code.sourceCode { white-space: pre; position: relative; }
@@ -403,5 +401,26 @@ the other 16 owned submodules; all 17 must ship a parseable
 <code>helix-deps.yaml</code> at the submodule root or the scanner
 reports a violation. The <code>HELIX_DEPS_WAIVERS=()</code> empty array
 is intentionally retained as a forensic anchor.</p>
+<h2
+id="2026-09-19-update--permanent-superspec-waiver-third-party-not-a-debt-item">2026-09-19
+update — PERMANENT <code>superspec</code> waiver (third-party, not a
+debt item)</h2>
+<p><code>submodules/superspec</code> (upstream
+<code>github.com/WangX0111/superspec</code>, consolidated onto the
+project's standard <code>submodules/</code> path this same day per an
+operator decision — see <code>scripts/check-constitution.sh</code>'s
+companion doc for the sibling <code>THIRD_PARTY_OWNED</code> fix, commit
+<code>80b1bb2c</code>) tripped <code>§11.4.31</code> the moment it
+entered the <code>submodules/*/</code> scan: it is not a vasic-digital
+or HelixDevelopment repo, so there is no upstream Lava can PR a
+<code>helix-deps.yaml</code> manifest into — unlike the HelixQA case
+above, this is not a debt item awaiting an upstream merge; it is a
+structural non-applicability. Added <code>"superspec:..."</code> to
+<code>HELIX_DEPS_WAIVERS</code> with a rationale citing this.
+Falsifiability rehearsed: removing the waiver entry reproduces
+<code>Submodules missing helix-deps.{yaml,json,toml}: superspec</code>
+verbatim; restoring it passes again. This waiver is expected to remain
+indefinitely — there is no resolution path to track, unlike the
+now-empty HelixQA entry above.</p>
 </body>
 </html>

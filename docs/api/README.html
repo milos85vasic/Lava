@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc 3.10" />
+  <meta name="generator" content="pandoc 3.11" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>README</title>
   <style>
@@ -41,7 +41,6 @@
       body {
         background-color: transparent;
         color: black;
-        font-size: 12pt;
       }
       p, h2, h3 {
         orphans: 3;
@@ -172,7 +171,6 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
 </head>
 <body>
@@ -231,10 +229,15 @@ fact is not backed by a source file it is marked
 <tr>
 <td><code>https://localhost:8443</code></td>
 <td>HTTP/3 (QUIC) + HTTP/2-over-TLS</td>
-<td>Default Go-service listener (<code>LAVA_API_LISTEN: ":8443"</code>,
+<td>Default Go-service listener
+(<code>LAVA_API_LISTEN: "${LAVA_API_LISTEN:-:8443}"</code>,
 <code>docker-compose.yml:66</code>). The container exposes
 <code>8443/udp</code> (QUIC) and <code>8443/tcp</code>
-(<code>Dockerfile:52</code>).</td>
+(<code>Dockerfile:52</code>). <code>LAVA_API_LISTEN</code> can be
+overridden to <code>":0"</code> to bind a real, OS-assigned free port
+instead of the fixed default
+(<code>internal/server.ResolveListen</code>); mDNS then advertises the
+actual bound port, ignoring <code>LAVA_API_MDNS_PORT</code>.</td>
 </tr>
 </tbody>
 </table>

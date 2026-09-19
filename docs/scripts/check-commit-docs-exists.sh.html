@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc 3.10" />
+  <meta name="generator" content="pandoc 3.11" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>check-commit-docs-exists.sh</title>
   <style>
@@ -41,7 +41,6 @@
       body {
         background-color: transparent;
         color: black;
-        font-size: 12pt;
       }
       p, h2, h3 {
         orphans: 3;
@@ -172,7 +171,6 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
     /* CSS for syntax highlighting */
     html { -webkit-text-size-adjust: 100%; }
     pre > code.sourceCode { white-space: pre; position: relative; }
@@ -244,10 +242,12 @@
 <h1
 id="scriptscheck-commit-docs-existssh--user-guide"><code>scripts/check-commit-docs-exists.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-08-26 (§6.J corpus floor — an
-unresolvable or empty commit range now refuses instead of skipping; LVA
-vacuous-pass sweep F13) <strong>Inheritance:</strong> HelixConstitution
-§11.4.x (commit-references-resolve mandate) + Lava §6.AD-debt closure
+<p><strong>Last verified:</strong> 2026-09-19 (submodule-nested path
+resolution — a commit body describing a fix made inside a top-level OR
+nested submodule no longer needs to spell out the submodule prefix to
+resolve; fixes a false positive on commit f6ff59eb)
+<strong>Inheritance:</strong> HelixConstitution §11.4.x
+(commit-references-resolve mandate) + Lava §6.AD-debt closure
 (CM-COMMIT-DOCS-EXISTS)</p>
 <h2 id="overview">Overview</h2>
 <p>Per-commit reference resolver. Scans commit message bodies for file
@@ -348,6 +348,38 @@ excluding <code>build/</code>, <code>.git/</code>,
 </ol>
 <p>The fallback prevents pedantic false-positives on human-written
 short-form paths while still catching genuinely-missing files.</p>
+<h2
+id="submodule-nested-path-resolution-added-2026-09-19">Submodule-nested
+path resolution (added 2026-09-19)</h2>
+<p>A commit may legitimately describe a fix made <strong>inside</strong>
+a submodule — top-level (<code>submodules/helixqa</code>) or nested (a
+submodule-of-a-submodule, e.g.
+<code>submodules/helixqa/tools/opensource/docling</code>) — without
+spelling out the submodule's own path prefix in prose. Example forensic
+anchor: commit <code>f6ff59eb</code> cited
+<code>tests/data/uspto/sources/pftaps057006474.txt</code>, describing a
+CRLF fix made inside <code>submodules/helixqa</code>'s nested
+<code>docling</code> submodule, where the file actually lives at
+<code>submodules/helixqa/tools/opensource/docling/tests/data/uspto/sources/pftaps057006474.txt</code>.
+The root-only existence check had no way to resolve that and flagged a
+real, resolvable reference as an orphan.</p>
+<p>Resolution order per candidate path:</p>
+<ol type="1">
+<li>Exact path check at the repo root.</li>
+<li><code>.gitignore</code> skip (operator-local evidence).</li>
+<li><strong>Submodule-nested resolution</strong> — enumerate every
+submodule root, top-level AND nested, via
+<code>git submodule foreach --quiet --recursive 'echo "$displaypath"'</code>,
+and accept the candidate if
+<code>&lt;submodule-root&gt;/&lt;candidate&gt;</code> exists on
+disk.</li>
+<li>Fuzzy top-level basename fallback (unchanged).</li>
+</ol>
+<p>This does <strong>not</strong> weaken the check for its real purpose:
+a path that resolves nowhere — not at the repo root, not inside any
+submodule at any depth — still fails. A candidate is only accepted when
+a real file exists at the joined path; there is no blanket "commit
+mentions a submodule" exemption.</p>
 <h2 id="6j-anti-bluff-falsifiability-rehearsal">§6.J anti-bluff
 falsifiability rehearsal</h2>
 <ol type="1">
@@ -460,7 +492,7 @@ signal vs noise).</li>
 unpushed commits before propagation.</li>
 </ul>
 <h2 id="hermetic-test">Hermetic test</h2>
-<p><code>tests/check-constitution/test_commit_docs_exists.sh</code> — 7
+<p><code>tests/check-constitution/test_commit_docs_exists.sh</code> — 10
 fixtures:</p>
 <ol type="1">
 <li>Commit with no path refs → pass</li>
@@ -470,6 +502,11 @@ fixtures:</p>
 (skipped)</li>
 <li>Stale ref inside backticks → pass (skipped)</li>
 <li>Fuzzy basename short-form → pass (resolved via find)</li>
+<li>Indented Bluff-Audit/quoted-output content → pass (skipped)</li>
+<li>Submodule-nested reference (no submodule prefix in prose) → pass
+(resolved via <code>git submodule foreach --recursive</code>)</li>
+<li>Submodule-nested-LOOKING reference that resolves nowhere → reject
+(exit 1) — proves fixture 8 is not a blanket exemption</li>
 <li>Real-repo HEAD sanity check → pass</li>
 </ol>
 <p>Run:</p>

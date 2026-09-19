@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc 3.10" />
+  <meta name="generator" content="pandoc 3.11" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>check-constitution.sh</title>
   <style>
@@ -41,7 +41,6 @@
       body {
         background-color: transparent;
         color: black;
-        font-size: 12pt;
       }
       p, h2, h3 {
         orphans: 3;
@@ -172,17 +171,19 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
 </head>
 <body>
 <h1
 id="scriptscheck-constitutionsh--user-guide"><code>scripts/check-constitution.sh</code>
 — User Guide</h1>
-<p><strong>Last verified:</strong> 2026-08-25 (§6.N/O/P/Q
-propagation-target floor, from the §6.N.2 bluff hunt of 2026-08-23; §6.H
-tracker exemption, LVA-134) <strong>Inheritance:</strong>
-HelixConstitution §11.4.18 (script documentation mandate)</p>
+<p><strong>Last verified:</strong> 2026-09-19
+(<code>THIRD_PARTY_OWNED</code>/<code>is_externally_owned()</code>
+exemption for <code>submodules/superspec</code>); previously 2026-08-25
+(§6.N/O/P/Q propagation-target floor, from the §6.N.2 bluff hunt of
+2026-08-23; §6.H tracker exemption, LVA-134)
+<strong>Inheritance:</strong> HelixConstitution §11.4.18 (script
+documentation mandate)</p>
 <h2 id="overview">Overview</h2>
 <p>Stub doc generated from the script's in-source header comment. See
 <code>scripts/check-constitution.sh</code> for canonical behavior. This
@@ -699,5 +700,48 @@ and closure logs (forensic anchors), and now the generated trackers. A
 near-miss file at the root that is <em>not</em> a generated rendering is
 still scanned, and a test asserts exactly that, so the exemption cannot
 be used as a sweep.</p>
+<h2
+id="2026-09-19-update--third_party_owned-exemption-for-submodulessuperspec">2026-09-19
+update — <code>THIRD_PARTY_OWNED</code> exemption for
+<code>submodules/superspec</code></h2>
+<p>Two independent gates in this scanner derive their expected
+per-submodule governance-doc corpus
+(CLAUDE.md/AGENTS.md/CONSTITUTION.md, and separately the §6.N
+propagation-target count) from <code>.gitmodules</code>, filtered only
+by the existing <code>HELIX_DEV_OWNED</code> exemption. When
+<code>submodules/superspec</code> (upstream
+<code>github.com/WangX0111/superspec</code>, an operator-chosen
+consolidation of a previously duplicated bare <code>superspec</code>
+submodule path onto the project's standard <code>submodules/</code>
+convention) entered that corpus for the first time, both gates correctly
+flagged it: Lava does not own that upstream and cannot commit governance
+docs into it — requiring their existence there would be requiring an
+impossible commit.</p>
+<p>Resolution: a new <code>THIRD_PARTY_OWNED=("superspec")</code> array
++ <code>is_third_party_owned()</code> helper, combined with the existing
+<code>is_helix_dev_owned()</code> via a shared
+<code>is_externally_owned()</code> wrapper. All five call sites that
+previously called <code>is_helix_dev_owned</code> directly (the two
+doc-corpus gates plus three §6.R/§6.N propagation loops) now call
+<code>is_externally_owned</code> instead, so the exemption applies
+uniformly everywhere <code>HELIX_DEV_OWNED</code> already did. Kept as a
+<strong>separate</strong> array/function from
+<code>HELIX_DEV_OWNED</code> rather than folding superspec into it — the
+name <code>HELIX_DEV_OWNED</code> would otherwise misdescribe a
+third-party, non-HelixDevelopment repo, which is exactly the kind of
+naming inaccuracy §6.J's anti-bluff posture exists to prevent.</p>
+<p>Falsifiability (performed, not asserted): reverting
+<code>is_externally_owned()</code> to call only
+<code>is_helix_dev_owned "$1"</code> (dropping the third-party branch)
+reproduces the original failure verbatim — exit 1, naming
+<code>submodules/superspec/CLAUDE.md</code> / <code>AGENTS.md</code> /
+<code>CONSTITUTION.md</code> as the missing corpus — confirming the
+exemption is load-bearing rather than a no-op. Reverting the mutation
+restores exit 0.</p>
+<p>No upstream-resolution path is owed here (unlike the HelixQA waiver
+above): <code>superspec</code> is not expected to ever gain
+Lava-specific governance docs, since it is consumed as-is third-party
+tooling, not an adopted-and-maintained own-org component. The exemption
+is therefore permanent by design, not a tracked debt item.</p>
 </body>
 </html>
