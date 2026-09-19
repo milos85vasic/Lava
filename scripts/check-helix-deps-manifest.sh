@@ -55,6 +55,15 @@ HELIX_DEPS_WAIVERS=(
     # in the same parent commit that removed this waiver. The waiver
     # list is intentionally retained (empty) as a forensic anchor —
     # past waivers + their resolution dates document the trail.
+
+    # PERMANENT, added 2026-09-19 — submodules/superspec (upstream
+    # github.com/WangX0111/superspec) is a genuinely third-party
+    # dependency, not a vasic-digital or HelixDevelopment repo Lava can
+    # PR a helix-deps.yaml manifest into. Same rationale + same
+    # "permanent, not a debt item" classification as
+    # scripts/check-constitution.sh's THIRD_PARTY_OWNED exemption (commit
+    # 80b1bb2c) added for the same submodule on the same day.
+    "superspec:third-party upstream (github.com/WangX0111/superspec), not vasic-digital/HelixDevelopment-owned; permanent, no PR-to-upstream path applies"
 )
 
 is_helix_deps_waived() {

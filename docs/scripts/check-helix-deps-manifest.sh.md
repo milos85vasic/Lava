@@ -93,3 +93,17 @@ Resolution: `HELIX_DEV_OWNED=("HelixQA")` waiver list + `is_helix_dev_owned()` h
 ## 2026-05-16 update — HelixQA waiver RESOLVED
 
 The Phase 4-debt PR to `HelixDevelopment/HelixQA` upstream landed as commit `b13ba7c` (`feat(gov): add helix-deps.yaml + install_upstreams.sh wrapper`), adding both missing files at HelixQA's repo root. Lava's pin advanced to `b13ba7c` in the same parent commit that removed HelixQA from `HELIX_DEPS_WAIVERS`. The waiver list is now empty — the per-Submodule loop in this scanner treats HelixQA on equal terms with the other 16 owned submodules; all 17 must ship a parseable `helix-deps.yaml` at the submodule root or the scanner reports a violation. The `HELIX_DEPS_WAIVERS=()` empty array is intentionally retained as a forensic anchor.
+
+## 2026-09-19 update — PERMANENT `superspec` waiver (third-party, not a debt item)
+
+`submodules/superspec` (upstream `github.com/WangX0111/superspec`, consolidated onto
+the project's standard `submodules/` path this same day per an operator decision — see
+`scripts/check-constitution.sh`'s companion doc for the sibling `THIRD_PARTY_OWNED` fix,
+commit `80b1bb2c`) tripped `§11.4.31` the moment it entered the `submodules/*/` scan: it
+is not a vasic-digital or HelixDevelopment repo, so there is no upstream Lava can PR a
+`helix-deps.yaml` manifest into — unlike the HelixQA case above, this is not a debt item
+awaiting an upstream merge; it is a structural non-applicability. Added `"superspec:..."`
+to `HELIX_DEPS_WAIVERS` with a rationale citing this. Falsifiability rehearsed: removing
+the waiver entry reproduces `Submodules missing helix-deps.{yaml,json,toml}: superspec`
+verbatim; restoring it passes again. This waiver is expected to remain indefinitely —
+there is no resolution path to track, unlike the now-empty HelixQA entry above.
