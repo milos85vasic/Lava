@@ -35,6 +35,35 @@ is_helix_dev_owned() {
   return 1
 }
 
+# ---------------------------------------------------------------------
+# Third-party-owned submodules — same exemption rationale as
+# HELIX_DEV_OWNED above, for repos owned by neither HelixDevelopment nor
+# vasic-digital. `superspec` (submodules/superspec, upstream
+# github.com/WangX0111/superspec) is consumed as-is spec-kit tooling per
+# an explicit 2026-09-19 operator decision: Lava cannot commit
+# CLAUDE.md/AGENTS.md/CONSTITUTION.md into an upstream it does not own,
+# so — rather than forking a new vasic-digital repo purely to satisfy
+# this gate — the submodule is exempted here with the same "Lava does
+# not force its governance structure onto externally-owned repos"
+# reasoning already established for HELIX_DEV_OWNED. Kept as a distinct
+# array/function (not folded into HELIX_DEV_OWNED) so the name stays
+# accurate: superspec is third-party, not HelixDevelopment-owned.
+# ---------------------------------------------------------------------
+THIRD_PARTY_OWNED=("superspec")
+
+is_third_party_owned() {
+  local path=$1
+  for owned in "${THIRD_PARTY_OWNED[@]}"; do
+    [[ "$path" == *"/$owned/"* ]] && return 0
+    [[ "$path" == *"/$owned"* ]] && return 0
+  done
+  return 1
+}
+
+is_externally_owned() {
+  is_helix_dev_owned "$1" || is_third_party_owned "$1"
+}
+
 # A submodule governance doc satisfies a §6.R/§6.S/§6.X inheritance gate if it
 # carries EITHER the verbatim Lava clause heading OR the §6.AD-canonical
 # `## INHERITED FROM constitution/...` pointer block.
@@ -315,7 +344,7 @@ done
 declared_submodule_paths=()
 while read -r _decl; do
   case "$_decl" in submodules/*) ;; *) continue ;; esac
-  is_helix_dev_owned "$_decl" && continue
+  is_externally_owned "$_decl" && continue
   declared_submodule_paths+=("$_decl")
 done < <(sed -n 's/^[[:space:]]*path = //p' .gitmodules 2>/dev/null)
 
@@ -419,14 +448,29 @@ done
 # `grep -c | ...`: `grep -c` exits 1 on a zero count, and under `set -e` in a
 # pipeline that is its own hazard (see LVA-135 for what pipes do to gate
 # conditions in this repo).
-declared_submodule_docs="$(awk '/^[[:space:]]*path = submodules\//{n++} END{print n+0}' .gitmodules 2>/dev/null || echo 0)"
+#
+# Externally-owned paths (is_externally_owned — HELIX_DEV_OWNED +
+# THIRD_PARTY_OWNED) are excluded from the expected count the SAME way the
+# §6.AD/§6.S/§6.X corpus check above excludes them: their CLAUDE.md, if any,
+# lives in an upstream Lava does not own and cannot commit into, so requiring
+# its EXISTENCE here would be requiring an impossible commit, not catching
+# real drift. Added 2026-09-19 when submodules/superspec (third-party,
+# github.com/WangX0111/superspec) tripped this gate on the same rename that
+# consolidated it under submodules/.
+declared_submodule_docs=0
+while read -r _decl; do
+  case "$_decl" in submodules/*) ;; *) continue ;; esac
+  is_externally_owned "$_decl" && continue
+  declared_submodule_docs=$((declared_submodule_docs + 1))
+done < <(sed -n 's/^[[:space:]]*path = //p' .gitmodules 2>/dev/null)
 
 if [[ "$declared_submodule_docs" -gt 0 && "$submodule_propagation_targets" -lt "$declared_submodule_docs" ]]; then
-  echo "propagation gate examined ${submodule_propagation_targets} submodule CLAUDE.md files, but .gitmodules declares ${declared_submodule_docs} under submodules/." >&2
+  echo "propagation gate examined ${submodule_propagation_targets} submodule CLAUDE.md files, but .gitmodules declares ${declared_submodule_docs} under submodules/ (externally-owned paths excluded)." >&2
   echo "  → The gate would PASS on a partial corpus, asserting nothing about the missing ones." >&2
   echo "  → Missing, with the reason distinguished:" >&2
   while read -r _decl; do
     case "$_decl" in submodules/*) ;; *) continue ;; esac
+    is_externally_owned "$_decl" && continue
     [[ -f "${_decl}/CLAUDE.md" ]] && continue
     if [[ ! -d "$_decl" ]] || [[ -z "$(ls -A "$_decl" 2>/dev/null)" ]]; then
       echo "      ${_decl} — directory absent or empty: the submodule is NOT INITIALISED." >&2
@@ -536,7 +580,7 @@ fi
 # mention in a notes/history paragraph MUST NOT satisfy this gate.
 # HelixDevelopment-owned submodules are exempt (see HELIX_DEV_OWNED).
 for sub in submodules/*/CLAUDE.md; do
-  is_helix_dev_owned "$sub" && continue
+  is_externally_owned "$sub" && continue
   if ! doc_inherits_clause "$sub" '## §6.R — No-Hardcoding Mandate'; then
     echo "MISSING 6.R inheritance reference: $sub" >&2
     echo "  → Append the §6.R heading paragraph, OR the §6.AD canonical" >&2
@@ -607,7 +651,7 @@ fi
 # 6.S(5): §6.S inheritance reference must appear in every submodules/*/CLAUDE.md
 # HelixDevelopment-owned submodules are exempt (see HELIX_DEV_OWNED).
 for sub in submodules/*/CLAUDE.md; do
-  is_helix_dev_owned "$sub" && continue
+  is_externally_owned "$sub" && continue
   if ! doc_inherits_clause "$sub" '## §6.S — Continuation Document Maintenance Mandate'; then
     echo "MISSING 6.S inheritance reference: $sub" >&2
     echo "  → Append the §6.S heading paragraph, OR the §6.AD canonical" >&2
@@ -646,7 +690,7 @@ fi
 # */AGENTS.md, and */CONSTITUTION.md (per §6.F inheritance).
 # HelixDevelopment-owned submodules are exempt (see HELIX_DEV_OWNED).
 for sub in submodules/*/CLAUDE.md submodules/*/AGENTS.md submodules/*/CONSTITUTION.md; do
-  is_helix_dev_owned "$sub" && continue
+  is_externally_owned "$sub" && continue
   if ! doc_inherits_clause "$sub" '## §6.X — Container-Submodule Emulator Wiring Mandate'; then
     echo "MISSING 6.X inheritance reference: $sub" >&2
     echo "  → Append the §6.X heading paragraph, OR the §6.AD canonical" >&2
@@ -746,7 +790,7 @@ done
 ad_propagated_targets=()
 for f in submodules/*/CLAUDE.md submodules/*/AGENTS.md submodules/*/CONSTITUTION.md; do
   [[ -f "$f" ]] || continue
-  is_helix_dev_owned "$f" && continue
+  is_externally_owned "$f" && continue
   ad_propagated_targets+=("$f")
 done
 for f in lava-api-go/CLAUDE.md lava-api-go/AGENTS.md lava-api-go/CONSTITUTION.md core/CLAUDE.md app/CLAUDE.md feature/CLAUDE.md; do

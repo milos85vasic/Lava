@@ -1,6 +1,6 @@
 # `scripts/check-constitution.sh` — User Guide
 
-**Last verified:** 2026-08-25 (§6.N/O/P/Q propagation-target floor, from the §6.N.2 bluff hunt of 2026-08-23; §6.H tracker exemption, LVA-134)
+**Last verified:** 2026-09-19 (`THIRD_PARTY_OWNED`/`is_externally_owned()` exemption for `submodules/superspec`); previously 2026-08-25 (§6.N/O/P/Q propagation-target floor, from the §6.N.2 bluff hunt of 2026-08-23; §6.H tracker exemption, LVA-134)
 **Inheritance:** HelixConstitution §11.4.18 (script documentation mandate)
 
 ## Overview
@@ -323,3 +323,35 @@ to use a credential — `.env.example` (a template), `CHANGELOG.md` (historical 
 the incident and closure logs (forensic anchors), and now the generated trackers. A
 near-miss file at the root that is *not* a generated rendering is still scanned, and a
 test asserts exactly that, so the exemption cannot be used as a sweep.
+
+## 2026-09-19 update — `THIRD_PARTY_OWNED` exemption for `submodules/superspec`
+
+Two independent gates in this scanner derive their expected per-submodule governance-doc
+corpus (CLAUDE.md/AGENTS.md/CONSTITUTION.md, and separately the §6.N propagation-target
+count) from `.gitmodules`, filtered only by the existing `HELIX_DEV_OWNED` exemption. When
+`submodules/superspec` (upstream `github.com/WangX0111/superspec`, an operator-chosen
+consolidation of a previously duplicated bare `superspec` submodule path onto the
+project's standard `submodules/` convention) entered that corpus for the first time, both
+gates correctly flagged it: Lava does not own that upstream and cannot commit governance
+docs into it — requiring their existence there would be requiring an impossible commit.
+
+Resolution: a new `THIRD_PARTY_OWNED=("superspec")` array + `is_third_party_owned()`
+helper, combined with the existing `is_helix_dev_owned()` via a shared
+`is_externally_owned()` wrapper. All five call sites that previously called
+`is_helix_dev_owned` directly (the two doc-corpus gates plus three §6.R/§6.N propagation
+loops) now call `is_externally_owned` instead, so the exemption applies uniformly
+everywhere `HELIX_DEV_OWNED` already did. Kept as a **separate** array/function from
+`HELIX_DEV_OWNED` rather than folding superspec into it — the name `HELIX_DEV_OWNED`
+would otherwise misdescribe a third-party, non-HelixDevelopment repo, which is exactly
+the kind of naming inaccuracy §6.J's anti-bluff posture exists to prevent.
+
+Falsifiability (performed, not asserted): reverting `is_externally_owned()` to call only
+`is_helix_dev_owned "$1"` (dropping the third-party branch) reproduces the original
+failure verbatim — exit 1, naming `submodules/superspec/CLAUDE.md` /
+`AGENTS.md` / `CONSTITUTION.md` as the missing corpus — confirming the exemption is
+load-bearing rather than a no-op. Reverting the mutation restores exit 0.
+
+No upstream-resolution path is owed here (unlike the HelixQA waiver above): `superspec`
+is not expected to ever gain Lava-specific governance docs, since it is consumed as-is
+third-party tooling, not an adopted-and-maintained own-org component. The exemption is
+therefore permanent by design, not a tracked debt item.

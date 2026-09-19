@@ -347,14 +347,24 @@ func resolveMDNSPort(configuredMDNSPort int, resolvedListen string, dynamic bool
 	}
 	_, portStr, err := net.SplitHostPort(resolvedListen)
 	if err != nil {
-		// resolvedListen is expected to already be a valid "host:port" pair
-		// by the time this is called (server.ResolveListen validated it);
-		// fall back to the configured value rather than advertising a
-		// nonsensical port if that invariant is ever violated.
+		// no-telemetry: this function is deliberately pure/no-I/O (see the
+		// doc comment above) so it stays unit-testable without a real
+		// network or logger; resolvedListen is validated by
+		// server.ResolveListen before this is ever called, so this is a
+		// caller-invariant violation, not a runtime condition a real
+		// deployment can hit. Adding observability.RecordNonFatal here
+		// would require threading a context into a function whose whole
+		// reason for existing is to be a pure decision the caller logs and
+		// acts on (per §6.AC, the CALLER already logs the dynamic-port
+		// path and any override — see run()'s "dynamic public port mode:
+		// ignoring configured LAVA_API_MDNS_PORT" log line right after
+		// this function returns). Fall back to the configured value
+		// rather than advertising a nonsensical port.
 		return configuredMDNSPort, false
 	}
 	actualPort, err := strconv.Atoi(portStr)
 	if err != nil {
+		// no-telemetry: same rationale as the SplitHostPort error path above.
 		return configuredMDNSPort, false
 	}
 	return actualPort, configuredMDNSPort != 0 && configuredMDNSPort != actualPort
