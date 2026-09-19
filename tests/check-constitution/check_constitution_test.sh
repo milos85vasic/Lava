@@ -59,9 +59,35 @@ test_live_repo_passes() {
 # runs this suite as part of the §11.4.32 verify-all sweep). rsync
 # --exclude keeps the fixture representative of what the constitution
 # checker actually reads while never writing the excluded bytes at all.
+#
+# Root-cause addendum (2026-09-19): the same class of bug recurred with three
+# NEW offenders that were never in the original exclude list: `.codegraph/`
+# (a 250MB+ regenerable semantic-index SQLite DB check-constitution.sh never
+# references at all), `submodules/*/tools/` (helixqa's own vendored
+# third-party tool trees under `submodules/helixqa/tools/opensource/*` --
+# llama-index, skyvern, docling, etc. -- 2.5GB+, again never read by any
+# structural check, which only reads submodules/*/{CLAUDE.md,AGENTS.md,
+# CONSTITUTION.md} plus two small named files under
+# submodules/containers/{pkg/emulator,cmd/emulator-matrix}), and
+# `.lava-ci-evidence/` (per-host generated evidence, already explicitly
+# excluded from check-constitution.sh's own credential-scan corpus at
+# scripts/check-constitution.sh:216, so the fixture never needed its content
+# either). Confirmed live on 2026-09-19: this host's `/tmp` is tmpfs with a
+# PER-UID quota (`usrquota` mount option) that other, concurrently-running
+# agent sessions sharing this UID can exhaust well before this fixture's own
+# footprint would matter -- `rsync` then dies mid-copy with "Disk quota
+# exceeded", silently swallowed by the trailing `|| true` below, leaving a
+# TRUNCATED fixture missing files added late in rsync's (alphabetical) walk
+# order such as `.githooks/pre-push` -- which then crashed a LATER test with
+# an opaque `sed: can't read .githooks/pre-push: No such file or directory`
+# instead of a diagnosable message. The three new excludes remove ~2.9GB of
+# content this fixture never needed, and the post-copy completeness check
+# below turns any REMAINING truncation (e.g. a still-exhausted quota) into a
+# clear, actionable FATAL instead of that opaque sed crash.
 make_fixture() {
-  local fixture
+  local fixture rsync_log
   fixture=$(_safe_tmpdir)
+  rsync_log="${fixture}.rsync-stderr"
   rsync -a \
     --exclude='.git/' \
     --exclude='build/' \
@@ -70,9 +96,28 @@ make_fixture() {
     --exclude='node_modules/' \
     --exclude='.claude/worktrees/' \
     --exclude='/releases/' \
-    "$REPO_ROOT/." "$fixture/" 2>/dev/null || true
+    --exclude='.codegraph/' \
+    --exclude='submodules/*/tools/' \
+    --exclude='.lava-ci-evidence/' \
+    "$REPO_ROOT/." "$fixture/" 2>"$rsync_log" || true
   mkdir -p "$fixture/scripts"
   cp "$SCRIPT" "$fixture/scripts/check-constitution.sh"
+  # §6.J anti-bluff: a PARTIAL copy is tolerable for some fixtures (e.g. a
+  # submodule that legitimately isn't checked out -- test_missing_6n_from_
+  # submodule_fails already SKIPs that case), so this check does not require
+  # a byte-identical copy. It DOES require the handful of files every test in
+  # this suite unconditionally depends on -- if those are missing, the fixture
+  # is unusable and the honest failure mode is a clear diagnostic naming the
+  # likely disk-space cause, not a downstream sed crash on a missing file.
+  if [[ ! -f "$fixture/.githooks/pre-push" || ! -f "$fixture/CLAUDE.md" ]]; then
+    echo "FATAL: make_fixture(): fixture at $fixture is missing .githooks/pre-push or CLAUDE.md" >&2
+    echo "  -> the rsync into this fixture did not complete (likely /tmp exhaustion -- see below)" >&2
+    tail -n 5 "$rsync_log" >&2 2>/dev/null || true
+    df -h "$(dirname "$fixture")" >&2 2>/dev/null || true
+    rm -f "$rsync_log"
+    exit 1
+  fi
+  rm -f "$rsync_log"
   echo "$fixture"
 }
 
