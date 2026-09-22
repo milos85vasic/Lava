@@ -743,5 +743,110 @@ above): <code>superspec</code> is not expected to ever gain
 Lava-specific governance docs, since it is consumed as-is third-party
 tooling, not an adopted-and-maintained own-org component. The exemption
 is therefore permanent by design, not a tracked debt item.</p>
+<h2
+id="2026-09-22-update--exact-match-fix-for-is_helix_dev_owned--is_third_party_owned">2026-09-22
+update — exact-match fix for <code>is_helix_dev_owned</code> +
+<code>is_third_party_owned</code></h2>
+<p>An independent review dispatched to the <code>opencode</code> CLI (a
+genuinely separate AI agent, not a Claude subagent, run read-only in
+parallel with a Claude Code review dispatched to the <code>kimi</code>
+CLI — both invoked non-interactively via <code>opencode run</code> /
+<code>kimi -p</code>) found a real gate-integrity gap in the exemption
+helpers added by the entries above: <code>is_third_party_owned()</code>
+(and the pre-existing <code>is_helix_dev_owned()</code> it was copied
+from) matched via <code>[[ "$path" == *"/$owned"* ]]</code> — a plain
+substring test, not an exact path-component match. Reproduced directly:
+<code>[[ "submodules/superspec-extra" == *"/superspec"* ]]</code>
+evaluates true, so a hypothetical future submodule named e.g.
+<code>superspec-extra</code> or <code>superspec2</code> — genuinely
+own-org, genuinely requiring governance docs — would have silently
+inherited the third-party exemption meant only for the literal
+<code>superspec</code> submodule. The same substring-match shape in
+<code>is_helix_dev_owned()</code> carried the identical latent risk for
+<code>HELIX_DEV_OWNED</code> entries.</p>
+<p>Fixed both functions to a
+<code>case "$path" in */"$owned"|*/"$owned"/*) return 0;; esac</code>
+exact-path-component match. Verified against every actual call-site
+input shape (all seven call sites in this script pass either a
+<code>.gitmodules</code>-declared <code>submodules/&lt;name&gt;</code>
+path or a
+<code>submodules/&lt;name&gt;/{CLAUDE,AGENTS,CONSTITUTION}.md</code>
+path — never a bare name) — the fix accepts
+<code>submodules/superspec</code> and
+<code>submodules/superspec/CLAUDE.md</code> exactly as before, and
+rejects <code>submodules/superspec-extra</code> /
+<code>submodules/mysuperspec</code> which the prior form incorrectly
+accepted.</p>
+<p>Bluff-Audit: is_helix_dev_owned() / is_third_party_owned()
+(scripts/check-constitution.sh) Mutation: reverted
+is_third_party_owned() to the original substring-match form
+Observed-Failure: isolated function test —
+<code>is_third_party_owned "submodules/superspec-extra-exploit-test"</code>
+(a real directory created for this rehearsal, since removed) returned
+true ("VULNERABLE: incorrectly exempted"), reproducing exactly the abuse
+vector the independent review flagged Reverted: yes — restored the
+case-based fix; the same isolated test then correctly printed "no match"
+for the exploit path while still matching the legitimate
+<code>submodules/superspec</code> path;
+<code>bash scripts/check-constitution.sh</code> re-confirmed exit 0
+against the real repo state</p>
+<p>Same review pass (<code>kimi</code> CLI this time) found a second,
+independent issue: the §6.N propagation-target floor (block 9) compared
+an inflated "actual" count against a deflated "expected" count.
+<code>submodule_propagation_targets</code> counted every existing
+<code>submodules/*/CLAUDE.md</code>, INCLUDING externally-owned ones
+(e.g. helixqa's, which exists), while the paired
+<code>declared_submodule_docs</code> EXCLUDED externally-owned entries
+via <code>is_externally_owned</code>. The asymmetry loosened the floor
+by exactly the externally-owned count on each side — tolerating that
+many more missing own-org docs before firing. Fixed by adding a separate
+<code>own_org_propagation_targets</code> counter (excluding
+externally-owned, paired correctly with
+<code>declared_submodule_docs</code>) used in the floor comparison,
+while the unfiltered <code>propagation_targets</code> array — and its
+raw <code>submodule_propagation_targets</code> count, still reported for
+context — continue to drive the §6.N/O/P/Q content checks (blocks
+9/9b/9d/9e) unchanged: those checks already accept externally-owned
+docs' <code>## INHERITED FROM constitution/</code> pointer form via
+<code>doc_inherits_clause</code>, so checking MORE files there is
+strictly more thorough, never a weakening.</p>
+<p>This edit also broke
+<code>tests/check-constitution/test_corpus_floors.sh</code>'s
+<code>_f5_harness()</code> helper, which extracted
+<code>is_helix_dev_owned()</code> via a hardcoded
+<code>sed -n '27,36p'</code> line range — fragile by construction, and
+it snapped the moment that function's body grew past line 36 from the
+exact-match fix above (syntax error: unexpected end of file from a
+truncated <code>for</code>/<code>case</code> block). Fixed by switching
+to the same marker-based <code>excerpt()</code> extraction already used
+elsewhere in that test file, spanning from the
+<code>HELIX_DEV_OWNED=</code> declaration through the end of
+<code>is_externally_owned()</code> — robust to any future length change
+in these functions. Note this test suite is NOT currently wired into
+<code>scripts/verify-all-constitution-rules.sh</code>'s 59-gate sweep,
+which is why the sweep stayed green while this standalone suite had 3
+failing cases; closing that gap is tracked separately, not fixed
+here.</p>
+<p>Bluff-Audit: own_org_propagation_targets
+(scripts/check-constitution.sh) Mutation: reverted the floor comparison
+at the <code>if</code> to use <code>submodule_propagation_targets</code>
+(the unfiltered count) instead of
+<code>own_org_propagation_targets</code> Observed-Failure: none by
+itself — the mutation ALONE doesn't fail any existing hermetic test,
+because
+<code>tests/check-constitution/test_propagation_target_floor.sh</code>'s
+fixtures don't currently include an externally-owned submodule, so this
+asymmetry was invisible to that suite. Confirmed the asymmetry directly
+instead, arithmetically: with the unfixed comparison, a real checkout's
+<code>submodule_propagation_targets</code> (includes helixqa's
+CLAUDE.md) exceeds <code>own_org_propagation_targets</code> by exactly
+the externally-owned count with an existing CLAUDE.md (1, for helixqa) —
+reproducing the inflated-actual/deflated-expected gap the review flagged
+Reverted: yes — restored <code>own_org_propagation_targets</code> in the
+comparison;
+<code>tests/check-constitution/test_propagation_target_floor.sh</code>
+(49 cases via <code>test_corpus_floors.sh</code>, plus its own 6
+dedicated cases) and the full <code>check-constitution.sh</code> run
+both re-confirmed green</p>
 </body>
 </html>
