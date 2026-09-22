@@ -29,8 +29,15 @@ HELIX_DEV_OWNED=("HelixQA" "helixqa")
 is_helix_dev_owned() {
   local path=$1
   for owned in "${HELIX_DEV_OWNED[@]}"; do
-    [[ "$path" == *"/$owned/"* ]] && return 0
-    [[ "$path" == *"/$owned"* ]] && return 0
+    # Exact path-COMPONENT match only (`case`, not a `==` substring glob):
+    # matches ".../$owned" (path ends exactly on the component) or
+    # ".../$owned/..." (component followed by a real path separator).
+    # A bare substring match (the prior form of this function) would also
+    # accept "submodules/HelixQA-fork" or "submodules/myHelixQA" — see the
+    # 2026-09-22 THIRD_PARTY_OWNED fix below for the confirmed exploit.
+    case "$path" in
+      */"$owned"|*/"$owned"/*) return 0 ;;
+    esac
   done
   return 1
 }
@@ -54,8 +61,18 @@ THIRD_PARTY_OWNED=("superspec")
 is_third_party_owned() {
   local path=$1
   for owned in "${THIRD_PARTY_OWNED[@]}"; do
-    [[ "$path" == *"/$owned/"* ]] && return 0
-    [[ "$path" == *"/$owned"* ]] && return 0
+    # Exact path-COMPONENT match only — see is_helix_dev_owned's comment.
+    # Fixed 2026-09-22 (opencode CLI independent review): the original
+    # `[[ "$path" == *"/$owned"* ]]` substring form let
+    # "submodules/superspec-extra" or "submodules/superspec2" — a
+    # DIFFERENT, hypothetical future submodule that merely starts with
+    # "superspec" — silently inherit this exemption too. Confirmed via a
+    # direct bash reproduction: `[[ "submodules/superspec-extra" ==
+    # *"/superspec"* ]]` evaluates true. The fixed `case` form only
+    # matches the exact component "superspec".
+    case "$path" in
+      */"$owned"|*/"$owned"/*) return 0 ;;
+    esac
   done
   return 1
 }

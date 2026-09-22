@@ -355,3 +355,37 @@ No upstream-resolution path is owed here (unlike the HelixQA waiver above): `sup
 is not expected to ever gain Lava-specific governance docs, since it is consumed as-is
 third-party tooling, not an adopted-and-maintained own-org component. The exemption is
 therefore permanent by design, not a tracked debt item.
+
+## 2026-09-22 update — exact-match fix for `is_helix_dev_owned` + `is_third_party_owned`
+
+An independent review dispatched to the `opencode` CLI (a genuinely separate AI agent,
+not a Claude subagent, run read-only in parallel with a Claude Code review dispatched
+to the `kimi` CLI — both invoked non-interactively via `opencode run` / `kimi -p`) found
+a real gate-integrity gap in the exemption helpers added by the entries above:
+`is_third_party_owned()` (and the pre-existing `is_helix_dev_owned()` it was copied
+from) matched via `[[ "$path" == *"/$owned"* ]]` — a plain substring test, not an
+exact path-component match. Reproduced directly: `[[ "submodules/superspec-extra" ==
+*"/superspec"* ]]` evaluates true, so a hypothetical future submodule named e.g.
+`superspec-extra` or `superspec2` — genuinely own-org, genuinely requiring governance
+docs — would have silently inherited the third-party exemption meant only for the
+literal `superspec` submodule. The same substring-match shape in `is_helix_dev_owned()`
+carried the identical latent risk for `HELIX_DEV_OWNED` entries.
+
+Fixed both functions to a `case "$path" in */"$owned"|*/"$owned"/*) return 0;; esac`
+exact-path-component match. Verified against every actual call-site input shape (all
+seven call sites in this script pass either a `.gitmodules`-declared `submodules/<name>`
+path or a `submodules/<name>/{CLAUDE,AGENTS,CONSTITUTION}.md` path — never a bare name)
+— the fix accepts `submodules/superspec` and `submodules/superspec/CLAUDE.md` exactly as
+before, and rejects `submodules/superspec-extra` / `submodules/mysuperspec` which the
+prior form incorrectly accepted.
+
+Bluff-Audit: is_helix_dev_owned() / is_third_party_owned() (scripts/check-constitution.sh)
+  Mutation: reverted is_third_party_owned() to the original substring-match form
+  Observed-Failure: isolated function test — `is_third_party_owned
+    "submodules/superspec-extra-exploit-test"` (a real directory created for this
+    rehearsal, since removed) returned true ("VULNERABLE: incorrectly exempted"),
+    reproducing exactly the abuse vector the independent review flagged
+  Reverted: yes — restored the case-based fix; the same isolated test then correctly
+    printed "no match" for the exploit path while still matching the legitimate
+    `submodules/superspec` path; `bash scripts/check-constitution.sh` re-confirmed
+    exit 0 against the real repo state
