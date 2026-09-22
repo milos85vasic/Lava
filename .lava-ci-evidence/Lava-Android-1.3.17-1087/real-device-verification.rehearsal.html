@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.11" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>real-device-verification.rehearsal</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1
+id="falsifiability-rehearsal--6n13-companion-to-real-device-verificationmdjson">Falsifiability
+rehearsal — §6.N.1.3 companion to
+<code>real-device-verification.{md,json}</code></h1>
+<p>Per the pre-push hook's §6.N.1.3 gate, this file records a genuine,
+executed falsifiability rehearsal of the production code path that
+<code>real-device-verification.{md,json}</code> (commit
+<code>c1b13ca7</code>) claims to cover — specifically Task 3
+(<code>Challenge00CrashSurvivalTest</code>), the load-bearing
+cold-start-survival canary that PASSed in that attestation.</p>
+<h2 id="target">Target</h2>
+<p><code>Challenge00CrashSurvivalTest.continueOnArchiveOrg_persists_signaledAuthState_to_disk</code>
+(<code>app/src/androidTest/kotlin/lava/app/challenges/Challenge00CrashSurvivalTest.kt</code>),
+whose own KDoc already documents this exact rehearsal (lines 50-65).
+This record is the <strong>genuine execution</strong> of that documented
+rehearsal against the same containerized-emulator matrix path
+(<code>scripts/run-challenge-matrix.sh</code>,
+<code>--runner=containerized</code>,
+<code>--avds "CZ_API34_Phone:34:phone"</code>) that produced the
+attestation being gated.</p>
+<h2 id="mutation">Mutation</h2>
+<p><code>core/auth/impl/src/main/kotlin/lava/auth/impl/AuthServiceImpl.kt</code>,
+<code>signalAuthorized()</code> — commented out:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode kotlin"><code class="sourceCode kotlin"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>preferencesStorage<span class="op">.</span>saveSignaledAuthState<span class="op">(</span>name <span class="op">=</span> name<span class="op">,</span> avatarUrl <span class="op">=</span> avatarUrl<span class="op">)</span></span></code></pre></div>
+<h2 id="step-1--rebuild--run-against-mutated-code-fail-as-expected">Step
+1 — Rebuild + run against MUTATED code: FAIL (as expected)</h2>
+<pre><code>$ export JAVA_HOME=/home/milosvasic/t062_work/jdk17/jdk-17.0.20.1+1
+$ ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon
+BUILD SUCCESSFUL in 52s
+
+$ ./scripts/run-challenge-matrix.sh --no-build \
+    --avds &quot;CZ_API34_Phone:34:phone&quot; \
+    --test-class &quot;lava.app.challenges.Challenge00CrashSurvivalTest&quot; \
+    --evidence-dir &quot;.lava-ci-evidence/2026-09-22-rehearsal-MUTATED-signalAuthorized&quot; \
+    --boot-timeout 8m --test-timeout 8m
+...
+  [1] CZ_API34_Phone            api=34 phone FAIL
+       error: exit status 1
+MATRIX FAILED — at least one AVD did not pass. tag.sh MUST refuse this commit.</code></pre>
+<p>Observed failure (<code>CZ_API34_Phone/gradle.log:1242-1245</code>,
+full log preserved at
+<code>.lava-ci-evidence/2026-09-22-rehearsal-MUTATED-signalAuthorized/</code>):</p>
+<pre><code>lava.app.challenges.Challenge00CrashSurvivalTest &gt; continueOnArchiveOrg_persists_signaledAuthState_to_disk[sdk_gphone64_x86_64 - 14] FAILED
+    java.lang.AssertionError: PRIMARY: SignaledAuthState MUST be persisted on disk after Continue tap. Phase 1.1 production-stack guarantee for force-stop survival.
+
+Tests on sdk_gphone64_x86_64 - 14 failed: There was 1 failure(s).</code></pre>
+<p>Machine attestation:
+<code>.lava-ci-evidence/2026-09-22-rehearsal-MUTATED-signalAuthorized/real-device-verification.json</code>
+— <code>"all_passed": false</code>,
+<code>"test_passed": false</code>.</p>
+<p>(Note: a first attempt at this step failed with an unrelated
+<code>25.0.4</code> Gradle/JDK error because <code>JAVA_HOME</code> was
+not exported for that invocation — a host-toolchain issue, not the
+rehearsal's mutation. Re-run with <code>JAVA_HOME</code> correctly
+exported produced the genuine assertion failure above. Recorded honestly
+per §11.4.6.)</p>
+<h2 id="step-2--revert">Step 2 — Revert</h2>
+<pre><code>$ git diff --stat core/auth/impl/src/main/kotlin/lava/auth/impl/AuthServiceImpl.kt
+(empty — byte-identical to pre-mutation)</code></pre>
+<h2 id="step-3--rebuild--run-against-reverted-code-pass">Step 3 —
+Rebuild + run against REVERTED code: PASS</h2>
+<pre><code>$ ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon
+BUILD SUCCESSFUL in 50s
+
+$ ./scripts/run-challenge-matrix.sh --no-build \
+    --avds &quot;CZ_API34_Phone:34:phone&quot; \
+    --test-class &quot;lava.app.challenges.Challenge00CrashSurvivalTest&quot; \
+    --evidence-dir &quot;.lava-ci-evidence/2026-09-22-rehearsal-REVERTED-signalAuthorized&quot; \
+    --boot-timeout 8m --test-timeout 8m
+...
+  [1] CZ_API34_Phone            api=34 phone PASS
+MATRIX PASSED — every AVD booted and every test passed.</code></pre>
+<p>Machine attestation:
+<code>.lava-ci-evidence/2026-09-22-rehearsal-REVERTED-signalAuthorized/real-device-verification.json</code>
+— <code>"all_passed": true</code>, <code>"test_passed": true</code>.</p>
+<h2 id="verdict">Verdict</h2>
+<p><strong>GENUINE.</strong> <code>Challenge00CrashSurvivalTest</code>
+fails with a clear, specific assertion message when the exact production
+code path it claims to cover
+(<code>AuthServiceImpl.signalAuthorized</code> persisting
+<code>SignaledAuthState</code> to disk) is broken, and passes again once
+reverted. The attestation in
+<code>real-device-verification.{md,json}</code> (commit
+<code>c1b13ca7</code>) is not a bluff.</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Result</th>
+<th>Evidence dir</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mutated</td>
+<td>FAIL —
+<code>AssertionError: PRIMARY: SignaledAuthState MUST be persisted...</code></td>
+<td><code>.lava-ci-evidence/2026-09-22-rehearsal-MUTATED-signalAuthorized/</code></td>
+</tr>
+<tr>
+<td>Reverted</td>
+<td>PASS</td>
+<td><code>.lava-ci-evidence/2026-09-22-rehearsal-REVERTED-signalAuthorized/</code></td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
