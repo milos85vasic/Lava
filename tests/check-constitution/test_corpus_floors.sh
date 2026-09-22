@@ -325,7 +325,19 @@ _f5_harness() {
     local out="$WORK/f5_harness.sh"
     {
         echo 'set -euo pipefail'
-        sed -n '27,36p' "$REPO_ROOT/scripts/check-constitution.sh"
+        # Marker-based, not a hardcoded line range: the prior '27,36p' sed
+        # extraction only ever captured is_helix_dev_owned() by accident of
+        # where that function happened to sit at the time this test was
+        # written, and broke outright (syntax error: unexpected end of file)
+        # the moment is_helix_dev_owned()'s body grew past line 36 — see the
+        # 2026-09-22 exact-path-component-match fix. Markers survive any
+        # future edit to these functions' length, matching the existing
+        # 8b-block excerpt below in style. Captures HELIX_DEV_OWNED,
+        # is_helix_dev_owned(), THIRD_PARTY_OWNED, is_third_party_owned(),
+        # and is_externally_owned() — everything the 8b block below calls.
+        excerpt "$REPO_ROOT/scripts/check-constitution.sh" \
+            'HELIX_DEV_OWNED=("HelixQA" "helixqa")' \
+            '# A submodule governance doc satisfies a §6.R/§6.S/§6.X inheritance gate if it'
         excerpt "$REPO_ROOT/scripts/check-constitution.sh" \
             '# 8b. §6.J per-scope doc CORPUS floor' 'END-OF-BLOCK 8b per-scope doc CORPUS floor'
         echo 'echo "REACHED CLEAN (per-scope corpus floor passed)"'

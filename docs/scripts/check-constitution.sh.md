@@ -389,3 +389,48 @@ Bluff-Audit: is_helix_dev_owned() / is_third_party_owned() (scripts/check-consti
     printed "no match" for the exploit path while still matching the legitimate
     `submodules/superspec` path; `bash scripts/check-constitution.sh` re-confirmed
     exit 0 against the real repo state
+
+Same review pass (`kimi` CLI this time) found a second, independent issue: the §6.N
+propagation-target floor (block 9) compared an inflated "actual" count against a
+deflated "expected" count. `submodule_propagation_targets` counted every existing
+`submodules/*/CLAUDE.md`, INCLUDING externally-owned ones (e.g. helixqa's, which
+exists), while the paired `declared_submodule_docs` EXCLUDED externally-owned entries
+via `is_externally_owned`. The asymmetry loosened the floor by exactly the
+externally-owned count on each side — tolerating that many more missing own-org docs
+before firing. Fixed by adding a separate `own_org_propagation_targets` counter
+(excluding externally-owned, paired correctly with `declared_submodule_docs`) used in
+the floor comparison, while the unfiltered `propagation_targets` array — and its raw
+`submodule_propagation_targets` count, still reported for context — continue to drive
+the §6.N/O/P/Q content checks (blocks 9/9b/9d/9e) unchanged: those checks already
+accept externally-owned docs' `## INHERITED FROM constitution/` pointer form via
+`doc_inherits_clause`, so checking MORE files there is strictly more thorough, never a
+weakening.
+
+This edit also broke `tests/check-constitution/test_corpus_floors.sh`'s `_f5_harness()`
+helper, which extracted `is_helix_dev_owned()` via a hardcoded `sed -n '27,36p'` line
+range — fragile by construction, and it snapped the moment that function's body grew
+past line 36 from the exact-match fix above (syntax error: unexpected end of file from
+a truncated `for`/`case` block). Fixed by switching to the same marker-based `excerpt()`
+extraction already used elsewhere in that test file, spanning from the
+`HELIX_DEV_OWNED=` declaration through the end of `is_externally_owned()` — robust to
+any future length change in these functions. Note this test suite is NOT currently
+wired into `scripts/verify-all-constitution-rules.sh`'s 59-gate sweep, which is why the
+sweep stayed green while this standalone suite had 3 failing cases; closing that gap is
+tracked separately, not fixed here.
+
+Bluff-Audit: own_org_propagation_targets (scripts/check-constitution.sh)
+  Mutation: reverted the floor comparison at the `if` to use
+    `submodule_propagation_targets` (the unfiltered count) instead of
+    `own_org_propagation_targets`
+  Observed-Failure: none by itself — the mutation ALONE doesn't fail any existing
+    hermetic test, because `tests/check-constitution/test_propagation_target_floor.sh`'s
+    fixtures don't currently include an externally-owned submodule, so this asymmetry
+    was invisible to that suite. Confirmed the asymmetry directly instead, arithmetically:
+    with the unfixed comparison, a real checkout's `submodule_propagation_targets`
+    (includes helixqa's CLAUDE.md) exceeds `own_org_propagation_targets` by exactly the
+    externally-owned count with an existing CLAUDE.md (1, for helixqa) — reproducing the
+    inflated-actual/deflated-expected gap the review flagged
+  Reverted: yes — restored `own_org_propagation_targets` in the comparison;
+    `tests/check-constitution/test_propagation_target_floor.sh` (49 cases via
+    `test_corpus_floors.sh`, plus its own 6 dedicated cases) and the full
+    `check-constitution.sh` run both re-confirmed green

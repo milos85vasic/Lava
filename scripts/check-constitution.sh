@@ -430,10 +430,29 @@ declare -a propagation_targets=(
 # hiding real propagation drift. Fixed 2026-07-02 (falsifiability: the hermetic
 # test_missing_6n_from_submodule_fails now exercises the submodule path).
 submodule_propagation_targets=0
+# own_org_propagation_targets excludes externally-owned CLAUDE.md files —
+# paired with declared_submodule_docs below, which ALSO excludes them, so
+# the floor comparison at the `if` below stays apples-to-apples. Content
+# checks 9/9b/9d/9e still iterate the FULL propagation_targets array
+# (unfiltered): externally-owned docs are still verified to carry a valid
+# inheritance form (doc_inherits_clause already accepts either the literal
+# heading or the §6.AD pointer-block), so this filtering only affects the
+# COUNT used for the corpus floor, never which files get content-checked.
+# Fixed 2026-09-22 (kimi CLI independent review, same review pass that
+# found the is_third_party_owned substring-match bug): before this fix,
+# submodule_propagation_targets counted externally-owned CLAUDE.md files
+# (e.g. helixqa's, which exists) while declared_submodule_docs excluded
+# them, inflating the "actual" side and deflating the "expected" side of
+# the comparison — loosening the floor by exactly the externally-owned
+# count on each side, silently tolerating that many MORE missing own-org
+# docs before firing.
+own_org_propagation_targets=0
 for sub in submodules/*/CLAUDE.md; do
   [[ -f "$sub" ]] || continue
   propagation_targets+=("$sub")
   submodule_propagation_targets=$((submodule_propagation_targets + 1))
+  is_externally_owned "$sub" && continue
+  own_org_propagation_targets=$((own_org_propagation_targets + 1))
 done
 # Floor on the submodule contribution. Without `nullglob` (unset here) an
 # unmatched glob yields the LITERAL string `submodules/*/CLAUDE.md`; `[[ -f ]]`
@@ -481,8 +500,8 @@ while read -r _decl; do
   declared_submodule_docs=$((declared_submodule_docs + 1))
 done < <(sed -n 's/^[[:space:]]*path = //p' .gitmodules 2>/dev/null)
 
-if [[ "$declared_submodule_docs" -gt 0 && "$submodule_propagation_targets" -lt "$declared_submodule_docs" ]]; then
-  echo "propagation gate examined ${submodule_propagation_targets} submodule CLAUDE.md files, but .gitmodules declares ${declared_submodule_docs} under submodules/ (externally-owned paths excluded)." >&2
+if [[ "$declared_submodule_docs" -gt 0 && "$own_org_propagation_targets" -lt "$declared_submodule_docs" ]]; then
+  echo "propagation gate examined ${own_org_propagation_targets} own-org submodule CLAUDE.md files (${submodule_propagation_targets} total, including externally-owned), but .gitmodules declares ${declared_submodule_docs} own-org submodule(s) under submodules/ (externally-owned paths excluded)." >&2
   echo "  → The gate would PASS on a partial corpus, asserting nothing about the missing ones." >&2
   echo "  → Missing, with the reason distinguished:" >&2
   while read -r _decl; do
