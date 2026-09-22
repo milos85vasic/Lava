@@ -278,7 +278,54 @@ android {
             manifestPlaceholders["apiKeyPermission"] = "digital.vasic.lava.permission.dev.READ_API_KEY"
             buildConfigField("String", "API_KEY_PERMISSION", "\"digital.vasic.lava.permission.dev.READ_API_KEY\"")
         }
+        // §6.Z / §6.AA release-variant device-testing gap closure (2026-09-22):
+        // standard AGP instrumentation CANNOT attach to a non-debuggable APK on
+        // a non-rooted device — a hard Android platform constraint, not just a
+        // Gradle convenience — so `release` itself can never gain a
+        // `connectedReleaseAndroidTest` task. This is the AndroidX-Benchmark
+        // pattern (see developer.android.com/topic/performance/benchmarking):
+        // a build type that `initWith(release)` (same postprocessing/R8/
+        // proguard-rules — the exact artifact shape we ship) but flips
+        // `isDebuggable = true` so instrumentation can attach, and signs with
+        // the DEBUG keystore so the generated androidTest APK's certificate
+        // matches (classic same-signature instrumentation requirement).
+        // Deliberately keeps the SAME applicationId as `release` (no suffix)
+        // rather than adding one — this is the closest-possible artifact to
+        // what actually ships; it simply cannot coexist installed alongside a
+        // real `release` build, which is fine since every Challenge run
+        // installs onto a fresh/cold-booted emulator.
+        create("releaseTest") {
+            initWith(getByName("release"))
+            isDebuggable = true
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+            // Belt-and-braces (2026-09-22): initWith() did NOT reliably
+            // propagate the legacy postprocessing{} block's custom
+            // proguard-rules.pro reference — confirmed via R8's own
+            // generated missing_rules.txt suggesting a -dontwarn rule that
+            // already exists at proguard-rules.pro:29, meaning R8 was not
+            // reading that file at all for this build type. Re-declared
+            // explicitly rather than relying on initWith() for this block.
+            postprocessing {
+                isRemoveUnusedCode = true
+                isRemoveUnusedResources = true
+                isObfuscate = false
+                isOptimizeCode = true
+                setProguardFiles(
+                    listOf(
+                        getDefaultProguardFile("proguard-defaults.txt"),
+                        "proguard-rules.pro",
+                    ),
+                )
+            }
+        }
     }
+
+    // Default `testBuildType` stays "debug" — connectedDebugAndroidTest is
+    // unchanged, zero blast radius. Passing -PlavaTestReleaseVariant=true on
+    // the Gradle command line switches to "releaseTest", making
+    // connectedReleaseTestAndroidTest the active connected-test task instead.
+    testBuildType = if (project.hasProperty("lavaTestReleaseVariant")) "releaseTest" else "debug"
 
     // Phase 11 (2026-05-06): generated lava.auth.LavaAuthGenerated source.
     // The output dir is added per-variant in afterEvaluate below so each
@@ -343,6 +390,16 @@ afterEvaluate {
     tasks.matching { it.name in listOf("compileReleaseKotlin", "kspReleaseKotlin") }.configureEach {
         dependsOn(generateLavaAuthClassRelease)
     }
+    // releaseTest is signed with the DEBUG keystore (see buildTypes above), so
+    // it reuses the DEBUG-keyed generated auth class — keeping the codegen's
+    // keystore consistent with whichever keystore actually signs the APK is
+    // the invariant that matters here, not the build type name. Skipping this
+    // wiring would silently reproduce the exact LVA-098 class of bug (a
+    // variant compiling successfully while missing LavaAuthGenerated from its
+    // real classpath, silently falling back to the stub auth provider).
+    tasks.matching { it.name in listOf("compileReleaseTestKotlin", "kspReleaseTestKotlin") }.configureEach {
+        dependsOn(generateLavaAuthClassDebug)
+    }
 }
 
 // LVA-098 (2026-08-14): root-caused via real-device evidence — the
@@ -379,6 +436,17 @@ afterEvaluate {
 //     afterEvaluate wrapper, not the API choice.
 android.sourceSets.getByName("debug").kotlin.srcDir(layout.buildDirectory.dir("generated/lava-auth/debug"))
 android.sourceSets.getByName("release").kotlin.srcDir(layout.buildDirectory.dir("generated/lava-auth/release"))
+// releaseTest reuses the DEBUG-keyed generated source (see the afterEvaluate
+// block above) — same eager-not-afterEvaluate pattern the LVA-098 fix
+// requires; a lazy/afterEvaluate registration here would reproduce that bug.
+android.sourceSets.getByName("releaseTest").kotlin.srcDir(layout.buildDirectory.dir("generated/lava-auth/debug"))
+// releaseTest has its own src/releaseTest/kotlin/.../QaKeyInjection.kt (a
+// MUTABLE twin, unlike release's immutable no-op one) — Challenge70 assigns
+// to QaKeyInjection.override, which only compiles against a `var`. This
+// build type is never distributed/shipped, so the mutable test-only hook
+// here does not weaken release's actual "guarantees NO test hook" posture;
+// AGP resolves src/releaseTest/kotlin automatically as this build type's own
+// source set, no extra srcDir() call needed for it.
 
 dependencies {
     // Task 3.1 (2026-06-03): shared cross-app linking contract + launcher.

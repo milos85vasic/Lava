@@ -15,6 +15,34 @@
 #       [--test-class lava.app.challenges.ChallengeNN_Foo]   # default: ALL Challenges
 #       [--evidence-dir .lava-ci-evidence/<tag>]             # default: dated dir
 #       [--no-build]                                         # skip APK rebuild
+#       [--build-type debug|releaseTest]                     # default: debug. "releaseTest" targets
+#                                                            # the AndroidX-Benchmark-style build type
+#                                                            # (initWith(release): same R8/proguard
+#                                                            # postprocessing as the real release build,
+#                                                            # isDebuggable=true so instrumentation can
+#                                                            # attach, debug-signed so the androidTest APK's
+#                                                            # cert matches). Passes -PlavaTestReleaseVariant=true
+#                                                            # to Gradle, which flips testBuildType from
+#                                                            # "debug" to "releaseTest" (app/build.gradle.kts),
+#                                                            # so the assemble task becomes assembleReleaseTest
+#                                                            # and the installed APK is the R8-processed one —
+#                                                            # NOT the actual signed release artifact (different
+#                                                            # signingConfig), but the closest artifact this
+#                                                            # project can currently instrument-test, since
+#                                                            # Android instrumentation requires a debuggable
+#                                                            # target APK (a hard platform constraint) and the
+#                                                            # real release build is deliberately non-debuggable.
+#                                                            # DEPENDENCY GAP (as of this flag's introduction):
+#                                                            # submodules/containers/cmd/emulator-matrix has NO
+#                                                            # --build-type flag yet and hardcodes
+#                                                            # connectedDebugAndroidTest in both
+#                                                            # pkg/emulator/containerized.go and
+#                                                            # pkg/emulator/android.go — until that Go-side
+#                                                            # change lands, --build-type releaseTest builds the
+#                                                            # correct APK locally but then FAILS at the
+#                                                            # delegate-to-CLI step (unknown flag). --build-type
+#                                                            # debug (the default) is completely unaffected and
+#                                                            # behaves exactly as before this flag existed.
 #       [--avds "name:api:form[,name:api:form...]"]          # REPLACE the §6.AE.2
 #                                                            # default matrix entirely with an
 #                                                            # explicit AVD list. Use this to target
@@ -111,6 +139,7 @@ cd "$REPO_ROOT"
 TEST_CLASS=""                   # empty = run all Challenges
 EVIDENCE_DIR=".lava-ci-evidence/$(date -u +%Y-%m-%dT%H-%M-%SZ)-challenge-matrix"
 NO_BUILD=0
+BUILD_TYPE="debug"              # debug|releaseTest — see header. debug is the zero-blast-radius default.
 LATEST_API="36"                 # current "latest stable" as of 2026-05
 ADD_TV=0
 ADD_FOLDABLE=0
@@ -166,6 +195,7 @@ while [[ $# -gt 0 ]]; do
         --test-class)    TEST_CLASS="$2"; shift 2 ;;
         --evidence-dir)  EVIDENCE_DIR="$2"; shift 2 ;;
         --no-build)      NO_BUILD=1; shift ;;
+        --build-type)    BUILD_TYPE="$2"; shift 2 ;;
         --avds)          AVDS_OVERRIDE="$2"; shift 2 ;;
         --extra-apk)     EXTRA_APKS+=("$2"); shift 2 ;;
         --boot-timeout)  BOOT_TIMEOUT="$2"; shift 2 ;;
@@ -180,6 +210,11 @@ while [[ $# -gt 0 ]]; do
         *)               echo "ERROR: unknown argument: $1" >&2; exit 2 ;;
     esac
 done
+
+case "$BUILD_TYPE" in
+    debug|releaseTest) ;;
+    *) echo "ERROR: --build-type must be 'debug' or 'releaseTest' (got '$BUILD_TYPE')" >&2; exit 2 ;;
+esac
 
 if [[ -n "$AVDS_OVERRIDE" ]]; then
     # --avds supplied: REPLACE the §6.AE.2 default matrix entirely with the
@@ -208,6 +243,7 @@ mkdir -p "$EVIDENCE_DIR"
 
 echo "==> §6.AE Challenge matrix runner"
 echo "    test class: ${TEST_CLASS:-<all under lava.app.challenges>}"
+echo "    build type: $BUILD_TYPE"
 echo "    evidence dir: $EVIDENCE_DIR"
 echo "    AVDs: $AVDS_JOINED"
 echo "    include-helixqa: $INCLUDE_HELIXQA"
@@ -425,12 +461,19 @@ EOF
 fi
 
 # --- on-gate-host: build (if not --no-build) + delegate to Containers CLI ---
-if [[ "$NO_BUILD" == "0" ]]; then
-    echo "==> Building debug APK"
-    ./gradlew --no-daemon :app:assembleDebug
+# BUILD_TYPE-aware Gradle property + task/output-path selection (see header).
+# debug: byte-identical to this script's pre-existing behavior.
+declare -a BUILD_TYPE_PROPS=()
+if [[ "$BUILD_TYPE" == "releaseTest" ]]; then
+    BUILD_TYPE_PROPS=(-PlavaTestReleaseVariant=true)
 fi
 
-APK="app/build/outputs/apk/debug/app-debug.apk"
+if [[ "$NO_BUILD" == "0" ]]; then
+    echo "==> Building $BUILD_TYPE APK"
+    ./gradlew --no-daemon "${BUILD_TYPE_PROPS[@]}" ":app:assemble${BUILD_TYPE^}"
+fi
+
+APK="app/build/outputs/apk/${BUILD_TYPE}/app-${BUILD_TYPE}.apk"
 if [[ ! -f "$APK" ]]; then
     echo "ERROR: APK not found at $APK after build" >&2
     exit 1
@@ -475,6 +518,27 @@ if [[ "$RESOLVED_RUNNER" == "containerized" ]]; then
     echo "==> containerized runner: --container-image=$CONTAINER_IMAGE --container-runtime=$CONTAINER_RUNTIME"
 fi
 
+# --build-type is forwarded ONLY for releaseTest — debug omits it entirely so
+# a CLI build predating the (not-yet-landed, see header DEPENDENCY GAP)
+# Containers-side --build-type flag keeps working exactly as before for the
+# default path. A releaseTest run against a CLI without that flag will fail
+# fast here with Go's stdlib "flag provided but not defined" — an honest
+# failure naming the real missing dependency, not a silent fallback to debug.
+declare -a BUILD_TYPE_CLI_ARGS=()
+if [[ "$BUILD_TYPE" != "debug" ]]; then
+    # --build-type alone only controls the Gradle TASK NAME the CLI targets
+    # (connected<BuildType>AndroidTest) inside the container's own internal
+    # `./gradlew` invocation. That invocation still needs to be TOLD which
+    # testBuildType to select in the first place — Lava's own
+    # app/build.gradle.kts and api-app/build.gradle.kts gate testBuildType
+    # behind -PlavaTestReleaseVariant=true (see their `testBuildType = if
+    # (project.hasProperty(...))` toggle) — the Containers package is
+    # deliberately consumer-agnostic and has no idea that property name
+    # exists, so this repo must forward it explicitly via the generic
+    # --gradle-property passthrough.
+    BUILD_TYPE_CLI_ARGS=(--build-type "$BUILD_TYPE" --gradle-property "lavaTestReleaseVariant=true")
+fi
+
 echo "==> Delegating to Containers/cmd/emulator-matrix --runner=auto (resolves to $RESOLVED_RUNNER on $PLATFORM)"
 "$CONTAINERS_CLI" \
     --runner=auto \
@@ -483,6 +547,7 @@ echo "==> Delegating to Containers/cmd/emulator-matrix --runner=auto (resolves t
     --evidence-dir "$EVIDENCE_DIR" \
     --image-manifest tools/lava-containers/vm-images.json \
     "${CONTAINER_ARGS[@]}" \
+    "${BUILD_TYPE_CLI_ARGS[@]}" \
     "${EXTRA_APK_ARGS[@]}" \
     ${BOOT_TIMEOUT:+--boot-timeout "$BOOT_TIMEOUT"} \
     ${TEST_TIMEOUT:+--test-timeout "$TEST_TIMEOUT"} \

@@ -22,7 +22,29 @@ truth.
 ./scripts/run-api-app-challenge-matrix.sh [--test-class lava.api.app.challenges.ChallengeNN] \
     [--avds "name:api:form,..."] [--evidence-dir <dir>] [--no-build] \
     [--boot-timeout <duration>] [--test-timeout <duration>] \
-    [--container-image <ref>] [--container-runtime <podman|docker>]
+    [--container-image <ref>] [--container-runtime <podman|docker>] \
+    [--build-type debug|releaseTest]
+```
+
+## `--build-type` — release-variant device testing (2026-09-22)
+
+Default `debug` — fully backward compatible, omitting this flag behaves
+exactly as before it existed. `--build-type releaseTest` targets a new
+Gradle build type on `api-app/build.gradle.kts` that mirrors `release`
+(same `proguard-rules.pro`/postprocessing shape actually shipped) but sets
+`isDebuggable=true` so instrumentation can attach at all — Android
+instrumentation cannot attach to a non-debuggable APK on a non-rooted
+device, a hard platform constraint, so `release` itself can never gain a
+`connectedReleaseAndroidTest` task. This script forwards
+`-PlavaTestReleaseVariant=true` to the local `./gradlew` assemble step and
+both `--build-type releaseTest` and `--gradle-property
+lavaTestReleaseVariant=true` to the Containers `emulator-matrix` CLI, whose
+own internal `./gradlew` invocation needs that property to select the same
+`testBuildType`.
+
+```bash
+./scripts/run-api-app-challenge-matrix.sh --no-build --build-type releaseTest \
+  --test-class lava.api.app.challenges.Challenge05ApiEmbedSourceHashMatchesTest
 ```
 
 ## `--test-timeout` pass-through — LVA-161 (2026-08-26)

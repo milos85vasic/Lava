@@ -352,7 +352,20 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="at">--container-image</span> ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64</span>
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="co"># ALSO invoke the 11 HelixQA Challenge scripts (Option 1 wiring)</span></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-challenge-matrix.sh <span class="at">--include-helixqa</span></span></code></pre></div>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-challenge-matrix.sh <span class="at">--include-helixqa</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Run a Challenge against the R8-minified releaseTest build type instead of</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="co"># debug (2026-09-22). releaseTest mirrors app/build.gradle.kts&#39;s release</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="co"># build type (same proguard-rules.pro/postprocessing shape) but is</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="co"># isDebuggable=true so instrumentation can attach at all — release itself</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="co"># never gets a connected-test task, a hard Android platform constraint, not</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="co"># a Gradle convenience. Forwards -PlavaTestReleaseVariant=true to the local</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="co"># assemble step and --build-type releaseTest --gradle-property</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="co"># lavaTestReleaseVariant=true to the Containers emulator-matrix CLI so its</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="co"># own internal ./gradlew invocation selects the same testBuildType. Default</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="co"># is &quot;debug&quot; — omitting this flag is byte-identical to before it existed.</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> scripts/run-challenge-matrix.sh <span class="at">--no-build</span> <span class="at">--build-type</span> releaseTest <span class="dt">\</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>  <span class="at">--test-class</span> lava.app.challenges.Challenge00CrashSurvivalTest</span></code></pre></div>
 <h2 id="inputs">Inputs</h2>
 <table>
 <thead>

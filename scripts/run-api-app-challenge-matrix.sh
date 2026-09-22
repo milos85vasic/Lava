@@ -18,6 +18,14 @@
 #       [--avds "name:api:form[,...]"]   # default: Pixel_8:35:phone (provisioned AVD)
 #       [--evidence-dir <dir>]           # default: dated dir under phase-e-api-app
 #       [--no-build]                     # skip the :api-app APK rebuild
+#       [--build-type debug|releaseTest] # default: debug. See run-challenge-matrix.sh's
+#                                        # header for the full rationale (AndroidX-Benchmark-
+#                                        # style build type: initWith(release), isDebuggable=true,
+#                                        # debug-signed). Same DEPENDENCY GAP applies: the
+#                                        # Containers cmd/emulator-matrix CLI has no --build-type
+#                                        # flag yet, so releaseTest builds correctly here but
+#                                        # fails at the delegate-to-CLI step until that Go-side
+#                                        # change lands. debug (the default) is unaffected.
 #
 # Constitutional note (§6.AG / §6.X): the emulator boot is Containers-driven.
 # The Containers cmd/emulator-matrix CLI now exposes a generic --gradle-module
@@ -42,6 +50,7 @@ GRADLE_MODULE=":api-app"
 AVDS_OVERRIDE="Pixel_8:35:phone"   # the provisioned macOS-host AVD (§6.AG --avds path)
 EVIDENCE_DIR=".lava-ci-evidence/phase-e-api-app/$(date -u +%Y-%m-%dT%H-%M-%SZ)-gate"
 NO_BUILD=0
+BUILD_TYPE="debug"     # debug|releaseTest — see header. debug is the zero-blast-radius default.
 # Per-AVD cold-boot timeout forwarded to the Containers emulator-matrix CLI
 # (its --boot-timeout flag, default 5m). On a loaded macOS host an ARM/HVF
 # cold-boot can exceed 5m purely on host contention (NOT a product defect);
@@ -70,10 +79,16 @@ while [[ $# -gt 0 ]]; do
         --container-image)   CONTAINER_IMAGE="$2"; shift 2 ;;
         --container-runtime) CONTAINER_RUNTIME="$2"; shift 2 ;;
         --no-build)      NO_BUILD=1; shift ;;
+        --build-type)    BUILD_TYPE="$2"; shift 2 ;;
         -h|--help)       sed -n '3,40p' "$0"; exit 0 ;;
         *)               echo "ERROR: unknown argument: $1" >&2; exit 2 ;;
     esac
 done
+
+case "$BUILD_TYPE" in
+    debug|releaseTest) ;;
+    *) echo "ERROR: --build-type must be 'debug' or 'releaseTest' (got '$BUILD_TYPE')" >&2; exit 2 ;;
+esac
 
 # Default: run all four api-app Challenge classes. The Containers CLI takes a
 # single --test-class; a comma-separated list is accepted by gradle's
@@ -86,19 +101,28 @@ mkdir -p "$EVIDENCE_DIR"
 
 echo "==> §6.AE/§6.X/§6.AG :api-app Challenge matrix runner"
 echo "    gradle module: $GRADLE_MODULE"
+echo "    build type: $BUILD_TYPE"
 echo "    test class(es): $TEST_CLASS"
 echo "    AVDs: $AVDS_OVERRIDE"
 echo "    evidence dir: $EVIDENCE_DIR"
 
-# --- build the :api-app APKs (debug + androidTest) unless --no-build ---
-if [[ "$NO_BUILD" == "0" ]]; then
-    echo "==> Building $GRADLE_MODULE debug + androidTest APKs (--max-workers=2, §6.T.2)"
-    GOMAXPROCS=2 nice -n 19 ./gradlew --no-daemon --max-workers=2 \
-        "${GRADLE_MODULE}:assembleDebug" "${GRADLE_MODULE}:assembleDebugAndroidTest"
+# BUILD_TYPE-aware Gradle property + task/output-path selection. debug is
+# byte-identical to this script's pre-existing behavior (see
+# run-challenge-matrix.sh's header for the full releaseTest rationale).
+declare -a BUILD_TYPE_PROPS=()
+if [[ "$BUILD_TYPE" == "releaseTest" ]]; then
+    BUILD_TYPE_PROPS=(-PlavaTestReleaseVariant=true)
 fi
 
-# api-app debug APK path (the artifact the emulator-matrix CLI installs).
-APK="api-app/build/outputs/apk/debug/api-app-debug.apk"
+# --- build the :api-app APKs (build-type + androidTest) unless --no-build ---
+if [[ "$NO_BUILD" == "0" ]]; then
+    echo "==> Building $GRADLE_MODULE $BUILD_TYPE + androidTest APKs (--max-workers=2, §6.T.2)"
+    GOMAXPROCS=2 nice -n 19 ./gradlew --no-daemon --max-workers=2 "${BUILD_TYPE_PROPS[@]}" \
+        "${GRADLE_MODULE}:assemble${BUILD_TYPE^}" "${GRADLE_MODULE}:assemble${BUILD_TYPE^}AndroidTest"
+fi
+
+# api-app APK path (the artifact the emulator-matrix CLI installs).
+APK="api-app/build/outputs/apk/${BUILD_TYPE}/api-app-${BUILD_TYPE}.apk"
 if [[ ! -f "$APK" ]]; then
     echo "ERROR: APK not found at $APK after build" >&2
     exit 1
@@ -158,6 +182,20 @@ if [[ "$ACCEL_BACKEND" == "kvm" ]]; then
     echo "==> containerized runner: --container-image=$CONTAINER_IMAGE --container-runtime=$CONTAINER_RUNTIME"
 fi
 
+# --build-type is forwarded ONLY for releaseTest, matching
+# run-challenge-matrix.sh's rationale — see its header's DEPENDENCY GAP note.
+# A releaseTest run against a Containers CLI predating that flag fails fast
+# with Go's stdlib "flag provided but not defined", naming the real gap
+# rather than silently falling back to debug.
+declare -a BUILD_TYPE_CLI_ARGS=()
+if [[ "$BUILD_TYPE" != "debug" ]]; then
+    # See run-challenge-matrix.sh's identical block for the full rationale:
+    # --build-type only picks the Gradle task NAME; the container's internal
+    # `./gradlew` invocation also needs -PlavaTestReleaseVariant=true to
+    # actually select that testBuildType in api-app/build.gradle.kts.
+    BUILD_TYPE_CLI_ARGS=(--build-type "$BUILD_TYPE" --gradle-property "lavaTestReleaseVariant=true")
+fi
+
 echo "==> Delegating to Containers/cmd/emulator-matrix --runner=auto (module=$GRADLE_MODULE)"
 "$CONTAINERS_CLI" \
     --gradle-module "${GRADLE_MODULE#:}" \
@@ -168,6 +206,7 @@ echo "==> Delegating to Containers/cmd/emulator-matrix --runner=auto (module=$GR
     --evidence-dir "$EVIDENCE_DIR" \
     --image-manifest tools/lava-containers/vm-images.json \
     "${CONTAINER_ARGS[@]}" \
+    "${BUILD_TYPE_CLI_ARGS[@]}" \
     ${BOOT_TIMEOUT:+--boot-timeout "$BOOT_TIMEOUT"} \
     ${TEST_TIMEOUT:+--test-timeout "$TEST_TIMEOUT"} \
     --cold-boot \

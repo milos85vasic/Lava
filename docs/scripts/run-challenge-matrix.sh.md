@@ -64,6 +64,19 @@ bash scripts/run-challenge-matrix.sh \
 
 # ALSO invoke the 11 HelixQA Challenge scripts (Option 1 wiring)
 bash scripts/run-challenge-matrix.sh --include-helixqa
+
+# Run a Challenge against the R8-minified releaseTest build type instead of
+# debug (2026-09-22). releaseTest mirrors app/build.gradle.kts's release
+# build type (same proguard-rules.pro/postprocessing shape) but is
+# isDebuggable=true so instrumentation can attach at all — release itself
+# never gets a connected-test task, a hard Android platform constraint, not
+# a Gradle convenience. Forwards -PlavaTestReleaseVariant=true to the local
+# assemble step and --build-type releaseTest --gradle-property
+# lavaTestReleaseVariant=true to the Containers emulator-matrix CLI so its
+# own internal ./gradlew invocation selects the same testBuildType. Default
+# is "debug" — omitting this flag is byte-identical to before it existed.
+bash scripts/run-challenge-matrix.sh --no-build --build-type releaseTest \
+  --test-class lava.app.challenges.Challenge00CrashSurvivalTest
 ```
 
 ## Inputs

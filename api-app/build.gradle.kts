@@ -219,7 +219,37 @@ android {
                 "\"digital.vasic.lava.permission.dev.READ_API_KEY\"",
             )
         }
+        // §6.Z / §6.AA release-variant device-testing gap closure (2026-09-22):
+        // mirrors app/build.gradle.kts's releaseTest build type verbatim — see
+        // its comment for the full rationale (AndroidX-Benchmark pattern:
+        // initWith(release) + isDebuggable=true + debug signing so
+        // instrumentation can attach at all; same applicationId as release, no
+        // suffix, since it never needs to coexist installed with release).
+        create("releaseTest") {
+            initWith(getByName("release"))
+            isDebuggable = true
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+            // Belt-and-braces (2026-09-22): see app/build.gradle.kts's identical
+            // block for the rationale — initWith() did not reliably propagate
+            // the legacy postprocessing{} block's custom proguard-rules.pro.
+            postprocessing {
+                isRemoveUnusedCode = true
+                isRemoveUnusedResources = true
+                isObfuscate = false
+                isOptimizeCode = true
+                setProguardFiles(
+                    listOf(
+                        getDefaultProguardFile("proguard-defaults.txt"),
+                        "proguard-rules.pro",
+                    ),
+                )
+            }
+        }
     }
+
+    // See app/build.gradle.kts's identical toggle for the rationale.
+    testBuildType = if (project.hasProperty("lavaTestReleaseVariant")) "releaseTest" else "debug"
 
     buildFeatures { buildConfig = true }
 
