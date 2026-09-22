@@ -1,0 +1,113 @@
+{
+  "channel": "firebase-app-distribution-api-app",
+  "version_name": "0.2.13",
+  "version_code": 28,
+  "commit_sha": "unknown",
+  "commit_sha_note": "The distribute-advancing commit (this evidence file's own commit) cannot embed its own git SHA (§6.AK Check 10 self-reference), so commit_sha uses the gate's lenient 'unknown' path (matches the 1.3.13-1079 / 1.3.15-1082 precedent). artifact.tested_code_sha below pins the exact commit the device gate actually ran against.",
+  "artifact": {
+    "app_id": "digital.vasic.lava.api",
+    "apk_path": "api-app/build/outputs/apk/release/api-app-release.apk",
+    "tested_code_sha": "54c50eaef3e39e9585817b92c9a739d39d836e03",
+    "apk_sha256": "76f97d3664fe429c7edce795496261fa8755f30c77d3769f0a4b10e32a770211",
+    "signer_cert_sha256": "0feb69c3633b16d33ef63ebb98354fff6823d4930074418d76e7d698fa259868",
+    "debug_apk_path": "api-app/build/outputs/apk/debug/api-app-debug.apk"
+  },
+  "authored_utc": "2026-09-22T20:50:00Z",
+  "combined_distribute_authorization": "n/a — §6.AA two-stage: this evidence backs Stage 1 (debug-only). Stage 2 (release) appended after operator device verification.",
+  "covering_challenges": {
+    "Challenge01ApiAppColdStartTest": {"debug": "PASS", "releaseTest": "PASS"},
+    "Challenge02ApiAppBootAndServeTest": {"debug": "PASS", "releaseTest": "PASS"},
+    "Challenge03StopRestartTest": {"debug": "PASS", "releaseTest": "PASS"},
+    "Challenge04NotificationActionsTest": {"debug": "PASS", "releaseTest": "PASS"},
+    "Challenge05ApiEmbedSourceHashMatchesTest": {"releaseTest": "PASS"}
+  },
+  "device_gate": {
+    "runner": "containers-submodule",
+    "runtime": "podman",
+    "container_image": "ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64",
+    "avd": "default (baked; requested CZ_API34_Phone was advisory, api-level matched)",
+    "api_level": 34,
+    "form_factor": "phone",
+    "cold_boot": true,
+    "gate_host": "Linux x86_64, KVM",
+    "gating": true,
+    "rows": [
+      {
+        "build_type": "debug",
+        "test_class": "lava.api.app.challenges.Challenge01ApiAppColdStartTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 45.987260954, "test_passed": true, "test_seconds": 69.529798444,
+        "concurrent": 1,
+        "note": "Ran together with Challenge02-04 in one gradle invocation; shared boot/test timing across the 4-class row.",
+        "evidence_dir": ".lava-ci-evidence/2026-09-22-apiapp-debug-c01-04/"
+      },
+      {
+        "build_type": "debug",
+        "test_class": "lava.api.app.challenges.Challenge02ApiAppBootAndServeTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 45.987260954, "test_passed": true, "test_seconds": 69.529798444,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/2026-09-22-apiapp-debug-c01-04/"
+      },
+      {
+        "build_type": "debug",
+        "test_class": "lava.api.app.challenges.Challenge03StopRestartTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 45.987260954, "test_passed": true, "test_seconds": 69.529798444,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/2026-09-22-apiapp-debug-c01-04/"
+      },
+      {
+        "build_type": "debug",
+        "test_class": "lava.api.app.challenges.Challenge04NotificationActionsTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 45.987260954, "test_passed": true, "test_seconds": 69.529798444,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/2026-09-22-apiapp-debug-c01-04/"
+      },
+      {
+        "build_type": "releaseTest",
+        "note": "R8-minified, initWith(release) — same postprocessing/proguard-rules.pro shape as the actual shipped release build. Required one additional keep beyond what was mirrored from :app: okhttp3.** (test-only helper, production code never uses OkHttp). Ran together with Challenge02-04 in one gradle invocation; shared boot/test timing.",
+        "test_class": "lava.api.app.challenges.Challenge01ApiAppColdStartTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 43.626108232, "test_passed": true, "test_seconds": 89.508397185,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/2026-09-22-apiapp-releaseTest-c01-04/"
+      },
+      {
+        "build_type": "releaseTest",
+        "test_class": "lava.api.app.challenges.Challenge02ApiAppBootAndServeTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 43.626108232, "test_passed": true, "test_seconds": 89.508397185,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/2026-09-22-apiapp-releaseTest-c01-04/"
+      },
+      {
+        "build_type": "releaseTest",
+        "test_class": "lava.api.app.challenges.Challenge03StopRestartTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 43.626108232, "test_passed": true, "test_seconds": 89.508397185,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/2026-09-22-apiapp-releaseTest-c01-04/"
+      },
+      {
+        "build_type": "releaseTest",
+        "test_class": "lava.api.app.challenges.Challenge04NotificationActionsTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 43.626108232, "test_passed": true, "test_seconds": 89.508397185,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/2026-09-22-apiapp-releaseTest-c01-04/"
+      },
+      {
+        "build_type": "releaseTest",
+        "note": "Direct proof of this version's real functional content: asserts the running embed's self-reported source hash equals lava-api-go 2.3.35's hash, not the stale 2.3.34.",
+        "test_class": "lava.api.app.challenges.Challenge05ApiEmbedSourceHashMatchesTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 50.452645494, "test_passed": true, "test_seconds": 86.834573752,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/2026-09-22-apiapp-releaseTest-c05/"
+      }
+    ]
+  },
+  "scope_honesty": "Covers api-app's core lifecycle suite (C01-04, cold-start through notification-actions) on BOTH debug and releaseTest, plus the embed-source-hash proof on releaseTest. Challenge06CopyKeyTest and Challenge07OpenClientTest (cross-app, require :app also installed on the same emulator) were NOT run this cycle — OWED for a full cross-app §6.AE.2 matrix. api-app's own Kotlin/Android source is byte-identical to versionCode 27 (already fully Firebase-distributed 2026-08-14); the only real change is the re-embedded lava-api-go 2.3.35, directly proven by Challenge05."
+}

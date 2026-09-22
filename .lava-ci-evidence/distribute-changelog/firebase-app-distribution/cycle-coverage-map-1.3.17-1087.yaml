@@ -1,0 +1,20 @@
+# §6.AK cycle-coverage-map for Lava-Android-1.3.17-1087
+#
+# This cycle's CHANGELOG claims split into two kinds:
+#   (a) lava-api-go dynamic-port/mDNS-ordering fix, the two governance
+#       gate-integrity bugs, and the Robolectric/JDK fix — none of these have
+#       a client-device-testable surface (Go-only backend, tooling/CI, and
+#       test-harness-only respectively). Their covering evidence is each
+#       claim's own real-stack tests (lava-api-go Go tests; hermetic
+#       check-constitution tests) documented in the CHANGELOG entry itself,
+#       NOT a device Challenge — per §6.AK's own "device Challenge OR
+#       per-artifact device test" wording, listing them here would be
+#       claiming a coverage TYPE that does not apply to them.
+#   (b) the release-variant device-testing gap closure — THIS one is
+#       client-device-testable and IS listed below, covered by
+#       Challenge00CrashSurvivalTest executed on BOTH build variants.
+version: "1.3.17-1087"
+claims:
+  - fix: "Release-variant (R8-minified) device-testing gap closed -- a new releaseTest build type plus 8 real minification fixes let this project execute Challenge tests against the actual release-shaped APK for the first time"
+    covering_challenges:
+      - "Challenge00CrashSurvivalTest"

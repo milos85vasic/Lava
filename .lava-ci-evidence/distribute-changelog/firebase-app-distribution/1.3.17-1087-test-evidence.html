@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.11" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>1.3.17-1087-test-evidence</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+<h1
+id="6z-pre-distribute-test-execution-evidence--lava-android-1317-1087">§6.Z
+Pre-Distribute Test-Execution Evidence — Lava-Android-1.3.17-1087</h1>
+<p><strong>Channel:</strong> firebase-app-distribution (client)
+<strong>Artifact under test:</strong>
+<code>digital.vasic.lava.client</code> / <code>.client.dev</code>
+versionName 1.3.17 versionCode 1087 <strong>Commit:</strong>
+<code>54c50eaef3e39e9585817b92c9a739d39d836e03</code> (master)
+<strong>Evidence authored:</strong> 2026-09-22</p>
+<h2 id="scope--this-cycles-real-changes">Scope — this cycle's real
+changes</h2>
+<ol type="1">
+<li><strong>lava-api-go 2.3.34 → 2.3.35</strong>: fixed a real
+<code>:8443</code> port collision with an unrelated process on a shared
+host (<code>server.ResolveListen()</code> + a new race-free
+<code>network.ListenEphemeral</code> helper added to
+<code>submodules/containers</code>), and a genuine
+mDNS/Alt-Svc-before-any-bind ordering bug found while investigating it.
+No <code>:app</code> module source changed for this reason — the client
+consumes lava-api-go only via the embedded on-device engine in
+<code>:api-app</code>, not directly.</li>
+<li><strong>Release-variant device-testing gap closed</strong> (this
+same commit, <code>54c50eae</code>): this project previously had NO way
+to run Challenge/instrumentation tests against the R8-minified
+release-shaped APK for either app. A new <code>releaseTest</code> Gradle
+build type (AndroidX-Benchmark pattern) plus 8 real,
+individually-discovered R8 minification fixes in
+<code>app/proguard-rules.pro</code> make this genuinely possible for the
+first time. This is real production proguard-rules.pro content and
+therefore affects the actual shipped <code>release</code> build too
+(built and verified below), even though it was discovered via the
+test-only <code>releaseTest</code> variant.</li>
+<li>Two governance gate-integrity bugs (substring-match exploits in
+<code>scripts/check-constitution.sh</code>) and a Robolectric/JDK
+host-compatibility fix — neither touches <code>:app</code> runtime
+source.</li>
+</ol>
+<p><strong>Net effect on <code>:app</code>'s own Kotlin/Compose
+source:</strong> no behavior change. <strong>Net effect on the actual
+shipped <code>release</code>/<code>debug</code> <code>:app</code>
+APKs:</strong> proguard-rules.pro additions only affect what R8 keeps,
+never removes anything the app itself needs — verified below by running
+the SAME Challenge against both variants, not merely by reasoning about
+the diff.</p>
+<h2 id="signed-artifact-verification">Signed artifact verification</h2>
+<pre><code>$ export JAVA_HOME=/home/milosvasic/t062_work/jdk17/jdk-17.0.20.1+1
+$ ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest :app:assembleRelease --no-daemon
+BUILD SUCCESSFUL</code></pre>
+<p><code>apksigner verify --print-certs app/build/outputs/apk/release/app-release.apk</code>:</p>
+<pre><code>Verifies
+Verified using v1 scheme (JAR signing): true
+Verified using v2 scheme (APK Signature Scheme v2): true
+Signer #1 certificate DN: CN=Lava Release, O=Lava, C=RS
+Signer #1 certificate SHA-256 digest: 0feb69c3633b16d33ef63ebb98354fff6823d4930074418d76e7d698fa259868</code></pre>
+<p><code>sha256sum app/build/outputs/apk/release/app-release.apk</code>:
+<code>1762826799148e606a4615016f9569ee64fc027d81795d2e52834eab48b47482</code></p>
+<p><strong>Note:</strong> this SHA supersedes an earlier build of the
+same commit — after the initial device gate below, <code>.env</code>'s
+<code>LAVA_AUTH_OBFUSCATION_PEPPER</code> +
+<code>LAVA_AUTH_CURRENT_CLIENT_NAME</code>/<code>LAVA_AUTH_ACTIVE_CLIENTS</code>
+were rotated for this release identity
+(<code>android-1.3.17-1087</code>) per §6.P Gates 4/5 — the pepper's
+prior SHA collided with <code>1.3.17-1085</code>'s (a different release
+identity, which the gate correctly rejects). The client was rebuilt and
+the device gate below re-run against the rebuilt APK; the earlier
+pre-rotation build's evidence is superseded, not separately
+recorded.</p>
+<h2
+id="device-gate--containerized-kvm-emulator-6x6ah-conformant-runnercontainerized">Device
+gate — containerized KVM emulator (§6.X/§6.AH-conformant,
+<code>runner=containerized</code>)</h2>
+<p>Runner: <code>containers-submodule</code> · AVD:
+<code>CZ_API34_Phone</code> (API 34, phone) · Cold-boot,
+non-host-direct, gating=true.</p>
+<table>
+<thead>
+<tr>
+<th>Build type</th>
+<th>Test</th>
+<th>Result</th>
+<th>Boot</th>
+<th>Test duration</th>
+<th>Evidence dir</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>debug</td>
+<td>Challenge00CrashSurvivalTest</td>
+<td><strong>PASS</strong></td>
+<td>54.8s</td>
+<td>93.0s</td>
+<td><code>.lava-ci-evidence/2026-09-22-client-debug-c00-fresh/</code></td>
+</tr>
+<tr>
+<td>releaseTest (R8-minified, same proguard-rules.pro as
+<code>release</code>)</td>
+<td>Challenge00CrashSurvivalTest</td>
+<td><strong>PASS</strong></td>
+<td>54.6s</td>
+<td>109.8s</td>
+<td><code>.lava-ci-evidence/2026-09-22-client-releaseTest-c00/</code></td>
+</tr>
+</tbody>
+</table>
+<p>(Both rows are the POST-auth-rotation runs, against the rebuilt APKs
+whose hashes appear above — the auth rotation required a rebuild between
+the initial and final device-gate passes; only the final,
+correctly-rotated results are reported here.)</p>
+<p><strong>Honest scope:</strong> this is the §6.Z clause 4
+mandatory-minimum cold-start canary for both build variants, not the
+full 73-Challenge suite — no <code>:app</code> source changed this cycle
+(see above), and the other 72 Challenges already have real device
+evidence from 1085 (<code>.../1.3.17-1085-test-evidence.md</code>). This
+IS the first-ever execution of ANY Challenge test against this project's
+actual R8-minified build shape — previously impossible, see the
+<code>54c50eae</code> commit body for the 8 real defects found and fixed
+getting there.</p>
+<h2 id="falsifiability-rehearsal-6n13-separate-companion">Falsifiability
+rehearsal (§6.N.1.3, separate companion)</h2>
+<p>See
+<code>.lava-ci-evidence/Lava-Android-1.3.17-1087/real-device-verification.rehearsal.md</code>
+(commit <code>8b0258e4</code>, this same release cycle) for the genuine
+mutate→FAIL→revert→PASS rehearsal of
+<code>Challenge00CrashSurvivalTest</code> against the production
+<code>AuthServiceImpl.signalAuthorized()</code> path — performed against
+the debug variant; the releaseTest variant's own R8-defect-discovery
+cycle (8 real mutate→observe→fix→reverify rounds, documented in commit
+<code>54c50eae</code>'s body) is itself a falsifiability rehearsal of
+the release-variant testing infrastructure, at a larger scale.</p>
+<h2
+id="lava-api-go-real-stack-tests-this-cycles-actual-functional-change">lava-api-go
+real-stack tests (this cycle's actual functional change)</h2>
+<p>Already captured in
+<code>.lava-ci-evidence/Lava-Android-1.3.17-1087/real-device-verification.md</code>
+(commit <code>c1b13ca7</code>, earlier this same release cycle): 7/8
+live curated providers PASS (1 genuine external
+<code>bitsearch.to</code> site failure, honestly disclosed, unrelated to
+this fix); full <code>tests/e2e</code>, <code>tests/contract</code>,
+<code>tests/integration</code>, <code>tests/parity</code>, and unit
+suite all <code>ok</code>.</p>
+<p><strong>api-app-embed re-verification (2026-09-22, this
+record):</strong> the on-device embed source-sync gate
+(<code>Challenge05ApiEmbedSourceHashMatchesTest</code>,
+<code>:api-app</code>, releaseTest build) genuinely PASSED, confirming a
+freshly-built <code>releaseTest</code> (and by the same
+proguard/build-config path, <code>release</code>) APK embeds the FIXED
+lava-api-go 2.3.35 source (hash
+<code>69171c6c32e25d026809c75c2de68530ea43faea82041c1f5c42f9ee4b9a1549</code>),
+not the pre-fix 2.3.34. Evidence:
+<code>.lava-ci-evidence/2026-09-22-apiapp-releaseTest-c05/</code>.</p>
+</body>
+</html>

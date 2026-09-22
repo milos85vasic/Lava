@@ -1,0 +1,20 @@
+# §6.AK cycle-coverage-map for Lava-API-App-0.2.13-28
+#
+# api-app's own Kotlin/Android source is byte-identical to versionCode 27
+# (a pure §6.Y administrative parity bump). This version's real functional
+# content is the re-embedded lava-api-go 2.3.35 engine, directly proven by
+# Challenge05ApiEmbedSourceHashMatchesTest. The core lifecycle suite
+# (Challenge01-04) is also listed as it was genuinely re-executed against
+# both build variants this cycle, confirming no regression from the
+# release-variant testing infrastructure landed alongside it.
+version: "0.2.13-28"
+claims:
+  - fix: "Re-embedded lava-api-go 2.3.35 (dynamic-port fix) into the on-device engine -- the embed source-sync gate confirms a fresh build genuinely carries the fix, not the stale 2.3.34"
+    covering_challenges:
+      - "Challenge05ApiEmbedSourceHashMatchesTest"
+  - fix: "Release-variant (R8-minified) device-testing gap closed for api-app -- core lifecycle suite re-verified on both build variants"
+    covering_challenges:
+      - "Challenge01ApiAppColdStartTest"
+      - "Challenge02ApiAppBootAndServeTest"
+      - "Challenge03StopRestartTest"
+      - "Challenge04NotificationActionsTest"

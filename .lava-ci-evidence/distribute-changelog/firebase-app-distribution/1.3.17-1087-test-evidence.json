@@ -1,0 +1,55 @@
+{
+  "channel": "firebase-app-distribution",
+  "version_name": "1.3.17",
+  "version_code": 1087,
+  "commit_sha": "unknown",
+  "commit_sha_note": "The distribute-advancing commit (this evidence file's own commit) cannot embed its own git SHA (§6.AK Check 10 self-reference), so commit_sha uses the gate's lenient 'unknown' path (matches the 1.3.13-1079 / 1.3.15-1082 precedent). artifact.tested_code_sha below pins the exact commit the device gate actually ran against.",
+  "artifact": {
+    "app_id": "digital.vasic.lava.client",
+    "apk_path": "app/build/outputs/apk/release/app-release.apk",
+    "tested_code_sha": "54c50eaef3e39e9585817b92c9a739d39d836e03",
+    "apk_sha256": "1762826799148e606a4615016f9569ee64fc027d81795d2e52834eab48b47482",
+    "apk_sha256_note": "Supersedes an earlier build of the same commit — the client was rebuilt after .env's LAVA_AUTH_OBFUSCATION_PEPPER/LAVA_AUTH_CURRENT_CLIENT_NAME/LAVA_AUTH_ACTIVE_CLIENTS were rotated for this release identity (android-1.3.17-1087) per §6.P Gates 4/5 (the prior pepper's SHA collided with 1.3.17-1085's, a different release identity). All rows below are from the rebuilt, correctly-rotated APK.",
+    "signer_cert_sha256": "0feb69c3633b16d33ef63ebb98354fff6823d4930074418d76e7d698fa259868",
+    "debug_apk_path": "app/build/outputs/apk/debug/app-debug.apk",
+    "debug_apk_sha256": "cee87cd64c52e8e332133210d6686a4754a50b19a42f9ef017cecf0913496736"
+  },
+  "authored_utc": "2026-09-22T21:10:00Z",
+  "combined_distribute_authorization": "n/a — §6.AA two-stage: this evidence backs Stage 1 (debug-only). Stage 2 (release) appended after operator device verification.",
+  "covering_challenges": {
+    "Challenge00CrashSurvivalTest": {"debug": "PASS", "releaseTest": "PASS"}
+  },
+  "device_gate": {
+    "runner": "containers-submodule",
+    "runtime": "podman",
+    "container_image": "ghcr.io/vasic-digital/lava-android-emulator:api34-x86_64",
+    "avd": "default (baked; requested CZ_API34_Phone was advisory, api-level matched)",
+    "api_level": 34,
+    "form_factor": "phone",
+    "cold_boot": true,
+    "gate_host": "Linux x86_64, KVM",
+    "gating": true,
+    "rows": [
+      {
+        "build_type": "debug",
+        "test_class": "lava.app.challenges.Challenge00CrashSurvivalTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 54.845081787, "test_passed": true, "test_seconds": 93.02873426,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/2026-09-22-client-debug-c00-fresh/",
+        "timestamp": "2026-09-22T23:09:24+02:00"
+      },
+      {
+        "build_type": "releaseTest",
+        "note": "R8-minified, initWith(release) — same postprocessing/proguard-rules.pro shape as the actual shipped release build. First-ever execution of any Challenge test against this project's release-shaped APK; required 8 real R8 keep-rule fixes documented in commit 54c50eae's body.",
+        "test_class": "lava.app.challenges.Challenge00CrashSurvivalTest",
+        "avd": "CZ_API34_Phone", "api_level": 34, "form_factor": "phone",
+        "boot_seconds": 54.648676531, "test_passed": true, "test_seconds": 109.80211279,
+        "concurrent": 1,
+        "evidence_dir": ".lava-ci-evidence/2026-09-22-client-releaseTest-c00/",
+        "timestamp": "2026-09-22T23:06:26+02:00"
+      }
+    ]
+  },
+  "scope_honesty": "Covers the §6.Z clause 4 mandatory-minimum cold-start canary for BOTH build variants (debug and, for the first time ever, the release-shaped releaseTest). Does NOT cover the full 73-Challenge suite — no :app source changed this cycle (lava-api-go 2.3.35 + gate-integrity fixes + release-testing infra only); the other 72 Challenges already have real device evidence from 1085 (.../1.3.17-1085-test-evidence.md). lava-api-go real-stack test results (7/8 live curated providers PASS, 1 honest external bitsearch.to failure; full contract/e2e/integration/parity/unit suite ok) already captured in .lava-ci-evidence/Lava-Android-1.3.17-1087/real-device-verification.md (commit c1b13ca7, same release cycle)."
+}

@@ -187,6 +187,72 @@ file in the same commit so the index stays trustworthy. Stale state in
 this file is itself a §6.J spirit issue — the file claims a guarantee,
 the repo has drifted, the agent acts on the claim.</p>
 <blockquote>
+<p><strong>🚀🚀 2026-09-22 evening (RELEASE-VARIANT DEVICE-TESTING GAP
+CLOSED + BOTH APPS DEBUG-DISTRIBUTED — client 1.3.17-1087 + api-app
+0.2.13-28, §6.AA Stage 1 only, Stage 2 BLOCKED pending operator
+real-device confirmation).</strong> Following the earlier same-day
+source-only cycle (see the entry two below), real signing keystores +
+<code>.env</code> + Firebase config became available on this host and
+were used for genuine work: (1) <strong>closed a real,
+previously-nonexistent capability gap</strong> — this project had no way
+to run instrumentation/Challenge tests against the R8-minified
+<code>release</code>-shaped APK for either app (standard Android
+instrumentation cannot attach to a non-debuggable APK at all). A new
+<code>releaseTest</code> Gradle build type (AndroidX-Benchmark pattern:
+<code>initWith(release)</code> + <code>isDebuggable=true</code> + debug
+signing) was added to both <code>app/build.gradle.kts</code> and
+<code>api-app/build.gradle.kts</code>, plus a matching
+<code>--build-type</code>/<code>--gradle-property</code> flag added to
+the <code>vasic-digital/Containers</code> submodule's
+<code>cmd/emulator-matrix</code> CLI (pin bumped) and the two Lava-side
+matrix wrapper scripts. <strong>8 real, individually-discovered R8
+minification defects</strong> were found and fixed getting a single
+Challenge test to actually pass against the release-shaped build
+(<code>kotlin.LazyKt</code>,
+<code>dagger.hilt.internal.Preconditions</code>,
+<code>androidx.test.espresso.IdlingResource</code>,
+<code>kotlinx.coroutines.DelayWithTimeoutDiagnostics</code>, a second
+slf4j binder, <code>kotlin.time.AbstractLongTimeSource</code>,
+<code>androidx.compose.ui.platform.InfiniteAnimationPolicy</code>, a
+Hilt-generated <code>@EntryPoint</code> wrapper) — each a genuine
+<code>NoClassDefFoundError</code>/<code>NoSuchMethodError</code>, fixed
+via broad, named proguard keep rules (all commit <code>54c50eae</code>).
+(2) <strong>Genuine device evidence obtained for BOTH build variants of
+BOTH apps</strong>: client <code>Challenge00CrashSurvivalTest</code>
+PASS on debug + releaseTest; api-app <code>Challenge01-04</code> (core
+lifecycle) PASS on debug + releaseTest; api-app <code>Challenge05</code>
+(embed-source-hash match) PASS on releaseTest, directly confirming a
+fresh build genuinely embeds the fixed lava-api-go 2.3.35, not the stale
+2.3.34. (3) <strong>Real signed release APKs built and verified</strong>
+(v1+v2, real <code>CN=Lava Release</code> cert) for both apps. (4)
+<strong>§6.P Gates 4/5 auth rotation performed</strong> —
+<code>.env</code>'s
+<code>LAVA_AUTH_OBFUSCATION_PEPPER</code>/<code>LAVA_AUTH_CURRENT_CLIENT_NAME</code>/<code>LAVA_AUTH_ACTIVE_CLIENTS</code>
+rotated for the new <code>android-1.3.17-1087</code> release identity
+(the prior pepper collided with 1085's, a different release identity) —
+client rebuilt+retested against the rotated identity. (5) <strong>§6.AK
+cycle-coverage-maps authored + PASSED</strong> for both apps
+(<code>cycle-coverage-map-1.3.17-1087.yaml</code>,
+<code>cycle-coverage-map-0.2.13-28.yaml</code>) — only the
+client-device-testable claims are listed; the Go-only/tooling-only
+CHANGELOG claims are honestly excluded per §6.AK's own "device Challenge
+OR per-artifact device test" wording (their covering evidence is each
+claim's own real-stack tests, documented separately). (6) <strong>Both
+apps' DEBUG variants genuinely Firebase-distributed</strong> (real
+tester-facing uploads via
+<code>scripts/firebase-distribute.sh --debug-only</code>, real Firebase
+Console release IDs, real tester-group notification): client Firebase
+release <code>2qo0a151jl82o</code>, api-app Firebase release
+<code>020tj3b96pgng</code>. <strong>§6.AA Stage 2 (release) is BLOCKED,
+not attempted</strong> — per this project's own constitution, the
+release stage requires the operator to have installed and verified the
+Firebase-delivered DEBUG build on a real device FIRST; this cannot be
+self-certified by an agent. <strong>NEXT:</strong> operator installs +
+verifies both Firebase-distributed debug builds on a real device; only
+then <code>--release-only</code> for both apps, followed by the §6.Y
+post-distribution version bump.</p>
+</blockquote>
+<blockquote>
 <p><strong>🟢🧾 2026-08-20 (BACKLOG-CLOSURE PLAN + FINAL-REVIEW FIXUP —
 LVA-095/082/088/089/091/019 all closed, tracker exports
 resynced).</strong> Executed
@@ -3191,12 +3257,20 @@ directly rather than trust §7's "accurate as of this commit" claim,
 which predates this entry.</p>
 </blockquote>
 <blockquote>
-<p><strong>Last updated:</strong> 2026-09-22 (source-only release
-Lava-Android-1.3.17-1087 + Lava-API-Go-2.3.35-2335 cut — dynamic-port
-fix, 2 governance gate-integrity bugs, lava-api-go systemd deployment
-live-verified; two blockers remain: <code>.env</code>/keystores
-retrieval permission-gated, <code>scripts/tag.sh</code> full path still
-needs real-device attestation. See top banner.)</p>
+<p><strong>Last updated:</strong> 2026-09-22 evening (release-variant
+device-testing gap closed for both apps, 8 real R8 fixes; both apps'
+DEBUG variants genuinely Firebase-distributed — client 1.3.17-1087,
+api-app 0.2.13-28; §6.AA Stage 2 BLOCKED pending operator real-device
+confirmation of the debug builds. See top banner.)</p>
+</blockquote>
+<blockquote>
+<p><strong>Last updated (prior):</strong> 2026-09-22 (source-only
+release Lava-Android-1.3.17-1087 + Lava-API-Go-2.3.35-2335 cut —
+dynamic-port fix, 2 governance gate-integrity bugs, lava-api-go systemd
+deployment live-verified; two blockers remain:
+<code>.env</code>/keystores retrieval permission-gated,
+<code>scripts/tag.sh</code> full path still needs real-device
+attestation. See top banner.)</p>
 <p><strong>Last updated (prior):</strong> 2026-08-27 (session closed —
 publish capability REMOVED after 12 proven escapes; 22 items filed
 LVA-149…170; §7 resume block rewritten for

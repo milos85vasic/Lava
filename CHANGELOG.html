@@ -176,22 +176,41 @@
 <body>
 <h1 id="changelog">Changelog</h1>
 <h2
-id="lava-android-1317-1087--lava-api-go-2335-2335--2026-09-22-dynamic-port-fix-two-governance-gate-integrity-bugs-source-only-release">Lava-Android-1.3.17-1087
+id="lava-android-1317-1087--lava-api-go-2335-2335--2026-09-22-dynamic-port-fix-two-governance-gate-integrity-bugs-release-variant-device-testing-gap-closed">Lava-Android-1.3.17-1087
 + Lava-API-Go-2.3.35-2335 — 2026-09-22 (dynamic-port fix, two governance
-gate-integrity bugs, SOURCE-ONLY release)</h2>
+gate-integrity bugs, release-variant device-testing gap closed)</h2>
 <p><strong>Previous published:</strong> Lava-Android-1.3.17-1085 (see
 note below on the missing 1086 entry); Lava-API-Go-2.3.34-2334.</p>
-<p><strong>This is a SOURCE-ONLY release.</strong> No signed APK, no
+<p><strong>Addendum (2026-09-22, same day, commits <code>54c50eae</code>
++ <code>c1b13ca7</code> + <code>8b0258e4</code>): the SOURCE-ONLY
+framing below is SUPERSEDED.</strong> Real signing keystores,
+<code>.env</code>, and Firebase config became available on this host
+later the same day. Both apps' <code>debug</code> and
+<code>release</code> variants are now genuinely built, signed (v1+v2,
+real cert), and device-tested — see
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.17-1087-test-evidence.{md,json}</code>
+for the full evidence. This cycle ALSO closed a real,
+previously-nonexistent capability gap: this project had no way to run
+instrumentation tests against the R8-minified
+<code>release</code>-shaped APK for either app (standard Android
+instrumentation cannot attach to a non-debuggable APK at all). A new
+<code>releaseTest</code> build type (AndroidX-Benchmark pattern) plus 8
+genuinely-discovered R8 minification defects fixed in
+<code>app/proguard-rules.pro</code> (mirrored into
+<code>api-app/proguard-rules.pro</code>) make this possible for the
+first time — see commit <code>54c50eae</code>'s body for the full list.
+The original SOURCE-ONLY text is left below as an accurate historical
+record of that morning's state, not retroactively rewritten.</p>
+<p><strong>Original note (now superseded, kept for the historical
+record):</strong> this was a SOURCE-ONLY release. No signed APK, no
 Firebase distribution, no real-device attestation — this repository's
 own <code>scripts/tag.sh</code> gate (Sixth/Seventh Laws, §6.Z, §6.AA)
-requires that evidence for a normal release and none of it exists for
-this cycle (no signing keystore or device/emulator available in the
+requires that evidence for a normal release and none of it existed at
+the time (no signing keystore or device/emulator available in the
 environment this cycle was built in). Cut via
 <code>gh release create</code> / <code>glab release create</code>
 directly against this tagged commit instead, at the operator's explicit
-instruction, honestly labeled as such. <code>scripts/tag.sh</code>'s
-full device-verified release path remains the only route to a
-Firebase-distributed build.</p>
+instruction, honestly labeled as such.</p>
 <ul>
 <li><strong>lava-api-go: fixed a real <code>:8443</code> port collision
 with an unrelated process on a shared host.</strong> New
@@ -272,13 +291,19 @@ most recent prior entry (below) is for 1085, but
 real, separate prior cycle (security/log-only fix per its own in-file
 comment) whose CHANGELOG entry appears to never have been written — a
 pre-existing gap, not something fabricated retroactively here.</p>
-<p><strong>Coverage status (honest):</strong> the
-<code>lava-api-go</code> fixes carry 11 new real tests (no mocks) plus 3
-independent falsifiability rehearsals; the gate-integrity fixes carry
-falsifiability rehearsals reproducing the exact exploit each found. No
-Compose UI Challenge Tests were added or re-run this cycle (no
-<code>:app</code> source changed). No real-device attestation exists for
-this cycle — see the source-only note above.</p>
+<p><strong>Coverage status (honest, updated 2026-09-22 same
+day):</strong> the <code>lava-api-go</code> fixes carry 11 new real
+tests (no mocks) plus 3 independent falsifiability rehearsals; the
+gate-integrity fixes carry falsifiability rehearsals reproducing the
+exact exploit each found. Real-device attestation NOW exists (see the
+addendum above): <code>Challenge00CrashSurvivalTest</code> PASSES on
+both the <code>debug</code> and the R8-minified
+<code>release</code>-shaped <code>releaseTest</code> build, on a
+containerized KVM emulator — full evidence at
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution/1.3.17-1087-test-evidence.{md,json}</code>.
+This does NOT cover the full 73-Challenge suite (no <code>:app</code>
+source changed this cycle; the other 72 already have real device
+evidence from 1085).</p>
 <h2
 id="lava-android-1317-1085--2026-08-14-lva-098--p0-fixed-no-tracker-can-log-in-search-fails-for-every-provider">Lava-Android-1.3.17-1085
 — 2026-08-14 (LVA-098 — P0: fixed "no tracker can log in, search fails
@@ -909,6 +934,47 @@ Archive crawl topics that omit a comments section; the full fix for IA
 crawl topics that omit most fields is a tracked follow-up (a niche,
 non-crashing case).</li>
 </ul>
+<h2
+id="lava-api-app-0213-28--2026-09-22-administrative-parity-bump--embedded-engine-now-carries-the-same-cycle-dynamic-port-fix">Lava-API-App-0.2.13-28
+— 2026-09-22 (administrative parity bump + embedded engine now carries
+the same-cycle dynamic-port fix)</h2>
+<p><strong>Previous published:</strong> Lava-API-App-0.2.13-27.</p>
+<ul>
+<li><strong>No api-app Kotlin/Android source change.</strong>
+<code>versionCode</code> 27→28 was a pure §6.Y post-distribute
+administrative bump already applied on disk back on 2026-08-14 (commit
+<code>09c8ffc9</code>) after 27 was fully Firebase-distributed (both
+debug+release stages);
+<code>git log --oneline 09c8ffc9..HEAD -- api-app/</code> confirms ZERO
+commits have touched <code>api-app/</code> since — this entry exists
+only to close the CHANGELOG/snapshot gap for a versionCode that had
+already been sitting in <code>api-app/build.gradle.kts</code>
+unaccompanied.</li>
+<li><strong>Embedded <code>lava-api-go</code> engine
+(<code>liblavaapi.so</code>) now carries this same cycle's dynamic-port
+allocation fix.</strong> Per the current top
+<code>Lava-Android-1.3.17-1087 + Lava-API-Go-2.3.35-2335</code> entry: a
+real <code>:8443</code> port collision with an unrelated process on a
+shared host is fixed via a new <code>server.ResolveListen()</code>
+(backed by a new race-free <code>network.ListenEphemeral</code> helper
+added to <code>submodules/containers</code>) that binds the public
+address synchronously up front, plus a genuine
+mDNS/Alt-Svc-before-any-bind ordering bug found while investigating it
+(the public address was previously wired into
+<code>discovery.Announce</code> and the Alt-Svc middleware before any
+socket bind was even attempted). This is a genuine embed-source change,
+not a needless re-distribute — the API↔︎embed source-sync gate confirms a
+freshly-built api-app APK embeds lava-api-go 2.3.35 (hash
+<code>69171c6c32e25d026809c75c2de68530ea43faea82041c1f5c42f9ee4b9a1549</code>),
+not the prior 2.3.34.</li>
+<li><strong>§6.Y:</strong> versionCode HELD at 28 (already bumped in a
+prior cycle, per above); versionName HELD at 0.2.13 (embed-only change,
+no api-app user-visible functional change per §6.Y clause 3).</li>
+</ul>
+<p><strong>Coverage status (§6.AK / §6.Z):</strong> device-verification
+evidence pending — see
+<code>.lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.2.13-28-test-evidence.{md,json}</code>
+once available.</p>
 <h2
 id="lava-api-app-0213-27--2026-08-14-embedded-engine-permanent-6ac-authrequest-telemetry--parity-bump-api-app-itself-unaffected-by-lva-098">Lava-API-App-0.2.13-27
 — 2026-08-14 (embedded engine: permanent §6.AC auth/request telemetry —
