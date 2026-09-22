@@ -1,4 +1,11 @@
 {
+"permissions": {
+      "allow": [
+        "Bash(ssh *)",
+        "Bash(rsync *)",
+        "Bash(scp *)"
+      ]
+    },
   "hooks": {
     "PreToolUse": [
       {
