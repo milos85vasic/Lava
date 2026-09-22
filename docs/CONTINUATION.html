@@ -3118,9 +3118,88 @@ record.</strong> The 27 newly-initialised are exactly
 advanceable.</p>
 </blockquote>
 <blockquote>
-<p><strong>Last updated:</strong> 2026-08-27 (session closed — publish
-capability REMOVED after 12 proven escapes; 22 items filed LVA-149…170;
-§7 resume block rewritten for
+<p><strong>🔧🚀 2026-09-22 (Lava-Android-1.3.17-1087 +
+Lava-API-Go-2.3.35-2335 — dynamic-port fix, two governance
+gate-integrity bugs, SOURCE-ONLY GitHub/GitLab release).</strong> Long
+session spanning a multi-day rate-limit pause.
+<strong>lava-api-go:</strong> fixed a real <code>:8443</code> port
+collision with an unrelated process on a shared host — new
+<code>server.ResolveListen()</code> (backed by a new race-free
+<code>network.ListenEphemeral</code> helper added to
+<code>submodules/containers</code>) binds synchronously up front;
+<code>LAVA_API_LISTEN=":0"</code> now genuinely requests an OS-assigned
+free port. Also fixed a related mDNS/Alt-Svc-before-any-bind ordering
+bug found during the same investigation (the public address was wired
+into discovery + Alt-Svc middleware before any socket bind was
+attempted, so a port collision surfaced only after mDNS had already
+advertised the wrong address). <strong>Two real governance
+gate-integrity bugs</strong> found via independent reviews dispatched to
+the <code>kimi</code> and <code>opencode</code> CLIs in parallel
+(genuinely separate agents, not Claude subagents) and independently
+re-verified: <code>scripts/check-constitution.sh</code>'s
+third-party-submodule exemption used a substring match instead of
+exact-path-component match (would silently exempt e.g.
+<code>submodules/superspec-extra</code>); the §6.N propagation-target
+floor compared an inflated "actual" count against a deflated "expected"
+count, tolerating more missing own-org governance docs than intended.
+Both carry real falsifiability rehearsals. <strong>A
+Robolectric/host-JDK incompatibility fixed across 4 test
+modules</strong> (<code>sqliteMode=LEGACY</code>), 180 tests / 0
+failures. <strong><code>submodules/superspec</code> duplicate
+registration consolidated</strong> onto the standard
+<code>submodules/</code> path (pin now <code>c20ac6c1</code>);
+<code>submodules/containers</code> advanced to <code>0053986a</code> for
+the <code>ListenEphemeral</code> helper. <strong>A background governance
+audit (BG-002) confirmed zero genuine gaps</strong> in existing
+anti-bluff/test-coverage governance — one honest compliance-backlog
+finding recorded (constitution's 7 nested engines pinned but not yet
+invoked by any Lava script), no new rule needed.
+<strong><code>lava-api-go</code>'s existing systemd <code>--user</code>
+deployment (shipped 2026-08-12, not new this cycle) was LIVE-VERIFIED
+FOR REAL this cycle</strong>: <code>curl</code>'d against the host's
+actual LAN IP (not loopback) → 200;
+<code>systemctl --user stop</code>/<code>start</code> proven to
+genuinely control the container lifecycle; <code>loginctl</code> linger
+confirmed enabled (survives reboot without an active login session).
+<strong>This is a SOURCE-ONLY release</strong> —
+<code>gh release create</code> / <code>glab release create</code>
+directly against the tagged commit, at the operator's explicit
+instruction, honestly labeled as such — because
+<code>scripts/tag.sh</code>'s own gate (Sixth/Seventh Laws, §6.Z, §6.AA)
+requires real-device attestation evidence that does not exist this
+cycle: no signing keystore and no device/emulator available in the
+environment this cycle was built in. <code>scripts/tag.sh</code>'s full
+device-verified release path remains blocked pending that evidence.
+<strong>Two blockers carried forward, both genuinely unresolved (see
+§2/§4.5):</strong> (1) retrieving
+<code>.env</code>/<code>keystores/</code>/<code>app/google-services.json</code>
+from another host (<code>nezha.local</code>) is blocked by Claude Code's
+own Bash-permission safety classifier — not a code bug, a settings-level
+gate the operator must clear (either grant the permission or copy the
+files manually via SSH); (2) <code>scripts/tag.sh</code>'s full release
+path stays blocked until real-device attestation evidence exists.
+<strong>Full CHANGELOG.md entry (top of file) is the authoritative
+technical record for this cycle</strong> — this paragraph summarizes it.
+<strong>UNCONFIRMED (§11.4.6):</strong> whether SpecKit feature
+<code>002-build-test-distribute-pipeline</code> (the prior "one-line
+resume" target, §7.1 below) is still the active priority — this
+session's work was unrelated to it, and over 3 weeks of
+otherwise-undocumented-in-this-file activity separate this entry from
+the 2026-08-27 entry above it. A fresh session should read
+<code>specs/002-build-test-distribute-pipeline/progress.yml</code>
+directly rather than trust §7's "accurate as of this commit" claim,
+which predates this entry.</p>
+</blockquote>
+<blockquote>
+<p><strong>Last updated:</strong> 2026-09-22 (source-only release
+Lava-Android-1.3.17-1087 + Lava-API-Go-2.3.35-2335 cut — dynamic-port
+fix, 2 governance gate-integrity bugs, lava-api-go systemd deployment
+live-verified; two blockers remain: <code>.env</code>/keystores
+retrieval permission-gated, <code>scripts/tag.sh</code> full path still
+needs real-device attestation. See top banner.)</p>
+<p><strong>Last updated (prior):</strong> 2026-08-27 (session closed —
+publish capability REMOVED after 12 proven escapes; 22 items filed
+LVA-149…170; §7 resume block rewritten for
 <code>/speckit-superspec-execute 002</code>; GitLab token rotation
 OWED.)</p>
 </blockquote>
@@ -6687,31 +6766,34 @@ this first)</h2>
 <tbody>
 <tr>
 <td>Lava parent on master</td>
-<td>2 mirrors (GitHub + GitLab) converged at HEAD
-<code>dca7cac7</code></td>
-<td>1077 wrap-up — sweep fixes, submodule install_upstreams</td>
+<td>2 mirrors (GitHub + GitLab), HEAD <code>fc1140f9</code> (2026-09-22)
+— SOURCE-ONLY release cut via
+<code>gh</code>/<code>glab release create</code>, NOT
+<code>scripts/tag.sh</code> (no signing keystore / device this
+cycle)</td>
+<td>Lava-Android-1.3.17-1087 + Lava-API-Go-2.3.35-2335</td>
 </tr>
 <tr>
 <td>API (lava-api-go)</td>
-<td>2.3.33 (code 2333) — <code>internal/version/version.go</code></td>
-<td>container <code>lava-api-go-thinker</code></td>
+<td>2.3.35 (code 2335) — <code>internal/version/version.go</code>;
+systemd <code>--user</code> deployment LIVE-VERIFIED this cycle (real
+LAN-IP curl 200, stop/start lifecycle proven, <code>loginctl</code>
+linger enabled)</td>
+<td>source-only, no container-image redistribute this cycle</td>
 </tr>
 <tr>
 <td>Android Firebase</td>
-<td>1.3.12 (1076) distributed 2026-06-25 (debug+release);
-<code>last-version-debug=1077</code>,
-<code>last-version-release=1077</code> (1077 is a cleanup-only evidence
-cycle — same feature set as 1076; APK built in
-<code>releases/1.3.12-1077/</code> but distribute §6.P-blocked because
-pointer==versionCode)</td>
-<td><code>lava-vasic-digital</code> Firebase project</td>
+<td>versionCode 1087 / versionName HELD at 1.3.17 (no <code>:app</code>
+source changed this cycle) — <strong>NOT distributed to Firebase this
+cycle</strong> (no signed APK possible without
+<code>.env</code>/keystores, see §2/§4.5 blocker)</td>
+<td>last actually-Firebase-distributed build remains 1.3.17-1085
+(2026-08-14)</td>
 </tr>
 <tr>
 <td>On-device API App</td>
-<td>0.2.11-22 distributed 2026-06-25; <code>last-version-debug=23</code>
-(api-app 0.2.11-23 is a parity bump, APK built, same status as
-client)</td>
-<td>Firebase App Distribution api-app channel</td>
+<td>unchanged this cycle (no <code>:api-app</code> source touched)</td>
+<td>last distributed per prior cycle entries above</td>
 </tr>
 <tr>
 <td>18 own-org submodules</td>
@@ -7867,6 +7949,18 @@ CONTINUATION §4.5 OWED#2 (mirror divergence) is CLOSED. ⚠️
 is OWED</strong> (the full Android + Go build was not run on this host)
 — verify before any release/distribute.</p>
 <blockquote>
+<p><strong>§6.S refresh 2026-09-22 (partial, this cycle):</strong> only
+<code>containers</code> (bumped for the <code>ListenEphemeral</code>
+helper) and <code>superspec</code> (consolidated from a duplicate
+registration) changed this cycle; both updated in the table below. The
+remaining rows are carried forward from the 2026-08-09 audit below and
+were NOT re-verified this cycle — treat any pin/mirror claim other than
+<code>containers</code>/<code>superspec</code> as
+<strong>UNCONFIRMED</strong> until a fresh
+<code>git submodule status</code> + <code>ls-remote</code> sweep is
+run.</p>
+</blockquote>
+<blockquote>
 <p><strong>§6.S refresh 2026-08-09 (live audit, read-only, no pins
 changed):</strong> the table below was regenerated from a real
 <code>git submodule status</code> + per-submodule
@@ -7926,10 +8020,20 @@ upstream tip <code>072724af</code></td>
 </tr>
 <tr>
 <td><code>containers</code></td>
-<td><code>746efe33</code></td>
-<td>GitHub + GitLab (converged)</td>
-<td>per-OS procWalker + conditional <code>--device /dev/kvm</code>; 4
-commits behind own upstream tip <code>83275f8b</code></td>
+<td><code>0053986a</code> (bumped 2026-09-22, see below)</td>
+<td>GitHub + GitLab (assumed converged — NOT re-audited this cycle)</td>
+<td>new <code>network.ListenEphemeral</code> race-free helper (backs
+<code>lava-api-go</code>'s dynamic-port fix); supersedes the
+2026-08-09-audited <code>746efe33</code> row above</td>
+</tr>
+<tr>
+<td><code>superspec</code></td>
+<td><code>c20ac6c1</code> (consolidated 2026-09-22)</td>
+<td>GitHub only (<code>WangX0111/superspec</code>, third-party — NOT
+vasic-digital/HelixDevelopment)</td>
+<td>duplicate registration eliminated this cycle onto the standard
+<code>submodules/</code> path; third-party dep, §6.W 2-mirror rule does
+not apply (not own-org)</td>
 </tr>
 <tr>
 <td><code>database</code></td>
@@ -8077,6 +8181,29 @@ forensic continuity; none are blocking this cycle's constitutional
 work.</p>
 <h3 id="45-active-known-issues">4.5 Active known issues</h3>
 <ul>
+<li><strong><code>.env</code>/<code>keystores/</code>/<code>app/google-services.json</code>
+retrieval blocked (2026-09-22, ongoing).</strong> These files are
+gitignored per §6.H and currently exist only on another host
+(<code>nezha.local</code>). Retrieving them into this session was
+blocked by Claude Code's own Bash-permission safety classifier — this is
+a settings-level permission gate, NOT a code bug or a project defect.
+<strong>Operator action needed:</strong> either grant the relevant Bash
+permission rule for the SSH+copy command, or copy the files onto this
+host manually. Until this closes, no signed APK build and no Firebase
+distribution are possible from this host.</li>
+<li><strong><code>scripts/tag.sh</code>'s full device-verified release
+path remains blocked (2026-09-22, ongoing).</strong> The Sixth/Seventh
+Laws + §6.Z + §6.AA gates it enforces require real-device attestation
+evidence that does not exist this cycle (no signing keystore, no
+device/emulator available in this environment). The 2026-09-22 release
+(Lava-Android-1.3.17-1087 + Lava-API-Go-2.3.35-2335) was cut SOURCE-ONLY
+via <code>gh release create</code>/<code>glab release create</code>
+directly against the tagged commit instead, at the operator's explicit
+instruction, honestly labeled as such — this is NOT a substitute for
+<code>scripts/tag.sh</code>'s gate and does not close this item. Closing
+requires the <code>.env</code>/keystores blocker above to close first,
+then a real device/emulator run producing the evidence
+<code>scripts/tag.sh</code> checks for.</li>
 <li><strong>LVA-008 — nav-teardown crash (search→back → MainActivity
 destroy ISE)</strong>: The primary open user-facing defect.
 Navigation-compose throws
@@ -8390,21 +8517,56 @@ matrix runner BLOCKED on §6.X-debt.</li>
 <hr />
 <h2 id="7-resume-prompt">7. RESUME PROMPT</h2>
 <blockquote>
-<p><strong>REWRITTEN 2026-08-27.</strong> Everything below this line
-supersedes every earlier resume block. The previous version pointed at
-<code>/Volumes/T7/Projects/lava</code> — a macOS path that does not
-exist on this host — and described priorities from June that are all
-superseded. It has been removed rather than kept, because a resume block
-that fails on its first line is worse than none.</p>
+<p><strong>PARTIALLY SUPERSEDED 2026-09-22.</strong> The block below
+(written 2026-08-27) is carried forward unmodified because this
+session's work (governance gate fixes + a dynamic-port fix + a
+source-only release, see the 2026-09-22 top banner and §1/§4.5) did NOT
+touch SpecKit feature <code>002-build-test-distribute-pipeline</code> at
+all. <strong>UNCONFIRMED (§11.4.6): whether §7.1's "accurate as of this
+commit" claim for <code>tasks.md</code>/<code>progress.yml</code> still
+holds</strong> — over 3 weeks of session gap separate this update from
+the 2026-08-27 text below, and this session did not check those files. A
+fresh session MUST re-read
+<code>specs/002-build-test-distribute-pipeline/progress.yml</code>
+directly before assuming §7.1-§7.4 below are still current, rather than
+trusting this prompt at face value.</p>
+<p><strong>Also note the repo path below
+(<code>/run/media/milosvasic/DATA4TB/Projects/lava</code>) does NOT
+match this session's actual working directory
+(<code>/home/milosvasic/Projects/lava</code>).</strong> This discrepancy
+is recorded as observed fact, not resolved — it may reflect a
+multi-track checkout (per root <code>CLAUDE.md</code>'s "Multi-Track
+Development System Adoption" section, Track 1 was registered at the
+DATA4TB path) or a host/environment change since 2026-08-27. A fresh
+session should confirm which checkout is authoritative
+(<code>git remote -v</code> + <code>git log -1</code> on both, if both
+exist) before assuming either path.</p>
+<p><strong>What IS confirmed current as of 2026-09-22 (see top banner +
+§4.5):</strong> <code>lava-api-go</code>'s systemd <code>--user</code>
+deployment is live and verified working end-to-end. Two blockers are
+open: (1) <code>.env</code>/
+<code>keystores/</code>/<code>app/google-services.json</code> retrieval
+from <code>nezha.local</code> is blocked by a Claude Code
+Bash-permission gate, operator action needed; (2)
+<code>scripts/tag.sh</code>'s full device-verified release path remains
+blocked pending that retrieval + a real device/emulator run. The
+2026-09-22 release was cut source-only
+(<code>gh</code>/<code>glab release create</code>) as an explicit,
+honestly-labeled exception, not a resolution of either blocker.</p>
 </blockquote>
-<h3 id="71--the-one-line-resume">7.1 — The one-line resume</h3>
+<h3
+id="71--the-one-line-resume-as-of-2026-08-27--re-verify-before-trusting-see-note-above">7.1
+— The one-line resume (as of 2026-08-27 — RE-VERIFY before trusting, see
+note above)</h3>
 <p>The project is mid-flight on <strong>SpecKit feature
 <code>002-build-test-distribute-pipeline</code></strong>. A fresh
 session resumes by running:</p>
 <pre><code>/speckit-superspec-execute 002</code></pre>
 <p>Nothing else is required. That command reads
 <code>specs/002-build-test-distribute-pipeline/tasks.md</code> and
-<code>progress.yml</code>, which are accurate as of this commit.</p>
+<code>progress.yml</code>, which were accurate as of the 2026-08-27
+commit — <strong>re-check them, do not assume, before proceeding; see
+the 2026-09-22 note above.</strong></p>
 <h3 id="72--exactly-what-is-left-4-tasks-one-chain">7.2 — Exactly what
 is left: 4 tasks, one chain</h3>
 <p><code>tasks.md</code>: <strong>59 of 63 checked.</strong> The 4 open
@@ -8546,29 +8708,45 @@ the hard way:</strong> <code>grep</code> is shadowed by a ugrep wrapper
 host</strong> and is inherited by <code>bash -c</code>. The repo path is
 <code>/run/media/milosvasic/DATA4TB/Projects/lava</code>.</p>
 <h3 id="77--paste-ready-block">7.7 — Paste-ready block</h3>
-<pre><code>Continue Lava SpecKit feature 002-build-test-distribute-pipeline.
-
-Repo: /run/media/milosvasic/DATA4TB/Projects/lava   (branch: master)
+<pre><code>Continue Lava. Repo path may be /home/milosvasic/Projects/lava OR
+/run/media/milosvasic/DATA4TB/Projects/lava — CONFIRM which checkout is
+current (git log -1 on each, if both exist) before doing anything else;
+this is an unresolved discrepancy noted 2026-09-22, not yet explained.
 
 Read in order, then act:
-  1. docs/CONTINUATION.md  §0 top banner and §7 (this section)
-  2. CLAUDE.md
-  3. specs/002-build-test-distribute-pipeline/tasks.md + progress.yml
+  1. docs/CONTINUATION.md  §0 top banner (2026-09-22 entry, newest) and §7
+  2. CHANGELOG.md newest entry (Lava-Android-1.3.17-1087 + Lava-API-Go-2.3.35-2335)
+  3. CLAUDE.md
+  4. specs/002-build-test-distribute-pipeline/progress.yml — RE-VERIFY status,
+     do not trust §7.1-7.4 below at face value; 3+ weeks of unrelated work
+     separate this prompt from when that section was last confirmed accurate.
 
-Then run:  /speckit-superspec-execute 002
+Two open blockers as of 2026-09-22 (see §4.5):
+  - .env / keystores/ / app/google-services.json retrieval from nezha.local
+    is blocked by a Claude Code Bash-permission gate. OPERATOR ACTION: grant
+    the permission or copy the files manually via SSH. Nothing else unblocks
+    a signed build or Firebase distribution.
+  - scripts/tag.sh&#39;s full device-verified release path stays blocked until
+    the above closes AND a real device/emulator run produces its required
+    evidence. The 2026-09-22 release was cut SOURCE-ONLY via gh/glab release
+    create as an explicit, honestly-labeled exception — do not treat it as
+    having satisfied scripts/tag.sh&#39;s gate.
 
-4 tasks remain (59/63 done): T054 needs a SIXTH review now that the
-publish path was deleted; T055 implements phase-07-closure.sh and is
-blocked on it; T056 follows T055; T062 needs a full Scenario 2 run that
-does not skip testing.
+Confirmed working and unaffected by the above: lava-api-go&#39;s systemd --user
+deployment (live-verified 2026-09-22 — real LAN-IP curl 200, stop/start
+lifecycle proven, loginctl linger enabled).
 
-Do not re-litigate the publish-path removal — twelve proven escapes over
-five review rounds, guarding demonstrably non-convergent. Do read §7.3
-before touching scripts/advance-all-submodules.sh.
-
-Open P0s: LVA-165 (rotate GitLab token - OPERATOR), LVA-166 (the script&#39;s
-stated clean-tree safety property is false), LVA-168 (a skipped phase is
-omitted from the run report, so a zero-test run reports PASS).</code></pre>
+If SpecKit feature 002 is confirmed still active per progress.yml, then:
+4 tasks remained as of 2026-08-27 (59/63 done): T054 needs a SIXTH review
+now that the publish path was deleted; T055 implements phase-07-closure.sh
+and is blocked on it; T056 follows T055; T062 needs a full Scenario 2 run
+that does not skip testing. Do not re-litigate the publish-path removal —
+twelve proven escapes over five review rounds, guarding demonstrably
+non-convergent. Read §7.3 before touching scripts/advance-all-submodules.sh.
+Open P0s from that cycle: LVA-165 (rotate GitLab token - OPERATOR), LVA-166
+(the script&#39;s stated clean-tree safety property is false), LVA-168 (a
+skipped phase is omitted from the run report, so a zero-test run reports
+PASS).</code></pre>
 <h2 id="8-house-keeping-the-agent-should-keep-doing">8. House-keeping
 the agent should keep doing</h2>
 <p>These are habits established across multiple cycles; future agents
