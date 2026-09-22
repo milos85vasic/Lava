@@ -25,10 +25,19 @@ const (
 	// x86_64 seccomp allowlist blocks (SIGSYS). A modernc/libc fork
 	// (third_party/modernc-libc, replace directive) remaps them to the *at
 	// forms at the X__syscallN dispatcher. arm64 was never affected.
-	Name = "2.3.34"
+	// 2.3.35: dynamic-port allocation fix (server.ResolveListen, backed by a
+	// new race-free network.ListenEphemeral helper in submodules/containers)
+	// — fixes a real :8443 collision with an unrelated process on a shared
+	// host, and fixes a genuine mDNS/Alt-Svc-before-any-bind ordering bug
+	// found while investigating it (the public address was wired into
+	// discovery.Announce and the Alt-Svc middleware before any socket bind
+	// was even attempted). User-facing operational fix -> Name bumps per
+	// §6.Y clause 3. SOURCE-ONLY release (no signed/tested binary artifact
+	// attached) — see CHANGELOG.md.
+	Name = "2.3.35"
 
 	// Code is the integer release counter. New tags MUST increment.
-	Code = 2334
+	Code = 2335
 )
 
 // SourceHash is the 64-hex sha256 of the EXACT lava-api-go source codebase that

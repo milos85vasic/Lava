@@ -134,7 +134,15 @@ android {
         // §6.Y post-distribution bump (2026-08-14): 1085 debug+release both
         // Firebase-distributed this cycle (LVA-098 fix). Bumping first, per
         // the standing mandate, before any new code lands in this cycle.
-        versionCode = 1086
+        // §6.Y.3 (2026-09-19/22 cycle): this cycle's real fixes are all in
+        // lava-api-go (dynamic-port/mDNS-ordering fix) and constitutional
+        // gate scripts (two gate-integrity bugs found by independent
+        // kimi/opencode CLI reviews) plus build/test-tooling (Robolectric
+        // native-runtime host incompatibility) — no :app module source
+        // changed this cycle, so versionCode bumps only; versionName held
+        // at 1.3.17. This is a source-only release (no signed build, no
+        // device attestation) — see CHANGELOG.md.
+        versionCode = 1087
         versionName = "1.3.17"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/
