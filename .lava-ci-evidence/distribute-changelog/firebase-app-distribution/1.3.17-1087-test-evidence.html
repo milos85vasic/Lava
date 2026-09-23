@@ -181,7 +181,7 @@ Pre-Distribute Test-Execution Evidence — Lava-Android-1.3.17-1087</h1>
 <strong>Artifact under test:</strong>
 <code>digital.vasic.lava.client</code> / <code>.client.dev</code>
 versionName 1.3.17 versionCode 1087 <strong>Commit:</strong>
-<code>54c50eaef3e39e9585817b92c9a739d39d836e03</code> (master)
+<code>c4e05e514fb3e85c4a29028a951e66871da29fd0</code> (master)
 <strong>Evidence authored:</strong> 2026-09-22</p>
 <h2 id="scope--this-cycles-real-changes">Scope — this cycle's real
 changes</h2>
@@ -196,7 +196,7 @@ No <code>:app</code> module source changed for this reason — the client
 consumes lava-api-go only via the embedded on-device engine in
 <code>:api-app</code>, not directly.</li>
 <li><strong>Release-variant device-testing gap closed</strong> (this
-same commit, <code>54c50eae</code>): this project previously had NO way
+same commit, <code>c4e05e51</code>): this project previously had NO way
 to run Challenge/instrumentation tests against the R8-minified
 release-shaped APK for either app. A new <code>releaseTest</code> Gradle
 build type (AndroidX-Benchmark pattern) plus 8 real,
@@ -290,7 +290,7 @@ full 73-Challenge suite — no <code>:app</code> source changed this cycle
 evidence from 1085 (<code>.../1.3.17-1085-test-evidence.md</code>). This
 IS the first-ever execution of ANY Challenge test against this project's
 actual R8-minified build shape — previously impossible, see the
-<code>54c50eae</code> commit body for the 8 real defects found and fixed
+<code>c4e05e51</code> commit body for the 8 real defects found and fixed
 getting there.</p>
 <h2 id="falsifiability-rehearsal-6n13-separate-companion">Falsifiability
 rehearsal (§6.N.1.3, separate companion)</h2>
@@ -302,7 +302,7 @@ mutate→FAIL→revert→PASS rehearsal of
 <code>AuthServiceImpl.signalAuthorized()</code> path — performed against
 the debug variant; the releaseTest variant's own R8-defect-discovery
 cycle (8 real mutate→observe→fix→reverify rounds, documented in commit
-<code>54c50eae</code>'s body) is itself a falsifiability rehearsal of
+<code>c4e05e51</code>'s body) is itself a falsifiability rehearsal of
 the release-variant testing infrastructure, at a larger scale.</p>
 <h2
 id="lava-api-go-real-stack-tests-this-cycles-actual-functional-change">lava-api-go

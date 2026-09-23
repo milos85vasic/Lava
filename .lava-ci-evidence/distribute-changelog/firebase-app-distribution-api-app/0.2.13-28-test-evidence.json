@@ -7,7 +7,7 @@
   "artifact": {
     "app_id": "digital.vasic.lava.api",
     "apk_path": "api-app/build/outputs/apk/release/api-app-release.apk",
-    "tested_code_sha": "54c50eaef3e39e9585817b92c9a739d39d836e03",
+    "tested_code_sha": "c4e05e514fb3e85c4a29028a951e66871da29fd0",
     "apk_sha256": "76f97d3664fe429c7edce795496261fa8755f30c77d3769f0a4b10e32a770211",
     "signer_cert_sha256": "0feb69c3633b16d33ef63ebb98354fff6823d4930074418d76e7d698fa259868",
     "debug_apk_path": "api-app/build/outputs/apk/debug/api-app-debug.apk"
