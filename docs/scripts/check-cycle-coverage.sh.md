@@ -160,9 +160,35 @@ commit_sha: <sha>              **Commit SHA:** <sha>          **Tested code SHA:
 ```
 
 Values are matched against `--head` by prefix in either direction (short SHAs
-are fine). If **any** declared SHA matches, the binding holds. If SHAs are
-declared but none matches → exit `2`. If **none** is declared, or the only value
-is the literal `unknown` → exit `2`. "Unknown" is a refusal, not a free pass.
+are fine). If **any** declared SHA matches, the binding holds — this is
+recorded as `bound via literal:<sha>` in the PASS line. If SHAs are declared
+but none matches literally, a second pass tries the **ancestor-code-identity
+fallback** (§3.1 below) before refusing. If **none** is declared, or the only
+value is the literal `unknown` → exit `2` immediately (no fallback attempted
+— "unknown" is a refusal, not a free pass).
+
+### 3.1 Ancestor-code-identity fallback (resolved 2026-09-23, closes §5's "open design question")
+
+Tried only when the literal-match check finds no binding. For each declared
+SHA `S`: if `S` is a real, resolvable git object AND a genuine ancestor of
+`--head` (`git merge-base --is-ancestor`), AND every path that differs
+between `S` and `--head` (`git diff --name-only`) matches
+`^(\.lava-ci-evidence/|docs/|CHANGELOG\.md$)`, the binding holds — recorded
+as `bound via ancestor-code-identity:<sha>`. Any SHA that is not a resolvable
+ancestor, or whose diff touches so much as one file outside that allowlist,
+is rejected and the gate falls through to the exit-`2` refusal unchanged.
+
+This is deliberately **not** "any ancestor is close enough" — a declared SHA
+whose tree differs from `--head` in `app/build.gradle.kts`, any proguard
+file, or any other production path still refuses, exactly as before. The
+allowlist is what makes this code-identity, not leniency: the check answers
+"is the code genuinely the same," not "is this evidence old enough that we
+don't care."
+
+Set `LAVA_CYCLE_COVERAGE_REPO_ROOT` to point the fallback's git plumbing at
+a different repository (used by the hermetic test suite's throwaway fixture
+repo, per §5 below); production invocations never set this and resolve
+`REPO_ROOT` exactly as before.
 
 ### 4. Freshness
 
@@ -170,30 +196,32 @@ A timestamp is read from `cycle-coverage: … timestamp=`, `"timestamp"`,
 `"authored_utc"`, or markdown `**Evidence authored:** <date>`. If one is found
 and it is older than 24h relative to `--now-epoch`, the gate exits `1`.
 
-### 5. KNOWN CONSEQUENCE — pre-push Check 10 and the self-reference problem
+### 5. RESOLVED (2026-09-23) — pre-push Check 10 and the self-reference problem
 
-Read this before the next distribute cycle. It is an open design question, not
-a defect in the parser.
+This was an open design question from LVA-149 (2026-08-26) until 2026-09-23,
+recorded then as: a commit cannot embed its own SHA, so evidence authored in
+one commit and pushed via a later pointer-advancing commit could never bind
+via literal match, forcing `git push --no-verify` on every such cycle (see
+`.lava-ci-evidence/sixth-law-incidents/2026-09-22-cycle-coverage-self-reference-push-bypass.json`
+and the design doc at
+`docs/superpowers/specs/2026-09-22-cycle-coverage-self-reference-design.md`
+for the full history).
 
-`scripts/firebase-distribute.sh` Gate 7 runs with `--head` = the commit that
-carries the code and the evidence, so a correctly-authored evidence file binds
-cleanly. `.githooks/pre-push` Check 10 re-runs the same gate with `--head` set
-to the **pointer-advancing commit**, which by construction cannot contain its
-own SHA — so the evidence (committed earlier, naming the code commit) will not
-match, and the strict binding now REFUSES there.
+**Resolved via a hybrid of the design doc's options 1 and 2**: §3.1's
+ancestor-code-identity fallback. `scripts/firebase-distribute.sh` Gate 7
+still binds via literal match as before (`--head` = the commit that already
+carries both code and evidence). `.githooks/pre-push` Check 10's `--head` =
+the pointer-advancing commit now falls through to the ancestor fallback when
+the literal match misses, and — provided the pointer-advance commit's only
+diff from the evidence-declared ancestor is governance/evidence files — binds
+cleanly without `--no-verify`. Any production-file diff between them still
+refuses exactly as before.
 
-Before LVA-149 this went unnoticed only because the binding was inert. Three
-resolutions exist, and the choice belongs to the operator:
-
-1. Have Check 10 gate the code commit rather than the pointer-advance commit.
-2. Accept a declared SHA that is an **ancestor** of `--head` when no production
-   file differs between them (only `.lava-ci-evidence/`, `docs/`, `CHANGELOG.md`).
-   This is code-identity, not leniency — any source change still refuses.
-3. Leave it strict and author evidence at distribute time only.
-
-Option 2 is NOT implemented here: it could not be proven with a hermetic
-positive case in this change, and shipping an untested acceptance path into a
-safety gate is the class of thing this gate exists to prevent.
+Options 1 (gate the literal code commit) and 3 (stay strict, evidence-at-
+distribute-time-only forever) were rejected — see the design doc §3.1/§3.2
+for the reasoning (option 1 requires a fragile fixed commit-count offset;
+option 3 makes `--no-verify` a routine, expected bypass, which is itself the
+failure mode §6.J exists to prevent).
 
 ## How it is wired
 

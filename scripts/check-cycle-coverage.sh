@@ -65,7 +65,13 @@
 #       format yields no parseable verdict record at all
 set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+# LAVA_CYCLE_COVERAGE_REPO_ROOT override (same pattern as
+# LAVA_CYCLE_COVERAGE_HEAD below): lets the hermetic test suite point the
+# ancestor-code-identity fallback's git plumbing (merge-base/diff) at a
+# throwaway fixture repo instead of this checkout, without touching real
+# history. Production invocations never set this env var, so REPO_ROOT
+# resolves exactly as before.
+REPO_ROOT="${LAVA_CYCLE_COVERAGE_REPO_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
 
 VER="" EDIR="" MAP="" HEAD_FLAG="" NOW_FLAG="" STRICT=0
 while [[ $# -gt 0 ]]; do
@@ -150,13 +156,40 @@ if [[ "${#ESHAS[@]}" -eq 0 ]]; then
     exit 2
 fi
 sha_bound=0
+bound_via=""
 for s in "${ESHAS[@]}"; do
-    if [[ "$HEAD" == "$s"* || "$s" == "$HEAD"* ]]; then sha_bound=1; break; fi
+    if [[ "$HEAD" == "$s"* || "$s" == "$HEAD"* ]]; then
+        sha_bound=1; bound_via="literal:$s"; break
+    fi
 done
+
+# Ancestor-plus-code-identity fallback (design doc 2026-09-22, LVA
+# self-reference gap). Only tried when no literal match exists — this NEVER
+# weakens the literal path above, it only widens it for the case a commit
+# cannot embed its own SHA (the pointer-advancing commit .githooks/pre-push
+# Check 10 re-checks). "Code-identity, not leniency": an ancestor whose tree
+# differs in ANY production file still refuses — only a pure governance/
+# evidence-only diff between the declared ancestor and HEAD may pass.
+if [[ "$sha_bound" -ne 1 ]]; then
+    for s in "${ESHAS[@]}"; do
+        # Full 40-char SHA required for merge-base/diff — the literal-match
+        # path above already accepts short prefixes; this fallback needs a
+        # resolvable object, so a bare 7-char SHA is skipped here (it will
+        # already have matched literally above if it was going to match at all).
+        git -C "$REPO_ROOT" cat-file -e "$s" 2>/dev/null || continue
+        git -C "$REPO_ROOT" merge-base --is-ancestor "$s" "$HEAD" 2>/dev/null || continue
+        if ! git -C "$REPO_ROOT" diff --name-only "$s" "$HEAD" 2>/dev/null \
+             | grep -vE '^(\.lava-ci-evidence/|docs/|CHANGELOG\.md$)' -q; then
+            sha_bound=1; bound_via="ancestor-code-identity:$s"; break
+        fi
+    done
+fi
+
 if [[ "$sha_bound" -ne 1 ]]; then
     echo "FATAL §6.AK.4: §6.Z evidence commit-SHA does not match the commit under test." >&2
     echo "       evidence '$EVI' declares: ${ESHAS[*]}" >&2
     echo "       current HEAD:             $HEAD" >&2
+    echo "       (checked: literal prefix match, and ancestor-with-governance-only-diff — neither held)" >&2
     exit 2
 fi
 
@@ -529,5 +562,5 @@ if [[ "$fail" -gt 0 ]]; then
     echo "FATAL §6.AK: $fail of $claims claim(s) lack a covering executed+PASSED device Challenge for $VER ($refs of $refs_total covering ref(s) uncovered; $REC_COUNT verdict record(s) parsed from $EVI)" >&2
     exit 1
 fi
-echo "§6.AK PASS: $claims claim(s) / $refs_total covering ref(s) verified against $REC_COUNT parsed verdict record(s) in $EVI (SHA $HEAD)"
+echo "§6.AK PASS: $claims claim(s) / $refs_total covering ref(s) verified against $REC_COUNT parsed verdict record(s) in $EVI (SHA $HEAD, bound via $bound_via)"
 exit 0
