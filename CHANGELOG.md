@@ -1,5 +1,11 @@
 # Changelog
 
+## Lava-Android-1.3.17-1088 — 2026-09-23 (§6.Y post-distribution bump — no :app source change)
+
+**Previous published:** Lava-Android-1.3.17-1087, both §6.AA stages genuinely Firebase-distributed this cycle (debug release `2qo0a151jl82o`, release-stage release `6r8bpkbg43hs0`).
+
+Pure administrative versionCode bump per §6.Y, landed immediately after 1087's release stage shipped. No `:app` source changed between 1087 and 1088 — versionName HELD at 1.3.17.
+
 ## Lava-Android-1.3.17-1087 + Lava-API-Go-2.3.35-2335 — 2026-09-22 (dynamic-port fix, two governance gate-integrity bugs, release-variant device-testing gap closed)
 
 **Previous published:** Lava-Android-1.3.17-1085 (see note below on the missing 1086 entry); Lava-API-Go-2.3.34-2334.
@@ -223,6 +229,12 @@ fast "Error — Retry" rather than a hang — that's the correct, honest behavio
   measure is fixed + guarded by a structural scanner so the class cannot recur.
 - **P2 (partial):** improved tolerance for Internet Archive crawl topics that omit a comments section; the full fix for IA crawl topics that omit most fields is a tracked follow-up (a niche, non-crashing case).
 
+## Lava-API-App-0.2.13-29 — 2026-09-23 (§6.Y post-distribution bump — no api-app source change)
+
+**Previous published:** Lava-API-App-0.2.13-28, both §6.AA stages genuinely Firebase-distributed this cycle (debug release `020tj3b96pgng`, release-stage release `46a1e05ru802o`).
+
+Pure administrative versionCode bump per §6.Y, landed immediately after 28's release stage shipped. No api-app source changed between 28 and 29 — versionName HELD at 0.2.13.
+
 ## Lava-API-App-0.2.13-28 — 2026-09-22 (administrative parity bump + embedded engine now carries the same-cycle dynamic-port fix)
 
 **Previous published:** Lava-API-App-0.2.13-27.
@@ -231,7 +243,7 @@ fast "Error — Retry" rather than a hang — that's the correct, honest behavio
 - **Embedded `lava-api-go` engine (`liblavaapi.so`) now carries this same cycle's dynamic-port allocation fix.** Per the current top `Lava-Android-1.3.17-1087 + Lava-API-Go-2.3.35-2335` entry: a real `:8443` port collision with an unrelated process on a shared host is fixed via a new `server.ResolveListen()` (backed by a new race-free `network.ListenEphemeral` helper added to `submodules/containers`) that binds the public address synchronously up front, plus a genuine mDNS/Alt-Svc-before-any-bind ordering bug found while investigating it (the public address was previously wired into `discovery.Announce` and the Alt-Svc middleware before any socket bind was even attempted). This is a genuine embed-source change, not a needless re-distribute — the API↔embed source-sync gate confirms a freshly-built api-app APK embeds lava-api-go 2.3.35 (hash `69171c6c32e25d026809c75c2de68530ea43faea82041c1f5c42f9ee4b9a1549`), not the prior 2.3.34.
 - **§6.Y:** versionCode HELD at 28 (already bumped in a prior cycle, per above); versionName HELD at 0.2.13 (embed-only change, no api-app user-visible functional change per §6.Y clause 3).
 
-**Coverage status (§6.AK / §6.Z):** device-verification evidence pending — see `.lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.2.13-28-test-evidence.{md,json}` once available.
+**Coverage status (§6.AK / §6.Z):** device-verification evidence now complete and both §6.AA stages genuinely Firebase-distributed (see the 0.2.13-29 entry above) — `.lava-ci-evidence/distribute-changelog/firebase-app-distribution-api-app/0.2.13-28-test-evidence.{md,json}`.
 
 ## Lava-API-App-0.2.13-27 — 2026-08-14 (embedded engine: permanent §6.AC auth/request telemetry — parity bump, api-app itself unaffected by LVA-098)
 

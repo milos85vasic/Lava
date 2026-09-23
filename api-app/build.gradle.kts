@@ -154,7 +154,13 @@ android {
         // §6.Y post-distribution bump (2026-08-14): 27 debug+release both
         // Firebase-distributed this cycle. Bumping first, per the standing
         // mandate, before any new code lands in this cycle.
-        versionCode = 28
+        // §6.Y post-distribution bump (2026-09-23): 28 debug+release both
+        // genuinely Firebase-distributed this cycle. api-app's own
+        // Kotlin/Android source is unchanged (test-infra-only fix, the
+        // ui-test-manifest releaseTest inheritance gap); embedded
+        // lava-api-go is unchanged from 27→28 (still 2.3.35). versionCode
+        // bumps only; versionName HELD.
+        versionCode = 29
         versionName = "0.2.13"
         // EncryptedSharedPreferences (androidx.security-crypto) requires API 23+
         // — the per-install auth-key store ([ApiKeyStore]) relies on it. The

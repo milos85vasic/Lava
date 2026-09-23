@@ -142,7 +142,14 @@ android {
         // changed this cycle, so versionCode bumps only; versionName held
         // at 1.3.17. This is a source-only release (no signed build, no
         // device attestation) — see CHANGELOG.md.
-        versionCode = 1087
+        // §6.Y post-distribution bump (2026-09-23): 1087 debug+release both
+        // genuinely Firebase-distributed this cycle (release-variant testing
+        // infra + 2 real test-infra fixes; no :app runtime behavior change
+        // for real users — the CrossTrackerFallbackModal finding was R8
+        // legitimately inlining a composable, not a stripped feature).
+        // versionCode bumps only; versionName HELD at 1.3.17 per §6.Y
+        // clause 3 (internal/test-infra fix, no new user-facing surface).
+        versionCode = 1088
         versionName = "1.3.17"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/
