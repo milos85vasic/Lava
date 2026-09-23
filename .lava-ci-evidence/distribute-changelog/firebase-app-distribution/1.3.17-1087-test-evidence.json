@@ -8,7 +8,7 @@
     "app_id": "digital.vasic.lava.client",
     "apk_path": "app/build/outputs/apk/release/app-release.apk",
     "tested_code_sha": "54c50eaef3e39e9585817b92c9a739d39d836e03",
-    "apk_sha256": "1762826799148e606a4615016f9569ee64fc027d81795d2e52834eab48b47482",
+    "apk_sha256": "8663e116cd8b9989ebf5ad698a2cd7a7401ce3388e30b023aba401b17b641b65",
     "apk_sha256_note": "Supersedes an earlier build of the same commit — the client was rebuilt after .env's LAVA_AUTH_OBFUSCATION_PEPPER/LAVA_AUTH_CURRENT_CLIENT_NAME/LAVA_AUTH_ACTIVE_CLIENTS were rotated for this release identity (android-1.3.17-1087) per §6.P Gates 4/5 (the prior pepper's SHA collided with 1.3.17-1085's, a different release identity). All rows below are from the rebuilt, correctly-rotated APK.",
     "signer_cert_sha256": "0feb69c3633b16d33ef63ebb98354fff6823d4930074418d76e7d698fa259868",
     "debug_apk_path": "app/build/outputs/apk/debug/app-debug.apk",

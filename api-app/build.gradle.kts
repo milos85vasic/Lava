@@ -357,6 +357,9 @@ dependencies {
     // ----------------------------------------------------------------
     androidTestImplementation(libs.androidx.compose.ui.test)
     debugImplementation(libs.androidx.compose.ui.testManifest)
+    // See app/build.gradle.kts's identical addition for the rationale —
+    // releaseTest is a distinct build type, does not inherit debugImplementation.
+    add("releaseTestImplementation", libs.androidx.compose.ui.testManifest)
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.test.ext)
     androidTestImplementation(libs.androidx.test.runner)

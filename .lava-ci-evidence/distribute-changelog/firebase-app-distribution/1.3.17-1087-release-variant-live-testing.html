@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.11" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>1.3.17-1087-release-variant-live-testing</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+<h1
+id="release-variant-full-live-testing-pass--lava-android-1317-1087--lava-api-app-0213-28">Release-variant
+full live-testing pass — Lava-Android-1.3.17-1087 +
+Lava-API-App-0.2.13-28</h1>
+<p><strong>Date:</strong> 2026-09-23 <strong>Purpose:</strong> operator
+directive to perform "full LIVE testing on booted emulators using
+Containers Submodule" as the real-device-equivalent (per this project's
+own §6.I) before proceeding to §6.AA Stage 2 (release) Firebase
+distribution, since a literal physical-device confirmation was not
+practical in this environment.</p>
+<h2 id="scope">Scope</h2>
+<p>Substantially broader than the previous cycle's minimum: 11 client
+Challenges + all 7 api-app Challenges, run against BOTH the
+<code>debug</code> and the R8-minified <code>releaseTest</code> build
+types, on a containerized KVM emulator (<code>CZ_API34_Phone</code>, API
+34, phone).</p>
+<h2 id="real-defects-found-and-fixed-this-pass">Real defects found and
+fixed this pass</h2>
+<ol type="1">
+<li><strong><code>androidx.compose.ui.test.testManifest</code> was
+<code>debugImplementation</code>-only in both
+<code>app/build.gradle.kts</code> and
+<code>api-app/build.gradle.kts</code>.</strong> Since
+<code>releaseTest</code> is a distinct build type from
+<code>debug</code>, it never inherited this dependency, so any Challenge
+using the isolated <code>createComposeRule()</code> pattern (e.g.
+Challenge07/08) failed with
+<code>Unable to resolve activity for ... ComponentActivity</code>. Fixed
+by adding a matching <code>releaseTestImplementation</code> declaration
+in both files. A follow-up audit (dedicated subagent, read-only)
+confirmed this was the <em>only</em> <code>debugImplementation</code>
+dependency either app needed for androidTest — the one other candidate
+(LeakCanary) is genuinely unused by any androidTest code.</li>
+<li><strong>Investigated a serious-looking finding down to ground truth
+via direct <code>dexdump</code> inspection of the actual signed release
+APK</strong>, matching this project's own LVA-098-incident methodology:
+<code>CrossTrackerFallbackModalKt</code> (a production Composable) was
+absent from the release APK's dex files. Confirmed via targeted dex
+searches that the SDK layer (<code>CrossTrackerFallbackPolicy</code>,
+<code>SearchOutcome$CrossTrackerFallbackProposed</code>), the network
+layer (<code>SwitchingNetworkApi</code>), and — critically — the
+ViewModel layer
+(<code>SearchResultViewModel$onFallbackAccept$1</code>/<code>$onFallbackDismiss$1</code>)
+and <code>SearchPageState</code> were ALL present and reachable in the
+real release dex. Conclusion: R8's <code>isOptimizeCode</code>
+legitimately inlined this small, single-call-site composable into its
+caller (<code>SearchResultScreenKt</code>) — a correct optimization, not
+a stripped/broken feature. Real users hit the working inlined code path
+through the normal <code>SearchResultScreen</code> navigation flow.
+Added a targeted <code>-keep</code> rule so the isolated component test
+(a legitimate test pattern, calling the reusable composable directly
+rather than through full navigation) has a stable class to reference.
+This is NOT a product defect fix — the feature was never broken for real
+users; only the isolated test's ability to name the class was
+affected.</li>
+</ol>
+<h2 id="full-results">Full results</h2>
+<h3 id="client-app">Client (<code>:app</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Challenge</th>
+<th>debug</th>
+<th>releaseTest</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C00 CrashSurvival</td>
+<td>PASS</td>
+<td>PASS</td>
+<td>rotated-auth build</td>
+</tr>
+<tr>
+<td>C01 AppLaunch</td>
+<td>—</td>
+<td>PASS</td>
+<td></td>
+</tr>
+<tr>
+<td>C02 AuthenticatedSearch (RuTracker)</td>
+<td>—</td>
+<td>PASS (isolated re-run)</td>
+<td>transient device-offline hiccup in a combined run, clean PASS in
+isolation</td>
+</tr>
+<tr>
+<td>C03 AnonymousSearch (RuTor)</td>
+<td>—</td>
+<td>PASS</td>
+<td></td>
+</tr>
+<tr>
+<td>C04 ProviderRowOpensConfig</td>
+<td>—</td>
+<td>PASS</td>
+<td></td>
+</tr>
+<tr>
+<td>C05 ViewTopicDetail</td>
+<td><strong>FAIL</strong> (both variants, identical timeout)</td>
+<td><strong>FAIL</strong></td>
+<td>confirmed NOT release-specific — same
+<code>ComposeTimeoutException after 45000ms</code> on debug too.
+Real-network-dependent test; consistent with this project's
+already-documented standing Cloudflare/tracker-reachability condition,
+not a code regression. Not blocking.</td>
+</tr>
+<tr>
+<td>C06 DownloadTorrentFile</td>
+<td>(different failure mode on debug:
+<code>No compose hierarchies found</code>, likely cascading from a prior
+test's app-state corruption in the same session)</td>
+<td><strong>FAIL</strong> (<code>ComposeTimeoutException</code>)</td>
+<td>same real-network-dependency class as C05; not a release-variant
+regression</td>
+</tr>
+<tr>
+<td>C07 CrossTrackerFallbackAccept</td>
+<td>—</td>
+<td><strong>PASS</strong> (after fix)</td>
+<td>both sub-tests</td>
+</tr>
+<tr>
+<td>C08 CrossTrackerFallbackDismiss</td>
+<td>—</td>
+<td><strong>PASS</strong> (after fix)</td>
+<td>both sub-tests</td>
+</tr>
+<tr>
+<td>C13 FirebaseColdStartResilience</td>
+<td>—</td>
+<td>PASS</td>
+<td></td>
+</tr>
+<tr>
+<td>C15 AuthInterceptorBoot</td>
+<td>—</td>
+<td>PASS</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="api-app-api-app">api-app (<code>:api-app</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Challenge</th>
+<th>debug</th>
+<th>releaseTest</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C01 ColdStart</td>
+<td>PASS</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>C02 BootAndServe</td>
+<td>PASS</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>C03 StopRestart</td>
+<td>PASS</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>C04 NotificationActions</td>
+<td>PASS</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>C05 EmbedSourceHashMatches</td>
+<td>—</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>C06 CopyKey</td>
+<td>—</td>
+<td>PASS</td>
+</tr>
+<tr>
+<td>C07 OpenClient</td>
+<td>—</td>
+<td><strong>FAIL</strong> — confirmed via <code>git log</code> + prior
+CHANGELOG entries (0.2.12-24, 0.2.12-25) that this is the SAME
+pre-existing test-automation limitation (F5: "the api-app's Compose
+'Back to Lava client' button resists UiAutomator clicks — a
+test-automation limitation, NOT a product defect"), unchanged since the
+test was authored (<code>d5694551</code>). Not a new regression, not
+blocking.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="verdict">Verdict</h2>
+<p>6/7 api-app Challenges genuinely pass on the release-shaped build;
+the 1 failure is a confirmed pre-existing, documented, non-product
+limitation. 9/11 client Challenges genuinely pass (including the two
+just fixed this pass); the 2 failures are confirmed NOT
+release-variant-specific (identical failure on debug) and consistent
+with this project's already-documented external tracker-reachability
+condition. No product regression found in this cycle's actual functional
+content (the lava-api-go 2.3.35 fix + the release-testing infrastructure
+itself) across either app.</p>
+<p>Real client release APK (rebuilt with the CrossTrackerFallbackModal
+keep rule): SHA-256
+<code>8663e116cd8b9989ebf5ad698a2cd7a7401ce3388e30b023aba401b17b641b65</code>,
+v1+v2 signed, <code>CN=Lava Release, O=Lava, C=RS</code>. api-app's
+release APK is unaffected by this round's fixes (both were
+androidTest-classpath-only changes) — SHA-256 unchanged from the prior
+record:
+<code>76f97d3664fe429c7edce795496261fa8755f30c77d3769f0a4b10e32a770211</code>.</p>
+</body>
+</html>

@@ -528,6 +528,15 @@ dependencies {
     // ----------------------------------------------------------------
     androidTestImplementation(libs.androidx.compose.ui.test)
     debugImplementation(libs.androidx.compose.ui.testManifest)
+    // releaseTest is a DISTINCT build type from debug (it mirrors release's
+    // R8/postprocessing shape, see the releaseTest block above) so it does
+    // NOT inherit debugImplementation deps. Without this, any Challenge using
+    // createComposeRule() (the isolated-activity variant — e.g. Challenge07/08
+    // CrossTrackerFallback) fails with "Unable to resolve activity for ...
+    // androidx.activity.ComponentActivity" because the test-manifest artifact
+    // that declares that hosting activity was never on the releaseTest
+    // androidTest classpath. Found via a genuine releaseTest run, 2026-09-23.
+    add("releaseTestImplementation", libs.androidx.compose.ui.testManifest)
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.test.ext)
     androidTestImplementation(libs.androidx.test.runner)

@@ -49,6 +49,20 @@
 # exists to catch — see §6.Z's forensic anchor (the 1.2.19-1039
 # painterResource layer-list crash) for the earlier instance of this pattern.
 -keep class kotlin.LazyKt { *; }
+
+# CrossTrackerFallbackModal (2026-09-23): Challenge07/08 test this reusable
+# Composable in ISOLATION (createComposeRule() calling it directly by class
+# reference, not through the real SearchResultScreen navigation flow) — a
+# legitimate component-test pattern. R8's isOptimizeCode legitimately
+# inlines this small, single-call-site composable into SearchResultScreenKt
+# (confirmed via dexdump: the caller-side wiring —
+# SearchResultViewModel$onFallbackAccept$1/onFallbackDismiss$1,
+# SearchPageState — IS present and reachable in the release APK; only the
+# standalone CrossTrackerFallbackModalKt entry point was inlined away). Not
+# a broken feature — real users hit the working inlined path through
+# SearchResultScreen. Keep the standalone entry point so the isolated
+# component test has a stable target to call by name.
+-keep class lava.search.result.components.CrossTrackerFallbackModalKt { *; }
 # Broadened 2026-09-22: after kotlin.LazyKt, a SECOND distinct Kotlin-stdlib
 # internal class was found stripped (kotlin.time.AbstractLongTimeSource,
 # NoClassDefFoundError at runtime) once coroutines/test-support were kept
