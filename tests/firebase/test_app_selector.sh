@@ -217,8 +217,8 @@ MAPEOF
 # would silently turn into a staleness test 24 hours after being written.
 COMMIT_SHA="$(cd "$REPO_ROOT" && git rev-parse HEAD 2>/dev/null || echo \"deadbeef\")"
 EVIDENCE_TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-echo '{"commit_sha": "'"$COMMIT_SHA"'", "timestamp": "'"$EVIDENCE_TS"'", "version": "1.2.35-1055", "covering_challenges": {"lava.app.challenges.Challenge00CrashSurvivalTest": "PASS"}, "passed": true}' > "$CLIENT_CHAN/1.2.35-1055-test-evidence.json"
-echo '{"commit_sha": "'"$COMMIT_SHA"'", "timestamp": "'"$EVIDENCE_TS"'", "version": "0.1.0-1", "covering_challenges": {"lava.app.challenges.Challenge00CrashSurvivalTest": "PASS"}, "passed": true}' > "$API_APP_CHAN/0.1.0-1-test-evidence.json"
+echo '{"commit_sha": "'"$COMMIT_SHA"'", "timestamp": "'"$EVIDENCE_TS"'", "version": "1.2.35-1055", "covering_challenges": {"lava.app.challenges.Challenge00CrashSurvivalTest": "PASS"}, "build_output": "BUILD SUCCESSFUL", "passed": true}' > "$CLIENT_CHAN/1.2.35-1055-test-evidence.json"
+echo '{"commit_sha": "'"$COMMIT_SHA"'", "timestamp": "'"$EVIDENCE_TS"'", "version": "0.1.0-1", "covering_challenges": {"lava.app.challenges.Challenge00CrashSurvivalTest": "PASS"}, "build_output": "BUILD SUCCESSFUL", "passed": true}' > "$API_APP_CHAN/0.1.0-1-test-evidence.json"
 # Fake release APK trees. Each APK is seeded with a `versionCode='<code>'`
 # badging line so the §6.Z content-versionCode guard (via the fake aapt2 above)
 # resolves the EXPECTED code and PASSES — client code 1055, api-app code 1.

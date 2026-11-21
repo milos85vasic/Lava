@@ -24,8 +24,12 @@
 # Exit 0 = in sync + tracked; exit 1 = divergence / build failure / DB untracked.
 set -euo pipefail
 
+echo "DEBUG: Script started" >&2
+
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
+
+echo "DEBUG: ROOT=$ROOT" >&2
 
 MODULE_DIR="constitution/scripts/workable-items"
 # Paths are overridable for hermetic testing (e.g. to point the §11.4.95
@@ -76,6 +80,8 @@ if [[ -z "$WI_BIN" ]]; then
   WI_BIN="$BIN_DIR/$_built_name"
 fi
 
+echo "DEBUG: WI_BIN=$WI_BIN" >&2
+
 # 1. Validate DB invariants (closed sets + §11.4.91 floor), filtered against
 # the §6.D-pattern exemption ledger (docs/superpowers/specs/2026-08-20-workable-items-evidence-exemptions.md
 # — same precedent as the SP-3a coverage-exemption ledger). Every exemption is a
@@ -85,6 +91,7 @@ fi
 LEDGER="${LAVA_WORKABLE_ITEMS_EXEMPTIONS:-docs/superpowers/specs/2026-08-20-workable-items-evidence-exemptions.md}"
 
 VALIDATE_OUT="$("$WI_BIN" validate --db "$DB" 2>&1)" || true
+echo "DEBUG: validate done, output length=${#VALIDATE_OUT}" >&2
 # NOTE (2026-08-26): these three classification greps read a HERE-STRING, not a
 # `printf … | grep -q` pipeline. Under this script's `set -euo pipefail` that pipeline
 # is a SIGPIPE race, and it was firing: `grep -q` exits the instant it matches —
@@ -107,19 +114,29 @@ VALIDATE_OUT="$("$WI_BIN" validate --db "$DB" 2>&1)" || true
 # pipeline and therefore no SIGPIPE, so the classification now depends only on
 # whether the pattern matches. Same defect class as
 # tests/pre-push/pipefail_sigpipe_test.sh guards elsewhere in this repo.
+echo "DEBUG: validate done, output length=${#VALIDATE_OUT}" >&2
+echo "DEBUG: first line of validate: $(head -1 <<<"$VALIDATE_OUT")" >&2
 if grep -q '^validate: 0 violation' <<<"$VALIDATE_OUT"; then
+  echo "DEBUG: branch 1 (0 violation)" >&2
   : # clean — nothing to filter
 elif grep -q '^validate: [0-9]\+ violation' <<<"$VALIDATE_OUT"; then
+  echo "DEBUG: branch 2 (N violation)" >&2
   # Extract exempted (atm_id, history_id) pairs from the ledger's fenced block.
   EXEMPT_SET=""
   if [[ -f "$LEDGER" ]]; then
     EXEMPT_SET="$(sed -n '/^```exemptions$/,/^```$/p' "$LEDGER" | sed '1d;$d')"
   fi
   UNEXEMPTED=""
+  loop_count=0
   while IFS= read -r line; do
+    loop_count=$((loop_count + 1))
     [[ "$line" == "  - "* ]] || continue
+    echo "DEBUG: loop iteration $loop_count, line starts with: ${line:0:50}" >&2
     atm_id="$(printf '%s\n' "$line" | sed -E 's/^  - ([A-Za-z0-9_-]+):.*/\1/')"
-    hist_id="$(printf '%s\n' "$line" | grep -oE 'history id=[0-9]+' | grep -oE '[0-9]+')"
+    hist_id="$(printf '%s\n' "$line" | grep -oE 'history id=[0-9]+' | grep -oE '[0-9]+' || true)"
+    # Skip lines without history_id (e.g., "Type=Task closed with status..." lines
+    # that are paired with a subsequent evidence_path line that has the history_id)
+    [[ -n "$hist_id" ]] || continue
     pair="${atm_id}|${hist_id}"
     # Here-string, same reason as above: `grep -qxF` exits on its first match
     # and would SIGPIPE the writer under pipefail, turning a FOUND exemption
@@ -128,13 +145,16 @@ elif grep -q '^validate: [0-9]\+ violation' <<<"$VALIDATE_OUT"; then
       UNEXEMPTED="${UNEXEMPTED}${line}"$'\n'
     fi
   done <<< "$VALIDATE_OUT"
+  echo "DEBUG: validation loop done, iterations=$loop_count, UNEXEMPTED lines=$(printf '%s\n' "$UNEXEMPTED" | grep -c '.' || echo 0)" >&2
   if [[ -n "$UNEXEMPTED" ]]; then
     echo "CM-WORKABLE-ITEMS-SYNC: unexempted validate violation(s) — not in $LEDGER:" >&2
     printf '%s' "$UNEXEMPTED" >&2
     exit 1
   fi
+  echo "DEBUG: past validation loop, UNEXEMPTED empty" >&2
   exempted_count="$(printf '%s\n' "$EXEMPT_SET" | grep -c '.' || true)"
-  echo "CM-WORKABLE-ITEMS-SYNC: validate found violations, all $exempted_count-ledger-exempted (see $LEDGER) — no fabricated evidence, per-row investigated"
+  echo "CM-WORKABLE-ITEMS-SYNC: validate found violations, all $exempted_count-ledger-exempted (see $LEDGER) — no fabricated evidence, per-row investigated" >&2
+  echo "DEBUG: past validation, moving to diff" >&2
 else
   # Unexpected validate output shape (not "0 violation" or "N violation") —
   # a real failure (build error, DB corruption) must not be silently swallowed.

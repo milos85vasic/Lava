@@ -1,0 +1,80 @@
+# Android Builder Image for Lava
+# Contains: Gradle 8.14.3, Android SDK (cmdline-tools, platforms, build-tools), JDK 17 (Temurin)
+# Used by distributed-build for building Android artifacts (:app, :api-app)
+
+FROM eclipse-temurin:17-jdk-jammy AS base
+
+# Install dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    unzip \
+    git \
+    ca-certificates \
+    python3 \
+    gcc \
+    libc6-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Go 1.26.11 (needed for build-cshared.sh cgo build)
+ENV GO_VERSION=1.26.11
+RUN wget -q https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -O /tmp/go.tar.gz && \
+    tar -C /usr/local -xzf /tmp/go.tar.gz && \
+    rm /tmp/go.tar.gz
+
+ENV PATH=${PATH}:/usr/local/go/bin
+ENV GOPATH=/go
+ENV GO111MODULE=on
+RUN mkdir -p /go/bin /go/pkg && chmod 777 /go /go/bin /go/pkg
+
+# Set environment variables
+ENV ANDROID_HOME=/opt/android-sdk
+ENV ANDROID_SDK_ROOT=/opt/android-sdk
+ENV PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/build-tools/35.0.0
+ENV GRADLE_USER_HOME=/gradle-cache
+ENV _JAVA_OPTIONS="-Xmx4g"
+
+# Install Android SDK command line tools
+RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/cmdline-tools.zip && \
+    unzip -q /tmp/cmdline-tools.zip -d ${ANDROID_HOME}/cmdline-tools && \
+    mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest && \
+    rm /tmp/cmdline-tools.zip
+
+# Accept licenses and install SDK components
+RUN yes | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null && \
+    ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager \
+        "platforms;android-35" \
+        "build-tools;35.0.0" \
+        "platform-tools" \
+        "ndk;27.0.12077973" \
+        "cmake;3.22.1" \
+        > /dev/null
+
+# Install Gradle 8.14.3
+ENV GRADLE_VERSION=8.14.3
+RUN wget -q https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -O /tmp/gradle.zip && \
+    unzip -q /tmp/gradle.zip -d /opt && \
+    ln -s /opt/gradle-${GRADLE_VERSION} /opt/gradle && \
+    rm /tmp/gradle.zip
+
+ENV PATH=${PATH}:/opt/gradle/bin
+
+# Create gradle cache directory
+RUN mkdir -p /gradle-cache && chmod 777 /gradle-cache
+
+# Create non-root user for builds
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+RUN groupadd -g ${GROUP_ID} builder && \
+    useradd -u ${USER_ID} -g ${GROUP_ID} -m -s /bin/bash builder && \
+    chown -R builder:builder /gradle-cache /opt/gradle-${GRADLE_VERSION} ${ANDROID_HOME}
+
+USER builder
+
+WORKDIR /project
+
+# Pre-warm Gradle daemon (optional, speeds up first build)
+RUN gradle --version > /dev/null 2>&1 || true
+
+# Default command
+CMD ["bash"]

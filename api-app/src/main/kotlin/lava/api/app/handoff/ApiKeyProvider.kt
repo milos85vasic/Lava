@@ -46,15 +46,14 @@ class ApiKeyProvider : ContentProvider() {
      * or the key store is unavailable. Set by [withFakes] in tests; the
      * production default below resolves the process-wide holders LAZILY per call.
      */
-    internal var keyProvider: () -> String? = { resolveRunningKey() }
+    internal var keyProvider: () -> String? = { ApiKeyResolver.runningKey() }
 
     /**
      * Returns the current loopback port the engine is listening on, or `null`
      * when the engine is not running. Set by [withFakes] in tests; the
      * production default below resolves the holders LAZILY per call.
      */
-    internal var portProvider: () -> Int? = { resolveRunningPort() }
-
+    internal var portProvider: () -> Int? = { ApiKeyResolver.runningPort() }
     // ── ContentProvider lifecycle ─────────────────────────────────────────
 
     override fun onCreate(): Boolean {
@@ -80,17 +79,6 @@ class ApiKeyProvider : ContentProvider() {
         // moment the engine is Running, independent of onCreate ordering.
         return true
     }
-
-    /** Resolve the access key from the live holders, only while the engine is Running. */
-    private fun resolveRunningKey(): String? {
-        val controller = ApiApplication.controllerHolder ?: return null
-        val keyStore = ApiApplication.keyStoreHolder ?: return null
-        return if (controller.state.value is ApiControlState.Running) keyStore.getOrCreate() else null
-    }
-
-    /** Resolve the live loopback port from the controller, only while Running. */
-    private fun resolveRunningPort(): Int? =
-        (ApiApplication.controllerHolder?.state?.value as? ApiControlState.Running)?.port
 
     // ── Query — the only supported operation ─────────────────────────────
 
@@ -173,4 +161,28 @@ class ApiKeyProvider : ContentProvider() {
         const val COL_ACCESS_KEY = "access_key"
         const val COL_LOOPBACK_PORT = "loopback_port"
     }
+}
+
+/**
+ * Resolves the live access key and loopback port from the process-wide holders,
+ * only while the engine is in [ApiControlState.Running].
+ *
+ * Kept as a separate object (not methods on [ApiKeyProvider]) to stay under
+ * Detekt's TooManyFunctions threshold for the provider class and to keep
+ * ReturnCount ≤ 2 per function.
+ */
+object ApiKeyResolver {
+
+    fun runningKey(): String? {
+        val controller = ApiApplication.controllerHolder
+        val keyStore = ApiApplication.keyStoreHolder
+        return if (controller != null && keyStore != null && controller.state.value is ApiControlState.Running) {
+            keyStore.getOrCreate()
+        } else {
+            null
+        }
+    }
+
+    fun runningPort(): Int? =
+        (ApiApplication.controllerHolder?.state?.value as? ApiControlState.Running)?.port
 }

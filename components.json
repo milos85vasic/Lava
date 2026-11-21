@@ -1,0 +1,27 @@
+[
+  {
+    "Name": "app",
+    "HasGo": false,
+    "HasNPM": false,
+    "HasJDK": true,
+    "HasRust": false,
+    "BuilderImage": "localhost/lava-android-builder:latest"
+  },
+  {
+    "Name": "api-app",
+    "HasGo": false,
+    "HasNPM": false,
+    "HasJDK": true,
+    "HasRust": false,
+    "BuilderImage": "localhost/lava-android-builder:latest"
+  },
+  {
+    "Name": "lava-api-go",
+    "HasGo": true,
+    "HasNPM": false,
+    "HasJDK": false,
+    "HasRust": false,
+    "BuilderImage": "localhost/lava-go-builder:latest",
+    "NetworkMode": "host"
+  }
+]

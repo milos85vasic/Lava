@@ -26,6 +26,10 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+# Use Java 17 for host Gradle (Kotlin 2.1.0 doesn't support Java 25)
+export JAVA_HOME=/tmp/jdk-17.0.13+11
+export PATH=$JAVA_HOME/bin:$PATH
+
 MODE="${1:---full}"
 EVIDENCE_DIR=".lava-ci-evidence/$(date -u +%Y-%m-%dT%H-%M-%SZ)"
 mkdir -p "$EVIDENCE_DIR"
@@ -124,6 +128,23 @@ echo "==> Unit tests"
   :core:tracker:testing:test \
   :core:network:impl:test \
   :core:preferences:test
+
+# ---------------------------------------------------------------------
+# 4b. Containerized release builds (§6.K Builds-Inside-Containers).
+#     Full mode only — this is the constitutional gate that verifies
+#     release artifacts build correctly in the hermetic builder images.
+#     Uses distributed-build with LocalContainerExecutor (via Podman) to
+#     satisfy §6.K by running builds inside the builder containers.
+# ---------------------------------------------------------------------
+if [[ "$MODE" != "--changed-only" ]]; then
+  echo "==> Containerized release builds (§6.K)"
+  VERSION="$(grep -E 'versionCode\s*=' app/build.gradle.kts | sed -E 's/.*versionCode\s*=\s*([0-9]+).*/\1/')"
+  VERSION_NAME="$(grep -E 'versionName\s*=' app/build.gradle.kts | sed -E 's/.*versionName\s*=\s*"([^"]+)".*/\1/')"
+  echo "    Building all components via distributed-build (version $VERSION_NAME-$VERSION)"
+  # Use distributed-build with local container executor (no remote hosts)
+  # This runs all 3 components (app, api-app, lava-api-go) in their respective builder containers
+  ./scripts/distributed-build --project . --components components.json --version "${VERSION_NAME}-${VERSION}" --skip-tests
+fi
 
 # ---------------------------------------------------------------------
 # 5. Constitutional doc parser.
@@ -326,6 +347,12 @@ echo "==> Detekt static analysis (whole project)"
 # ---------------------------------------------------------------------
 echo "==> Go vet (lava-api-go)"
 ( cd lava-api-go && make vet )
+
+# ---------------------------------------------------------------------
+# 5e. §6.AC Go non-fatal telemetry vet check (mechanical enforcement).
+# ---------------------------------------------------------------------
+echo "==> §6.AC Go non-fatal telemetry vet check"
+./scripts/check-go-nonfatal-vet.sh
 
 # ---------------------------------------------------------------------
 # 6. SwitchingNetworkApi parity gate (full mode).

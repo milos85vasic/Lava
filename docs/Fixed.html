@@ -1053,9 +1053,9 @@ operator-report — docs/tickets/DESIGN.md</p>
 id="lva-076--apiengine-processjavares-buildcshared-task-dependency--gradle-heap">LVA-076
 — apiengine processJavaRes buildCshared task dependency + Gradle
 heap</h2>
-<p><strong>Status:</strong> Completed (→ Fixed.md)
-<strong>Type:</strong> Bug <strong>Evidence:</strong>
-docs/CONTINUATION.md <strong>Severity:</strong> medium</p>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/CONTINUATION.md
+<strong>Severity:</strong> medium</p>
 <p>Gradle validation BUILD FAILED on clean .cxx: process JavaRes
 consumed buildCshared output without a declared edge; D8 OOM on 2g heap.
 Declared dependency plus bumped heap to 4g.</p>
@@ -1071,9 +1071,9 @@ release APK cold-start on the Genymotion VM per clause 6.Z.</p>
 <h2
 id="lva-078--restore-lava-api-go-container-image-build-broken-containerignore">LVA-078
 — restore lava-api-go container image build broken containerignore</h2>
-<p><strong>Status:</strong> Completed (→ Fixed.md)
-<strong>Type:</strong> Bug <strong>Evidence:</strong>
-docs/CONTINUATION.md <strong>Severity:</strong> medium</p>
+<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
+Bug <strong>Evidence:</strong> docs/CONTINUATION.md
+<strong>Severity:</strong> medium</p>
 <p>Root containerignore blanket-excluded submodules but go.mod replaces
 parent submodules X; in-container go build failed on missing replacement
 dirs. Excluded only nested git and build, kept source.</p>
@@ -1108,9 +1108,9 @@ JDK17/Gradle8.9/podman5.8.2 present.</p>
 id="lva-036--llm_orchestrator-githubgitlab-pre-existing-mirror-fork-non-ff-blocks-6w-convergence">LVA-036
 — llm_orchestrator github↔︎gitlab pre-existing mirror fork (non-FF)
 blocks §6.W convergence</h2>
-<p><strong>Status:</strong> Fixed (→ Fixed.md) <strong>Type:</strong>
-Task <strong>Evidence:</strong> docs/issues/fixed/BUGFIXES.md
-<strong>Severity:</strong> P2</p>
+<p><strong>Status:</strong> Completed (→ Fixed.md)
+<strong>Type:</strong> Task <strong>Evidence:</strong>
+docs/issues/fixed/BUGFIXES.md <strong>Severity:</strong> P2</p>
 <p>github/master and gitlab/master diverged at d2a2151 with unique
 non-doc go.mod content each; LVA-030 commit landed gitlab+working-tree
 but github refused non-FF. Needs a content-merge decision

@@ -1053,6 +1053,33 @@ if ! bash "$(dirname "${BASH_SOURCE[0]}")/check-no-guessing-vocabulary.sh"; then
   exit 1
 fi
 
+# ---------------------------------------------------------------------
+# §6.N-debt bluff-hunt cadence validation (added 2026-11-20).
+# Ensures the bluff-hunt apparatus is wired: script executable and at
+# least one evidence file exists (so the cadence is not silently empty).
+# ---------------------------------------------------------------------
+if [[ ! -x scripts/bluff-hunt.sh ]]; then
+  echo "MISSING executable scripts/bluff-hunt.sh (§6.N-debt)" >&2
+  exit 1
+fi
+if [[ ! -d .lava-ci-evidence/bluff-hunt ]] || [[ -z "$(ls -A .lava-ci-evidence/bluff-hunt 2>/dev/null)" ]]; then
+  echo "MISSING bluff-hunt evidence directory (§6.N-debt)" >&2
+  echo "  → Run scripts/bluff-hunt.sh --evidence <date> to seed it." >&2
+  exit 1
+fi
+
+# ---------------------------------------------------------------------
+# §6.Z-debt distribute-guard presence check (added 2026-11-20).
+# firebase-distribute.sh MUST contain the Phase-1 Gate 6 pre-distribute
+# test-evidence gate (commit-SHA match + 24h freshness + BUILD SUCCESSFUL
+# verbatim + C00 cold-start canary).
+# ---------------------------------------------------------------------
+if ! grep -q '§6.Z Gate 6' scripts/firebase-distribute.sh; then
+    echo "MISSING §6.Z Gate 6 pre-distribute test-evidence gate in scripts/firebase-distribute.sh" >&2
+    echo "  → Add Phase 1 Gate 6 per §6.Z-debt closure." >&2
+    exit 1
+fi
+
 echo "Constitution check passed: 6.D + 6.E + 6.F present in CLAUDE.md;"
 echo "submodules/tracker_sdk/CLAUDE.md present; core/ + feature/ scoped"
 echo "clauses present; no clause-6.H credential patterns in tracked files;"

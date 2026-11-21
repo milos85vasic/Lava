@@ -616,7 +616,7 @@ HelixConstitution §11.4.93/95/106 materialization. Go CLI (modernc.org/sqlite, 
 
 ## LVA-076 — apiengine processJavaRes buildCshared task dependency + Gradle heap
 
-**Status:** Completed (→ Fixed.md)
+**Status:** Fixed (→ Fixed.md)
 **Type:** Bug
 **Evidence:** docs/CONTINUATION.md
 **Severity:** medium
@@ -634,7 +634,7 @@ App has no connectedReleaseAndroidTest because testBuildType is debug; added scr
 
 ## LVA-078 — restore lava-api-go container image build broken containerignore
 
-**Status:** Completed (→ Fixed.md)
+**Status:** Fixed (→ Fixed.md)
 **Type:** Bug
 **Evidence:** docs/CONTINUATION.md
 **Severity:** medium
@@ -664,7 +664,7 @@ QA video 0001-0155: app did not crash/ANR; brand logo renders red. LVA-008 searc
 
 ## LVA-036 — llm_orchestrator github↔gitlab pre-existing mirror fork (non-FF) blocks §6.W convergence
 
-**Status:** Fixed (→ Fixed.md)
+**Status:** Completed (→ Fixed.md)
 **Type:** Task
 **Evidence:** docs/issues/fixed/BUGFIXES.md
 **Severity:** P2

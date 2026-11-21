@@ -176,6 +176,17 @@
 <body>
 <h1 id="lava--work-continuation-index">Lava — Work Continuation
 Index</h1>
+<blockquote>
+<p><strong>2026-11-20 (§6.N-debt closure):</strong> Bluff-Hunt Cadence
+Tightening mechanical enforcement landed. pre-push Check 11 now rejects
+matrix-runner/gate/attestation changes without a recent bluff-hunt
+evidence file; gate_files regex extended to cover
+run-challenge-matrix.sh + bluff-hunt.sh. check-constitution.sh now
+validates bluff-hunt.sh executability + non-empty evidence dir. Three
+triggers: (1) per operator anti-bluff-mandate invocation (manual,
+lighter scope), (2) per matrix-runner/gate change (pre-push enforced),
+(3) per phase-gating attestation file added (pre-push enforced).</p>
+</blockquote>
 <p><strong>Purpose:</strong> this single file is the source-of-truth for
 resuming the project's work across any CLI session. A fresh agent reads
 this file first, locates the active phase, and continues from there.
@@ -3327,12 +3338,11 @@ directly rather than trust §7's "accurate as of this commit" claim,
 which predates this entry.</p>
 </blockquote>
 <blockquote>
-<p><strong>Last updated:</strong> 2026-09-23 (§6.AA fully complete —
-both apps, both stages, genuinely Firebase-distributed: client
-1.3.17-1088 [was 1087 for the distribute itself], api-app 0.2.13-29 [was
-28]; the §6.AK self-reference gate gap is permanently resolved via an
-ancestor-code-identity fallback, no more routine
-<code>--no-verify</code> needed. See top banner.)</p>
+<p><strong>Last updated:</strong> 2026-11-20 (§6.Z-debt closed: Phase-1
+Gate 6 pre-distribute test-evidence gate added to firebase-distribute.sh
+(commit-SHA match + 24h freshness + BUILD SUCCESSFUL verbatim + C00
+cold-start canary); check-constitution.sh now validates the gate
+presence.)</p>
 </blockquote>
 <blockquote>
 <p><strong>Last updated (prior):</strong> 2026-09-22 evening

@@ -189,13 +189,8 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tbody>
 <tr>
 <td>Bug</td>
-<td>Completed (→ Fixed.md)</td>
-<td>2</td>
-</tr>
-<tr>
-<td>Bug</td>
 <td>Fixed (→ Fixed.md)</td>
-<td>81</td>
+<td>83</td>
 </tr>
 <tr>
 <td>Feature</td>
@@ -205,12 +200,12 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <tr>
 <td>Task</td>
 <td>Completed (→ Fixed.md)</td>
-<td>39</td>
+<td>40</td>
 </tr>
 <tr>
 <td>Task</td>
 <td>Fixed (→ Fixed.md)</td>
-<td>9</td>
+<td>8</td>
 </tr>
 <tr>
 <td>Task</td>
@@ -239,6 +234,8 @@ the SQLite single-source-of-truth (§11.4.53).</p>
 <th>Type</th>
 <th>Fixed-In Tag(s)</th>
 <th>One-line description</th>
+<th>Reproduction</th>
+<th>Investigation</th>
 </tr>
 </thead>
 <tbody>
@@ -262,6 +259,8 @@ PATH. Fix in helixqa pkg actor/bridge ADB dispatch. Evidence:
 .lava-ci-evidence/helixqa/vm-qa-vision2-20260608T182251Z/ (4/4 reached
 vision+navigation, 1 ERROR + 3 FAILED on the launch-dispatch 127, NOT
 bridge errors anymore).</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>2</td>
@@ -277,6 +276,8 @@ resolution (non-404) — the routes resolve but to a 500, not a working
 provider dispatch. Confirm whether production wires the middleware
 elsewhere (real server bootstrap) or this is a real gap. Evidence:
 router_test.go note + internal/router/router.go.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>3</td>
@@ -292,6 +293,8 @@ test asserting 'adding Rutracker is a no-op' would pass against the fake
 while exercising different behavior than production — a latent
 §Third-Law bluff-fake. Fix: add the Rutracker no-op branch + doc to the
 fake. Flagged by the W6 core/domain UseCase agent (2026-06-09).</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>4</td>
@@ -309,6 +312,8 @@ behaviorally-equivalent to the real repos so tests can use them
 directly. Flagged by the rating+visited VM-test agent (2026-06-09). Fix:
 implement the stubs as real in-memory fakes matching the real repo
 contracts + add equivalence tests.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>5</td>
@@ -320,6 +325,8 @@ contracts + add equivalence tests.</td>
 were distributed without per-AVD containerized emulator evidence. Need
 to execute the covering Challenge matrix, generate
 real-device-verification rows, and backfill the evidence files.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>6</td>
@@ -332,6 +339,8 @@ TestSuggestsRepository.observeSuggests/addSuggest threw TODO(); clear()
 no-op. Real SuggestsRepositoryImpl emits newest-first (timestamp DESC) +
 case-insensitive UPSERT (id=lowercase().hashCode(), REPLACE) + clear
 deletes all. Unusable stub = Third-Law bluff fake.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>7</td>
@@ -345,6 +354,8 @@ while real SearchHistoryRepositoryImpl uses content-derived Filter.id()
 + @Insert REPLACE UPSERT + ORDER BY timestamp DESC. The existing
 TestSearchHistoryRepositoryTest asserted the fake-shaped behavior (ids
 [0,2], oldest-first) — a bluff test.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>8</td>
@@ -364,6 +375,8 @@ real ObserveRatingRequestUseCaseImpl (deep tree:
 ObserveSearchHistory/Visited[-&gt;EnrichTopics]/Bookmarks use cases over
 shared in-memory fakes, now usable post LVA-012/015) + seed engagement
 in the Show test. Source: parallel fake-audit 2026-06-09.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>9</td>
@@ -377,6 +390,8 @@ FavoritesRepositoryImpl/FavoriteTopicDao are @Insert REPLACE (id PK).
 LATENT: no test re-adds a duplicate id, so unexercised. Tighten add() to
 replace-by-id for consistency with LVA-011..015. Source: parallel
 fake-audit 2026-06-09.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>10</td>
@@ -391,6 +406,8 @@ are surfaced via getSettings() instead. Orphaned per-field-getter
 leftover (no Favorites/Bookmarks counterpart). Remove decl + override.
 Source: parallel dead-code audit 2026-06-09 (codebase otherwise clean: 0
 shipped TODO(), 0 if(false), 0 silent-no-op effect methods).</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>11</td>
@@ -401,6 +418,8 @@ shipped TODO(), 0 if(false), 0 silent-no-op effect methods).</td>
 <td>LVA-019 — Task P1 process: coverage ledger has partial/gap overlap
 and lacks per-release ledger snapshots. Normalize the registry and add
 release-attestation ledgers.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>12</td>
@@ -413,6 +432,8 @@ creator/title/year/date as string/*string; archive.org returns these as
 JSON arrays for multi-author/date items → json.Unmarshal fails the
 ENTIRE response (every result), not one row. Found by parallel Go
 bug-hunt.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>13</td>
@@ -426,6 +447,8 @@ returned "error" for any error without Name() or the 2 context sentinels
 error → §6.AC per-type triage defeated. Existing
 nonfatal_errorclass_test was a bluff (only tested
 Name()-implementers).</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>14</td>
@@ -437,6 +460,8 @@ Name()-implementers).</td>
 pickBestFormatURL exact-matched bare MIME keys (text/plain) but Gutendex
 always suffixes charset (text/plain; charset=utf-8) → blank Format label
 + skipped preferred ordering for text-only books.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>15</td>
@@ -449,6 +474,8 @@ returned success.User.Id (numeric data-uid) as AuthToken; the real
 session cookie is User.Token. Login 'succeeds' but every authenticated
 v1 call (favorites/add-comment/download) sends a non-cookie value → 401.
 No e2e login test existed (why it shipped).</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>16</td>
@@ -460,6 +487,8 @@ No e2e login test existed (why it shipped).</td>
 size string into a synthetic file entry → topic detail screen shows one
 nonsense 'Size' file instead of the real list. The existing
 TestFromTopicPage asserted the bogus file (bluff).</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>17</td>
@@ -473,6 +502,8 @@ as the answer) but rutracker needs CaptchaCode=dynamic-field-NAME
 answer (self-acknowledged TODO provider.go:221). Needs LoginOpts +
 OpenAPI model change (CaptchaValue field) — deferred. Found by parallel
 Go bug-hunt.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>18</td>
@@ -485,6 +516,8 @@ image/png, ...) but rutracker.FetchCaptcha captures the real
 Content-Type, dropped by the adapter (no ContentType field on
 provider.CaptchaImage). Minor (most decoders sniff). Found by parallel
 Go bug-hunt.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>19</td>
@@ -496,6 +529,8 @@ Go bug-hunt.</td>
 var then emitted sizeBytes=null, so every Kinozal row dropped size (size
 sort/filter + cross-tracker ranking blind). Found by parallel Kotlin
 tracker bug-hunt.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>20</td>
@@ -509,6 +544,8 @@ results have no date. Found by parallel Kotlin tracker bug-hunt. (Also
 UNCONFIRMED: nnmclub/kinozal parseSize Latin-only regex may miss
 Cyrillic units in real HTML — kinozal already handles both as of
 LVA-027.)</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>21</td>
@@ -523,6 +560,8 @@ fcba.example.com / fdcdn.net is routed as LAN (http://host:8080) instead
 of https://host/forum/ → no green dot, every request fails. Fix: gate on
 contains(':') before the hex parse. Found by parallel core/network
 bug-hunt.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>22</td>
@@ -538,6 +577,8 @@ from the 5-dep + helixqa adoption; orthogonal to the 60e2d66
 constitution bump. Each needs a submodule commit + push + parent pin
 bump (helixqa is always-track-upstream per Q9). Surfaced by full
 check-constitution during the constitution-bump cycle.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>23</td>
@@ -548,6 +589,8 @@ check-constitution during the constitution-bump cycle.</td>
 <td>LVA-031 — scan-no-hardcoded-uuid.sh flags VM UUID +
 NavBackStackEntry UUIDs in 14 tracked genymotion evidence files →
 check-constitution exit 1. Redacted per e767b701 precedent.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>24</td>
@@ -559,6 +602,8 @@ check-constitution exit 1. Redacted per e767b701 precedent.</td>
 AsForumTopicDtoTorrent ignoring the union discriminator → Topic variants
 render as empty fake-torrent rows. Fixed via
 AsForumTopicDtoTorrentChecked.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>25</td>
@@ -569,6 +614,8 @@ AsForumTopicDtoTorrentChecked.</td>
 <td>LVA-033 — RuTorTopicParser dropped the Добавлен date despite the
 fixture carrying it. Added dotted DD-MM-YYYY shape to
 RuTorDateParser.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>26</td>
@@ -579,6 +626,8 @@ RuTorDateParser.</td>
 <td>LVA-034 — host:port-only packing dropped the per-instance key →
 list-selected on-device Lava-API endpoint 401s (withKeyOverride dead).
 Fixed via #-sentinel encoded packing.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>27</td>
@@ -588,17 +637,21 @@ Fixed via #-sentinel encoded packing.</td>
 <td>—</td>
 <td>LVA-035 — Added PagingDataLoaderTest (append-terminal off-by-one +
 refresh-error regression), production byte-identical.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>28</td>
 <td>P2</td>
-<td>Fixed (→ Fixed.md)</td>
+<td>Completed (→ Fixed.md)</td>
 <td>Task</td>
 <td>—</td>
 <td>LVA-036 — github/master and gitlab/master diverged at d2a2151 with
 unique non-doc go.mod content each; LVA-030 commit landed
 gitlab+working-tree but github refused non-FF. Needs a content-merge
 decision (operator-gated, NO force-push per §6.T.3).</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>29</td>
@@ -611,6 +664,8 @@ top-level tests/ → flagged
 tests/check-constitution/test_no_hardcoded_hostport.sh →
 check-constitution exit 1 → pre-push blocked. Added ^tests/
 exemption.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>30</td>
@@ -620,6 +675,8 @@ exemption.</td>
 <td>—</td>
 <td>LVA-038 — Wave-3 parallel-fleet find; fixed in f3b2d269;
 falsifiability-proven; main-stream re-verified.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>31</td>
@@ -629,6 +686,8 @@ falsifiability-proven; main-stream re-verified.</td>
 <td>—</td>
 <td>LVA-039 — Wave-3 parallel-fleet find; fixed in 9f895502;
 falsifiability-proven; main-stream re-verified.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>32</td>
@@ -638,6 +697,8 @@ falsifiability-proven; main-stream re-verified.</td>
 <td>—</td>
 <td>LVA-040 — Wave-3 parallel-fleet find; fixed in 8e0720ab;
 falsifiability-proven; main-stream re-verified.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>33</td>
@@ -647,6 +708,8 @@ falsifiability-proven; main-stream re-verified.</td>
 <td>—</td>
 <td>LVA-041 — Wave-3 parallel-fleet find; fixed in 0cecbe4e;
 falsifiability-proven; main-stream re-verified.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>34</td>
@@ -656,6 +719,8 @@ falsifiability-proven; main-stream re-verified.</td>
 <td>—</td>
 <td>LVA-042 — Wave-3 parallel-fleet find; fixed in a11aee32;
 falsifiability-proven; main-stream re-verified.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>35</td>
@@ -665,6 +730,8 @@ falsifiability-proven; main-stream re-verified.</td>
 <td>—</td>
 <td>LVA-043 — Wave-3 parallel-fleet find; fixed in c117caeb;
 falsifiability-proven; main-stream re-verified.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>36</td>
@@ -676,6 +743,8 @@ falsifiability-proven; main-stream re-verified.</td>
 is deliberately not exposed (no capability) → user-unreachable. Not a
 bluff (§6.E honest), a functionality gap. Needs a new capability +
 feature interface.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>37</td>
@@ -685,6 +754,8 @@ feature interface.</td>
 <td>—</td>
 <td>LVA-045 — Wave-3 parallel-fleet find; fixed in c37995a7;
 falsifiability-proven; main-stream re-verified.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>38</td>
@@ -696,6 +767,8 @@ falsifiability-proven; main-stream re-verified.</td>
 union into non-pointer UserDto with no error → Login returns
 Success:true AuthToken:'' for wrong creds → every authed call 401s.
 LVA-032 class. Fixed via AsAuthResponseDtoSuccessChecked.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>39</td>
@@ -705,6 +778,8 @@ LVA-032 class. Fixed via AsAuthResponseDtoSuccessChecked.</td>
 <td>—</td>
 <td>LVA-047 — case-sensitive startsWith rejected
 magnet:?xt=urn:BTIH:<hash>; fixed to regionMatches ignoreCase.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>40</td>
@@ -716,6 +791,8 @@ magnet:?xt=urn:BTIH:<hash>; fixed to regionMatches ignoreCase.</td>
 filter.author?.name under AuthorIdKey instead of AuthorNameKey. Flagged
 by wave-4 §6.Q agent (out of its scope). Needs fix + roundtrip
 test.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>41</td>
@@ -726,6 +803,8 @@ test.</td>
 <td>LVA-049 — appendOptionalParams passes raw query; a query with
 &amp;/? corrupts the route. Add Uri.encode at call sites + roundtrip
 test.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>42</td>
@@ -736,6 +815,8 @@ test.</td>
 <td>LVA-050 — All 4 test bodies pass (XML failures=0) but a teardown
 RuntimeException makes Gradle report FAILED. Quarantine/fix the
 teardown.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>43</td>
@@ -745,6 +826,8 @@ teardown.</td>
 <td>—</td>
 <td>LVA-051 — scripts/record-device-session.sh + hermetic path test
 landed; device-bound capture UNCONFIRMED without a live device.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>44</td>
@@ -759,6 +842,8 @@ clean re-apply of the LVA-052 net-new files
 (HttpDownloadSource/DownloadHttpFileUseCase/DownloadService.downloadHttpFile/SDK.downloadHttpFile)
 on top of master. Topic-screen Compose routing (provider id through nav)
 still OWED.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>45</td>
@@ -770,6 +855,8 @@ still OWED.</td>
 (JDK21 SequencedCollection) absent on Android &lt;35 → a PostBr followed
 by Hr crashes the topic screen. Fixed to removeAt(lastIndex) + 28
 converter tests.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>46</td>
@@ -780,6 +867,8 @@ converter tests.</td>
 <td>LVA-054 — LVA-053 class: Kotlin stdlib these desugar to java.util.*
 methods absent below API35. Sweep all modules + add a lint/detekt
 guard.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>47</td>
@@ -790,6 +879,8 @@ guard.</td>
 <td>LVA-055 — scripts/run-test-pg.sh runs only ./internal/cache +
 ./tests/integration; add ./internal/storage so its Postgres legs run in
 the canonical harness.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>48</td>
@@ -800,6 +891,8 @@ the canonical harness.</td>
 <td>LVA-056 — scan-no-hardcoded-ipv4.sh regex lacked top-level tests/ →
 flagged tests/device-recording synthetic 127.0.0.1:6555 →
 check-constitution exit 1 (LVA-037 class). Added ^tests/.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>49</td>
@@ -812,6 +905,8 @@ with no provider_error event and no failed counter, while
 total_providers still counted it — the user's requested provider
 vanished with zero client signal. Now emits provider_error + counts
 failed.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>50</td>
@@ -823,6 +918,8 @@ failed.</td>
 tracked binary SQLite SSoT docs/workable_items.db, which stores ticket
 text quoting IP/host/UUID literals, producing a Binary file matches
 violation. Added .db exemption to all three.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>51</td>
@@ -832,6 +929,8 @@ violation. Added .db exemption to all three.</td>
 <td>—</td>
 <td>LVA-059 — multi-search auto-discovery emits providers in
 non-deterministic map order (cosmetic).</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>52</td>
@@ -844,6 +943,8 @@ reconstructed Torrent vs BaseTopic without checking date/magnetLink, so
 a magnet-only favorited or visited torrent was read back as BaseTopic
 and became un-downloadable, and getTorrents() filtered it out entirely.
 Added both fields to the discriminator.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>53</td>
@@ -853,6 +954,8 @@ Added both fields to the discriminator.</td>
 <td>—</td>
 <td>LVA-061 — self-signed cert reused across restarts without
 re-checking IP-SAN; LAN IP change → host-mismatch.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>54</td>
@@ -862,6 +965,8 @@ re-checking IP-SAN; LAN IP change → host-mismatch.</td>
 <td>—</td>
 <td>LVA-062 — wave-6 §6.N.2 found CM-WORKABLE-ITEMS-SYNC clause-3 was
 uncovered; sweep other gates.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>55</td>
@@ -872,6 +977,8 @@ uncovered; sweep other gates.</td>
 <td>LVA-063 — Added 9 falsifiable tests for the credentials dialog
 SubmitDialog flows, §6.G verified filter, and the credentials_manager
 FirstTimeSetup/AddNew/Edit/DismissEdit lifecycle.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>56</td>
@@ -882,6 +989,8 @@ FirstTimeSetup/AddNew/Edit/DismissEdit lifecycle.</td>
 <td>LVA-064 — The TLS reuse gate checks IP-SAN coverage but not
 certificate expiry, so a persisted cert past its NotAfter is silently
 reused; add an expiry check to the reuse gate with a test.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>57</td>
@@ -892,6 +1001,8 @@ reused; add an expiry check to the reuse gate with a test.</td>
 <td>LVA-065 — SearchViewModel was not inspected in depth this loop;
 audit its error and paging-state branches and add falsifiable coverage
 where real gaps exist.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>58</td>
@@ -904,6 +1015,8 @@ lscr.io/linuxserver/jackett v0.24.2040-ls426 via podman in the loopback
 topology: api_key bootstrap + Torznab /caps endpoint served valid XML at
 the exact path IPTorrentsJackettApi uses; JVM parser tests green; pinned
 the validated digest in .env.example.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>59</td>
@@ -915,6 +1028,8 @@ the validated digest in .env.example.</td>
 active-tracker default because the favorite/visited Room rows store no
 provider id; add a providerId column + migration so an
 archiveorg/gutenberg favorite routes to HTTP_DOWNLOAD.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>60</td>
@@ -925,6 +1040,8 @@ archiveorg/gutenberg favorite routes to HTTP_DOWNLOAD.</td>
 <td>LVA-068 — tls.go only re-checks cert expiry at Start; a
 multi-month-running embed could serve a leaf that expires without a
 restart. Add a periodic re-mint check.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>61</td>
@@ -935,6 +1052,8 @@ restart. Add a periodic re-mint check.</td>
 <td>LVA-069 — handleSseEvent raw-JSON parsing
 (provider_start/results/provider_done/provider_error) and onRetryClick
 Error-state re-dispatch are untested production branches.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>62</td>
@@ -948,6 +1067,8 @@ ToggleFavoriteUseCase/AddLocalFavoriteUseCase/GetTopicUseCase + the
 Topic/TopicPage models (write) and TopicModel + favorites/visited
 side-effects to openTopic(id,providerId) (read), mirroring
 search_result.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>63</td>
@@ -958,6 +1079,8 @@ search_result.</td>
 <td>LVA-071 — observeSseSearch internally constructs the SseClient with
 a hardcoded https base; inject it so the full SSE error to Error to
 retry path is hermetically testable against a MockWebServer.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>64</td>
@@ -971,6 +1094,8 @@ NotAfter/IP-SANs context (no secrets per §6.H). A wave-10 attempt was
 discarded because its falsifiability rehearsal was inconclusive and the
 SourceHash contract failed; redo with a test that fails when the actual
 rotation-path RecordWarning call is removed.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>65</td>
@@ -983,6 +1108,8 @@ NavTeardownCrashReporter (chained uncaught handler) tags the known
 upstream androidx nav-teardown ISE with attributable §6.AC Crashlytics
 context before the process dies, so it surfaces as a known/triageable
 defect; 6 falsifiable JVM tests; wired into LavaApplication.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>66</td>
@@ -994,16 +1121,20 @@ defect; 6 falsifiable JVM tests; wired into LavaApplication.</td>
 SurfaceFlinger commit timeouts and spurious No-compose-hierarchies
 Challenge failures; the runner now wakes and keeps the screen on, proven
 by C00/C01/C07/C08 going green after the wake.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>67</td>
 <td>medium</td>
-<td>Completed (→ Fixed.md)</td>
+<td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
 <td>—</td>
 <td>LVA-076 — Gradle validation BUILD FAILED on clean .cxx: process
 JavaRes consumed buildCshared output without a declared edge; D8 OOM on
 2g heap. Declared dependency plus bumped heap to 4g.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>68</td>
@@ -1015,17 +1146,21 @@ JavaRes consumed buildCshared output without a declared edge; D8 OOM on
 testBuildType is debug; added scripts run-release-canary.sh to validate
 the exact R8 release APK cold-start on the Genymotion VM per clause
 6.Z.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>69</td>
 <td>medium</td>
-<td>Completed (→ Fixed.md)</td>
+<td>Fixed (→ Fixed.md)</td>
 <td>Bug</td>
 <td>—</td>
 <td>LVA-078 — Root containerignore blanket-excluded submodules but
 go.mod replaces parent submodules X; in-container go build failed on
 missing replacement dirs. Excluded only nested git and build, kept
 source.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>70</td>
@@ -1040,6 +1175,8 @@ INPUT chips (observeAll filtered+sorted) but the input-vs-RESULTS
 divergence + run-to-run instability is distinct and still open. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md issue
 #3.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>71</td>
@@ -1051,6 +1188,8 @@ divergence + run-to-run instability is distinct and still open. Source:
 Operator directive: rebuild, gate, distribute all 4 variants. Infra
 confirmed UP this session: thinker+nezha reachable, T7 writable,
 JDK17/Gradle8.9/podman5.8.2 present.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>72</td>
@@ -1062,6 +1201,8 @@ JDK17/Gradle8.9/podman5.8.2 present.</td>
 all submodules. Frozen-by-default overridden for this cycle. Must
 build-verify after each bump; revert+report any submodule whose bump
 breaks the build.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>73</td>
@@ -1076,6 +1217,8 @@ issue/non-fatal read). bq CLI absent. Crashlytics dashboard read
 requires console or a BigQuery export not configured. Fallback: in-repo
 §6.AC telemetry + known crash tickets; operator to paste console items
 for full triage. §11.4.6 honest record.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>74</td>
@@ -1090,6 +1233,8 @@ for full triage. §11.4.6 honest record.</td>
 but 1076 NOT yet distributed/device-verified. Pending §6.Z gate. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #1.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>75</td>
@@ -1103,6 +1248,8 @@ CODE-FIX in 1076 (chips from ProviderConfigRepository.observeAll()
 searchEnabled&amp;&amp;isEnabled). Pending §6.Z device verification.
 Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #2.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>76</td>
@@ -1116,6 +1263,8 @@ displayLabel). CODE-FIX in 1076 (friendly chip names). Pending §6.Z
 verification. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #4.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>77</td>
@@ -1129,6 +1278,8 @@ CODE-FIX in 1076 (loading/empty state branches). Pending §6.Z
 verification. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #5.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>78</td>
@@ -1141,6 +1292,8 @@ in 1076 (#6 count bound to real descriptor list). Pending §6.Z
 verification. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #6.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>79</td>
@@ -1153,6 +1306,8 @@ hardcoding violation (config-driven preset). 'On this network' label for
 a cloud/remote preset still worth confirming. Pending §6.Z verification.
 Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #7.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>80</td>
@@ -1164,6 +1319,8 @@ Source: .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 (discovered-API friendly name). Pending §6.Z verification. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #8.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>81</td>
@@ -1186,6 +1343,8 @@ versions stale per SS6.AK -- device gate was occupied by a parallel
 LVA-087 verification agent this cycle, could not re-run. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #9.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>82</td>
@@ -1198,6 +1357,8 @@ co-mingling NOT visually confirmed. Needs on-device package check
 (applicationIdSuffix .dev + launcher label). OPEN/UNCONFIRMED. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #10.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>83</td>
@@ -1211,6 +1372,8 @@ white-icon were NOT triggered on screen here (remain open under their
 own tickets). Informational record. Source:
 .lava-ci-evidence/video-analysis/2026-06-25-lava-issues-video.md
 #11.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>84</td>
@@ -1252,6 +1415,8 @@ forces this race and asserts correct provider resolution once
 repopulation completes, or (b) a product decision to gate the splash
 screen / first search on repopulation completion (with a timeout +
 fallback) instead of racing it.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>85</td>
@@ -1285,6 +1450,8 @@ sibling cold-start race finding LVA-093. Real-world frequency and
 user-visible impact are UNCONFIRMED without device instrumentation -- no
 build or test was executed for this specific finding, only source
 reading.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>86</td>
@@ -1305,6 +1472,8 @@ predating this session; none of the 4 merged branches touch
 onboarding/api-key/mDNS code per git diff --name-only). Not yet
 root-caused - source: real gradle test run,
 feature/onboarding/build/test-results/testDebugUnitTest/.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>87</td>
@@ -1332,6 +1501,8 @@ reverting restored all-green with zero regressions across the three
 pre-existing pipeline suites. Found during T038. Severity high. Source
 of truth: specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>88</td>
@@ -1349,6 +1520,8 @@ DIAGNOSIS block naming both offending paths. Found during T038. Severity
 low. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>89</td>
@@ -1371,6 +1544,8 @@ which sits outside the maxdepth-1 scan. Gate confirmed clean afterwards
 medium. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>90</td>
@@ -1390,6 +1565,8 @@ the same regression fails fast and harmlessly. Found during T038.
 Severity medium. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>91</td>
@@ -1402,6 +1579,8 @@ Room Flow .first() off the StandardTestDispatcher). Fixed in the 68th
 cycle (Commit 1) via bounded await-until-selectedProvider loop;
 falsifiability-rehearsed. <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/sixth-law-incidents/2026-05-20-flaky-credentialsviewmodeltest.json</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>92</td>
@@ -1427,6 +1606,8 @@ marker-writing stub, confirming the documented argument order
 high. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>93</td>
@@ -1447,6 +1628,8 @@ T028. Severity medium. This shape recurs as S-D in the wave-4 wrapper
 audit and is Check B of the standing static guard. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>94</td>
@@ -1476,6 +1659,8 @@ fix is not a blanket fail-everything. Found during T028 follow-up.
 Severity high. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>95</td>
@@ -1504,6 +1689,8 @@ reproduction harness for the firebase-distribute combined-mode finding.
 Severity medium. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>96</td>
@@ -1543,6 +1730,8 @@ and the ORIGINAL validator suite still passes. Found by the systematic
 vacuous-PASS audit; task T012. Severity critical. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>97</td>
@@ -1578,6 +1767,8 @@ used. New suite tests/pipeline/test_phase_01_artifact_verification.sh
 build still failing). Task T020. Severity high. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>98</td>
@@ -1608,6 +1799,8 @@ tests/pipeline/test_phase_04_live_verify_response_body.sh (9 checks).
 Task T036. Severity high. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>99</td>
@@ -1632,6 +1825,8 @@ fix re-verified against it afterwards. Each new suite carries positive
 cases so a blanket fail-everything fix would not pass. Severity high.
 Source of truth: specs/002-build-test-distribute-pipeline/progress.yml
 and specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>100</td>
@@ -1655,6 +1850,8 @@ afterwards. Each new suite carries positive cases so a blanket
 fail-everything fix would not pass. Severity medium. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>101</td>
@@ -1679,6 +1876,8 @@ suite carries positive cases so a blanket fail-everything fix would not
 pass. Severity high. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>102</td>
@@ -1704,6 +1903,8 @@ suite carries positive cases so a blanket fail-everything fix would not
 pass. Severity medium. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>103</td>
@@ -1726,6 +1927,8 @@ suite carries positive cases so a blanket fail-everything fix would not
 pass. Severity medium. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>104</td>
@@ -1749,6 +1952,8 @@ fix re-verified against it afterwards. Each new suite carries positive
 cases so a blanket fail-everything fix would not pass. Severity medium.
 Source of truth: specs/002-build-test-distribute-pipeline/progress.yml
 and specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>105</td>
@@ -1772,6 +1977,8 @@ suite carries positive cases so a blanket fail-everything fix would not
 pass. Severity medium. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>106</td>
@@ -1794,6 +2001,8 @@ fix re-verified against it afterwards. Each new suite carries positive
 cases so a blanket fail-everything fix would not pass. Severity medium.
 Source of truth: specs/002-build-test-distribute-pipeline/progress.yml
 and specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>107</td>
@@ -1817,6 +2026,8 @@ suite carries positive cases so a blanket fail-everything fix would not
 pass. Severity medium. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>108</td>
@@ -1843,6 +2054,8 @@ fix re-verified against it afterwards. Each new suite carries positive
 cases so a blanket fail-everything fix would not pass. Severity medium.
 Source of truth: specs/002-build-test-distribute-pipeline/progress.yml
 and specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>109</td>
@@ -1869,6 +2082,8 @@ fix re-verified against it afterwards. Each new suite carries positive
 cases so a blanket fail-everything fix would not pass. Severity high.
 Source of truth: specs/002-build-test-distribute-pipeline/progress.yml
 and specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>110</td>
@@ -1907,6 +2122,8 @@ which rejected the new value with "internal error - invalid outcome", so
 both had to move. Severity critical. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>111</td>
@@ -1951,6 +2168,8 @@ have each already reached production here, not a substitute for the
 behavioural suites alongside it. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>112</td>
@@ -1998,6 +2217,8 @@ would have inherited the hole; any amendment authorizing an unattended
 combined distribute would authorize exactly this. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>113</td>
@@ -2027,6 +2248,8 @@ baselines. BLOCKS: feature 002 phase 5 (US3 distribute), specifically
 task T043. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>114</td>
@@ -2047,6 +2270,8 @@ baselines. BLOCKS: feature 002 phase 5 (US3 distribute), specifically
 task T043. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>115</td>
@@ -2072,6 +2297,8 @@ baselines. BLOCKS: feature 002 phase 6 (US4 repository closure),
 specifically task T055. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>116</td>
@@ -2090,6 +2317,8 @@ baselines. BLOCKS: feature 002 phase 6 (US4 repository closure),
 specifically task T055. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>117</td>
@@ -2120,6 +2349,8 @@ CLOSURE CRITERIA: outcome resolves to FAIL (or a distinct INTERRUPTED
 token) whenever the recorded phase sequence is a proper prefix of the
 phase set the invocation requested, with the regression test asserting
 it against a real truncated report rather than a synthetic one.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>118</td>
@@ -2151,6 +2382,8 @@ CRITERIA: the fixture is constructed so the literal is assembled at
 runtime rather than stored verbatim, or the hermetic-fixture path is
 added to the scanner's exclusion list with a comment naming why, and a
 test asserts a genuine violation elsewhere is still caught.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>119</td>
@@ -2184,6 +2417,8 @@ listing stays far below the pipe buffer, so the SIGPIPE path is never
 entered. Full record:
 .lava-ci-evidence/bluff-hunt/2026-08-23-cycle-gate-shaping-scripts.json
 finding F1.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>120</td>
@@ -2212,6 +2447,8 @@ sweep's gate count at lines 287-290. The propagation block is the one
 that lacks it. Full record:
 .lava-ci-evidence/bluff-hunt/2026-08-23-cycle-gate-shaping-scripts.json
 finding F3.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>121</td>
@@ -2243,6 +2480,8 @@ table) enumerates every one of the 25 with an explicit stance, the 7
 unnamed submodules gain a recorded operator decision, and a test asserts
 the script's policy table and the governance document agree entry for
 entry.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>122</td>
@@ -2279,6 +2518,8 @@ report could not be read" and "the phase reported no failure" the same
 answer. An unreadable count is treated as zero on purpose, which
 appends, so the check fails closed. Regression coverage:
 tests/pipeline/test_phase_failure_always_recorded.sh.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>123</td>
@@ -2311,6 +2552,8 @@ and moves it into place atomically, so a failed or partial write no
 longer leaves an EMPTY marker behind: the marker either says which
 phase, or it is not there at all. Regression coverage:
 tests/pipeline/test_run_report_library_robustness.sh.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>124</td>
@@ -2337,6 +2580,8 @@ interruption could not be recorded, that the run did not finish, and
 that report.json must not be read as a pass. The successful case still
 prints which phase was interrupted and that it was recorded as
 FAIL.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>125</td>
@@ -2366,6 +2611,8 @@ as load-bearing rather than decorative, so the scan completes over every
 record and the documented counts-as-FAILED rule actually holds.
 Regression coverage:
 tests/pipeline/test_run_report_evidence_summary.sh.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>126</td>
@@ -2396,6 +2643,8 @@ companion is excluded because of WHERE it is rather than because of an
 assumption about its file extension, and the false doc claim is replaced
 by a dated correction in the same comment block that states plainly
 which half of the old claim was wrong.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>127</td>
@@ -2436,6 +2685,8 @@ was taught to tell a standalone argument from a variable embedded in
 prose rather than annotating a file outside the guard's surface.
 Regression coverage:
 tests/pipeline/test_vacuous_pass_guard_discrimination.sh.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>128</td>
@@ -2466,6 +2717,8 @@ with an explicit harness-assumption-broken message if it is not. The
 case also uses the marker path that mark_phase_in_flight prints rather
 than reconstructing it, so a change to WHERE the marker lives is caught
 here too.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>129</td>
@@ -2501,6 +2754,8 @@ idempotent and safe to run before the backup exists and safe to run
 twice. RE-VERIFIED at the time of filing: the tracked CLAUDE.md carries
 the 11.4.134 anchor and zero placeholder occurrences, and
 scripts/check-constitution.sh runs to completion with exit 0.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>130</td>
@@ -2532,6 +2787,8 @@ tree: phase-05-distribute.sh CONDITION_IDS=(A B C D E F G H) with no
 (I); tests/pipeline/test_phase_05_distribute_gate.sh and
 test_phase_05_distribute_gate_vacuity.sh both ALL CHECKS PASSED exit 0
 (41 assertions).</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>131</td>
@@ -2574,6 +2831,8 @@ asserts byte-equality against the tracked copies at BOTH tracked
 locations), with a hermetic fixture that mutates the DB, regenerates
 only Issues.md and Fixed.md, and asserts the gate FAILS -- which it does
 not do today.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>132</td>
@@ -2587,6 +2846,8 @@ cold-start canary + full 37-class Challenge suite on Pixel_8/API35 (43
 pass / 3 credential-skip / 0 fail). RESOLVED 2026-05-20.
 <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/sixth-law-incidents/2026-05-13-emulator-container-darwin-arm64-gap.json</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>133</td>
@@ -2601,6 +2862,8 @@ CodeGraph), §11.4.85 (stress/chaos), §11.4.98, §11.4.102. Pin-bump is
 operator-gated; decision owed on §6.AD.3 Path B vs SQLite DB.
 <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>134</td>
@@ -2615,6 +2878,8 @@ directive §6.L 68th invocation, key prefix LVA. Superseded by migration
 to the canonical constitution binary
 (docs/tickets/MIGRATION-TO-CANONICAL.md). <strong>Source:</strong>
 operator-report — docs/tickets/DESIGN.md</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>135</td>
@@ -2627,6 +2892,8 @@ index; Lava currently EXCLUDES submodules/ per docs/CODEGRAPH.md +
 63rd-cycle policy. Reconcile .codegraph config + docs when pin is
 bumped. <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>136</td>
@@ -2638,6 +2905,8 @@ bumped. <strong>Source:</strong> self-discovered —
 test class. Lava has no chaos/stress suite today. Assess + scaffold when
 pin is bumped. <strong>Source:</strong> self-discovered —
 .lava-ci-evidence/constitution-review/2026-05-31-68th-cycle-review.md</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 </tbody>
 </table>

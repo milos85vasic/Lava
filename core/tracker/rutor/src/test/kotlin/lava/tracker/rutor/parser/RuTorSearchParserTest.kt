@@ -24,7 +24,7 @@ class RuTorSearchParserTest {
 
     @Test
     fun `normal search results contain at least 10 torrents with sizes`() {
-        val html = loader.load("search", "search-normal-2026-08-10.html")
+        val html = loader.load("search", "search-normal-2026-11-20.html")
         val result = parser.parse(html, pageHint = 0)
 
         assertTrue(
@@ -55,7 +55,7 @@ class RuTorSearchParserTest {
 
     @Test
     fun `empty search results have no items and totalPages defaults to 1`() {
-        val html = loader.load("search", "search-empty-2026-08-10.html")
+        val html = loader.load("search", "search-empty-2026-11-20.html")
         val result = parser.parse(html, pageHint = 0)
 
         assertTrue("empty page must surface no items, got ${result.items.size}", result.items.isEmpty())
@@ -84,7 +84,7 @@ class RuTorSearchParserTest {
 
     @Test
     fun `cyrillic search results carry Cyrillic characters in titles`() {
-        val html = loader.load("search", "search-cyrillic-2026-09-19.html")
+        val html = loader.load("search", "search-cyrillic-2026-11-20.html")
         val result = parser.parse(html, pageHint = 0)
 
         assertTrue("cyrillic search should return non-empty items", result.items.isNotEmpty())
@@ -96,7 +96,7 @@ class RuTorSearchParserTest {
                 result.items.take(3).map { it.title },
             anyCyrillic,
         )
-        // Single-page pagination block (refreshed 2026-09-19); the live "Кино
+        // Single-page pagination block (refreshed 2026-11-20); the live "Кино
         // новинки" query now returns 3 results on one page, so `Страницы:  1`
         // is the only pagination text and the parser's max(int) = 1.
         assertEquals(1, result.totalPages)

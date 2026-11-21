@@ -1,7 +1,7 @@
 {
   "all_200_with_2_items": true,
   "calls_per_worker": 25,
-  "captured_at": "2026-09-22T14:39:12Z",
+  "captured_at": "2026-11-19T22:45:41Z",
   "goroutine_leak": false,
   "goroutines_after": 9,
   "goroutines_baseline": 3,

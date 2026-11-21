@@ -116,7 +116,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     # cycle) to include .githooks/pre-push (the hook itself is gate-shaping)
     # + scripts/firebase-distribute.sh (release-gate script) per §6.AD-debt
     # closure-cycle audit. =====
-    gate_files=$(grep -E '^(submodules/containers/pkg/emulator/.*\.go|scripts/run-emulator-tests\.sh|scripts/tag\.sh|scripts/check-constitution\.sh|scripts/firebase-distribute\.sh|\.githooks/pre-push)$' <<<"$changed_paths" || true)
+    gate_files=$(grep -E '^(submodules/containers/pkg/emulator/.*\.go|scripts/run-emulator-tests\.sh|scripts/run-challenge-matrix\.sh|scripts/tag\.sh|scripts/check-constitution\.sh|scripts/firebase-distribute\.sh|scripts/bluff-hunt\.sh|\.githooks/pre-push)$' <<<"$changed_paths" || true)
     if [[ -n "$gate_files" ]]; then
       msg=$(git log -1 --pretty=%B "$sha")
       if ! grep -qE '^Bluff-Audit:' <<<"$msg"; then
@@ -358,6 +358,20 @@ while read -r local_ref local_sha remote_ref remote_sha; do
           violations+=("$sha: §6.N.1.3 violation — added attestation $f without falsifiability rehearsal. Accept: (1) embed falsifiability_rehearsal/Bluff_Audit/bluff_classification block in $f; OR (2) ship $stem.rehearsal.{json,md} alongside; OR (3) add Bluff-Audit stamp in commit body referencing $f.")
         fi
       done <<<"$new_attestations"
+    fi
+
+    # ===== Check 11: §6.N-debt bluff-hunt cadence — matrix-runner / gate
+    # change or new phase-gating attestation requires a recent bluff-hunt
+    # evidence file. Three triggers (§6.N): matrix-runner/gate change
+    # (pre-push enforced) and phase-gating attestation file added
+    # (pre-push enforced). Lighter per-operator-invocation trigger is
+    # manual via scripts/bluff-hunt.sh. =====
+    bluffhunt_triggers=$(grep -E '^(scripts/run-challenge-matrix\.sh|scripts/run-emulator-tests\.sh|scripts/check-constitution\.sh|scripts/bluff-hunt\.sh|\.githooks/pre-push|\.lava-ci-evidence/[^/]+/real-device-verification\.(json|md))$' <<<"$changed_paths" || true)
+    if [[ -n "$bluffhunt_triggers" ]]; then
+      latest_bh=$(ls -1 .lava-ci-evidence/bluff-hunt/*.json 2>/dev/null | sort | tail -1 || true)
+      if [[ -z "$latest_bh" ]]; then
+        violations+=("$sha: §6.N-debt bluff-hunt cadence violation — matrix-runner/gate/attestation change without any bluff-hunt evidence file under .lava-ci-evidence/bluff-hunt/. Run scripts/bluff-hunt.sh --evidence <date> first.")
+      fi
     fi
   done
 done

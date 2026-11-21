@@ -233,6 +233,8 @@ SQLite single-source-of-truth (§11.4.12).</p>
 <th>Status</th>
 <th>Severity</th>
 <th>Description</th>
+<th>Reproduction</th>
+<th>Investigation</th>
 </tr>
 </thead>
 <tbody>
@@ -287,6 +289,8 @@ crash as green. CLOSURE PENDING — THIS ITEM IS NOT CLOSED: closure
 requires a C06 + C11 device re-run at HEAD on a 6.AH-conformant
 container or VM emulator (never host-direct, never a live ADB device),
 both GREEN, with the JUnit XML captured as closure evidence.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-121</td>
@@ -305,6 +309,8 @@ To close, either construct a real producing path or record the argument
 that none exists. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-122</td>
@@ -323,6 +329,8 @@ realistic producing scenario was constructed. To close, either construct
 one or record why the phase directory cannot become unreadable mid-run.
 Source of truth: specs/002-build-test-distribute-pipeline/progress.yml
 and specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-123</td>
@@ -341,6 +349,8 @@ curl rather than passing vacuously. To close, either construct a
 producing case or make the parse fail loudly on an unrecognized shape.
 Source of truth: specs/002-build-test-distribute-pipeline/progress.yml
 and specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-128</td>
@@ -368,6 +378,8 @@ pin); and the refusal paths REJECTED_BREAKING_CHANGE,
 REJECTED_PUSH_CONFLICT and REFUSED_GOVERNANCE_DENY. Source of truth:
 specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-129</td>
@@ -389,6 +401,8 @@ deliberately not wired pending T040/T041 and T048/T049, and asking for
 them via --until is a usage error rather than a silent no-op. Source of
 truth: specs/002-build-test-distribute-pipeline/progress.yml and
 specs/002-build-test-distribute-pipeline/tasks.md.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-131</td>
@@ -421,6 +435,8 @@ tests/pipeline/test_phase_02_go_evidence_isolation.sh is present as
 regression coverage; neither is committed yet. CLOSURE CRITERIA: two
 consecutive full runs both reach their final phase, with the tracked
 jackett files unchanged after each.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-132</td>
@@ -449,6 +465,8 @@ runs in the background with the shell waiting on it interruptibly (or an
 equivalent seam), and a test delivers TERM mid-phase and asserts the
 report is finalized within a bounded interval rather than after the
 phase completes.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-133</td>
@@ -476,6 +494,8 @@ falsifiability demonstration is reachable — for example by committing
 the mutation on a disposable branch, or by using the anti-bluff Evidence
 Record variant the scenario's own closing paragraph already describes as
 available now.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-137</td>
@@ -534,6 +554,8 @@ authority left for the case it exists to catch. The closure criteria
 above are unchanged; the fixture set should additionally include a
 benign documentation string that quotes all three trigger tokens and
 MUST be permitted.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-148</td>
@@ -569,6 +591,8 @@ consequence inside firebase-distribute.sh is tracked at LVA-120, and
 clause 8 condition (D) inherits both. DRAFTED OPTIONS:
 specs/002-build-test-distribute-pipeline/amendment-defects-proposal.md
 sections 2 and V-5.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-149</td>
@@ -619,6 +643,8 @@ orchestrator from a DIFFERENT working directory than the repository
 under test and asserts both that the report lands in the target
 repository's evidence tree and that its commit_sha equals the target
 repository's HEAD rather than the caller's.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-151</td>
@@ -664,6 +690,8 @@ gate-runners will read it, and either a lock file serializes gate
 invocations across concurrent agents or each long-running gate acquires
 an advisory lock for the duration of its sweep, with a test proving two
 concurrent invocations serialize rather than interleave.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-152</td>
@@ -702,6 +730,8 @@ pattern), or the helper is invoked without a command substitution so its
 global assignment reaches the caller; and one deliberately-failing
 fixture asserts that the printed diagnostic contains a string unique to
 the failing invocation, which the current code cannot satisfy.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-153</td>
@@ -722,6 +752,8 @@ MEANWHILE: test case P5 asserts the variable can only ever hold an app
 slug, so it cannot silently acquire a build-variant value while the
 rename is pending. Source: self-discovered during the LVA-148 rename,
 2026-08-26.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-154</td>
@@ -747,6 +779,8 @@ reader to look for it, and the whole point of the rename was that one
 word naming two axes is a trap. Governance edits require operator
 review, which is why this is filed rather than done. Source:
 self-discovered during the LVA-148 rename, 2026-08-26.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-155</td>
@@ -773,6 +807,8 @@ a distribute pointer, and the pending change set touches no last-version
 or distribute-changelog path (verified). Source: self-discovered during
 the LVA-149 fix, 2026-08-26. Needs an operator decision before the next
 distribute.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-156</td>
@@ -796,6 +832,8 @@ regression: it is a historical finding about what was actually verified
 versus what was reported. Recorded so the record of that release is
 honest. Source: self-discovered during the LVA-149 blast-radius
 assessment, 2026-08-26.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-157</td>
@@ -834,6 +872,8 @@ and it is not yet established whether clause 8 can still qualify on
 C00-only evidence once they validate properly — that is being determined
 now. Source: self-discovered during the tag.sh critical fail-open fixes,
 2026-08-26.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-158</td>
@@ -857,6 +897,8 @@ re-review finding that every push and both B-2 residuals in
 advance-all-submodules.sh sit behind has_local_mods — a precondition the
 script neither checks nor states. Source: self-discovered, sweep finding
 P11 promoted from UNCONFIRMED to CONFIRMED, 2026-08-26.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-159</td>
@@ -881,6 +923,8 @@ while feeding them nothing is the highest-consequence instance of the
 vacuous-pass family found this cycle. NOT FIXED: the file is staged by
 another agent's concurrent work; the remedy is one line in the stub.
 Source: self-discovered during the corpus-floor sweep, 2026-08-26.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-160</td>
@@ -914,6 +958,8 @@ is NOT the cold-start canary — equivalently, intersect the executed-PASS
 Challenge set with the cycle's claim-set per 6.AK clause 1. Nothing
 implements this today. Source: self-discovered during the clause-8
 fixture repair, 2026-08-26.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-161</td>
@@ -944,6 +990,8 @@ no passes for the killed classes, wording them 'No <testcase> entry
 found ... 0 file(s) parsed — either the class filter did not match, or
 the run aborted before instrumentation completed'. Source:
 self-discovered during the T062 run, 2026-08-26.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-162</td>
@@ -968,6 +1016,8 @@ LVA-160 (clause 8 condition (C) never reads WHICH Challenge ran): two
 independent device-evidence gates, each unable to see the field it
 exists to check. Source: self-discovered during the T062 run,
 2026-08-26.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-163</td>
@@ -1011,6 +1061,8 @@ authoring shell command, which silently dropped the submodule name in
 two places. Corrected here; recorded because a tracker entry that
 quietly lost a fact is the same defect class this cycle has been
 evicting all day.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-164</td>
@@ -1057,6 +1109,8 @@ check that makes the advance safe, and would need to be provably scoped
 to eol-only; (d) do not initialise docling at all, which conflicts with
 the operator's all-59-recursive decision. Source: self-discovered while
 verifying the consequences of the recursive init, 2026-08-26.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-165</td>
@@ -1086,6 +1140,8 @@ COLON-DASH applied to any name matching TOKEN, SECRET, KEY, PASSWORD or
 CREDENTIAL would catch the class mechanically rather than relying on
 nobody making the mistake a third time. Source: self-discovered and
 self-reported by the acting agent, 2026-08-26.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-166</td>
@@ -1126,6 +1182,8 @@ and a later unsandboxed build executes what it finds. UNCONFIRMED:
 whether a real Lava build completes inside the sandbox - that experiment
 gates the whole item. Source: self-discovered during the T054
 architectural analysis, 2026-08-26.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-167</td>
@@ -1174,6 +1232,8 @@ measured. phase-02-test.sh under masking is UNCONFIRMED and is the
 higher-risk half, because section 6.AH emulators interact with the mount
 namespace. Source: self-discovered during the LVA-166 sandbox
 feasibility experiment, 2026-08-27.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-168</td>
@@ -1208,6 +1268,8 @@ measurement. The measurement disproved the comment. Recorded because
 trusting a comment over an experiment is the defect class this cycle has
 been evicting. Source: self-discovered during the T062 end-to-end run,
 2026-08-27.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-169</td>
@@ -1226,6 +1288,8 @@ preventive check-ignore guard, reached by a different path: that guard
 probes .lava-ci-evidence/pipeline-runs/ specifically and does not see
 these nested per-package directories. Source: self-discovered during the
 T062 end-to-end run, 2026-08-27.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-170</td>
@@ -1242,6 +1306,8 @@ identical input. A gate that is enforced on one path and not another is
 worse than one enforced nowhere, because its presence implies coverage
 it does not provide. Source: self-discovered during the T062 end-to-end
 run, 2026-08-27.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 <tr>
 <td>LVA-5</td>
@@ -1275,6 +1341,8 @@ is observed authenticating after the operator's intent changes, or if
 the operator later elects to rotate, this item resumes as ordinary
 pending work under its original unblock options [A], [B] or [C],
 unchanged.</td>
+<td>UNSET</td>
+<td>UNSET</td>
 </tr>
 </tbody>
 </table>

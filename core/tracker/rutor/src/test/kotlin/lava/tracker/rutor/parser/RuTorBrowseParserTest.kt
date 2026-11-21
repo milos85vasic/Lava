@@ -7,7 +7,7 @@ import org.junit.Test
 
 /**
  * Drives [RuTorBrowseParser] against the three `browse-*` fixtures (normal + deep-pagination
- * refreshed 2026-09-19; empty is a marked synthetic dated 2026-04-30).
+ * refreshed 2026-11-20; empty is a marked synthetic dated 2026-04-30).
  *
  * Sixth Law clause 2 (falsifiability): assertions are on user-visible mapped state
  * (item titles, sizeBytes, magnet hash, totalPages). A parser that produces empty
@@ -20,7 +20,7 @@ class RuTorBrowseParserTest {
 
     @Test
     fun `normal browse page returns 10+ items with sizes and pagination`() {
-        val html = loader.load("browse", "browse-normal-2026-09-19.html")
+        val html = loader.load("browse", "browse-normal-2026-11-20.html")
         val result = parser.parse(html, pageHint = 0)
 
         assertTrue(
@@ -39,9 +39,9 @@ class RuTorBrowseParserTest {
             "all rows must produce a 40-char infoHash; offenders=${badHash.size}",
             badHash.isEmpty(),
         )
-        // Pagination references /browse/6962/0/0/0 → 6963 total pages (0-indexed;
-        // refreshed 2026-09-19, real drift from the 2026-07-02 capture's 6884).
-        assertEquals(6963, result.totalPages)
+        // Pagination references /browse/7034/0/0/0 → 7035 total pages (0-indexed;
+        // refreshed 2026-11-20, real drift from the 2026-09-19 capture's 6963).
+        assertEquals(7035, result.totalPages)
         // currentPage hint round-trips.
         assertEquals(0, result.currentPage)
     }
@@ -59,11 +59,11 @@ class RuTorBrowseParserTest {
 
     @Test
     fun `deep-pagination page 50 reports correct currentPage and totalPages`() {
-        val html = loader.load("browse", "browse-deep-pagination-2026-09-19.html")
+        val html = loader.load("browse", "browse-deep-pagination-2026-11-20.html")
         val result = parser.parse(html, pageHint = 50)
 
-        // totalPages = 6962 + 1 = 6963 (refreshed 2026-09-19).
-        assertEquals(6963, result.totalPages)
+        // totalPages = 7034 + 1 = 7035 (refreshed 2026-11-20).
+        assertEquals(7035, result.totalPages)
         assertEquals(50, result.currentPage)
         assertTrue(
             "deep-pagination page should still surface result rows; got ${result.items.size}",

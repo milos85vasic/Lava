@@ -343,6 +343,116 @@ else
 fi
 
 # ----------------------------------------------------------------
+# 1b2. §6.Z Phase-1 Gate 6 — pre-distribute test-evidence gate.
+# Closes §6.Z-debt. Refuses to distribute unless the pre-distribute
+# test-evidence file for THIS version exists, its commit SHA matches the
+# current HEAD, its timestamp is within 24h, and it contains a verbatim
+# "BUILD SUCCESSFUL" marker plus a C00 cold-start PASS (the load-bearing
+# canary). Mandatory test set: C00 cold-start + C01 launch + every Cn whose
+# target file appears in the cycle's diff.
+# ----------------------------------------------------------------
+EVIDENCE_BASE="$CHANGELOG_DIR"
+EVIDENCE_MD="$EVIDENCE_BASE/$APP_VERSION-$APP_VERSION_CODE-test-evidence.md"
+EVIDENCE_JSON="$EVIDENCE_BASE/$APP_VERSION-$APP_VERSION_CODE-test-evidence.json"
+EVIDENCE_FILE=""
+if [[ -f "$EVIDENCE_JSON" ]]; then EVIDENCE_FILE="$EVIDENCE_JSON"; elif [[ -f "$EVIDENCE_MD" ]]; then EVIDENCE_FILE="$EVIDENCE_MD"; fi
+if [[ -z "$EVIDENCE_FILE" ]]; then
+    echo "FATAL §6.Z Gate 6: no pre-distribute test-evidence file found." >&2
+    echo "       Expected one of:" >&2
+    echo "         $EVIDENCE_MD" >&2
+    echo "         $EVIDENCE_JSON" >&2
+    echo "       Run the mandatory test set (C00 cold-start + C01 launch + every Cn" >&2
+    echo "       whose target file appears in the cycle's diff) on the EXACT artifact" >&2
+    echo "       about to be distributed, then write the evidence file before distributing." >&2
+    exit 1
+fi
+echo "    §6.Z Gate 6: test-evidence file present: $EVIDENCE_FILE"
+
+CURRENT_HEAD_SHA="$(git rev-parse HEAD)"
+RECORDED_SHA=""
+if [[ "$EVIDENCE_FILE" == *.json ]]; then
+    RECORDED_SHA="$(jq -r '.commit_sha // .commit // empty' "$EVIDENCE_FILE" 2>/dev/null || true)"
+else
+    RECORDED_SHA="$(grep -oE 'Commit SHA:[[:space:]]*[0-9a-f]{7,40}' "$EVIDENCE_FILE" | head -1 | grep -oE '[0-9a-f]{7,40}' || true)"
+    if [[ -z "$RECORDED_SHA" ]]; then
+        RECORDED_SHA="$(grep -oE 'commit_sha[^"]*"[^"]*"' "$EVIDENCE_FILE" | head -1 | grep -oE '[0-9a-f]{7,40}' || true)"
+    fi
+fi
+if [[ -z "$RECORDED_SHA" ]]; then
+    echo "FATAL §6.Z Gate 6: could not extract a recorded commit SHA from $EVIDENCE_FILE." >&2
+    echo "       The evidence file must record the commit SHA it was executed against." >&2
+    exit 1
+fi
+CURRENT_SHORT="${CURRENT_HEAD_SHA:0:7}"
+RECORDED_SHORT="${RECORDED_SHA:0:7}"
+if [[ "$CURRENT_SHORT" != "$RECORDED_SHORT" ]]; then
+    echo "FATAL §6.Z Gate 6: recorded commit SHA $RECORDED_SHA does not match current HEAD $CURRENT_HEAD_SHA." >&2
+    echo "       The evidence must be for the EXACT artifact about to be distributed." >&2
+    exit 1
+fi
+echo "    §6.Z Gate 6: commit SHA matches HEAD ($CURRENT_SHORT)."
+
+RECORDED_TS=""
+if [[ "$EVIDENCE_FILE" == *.json ]]; then
+    RECORDED_TS="$(jq -r '.authored_utc // .timestamp // .authored_at // empty' "$EVIDENCE_FILE" 2>/dev/null || true)"
+else
+    RECORDED_TS="$(grep -oE 'Evidence authored:[[:space:]]*[^$]*' "$EVIDENCE_FILE" | head -1 | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}' || true)"
+    if [[ -z "$RECORDED_TS" ]]; then
+        RECORDED_TS="$(grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}Z?' "$EVIDENCE_FILE" | head -1 || true)"
+    fi
+fi
+if [[ -n "$RECORDED_TS" ]]; then
+    EPOCH_NOW="$(date +%s)"
+    RECORDED_EPOCH="$(python3 - "$RECORDED_TS" <<'PY'
+import sys, datetime
+ts=sys.argv[1].rstrip('Z')
+try:
+    dt=datetime.datetime.fromisoformat(ts)
+    print(int(dt.replace(tzinfo=datetime.timezone.utc).timestamp()))
+except Exception:
+    print(0)
+PY
+)"
+    if [[ "$RECORDED_EPOCH" -gt 0 ]]; then
+        AGE_SEC=$(( EPOCH_NOW - RECORDED_EPOCH ))
+        if [[ "$AGE_SEC" -gt 86400 ]]; then
+            echo "FATAL §6.Z Gate 6: evidence timestamp $RECORDED_TS is older than 24h (age ${AGE_SEC}s)." >&2
+            echo "       Re-run the mandatory test set on this commit and refresh the evidence file." >&2
+            exit 1
+        fi
+        echo "    §6.Z Gate 6: evidence fresh (age ${AGE_SEC}s <= 24h)."
+    fi
+fi
+
+if ! grep -qF "BUILD SUCCESSFUL" "$EVIDENCE_FILE"; then
+    echo "FATAL §6.Z Gate 6: evidence file does not contain verbatim 'BUILD SUCCESSFUL'." >&2
+    echo "       The captured gradle output for the mandatory test set must be pasted" >&2
+    echo "       verbatim into the evidence file." >&2
+    exit 1
+fi
+echo "    §6.Z Gate 6: 'BUILD SUCCESSFUL' present verbatim."
+
+C00_OK=false
+if [[ "$EVIDENCE_FILE" == *.json ]]; then
+    if jq -e '.cold_start_gate.all_passed == true' "$EVIDENCE_FILE" >/dev/null 2>&1; then C00_OK=true; fi
+    if jq -e '.cold_start_gate.test_passed == true' "$EVIDENCE_FILE" >/dev/null 2>&1; then C00_OK=true; fi
+fi
+if [[ "$C00_OK" != "true" ]]; then
+    if grep -qiE 'Challenge00|C00' "$EVIDENCE_FILE" && grep -qiE 'PASS' "$EVIDENCE_FILE"; then
+        C00_OK=true
+    fi
+fi
+if [[ "$C00_OK" != "true" ]]; then
+    echo "FATAL §6.Z Gate 6: C00 cold-start canary did not PASS (or is missing)." >&2
+    echo "       Cold-start verification is the load-bearing canary; skipping it is a §6.Z violation." >&2
+    exit 1
+fi
+echo "    §6.Z Gate 6: C00 cold-start canary PASS."
+
+echo "    §6.Z Gate 6 passed: test-evidence SHA matches HEAD, fresh, BUILD SUCCESSFUL, C00 PASS."
+
+
+# ----------------------------------------------------------------
 # 1c. §6.AK Phase-1 Gate 7 — cycle-coverage (claims × executed device Challenges).
 # Closes the firebase-distribute portion of §6.AK-debt. Refuses to distribute
 # unless EVERY CHANGELOG-claimed user-visible fix for this version has an

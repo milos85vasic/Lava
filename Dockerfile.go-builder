@@ -1,0 +1,31 @@
+# Go Builder Image for Lava
+# Contains: Go 1.25+, git, build tools
+# Used by distributed-build for building Go artifacts (lava-api-go)
+
+FROM golang:1.26-bookworm AS base
+
+# Install additional build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    ca-certificates \
+    make \
+    gcc \
+    libc6-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user for builds
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+RUN groupadd -g ${GROUP_ID} builder && \
+    useradd -u ${USER_ID} -g ${GROUP_ID} -m -s /bin/bash builder
+
+# Set up Go module cache
+ENV GOMODCACHE=/go-cache
+RUN mkdir -p /go-cache && chown -R builder:builder /go-cache
+
+USER builder
+
+WORKDIR /project
+
+# Default command
+CMD ["bash"]
