@@ -143,7 +143,7 @@ if [[ "$MODE" != "--changed-only" ]]; then
   echo "    Building all components via distributed-build (version $VERSION_NAME-$VERSION)"
   # Use distributed-build with local container executor (no remote hosts)
   # This runs all 3 components (app, api-app, lava-api-go) in their respective builder containers
-  ./scripts/distributed-build --project . --components components.json --version "${VERSION_NAME}-${VERSION}" --skip-tests
+  ./scripts/distributed-build --project . --components components.json --version "${VERSION_NAME}-${VERSION}" --skip-tests --timeout 60
 fi
 
 # ---------------------------------------------------------------------
