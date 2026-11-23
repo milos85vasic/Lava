@@ -47,7 +47,11 @@ class ApiKeyClient(
                     // /v1 search 401's). Log a NON-SECRET signal (authority only,
                     // never the key value per §6.H) so a future recurrence is
                     // diagnosable from logcat without re-deriving the root cause.
-                    Log.w(TAG, "API key provider returned an EMPTY cursor for $authority (engine not running, or key-handoff broken)")
+                    Log.w(
+                        TAG,
+                        "API key provider returned an EMPTY cursor for $authority " +
+                            "(engine not running, or key-handoff broken)",
+                    )
                     return@use null
                 }
                 val keyIdx = cursor.getColumnIndexOrThrow("access_key")

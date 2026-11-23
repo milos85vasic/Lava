@@ -48,8 +48,18 @@ class NavTeardownCrashReporterTest {
             "Cannot move to state DESTROYED. State must be at least 'CREATED' to be moved to 'DESTROYED'.",
         )
         e.stackTrace = arrayOf(
-            StackTraceElement("androidx.navigation.NavBackStackEntry", "handleLifecycleEvent", "NavBackStackEntry.kt", 213),
-            StackTraceElement("androidx.navigation.NavControllerImpl", "moveToDestroyed", "NavControllerImpl.kt", 142),
+            StackTraceElement(
+                "androidx.navigation.NavBackStackEntry",
+                "handleLifecycleEvent",
+                "NavBackStackEntry.kt",
+                213,
+            ),
+            StackTraceElement(
+                "androidx.navigation.NavControllerImpl",
+                "moveToDestroyed",
+                "NavControllerImpl.kt",
+                142,
+            ),
         )
         return e
     }

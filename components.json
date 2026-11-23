@@ -9,11 +9,12 @@
   },
   {
     "Name": "api-app",
-    "HasGo": false,
+    "HasGo": true,
     "HasNPM": false,
     "HasJDK": true,
     "HasRust": false,
-    "BuilderImage": "localhost/lava-android-builder:latest"
+    "BuilderImage": "localhost/lava-android-builder:latest",
+    "NetworkMode": "host"
   },
   {
     "Name": "lava-api-go",

@@ -16,7 +16,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import lava.analytics.firebase.FirebaseInitializer
 import lava.common.analytics.AnalyticsTracker
-import lava.common.analytics.rethrowIfCancellation
 import lava.domain.usecase.RepopulateProvidersOnStartupUseCase
 import lava.network.api.ImageLoader
 import lava.tracker.client.work.MirrorHealthCheckWorker
@@ -95,8 +94,7 @@ class LavaApplication : Application() {
         startupScope.launch {
             try {
                 repopulateProviders()
-            } catch (e: Throwable) {
-                e.rethrowIfCancellation()
+            } catch (e: Exception) {
                 analytics.recordNonFatal(
                     e,
                     mapOf(AnalyticsTracker.Params.ERROR to "startup_provider_repopulate_failed"),

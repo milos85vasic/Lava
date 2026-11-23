@@ -36,7 +36,9 @@ class NavTeardownCrashReporter(
                     mapOf(
                         AnalyticsTracker.Params.FEATURE to FEATURE_NAVIGATION,
                         AnalyticsTracker.Params.OPERATION to OPERATION_TEARDOWN,
-                        AnalyticsTracker.Params.ERROR_CLASS to (throwable::class.java.simpleName.ifBlank { "IllegalStateException" }),
+                        AnalyticsTracker.Params.ERROR_CLASS to (
+                            throwable::class.java.simpleName.ifBlank { "IllegalStateException" }
+                            ),
                         AnalyticsTracker.Params.ERROR_MESSAGE to throwable.message.orEmpty().take(MAX_MESSAGE),
                         AnalyticsTracker.Params.SCREEN to SCREEN_SEARCH_INPUT,
                         KNOWN_DEFECT_KEY to "true",
