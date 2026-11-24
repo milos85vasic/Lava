@@ -149,8 +149,8 @@ android {
         // legitimately inlining a composable, not a stripped feature).
         // versionCode bumps only; versionName HELD at 1.3.17 per §6.Y
         // clause 3 (internal/test-infra fix, no new user-facing surface).
-        versionCode = 1088
-        versionName = "1.3.17"
+        versionCode = 1089
+        versionName = "1.3.18"
         // SP-3a Step 6 (2026-04-30): wire Hilt + Compose UI test infra so the
         // 8 Challenge Tests at app/src/androidTest/kotlin/lava/app/challenges/
         // become runnable on a connected device. The custom runner installs
