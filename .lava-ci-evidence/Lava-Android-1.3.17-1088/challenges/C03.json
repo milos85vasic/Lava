@@ -1,0 +1,9 @@
+{
+  "test": "Challenge02AuthenticatedSearchOnRuTrackerTest",
+  "description": "Authenticated search on RuTracker - pickRuTracker_enterCreds_signIn_reachesMainApp",
+  "status": "SKIPPED",
+  "duration_seconds": 145,
+  "device": "host_emu(AVD) - 14 (API 34)",
+  "timestamp": "2026-11-24T18:20:00Z",
+  "note": "Test skipped when run in isolation - likely requires pre-authenticated state"
+}

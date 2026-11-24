@@ -1,0 +1,8 @@
+{
+  "test": "Challenge00CrashSurvivalTest",
+  "description": "Cold start crash survival - continueOnArchiveOrg_persists_signaledAuthState_to_disk",
+  "status": "PASS",
+  "duration_seconds": 58,
+  "device": "host_emu(AVD) - 14 (API 34)",
+  "timestamp": "2026-11-24T18:15:00Z"
+}

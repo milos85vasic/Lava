@@ -1,0 +1,8 @@
+{
+  "test": "Challenge07CrossTrackerFallbackAcceptTest, Challenge08CrossTrackerFallbackDismissTest",
+  "description": "Cross-tracker fallback accept/dismiss - tappingTryButton_invokesOnAccept, fallbackModal_rendersTitleAndTryButton, fallbackModal_rendersCancelButton, tappingCancel_invokesOnDismiss",
+  "status": "PASS",
+  "duration_seconds": 100,
+  "device": "host_emu(AVD) - 14 (API 34)",
+  "timestamp": "2026-11-24T18:30:00Z"
+}
